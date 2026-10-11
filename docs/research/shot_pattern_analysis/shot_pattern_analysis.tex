@@ -272,7 +272,7 @@ $\longrightarrow$\quad\textbf{RK4 Ball Flight to First Contact}\quad$\longrighta
 \textbf{Conditional Dispersion and Course Score}}}
 \end{center}
 
-\textbf{Nominal matching and paired sampling.} For each club, lean, and curve
+\textbf{Nominal Matching and Paired Sampling.} For each club, lean, and curve
 scale, the study forward-simulates candidate deliveries and solves nominal
 face and clubhead speed. The prescribed face-to-path difference sets path from
 face, while the target remains $(X_T,0)$ in the native forward/left/up frame.
@@ -282,6 +282,25 @@ correction is used. Each pattern therefore begins at the same nominal point,
 but its matched face, path, and speed can differ. A failed bounded search is
 recorded as unavailable; the optimizer's exit alone neither proves
 reachability nor physical impossibility.
+For prescribed face-to-path difference $\delta$, path is $p=f-\delta$.
+The bounded least-squares problem is
+\[
+ (f_*,v_*)=\arg\min_{(f,v)\in\mathcal B}
+ \tfrac12\|(X_n(f,v;\delta)-X_T,\;Y_n(f,v;\delta))\|^2.
+\]
+The original search box uses reference face $f_{\rm ref}\pm3^\circ$ and
+speed $[0.75,1.25]v_{\rm ref}$, initialized at the reference face and speed
+clipped to the bounds. The reference face is $0^\circ$ for Straight and
+$\pm1.5^\circ$ times curve scale for Draw/Fade; their face-to-path
+differences are respectively $0^\circ$, $-1.5^\circ$ and $+1.5^\circ$
+times curve scale. SciPy's bounded least-squares solver uses
+$\texttt{xtol}=\texttt{ftol}=\texttt{gtol}=10^{-11}$ and
+$\texttt{max\_nfev}=80$. Both a successful solver termination and the
+independently evaluated endpoint tolerance are required. This local search
+provides neither a uniqueness guarantee nor a global feasibility proof.
+Within-lean targets use the zero-error straight reference at that lean;
+fixed-target controls use its zero-lean target. The explicit expanded face and
+speed bounds of the supplement are retained in the across-lean controls below.
 
 For each executed condition a single seeded multivariate Gaussian sample is
 drawn and reused by shot index for Straight, Draw, and Fade. Its ordered
@@ -297,7 +316,60 @@ dataset was available to estimate them. Shaft rotation is converted
 nonlinearly into delivered face and loft, so the imposed rotation/path
 covariance is not itself the realized face/path covariance.
 
-\textbf{Club and contact assumptions.} Static loft and lie are taken from the
+The executed matrices use seed 20261009. With $D$ the diagonal matrix of
+primitive SDs and $C$ their correlation matrix, the sampler implements
+\[
+ \boldsymbol\epsilon_i=D U\Lambda^{1/2}\mathbf z_i,\qquad
+ C=U\Lambda U^T,\quad \mathbf z_i\sim\mathcal N(\mathbf0,I_7),\quad
+ \Sigma=DCD.
+\]
+NumPy's default generator supplies the independent standard-normal rows;
+correlation eigenvalues are clipped only for validated numerical roundoff.
+The same seed and field ordering preserve pairing across the comparisons.
+Forward-lean and attack-angle SDs are zero in all nine executed profiles,
+although the interface supports them. Each row below also includes the chosen
+shaft-twist SD of $1^\circ$ or $2^\circ$.
+\begin{center}\small
+\begin{tabular}{lrrrr}
+\toprule
+Profile & Path SD ($^\circ$) & Speed SD (mph) & Strike SD (in/Axis) & $\rho_{\theta,p}$\\
+\midrule
+\texttt{shaft\_only} & 0 & 0 & 0 & 0\\
+\texttt{shaft\_path} & 0.5 & 0 & 0 & 0\\
+\texttt{shaft\_speed1} & 0 & 1 & 0 & 0\\
+\texttt{shaft\_speed2} & 0 & 2 & 0 & 0\\
+\texttt{shaft\_strike} & 0 & 0 & 0.25 & 0\\
+\texttt{combined1} & 0.5 & 1 & 0.25 & 0\\
+\texttt{combined2} & 0.5 & 2 & 0.25 & 0\\
+\texttt{cov\_facepath\_positive} & 0.5 & 1 & 0.25 & $-0.6$\\
+\texttt{cov\_facepath\_negative} & 0.5 & 1 & 0.25 & $+0.6$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Here $1\,\mathrm{mph}=0.44704\,\mathrm{m/s}$ and
+$0.25\,\mathrm{in}=0.00635\,\mathrm m$. Zero entries in the last column
+indicate no imposed correlation; correlation with a constant dimension is
+not statistically defined. The first seven profiles use $C=I_7$.
+For the two covariance profiles the active five-dimensional block is
+$C_5=AA^T$, with $q=-0.6$ or $+0.6$, respectively:
+\[
+ A=\begin{pmatrix}
+ 1&0&0&0&0\\
+ q&0.8&0&0&0\\
+ 0.2&0&\sqrt{0.96}&0&0\\
+ 0&0.3&0&\sqrt{0.91}&0\\
+ 0&0&0.25&0&\sqrt{0.9375}
+ \end{pmatrix}.
+\]
+Thus these profiles contain additional speed/strike correlations, not only
+rotation/path correlation. Correlations involving the two zero-SD dimensions
+do not change the modeled covariance. Positive shaft twist closes the face,
+explaining the opposite signs in the legacy profile names. Requested primitive
+covariance, realized nonlinear face/path covariance, and covariance calculated
+only among supported shots are distinct quantities; the reported delivered
+face/path diagnostic is conditioned on each pattern's supported shots.
+
+\textbf{Club and Contact Assumptions.} Static loft and lie are taken from the
 cited model-year specifications; all remaining club properties are explicit
 hybrid research assumptions, not a reconstruction of those products. The
 finite club head has mass, a center of gravity behind the face, and a diagonal
@@ -325,6 +397,32 @@ sets pre-impact club angular velocity and ball velocity/spin to zero; shaft
 twist specifies club orientation, not a closure angular rate. Club angular
 velocity generated by impact is retained in the contact solution.
 
+More precisely, let the central delivered face frame be
+$B=[\mathbf n_0,\mathbf h,\mathbf u]$, with $\mathbf h$ heelward and
+$\mathbf u$ face-up. For toe-positive offset $a$, high-positive offset $b$,
+CG depth $d$, and curvature radii $R_B,R_R$, the adapter uses a local
+\emph{parabolic} surface:
+\[
+ \mathbf r_c=\left[d-\tfrac12(a^2/R_B+b^2/R_R)\right]\mathbf n_0
+              -a\mathbf h+b\mathbf u,
+\]
+\[
+ \mathbf n=\frac{\mathbf n_0-(a/R_B)\mathbf h+(b/R_R)\mathbf u}
+ {\|\mathbf n_0-(a/R_B)\mathbf h+(b/R_R)\mathbf u\|},\qquad
+ I_c=B\,\mathrm{diag}(I_n,I_h,I_u)B^T.
+\]
+A zero radius denotes a flat direction: its reciprocal terms are omitted.
+The normal used in contact is the local $\mathbf n$, while inertia is oriented
+by the central frame $B$; the radii do not define an exact spherical face.
+The rectangular supported face requires $|a|\le h_{\max}$ and
+$|b|\le v_{\max}$. For right-positive path $p$, attack angle $\gamma$,
+and speed $v_c$, the pre-impact translational velocity is
+\[
+ \mathbf v_c^-=v_c(\cos\gamma\cos p,-\cos\gamma\sin p,\sin\gamma)^T.
+\]
+All trigonometric evaluations use radians after converting the degree-valued
+public inputs.
+
 The primary impact law is a two-body rigid-body impulse calculation with
 Coulomb friction coefficient $\mu=0.4$ and \emph{energetic restitution}
 $e_E=0.83$. In compact form, let $\mathbf c$ be the club-minus-ball relative
@@ -332,7 +430,13 @@ velocity at contact, $\mathbf J$ the impulse on the ball, $m_c,m_b$ the club
 and ball masses, $\mathbf r_c$ and $\mathbf r_b$ the CG-to-contact levers,
 and $I_c,I_b$ the world-frame inertia tensors. The ball is modeled as a solid
 sphere with mass $m_b=0.04593$\,kg, radius $R=0.021335$\,m, and
-$I_b=(2/5)m_bR^2$. The relative contact velocity changes as
+$I_b=(2/5)m_bR^2$ (the scalar multiplying the identity tensor).
+The contact-relative velocity and its impulse update are
+\[
+ \mathbf c=\mathbf v_c+\boldsymbol\omega_c\times\mathbf r_c
+             -\mathbf v_b-\boldsymbol\omega_b\times\mathbf r_b.
+\]
+The relative contact velocity changes as
 \[
  \mathbf c^+=\mathbf c^- - K\mathbf J,\qquad
  K=\left(m_c^{-1}+m_b^{-1}\right)I
@@ -341,6 +445,10 @@ $I_b=(2/5)m_bR^2$. The relative contact velocity changes as
 \]
 The impulse updates both bodies' linear velocities and creates angular
 velocity through its moment arm:
+\[
+ \Delta\mathbf v_b=\mathbf J/m_b,\qquad
+ \Delta\mathbf v_c=-\mathbf J/m_c.
+\]
 \[
  \Delta\boldsymbol\omega_b=I_b^{-1}(\mathbf r_b\times\mathbf J),\qquad
  \Delta\boldsymbol\omega_c=-I_c^{-1}(\mathbf r_c\times\mathbf J).
@@ -354,9 +462,29 @@ $\|d\mathbf J_t\|\leq\mu\,dJ_n$; normal compression stops when approach
 velocity reaches zero. During rebound the accumulated returned normal work
 is set to $e_E^2$ times compression work. This is why the primary coefficient
 is an energy restitution and not a prescribed ratio of normal velocities when
-normal and tangential motion are coupled. The reported primary resolution is
-128 compression steps; refinement checks are in the independent numerical
-evidence linked by the design reference.
+normal and tangential motion are coupled.
+For an orthonormal tangent basis $T$, current relative velocity $\mathbf c$,
+and positive normal increment $dP$, the implemented disk problem is
+\[
+ \mathbf q_* =\arg\min_{\|\mathbf q\|\le\mu dP}
+ \left\{\tfrac12\mathbf q^T(T^TKT)\mathbf q
+ -[T^T(\mathbf c-dP K\mathbf n)]^T\mathbf q\right\},\qquad
+ d\mathbf J=dP\mathbf n+T\mathbf q_*.
+\]
+The positive compression and rebound work are
+\[
+ E_c=\int_{\mathrm{compression}}c_n\,dP,\qquad
+ E_r=-\int_{\mathrm{rebound}}c_n\,dP=e_E^2 E_c,
+ \qquad c_n=\mathbf n^T\mathbf c.
+\]
+The nominal normal-impulse resolution is $N=128$, defining
+$\Delta P_0=c_n^-/[N(\mathbf n^TK\mathbf n)]$; it is not a guarantee of
+exactly 128 compression increments. Work uses trapezoidal quadrature, and
+48 bisection iterations locate the final compression and rebound increments.
+An eligible frictionless or block-diagonal sticking case uses the analytical
+fast path instead. The disk solve likewise uses a 48-iteration multiplier
+bisection when its unconstrained solution exceeds the Coulomb radius.
+Refinement evidence at $N=256,512$ is linked by the design reference.
 
 A separate maximum-dissipation/Newton comparator enforces an instantaneous
 normal velocity restitution condition with the same numeric value 0.83 and a
@@ -368,20 +496,82 @@ not represent calibrated face compliance, shaft flexibility, grooves, local
 friction variation, or measured ball/club launch behavior; external empirical
 validation remains open.
 
-\textbf{Flight and endpoint.} The computed post-impact ball velocity and spin
-initialize the shared Rust flight kernel. It integrates position, velocity,
-and decaying spin with fourth-order Runge--Kutta at $\Delta t=0.02$\,s, up to
-12\,s. Acceleration includes gravity, air drag, and a spin-induced force based
-on relative air velocity; the ball spin decays exponentially at the configured
-rate. The runs use the simulator's standard still-air environment. Carry is the
-interpolated position where the trajectory crosses ground height. This is a first-contact landing model: first ground contact is treated
-as the hypothetical final lie for scoring. Bounce, roll, turf response,
+\textbf{Flight and Endpoint.} The computed post-impact ball velocity and spin
+initialize the same frozen Rust flight kernel documented for the historical
+study, with the phase-two contact model supplying the launch state. Its state
+is $(\mathbf r,\mathbf v,\omega)$, with constant spin-axis direction
+$\widehat{\boldsymbol\omega}$ and angular-speed magnitude $\omega$:
+\[
+ \dot{\mathbf r}=\mathbf v,\qquad
+ m_b\dot{\mathbf v}=m_b\mathbf g+\mathbf F_D+\mathbf F_M,\qquad
+ \dot\omega=-\lambda\omega,\quad \lambda=0.05\,\mathrm{s}^{-1}.
+\]
+The launch adapter converts impact spin magnitude from rad/s to RPM at the
+Python launch boundary and the native wrapper converts it back to rad/s.
+The ODE has exponential spin decay; its seventh state is integrated by RK4,
+not an exact exponential update. The actual Python-supplied ball radius is
+$R=0.021335$\,m, with the impact mass above and area $A_b=\pi R^2$.
+Still-air parameters are $\rho=1.225\,\mathrm{kg/m^3}$,
+$\mu_a=1.81\times10^{-5}\,\mathrm{Pa\,s}$, and
+$\mathbf g=(0,0,-9.80665)\,\mathrm{m/s^2}$. For relative air velocity
+$\mathbf v_a=\mathbf v-\mathbf w$ ($\mathbf w=0$ here), $V=\|\mathbf v_a\|$,
+and $\boldsymbol\omega=\omega\widehat{\boldsymbol\omega}$, the active forces are
+\[
+ \mathbf F_D=-\tfrac12\rho C_D A_b V\mathbf v_a,\qquad
+ S=R\|\boldsymbol\omega\|/V,\quad C_L=\min(0.26,0.70S^{0.645}),
+\]
+\[
+ \mathbf F_M=\tfrac12\rho C_L A_b V^2
+ \frac{\boldsymbol\omega\times\mathbf v_a}
+ {\|\boldsymbol\omega\times\mathbf v_a\|}.
+\]
+Only this single spin-induced force is added. Define
+\[
+ \mathrm{Re}_c=\operatorname{clip}(\rho V(2R)/\mu_a,10^3,10^7),\quad
+ H(z;z_0,w)=\tfrac12[1+\tanh((z-z_0)/w)].
+\]
+For the supplied base drag coefficient 0.25, the exact active drag curve is
+\[
+ \begin{split}
+ C_D=\operatorname{clip}\bigl(&0.50-0.25H(\log_{10}\mathrm{Re}_c;
+                                    \log_{10}(70000),0.16)\\
+                         &+0.05H(\log_{10}\mathrm{Re}_c;
+                                    \log_{10}(700000),0.45),\;0.15,0.55\bigr).
+ \end{split}
+\]
+These coefficients are the frozen implementation's empirical assumptions;
+they are not a new calibration to the modeled ball. The spin force uses total
+spin magnitude rather than its component perpendicular to air velocity.
+Its magnitude therefore does not decrease smoothly with axis alignment except
+at the near-zero cross-product cutoff. The source returns zero spin force
+when speed, spin magnitude, or the spin--velocity cross-product norm is below
+$10^{-6}$ in their respective SI numerical units; drag is zero below the same
+speed threshold. Arbitrary off-center spin predictions inherit this model
+limitation. Internal contact conservation does not validate the aerodynamic law.
+
+All seven states use fourth-order Runge--Kutta at $\Delta t=0.02$\,s with a
+nominal 12\,s horizon. The wrapper allows $\lfloor12/\Delta t\rfloor+1$
+steps, giving a nominal upper bound of 12.02\,s at the production step.
+The native ground-stop test is enabled only after $t>0.05$\,s to exclude the
+initial zero-height state. Failure to return a landing is a numerical failure,
+not a substituted airborne endpoint. Launch position is the origin at zero
+height. Between the last
+above-ground state and first nonpositive-height state, landing is
+\[
+ \mathbf r_{\rm land}=\mathbf r_j+
+ \frac{z_j}{z_j-z_{j+1}}(\mathbf r_{j+1}-\mathbf r_j).
+\]
+The startup guard is an implementation qualification for extremely short
+flights: it can pass an earlier ground crossing before termination is enabled.
+This linear event interpolation does not inherit a fourth-order landing-time
+accuracy guarantee merely from RK4 state integration. First ground contact is
+treated as the hypothetical final lie for scoring. Bounce, roll, turf response,
 obstacles, wind variation, and elevation are not simulated.
 Unsupported off-face, nonapproaching, or nonairborne samples are kept with
 their failure status, never clipped or resampled. Endpoint distributions are
 therefore conditional on supported airborne shots when failures occur.
 
-\textbf{Conditional scoring and interpretation.} The driver case assumes a
+\textbf{Conditional Scoring and Interpretation.} The driver case assumes a
 flat 400\,m hole with a 30\,m fairway corridor; its carry endpoint is assigned
 a fairway or rough lie. Iron and wedge cases assume a fairway approach to a
 centered 15\,m-radius green, with rough outside. A source-backed historical
@@ -397,6 +587,71 @@ use the common supported indices across all six populations. Bootstrap
 intervals quantify sampling variation for those simulated populations only. They do not include uncertainty
 in club properties, contact law, flight physics, human delivery distributions,
 course geometry, or the scoring benchmark.
+
+Let $A_{kc}$ be the supported shot-index set for pattern $k$ in condition $c$,
+$A_{3c}=\bigcap_{k\in\{S,D,F\}}A_{kc}$, and
+$A_6=A_{3c_1}\cap A_{3c_2}$. With endpoint scores
+$SG_{ikc}=J(d_{\rm start},\ell_{\rm start})-1-J(d_{ikc},\ell_{ikc})$,
+the within-condition benefit and between-condition interaction are
+\[
+ \widehat B_{kc}=\frac{1}{|A_{3c}|}\sum_{i\in A_{3c}}
+       (SG_{ikc}-SG_{iSc}),
+\]
+\[
+ \widehat{\Delta B}_k=\frac{1}{|A_6|}\sum_{i\in A_6}
+ [(SG_{ikc_2}-SG_{iSc_2})-(SG_{ikc_1}-SG_{iSc_1})].
+\]
+The order $c_2-c_1$ follows the named contrast in each result table.
+Changing support can change the conditional population as well as the response;
+these estimands do not recover the unknown scores of unsupported outcomes.
+Failure probabilities remain separately reported, and unconditional expected
+scoring is unavailable without defensible terminal states for those failures.
+The saved mean-difference intervals use 500 paired bootstrap resamples of the
+appropriate common index set and empirical 2.5th/97.5th percentiles. Differences
+are formed before resampling. These pointwise intervals have finite bootstrap
+endpoint precision; a borderline zero crossing is not strong evidence of a
+stable sign. No multiplicity-adjusted discovery claim is made.
+
+\textbf{Endpoint Statistics and Binned Density.} For a pattern's $n$ supported
+reported endpoints $\mathbf z_i=(X_i,Y_i)^T$ and target
+$\mathbf z_T=(X_T,0)^T$, let
+\[
+ \bar{\mathbf z}=n^{-1}\sum_i\mathbf z_i,\quad
+ \widehat\Sigma_z=\frac{1}{n-1}\sum_i
+ (\mathbf z_i-\bar{\mathbf z})(\mathbf z_i-\bar{\mathbf z})^T,
+ \quad\mathbf b=\bar{\mathbf z}-\mathbf z_T.
+\]
+Lateral and downrange SDs are the square roots of the corresponding diagonal
+entries; covariance describes orientation, while target RMSE includes bias:
+\[
+ \mathrm{RMSE}^2=n^{-1}\sum_i\|\mathbf z_i-\mathbf z_T\|^2
+ =\|\mathbf b\|^2+\frac{n-1}{n}\operatorname{tr}(\widehat\Sigma_z).
+\]
+Radial target quantiles use $\|\mathbf z_i-\mathbf z_T\|$, and containment is
+the fraction within the stated radius. These are distinct from radial carry
+$\|\mathbf z_i\|$. A narrow one-dimensional endpoint locus is not evidence of
+a calibrated two-dimensional player dispersion ellipse.
+
+The unsmoothed histogram uses common spatial bin edges across the compared
+patterns. For bin $j$ of area $a_j$ and count $n_j$, density is
+$\widehat f_j=n_j/(n a_j)$, so $\sum_j\widehat f_j a_j=1$ separately for each
+supported pattern population. Bins are ordered by density and retained through
+the threshold needed for 50\%, 80\%, or 95\% cumulative mass; all tied bins at
+the cutoff are included. Achieved mass can therefore exceed the named level.
+Bin resolution and achieved mass are reporting quantities, not physical
+precision; these regions depend on the grid and are not smooth population
+density estimates or confidence regions for a mean. No Gaussian width or KDE
+is imposed on singular or nearly one-dimensional samples.
+
+The equations above follow the preserved study adapters and shared kernels:
+\texttt{matched\_physics.py}, \texttt{nominal\_matching.py},
+\texttt{noise.py}, \texttt{incremental\_contact\_kernel.py}, and
+\path{aerodynamics.rs} and \path{ball_flight.rs}. Their execution identities
+are recorded in the \href{phase2/source_transition_supplement.json}{Accepted
+Source Transition}; the saved-data workflow retains those identities separately
+from later reporting changes. The local parabolic face, contact law, force
+coefficients, stochastic covariance, and hypothetical course geometry jointly
+define the model whose conditional outputs are tabulated below.
 
 The saved original and supplemental simulations and independent data audits are
 complete. Numerical narrative and standalone graphics have scoped independent review. This illustrated article requires its own compiled-page review before publication. The retained

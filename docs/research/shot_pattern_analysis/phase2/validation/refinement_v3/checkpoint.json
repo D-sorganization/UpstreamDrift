@@ -1,0 +1,18 @@
+{
+  "status": "in_progress_not_publication_accepted",
+  "methods_compile": {
+    "exit": 0,
+    "pages": 39,
+    "warnings": 0
+  },
+  "source_sha256": "2f8734aa3fb566eec1b19e8fe82bd205a29640337e114ca96823e807bfc0fca6",
+  "methods_pdf_sha256": "4fa60e1f85110b77846269d75a70b1cba686afc2833c4d85ef50daa2a3851fe7",
+  "results_preservation": "All bytes from The saved original and supplemental simulations through end of source unchanged from68920fa83f",
+  "remaining": [
+    "Supplemental trace replay parity and plotting",
+    "Full revised-page review",
+    "Integration gates and protected merge",
+    "AffineDrift publication and public link verification"
+  ],
+  "editor_compiler": "Still fails before parsing at bundle download; issue12120 remains open"
+}
