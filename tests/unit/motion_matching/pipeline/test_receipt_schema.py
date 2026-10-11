@@ -51,6 +51,8 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     receipt = validate_receipt(doc)
     assert isinstance(receipt, Receipt)
     assert receipt.dynamics.reference_zmp is not None
+    # 140/180 since the receipt was regenerated on the measured driver club
+    # cluster (#12221; a parent-commit control reproduces 157/180);
     # 157/180 since the receipt was regenerated for #12030 on the GCV-20
     # impact-split reference (#12145; a control on main gives the same value);
     # 62/72 with the spec's own pelvis alignment in the hip rewrite (#12109);
@@ -58,7 +60,7 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     # left hip alone (#11737), and the pre-OSV-6 receipt under
     # anthro_driver_pre_osv6/ recorded 2/3.
     assert receipt.dynamics.reference_zmp.outside_fraction_1s_to_1_5s == pytest.approx(
-        157 / 180, rel=1e-5
+        140 / 180, rel=1e-5
     )
 
 

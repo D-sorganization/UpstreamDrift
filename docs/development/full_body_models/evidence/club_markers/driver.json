@@ -1,0 +1,36 @@
+{
+  "body": "Clubhead",
+  "club": "driver",
+  "head_triad_edges_m": [
+    0.052039926323535005, 0.09240965781568333, 0.09577520773162101
+  ],
+  "offsets_m": {
+    "Marker_2:2:1": [
+      0.0014236261251189483, -0.07311493220309755, -0.008604687430533628
+    ],
+    "Marker_2:2:2": [
+      0.04934388630384107, -0.010268455189889931, -0.05649533212282851
+    ],
+    "Marker_2:2:3": [
+      0.0622866156510181, 0.000823910819803318, -0.007326245237757357
+    ],
+    "Marker_3:3:1": [
+      -0.6836089803832125, -0.07775938316971392, -0.005741693174614749
+    ],
+    "Marker_3:3:2": [
+      -0.754133043520802, -0.050610533528774065, 0.021684806777813963
+    ],
+    "Marker_3:3:3": [
+      -0.8044805309230546, -0.07052190794175632, -0.0015704053780767567
+    ]
+  },
+  "schema": "club-markers/1",
+  "source": {
+    "capture": "driver",
+    "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "method": "static-seed calibration: ik.attachments_m of the --static-seeds run on the club's capture (the static trial places every marker, club cluster included)",
+    "receipt": "docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json",
+    "receipt_commit": "1bef55345715f5c4787ab80f2b54bc19736df633",
+    "receipt_sha256": "5ed073d4206e161a5df637b7803638af9acce8f77d67063e12274839522a3935"
+  }
+}
