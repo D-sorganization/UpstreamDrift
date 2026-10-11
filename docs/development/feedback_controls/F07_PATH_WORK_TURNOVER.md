@@ -109,3 +109,14 @@ observations do not establish a global bound, full wrapped-path behavior, or
 replay qualification. Model and captured-state assets remain in their private
 repository; this summary does not represent direct execution on the parent
 7090 model.
+
+## Current Parent Integration
+
+Normal merge `ec9e786e1fd73e68a53e20fdfc4d8d658933e7ea` preserves the
+current feasibility parent `2ee82c02c4c239ae5090a5397b4c8e9af56a825a`. The
+dedicated OpenSim 4.6 audit suite passed all 24 tests again with zero skips.
+Agent-context check and all five central pre-PR gates passed; that central
+invocation mapped no tests, so the dedicated SDK run supplies native evidence.
+The existing byte-bound closed-loop neck receipt is explicitly excluded from
+Prettier to preserve its provenance during normal hooks. PR #12239 remains
+a diagnostic audit and requires its parent integration before final merge.
