@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "6b6e4be55e7086a33db43b36d2632765be619bde",
+  "tools_pin": "86d0f28b1cc5acf61185e07e320c816c2d005512",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -11,10 +11,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 399,
-    "diverged": 274,
+    "identical": 400,
+    "diverged": 273,
     "ud-only": 1776,
-    "tools-only": 808,
+    "tools-only": 805,
     "spelling-only": 121
   },
   "packages": {
@@ -245,7 +245,7 @@
     "core": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 24,
+      "ud-only": 23,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -425,10 +425,10 @@
       "spelling-only": 0
     },
     "humanoid_character_builder": {
-      "identical": 13,
-      "diverged": 27,
+      "identical": 14,
+      "diverged": 26,
       "ud-only": 36,
-      "tools-only": 3,
+      "tools-only": 0,
       "spelling-only": 9
     },
     "impact_parameters": {
@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 293,
+      "ud-only": 294,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -6725,18 +6725,6 @@
       "spelling_only": false
     },
     {
-      "path": "core/physical_inertia.py",
-      "classification": "ud-only",
-      "package": "core",
-      "subpackage": "",
-      "ud_bytes": 1123,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "core/physics_constants.py",
       "classification": "ud-only",
       "package": "core",
@@ -7989,7 +7977,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 14028,
+      "ud_bytes": 15129,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -11542,8 +11530,8 @@
       "package": "humanoid_character_builder",
       "subpackage": "mesh",
       "ud_bytes": 20498,
-      "tools_bytes": 20606,
-      "byte_delta": -108,
+      "tools_bytes": 20438,
+      "byte_delta": 60,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11568,18 +11556,6 @@
       "ud_bytes": 15766,
       "tools_bytes": 15676,
       "byte_delta": 90,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "humanoid_character_builder/mesh/triangle_lamina.py",
-      "classification": "tools-only",
-      "package": "humanoid_character_builder",
-      "subpackage": "mesh",
-      "ud_bytes": null,
-      "tools_bytes": 7288,
-      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11790,13 +11766,13 @@
     },
     {
       "path": "humanoid_character_builder/tests/test_inertia_calculator.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "humanoid_character_builder",
       "subpackage": "tests",
       "ud_bytes": 9755,
-      "tools_bytes": 9759,
-      "byte_delta": -4,
-      "byte_identical": false,
+      "tools_bytes": 9755,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -11837,18 +11813,6 @@
       "spelling_only": false
     },
     {
-      "path": "humanoid_character_builder/tests/test_triangle_lamina.py",
-      "classification": "tools-only",
-      "package": "humanoid_character_builder",
-      "subpackage": "tests",
-      "ud_bytes": null,
-      "tools_bytes": 9227,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "humanoid_character_builder/tests/test_urdf_contracts_integration.py",
       "classification": "diverged",
       "package": "humanoid_character_builder",
@@ -11869,18 +11833,6 @@
       "tools_bytes": 10054,
       "byte_delta": 0,
       "byte_identical": true,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "humanoid_character_builder/tests/test_urdf_inertia_export.py",
-      "classification": "tools-only",
-      "package": "humanoid_character_builder",
-      "subpackage": "tests",
-      "ud_bytes": null,
-      "tools_bytes": 3178,
-      "byte_delta": null,
-      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -13005,7 +12957,7 @@
       "classification": "ud-only",
       "package": "model_appearance",
       "subpackage": "",
-      "ud_bytes": 13218,
+      "ud_bytes": 13526,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15393,7 +15345,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "execution",
-      "ud_bytes": 1004,
+      "ud_bytes": 1050,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15405,7 +15357,19 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "execution",
-      "ud_bytes": 5530,
+      "ud_bytes": 6329,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/execution/club_markers.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "execution",
+      "ud_bytes": 5715,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15453,7 +15417,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "execution",
-      "ud_bytes": 27545,
+      "ud_bytes": 30366,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15561,7 +15525,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 42842,
+      "ud_bytes": 43327,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16617,7 +16581,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 13799,
+      "ud_bytes": 14502,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16677,7 +16641,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 29606,
+      "ud_bytes": 29609,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16749,7 +16713,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 34010,
+      "ud_bytes": 34053,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16929,7 +16893,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 18843,
+      "ud_bytes": 18890,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -41739,9 +41703,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-10-11",
-        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+        "author": "Dieter Olson",
+        "date": "2026-08-20",
+        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
       }
     },
     {
@@ -41794,19 +41758,6 @@
         "author": "Dieter Olson",
         "date": "2026-09-26",
         "commit": "3678409fc51024150ab28970b72e3b468935f345"
-      }
-    },
-    {
-      "path": "humanoid_character_builder/tests/test_inertia_calculator.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-10-11",
-        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {

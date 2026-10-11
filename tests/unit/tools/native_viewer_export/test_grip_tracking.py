@@ -169,8 +169,8 @@ def _crossing_head_path() -> tuple[np.ndarray, np.ndarray]:
 def _overshoot_head_path() -> tuple[np.ndarray, np.ndarray]:
     """Synthetic swing reproducing the GCV-14 bug (#11720).
 
-    The peak-clubhead-speed sample lands 9 cm above the address height (so
-    ``impact_frame``'s height check alone accepts it) but 35 cm away from the
+    The peak-clubhead-speed sample lands 9 cm above the address height (so a
+    height check alone accepts it) but 35 cm away from the
     ball horizontally -- it is the follow-through, not impact. The true
     closest approach to the ball falls on the segment between two earlier
     samples.
@@ -246,13 +246,14 @@ def test_hud_impact_time_uses_ball_passage_not_the_peak_speed_sample(
     """GCV-14 (#11720): a peak-speed sample near the address height but far from
     the ball must not be reported as impact; the sub-sample ball-passage time
     (strictly between the two samples whose segment crosses the ball) must."""
-    from src.shared.python.model_appearance.club_face import ball_passage, impact_frame
+    from src.shared.python.model_appearance.club_face import ball_passage
+    from src.shared.python.motion_matching.loaders._align import detect_impact_index
     from src.tools.native_viewer_export import overlay
 
     t, head = _overshoot_head_path()
-    peak = impact_frame(t, head)
+    peak = detect_impact_index(t, head)
     t_expected, k, _ = ball_passage(t, head)
-    assert k < peak  # the true crossing precedes the accepted peak-speed sample
+    assert k < peak  # the true crossing precedes the peak-speed sample
     _patch_mujoco_overlay_source(monkeypatch, head)
     got = overlay.detect_impact_time_s(_swing_for(t))
     assert got == pytest.approx(t_expected)
