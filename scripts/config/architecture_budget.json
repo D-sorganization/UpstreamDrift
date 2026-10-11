@@ -1453,42 +1453,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/shared/python/physics/incremental_contact_kernel.py",
-      "symbol": "_trial_source",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - _trial_source exceeds parameters budget (11 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/shared/python/physics/incremental_contact_kernel.py",
-      "symbol": "_integrate_source",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - _integrate_source exceeds function-lines budget (154 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/shared/python/physics/incremental_contact_kernel.py",
-      "symbol": "_integrate_source",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - _integrate_source exceeds parameters budget (12 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/shared/python/physics/incremental_contact_kernel.py",
-      "symbol": "integrate_impulse",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - integrate_impulse exceeds parameters budget (11 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/academic_plots.py",
       "symbol": "write_academic_dispersion_figure",
       "rule": "function-lines",

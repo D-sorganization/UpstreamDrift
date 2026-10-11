@@ -6,7 +6,7 @@ import math
 import importlib
 import importlib.util
 from collections.abc import Callable
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 
@@ -15,6 +15,21 @@ numba: Any = (
     if importlib.util.find_spec("numba") is not None
     else None
 )
+
+
+class ContactKernelInput(NamedTuple):
+    """Explicit physical and integration inputs for the contact kernel."""
+
+    relative_initial: np.ndarray
+    normal: np.ndarray
+    inverse_mass: np.ndarray
+    tangent: np.ndarray
+    tangent_mass: np.ndarray
+    eigenvalues: np.ndarray
+    eigenvectors: np.ndarray
+    friction: float
+    energetic_restitution: float
+    steps_per_compression: int
 
 
 def _disk_source(
@@ -63,16 +78,19 @@ _disk_kernel = (
 def _trial_source(
     current: np.ndarray,
     step: float,
-    relative_initial: np.ndarray,
-    normal: np.ndarray,
-    inverse_mass: np.ndarray,
-    tangent: np.ndarray,
-    tangent_mass: np.ndarray,
-    eigenvalues: np.ndarray,
-    eigenvectors: np.ndarray,
-    friction: float,
+    physical: tuple,
     disk_solver: Callable[..., tuple[np.ndarray, bool]],
 ) -> tuple[np.ndarray, float, float, bool]:
+    (
+        relative_initial,
+        normal,
+        inverse_mass,
+        tangent,
+        tangent_mass,
+        eigenvalues,
+        eigenvectors,
+        friction,
+    ) = physical
     relative = relative_initial - inverse_mass @ current
     normal_before = float(relative @ normal)
     tangent_target = tangent.T @ (relative - step * inverse_mass @ normal)
@@ -91,82 +109,55 @@ _trial_kernel = (
 )
 
 
-def _integrate_source(
-    relative_initial: np.ndarray,
-    normal: np.ndarray,
-    inverse_mass: np.ndarray,
-    tangent: np.ndarray,
-    tangent_mass: np.ndarray,
-    eigenvalues: np.ndarray,
-    eigenvectors: np.ndarray,
-    friction: float,
-    energetic_restitution: float,
-    steps_per_compression: int,
+def _trial_at_step_source(
+    impulse: np.ndarray,
+    step: float,
+    physical: tuple,
     trial_solver: Callable[..., tuple[np.ndarray, float, float, bool]],
     disk_solver: Callable[..., tuple[np.ndarray, bool]],
 ) -> tuple[np.ndarray, float, float, bool]:
-    approach = float(relative_initial @ normal)
-    base_step = approach / (
-        float(normal @ inverse_mass @ normal) * steps_per_compression
-    )
-    if not math.isfinite(base_step) or base_step <= 0:
-        raise RuntimeError("incremental normal impulse step is invalid")
-    impulse = np.zeros(3)
+    """Evaluate one unchanged contact trial with its shared physical inputs."""
+    return trial_solver(impulse, step, physical, disk_solver)
+
+
+_trial_at_step_kernel = (
+    numba.njit(cache=True, fastmath=False)(_trial_at_step_source)
+    if numba is not None
+    else _trial_at_step_source
+)
+
+
+def _compression_source(
+    impulse: np.ndarray,
+    base_step: float,
+    steps_per_compression: int,
+    physical: tuple,
+    trial_solver: Callable[..., tuple[np.ndarray, float, float, bool]],
+    disk_solver: Callable[..., tuple[np.ndarray, bool]],
+    trial_at_step: Callable[..., tuple[np.ndarray, float, float, bool]],
+) -> tuple[np.ndarray, float, bool]:
     compression_work = 0.0
-    rebound_work = 0.0
     slipped = False
     compression_done = False
     for _ in range(10 * steps_per_compression):
         step = base_step
-        delta, before, after, is_sliding = trial_solver(
-            impulse,
-            step,
-            relative_initial,
-            normal,
-            inverse_mass,
-            tangent,
-            tangent_mass,
-            eigenvalues,
-            eigenvectors,
-            friction,
-            disk_solver,
+        delta, before, after, is_sliding = trial_at_step(
+            impulse, step, physical, trial_solver, disk_solver
         )
         if after <= 0:
             lo, hi = 0.0, step
             for _ in range(48):
                 mid = (lo + hi) * 0.5
                 if (
-                    trial_solver(
-                        impulse,
-                        mid,
-                        relative_initial,
-                        normal,
-                        inverse_mass,
-                        tangent,
-                        tangent_mass,
-                        eigenvalues,
-                        eigenvectors,
-                        friction,
-                        disk_solver,
-                    )[2]
+                    trial_at_step(impulse, mid, physical, trial_solver, disk_solver)[2]
                     > 0
                 ):
                     lo = mid
                 else:
                     hi = mid
             step = hi
-            delta, before, after, is_sliding = trial_solver(
-                impulse,
-                step,
-                relative_initial,
-                normal,
-                inverse_mass,
-                tangent,
-                tangent_mass,
-                eigenvalues,
-                eigenvectors,
-                friction,
-                disk_solver,
+            delta, before, after, is_sliding = trial_at_step(
+                impulse, step, physical, trial_solver, disk_solver
             )
             compression_done = True
         impulse += delta
@@ -178,44 +169,44 @@ def _integrate_source(
         raise RuntimeError("compression event not reached within impulse horizon")
     if compression_work <= 0:
         raise RuntimeError("normal compression work must be positive")
+    return impulse, compression_work, slipped
 
-    target_work = energetic_restitution**2 * compression_work
+
+_compression_kernel = (
+    numba.njit(cache=True, fastmath=False)(_compression_source)
+    if numba is not None
+    else _compression_source
+)
+
+
+def _rebound_source(
+    impulse: np.ndarray,
+    base_step: float,
+    steps_per_compression: int,
+    physical: tuple,
+    target_work: float,
+    trial_solver: Callable[..., tuple[np.ndarray, float, float, bool]],
+    disk_solver: Callable[..., tuple[np.ndarray, bool]],
+    trial_at_step: Callable[..., tuple[np.ndarray, float, float, bool]],
+) -> tuple[np.ndarray, float, bool]:
+    rebound_work = 0.0
+    slipped = False
     rebound_done = False
     for _ in range(10 * steps_per_compression):
         if target_work - rebound_work <= 1e-12:
             rebound_done = True
             break
         step = base_step
-        delta, before, after, is_sliding = trial_solver(
-            impulse,
-            step,
-            relative_initial,
-            normal,
-            inverse_mass,
-            tangent,
-            tangent_mass,
-            eigenvalues,
-            eigenvectors,
-            friction,
-            disk_solver,
+        delta, before, after, is_sliding = trial_at_step(
+            impulse, step, physical, trial_solver, disk_solver
         )
         gained = -0.5 * (before + after) * step
         if gained >= target_work - rebound_work:
             lo, hi = 0.0, step
             for _ in range(48):
                 mid = (lo + hi) * 0.5
-                _, start_mid, end_mid, _ = trial_solver(
-                    impulse,
-                    mid,
-                    relative_initial,
-                    normal,
-                    inverse_mass,
-                    tangent,
-                    tangent_mass,
-                    eigenvalues,
-                    eigenvectors,
-                    friction,
-                    disk_solver,
+                _, start_mid, end_mid, _ = trial_at_step(
+                    impulse, mid, physical, trial_solver, disk_solver
                 )
                 work_mid = -0.5 * (start_mid + end_mid) * mid
                 if work_mid < target_work - rebound_work:
@@ -223,18 +214,8 @@ def _integrate_source(
                 else:
                     hi = mid
             step = hi
-            delta, before, after, is_sliding = trial_solver(
-                impulse,
-                step,
-                relative_initial,
-                normal,
-                inverse_mass,
-                tangent,
-                tangent_mass,
-                eigenvalues,
-                eigenvectors,
-                friction,
-                disk_solver,
+            delta, before, after, is_sliding = trial_at_step(
+                impulse, step, physical, trial_solver, disk_solver
             )
             gained = -0.5 * (before + after) * step
         impulse += delta
@@ -244,7 +225,60 @@ def _integrate_source(
         raise RuntimeError("rebound work target not reached within impulse horizon")
     if abs(rebound_work - target_work) > 1e-8:
         raise RuntimeError("energetic restitution postcondition failed")
-    return impulse, compression_work, rebound_work, slipped
+    return impulse, rebound_work, slipped
+
+
+_rebound_kernel = (
+    numba.njit(cache=True, fastmath=False)(_rebound_source)
+    if numba is not None
+    else _rebound_source
+)
+
+
+def _integrate_source(
+    physical: tuple,
+    energetic_restitution: float,
+    steps_per_compression: int,
+    trial_solver: Callable[..., tuple[np.ndarray, float, float, bool]],
+    disk_solver: Callable[..., tuple[np.ndarray, bool]],
+    trial_at_step: Callable[..., tuple[np.ndarray, float, float, bool]],
+    compression_solver: Callable[..., tuple[np.ndarray, float, bool]],
+    rebound_solver: Callable[..., tuple[np.ndarray, float, bool]],
+) -> tuple[np.ndarray, float, float, bool]:
+    relative_initial, normal, inverse_mass = physical[:3]
+    approach = float(relative_initial @ normal)
+    base_step = approach / (
+        float(normal @ inverse_mass @ normal) * steps_per_compression
+    )
+    if not math.isfinite(base_step) or base_step <= 0:
+        raise RuntimeError("incremental normal impulse step is invalid")
+    impulse = np.zeros(3)
+    impulse, compression_work, compression_slipped = compression_solver(
+        impulse,
+        base_step,
+        steps_per_compression,
+        physical,
+        trial_solver,
+        disk_solver,
+        trial_at_step,
+    )
+    target_work = energetic_restitution**2 * compression_work
+    impulse, rebound_work, rebound_slipped = rebound_solver(
+        impulse,
+        base_step,
+        steps_per_compression,
+        physical,
+        target_work,
+        trial_solver,
+        disk_solver,
+        trial_at_step,
+    )
+    return (
+        impulse,
+        compression_work,
+        rebound_work,
+        compression_slipped | rebound_slipped,
+    )
 
 
 _compiled_integrator = (
@@ -255,38 +289,45 @@ _compiled_integrator = (
 
 
 def integrate_impulse(
-    relative_initial: np.ndarray,
-    normal: np.ndarray,
-    inverse_mass: np.ndarray,
-    tangent: np.ndarray,
-    tangent_mass: np.ndarray,
-    eigenvalues: np.ndarray,
-    eigenvectors: np.ndarray,
-    friction: float,
-    energetic_restitution: float,
-    steps_per_compression: int,
+    inputs: ContactKernelInput,
     *,
     backend: str,
 ) -> tuple[np.ndarray, float, float, bool]:
     """Dispatch the identical kernel source, never swallowing JIT failures."""
-    args = (
-        relative_initial,
-        normal,
-        inverse_mass,
-        tangent,
-        tangent_mass,
-        eigenvalues,
-        eigenvectors,
-        friction,
-        energetic_restitution,
-        steps_per_compression,
+    physical = (
+        inputs.relative_initial,
+        inputs.normal,
+        inputs.inverse_mass,
+        inputs.tangent,
+        inputs.tangent_mass,
+        inputs.eigenvalues,
+        inputs.eigenvectors,
+        inputs.friction,
     )
     if backend == "auto":
         backend = "numba" if _compiled_integrator is not None else "python_reference"
     if backend == "python_reference":
-        return _integrate_source(*args, _trial_source, _disk_source)
+        return _integrate_source(
+            physical,
+            inputs.energetic_restitution,
+            inputs.steps_per_compression,
+            _trial_source,
+            _disk_source,
+            _trial_at_step_source,
+            _compression_source,
+            _rebound_source,
+        )
     if backend == "numba" and _compiled_integrator is not None:
-        return _compiled_integrator(*args, _trial_kernel, _disk_kernel)
+        return _compiled_integrator(
+            physical,
+            inputs.energetic_restitution,
+            inputs.steps_per_compression,
+            _trial_kernel,
+            _disk_kernel,
+            _trial_at_step_kernel,
+            _compression_kernel,
+            _rebound_kernel,
+        )
     raise ValueError("backend must be available numba or python_reference")
 
 

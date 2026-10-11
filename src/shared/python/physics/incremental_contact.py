@@ -14,7 +14,11 @@ import math
 
 import numpy as np
 
-from .incremental_contact_kernel import contact_backend_info, integrate_impulse
+from .incremental_contact_kernel import (
+    ContactKernelInput,
+    contact_backend_info,
+    integrate_impulse,
+)
 from .rigid_contact import (
     RigidContactInput,
     RigidContactResult,
@@ -104,16 +108,18 @@ def solve_incremental_contact(
                 fastpath_used=True,
             )
     impulse, compression_work, rebound_work, slipped = integrate_impulse(
-        system.relative_velocity,
-        n,
-        k,
-        tangent,
-        ktt,
-        eigenvalues,
-        eigenvectors,
-        state.friction_coefficient,
-        energetic_restitution,
-        steps_per_compression,
+        ContactKernelInput(
+            relative_initial=system.relative_velocity,
+            normal=n,
+            inverse_mass=k,
+            tangent=tangent,
+            tangent_mass=ktt,
+            eigenvalues=eigenvalues,
+            eigenvectors=eigenvectors,
+            friction=state.friction_coefficient,
+            energetic_restitution=energetic_restitution,
+            steps_per_compression=steps_per_compression,
+        ),
         backend=backend,
     )
     result = _finish_contact(
