@@ -1,0 +1,121 @@
+{
+  "schema": "shot-pattern-presentation-v2/1",
+  "display_axes": {
+    "x": "lateral_m_right_positive",
+    "y": "downrange_m"
+  },
+  "coordinate_source": "saved [downrange_m, lateral_m] without translation or aim correction",
+  "embedded_figure_mapping": [
+    {
+      "original": "phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/density.pdf",
+      "replacement": "presentation_v2/driver_baseline_density.pdf",
+      "sources": {
+        "final_v1/driver_lean0_curve1_rotation1_combined2/shots.csv.gz": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484"
+      }
+    },
+    {
+      "original": "phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "replacement": "presentation_v2/driver_baseline_flight_paths.pdf",
+      "sources": {
+        "final_v1/driver_lean0_curve1_rotation1_combined2/flight_samples.json": "e1783bde8253090ee9ff04e085ece3962ed2f7dd015093d044fc43ca6545d152"
+      }
+    },
+    {
+      "original": "phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/density.pdf",
+      "replacement": "presentation_v2/seven_iron_baseline_density.pdf",
+      "sources": {
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/shots.csv.gz": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9"
+      }
+    },
+    {
+      "original": "phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "replacement": "presentation_v2/seven_iron_baseline_flight_paths.pdf",
+      "sources": {
+        "final_v1/seven_iron_lean0_curve1_rotation1_combined2/flight_samples.json": "021fe3df425c463ed2d7ed59aa6651886558fc5cc3b8b4b7c3c9a3d226af29c2"
+      }
+    },
+    {
+      "original": "phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/density.pdf",
+      "replacement": "presentation_v2/pitching_wedge_baseline_density.pdf",
+      "sources": {
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/shots.csv.gz": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e"
+      }
+    },
+    {
+      "original": "phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "replacement": "presentation_v2/pitching_wedge_baseline_flight_paths.pdf",
+      "sources": {
+        "final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/flight_samples.json": "d27c46735c3566a816d8d056cf5082e9e40f2fcfd2949a205f159e1d2ae2e34d"
+      }
+    },
+    {
+      "original": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve1_rotation2_combined2_178p949m_3517439202_density.png",
+      "replacement": "presentation_v2/driver_shaft_rotation_sd_density.pdf",
+      "sources": {
+        "control_final_v1/driver_lean0_curve1_rotation1_combined2/shots.csv.gz": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484",
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/shots.csv.gz": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d"
+      },
+      "comparison_receipt": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+    },
+    {
+      "original": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density.png",
+      "replacement": "presentation_v2/driver_curve_strength_density.pdf",
+      "sources": {
+        "control_final_v1/driver_lean0_curve1_rotation1_combined2/shots.csv.gz": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484",
+        "control_final_v1/driver_lean0_curve2_rotation1_combined2/shots.csv.gz": "c13f1d3965b83d977b6446486370a6fe1659e08b3d9737384696576928d96905"
+      },
+      "comparison_receipt": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+    },
+    {
+      "original": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve1_rotation2_combined2_127p882m_df1aad6644_density.pdf",
+      "replacement": "presentation_v2/seven_iron_shaft_rotation_sd_density.pdf",
+      "sources": {
+        "control_final_v1/seven_iron_lean0_curve1_rotation1_combined2/shots.csv.gz": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9",
+        "control_final_v1/seven_iron_lean0_curve1_rotation2_combined2/shots.csv.gz": "b16f41b07ae36f889aab9305669b725388f41d62e4cbbcf2c65b2f3df07d8953"
+      },
+      "comparison_receipt": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+    },
+    {
+      "original": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve2_rotation1_combined2_127p882m_2d9a63d794_density.pdf",
+      "replacement": "presentation_v2/seven_iron_curve_strength_density.pdf",
+      "sources": {
+        "control_final_v1/seven_iron_lean0_curve1_rotation1_combined2/shots.csv.gz": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9",
+        "control_final_v1/seven_iron_lean0_curve2_rotation1_combined2/shots.csv.gz": "9cd2d4df0defb918ba89948c8ed9e42fcce930b1f4aac3c1cc4a0ff8bf24fdc2"
+      },
+      "comparison_receipt": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+    },
+    {
+      "original": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_density.pdf",
+      "replacement": "presentation_v2/pitching_wedge_shaft_rotation_sd_density.pdf",
+      "sources": {
+        "control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/shots.csv.gz": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e",
+        "control_final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/shots.csv.gz": "9d089f3b70b0cb5ddeeabe1ff309cfec960c5ed78368d4b764f3dea2315a3eee"
+      },
+      "comparison_receipt": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+    },
+    {
+      "original": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density.pdf",
+      "replacement": "presentation_v2/pitching_wedge_curve_strength_density.pdf",
+      "sources": {
+        "control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/shots.csv.gz": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e",
+        "supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined2/shots.csv.gz": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+      },
+      "comparison_receipt": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+    },
+    {
+      "original": "phase2/supplement_report_v2_layout_repair/figures/comparisons/across_lean_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean5_curve1_rotation2_combined2_178p949m_e5c0a1a1e9_overhead.pdf",
+      "replacement": "presentation_v2/driver_across_lean_flight_paths.pdf",
+      "sources": {
+        "control_final_v1/driver_lean0_curve1_rotation2_combined2/flight_samples.json": "f1304903884a12c61fdf4471600d310a885214375d14c2695cfc77babca5cb2a",
+        "control_final_v1/driver_lean5_curve1_rotation2_combined2/flight_samples.json": "36bfd66305683d0397900e8e9746294d342d867521a3b81a7d92b9cd0d4e3c41"
+      },
+      "comparison_receipt": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+    }
+  ],
+  "graphical_summary": "presentation_v2/summary.pdf",
+  "summary_numbers_source": "shot_pattern_analysis.tex: Selected Relative-SG Ranges and Pointwise Interval Directions",
+  "presentation_source_sha256": {
+    "render.py": "01956c51def860f37e61acab65c01a88431c0dc37c89a3262ab3bcbb07981421",
+    "summary.py": "9351b009d71b5b2d152e2c6c07b2c5fe620580e5a058eda469487aae21190b7a"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "shot-pattern-presentation-validation/1",
+  "red_test": {
+    "command": "MPLBACKEND=Agg /home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python -m pytest -q tests/tools/shot_pattern_analysis/test_presentation_v2.py",
+    "outcome": "exit 2; collection failed with ModuleNotFoundError: docs.research.shot_pattern_analysis.phase2.presentation_v2 before render.py was added"
+  },
+  "green_test": {
+    "command": "MPLBACKEND=Agg /home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python -m pytest -q tests/tools/shot_pattern_analysis/test_presentation_v2.py",
+    "outcome": "exit 0; 7 passed"
+  },
+  "lint": {
+    "command": "/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/ruff check docs/research/shot_pattern_analysis/phase2/presentation_v2/render.py docs/research/shot_pattern_analysis/phase2/presentation_v2/summary.py tests/tools/shot_pattern_analysis/test_presentation_v2.py && /home/dieterolson/Repositories/UpstreamDrift/.venv/bin/ruff format --check docs/research/shot_pattern_analysis/phase2/presentation_v2/render.py docs/research/shot_pattern_analysis/phase2/presentation_v2/summary.py tests/tools/shot_pattern_analysis/test_presentation_v2.py",
+    "outcome": "exit 0; All checks passed; 3 files already formatted"
+  },
+  "render": {
+    "command": "MPLBACKEND=Agg /home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python -m docs.research.shot_pattern_analysis.phase2.presentation_v2.render",
+    "outcome": "exit 0; 13 mapped replacement PDFs and 13 companion PNGs plus summary PDF and PNG"
+  }
+}

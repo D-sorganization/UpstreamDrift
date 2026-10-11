@@ -47,9 +47,13 @@ carry, and conditional scoring depend on the club, delivery variability, and
 geometric assumptions. A matched nominal target does not force equal carry
 on every shot or isolate curvature as a cause.
 \vfill
-{\small\color{ResearchGray}Illustrated Research Edition\quad |\quad October 2026\par
+{\small\color{ResearchGray}Illustrated Research Edition---Revised October 11, 2026\par
 10,000 Attempted Shots per Pattern per Executed Condition\par
-Geometric and Numerical Analysis; No Measured Player Dataset}
+Geometric and Numerical Analysis; No Measured Player Dataset\par
+\vspace{0.12in}
+Presentation revision: conventional lateral-x/downrange-y figures and expanded
+methods; numerical simulation results are unchanged. The prior frozen edition
+is retained separately.}
 \end{titlepage}
 \hypersetup{pageanchor=true}
 \section*{Abstract}
@@ -96,9 +100,21 @@ for seven iron, and $+0.00010$ to $+0.0111$ for wedge. These are ranges of
 per-opportunity estimates, not pooled intervals or per-round improvements.
 Complete paired intervals and Fade comparisons appear in the numerical results.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.96\linewidth,height=0.86\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/summary.pdf}}
+\caption{Graphical Summary of Conditional Findings}
+\end{figure}
+
 \subsection{How to Read the Figures}
-Positive lateral distance is right of target. Density plots show endpoint
-populations, with 50\%, 80\%, and 95\% empirical highest-density regions;
+The report graphics use the conventional plotting layout: reported lateral
+distance is on the horizontal axis and downrange distance is on the vertical
+axis; reported lateral is positive right. The native right-handed model frame
+is $(X_n,Y_n,Z_n)=$ forward/target, left, up. Reported endpoint coordinates are
+$(X,Y)=(X_n,-Y_n)$, so the plotted lateral sign differs from native $Y_n$.
+Contact and club-frame vector equations use the native frame; endpoint and
+scoring tables use the reported frame. Density plots show endpoint
+populations, with 50\%, 80\%, and 95\% binned empirical highest-density regions;
 these are not confidence intervals for a mean. Dots and flight paths are
 labelled samples. The baseline club plates use zero lean, curve strength
 $1\times$, shaft-twist SD $1^\circ$, and the combined2 profile: path SD
@@ -109,96 +125,96 @@ face-SD experiment is retained separately in the historical appendix.
 \section{Visual Results}
 The following plates embed the accepted graphics directly. The paired
 variability and curve-strength plots use the same supported shot indices
-across all six populations. Their exact source protocols and counts are
-printed in the graphics. Comparisons are conditional on support; unshown
+across all six populations. Counts appear in the graphics; exact source
+protocols and file hashes are retained in the \href{phase2/presentation_v2/mapping.json}{Presentation Figure Mapping}. Comparisons are conditional on support; unshown
 invalid outcomes are still retained in the experiment inventory.
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/density.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/driver_baseline_density.pdf}}
 \caption{Driver: Endpoint Dispersion}
 \begin{minipage}{0.97\linewidth}\small Driver Straight, Draw, and Fade Endpoints at a Matched 178.9 m Target. Density contours condition on supported airborne shots (10,000/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/overhead.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/driver_baseline_flight_paths.pdf}}
 \caption{Driver: Illustrative Flight Paths}
 \begin{minipage}{0.97\linewidth}\small Driver Straight, Draw, and Fade Endpoints at a Matched 178.9 m Target. Six saved flight paths per pattern illustrate the supported airborne populations (10,000/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation. Flight curves are saved illustrative samples, not the full simulated population or a paired path-by-path experiment. Read the lateral magnification stated in the plot.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/density.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/seven_iron_baseline_density.pdf}}
 \caption{Seven Iron: Endpoint Dispersion}
 \begin{minipage}{0.97\linewidth}\small 7-Iron Straight, Draw, and Fade Endpoints at a Matched 127.9 m Target. Density contours condition on supported airborne shots (9,996/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/overhead.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/seven_iron_baseline_flight_paths.pdf}}
 \caption{Seven Iron: Illustrative Flight Paths}
 \begin{minipage}{0.97\linewidth}\small 7-Iron Straight, Draw, and Fade Endpoints at a Matched 127.9 m Target. Six saved flight paths per pattern illustrate the supported airborne populations (9,996/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation. Flight curves are saved illustrative samples, not the full simulated population or a paired path-by-path experiment. Read the lateral magnification stated in the plot.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/density.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/pitching_wedge_baseline_density.pdf}}
 \caption{Pitching Wedge: Endpoint Dispersion}
 \begin{minipage}{0.97\linewidth}\small Pitching Wedge Straight, Draw, and Fade Endpoints at a Matched 77.4 m Target. Density contours condition on supported airborne shots (9,999/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/overhead.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/pitching_wedge_baseline_flight_paths.pdf}}
 \caption{Pitching Wedge: Illustrative Flight Paths}
 \begin{minipage}{0.97\linewidth}\small Pitching Wedge Straight, Draw, and Fade Endpoints at a Matched 77.4 m Target. Six saved flight paths per pattern illustrate the supported airborne populations (9,999/10,000 supported per pattern for this configuration); axes are in metres. The zero-error nominal endpoints were matched before input variation. Flight curves are saved illustrative samples, not the full simulated population or a paired path-by-path experiment. Read the lateral magnification stated in the plot.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve1_rotation2_combined2_178p949m_3517439202_density.png}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/driver_shaft_rotation_sd_density.pdf}}
 \caption{Driver: Increasing Shaft-Rotation Variability}
 \begin{minipage}{0.97\linewidth}\small Driver Endpoint Response to Shaft-Rotation Variability: shaft-rotation noise SD 1\textdegree{} versus 2\textdegree{} at 0\textdegree{} nominal lean and curve $\times$1. Straight, Draw, and Fade panels compare the same physical pattern across the two ordered populations at a matched 178.9 m target, conditional on 10,000 shot indices supported in all six populations (of 10,000 attempts per population); plotted distances are in metres.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density.png}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/driver_curve_strength_density.pdf}}
 \caption{Driver: Doubling Curve Strength}
 \begin{minipage}{0.97\linewidth}\small Driver Endpoint Response to Curve Strength: curve scale $\times$1 versus $\times$2 at 0\textdegree{} nominal lean and shaft-rotation noise SD 1\textdegree{}. Straight, Draw, and Fade panels compare the same physical pattern across the two ordered populations at a matched 178.9 m target, conditional on 10,000 shot indices supported in all six populations (of 10,000 attempts per population); plotted distances are in metres.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve1_rotation2_combined2_127p882m_df1aad6644_density.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/seven_iron_shaft_rotation_sd_density.pdf}}
 \caption{Seven Iron: Increasing Shaft-Rotation Variability}
 \begin{minipage}{0.97\linewidth}\small 7-Iron Endpoint Response to Shaft-Rotation Variability: shaft-rotation noise SD 1\textdegree{} versus 2\textdegree{} at 0\textdegree{} nominal lean and curve $\times$1. Straight, Draw, and Fade panels compare the same physical pattern across the two ordered populations at a matched 127.9 m target, conditional on 9,996 shot indices supported in all six populations (of 10,000 attempts per population); plotted distances are in metres.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve2_rotation1_combined2_127p882m_2d9a63d794_density.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/seven_iron_curve_strength_density.pdf}}
 \caption{Seven Iron: Doubling Curve Strength}
 \begin{minipage}{0.97\linewidth}\small 7-Iron Endpoint Response to Curve Strength: curve scale $\times$1 versus $\times$2 at 0\textdegree{} nominal lean and shaft-rotation noise SD 1\textdegree{}. Straight, Draw, and Fade panels compare the same physical pattern across the two ordered populations at a matched 127.9 m target, conditional on 9,996 shot indices supported in all six populations (of 10,000 attempts per population); plotted distances are in metres.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_density.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/pitching_wedge_shaft_rotation_sd_density.pdf}}
 \caption{Pitching Wedge: Increasing Shaft-Rotation Variability}
 \begin{minipage}{0.97\linewidth}\small Pitching Wedge Endpoint Response to Shaft-Rotation Variability: shaft-rotation noise SD 1\textdegree{} versus 2\textdegree{} at 0\textdegree{} nominal lean and curve $\times$1. Straight, Draw, and Fade panels compare the same physical pattern across the two ordered populations at a matched 77.4 m target, conditional on 9,999 shot indices supported in all six populations (of 10,000 attempts per population); plotted distances are in metres.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/pitching_wedge_curve_strength_density.pdf}}
 \caption{Pitching Wedge: Doubling Curve Strength}
 \begin{minipage}{0.97\linewidth}\small Pitching Wedge Endpoint Response to Curve Strength: curve scale $\times$1 versus $\times$2 at 0\textdegree{} nominal lean and shaft-rotation noise SD 1\textdegree{}. Straight, Draw, and Fade panels compare the same physical pattern across the two ordered populations at a matched 77.4 m target, conditional on 9,999 shot indices supported in all six populations (of 10,000 attempts per population); plotted distances are in metres. The second population comes from the independently executed wedge primary face-bounds protocol.\end{minipage}
 \end{figure}\end{landscape}
 
 \clearpage\begin{landscape}
 \begin{figure}[p]\centering
-\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/supplement_report_v2_layout_repair/figures/comparisons/across_lean_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean5_curve1_rotation2_combined2_178p949m_e5c0a1a1e9_overhead.pdf}}
+\includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/driver_across_lean_flight_paths.pdf}}
 \caption{Driver: Forward-Lean Comparison}
 \begin{minipage}{0.97\linewidth}\small Driver Landing-Location Shift Across Nominal Shaft Lean. Thirty-six saved flight paths (six per pattern at each lean) illustrate 0\textdegree{} with 5\textdegree{} lean while curve scale ($\times$1) and shaft-rotation noise SD (2\textdegree{}) stay fixed. Straight, Draw, and Fade are matched at a 178.9 m nominal target; the separate paired endpoint and scoring analysis uses 9,940 indices supported in all six populations (of 10,000 attempts per population). The plotted carry and lateral coordinates are in metres; this model perturbation is descriptive rather than an independently validated causal mechanism. Flight curves are saved illustrative samples, not the full simulated population or a paired path-by-path experiment. Read the lateral magnification stated in the plot.\end{minipage}
 \end{figure}\end{landscape}
@@ -236,6 +252,151 @@ scoring, and common-six-population paired contrasts have different denominators
 and must not be conflated. The fixed-target control separates comparisons at a
 common distance from within-lean matching; re-matching delivery still prevents
 a causal claim that curvature or shaft lean alone improves accuracy.
+
+\subsection{From Delivery Assumptions to Scored Endpoints}
+The calculation has five linked stages. A nominal shot is first matched by
+forward simulation; a paired error vector is then added to the club delivery;
+rigid-body impact computes ball and club post-impact motion; the resulting ball
+state is integrated to first ground contact; and a stated course scenario maps
+the endpoint to a conditional score. This order matters: endpoint location and
+scoring emerge from delivery, contact, and flight together. There is no direct
+rule that assigns extra carry to a closed face or extra curvature to a draw.
+
+\begin{center}
+\setlength{\fboxsep}{7pt}
+\fbox{\parbox{0.96\linewidth}{\centering\small
+\textbf{Matched Nominal Delivery}\quad$\longrightarrow$\quad
+\textbf{Paired Delivery Errors}\quad$\longrightarrow$\quad
+\textbf{Rigid Club--Ball Impact}\\[2pt]
+$\longrightarrow$\quad\textbf{RK4 Ball Flight to First Contact}\quad$\longrightarrow$\quad
+\textbf{Conditional Dispersion and Course Score}}}
+\end{center}
+
+\textbf{Nominal matching and paired sampling.} For each club, lean, and curve
+scale, the study forward-simulates candidate deliveries and solves nominal
+face and clubhead speed. The prescribed face-to-path difference sets path from
+face, while the target remains $(X_T,0)$ in the native forward/left/up frame.
+Acceptance is based on the raw two-coordinate endpoint residual
+$\sqrt{(X-X_T)^2+Y^2}\leq0.05$\,m. No post-flight rotation or per-shot aim
+correction is used. Each pattern therefore begins at the same nominal point,
+but its matched face, path, and speed can differ. A failed bounded search is
+recorded as unavailable; the optimizer's exit alone neither proves
+reachability nor physical impossibility.
+
+For each executed condition a single seeded multivariate Gaussian sample is
+drawn and reused by shot index for Straight, Draw, and Fade. Its ordered
+components are shaft rotation, path, speed, toe/heel strike, high/low strike,
+forward lean, and attack angle. The modeled units are degrees, degrees,
+metres per second, metres, metres, degrees, and degrees. In selected protocols,
+shaft-rotation SD is $1^\circ$ or $2^\circ$, path SD is $0.5^\circ$, speed SD
+is 1 or 2 mph, and strike SD is 0.25 inch on each face axis. Paired indices
+make contrasts less sensitive to Monte Carlo noise; they do not represent
+repeated measurements of the same golfer. The Gaussian distributions and any
+correlations are user-specified sensitivity inputs: no empirical golfer
+dataset was available to estimate them. Shaft rotation is converted
+nonlinearly into delivered face and loft, so the imposed rotation/path
+covariance is not itself the realized face/path covariance.
+
+\textbf{Club and contact assumptions.} Static loft and lie are taken from the
+cited model-year specifications; all remaining club properties are explicit
+hybrid research assumptions, not a reconstruction of those products. The
+finite club head has mass, a center of gravity behind the face, and a diagonal
+inertia tensor stated in the local face-normal/heel/face-up axes:
+\begin{center}\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+Club & Mass & CG & $I_n$ & $I_h$ & $I_u$ & $h_{\max}$ & $v_{\max}$\\
+ & (kg) & (mm) & \multicolumn{3}{c}{($10^{-4}$ kg\,m$^2$)} & \multicolumn{2}{c}{(mm)}\\
+\midrule
+Driver & 0.200 & 35 & 2.5 & 4.0 & 4.5 & 50 & 27\\
+7-Iron & 0.272 & 10 & 1.2 & 2.0 & 2.5 & 35 & 23\\
+Pitching Wedge & 0.300 & 8 & 1.0 & 2.0 & 2.2 & 35 & 25\\
+\bottomrule
+\end{tabular}
+\end{center}
+Here CG denotes depth behind the face; $h_{\max}$ and $v_{\max}$ are the
+face half-width and half-height, respectively. The tensor is rotated into
+world coordinates for each delivery. A toe/heel or
+high/low offset changes both the contact lever from head CG and, for the
+assumed driver bulge and roll radii of 300 mm, the local face normal. The iron
+and wedge faces are modeled as flat. Thus an off-center strike can
+change translation and rotation through the same contact impulse. The model
+sets pre-impact club angular velocity and ball velocity/spin to zero; shaft
+twist specifies club orientation, not a closure angular rate. Club angular
+velocity generated by impact is retained in the contact solution.
+
+The primary impact law is a two-body rigid-body impulse calculation with
+Coulomb friction coefficient $\mu=0.4$ and \emph{energetic restitution}
+$e_E=0.83$. In compact form, let $\mathbf c$ be the club-minus-ball relative
+velocity at contact, $\mathbf J$ the impulse on the ball, $m_c,m_b$ the club
+and ball masses, $\mathbf r_c$ and $\mathbf r_b$ the CG-to-contact levers,
+and $I_c,I_b$ the world-frame inertia tensors. The ball is modeled as a solid
+sphere with mass $m_b=0.04593$\,kg, radius $R=0.021335$\,m, and
+$I_b=(2/5)m_bR^2$. The relative contact velocity changes as
+\[
+ \mathbf c^+=\mathbf c^- - K\mathbf J,\qquad
+ K=\left(m_c^{-1}+m_b^{-1}\right)I
+ -[\mathbf r_c]_\times I_c^{-1}[\mathbf r_c]_\times
+ -[\mathbf r_b]_\times I_b^{-1}[\mathbf r_b]_\times.
+\]
+The impulse updates both bodies' linear velocities and creates angular
+velocity through its moment arm:
+\[
+ \Delta\boldsymbol\omega_b=I_b^{-1}(\mathbf r_b\times\mathbf J),\qquad
+ \Delta\boldsymbol\omega_c=-I_c^{-1}(\mathbf r_c\times\mathbf J).
+\]
+For the ball, $\mathbf r_b=-R\mathbf n$, so tangential impulse contributes
+spin about the ball center; for the club, an off-center impulse changes head
+rotation through the finite inertia tensor. Contact is integrated in
+normal-impulse increments. At each increment the tangential
+impulse is selected by a maximum-dissipation Coulomb-disk solve, with
+$\|d\mathbf J_t\|\leq\mu\,dJ_n$; normal compression stops when approach
+velocity reaches zero. During rebound the accumulated returned normal work
+is set to $e_E^2$ times compression work. This is why the primary coefficient
+is an energy restitution and not a prescribed ratio of normal velocities when
+normal and tangential motion are coupled. The reported primary resolution is
+128 compression steps; refinement checks are in the independent numerical
+evidence linked by the design reference.
+
+A separate maximum-dissipation/Newton comparator enforces an instantaneous
+normal velocity restitution condition with the same numeric value 0.83 and a
+Coulomb impulse cone. That value has a different law definition there. The
+comparator is a sensitivity contrast, not the primary contact history and not
+a second empirical calibration. Conservation, passivity, and refinement
+checks support numerical consistency only. The rigid point-contact model does
+not represent calibrated face compliance, shaft flexibility, grooves, local
+friction variation, or measured ball/club launch behavior; external empirical
+validation remains open.
+
+\textbf{Flight and endpoint.} The computed post-impact ball velocity and spin
+initialize the shared Rust flight kernel. It integrates position, velocity,
+and decaying spin with fourth-order Runge--Kutta at $\Delta t=0.02$\,s, up to
+12\,s. Acceleration includes gravity, air drag, and a spin-induced force based
+on relative air velocity; the ball spin decays exponentially at the configured
+rate. The runs use the simulator's standard still-air environment. Carry is the
+interpolated position where the trajectory crosses ground height. This is a first-contact landing model: first ground contact is treated
+as the hypothetical final lie for scoring. Bounce, roll, turf response,
+obstacles, wind variation, and elevation are not simulated.
+Unsupported off-face, nonapproaching, or nonairborne samples are kept with
+their failure status, never clipped or resampled. Endpoint distributions are
+therefore conditional on supported airborne shots when failures occur.
+
+\textbf{Conditional scoring and interpretation.} The driver case assumes a
+flat 400\,m hole with a 30\,m fairway corridor; its carry endpoint is assigned
+a fairway or rough lie. Iron and wedge cases assume a fairway approach to a
+centered 15\,m-radius green, with rough outside. A source-backed historical
+PGA expected-strokes benchmark is interpolated at those assumed lie and
+distance states. Fairway and rough values come from the historical published
+table; short-putt values use an anchor-reconciled approximate putting fit. The
+result is an approximate 2003--2010 population benchmark, not a current
+player-specific model. SG is consequently conditional on supported
+endpoints and these geometry/baseline choices; it is not measured performance
+or an expected per-round improvement. Within-condition paired SG contrasts
+use shot indices supported in all three patterns; between-condition contrasts
+use the common supported indices across all six populations. Bootstrap
+intervals quantify sampling variation for those simulated populations only. They do not include uncertainty
+in club properties, contact law, flight physics, human delivery distributions,
+course geometry, or the scoring benchmark.
 
 The saved original and supplemental simulations and independent data audits are
 complete. Numerical narrative and standalone graphics have scoped independent review. This illustrated article requires its own compiled-page review before publication. The retained
@@ -776,7 +937,7 @@ The geometric derivative above establishes that face closure and delivered loft 
 
 \subsection{Numerical Traceability and Publication Status}
 
-The selected 24 conditions and 72 rows are bound by \href{phase2/validation/selected_headline_traceability_v1/review.json}{Headline Traceability} to 52 summary/manifest hashes. The direct interactions and controls use the actual selectors in \texttt{final\_report\_inputs.py} and the \href{phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json}{384-Comparison Numerical Ledger}: 164 SD, 164 curve-strength and 56 across-lean comparisons. All seven numerical artifacts were byte-reconciled against \href{phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json}{Expected Numerical Hashes}. The numerical qualification and the separate saved-graphic visual reviews are complete. This illustrated edition embeds 13 of those reviewed plates; the final article review binds the assembled PDF to its source and figure hashes.
+The selected 24 conditions and 72 rows are bound by \href{phase2/validation/selected_headline_traceability_v1/review.json}{Headline Traceability} to 52 summary/manifest hashes. The direct interactions and controls use the actual selectors in \texttt{final\_report\_inputs.py} and the \href{phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json}{384-Comparison Numerical Ledger}: 164 SD, 164 curve-strength and 56 across-lean comparisons. All seven numerical artifacts were byte-reconciled against \href{phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json}{Expected Numerical Hashes}. The numerical qualification and the separate saved-graphic visual reviews are complete. This revised edition replots 13 plates from those saved inputs with conventional axis placement and adds a graphical summary. The \href{phase2/validation/illustrated_article_v2/review.json}{Revised Article Review} binds the assembled PDF to its source and figure hashes; the frozen original edition and its receipts remain separate.
 
 The full matrix inventories remain 324 primary cells (270 completed, 54 unavailable; 8.1 million attempted rows), 72 original fixed-target cells (52 completed, 20 unavailable; 1.56 million rows), and 26 supplemental cells (780,000 rows, 779,712 supported and 288 unsupported). Four verified aliases add no shots. Source audits are \href{phase2/validation/independent_primary_final_audit.json}{Primary}, \href{phase2/validation/independent_control_final_audit.json}{Control}, and \href{phase2/validation/supplement_final_completion.json}{Supplemental Completion}. Unavailable bounded-search records are not relabeled as physical impossibility.
 
