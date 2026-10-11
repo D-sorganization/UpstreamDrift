@@ -61,11 +61,11 @@ docs/development/full_body_models/evidence/foot_progression/osv4_final/capture_o
 # #12187: byte-bound native neck-tracking receipt from #12154.
 docs/development/full_body_models/evidence/head_gaze/fd_neck_tracking.json
 
-# #12202: preserve exact serialization of canonical baseline receipts.
+# #12191/#12198: canonical ground-support evidence retains its recorded hashes.
 docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json
 docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json
 
-# #12195 / #12202: preserve canonical native Drake parity source bytes from #12216.
+# #12198: preserve byte-bound Drake parity evidence merged from #12216.
 docs/development/full_body_models/evidence/foot_progression/drake_parity_12039/after_driver_drake/address_report.json
 docs/development/full_body_models/evidence/foot_progression/drake_parity_12039/after_driver_mujoco/address_report.json
 docs/development/full_body_models/evidence/foot_progression/drake_parity_12039/after_iron_drake/address_report.json

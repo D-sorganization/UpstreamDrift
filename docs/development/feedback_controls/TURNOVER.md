@@ -1,5 +1,16 @@
 # Feedback Controls Planning Turnover
 
+## F07 Native Moco Physical-Body Preflight (#12205)
+
+The maintained OpenSim Moco runner now requires the existing source/native
+body-inertia audit during preparation and repeats it immediately before solve,
+export and replay. An admitted SHA-bound sidecar cannot substitute for a fresh
+native readback. Invalid or missing physical evidence becomes an explicit
+blocker without hiding independent preparation failures. See chapter53 and
+`F07_MOCO_INERTIA_PREFLIGHT_TURNOVER.md`. The unchanged 557-muscle source
+remains physically unqualified; all 17 variants/six ecosystems and the
+full-horizon captured swing remain open.
+
 ## Physical Inertia Helper Handoff
 
 Issue #12183 fixes rotation-dependent acceptance and scale-masked asymmetry in
@@ -552,3 +563,27 @@ Python 3.13 for an `init=False` field. The regression accepts both runtime
 exceptions while requiring the `init=False` diagnostic. The affected test
 file passes on Python 3.11.17 and 3.13.5. The initial full unit run completed
 23,846 tests with this single failure before the test-only correction.
+
+## F07 Exact 557-Muscle Diagnostic Replay (#12182)
+
+The exact derived BUET–Hamner source now has a separate v3 excitation replay
+profile. The original one-equilibrium seed fails its unchanged source chart at
+the first 1 ms sample. An explicitly declared six-coordinate interior seed
+passes only a 0.2 ms saved-input/fresh-native replay with all 557 muscle
+channels and 17 observed couplers. The public hash-bound receipt and failed
+attempts are in `F07_EXACT_557_REPLAY_TURNOVER.md`; chapter50 records the
+calculation. Four invalid original body inertia tensors, physiological
+preparation, longer source-chart viability, real marker registration and
+capture matching remain open. The calculation registry stays unapproved.
+
+## F07 Source-Body Inertia Admission (#12191)
+
+`native_body_inertia.py` now checks exact source/native mass, body-frame COM,
+and inertia before a physical OpenSim claim. Its rotated-invalid and welded
+massless fixtures, source mutation and altered native readback are TDD
+regressions. Actual OpenSim 4.6 identifies exactly four invalid positive-mass
+bodies in the unchanged 557-muscle source; nine exact massless carriers use
+their explicit zero policy. See chapter52, the source-bound receipt and
+`F07_NATIVE_BODY_INERTIA_TURNOVER.md`. This gate neither changes source data
+nor upgrades the 0.2 ms #12182 diagnostic to a physiological or full-horizon
+result. All 17 required variants and six ecosystems remain open.
