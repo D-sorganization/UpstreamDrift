@@ -25,7 +25,10 @@ invokes the `codemap-mcp` console-script entry point (which resolves to
 }
 ```
 
-If `codemap-mcp` is not on `PATH`, the equivalent module-form invocation is:
+If `codemap-mcp` is not on `PATH`, the equivalent module-form invocation
+resolves the implementation from the pinned Tools tree (the former in-tree
+copy under `src/shared/python/codemap/` was retired in
+[#9406](https://github.com/D-sorganization/UpstreamDrift/issues/9406)):
 
 ```json
 {
@@ -34,7 +37,7 @@ If `codemap-mcp` is not on `PATH`, the equivalent module-form invocation is:
       "command": "python",
       "args": ["-m", "shared.python.codemap.mcp_server"],
       "env": {
-        "PYTHONPATH": "src"
+        "PYTHONPATH": "vendor/ud-tools/src"
       }
     }
   }
@@ -46,7 +49,7 @@ If `codemap-mcp` is not on `PATH`, the equivalent module-form invocation is:
 For AI platforms supporting JSONL ingestion, you can perform a full export of the codebase index:
 
 ```bash
-python -m shared.python.codemap export --jsonl
+PYTHONPATH=vendor/ud-tools/src python -m shared.python.codemap export --jsonl
 ```
 
 This generates `.codemap/exports/code_map.jsonl.gz`, which includes all indexed functions, classes, and docstrings.
