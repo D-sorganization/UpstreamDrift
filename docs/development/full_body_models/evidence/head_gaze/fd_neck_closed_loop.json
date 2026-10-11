@@ -1,0 +1,584 @@
+{
+ "issue": "#11729 (OSV-3c)",
+ "note": "forward-dynamics replay (MuJoCo computed-torque tracking); the gaze-schedule neck is a modelled behaviour, not measured data",
+ "rows": [
+  {
+   "run": "driver_gaze_closed_v2",
+   "capture": "driver",
+   "gaze_weight": 0.0,
+   "neck_reference": "gaze_schedule_closed_loop",
+   "ik_marker_rms_mm": 29.01,
+   "fd_marker_rms_mm": 90.56,
+   "fd_address_to_impact_rms_mm": 49.28,
+   "fd_segment_rms_mm": {
+    "head": 146.81,
+    "trunk": 51.66,
+    "pelvis": 50.91,
+    "left_arm": 85.0,
+    "right_arm": 62.16,
+    "left_leg": 49.06,
+    "right_leg": 70.73,
+    "club": 135.28
+   },
+   "ik_head_gaze_address_to_impact": {
+    "eye_translation_range_mm": [
+     54.22159971266605,
+     111.61576511631668,
+     29.47063992894794
+    ],
+    "head_yaw_range_deg": 49.2495164897488,
+    "head_pitch_range_deg": 9.737797418328451,
+    "head_roll_range_deg": 74.05602900206985,
+    "theta_gaze_max_deg": 38.13244726669174,
+    "theta_gaze_rms_deg": 20.679904342978425,
+    "frames": 477
+   },
+   "fd_head_gaze": {
+    "available": true,
+    "neck_reference": "gaze_schedule_closed_loop",
+    "neck_solve": {
+     "clamped_frames": 221,
+     "max_residual_deg": 0.009026156050352053,
+     "rms_residual_deg": 0.0040368072442809
+    },
+    "plan": {
+     "ball_at_address_m": [
+      0.09098522919509158,
+      -0.015563910384735227,
+      0.021592780104875565
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 476,
+     "impact_time_s": 1.3222222222222222,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      0.005787806718404933,
+      -0.9999832505064223,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.805602729100454,
+      -0.030621257315011405,
+      -0.5916642472436106
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "tracked_reference": {
+     "address_to_impact": {
+      "frames": 477,
+      "rms_deg": 0.3299716465991721,
+      "max_deg": 2.740260442640765
+     },
+     "hold": {
+      "frames": 10,
+      "rms_deg": 1.9800409548583446,
+      "max_deg": 4.247207781039262
+     },
+     "release": {
+      "frames": 126,
+      "rms_deg": 0.36403712870543725,
+      "max_deg": 1.395568494693927
+     },
+     "after_release": {
+      "frames": 41,
+      "rms_deg": 0.16637870287363304,
+      "max_deg": 0.34990367362432767
+     },
+     "address_to_impact_metrics": {
+      "eye_translation_range_mm": [
+       95.16922931957694,
+       196.87561557663537,
+       39.52038447190209
+      ],
+      "head_yaw_range_deg": 27.875343467249763,
+      "head_pitch_range_deg": 7.892587232217764,
+      "head_roll_range_deg": 26.670061614181424,
+      "theta_gaze_max_deg": 2.740260442640765,
+      "theta_gaze_rms_deg": 0.32997164660001727,
+      "frames": 477
+     }
+    },
+    "replay": {
+     "address_to_impact": {
+      "frames": 477,
+      "rms_deg": 0.40563385704909366,
+      "max_deg": 3.301684327534498
+     },
+     "hold": {
+      "frames": 10,
+      "rms_deg": 2.8871074965825305,
+      "max_deg": 3.948799662568939
+     },
+     "release": {
+      "frames": 126,
+      "rms_deg": 1.7141240141369452,
+      "max_deg": 3.165410730000761
+     },
+     "after_release": {
+      "frames": 41,
+      "rms_deg": 2.076749630748687,
+      "max_deg": 3.1697830365433632
+     },
+     "address_to_impact_metrics": {
+      "eye_translation_range_mm": [
+       135.9753852263814,
+       206.41970402403604,
+       46.99200527488445
+      ],
+      "head_yaw_range_deg": 28.220223906977395,
+      "head_pitch_range_deg": 7.480215150383142,
+      "head_roll_range_deg": 28.40920163589041,
+      "theta_gaze_max_deg": 3.301684327534388,
+      "theta_gaze_rms_deg": 0.4056338570495156,
+      "frames": 477
+     }
+    },
+    "note": "replay is computed-torque tracking of the tracked reference; the gaze-driven neck is a modelled behaviour re-solved on the simulated torso during the replay, and head markers do not drive it",
+    "feedback": {
+     "updates": 654,
+     "clamped_updates": 93,
+     "max_residual_deg": 0.003932789380967022,
+     "rms_residual_deg": 0.001216947148453161,
+     "update_period_s": 0.002777777777777778
+    }
+   }
+  },
+  {
+   "run": "driver_gaze_open",
+   "capture": "driver",
+   "gaze_weight": 0.0,
+   "neck_reference": "gaze_schedule",
+   "ik_marker_rms_mm": 29.01,
+   "fd_marker_rms_mm": 92.45,
+   "fd_address_to_impact_rms_mm": 48.72,
+   "fd_segment_rms_mm": {
+    "head": 158.29,
+    "trunk": 51.66,
+    "pelvis": 50.78,
+    "left_arm": 85.16,
+    "right_arm": 62.51,
+    "left_leg": 51.31,
+    "right_leg": 71.32,
+    "club": 134.91
+   },
+   "ik_head_gaze_address_to_impact": {
+    "eye_translation_range_mm": [
+     54.22159971266605,
+     111.61576511631668,
+     29.47063992894794
+    ],
+    "head_yaw_range_deg": 49.2495164897488,
+    "head_pitch_range_deg": 9.737797418328451,
+    "head_roll_range_deg": 74.05602900206985,
+    "theta_gaze_max_deg": 38.13244726669174,
+    "theta_gaze_rms_deg": 20.679904342978425,
+    "frames": 477
+   },
+   "fd_head_gaze": {
+    "available": true,
+    "neck_reference": "gaze_schedule",
+    "neck_solve": {
+     "clamped_frames": 221,
+     "max_residual_deg": 0.009026156050352053,
+     "rms_residual_deg": 0.0040368072442809
+    },
+    "plan": {
+     "ball_at_address_m": [
+      0.09098522919509158,
+      -0.015563910384735227,
+      0.021592780104875565
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 476,
+     "impact_time_s": 1.3222222222222222,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      0.005787806718404933,
+      -0.9999832505064223,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.805602729100454,
+      -0.030621257315011405,
+      -0.5916642472436106
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "tracked_reference": {
+     "address_to_impact": {
+      "frames": 477,
+      "rms_deg": 0.3299716465991721,
+      "max_deg": 2.740260442640765
+     },
+     "hold": {
+      "frames": 10,
+      "rms_deg": 1.9800409548583446,
+      "max_deg": 4.247207781039262
+     },
+     "release": {
+      "frames": 126,
+      "rms_deg": 0.36403712870543725,
+      "max_deg": 1.395568494693927
+     },
+     "after_release": {
+      "frames": 41,
+      "rms_deg": 0.16637870287363304,
+      "max_deg": 0.34990367362432767
+     },
+     "address_to_impact_metrics": {
+      "eye_translation_range_mm": [
+       95.16922931957694,
+       196.87561557663537,
+       39.52038447190209
+      ],
+      "head_yaw_range_deg": 27.875343467249763,
+      "head_pitch_range_deg": 7.892587232217764,
+      "head_roll_range_deg": 26.670061614181424,
+      "theta_gaze_max_deg": 2.740260442640765,
+      "theta_gaze_rms_deg": 0.32997164660001727,
+      "frames": 477
+     }
+    },
+    "replay": {
+     "address_to_impact": {
+      "frames": 477,
+      "rms_deg": 2.082279071668676,
+      "max_deg": 6.917464204835068
+     },
+     "hold": {
+      "frames": 10,
+      "rms_deg": 1.0926846609692904,
+      "max_deg": 2.121124389916069
+     },
+     "release": {
+      "frames": 126,
+      "rms_deg": 17.20701408158857,
+      "max_deg": 24.315236389973183
+     },
+     "after_release": {
+      "frames": 41,
+      "rms_deg": 16.71936334481618,
+      "max_deg": 20.568410828480484
+     },
+     "address_to_impact_metrics": {
+      "eye_translation_range_mm": [
+       140.41129060592206,
+       205.00986664710146,
+       49.304007139942655
+      ],
+      "head_yaw_range_deg": 28.763188274708284,
+      "head_pitch_range_deg": 8.429718810133597,
+      "head_roll_range_deg": 26.645110010019454,
+      "theta_gaze_max_deg": 6.9174642048351735,
+      "theta_gaze_rms_deg": 2.082279071668783,
+      "frames": 477
+     }
+    },
+    "note": "replay is computed-torque tracking of the tracked reference; the gaze-driven neck is a modelled behaviour and head markers do not drive the replay neck"
+   }
+  },
+  {
+   "run": "iron_gaze_closed_v2",
+   "capture": "iron",
+   "gaze_weight": 0.0,
+   "neck_reference": "gaze_schedule_closed_loop",
+   "ik_marker_rms_mm": 26.15,
+   "fd_marker_rms_mm": 64.26,
+   "fd_address_to_impact_rms_mm": 38.41,
+   "fd_segment_rms_mm": {
+    "head": 99.55,
+    "trunk": 48.82,
+    "pelvis": 58.46,
+    "left_arm": 68.57,
+    "right_arm": 57.01,
+    "left_leg": 38.19,
+    "right_leg": 37.44,
+    "club": 79.75
+   },
+   "ik_head_gaze_address_to_impact": {
+    "eye_translation_range_mm": [
+     66.50686392282648,
+     127.05629991058443,
+     38.77616217807645
+    ],
+    "head_yaw_range_deg": 44.3126373059296,
+    "head_pitch_range_deg": 9.585007434342437,
+    "head_roll_range_deg": 66.00798590479778,
+    "theta_gaze_max_deg": 33.59975190796373,
+    "theta_gaze_rms_deg": 19.132545066870392,
+    "frames": 483
+   },
+   "fd_head_gaze": {
+    "available": true,
+    "neck_reference": "gaze_schedule_closed_loop",
+    "neck_solve": {
+     "clamped_frames": 92,
+     "max_residual_deg": 0.005021639448645379,
+     "rms_residual_deg": 0.002843913532751376
+    },
+    "plan": {
+     "ball_at_address_m": [
+      -0.06147604743888938,
+      0.03202716426606761,
+      0.020763483918309213
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 482,
+     "impact_time_s": 1.3426183844011141,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      -0.15342230442553287,
+      -0.9881607139047571,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.7267380989367398,
+      -0.1149986875057174,
+      -0.6772200804950897
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "tracked_reference": {
+     "address_to_impact": {
+      "frames": 483,
+      "rms_deg": 0.16546726830108552,
+      "max_deg": 1.1854857041365312
+     },
+     "hold": {
+      "frames": 10,
+      "rms_deg": 0.29117564112844907,
+      "max_deg": 0.5736395944261332
+     },
+     "release": {
+      "frames": 126,
+      "rms_deg": 0.07948679323235587,
+      "max_deg": 0.21159254895018814
+     },
+     "after_release": {
+      "frames": 38,
+      "rms_deg": 0.16648834108435695,
+      "max_deg": 0.2522701767540612
+     },
+     "address_to_impact_metrics": {
+      "eye_translation_range_mm": [
+       56.6935117044392,
+       159.33798955030386,
+       55.33159424533274
+      ],
+      "head_yaw_range_deg": 17.7178999429116,
+      "head_pitch_range_deg": 1.956855941847472,
+      "head_roll_range_deg": 10.138265541071995,
+      "theta_gaze_max_deg": 1.185485704136224,
+      "theta_gaze_rms_deg": 0.1654672683023852,
+      "frames": 483
+     }
+    },
+    "replay": {
+     "address_to_impact": {
+      "frames": 483,
+      "rms_deg": 0.11806843171051994,
+      "max_deg": 0.5231959232562811
+     },
+     "hold": {
+      "frames": 10,
+      "rms_deg": 0.6007753195977416,
+      "max_deg": 0.687755084973766
+     },
+     "release": {
+      "frames": 126,
+      "rms_deg": 1.2419241624385358,
+      "max_deg": 1.849058356945419
+     },
+     "after_release": {
+      "frames": 38,
+      "rms_deg": 0.6825107285359511,
+      "max_deg": 1.2529735240069395
+     },
+     "address_to_impact_metrics": {
+      "eye_translation_range_mm": [
+       68.8233700122573,
+       142.69428808066345,
+       44.75907498457232
+      ],
+      "head_yaw_range_deg": 18.522887690435454,
+      "head_pitch_range_deg": 3.2857635666555254,
+      "head_roll_range_deg": 10.654977331898959,
+      "theta_gaze_max_deg": 0.5231959232576744,
+      "theta_gaze_rms_deg": 0.11806843171175979,
+      "frames": 483
+     }
+    },
+    "note": "replay is computed-torque tracking of the tracked reference; the gaze-driven neck is a modelled behaviour re-solved on the simulated torso during the replay, and head markers do not drive it",
+    "feedback": {
+     "updates": 656,
+     "clamped_updates": 69,
+     "max_residual_deg": 0.0028091125138330003,
+     "rms_residual_deg": 0.0007811474241087343,
+     "update_period_s": 0.002785515320334262
+    }
+   }
+  },
+  {
+   "run": "iron_gaze_open",
+   "capture": "iron",
+   "gaze_weight": 0.0,
+   "neck_reference": "gaze_schedule",
+   "ik_marker_rms_mm": 26.15,
+   "fd_marker_rms_mm": 64.53,
+   "fd_address_to_impact_rms_mm": 38.24,
+   "fd_segment_rms_mm": {
+    "head": 104.3,
+    "trunk": 49.25,
+    "pelvis": 58.24,
+    "left_arm": 67.61,
+    "right_arm": 56.92,
+    "left_leg": 37.59,
+    "right_leg": 38.01,
+    "club": 78.59
+   },
+   "ik_head_gaze_address_to_impact": {
+    "eye_translation_range_mm": [
+     66.50686392282648,
+     127.05629991058443,
+     38.77616217807645
+    ],
+    "head_yaw_range_deg": 44.3126373059296,
+    "head_pitch_range_deg": 9.585007434342437,
+    "head_roll_range_deg": 66.00798590479778,
+    "theta_gaze_max_deg": 33.59975190796373,
+    "theta_gaze_rms_deg": 19.132545066870392,
+    "frames": 483
+   },
+   "fd_head_gaze": {
+    "available": true,
+    "neck_reference": "gaze_schedule",
+    "neck_solve": {
+     "clamped_frames": 92,
+     "max_residual_deg": 0.005021639448645379,
+     "rms_residual_deg": 0.002843913532751376
+    },
+    "plan": {
+     "ball_at_address_m": [
+      -0.06147604743888938,
+      0.03202716426606761,
+      0.020763483918309213
+     ],
+     "ball_radius_m": 0.021335,
+     "impact_index": 482,
+     "impact_time_s": 1.3426183844011141,
+     "impact_rule": "lowest clubhead point within 0.05 s of peak speed",
+     "target_line_direction": [
+      -0.15342230442553287,
+      -0.9881607139047571,
+      0.0
+     ],
+     "t_hold_s": 0.03,
+     "t_release_s": 0.35,
+     "eye_offset_head_m": [
+      0.09,
+      0.0,
+      0.128
+     ],
+     "gaze_axis_head": [
+      0.7267380989367398,
+      -0.1149986875057174,
+      -0.6772200804950897
+     ],
+     "gaze_axis_rule": "head-frame direction of the address line of sight to the ball"
+    },
+    "tracked_reference": {
+     "address_to_impact": {
+      "frames": 483,
+      "rms_deg": 0.16546726830108552,
+      "max_deg": 1.1854857041365312
+     },
+     "hold": {
+      "frames": 10,
+      "rms_deg": 0.29117564112844907,
+      "max_deg": 0.5736395944261332
+     },
+     "release": {
+      "frames": 126,
+      "rms_deg": 0.07948679323235587,
+      "max_deg": 0.21159254895018814
+     },
+     "after_release": {
+      "frames": 38,
+      "rms_deg": 0.16648834108435695,
+      "max_deg": 0.2522701767540612
+     },
+     "address_to_impact_metrics": {
+      "eye_translation_range_mm": [
+       56.6935117044392,
+       159.33798955030386,
+       55.33159424533274
+      ],
+      "head_yaw_range_deg": 17.7178999429116,
+      "head_pitch_range_deg": 1.956855941847472,
+      "head_roll_range_deg": 10.138265541071995,
+      "theta_gaze_max_deg": 1.185485704136224,
+      "theta_gaze_rms_deg": 0.1654672683023852,
+      "frames": 483
+     }
+    },
+    "replay": {
+     "address_to_impact": {
+      "frames": 483,
+      "rms_deg": 0.6558048427245254,
+      "max_deg": 2.034939103537918
+     },
+     "hold": {
+      "frames": 10,
+      "rms_deg": 0.8686803563255014,
+      "max_deg": 1.2793168873269611
+     },
+     "release": {
+      "frames": 126,
+      "rms_deg": 8.636688261561485,
+      "max_deg": 13.333509442738714
+     },
+     "after_release": {
+      "frames": 38,
+      "rms_deg": 7.6454285939979165,
+      "max_deg": 9.845603852753644
+     },
+     "address_to_impact_metrics": {
+      "eye_translation_range_mm": [
+       69.50787228722771,
+       142.0642740035584,
+       44.267802696572154
+      ],
+      "head_yaw_range_deg": 18.92034885889302,
+      "head_pitch_range_deg": 4.011121085808064,
+      "head_roll_range_deg": 9.94066228148684,
+      "theta_gaze_max_deg": 2.034939103536843,
+      "theta_gaze_rms_deg": 0.6558048427247878,
+      "frames": 483
+     }
+    },
+    "note": "replay is computed-torque tracking of the tracked reference; the gaze-driven neck is a modelled behaviour and head markers do not drive the replay neck"
+   }
+  }
+ ]
+}
