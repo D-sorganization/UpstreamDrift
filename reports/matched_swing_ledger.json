@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-11T07:34:40Z",
+  "generated_at": "2026-10-11T07:35:41Z",
   "rows": [
     {
       "acceptance": null,
@@ -25,6 +25,56 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt.json",
       "sha256": "79f861661492420f8ec9d6d97fa5072fafc6bd67f937974203bb7d97ee34b21b"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "anthropometry",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_driver.json",
+      "sha256": "8f6714f352cb41b53aaeb59fffeeb07dcc543916bf886c37f0e2bc3b45ce6a68"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "anthropometry",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt_iron7.json",
+      "sha256": "bf7ba6ff0e1f672d2aeaf1c09e5b52ca854d9a25a91894197a0cbeedb40b06b0"
     },
     {
       "acceptance": null,
@@ -6086,5 +6136,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 149
+  "total_receipts": 151
 }
