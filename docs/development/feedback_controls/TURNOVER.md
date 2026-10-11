@@ -587,3 +587,15 @@ their explicit zero policy. See chapter52, the source-bound receipt and
 `F07_NATIVE_BODY_INERTIA_TURNOVER.md`. This gate neither changes source data
 nor upgrades the 0.2 ms #12182 diagnostic to a physiological or full-horizon
 result. All 17 required variants and six ecosystems remain open.
+
+## Same-Input Lazy Package Exports (#11898)
+
+The `same_input` facade now resolves its established exports lazily. A clean
+subprocess test blocks `cv2`, historical-fit, pipeline, visualization, and
+reference/integrator imports while importing the closure submodule and
+requesting `project_to_closure`; the package does not initialize those
+dependencies. A separate subprocess verifies the full export set, provider
+object identities, `dir()` discoverability, and normal `AttributeError` for
+unknown names. The focused regression passes on the Python 3.13 host. This is
+an import-boundary fix only; it adds no native execution or qualification
+evidence.
