@@ -41,7 +41,7 @@ the exact model's initialized native OpenSim readback. When OpenSim bindings are
 unavailable, muscle inventory status is `unknown` and muscle support is not
 advertised; a successful readback with no muscles is `observed_empty`. Neither
 status qualifies the model for replay. The implementation and bounded evidence
-are documented in [chapter 41](41-opensim-native-muscle-capability.qmd).
+are documented in [chapter 61](61-opensim-native-muscle-capability.qmd).
 
 Recursive traversal reports exact native paths/classes for muscles, all forces,
 nonmuscle actuators, controllers, constraints, contact geometry, bodies and other

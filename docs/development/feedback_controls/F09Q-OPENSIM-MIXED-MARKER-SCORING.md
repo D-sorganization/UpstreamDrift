@@ -41,7 +41,7 @@ Validation in the installed OpenSim 4.6 Python 3.12 environment:
 
 The default interpreter skips OpenSim-native execution when the optional
 provider is unavailable; that skip is not native coverage. Canonical chapter:
-`manuals/upstreamdrift/chapters/49-native-opensim-mixed-marker-observation.qmd`.
+`manuals/upstreamdrift/chapters/62-native-opensim-mixed-marker-observation.qmd`.
 The engineering manual remains at zero registered calculations and
 `blocked-inventory-required`.
 

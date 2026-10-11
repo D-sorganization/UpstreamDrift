@@ -156,7 +156,18 @@ line, so the target direction is the horizontal part of the address (state 0)
 face normal (face square at address, as `plan_gaze` does), right-handed, Z-up;
 the card records `extras.target_source = "address_face_normal"`, so face angle
 and path are relative to that assumed line. Unavailable rows show "unavailable" and a
-reason, never zero. When no card can be computed (no MuJoCo, no club, speed
+reason, never zero. Impact Location (toe, high) uses the decorative ball
+(`SwingInput.ball`, passed explicitly by `export_swing`): the contact point is the
+ball surface point facing the club, `ball_centre - radius * n_face` at the impact
+sample, and toe/high are its offsets from the face centre along the face toe axis
+(positive toward the toe) and `toe x normal`; the card records
+`extras.ball_source` (the placement source, e.g. `address_geometry`). With the
+address-geometry ball this is the offset from the address face line, not a
+measured contact. A contact more than 50 mm (`MAX_FACE_OFFSET_M`) from the face
+centre lies off every club face. That means the model face passed the ball
+without striking it, so the row is "unavailable" and its reason carries the
+measured miss. Without a ball the row stays unavailable ("needs the ball
+contact point (no ball placement supplied)"). When no card can be computed (no MuJoCo, no club, speed
 below 1 m/s) nothing is drawn, `ExportResult.impact_card` holds the reason, and
 the showcase manifest records it. The panel shows model estimates, not a
 measurement.
