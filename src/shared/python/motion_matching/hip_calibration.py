@@ -105,6 +105,39 @@ class HipRotationZero:
         return {"r": self.offset_r_deg, "l": self.offset_l_deg}
 
 
+# Where hip_rotation = 0 sits (#12042). ``capture``: the measured address thigh
+# twist, the setting of the canonical receipts (ill-conditioned with lateral-only
+# knee/ankle markers and a nearly straight lead knee). ``neutral``: 0/0, the
+# femur frame aligned with the calibrated pelvis frame, so the +-40 deg
+# hip_rotation bound is anatomical rather than shifted by the estimate.
+HIP_ZERO_TWIST_MODES: tuple[str, ...] = ("capture", "neutral")
+DEFAULT_HIP_ZERO_TWIST = "capture"
+
+
+def select_hip_zero_twist(mode: str, measured: HipRotationZero) -> HipRotationZero:
+    """Return the zero-twist offsets to apply for ``mode``.
+
+    Preconditions: ``measured`` is a ``HipRotationZero``; ``mode`` is one of
+    ``HIP_ZERO_TWIST_MODES``.
+    Postconditions: ``capture`` returns ``measured`` unchanged; ``neutral``
+    returns zero offsets for both hips.
+    Raises ``TypeError`` for a bad ``measured`` and ``ValueError`` for an
+    unknown mode.
+    """
+    if not isinstance(measured, HipRotationZero):
+        raise TypeError(
+            f"measured must be a HipRotationZero, got {type(measured).__name__}"
+        )
+    if mode == "capture":
+        return measured
+    if mode == "neutral":
+        return HipRotationZero(offset_r_deg=0.0, offset_l_deg=0.0)
+    raise ValueError(
+        f"Unknown hip zero-twist mode {mode!r}; valid modes: "
+        f"{', '.join(HIP_ZERO_TWIST_MODES)}"
+    )
+
+
 def functional_hip_calibration(
     points: Array,
     valid: NDArray[Any],
