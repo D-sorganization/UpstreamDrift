@@ -18,11 +18,11 @@ from typing import Any
 
 import jsonschema
 
-from src.shared.python.reporting.swing_report.contract import (
+from .contract import (
     SwingReport,
     report_from_dict,
 )
-from src.shared.python.reporting.swing_report.policy import (
+from .policy import (
     STATUS_ADVERTISED,
     STATUS_VALIDATED,
     STATUS_WITHHELD,
