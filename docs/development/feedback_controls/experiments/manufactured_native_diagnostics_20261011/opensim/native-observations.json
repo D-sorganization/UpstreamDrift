@@ -1,0 +1,47 @@
+{
+  "native_muscle_count": 2,
+  "native_observations": [
+    {
+      "absolute_path": "/forceset/flexor",
+      "activation_model_class": "MuscleFirstOrderActivationDynamicModel",
+      "fallback_comparison": "comparison only; fallback values are not treated as source declarations",
+      "matches_prior_fallback": true,
+      "muscle_class": "Millard2012EquilibriumMuscle",
+      "name": "flexor",
+      "properties": {
+        "activation_time_constant_s": 0.01,
+        "deactivation_time_constant_s": 0.04,
+        "minimum_activation": 0.01
+      }
+    },
+    {
+      "absolute_path": "/forceset/extensor",
+      "activation_model_class": "MuscleFirstOrderActivationDynamicModel",
+      "fallback_comparison": "comparison only; fallback values are not treated as source declarations",
+      "matches_prior_fallback": true,
+      "muscle_class": "Millard2012EquilibriumMuscle",
+      "name": "extensor",
+      "properties": {
+        "activation_time_constant_s": 0.01,
+        "deactivation_time_constant_s": 0.04,
+        "minimum_activation": 0.01
+      }
+    }
+  ],
+  "opensim_version": "4.6",
+  "probe_scope": "Model load and property getters only; no system initialization or dynamics",
+  "source": {
+    "explicit_activation_properties": {
+      "extensor": [],
+      "flexor": []
+    },
+    "muscle_names": [
+      "extensor",
+      "flexor"
+    ],
+    "path": "C:\\Users\\diete\\Repositories\\Worktrees\\feedback-controls-main-integration-12202\\docs\\development\\feedback_controls\\experiments\\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\\solution_control_replay_inputs_final\\source.osim",
+    "sha256_after": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143",
+    "sha256_before": "6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143"
+  },
+  "status": "observed"
+}

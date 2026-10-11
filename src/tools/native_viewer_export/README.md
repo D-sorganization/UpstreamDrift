@@ -114,3 +114,12 @@ which left the golfer at about a quarter of the frame height.
 `golf_view_presets.framing` measures the projected extent of a set of points
 (`projected_extent`). It also gives the camera distance that frames them with
 a 15 % margin (`fit_distance_m`).
+
+## Owner Showcase Driver
+
+`python3 -m scripts.render_forces_showcase --capture capture-A --swing driver=driver.npz`
+renders the `clean/`, `club_forces/` and `grf/` clip set (1280x720, 60 fps,
+CRF 18) into `~/Videos/Parity Audit/forces_and_impact/` through this tool and
+writes `manifest_<capture>.json`. A missing bundle or unavailable engine stops
+the run with a message (`--skip-unavailable` records it instead). The inset
+plot strips and the impact parameter card are not rendered yet (GCV-19, #11725).
