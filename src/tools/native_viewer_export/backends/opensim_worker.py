@@ -27,6 +27,7 @@ from src.shared.python.golf_view_presets import (
 )
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.ball import BALL_RGBA, BallPlacement
 from src.tools.native_viewer_export.backends._club import club_parts
 from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._scene import (
@@ -41,6 +42,7 @@ FOV_Y_RAD = VIEWER_FOV_Y_RAD
 SETTLE_S = 0.6
 _GREY = (0.75, 0.78, 0.85)
 _SHAPE_GREY = (0.7, 0.72, 0.8)
+BALL_RGB = BALL_RGBA[:3]
 
 
 def require_virtual_display() -> str:
@@ -178,6 +180,24 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
     return model, float(skeleton.ground.height_m)
 
 
+def attach_ball(osim: Any, model: Any, ball: dict[str, Any]) -> Any:
+    """Attach the decorative ball as a sphere on the model's ground (visual only).
+
+    Returns the sphere geometry so the render loop can change its opacity.
+    """
+    placement = BallPlacement.from_dict(ball)
+    geom = osim.Sphere(placement.radius_m)
+    _attach(
+        osim, model.updGround(), np.eye(3), placement.position_m, geom, BALL_RGB, 9000
+    )
+    return geom
+
+
+def set_ball_opacity(geom: Any, visible: bool) -> None:
+    """Show or hide the ball by Appearance opacity (the visualizer redraws it)."""
+    geom.upd_Appearance().set_opacity(1.0 if visible else 0.0)
+
+
 def set_camera(
     osim: Any, viz: Any, view: str, job: WorkerJob, lookat_m: list[float]
 ) -> None:
@@ -198,6 +218,7 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     model, ground_h = build_model(osim, bundle.spec_bytes)
+    ball_geom = attach_ball(osim, model, job.ball) if job.ball else None
     model.setUseVisualizer(True)
     state = model.initSystem()
     viz = model.updVisualizer().updSimbodyVisualizer()
@@ -214,6 +235,8 @@ def main(job_path: str) -> None:
         for name, value in zip(bundle.coordinate_order, q[k], strict=True):
             coords.get(name).setValue(state, float(value), False)
         model.realizePosition(state)
+        if ball_geom is not None and job.ball_visible:
+            set_ball_opacity(ball_geom, job.ball_visible[pos])
         for view in job.views:
             look = job.lookat_for(view, pos)
             set_camera(osim, viz, view, job, look)

@@ -13,7 +13,7 @@ from dataclasses import dataclass, field, replace
 import functools
 import math
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 import warnings
 
 import numpy as np
@@ -40,6 +40,9 @@ from src.tools.native_viewer_export.compositor import (
     draw_hud,
     draw_label,
 )
+
+if TYPE_CHECKING:
+    from src.tools.native_viewer_export.ball import BallPlacement
 
 Image8 = NDArray[np.uint8]
 ENGINES = ("drake", "pinocchio", "opensim", "myosuite", "mujoco")
@@ -92,6 +95,7 @@ class ExportSettings:
     overlays: bool = True
     multiview: bool = True
     hud: bool = True  # False: clean frames, no view label or HUD text
+    ball: bool = True  # decorative golf ball until impact (GCV-13, #11719)
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
@@ -176,6 +180,7 @@ class SwingInput:
     club: str
     rollout_engine: str
     sample_times_s: tuple[float, ...] | None = None  # set on resampled swings
+    ball: BallPlacement | None = None  # decorative ball, set once per export
 
     @property
     def reference_shape(self) -> tuple[int, ...]:
@@ -451,6 +456,8 @@ class ExportResult:
     glyph_counts: tuple[int, ...] = ()
     frames_by_suffix: dict[str, int] = field(default_factory=dict)
     grip_json: Path | None = None  # grip plot payload (GCV-10), when enabled
+    #: ball provenance: placement dict, or {'unavailable': reason}; None if disabled
+    ball: dict[str, Any] | None = None
 
     @property
     def skipped(self) -> bool:
@@ -610,6 +617,9 @@ def export_swing(
     if reason is not None:
         return ExportResult(engine, {}, 0, skipped_reason=reason)
     out_dir = Path(out_dir)
+    from src.tools.native_viewer_export.ball import attach_ball
+
+    swing, ball_record = attach_ball(swing, settings)
     plans = clip_plans(swing, settings)
     out_dir.mkdir(parents=True, exist_ok=True)
     factory = writer_factory or functools.partial(imageio_writer, crf=settings.crf)
@@ -630,4 +640,5 @@ def export_swing(
         counts[plans[0].suffix],
         glyph_counts=tuple(glyph_counts),
         frames_by_suffix=counts,
+        ball=ball_record,
     )
