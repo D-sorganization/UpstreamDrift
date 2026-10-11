@@ -14,7 +14,7 @@ import argparse
 from pathlib import Path
 
 from .summary import render_summary
-from .flight_panel import plot_flight_panel
+from .flight_panel import FlightPanelLayout, plot_flight_panel
 from .supplemental import SupplementalBundle, load_supplemental
 from .sources import cell_dir as _cell_dir
 from .sources import orient_points
@@ -224,19 +224,15 @@ def _flight_plate(
     all_x = np.concatenate([p[:, 0] for p in all_paths])
     xhalf = max(np.max(np.abs(all_x)) * 1.10, 1.0)
     ymax = max(np.max(p[:, 1]) for p in all_paths) * 1.06
+    layout = FlightPanelLayout(target, xhalf, ymax, rows, supplemental, COLORS)
     for index, (label, paths) in enumerate(oriented):
         plot_flight_panel(
             axes.flat[index],
             label,
             paths,
-            target,
-            xhalf,
-            ymax,
             index,
-            rows,
-            supplemental,
-            COLORS,
             nominals[index] if supplemental else None,
+            layout,
         )
     _annotate_flight_plate(fig, title, note, supplemental)
     fig.subplots_adjust(
