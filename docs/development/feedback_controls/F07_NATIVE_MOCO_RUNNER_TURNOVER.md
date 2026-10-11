@@ -151,3 +151,21 @@ protocol exist. It does not close F07, F08 or the six-engine/17-row denominator.
 The privately staged diagnostic has source/clock/mask receipts and its own
 local reproduction script. Its raw TRCs are deliberately outside this public
 repository and are not a public artifact or approved capture release.
+
+## Typed Finite-Difference Configuration
+
+MocoTrackingConfig now exposes optim_finite_difference_scheme, defaulting to
+central for requests that omit the setting. The typed request admits only
+central and forward; it rejects other values before MocoStudy creation.
+The builder applies the selected scheme to MocoCasADiSolver, reads it back,
+and refuses a mismatch before creating its initial guess. Because the serialized config participates in request
+identity, loading an older request with the omitted field supplies the default
+but produces a new typed identity; historical request bytes and receipts remain
+unchanged.
+
+The pinned OpenSim 4.6 property audit confirmed that a fresh solver stores and
+returns the requested forward value. It also stored an unsupported string,
+so a setter/getter round trip does not prove solver validation or numerical
+support. This change contains no solve evidence and makes no performance,
+convergence, or numerical-accuracy claim. A future executed solve needs its own
+source-bound evidence and identity.

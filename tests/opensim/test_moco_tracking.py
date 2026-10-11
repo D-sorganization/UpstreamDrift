@@ -6,12 +6,15 @@ OpenSim-dependent tests when available.
 
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
+import sys
 import pytest
 
 from src.engines.physics_engines.opensim.python.tour_matching.moco_tracking import (
     MocoTrackingConfig,
     sanitize_trc_for_horizon,
     _is_finite_float,
+    build_moco_study,
 )
 
 
@@ -94,3 +97,155 @@ def test_sanitize_trc_for_horizon_prunes_nan_markers() -> None:
         assert "MarkerGood" in out_lines[3]
         assert "MarkerLateNaN" in out_lines[3]
         assert "MarkerDropout" not in out_lines[3]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("scheme", ["central", "forward"])
+def test_finite_difference_scheme_accepts_typed_values(scheme: str) -> None:
+    """The typed config permits only the finite-difference policy values."""
+    cfg = MocoTrackingConfig(optim_finite_difference_scheme=scheme)
+    cfg.validate()
+    assert cfg.optim_finite_difference_scheme == scheme
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("scheme", ["__unsupported__", "", None, 1, True])
+def test_finite_difference_scheme_rejects_invalid_values(scheme: object) -> None:
+    """Invalid policy values fail validation instead of relying on SWIG."""
+    cfg = MocoTrackingConfig(optim_finite_difference_scheme=scheme)
+    with pytest.raises((TypeError, ValueError), match="optim_finite_difference_scheme"):
+        cfg.validate()
+
+
+@pytest.mark.unit
+def test_invalid_finite_difference_is_rejected_before_study_creation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Invalid solver policy must fail before creating a native study."""
+    study_created = False
+
+    def create_study() -> object:
+        nonlocal study_created
+        study_created = True
+        raise AssertionError("study creation must not be reached")
+
+    monkeypatch.setitem(sys.modules, "opensim", SimpleNamespace(MocoStudy=create_study))
+    cfg = MocoTrackingConfig(optim_finite_difference_scheme="__unsupported__")
+    with pytest.raises((TypeError, ValueError), match="optim_finite_difference_scheme"):
+        build_moco_study("model.osim", "markers.trc", "guess.sto", cfg)
+    assert not study_created
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("reported_scheme", "should_raise"), [("forward", False), ("central", True)]
+)
+def test_forward_scheme_readback_is_checked_before_guess_creation(
+    monkeypatch: pytest.MonkeyPatch,
+    reported_scheme: str,
+    should_raise: bool,
+) -> None:
+    """Native solver readback must match before its initial guess is created."""
+    events: list[str] = []
+
+    class FakeGuess:
+        def insertStatesTrajectory(self, table: object, interpolate: bool) -> None:
+            events.append("insert_guess")
+
+        def getStateNames(self) -> list[str]:
+            return []
+
+        def getControlNames(self) -> list[str]:
+            return []
+
+    class FakeSolver:
+        def set_num_mesh_intervals(self, value: int) -> None:
+            events.append("mesh")
+
+        def set_optim_max_iterations(self, value: int) -> None:
+            events.append("iterations")
+
+        def set_optim_convergence_tolerance(self, value: float) -> None:
+            events.append("convergence_tolerance")
+
+        def set_optim_constraint_tolerance(self, value: float) -> None:
+            events.append("constraint_tolerance")
+
+        def set_optim_finite_difference_scheme(self, value: str) -> None:
+            events.append(f"finite_difference:{value}")
+
+        def get_optim_finite_difference_scheme(self) -> str:
+            events.append("finite_difference_readback")
+            return reported_scheme
+
+        def createGuess(self) -> FakeGuess:
+            events.append("create_guess")
+            return FakeGuess()
+
+        def setGuess(self, guess: FakeGuess) -> None:
+            events.append("set_guess")
+
+    class FakeProblem:
+        def setModelProcessor(self, processor: object) -> None:
+            events.append("model_processor")
+
+        def setTimeBounds(self, start: float, end: float) -> None:
+            events.append("time_bounds")
+
+        def addGoal(self, goal: object) -> None:
+            events.append("goal")
+
+    class FakeStudy:
+        def setName(self, name: str) -> None:
+            events.append("study_name")
+
+        def updProblem(self) -> FakeProblem:
+            return FakeProblem()
+
+        def initCasADiSolver(self) -> FakeSolver:
+            events.append("init_solver")
+            return FakeSolver()
+
+    class FakeGoal:
+        def __init__(self, name: str) -> None:
+            events.append(f"goal:{name}")
+
+        def setWeight(self, weight: float) -> None:
+            events.append("goal_weight")
+
+        def setMarkersReference(self, reference: object) -> None:
+            events.append("markers_reference")
+
+        def setAllowUnusedReferences(self, allow: bool) -> None:
+            events.append("unused_references")
+
+    fake_opensim = SimpleNamespace(
+        MocoStudy=FakeStudy,
+        ModelProcessor=lambda path: object(),
+        MocoControlGoal=FakeGoal,
+        MocoMarkerTrackingGoal=FakeGoal,
+        SetMarkerWeights=lambda: object(),
+        MarkersReference=lambda path, weights: object(),
+        MocoCasADiSolver=SimpleNamespace(safeDownCast=lambda solver: solver),
+        TimeSeriesTable=lambda path: object(),
+    )
+    monkeypatch.setitem(sys.modules, "opensim", fake_opensim)
+
+    if should_raise:
+        with pytest.raises(RuntimeError, match="did not retain"):
+            build_moco_study(
+                "model.osim",
+                "markers.trc",
+                "guess.sto",
+                MocoTrackingConfig(optim_finite_difference_scheme="forward"),
+            )
+        assert "create_guess" not in events
+    else:
+        build_moco_study(
+            "model.osim",
+            "markers.trc",
+            "guess.sto",
+            MocoTrackingConfig(optim_finite_difference_scheme="forward"),
+        )
+        assert events.index("finite_difference_readback") < events.index("create_guess")
+    assert "finite_difference:forward" in events
