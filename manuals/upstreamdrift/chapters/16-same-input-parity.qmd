@@ -20,6 +20,16 @@ dynamically identical and that remaining differences come from documented
 numerical policy. It says nothing about whether the model matches a human
 golfer.
 
+## Lazy Package Facade
+
+The `same_input` package preserves its existing public exports through lazy
+attribute lookup. Importing `same_input.closure` or requesting
+`project_to_closure` does not initialize reference generation, the shared
+integrator, or optional renderer dependencies. Requesting another public name
+loads its existing provider module; names, `__all__`, and object identities
+remain unchanged. This import boundary does not alter dynamics or parity
+evidence.
+
 ## Conventions
 
 - One specification JSON builds every engine adapter: 44 generalized
