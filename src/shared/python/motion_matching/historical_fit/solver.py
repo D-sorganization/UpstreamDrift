@@ -75,7 +75,8 @@ class _Fit:
             for fraction in config.interior_fractions
         ]
         if isinstance(config.constraint_options, ScheduledConstraintOptions):
-            boundaries = config.constraint_options.schedule.boundary_times()
+            schedule = config.constraint_options.schedule
+            boundaries = schedule.boundary_times()
             if (
                 boundaries[0] != inputs.source_times[0]
                 or boundaries[-1] != inputs.source_times[-1]
@@ -445,11 +446,14 @@ def _trajectory_domain(fit: _Fit, knots: np.ndarray) -> HermiteBoundsDomain | No
     bounds = {
         name: (lower, upper) for name, lower, upper in fit.config.coordinate_bounds
     }
+    order = fit.native.coordinate_order
+    free_coords = fit.inputs.free_coordinates
+    seed = fit.inputs.seed
     for name, (lower, upper) in bounds.items():
-        if name not in fit.native.coordinate_order:
+        if name not in order:
             raise ValueError("Coordinate bounds name an unknown native coordinate")
-        if name not in fit.inputs.free_coordinates:
-            value = fit.inputs.seed[fit.native.coordinate_order.index(name)]
+        if name not in free_coords:
+            value = seed[order.index(name)]
             if not lower <= value <= upper:
                 raise ValueError("Coordinate bounds reject the locked native seed")
     return HermiteBoundsDomain(

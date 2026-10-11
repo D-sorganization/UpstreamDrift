@@ -143,11 +143,10 @@ class ResearchGolfDialog(QDialog):
         self._timer.start()
 
     async def _execute(self, operation: str) -> Any:
+        shot = self.admitted.shot
         if operation == "connect":
             adapter = LocalReferenceAdapter()
-            connected_service = GolfSessionService(
-                self.admitted.shot.session_id, adapter
-            )
+            connected_service = GolfSessionService(shot.session_id, adapter)
             status = await connected_service.select_destination(adapter)
             self.adapter, self.service = adapter, connected_service
             return status
@@ -155,9 +154,9 @@ class ResearchGolfDialog(QDialog):
         if service is None:
             raise RuntimeError("Connect the actual local simulator first")
         if operation == "prepare":
-            return service.prepare_research_shot(self.admitted.shot)
+            return service.prepare_research_shot(shot)
         if operation == "recall":
-            return service.get_local_trajectory_record(self.admitted.shot.shot_id)
+            return service.get_local_trajectory_record(shot.shot_id)
         if self._prepared_id is None:
             raise RuntimeError("No public prepared shot identity")
         if operation == "arm":
@@ -220,7 +219,8 @@ class ResearchGolfDialog(QDialog):
             self._show_samples(result)
 
     def _show_samples(self, record: Any) -> None:
-        if record.shot_id != self.admitted.shot.shot_id:
+        shot = self.admitted.shot
+        if record.shot_id != shot.shot_id:
             raise ValueError("Retained local samples belong to another shot")
         self.samples.setRowCount(len(record.points))
         for row, point in enumerate(record.points):

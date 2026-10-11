@@ -159,7 +159,8 @@ def _scope_contact_domain(
         config.constraint_options, ScheduledConstraintOptions
     ):
         return
-    phases = config.constraint_options.schedule.phases
+    constraint_opts = config.constraint_options
+    phases = constraint_opts.schedule.phases
     if (Fraction(*phases[0].start_pts), Fraction(*phases[-1].end_pts)) != (
         domain.first_pts,
         domain.last_pts,
@@ -182,7 +183,8 @@ def _registered_scope(library: Any, scope: Any) -> None:
     if library is None or scope is None:
         return  # Pure DTO/domain tests; production callers always supply a library.
     try:
-        registered = library.load_source_scope_review(scope.review.artifact.artifact_id)
+        artifact = scope.review.artifact
+        registered = library.load_source_scope_review(artifact.artifact_id)
     except KeyError as exc:
         raise ValueError("Registered source scope review required") from exc
     if registered.to_record() != scope.to_record():

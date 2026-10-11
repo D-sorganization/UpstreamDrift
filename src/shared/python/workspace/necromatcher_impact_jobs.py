@@ -205,9 +205,10 @@ class NativeImpactSession:
     def _root(self, run_id: str) -> Path:
         if not isinstance(run_id, str) or not re.fullmatch(r"[a-f0-9]{32}", run_id):
             raise ValueError("Invalid impact run identity")
-        root = self.library.root / "impact-runs" / run_id
+        lib_root = self.library.root
+        root = lib_root / "impact-runs" / run_id
         if (
-            self.library.root.is_symlink()
+            lib_root.is_symlink()
             or root.parent.is_symlink()
             or root.is_symlink()
             or not root.is_dir()
@@ -246,12 +247,12 @@ class NativeImpactSession:
                     raise RuntimeError("An impact job is already running") from exc
             parents = impact_job_parents(self.library, replay_id)
             with self.library.authenticated_read():
-                if selection.recorded_sample_index >= len(
-                    self.library.load_replay(replay_id).t
-                ):
+                replay = self.library.load_replay(replay_id)
+                if selection.recorded_sample_index >= len(replay.t):
                     raise IndexError("Selected sample is outside the replay")
-            directory = self.library.root / "impact-runs"
-            if self.library.root.is_symlink() or directory.is_symlink():
+            lib_root = self.library.root
+            directory = lib_root / "impact-runs"
+            if lib_root.is_symlink() or directory.is_symlink():
                 raise ValueError("Impact run directory may not be a symlink")
             root = directory / uuid4().hex
             stamp = impact_execution_stamp()

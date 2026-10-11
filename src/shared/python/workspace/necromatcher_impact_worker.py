@@ -198,15 +198,15 @@ def main() -> None:
     }
     if not isinstance(request, dict) or set(request) != keys:
         raise ValueError("Impact job envelope requires exact fields")
+    path_parents = path.parents
     if (
         request["kind"] != "necromatcher/impact-job/1"
         or not isinstance(request["run_id"], str)
         or re.fullmatch(r"[a-f0-9]{32}", request["run_id"]) is None
-        or request["run_id"] != path.parent.name
+        or request["run_id"] != path_parents[0].name
         or path.name != "request.json"
-        or path.parent.parent.name != "impact-runs"
-        or path.parent.parent.parent.resolve()
-        != Path(request["library_root"]).resolve()
+        or path_parents[1].name != "impact-runs"
+        or path_parents[2].resolve() != Path(request["library_root"]).resolve()
     ):
         raise ValueError("Impact job path and identity differ")
     library_root = Path(request["library_root"])

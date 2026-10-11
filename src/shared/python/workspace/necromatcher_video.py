@@ -70,10 +70,11 @@ class ShaftVideoOverlay:
     assessment: ShaftAxisAssessment
 
     def to_record(self) -> dict[str, Any]:
+        evidence = self.bound.evidence
         record = {
             "schema": "necromatcher/shaft-video-overlay/1",
-            "evidence": self.bound.evidence.to_record(),
-            "evidence_sha256": self.bound.evidence.sha256,
+            "evidence": evidence.to_record(),
+            "evidence_sha256": evidence.sha256,
             "source_clock_sha256": self.bound.source_clock_sha256,
             "axis": self.axis.to_record(),
             "assessment": asdict(self.assessment),
@@ -182,7 +183,10 @@ def _draw_shaft(
     clipped = clip_infinite_axis(projected, (image.shape[1], image.shape[0]))
     if clipped is not None:
         _line(image, clipped[0], clipped[1], _SHAFT_NATIVE)
-    positions = [item.frame_index for item in overlay.bound.evidence.frames]
+    bound = overlay.bound
+    evidence = bound.evidence
+    frames = evidence.frames
+    positions = [item.frame_index for item in frames]
     record: dict[str, Any] = {
         "status": "unreviewed",
         "raw_rms_pixels": None,
@@ -195,7 +199,7 @@ def _draw_shaft(
     }
     if index in positions:
         position = positions.index(index)
-        segment = overlay.bound.evidence.frames[position].segment
+        segment = frames[position].segment
         record["status"] = segment.status
         errors = overlay.assessment.perpendicular_errors_pixels[position]
         record["angular_error_deg"] = overlay.assessment.angular_errors_deg[position]
@@ -502,7 +506,9 @@ def _shaft_frame(
 ) -> tuple[dict[str, Any], list[str]]:
     if shaft is None:
         return {}, []
-    for item in shaft.bound.evidence.frames:
+    bound = shaft.bound
+    evidence = bound.evidence
+    for item in evidence.frames:
         if item.frame_index == index and (
             item.png_sha256 != "sha256:" + hashlib.sha256(original_png).hexdigest()
         ):

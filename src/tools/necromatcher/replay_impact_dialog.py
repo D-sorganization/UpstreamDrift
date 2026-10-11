@@ -253,7 +253,8 @@ class ReplayImpactDialog(QDialog):
         self._timer = QTimer(self)
         self._timer.setInterval(50)
         self._timer.timeout.connect(self._poll)
-        self._work("load", lambda: self.session.library.load_replay(self.replay_id))
+        session = self.session
+        self._work("load", lambda: session.library.load_replay(self.replay_id))
 
     def _build(self) -> None:
         layout = QVBoxLayout(self)

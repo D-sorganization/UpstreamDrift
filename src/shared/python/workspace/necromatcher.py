@@ -61,15 +61,17 @@ _FIT_RECALL_CHAIN: ContextVar[tuple[tuple[str, str], ...]] = ContextVar(
 
 def _scope_review_metadata(scope: SourceFitScope) -> dict[str, Any]:
     """Use the verified scope declaration as the receipt asset's immutable index."""
+    review = scope.review
+    artifact = review.artifact
     return {
-        "schema": scope.review.artifact.schema,
-        "hash": scope.review.artifact.hash,
+        "schema": artifact.schema,
+        "hash": artifact.hash,
         "capture_id": scope.capture_id,
         "capture_hash": scope.capture_hash,
         "source_clock_sha256": scope.source_clock_sha256,
         "first_frame": scope.first_frame,
         "end_exclusive_frame": scope.end_exclusive_frame,
-        "receipt_bytes": scope.review.receipt_bytes,
+        "receipt_bytes": review.receipt_bytes,
         "qualification": "authored_uncalibrated",
     }
 

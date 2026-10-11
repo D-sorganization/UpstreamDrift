@@ -378,6 +378,9 @@ def _review_payload(
     payload = _read_review_artifact(
         scope.review.artifact, scope.review.receipt_bytes, artifact_root
     )
+    review = scope.review
+    first_id = review.first_identity
+    excl_id = review.excluded_identity
     expected = {
         "schema": SOURCE_SCOPE_REVIEW_SCHEMA,
         "capture_id": identity.capture_id,
@@ -385,14 +388,12 @@ def _review_payload(
         "source_clock_sha256": identity.source_clock_sha256,
         "first_frame": scope.first_frame,
         "end_exclusive_frame": scope.end_exclusive_frame,
-        "first_identity": scope.review.first_identity.to_dict(),
-        "excluded_identity": scope.review.excluded_identity.to_dict()
-        if scope.review.excluded_identity is not None
-        else None,
+        "first_identity": first_id.to_dict(),
+        "excluded_identity": excl_id.to_dict() if excl_id is not None else None,
         "contact_calibrated": False,
         "review_kind": "authored_uncalibrated",
-        "reason": scope.review.reason,
-        "uncertainty_policy": scope.review.uncertainty_policy,
+        "reason": review.reason,
+        "uncertainty_policy": review.uncertainty_policy,
     }
     if not isinstance(payload, dict) or set(payload) != set(expected):
         raise ValueError("Scope review schema/content differs from declaration")

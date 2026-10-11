@@ -38,14 +38,13 @@ class BoundNativeHypothesis:
     def candidate_record(self) -> dict[str, Any]:
         """Adapt only verified authored identities for the canonical fit builder."""
         source = self.parent_record()
-        source["model_id"] = self.request.model.model_id
-        source["model_hash"] = self.request.model.model_hash
-        source["provenance"]["native_definition"] = json.loads(
-            self.request.model.definition_bytes
-        )
+        model = self.request.model
+        source["model_id"] = model.model_id
+        source["model_hash"] = model.model_hash
+        source["provenance"]["native_definition"] = json.loads(model.definition_bytes)
         original = source["evidence"]["original_fit"]
         original["camera"] = self.request.to_record()["camera"]
-        original["attachments"] = self.request.model.to_record()["attachments"]
+        original["attachments"] = model.to_record()["attachments"]
         return source
 
 
@@ -168,12 +167,13 @@ def bind_native_hypothesis(
     original = source["evidence"]["original_fit"]
     if tuple(request.model.attachments) != tuple(original["attachments"]):
         raise ValueError("Hypothesis must retain every parent marker identity/order")
+    model_sha = request.model.definition_sha256
     rebound = ImageSplineStart.from_coefficients(
         start.knot_times,
         start.spline_coefficients,
         mapping.coordinate_order,
         mapping.free_coordinates,
-        request.model.definition_sha256.removeprefix("sha256:"),
+        model_sha.removeprefix("sha256:"),
     )
     return BoundNativeHypothesis(
         request,
