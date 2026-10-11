@@ -1,3 +1,37 @@
+# Native Wrapped-Path Closure Handoff — #12234
+
+`native_wrapped_path.py` carries a source-hash-bound declaration for
+WrapCylinder/WrapEllipsoid/WrapSphere geometry, exact PathWrap targets and
+owners, and ConditionalPathPoint coordinate ranges. The constrained muscle
+path remains default-reject unless the caller supplies the declaration. Native
+reference observation reports the evaluated route without changing it. It
+does not prove global worklessness or guide-work bounds and makes no
+physiological claim. Eleven OpenSim 4.6 wrapped-path fixtures pass; the
+shared Chapter 56 typed findings/request integration is present in the
+current feature history. See provisional Chapter 57 and
+`docs/development/native_wrapped_path_diagnostic.qmd`.
+
+# Native Contact Source Closure Handoff — #12244
+
+Commits `316b011324` and `b48f7b053b` bind the exact-source contact declaration,
+shared sampler, and `opensim_force_torque.py` implementation digest into
+constrained replay identity. OpenSim 4.6 tests cover Smooth and HuntCrossley
+force identities, sphere/half-space geometry closure, source mutation, changed
+provider digest, default rejection, and finite constrained Smooth wrench
+sampling. HuntCrossley constrained replay remains untested because strict
+self-contained XML validation previously rejected its generated fixture;
+the parser fix and new source audit tests now pass. Request/runner serialization,
+preparation closure, export identity, and fresh-replay digest checks are
+integrated. No capture contact, support/grip, or physical qualification is
+claimed. See provisional Chapter 58 and
+`docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md`.
+
+# Active: Fixed Club Cluster in the Static Trial, #12221
+
+- Branch `claude/12221-fixed-triad`. Opt-in `--fix-club-markers` (needs `--static-seeds`) keeps the six `Clubhead` markers at the document's per-club offsets, so a grip rotation can no longer move the capture's own face through the static trial. Default receipts are unchanged.
+- Fixture flags at `87ba5b2f39`: 7-iron −15.6 % (control, corrected #12210 cluster) → −2.6 %, peak 0.0 ms, impact face 7.18 vs 3.21°. The driver document's cluster puts the capture address face at −20.8°, so it is not a valid face frame.
+- Next: a measured driver cluster (#12210 procedure), then refit `grip_rotation_deg` on the fixed clusters. Calc record: `simscape_matching_reference.tex`, "Fixed Club Cluster in the Static Trial".
+
 # Active: Club-Face Fixtures on the Current Spec, #12117
 
 - Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
@@ -1181,6 +1215,14 @@ three sampled poses. See chapter54 and
 `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md`. Keep the PR draft/unarmed until
 Tools #5503 and #12207 are integrated. No source anatomy, physiology,
 force/work chart, contact/grip, captured match or parity claim follows.
+
+## Explicitly Unqualified Moco Feasibility — #12225
+
+Draft PR #12228 contains the diagnostic opt-in and 51 actual native test passes.
+See `F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md` and canonical chapter 55.
+Full-clock private preflight retains unavailable passive admission and blocked
+independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
+support/grip, captured matching and parity gates remain open.
 
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter

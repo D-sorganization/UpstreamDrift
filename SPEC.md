@@ -1,3 +1,51 @@
+## Explicitly Unqualified Moco Feasibility (#12225)
+
+The native runner accepts a default-false boolean diagnostic disposition only
+when passive physiological limits are unavailable. True is request-bound and
+retained in preparation; the unavailable-policy blocker remains visible, and
+all other source, physical, state, chart, observation and control gates remain
+mandatory. No supplied limits can be overridden, and independent excitation
+replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
+feasibility turnover record TDD, native execution and remaining full-capture gates.
+
+## Native Wrapped-Path Source Closure (#12234)
+
+The opt-in wrapped-path declaration binds exact native wrap geometry, PathWrap
+ownership and target links, and ConditionalPathPoint coordinate ranges to the
+complete source hash. Fresh native source comparison is required before
+constrained replay. The strict default continues to reject wrapped components.
+Route observation is source-bound and read-only; unproven global transitions
+and guide-work bounds remain unqualified and require diagnostic opt-in. This
+does not admit nonlinear path functions, generalized joints, contact, or
+physiological claims. Chapter 57 records the closure profile and fixtures;
+runner-level typed finding aggregation depends on the shared Chapter 56 API.
+
+## Native Contact Source Closure (#12244)
+
+Constrained contact replay requires an exact-source declaration for supported
+HuntCrossley or Smooth sphere/half-space contact, including serialized force
+and geometry component identities. The contact policy hash covers both the
+declaration/sampler and the executed `opensim_force_torque.py` wrench provider.
+The default remains rejecting. OpenSim 4.6 tests verify both force/geometry
+closures and finite constrained Smooth-contact wrench output; strict XML
+validation currently rejects the generated HuntCrossley fixture before replay.
+This does not authorize capture contact or establish support, grip, physical
+qualification, or full-horizon replay. Request-level integration remains
+pending. See provisional Chapter 58 and
+`docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md`.
+
+## Native Path-Work Consistency Diagnostic (F07, #11856)
+
+The original single-pin diagnostic in `scripts/diagnostics/native_path_work.py`
+observes native unit-tension force, length and lengthening speed against refined
+geometry derivatives, with serialized model and actual runtime identities. A
+moving point followed by a fixed point on the same body reproduces a force/length
+difference; fixed-point controls agree. This is a workless-identity audit, not
+proof of a runtime defect. Physiological fitting, donor path/input-domain
+validation, contact, complete-state full-capture replay, and manual release remain
+blocked. Canonical calculation reference:
+`manuals/upstreamdrift/chapters/24-native-path-work.qmd`.
+
 ## Coordinate-Invariant Physical Inertia Contract (#12183)
 
 The existing DIME inertia helper checks triangle feasibility on sorted principal
@@ -15,6 +63,15 @@ Keep admitted Tools 86d0f28 and one private replay contract identity. Canonical
 chapter 39 and F10i turnover separate actual affected runtime checks, optional SDK
 skips, capture-loader DLL failures and the outstanding full-model scientific gates.
 Reference-conventions chapter is now 40; project MyoSuite remains chapter 38.
+
+## MyoSuite Native Muscle Actuator Classification (#12249)
+
+`MyoSuiteMuscleAnalyzer` uses the installed MuJoCo named `mjDYN_MUSCLE` enum to
+select native muscle actuators. The native MuJoCo 3.8.0 regression mixes muscle,
+filter, and motor actuators without requiring Gym or MyoSuite environment
+registration. This fixes actuator-type classification only; it does not qualify
+muscle physiology, capture mapping, excitation replay, or engine parity. See
+chapter 31 and the F09q turnover.
 
 ## Project MyoSuite Bounded Native Command Solve (F09n)
 
@@ -10613,6 +10670,31 @@ The receipt retains `state_reset_allowed=False` separately from an unknown
 reset count when the adapter does not instrument that counter; policy is not
 reported as a measured zero.
 
+F09c also has an explicitly bound full-body MuJoCo generalized-effort path.
+It consumes the exact source coordinate order, complete q/v state, and frozen
+ZOH generalized efforts with zero root entries. The shared `VectorPlant` and
+RK4 integrator run eight fixed substeps with projection disabled; model-owned
+contact and weld dynamics are evaluated during the engine-acceleration calls.
+The path does not call `mj_step`, assemble/reset state, or accept a feedback
+callback. It reports closure residuals without adding a qualification
+threshold, accepts only q/v-only state under its exact provider identity, and
+remains unqualified. This consumer does not claim that it generated its input
+history or that the history is a full capture.
+
+The paired `record_native_full_body_feedback` producer accepts a declared
+Python controller with caller-bound source/configuration/reference digests.
+Before any integrator stage, it requires a complete finite initial q/v state,
+validates each returned effort's full coordinate shape and finiteness, and
+rejects nonzero root efforts. The controller receives detached q/v copies once
+per fixed interval; each output is held across eight shared RK4 substeps (32
+acceleration-stage evaluations per outer interval). It returns the standard
+T01 frozen-input bundle plus an unqualified producer record with the exact
+applied efforts and generated trajectory digests. Fresh replay is controller
+free. Initial closure residuals are reported without a threshold, and no
+assembly, reset, or projection is performed. The producer declares no effort
+bounds and makes no bounded-control, capture-match, support/grip, or physiology
+claim. See canonical chapter13 and the F09C turnover.
+
 ## Native Marker Positions From Replay States (F09d, #11907)
 
 `src/engines/feedback_native_markers.py` executes a frozen replay through the
@@ -11138,4 +11220,3 @@ poses. Chapter54 and `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md` retain exact
 hashes, exclusions and reproduction. Tools #5503 and #12207 are pending;
 physiology, native force/work over a chart, contact/grip, head/markers,
 private full-horizon matching and all17/six-engine qualification remain open.
-

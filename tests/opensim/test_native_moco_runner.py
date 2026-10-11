@@ -84,6 +84,12 @@ def _write_request(request: NativeMocoRequest, path: Path) -> None:
                 if request.passive_policy is None
                 else asdict(request.passive_policy),
                 "excluded_markers": dict(request.excluded_markers),
+                "contact_declaration": None
+                if request.contact_declaration is None
+                else {
+                    **asdict(request.contact_declaration),
+                    "declaration_sha256": request.contact_declaration.declaration_sha256,
+                },
             }
         ),
         encoding="utf-8",
