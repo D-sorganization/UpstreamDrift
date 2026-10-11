@@ -177,7 +177,7 @@ def _swing(steps: int = 100) -> SwingInput:
 
 
 def _export(monkeypatch, tmp_path, card, **overrides):
-    monkeypatch.setattr(core, "impact_card_for", lambda swing, t: card)
+    monkeypatch.setattr(core, "impact_card_for", lambda swing, t, ball=None: card)
     settings = ExportSettings(
         views=("face_on",),
         multiview=False,
@@ -372,6 +372,92 @@ def test_club_face_world_is_consistent_with_the_ball() -> None:
     placed = address_ball(swing, None)
     if not isinstance(placed, str):  # the ball module uses the same helper
         assert np.asarray(placed.position_m) == pytest.approx(ball, abs=1e-6)
+
+
+_RADIUS = 0.02135
+
+
+def _placement(series, offset=(0.0, 0.0, 0.0), source="address_geometry"):
+    """Ball whose facing surface point is the face centre plus ``offset``.
+
+    The face normal points from the face to the ball, so the centre is one
+    radius ahead of the wanted contact point along the normal.
+    """
+    from src.tools.native_viewer_export.ball import BallPlacement
+
+    idx = 149  # contact index 150 (t = 0.15 s) -> impact sample 149
+    contact = np.asarray(series.face_center_m[idx]) + np.asarray(offset)
+    centre = contact + _RADIUS * np.asarray(series.face_normal[idx])
+    return BallPlacement(tuple(centre), _RADIUS, source)
+
+
+def _rows(card):
+    return {r.key: r for r in card.rows}
+
+
+def _toe_high(card):
+    """(toe_mm, high_mm) of the "Impact Location" row (high is in its note)."""
+    row = _rows(card)["impact_location"]
+    assert row.value is not None, row.reason
+    return row.value, float(row.note.split()[1])
+
+
+def test_square_strike_through_the_face_centre_reads_zero_zero() -> None:
+    series = _line_series([1.0, 0.0, 0.0])
+    card = impact_card.card_from_series(series, 0.15, _placement(series))
+    assert _toe_high(card) == pytest.approx((0.0, 0.0), abs=0.5)
+    assert card.extras["ball_source"] == "address_geometry"
+
+
+def test_contact_offset_toward_the_toe_axis_is_positive_toe() -> None:
+    # _face_location: toe_mm = (contact - face_centre) . toe_axis, so a contact
+    # 10 mm along +toe_axis reads +10 mm toe; high is along toe x normal.
+    series = _line_series([1.0, 0.0, 0.0])
+    toe = np.asarray(series.toe_axis[0])
+    card = impact_card.card_from_series(
+        series, 0.15, _placement(series, 0.010 * toe, "bundle:ball_impact")
+    )
+    assert _toe_high(card) == pytest.approx((10.0, 0.0), abs=0.5)
+    assert card.extras["ball_source"] == "bundle:ball_impact"
+
+
+def test_contact_offset_along_the_high_axis_is_high() -> None:
+    series = _line_series([1.0, 0.0, 0.0])
+    toe = np.asarray(series.toe_axis[0])
+    high = np.cross(toe, np.asarray(series.face_normal[0]))
+    card = impact_card.card_from_series(series, 0.15, _placement(series, 0.005 * high))
+    assert _toe_high(card) == pytest.approx((0.0, 5.0), abs=0.5)
+
+
+def test_no_ball_leaves_impact_location_unavailable_with_a_reason() -> None:
+    card = impact_card.card_from_series(_line_series([1.0, 0.0, 0.0]), 0.15)
+    row = _rows(card)["impact_location"]
+    assert row.value is None
+    assert "no ball placement supplied" in row.reason
+    assert "GCV-11" not in row.reason
+    assert "GCV-13" not in row.reason
+    assert "ball_source" not in card.extras
+
+
+def test_fixture_card_with_the_address_ball_records_its_source() -> None:
+    import dataclasses
+
+    from src.tools.native_viewer_export.ball import address_ball
+    from src.tools.native_viewer_export.overlay import detect_impact_time_s
+
+    swing = _fixture_swing()
+    placed = address_ball(swing, None)
+    if isinstance(placed, str):
+        pytest.skip(placed)
+    swing = dataclasses.replace(swing, ball=placed)
+    card = impact_card.impact_card_for(swing, detect_impact_time_s(swing), swing.ball)
+    assert isinstance(card, ImpactCard), card
+    # plumbing only: the committed fixture is a stale pose set (#12223), so the
+    # offset magnitude is not golf-realistic and is deliberately not asserted
+    assert np.isfinite(_toe_high(card)).all()
+    assert card.extras["ball_source"] == placed.source
+    without = impact_card.impact_card_for(swing, detect_impact_time_s(swing))
+    assert _rows(without)["impact_location"].value is None
 
 
 def test_fixture_series_uses_the_true_face() -> None:

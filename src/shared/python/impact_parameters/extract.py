@@ -309,7 +309,9 @@ def _fill_geometry(
     values["low_point_height_m"] = height
     if ball_contact_m is None:
         for name in ("toe_mm", "high_mm"):
-            unavailable[name] = "needs face geometry (GCV-11) and ball (GCV-13)"
+            unavailable[name] = (
+                "needs the ball contact point (no ball placement supplied)"
+            )
         return
     loc = _face_location(series, idx, ball_contact_m)
     if isinstance(loc, str):
