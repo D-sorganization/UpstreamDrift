@@ -1,6 +1,6 @@
 import { apiFetch, apiFetchForm } from './fetch';
 import { getApiBase } from './backend';
-import type { AssetRequest, ForceLayerRequest, IdentityRequest, ModelRequest, RefitRequest, SwingRequest, VideoExportRequest } from './generated/types';
+import type { AssetRequest, ForceLayerRequest, IdentityRequest, ModelRequest, SwingRequest, VideoExportRequest } from './generated/types';
 
 const root = '/api/v1/necromatcher';
 export interface SourceFitScope {

@@ -124,4 +124,3 @@ it('submits the opt-in force layer only after it is enabled', async () => {
   await user.click(screen.getByRole('button',{name:'Export Research Overlay'}));
   expect(api.submitVideoExport).toHaveBeenCalledExactlyOnceWith('fit-1',{enabled:true,kinds:['joint_reaction','contact'],scale:1,segment_shading:true});
 });
-});
