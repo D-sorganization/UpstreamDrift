@@ -14,11 +14,19 @@ controllers, prescribed motion, and undeclared non-muscle forces remain
 rejected. A weld does not waive state, constraint, force, wrapped-path,
 contact, or native initialization checks.
 
-The fixture prepared for issue #12280 uses nonzero weld-frame translation and
-rotation, attaches a muscle path to the welded body, and retains movable and
-coupled coordinates. Its native tests are separate from the pure admission
-tests and require a reviewed bounded OpenSim run. A passing synthetic replay
-would establish only this software path: it would not establish capture
-matching, anatomy, support or grip, physiological validity, full-clock
-replay, or qualification of a production model. The calculation registry
-remains release-blocked.
+The synthetic fixture for issue #12280 uses nonzero weld-frame translation
+and rotation, attaches a muscle path to the welded body, and retains movable
+and coupled coordinates. The selected native fixture run passed all three
+cases: fresh reload and saved-excitation replay, plus source-mutation
+rejections for a weld-frame orientation and parent-frame socket. The pure
+admission tests remain a separate 14-case check. Raw public test outputs and
+their hashes are archived under
+`docs/development/feedback_controls/evidence/native_weldjoint_12280/`.
+
+This synthetic result establishes only this software path. It does not
+establish capture matching, anatomy, support or grip, physiological validity,
+full-clock replay, or qualification of a production model. The aggregate
+pre-PR check remains incomplete: its first run reported duplicate mypy module
+identities and missing vendor initialization, and the bounded mypy retry was
+stopped at the local resource cap before producing a result. The calculation
+registry remains release-blocked.
