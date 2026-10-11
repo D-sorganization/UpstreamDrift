@@ -1,0 +1,400 @@
+"""Prepare only: two-interval T01 feedback recording and fresh replay smoke."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import platform
+import sys
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+
+from mujoco_v1_two_interval_pd_smoke import (
+    CONTROL_COORDINATE,
+    DT_SECONDS,
+    EFFORT_LIMIT_NM,
+    ManufacturedPDController,
+    STEPS,
+    build_reference_q,
+    canonical_sha256,
+    controller_configuration,
+    expected_phase_call_counts,
+    validate_controller_call_history,
+    validate_feedback_replay_evidence,
+    validate_torso_rotational_mapping,
+)
+
+REPO = Path(r"C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+PLANNING = Path(r"C:/Users/diete/Repositories/docs/development/feedback_controls_planning")
+SPEC = REPO / "docs/development/full_body_models/full_body_spec_v1.json"
+CANDIDATE = REPO / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json"
+SEED = PLANNING / "mujoco_v1_zero_effort_20261011_root_attempt2/native-observation.json"
+CONTROLLER_SOURCE = PLANNING / "mujoco_v1_two_interval_pd_smoke.py"
+DRIVER_SOURCE = PLANNING / "run_mujoco_v1_two_interval_pd_smoke_20261012.py"
+EXPECTED = {
+    "spec": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "candidate": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
+    "seed": "70d5ed01ee63bef2c161745d7ca0f7e955af8249c9e7529ea20ebc6e2258a49a",
+}
+SOURCE_FILES = (
+    SPEC,
+    CANDIDATE,
+    SEED,
+    CONTROLLER_SOURCE,
+    DRIVER_SOURCE,
+    REPO / "src/engines/physics_engines/mujoco/python/native_full_body_replay.py",
+    REPO / "src/engines/physics_engines/mujoco/python/full_body_model.py",
+    REPO / "src/engines/physics_engines/mujoco/python/full_body_mjcf.py",
+    REPO / "src/engines/physics_engines/mujoco/python/native_mjcf.py",
+    REPO / "src/engines/physics_engines/mujoco/python/native_model.py",
+    REPO / "src/engines/physics_engines/mujoco/python/full_body_ik.py",
+    REPO / "src/engines/native_replay_contracts.py",
+    REPO / "src/shared/python/motion_matching/contact_law.py",
+    REPO / "src/shared/python/motion_matching/constraint_kinematics.py",
+    REPO / "src/shared/python/motion_matching/full_body_ik.py",
+    REPO / "src/shared/python/motion_matching/same_input/__init__.py",
+    REPO / "src/shared/python/motion_matching/same_input/plant.py",
+    REPO / "src/shared/python/motion_matching/same_input/integrator.py",
+)
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def sha256_file(path: Path) -> str:
+    return sha256_bytes(path.read_bytes())
+
+
+def file_hashes() -> dict[str, str]:
+    return {str(path.resolve()): sha256_file(path) for path in SOURCE_FILES}
+
+
+def _load_t01_contracts() -> Any:
+    from src.engines.native_replay_contracts import native_replay_contract_types
+
+    return native_replay_contract_types()
+
+
+def _serialize_reload_bundle(contracts: Any, bundle: Any, bundle_path: Path) -> tuple[Any, bytes]:
+    serialized = contracts.dumps_experiment_replay_bundle(bundle)
+    bundle_bytes = serialized.encode("utf-8") if isinstance(serialized, str) else bytes(serialized)
+    if bundle_path.exists():
+        raise FileExistsError("T01 sidecar path must be fresh")
+    bundle_path.write_bytes(bundle_bytes)
+    reloaded = contracts.load_experiment_replay_bundle(bundle_bytes.decode("utf-8"))
+    return reloaded, bundle_bytes
+
+
+def _bundle_initial_state(bundle: Any) -> dict[str, np.ndarray]:
+    state = {item.component_id: np.asarray(item.values, dtype=np.float64) for item in bundle.initial_state}
+    if tuple(state) != ("qpos", "qvel"):
+        raise ValueError("complete ordered qpos/qvel T01 state is required")
+    return state
+
+
+class _CountedVectorPlant:
+    """Transparent delegate recording direct calls and closure observations."""
+
+    def __init__(self, plant: Any) -> None:
+        self._plant = plant
+        self.coordinate_order = tuple(plant.coordinate_order)
+        self.direct_acceleration_calls = 0
+        self.closure_pose_rate_observations = 0
+        self.closure_pose_only_observations = 0
+
+    def acceleration(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> np.ndarray:
+        self.direct_acceleration_calls += 1
+        return self._plant.acceleration(q, v, tau)
+
+    def closure_residuals(self, q: np.ndarray, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        self.closure_pose_rate_observations += 1
+        return self._plant.closure_residuals(q, v)
+
+    def closure_pose_residual(self, q: np.ndarray) -> np.ndarray:
+        self.closure_pose_only_observations += 1
+        return self._plant.closure_pose_residual(q)
+
+
+def _load_frozen_state(spec_bytes: bytes) -> tuple[dict[str, Any], tuple[str, ...], np.ndarray, np.ndarray]:
+    if sha256_bytes(spec_bytes) != EXPECTED["spec"] or sha256_file(CANDIDATE) != EXPECTED["candidate"]:
+        raise ValueError("source spec or candidate bytes differ from reviewed identity")
+    seed_bytes = SEED.read_bytes()
+    if sha256_bytes(seed_bytes) != EXPECTED["seed"]:
+        raise ValueError("successful zero-effort seed receipt digest changed")
+    seed = json.loads(seed_bytes)
+    spec = json.loads(spec_bytes)
+    names = tuple(spec["coordinate_order"])
+    primitive_pairs = tuple(
+        (item["coordinate"], item["primitive"])
+        for joint in spec["joints"]
+        for item in joint["primitives"]
+    )
+    validate_torso_rotational_mapping(names, primitive_pairs)
+    if seed["source"]["spec_sha256"] != EXPECTED["spec"] or seed["source"]["candidate_sha256"] != EXPECTED["candidate"]:
+        raise ValueError("seed receipt is not bound to the pinned source and candidate")
+    if tuple(seed["initial_state"]["coordinate_order"]) != names or len(names) != 41 or len(set(names)) != 41:
+        raise ValueError("seed coordinate order does not match exact full-body source")
+    q0 = np.asarray(seed["initial_state"]["qpos"], dtype=np.float64)
+    v0 = np.asarray(seed["initial_state"]["qvel"], dtype=np.float64)
+    effort0 = np.asarray(seed["initial_state"]["effort"], dtype=np.float64)
+    gate = seed["pre_acceleration_gate"]
+    if q0.shape != (41,) or v0.shape != (41,) or effort0.shape != (41,):
+        raise ValueError("seed receipt must contain complete 41-coordinate q/v/effort")
+    if not np.isfinite(q0).all() or not np.array_equal(v0, np.zeros(41)) or not np.array_equal(effort0, np.zeros(41)):
+        raise ValueError("seed q must be finite with zero rate and zero observed effort")
+    if seed["acceleration_call_count"] != 1 or gate["jacobian_rank"] != 6 or gate["required_rank"] != 6:
+        raise ValueError("successful source-bound seed lacks its exact prior gate evidence")
+    if gate["max_abs_pose_or_rate_residual"] > gate["declared_closure_gate_m_rad"]:
+        raise ValueError("successful seed closure evidence exceeds its declared gate")
+    return seed, names, q0, v0
+
+
+def _record_and_replay_t01(
+    replay_api: Any,
+    contracts: Any,
+    request: Any,
+    controller: ManufacturedPDController,
+    *,
+    coordinate_order: tuple[str, ...],
+    q0: np.ndarray,
+    v0: np.ndarray,
+    spec_path: Path,
+    bundle_path: Path,
+) -> tuple[Any, Any, bytes, _CountedVectorPlant, _CountedVectorPlant, int, dict[str, int]]:
+    """Run the existing producer, T01 serialization roundtrip, and fresh replay."""
+    base_vector_plant = replay_api.VectorPlant
+    counted_plants: list[_CountedVectorPlant] = []
+
+    def counted_factory(*args: Any, **kwargs: Any) -> _CountedVectorPlant:
+        counted = _CountedVectorPlant(base_vector_plant(*args, **kwargs))
+        counted_plants.append(counted)
+        return counted
+
+    replay_api.VectorPlant = counted_factory
+    try:
+        recording = replay_api.record_native_full_body_feedback(request, controller)
+        if len(counted_plants) != 1:
+            raise AssertionError("feedback recording must construct exactly one VectorPlant")
+        record_plant = counted_plants[0]
+        expected_counts = expected_phase_call_counts(STEPS)
+        _check_phase_counts(record_plant, expected_counts, "feedback recording")
+        if len(controller.calls) != STEPS:
+            raise AssertionError("controller must run once at each of the two intervals")
+        validate_controller_call_history(
+            coordinate_order=coordinate_order,
+            calls=controller.calls,
+            recorded_q=np.asarray(recording.qpos),
+            recorded_v=np.asarray(recording.qvel),
+            applied_efforts=np.asarray(recording.applied_generalized_efforts),
+        )
+
+        reloaded_bundle, bundle_bytes = _serialize_reload_bundle(contracts, recording.bundle, bundle_path)
+        bundled_state = _bundle_initial_state(reloaded_bundle)
+        if not np.array_equal(bundled_state["qpos"], q0) or not np.array_equal(bundled_state["qvel"], v0):
+            raise AssertionError("frozen T01 initial named state differs from the exact reviewed seed")
+        call_count_before_replay = len(controller.calls)
+        replay = replay_api.replay_native_full_body_bundle(reloaded_bundle, spec_path)
+        if len(counted_plants) != 2 or counted_plants[0] is counted_plants[1]:
+            raise AssertionError("fresh controller-off replay must construct a distinct VectorPlant")
+        replay_plant = counted_plants[1]
+        _check_phase_counts(replay_plant, expected_counts, "fresh T01 replay")
+
+        times = np.asarray(recording.time_seconds, dtype=np.float64)
+        frozen_efforts = np.asarray(recording.bundle.input_history.values, dtype=np.float64)
+        validate_feedback_replay_evidence(
+            coordinate_order=coordinate_order,
+            times=times,
+            frozen_efforts=frozen_efforts,
+            recorded_q=np.asarray(recording.qpos),
+            recorded_v=np.asarray(recording.qvel),
+            replay_q=np.asarray(replay.qpos),
+            replay_v=np.asarray(replay.qvel),
+            controller_call_count_before_replay=call_count_before_replay,
+            controller_call_count_after_replay=len(controller.calls),
+        )
+        if not np.array_equal(np.asarray(recording.applied_generalized_efforts), frozen_efforts[:-1]):
+            raise AssertionError("T01 interval rows differ from the feedback actions actually recorded")
+        if not np.array_equal(frozen_efforts[-1], frozen_efforts[-2]):
+            raise AssertionError("T01 terminal held-input sentinel changed")
+        return recording, replay, bundle_bytes, record_plant, replay_plant, call_count_before_replay, expected_counts
+    finally:
+        replay_api.VectorPlant = base_vector_plant
+
+
+def run_smoke(output_path: Path) -> dict[str, Any]:
+    if output_path.exists():
+        raise FileExistsError("child output path must be fresh")
+    before = file_hashes()
+    spec_bytes = SPEC.read_bytes()
+    seed, names, q0, v0 = _load_frozen_state(spec_bytes)
+    if names.index(CONTROL_COORDINATE) < 6:
+        raise ValueError("manufactured PD channel must be an actuated non-root coordinate")
+    reference_q = build_reference_q(names, q0)
+    config = controller_configuration()
+    config_sha = canonical_sha256(config)
+    reference_payload = {
+        "source_sha256": EXPECTED["spec"],
+        "seed_sha256": EXPECTED["seed"],
+        "coordinate_order": names,
+        "reference_q": reference_q,
+    }
+    reference_sha = canonical_sha256(reference_payload)
+    controller_source_sha = sha256_file(CONTROLLER_SOURCE)
+    controller = ManufacturedPDController(names, reference_q)
+
+    from src.engines.physics_engines.mujoco.python import native_full_body_replay as replay_api
+
+    policy = replay_api.DeclaredFullBodyFeedbackPolicy(
+        "manufactured-one-coordinate-pd",
+        "1",
+        CONTROLLER_SOURCE,
+        controller_source_sha,
+        config_sha,
+        reference_sha,
+    )
+    request = replay_api.NativeFullBodyFeedbackRequest(
+        SPEC,
+        q0,
+        v0,
+        steps=STEPS,
+        dt_s=DT_SECONDS,
+        controller_policy=policy,
+        model_id="manufactured-full-body-v1",
+        variant_id="candidate81-worldz-lift",
+        experiment_id="diagnostic:two-interval-pd-smoke",
+    )
+    contracts = _load_t01_contracts()
+    bundle_path = output_path.with_name("frozen-t01-bundle.json")
+    recording, replay, bundle_bytes, record_plant, replay_plant, call_count_before_replay, expected_counts = _record_and_replay_t01(
+        replay_api,
+        contracts,
+        request,
+        controller,
+        coordinate_order=names,
+        q0=q0,
+        v0=v0,
+        spec_path=SPEC,
+        bundle_path=bundle_path,
+    )
+    bundle_digest = sha256_bytes(bundle_bytes)
+    after = file_hashes()
+    if before != after:
+        raise RuntimeError("source, controller, state receipt, or provider changed during run")
+
+    output = {
+            "schema_version": 1,
+            "qualification_status": "unqualified_manufactured_feedback_and_fresh_replay_smoke",
+            "source": {
+                "spec_sha256": EXPECTED["spec"],
+                "candidate_sha256": EXPECTED["candidate"],
+                "seed_observation_sha256": EXPECTED["seed"],
+                "files_before": before,
+                "files_after": after,
+                "provider_sha256": recording.bundle.model.provider_sha256,
+                "loaded_native_model_sha256": recording.bundle.model.loaded_native_model_sha256,
+                "engine_id": recording.bundle.model.engine_id,
+                "provider_id": recording.bundle.model.provider_id,
+                "provider_version": recording.bundle.model.provider_version,
+                "ordered_input_channel_ids": list(recording.bundle.model.ordered_input_channel_ids),
+            },
+            "runtime": {
+                "python_executable": sys.executable,
+                "python_version": sys.version,
+                "platform": platform.platform(),
+            },
+            "controller": {
+                "source_path": str(CONTROLLER_SOURCE.resolve()),
+                "source_sha256": controller_source_sha,
+                "configuration": config,
+                "configuration_sha256": config_sha,
+                "reference_sha256": reference_sha,
+                "recorded_controller_policy_sha256": recording.controller_sha256,
+                "reference_q": list(reference_q),
+                "calls": controller.calls,
+                "action_channel": CONTROL_COORDINATE,
+                "action_limit_abs_nm": EFFORT_LIMIT_NM,
+            },
+            "clock": {"steps": STEPS, "dt_seconds": DT_SECONDS, "horizon_seconds": STEPS * DT_SECONDS},
+            "input_bundle": {
+                "path": str(bundle_path.resolve()),
+                "sha256": bundle_digest,
+                "input_sha256": recording.bundle.applied_input_sha256,
+                "policy_sha256": recording.bundle.policy_sha256,
+                "applied_effort_sha256": recording.applied_effort_sha256,
+                "terminal_sentinel_matches": True,
+                "serialized_and_reloaded_before_fresh_replay": True,
+            },
+            "recorded": {
+                "qpos": np.asarray(recording.qpos).tolist(),
+                "qvel": np.asarray(recording.qvel).tolist(),
+                "applied_generalized_efforts": np.asarray(recording.applied_generalized_efforts).tolist(),
+                "initial_pose_closure_residual": np.asarray(recording.initial_pose_closure_residual).tolist(),
+                "initial_rate_closure_residual": np.asarray(recording.initial_rate_closure_residual).tolist(),
+                "per_interval_pose_closure_magnitude": np.asarray(recording.pose_closure_residuals).tolist(),
+                "trajectory_sha256": recording.trajectory_sha256,
+                "call_counts": _phase_count_payload(record_plant, expected_counts),
+            },
+            "fresh_replay": {
+                "qpos": np.asarray(replay.qpos).tolist(),
+                "qvel": np.asarray(replay.qvel).tolist(),
+                "applied_generalized_efforts": np.asarray(replay.applied_generalized_efforts).tolist(),
+                "initial_pose_closure_residual": np.asarray(replay.initial_pose_closure_residual).tolist(),
+                "initial_rate_closure_residual": np.asarray(replay.initial_rate_closure_residual).tolist(),
+                "per_interval_pose_closure_magnitude": np.asarray(replay.pose_closure_residuals).tolist(),
+                "input_sha256": replay.input_sha256,
+                "policy_sha256": replay.policy_sha256,
+                "call_counts": _phase_count_payload(replay_plant, expected_counts),
+                "controller_calls_during_replay": len(controller.calls) - call_count_before_replay,
+                "exact_state_match": True,
+            },
+            "scope": {
+                "method": "existing feedback recorder and ordinary T01 fresh replay; source-owned contact/weld recomputed by each plant",
+                "hidden_closure_acceleration_note": "each VectorPlant closure query executes one zero-effort adapter acceleration; counts are reported separately from RK4 stages",
+                "physics_claim": "no support equilibrium, tracking, physiology, or captured-motion qualification",
+                "projection_reset_optimizer": "none",
+            },
+    }
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return output
+
+
+def _check_phase_counts(plant: _CountedVectorPlant, expected: dict[str, int], phase: str) -> None:
+    if plant.direct_acceleration_calls != expected["rk4_derivative_acceleration_calls"]:
+        raise AssertionError(f"{phase}: RK4 derivative acceleration count differs")
+    if plant.closure_pose_rate_observations != expected["closure_pose_rate_observations"]:
+        raise AssertionError(f"{phase}: closure pose/rate observation count differs")
+    if plant.closure_pose_only_observations != expected["closure_pose_only_observations"]:
+        raise AssertionError(f"{phase}: closure pose-only observation count differs")
+
+
+def _phase_count_payload(plant: _CountedVectorPlant, expected: dict[str, int]) -> dict[str, int]:
+    return {
+        "rk4_derivative_acceleration_calls": plant.direct_acceleration_calls,
+        "closure_pose_rate_observations": plant.closure_pose_rate_observations,
+        "closure_pose_only_observations": plant.closure_pose_only_observations,
+        "hidden_closure_acceleration_calls": expected["hidden_closure_acceleration_calls"],
+        "total_engine_acceleration_calls": plant.direct_acceleration_calls + expected["hidden_closure_acceleration_calls"],
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--execute-native", action="store_true")
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if not args.execute_native:
+        parser.error("preparation only; reviewed execution must pass --execute-native")
+    if args.output.exists() or args.output.with_name("frozen-t01-bundle.json").exists():
+        parser.error("output and bundle sidecar paths must both be fresh")
+    result = run_smoke(args.output)
+    print(json.dumps({"output": str(args.output), "output_sha256": sha256_file(args.output), "t01_sha256": result["input_bundle"]["sha256"], "steps": STEPS}, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,380 @@
+"""Prepare one source-bound Drake kinematics/contact observation at exact q.
+
+This diagnostic reads the native closure geometry and shared sphere-contact
+law only. It does not solve acceleration, project state, optimize, or integrate.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib
+import importlib.metadata
+import json
+import platform
+import re
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, Mapping
+
+import numpy as np
+
+import pinocchio_fullbody_source_assembly_20261012 as source_setup
+import pinocchio_v1_candidate_lift_parity_20261012 as candidate_probe
+
+
+GEOMETRY_PROBE_SHA256 = (
+    "40c521457a251cf9b5c905a950a3806d9573ccf8a34e4a1a09d5e3948bedb2b1"
+)
+DRAKE_SOURCE_HASHES = {
+    "src/engines/physics_engines/drake/python/full_body_model.py": "a60b02a1cd77f53a360f1259487049c60a364334981cdeca28c7052edab11f47",
+    "src/engines/physics_engines/drake/python/full_body_urdf.py": "060ca5e31bc701e840ff3e617888411d7bd40083c8c61d2785c10f16f77f1845",
+    "src/shared/python/model_generation/export/model_bundle.py": "7f382db0319d51ab4cb952b67d924641d30d9c2746eb4653993d39d33e2529d2",
+    "src/shared/python/biomechanics/grip_extraction.py": "695ffbb82a083922af43f31ac93b0f769dff698c77171209adfc4d1c0e6a09f2",
+    "src/shared/python/biomechanics/grip_wrench.py": "fb9ad197440dd8cd2566e16a30972bf01f60537c5ed57ca7ffa0503b10fd72ea",
+    "src/shared/python/contracts.py": "620449c8e8b3f07acab5eca63ab2c43480563c5667f1fb225823dfcccf422a5d",
+    "src/shared/python/force_overlay/contracts.py": "bc86c7a4de5e091769f5eee087e37c5341502f77ae2f74e08d270a9ca892500e",
+    "src/shared/python/motion_matching/contact_law.py": "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c",
+    "src/shared/python/motion_matching/full_body_spec.py": "58fa5666c765a7ae979529f7c4c217a0aaec235625927351154150d34d65335c",
+}
+DRAKE_VERSION_PATTERN = re.compile(r"1\.57\.\d+")
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def verify_drake_sources(repo: Path) -> dict[str, str]:
+    """Check the exact adapter and imported source helpers from frozen 9e."""
+    result = {name: sha256_file(repo / name) for name in DRAKE_SOURCE_HASHES}
+    mismatches = {
+        name: {"expected": DRAKE_SOURCE_HASHES[name], "actual": result[name]}
+        for name in result
+        if result[name] != DRAKE_SOURCE_HASHES[name]
+    }
+    if mismatches:
+        raise ValueError(f"pinned Drake source files differ: {mismatches}")
+    return result
+
+
+def require_supported_drake_version(version: str) -> str:
+    """Accept only the reviewed Drake 1.57 patch series."""
+    if DRAKE_VERSION_PATTERN.fullmatch(version) is None:
+        raise RuntimeError(
+            f"Drake {version!r} is unsupported; this observer is reviewed for 1.57.x"
+        )
+    return version
+
+
+def svd_report(matrix: Any) -> dict[str, Any]:
+    jacobian = np.asarray(matrix, dtype=np.float64)
+    if (
+        jacobian.ndim != 2
+        or min(jacobian.shape, default=0) == 0
+        or not np.isfinite(jacobian).all()
+    ):
+        raise ValueError("Drake spatial Jacobian must be a nonempty finite matrix")
+    singular = np.linalg.svd(jacobian, compute_uv=False)
+    tolerance = float(max(jacobian.shape) * np.finfo(np.float64).eps * singular[0])
+    return {
+        "shape": list(jacobian.shape),
+        "singular_values": [float(value) for value in singular],
+        "numpy_default_rank_tolerance": tolerance,
+        "rank": int(np.linalg.matrix_rank(jacobian)),
+        "condition_2": float(singular[0] / singular[-1]) if singular[-1] else None,
+    }
+
+
+def drake_weld_observation(
+    owner: Any,
+    api: Any,
+    coordinates: Mapping[str, float],
+    rates: Mapping[str, float],
+    coordinate_order: tuple[str, ...],
+) -> dict[str, Any]:
+    """Read closure residuals and a public Drake spatial-velocity Jacobian."""
+    if tuple(owner.coordinate_order) != coordinate_order:
+        raise ValueError("Drake adapter coordinate order differs from source")
+    pose, rate = owner.closure_residuals(coordinates, rates)
+    pose_vector = np.asarray(pose, dtype=np.float64)
+    rate_vector = np.asarray(rate, dtype=np.float64)
+    if (
+        pose_vector.shape != (6,)
+        or rate_vector.shape != (6,)
+        or not np.isfinite(np.r_[pose_vector, rate_vector]).all()
+    ):
+        raise ValueError("Drake closure residuals must be finite six-vectors")
+
+    plant = owner.plant
+    context = owner.context
+    frame_a = plant.GetFrameByName("native_closure_a")
+    frame_b = plant.GetFrameByName("native_closure_b")
+    raw = plant.CalcJacobianSpatialVelocity(
+        context,
+        api.JacobianWrtVariable.kV,
+        frame_b,
+        np.zeros(3, dtype=np.float64),
+        frame_a,
+        frame_a,
+    )
+    jacobian_plant = np.asarray(raw, dtype=np.float64)
+    if jacobian_plant.shape != (6, 41) or not np.isfinite(jacobian_plant).all():
+        raise ValueError("Drake native spatial weld Jacobian must be finite 6x41")
+    jacobian_source = np.asarray(owner.named_columns(jacobian_plant), dtype=np.float64)
+    if jacobian_source.shape != (6, 41) or not np.isfinite(jacobian_source).all():
+        raise ValueError("Drake source-ordered weld Jacobian must be finite 6x41")
+    rates_source = np.asarray(
+        [rates[name] for name in coordinate_order], dtype=np.float64
+    )
+    rates_plant = np.asarray(owner.to_plant_velocities(rates_source), dtype=np.float64)
+    direct_spatial_rate = jacobian_plant @ rates_plant
+    rate_linear_then_angular = np.r_[direct_spatial_rate[3:], direct_spatial_rate[:3]]
+    if not np.allclose(rate_linear_then_angular, rate_vector, rtol=0.0, atol=1e-10):
+        raise ValueError(
+            "public Drake Jacobian rate does not match adapter closure residual"
+        )
+    return {
+        "pose_residual_translation_then_rotation_vector_frame_a": pose_vector.tolist(),
+        "rate_residual_linear_then_angular_frame_a": rate_vector.tolist(),
+        "native_spatial_jacobian_row_order": "angular_then_linear, expressed in closure frame a",
+        "native_spatial_jacobian_column_order": "Drake plant velocity order",
+        "source_order_spatial_jacobian": jacobian_source.tolist(),
+        "source_order_spatial_jacobian_row_order": "angular_then_linear",
+        "direct_jacobian_rate_linear_then_angular_frame_a": rate_linear_then_angular.tolist(),
+        "native_spatial_jacobian_svd": svd_report(jacobian_source),
+        "closure_residual_and_direct_jacobian_rate_agree": True,
+    }
+
+
+def drake_contact_observation(
+    owner: Any, coordinates: Mapping[str, float], rates: Mapping[str, float]
+) -> dict[str, Any]:
+    """Read named sphere samples via the public Drake shared-contact adapter."""
+    samples = owner.contact_forces(coordinates, rates)
+    rows: dict[str, Any] = {}
+    for name, sample in samples.items():
+        point = np.asarray(sample.contact_point_m, dtype=np.float64)
+        normal = np.asarray(sample.normal_force_n, dtype=np.float64)
+        friction = np.asarray(sample.friction_force_n, dtype=np.float64)
+        fields = np.r_[
+            point,
+            normal,
+            friction,
+            sample.penetration_m,
+            sample.penetration_rate_m_s,
+        ]
+        if (
+            any(value.shape != (3,) for value in (point, normal, friction))
+            or not np.isfinite(fields).all()
+        ):
+            raise ValueError(f"Drake contact sample {name} is malformed")
+        rows[name] = {
+            "contact_point_world_m": point.tolist(),
+            "normal_force_n": normal.tolist(),
+            "friction_force_n": friction.tolist(),
+            "penetration_m": float(sample.penetration_m),
+            "penetration_rate_m_s": float(sample.penetration_rate_m_s),
+        }
+    return {"spheres": rows, "sphere_count": len(rows)}
+
+
+def observe(repo: Path, output: Path, script_path: Path) -> dict[str, Any]:
+    """Build the exact full-body adapter and observe candidate geometry only."""
+    if output.exists():
+        raise FileExistsError("output receipt path must be fresh; no overwrite")
+    source_hashes = source_setup.verify_sources(repo)
+    drake_hashes = verify_drake_sources(repo)
+    geometry_path = Path(candidate_probe.OBSERVATION)
+    candidate_path = Path(candidate_probe.CANDIDATE)
+    geometry_sha = candidate_probe.verify_artifact(
+        geometry_path,
+        candidate_probe.OBSERVATION_SHA256,
+        "candidate-lift geometry receipt",
+    )
+    candidate_sha = candidate_probe.verify_artifact(
+        candidate_path, candidate_probe.CANDIDATE_SHA256, "external candidate JSON"
+    )
+    helper_path = Path(source_setup.__file__).resolve()
+    helper_sha = sha256_file(helper_path)
+    geometry_script = Path(candidate_probe.__file__).resolve()
+    geometry_script_sha = sha256_file(geometry_script)
+    if helper_sha != candidate_probe.SOURCE_HELPER_SHA256:
+        raise ValueError("pinned source bootstrap helper hash mismatch")
+    if geometry_script_sha != GEOMETRY_PROBE_SHA256:
+        raise ValueError("candidate geometry probe hash mismatch")
+    upper_path = repo / candidate_probe.UPPER
+    spec_path = repo / candidate_probe.SPEC
+    upper_sha = candidate_probe.verify_artifact(
+        upper_path, candidate_probe.UPPER_SHA256, "upper-body geometry"
+    )
+    spec_sha = candidate_probe.verify_artifact(
+        spec_path, candidate_probe.EXPECTED_SPEC_SHA256, "full-body specification"
+    )
+    geometry = json.loads(geometry_path.read_text(encoding="utf-8"))
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    try:
+        drake_version = require_supported_drake_version(
+            importlib.metadata.version("drake")
+        )
+    except importlib.metadata.PackageNotFoundError as exc:
+        raise RuntimeError(
+            "reviewed Drake 1.57.x distribution is not installed"
+        ) from exc
+    spec_module = importlib.import_module(
+        "src.shared.python.motion_matching.full_body_spec"
+    )
+    spec_module_path = Path(spec_module.__file__).resolve()
+    expected_spec_module = (
+        repo / "src/shared/python/motion_matching/full_body_spec.py"
+    ).resolve()
+    if spec_module_path != expected_spec_module:
+        raise RuntimeError(
+            "full-body spec helper imported outside exact source archive"
+        )
+    spec = spec_module.load_full_body_spec(
+        spec_path, json.loads(upper_path.read_text(encoding="utf-8"))
+    )
+    order = tuple(spec["coordinate_order"])
+    if len(order) != 41:
+        raise ValueError("frozen full-body source must have 41 coordinates")
+    coordinates, rates = candidate_probe.candidate_named_state(
+        geometry, order, tuple(candidate["coordinate_names"])
+    )
+
+    source_import_paths = source_setup.install_source_import_paths(repo)
+    import pydrake
+
+    api = importlib.import_module("pydrake.all")
+    if not hasattr(api, "MultibodyPlant") or not hasattr(api, "JacobianWrtVariable"):
+        raise ImportError("real pydrake public kinematics APIs are unavailable")
+    pydrake_path = Path(pydrake.__file__).resolve()
+    if repo.resolve() in pydrake_path.parents or not str(
+        api.MultibodyPlant.__module__
+    ).startswith("pydrake."):
+        raise ImportError(
+            "Drake API did not resolve to the external installed Drake package"
+        )
+    model_module = importlib.import_module(
+        "src.engines.physics_engines.drake.python.full_body_model"
+    )
+    model_module_path = Path(model_module.__file__).resolve()
+    expected_model_module = (
+        repo / "src/engines/physics_engines/drake/python/full_body_model.py"
+    ).resolve()
+    if model_module_path != expected_model_module:
+        raise RuntimeError(
+            "full-body Drake adapter imported outside exact source archive"
+        )
+    model_type = model_module.FullBodyDrakeModel
+    owner = model_type(spec)
+    contacts = drake_contact_observation(owner, coordinates, rates)
+    if contacts["sphere_count"] != 4:
+        raise ValueError("frozen source contact inventory must contain four spheres")
+    weld = drake_weld_observation(owner, api, coordinates, rates, order)
+
+    result: dict[str, Any] = {
+        "schema_version": "drake-candidate-lift-geometry-observation-v1",
+        "created_utc": datetime.now(UTC).isoformat(),
+        "status": "observed_kinematics_only",
+        "qualification": "none; manufactured source-bound pose, zero-rate geometry only",
+        "source_commit": source_setup.COMMIT,
+        "base_manifest_sha256": source_setup.MANIFEST_SHA256,
+        "source_hashes": source_hashes,
+        "source_import_paths": list(source_import_paths),
+        "drake_source_hashes": drake_hashes,
+        "candidate_geometry_receipt_sha256": geometry_sha,
+        "candidate_sha256": candidate_sha,
+        "full_body_spec_sha256": spec_sha,
+        "upper_geometry_sha256": upper_sha,
+        "source_setup_helper_sha256": helper_sha,
+        "candidate_geometry_probe_sha256": geometry_script_sha,
+        "drake_observer_sha256": sha256_file(script_path),
+        "runtime": {
+            "python": sys.version,
+            "platform": platform.platform(),
+            "drake_distribution_version": drake_version,
+            "pydrake_package_origin": str(pydrake_path),
+            "pydrake_package_sha256": sha256_file(pydrake_path),
+            "full_body_model_module_origin": str(model_module_path),
+            "full_body_model_module_sha256": sha256_file(model_module_path),
+            "full_body_spec_module_origin": str(spec_module_path),
+        },
+        "input": {
+            "coordinate_order": list(order),
+            "q_named": coordinates,
+            "rates_named": rates,
+            "rates_exact_zero": all(value == 0.0 for value in rates.values()),
+            "candidate_upper_coordinate_names": list(candidate["coordinate_names"]),
+        },
+        "drake_weld": weld,
+        "shared_contact_samples": contacts,
+        "comparison": {
+            "pinocchio_geometry_receipt_sha256": "55ee3bad5c440f529bcf12226ab62984e031c7651b4fd1ba97d53735c097eb92",
+            "pose_or_rate_component_equality_asserted": False,
+            "contact_force_equality_asserted": False,
+            "force_or_equilibrium_claim": False,
+        },
+        "execution_limits": {
+            "acceleration_or_dynamics": False,
+            "projection": False,
+            "optimizer": False,
+            "integration": False,
+            "physical_qualification": False,
+        },
+    }
+    source_after = source_setup.verify_sources(repo)
+    drake_after = verify_drake_sources(repo)
+    artifacts_before = {
+        "geometry_receipt": geometry_sha,
+        "candidate": candidate_sha,
+        "spec": spec_sha,
+        "upper_geometry": upper_sha,
+        "source_setup": helper_sha,
+        "geometry_probe": geometry_script_sha,
+        "drake_observer": sha256_file(script_path),
+    }
+    artifacts_after = {
+        "geometry_receipt": sha256_file(geometry_path),
+        "candidate": sha256_file(candidate_path),
+        "spec": sha256_file(spec_path),
+        "upper_geometry": sha256_file(upper_path),
+        "source_setup": sha256_file(helper_path),
+        "geometry_probe": sha256_file(geometry_script),
+        "drake_observer": sha256_file(script_path),
+    }
+    result["source_hashes_after"] = source_after
+    result["drake_source_hashes_after"] = drake_after
+    result["artifact_hashes_before"] = artifacts_before
+    result["artifact_hashes_after"] = artifacts_after
+    result["source_and_artifacts_unchanged"] = (
+        source_hashes == source_after
+        and drake_hashes == drake_after
+        and artifacts_before == artifacts_after
+    )
+    if not result["source_and_artifacts_unchanged"]:
+        result["status"] = "provenance_changed"
+    source_setup.write_json_atomic(output, result)
+    return result
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    result = observe(
+        args.repo_root.resolve(), args.output.resolve(), Path(__file__).resolve()
+    )
+    print(
+        json.dumps({"status": result["status"], "output": str(args.output.resolve())})
+    )
+    return 0 if result["status"] == "observed_kinematics_only" else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

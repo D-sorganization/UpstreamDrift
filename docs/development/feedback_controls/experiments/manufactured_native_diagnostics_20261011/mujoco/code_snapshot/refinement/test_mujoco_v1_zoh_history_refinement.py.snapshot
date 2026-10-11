@@ -1,0 +1,116 @@
+"""Tests for identical-input RK4 substep refinement contracts."""
+from types import SimpleNamespace
+
+import numpy as np
+import pytest
+
+from mujoco_v1_zoh_history_refinement import (
+    DT_SECONDS,
+    REFINEMENT_SUBSTEPS,
+    ROOT_COORDINATES,
+    STEPS,
+    TORSO_COORDINATE,
+    expected_acceleration_counts,
+    refine_same_frozen_history,
+    state_difference_payload,
+    validate_clock_and_held_history,
+)
+
+
+def _history() -> tuple[tuple[str, ...], np.ndarray, np.ndarray]:
+    names = ROOT_COORDINATES + (TORSO_COORDINATE, "other")
+    times = np.arange(STEPS + 1, dtype=np.float64) * DT_SECONDS
+    efforts = np.zeros((STEPS + 1, len(names)), dtype=np.float64)
+    efforts[:-1, 6] = np.linspace(1e-6, 9e-7, STEPS)
+    efforts[-1] = efforts[-2]
+    return names, times, efforts
+
+
+def test_long_history_is_fixed_clock_full_state_zero_root_and_held_terminal() -> None:
+    names, times, efforts = _history()
+    checked_times, checked_efforts = validate_clock_and_held_history(names, times, efforts)
+    assert np.array_equal(checked_times, times)
+    assert np.array_equal(checked_efforts, efforts)
+    assert expected_acceleration_counts(10, 8)["rk4_derivative_acceleration_calls"] == 320
+    assert expected_acceleration_counts(10, 16)["rk4_derivative_acceleration_calls"] == 640
+    assert expected_acceleration_counts(10, 16)["hidden_closure_acceleration_calls"] == 11
+
+
+def test_refinement_uses_exact_frozen_zoh_rows_and_does_not_call_controller() -> None:
+    names, times, efforts = _history()
+    callbacks = [{"recorded": i} for i in range(STEPS)]
+    before = list(callbacks)
+    calls: list[dict[str, object]] = []
+
+    def integrate(plant, q0, v0, input_times, input_efforts, **kwargs):
+        calls.append({"plant": plant, "q0": q0.copy(), "v0": v0.copy(), "times": input_times.copy(), "efforts": input_efforts.copy(), **kwargs})
+        return SimpleNamespace(
+            time_seconds=input_times.copy(),
+            applied_generalized_efforts=input_efforts[:-1].copy(),
+            qpos=np.zeros((len(input_times), len(names))),
+            qvel=np.zeros((len(input_times), len(names))),
+        )
+
+    result = refine_same_frozen_history(
+        integrate,
+        object(),
+        q0=np.zeros(len(names)),
+        v0=np.zeros(len(names)),
+        times=times,
+        frozen_efforts=efforts,
+        input_sha256="a" * 64,
+        refinement_policy_sha256="b" * 64,
+        controller_calls=callbacks,
+        coordinate_order=names,
+    )
+    assert len(calls) == 1
+    assert calls[0]["substeps"] == REFINEMENT_SUBSTEPS
+    assert np.array_equal(calls[0]["times"], times)
+    assert np.array_equal(calls[0]["efforts"], efforts)
+    assert np.array_equal(calls[0]["efforts"][:-1], efforts[:-1])
+    assert callbacks == before
+    assert result.callback_call_count_before == result.callback_call_count_after == STEPS
+    assert result.call_counts["total_engine_acceleration_calls"] == 651
+
+
+def test_refinement_rejects_changed_terminal_sentinel_before_integrator() -> None:
+    names, times, efforts = _history()
+    efforts[-1, 6] += 1e-12
+    called = False
+
+    def integrate(*args, **kwargs):
+        nonlocal called
+        called = True
+        raise AssertionError("must reject malformed frozen signal first")
+
+    with pytest.raises(ValueError, match="terminal held-effort sentinel"):
+        refine_same_frozen_history(
+            integrate,
+            object(),
+            q0=np.zeros(len(names)),
+            v0=np.zeros(len(names)),
+            times=times,
+            frozen_efforts=efforts,
+            input_sha256="a" * 64,
+            refinement_policy_sha256="b" * 64,
+            controller_calls=[1] * STEPS,
+            coordinate_order=names,
+        )
+    assert not called
+
+
+def test_state_difference_is_per_coordinate_and_common_clock_shaped() -> None:
+    names, _, _ = _history()
+    ordinary = np.zeros((STEPS + 1, len(names)))
+    refined = ordinary.copy()
+    refined[-1, names.index(TORSO_COORDINATE)] = 2e-5
+    payload = state_difference_payload(names, ordinary, ordinary, refined, ordinary)
+    assert payload["terminal_abs_q_difference_by_coordinate"][TORSO_COORDINATE] == pytest.approx(2e-5)
+    assert payload["terminal_abs_v_difference_by_coordinate"][TORSO_COORDINATE] == 0.0
+
+
+def test_clock_rejects_a_different_sampled_feedback_grid() -> None:
+    names, times, efforts = _history()
+    times[-1] += 1e-12
+    with pytest.raises(ValueError, match="fixed common clock"):
+        validate_clock_and_held_history(names, times, efforts)

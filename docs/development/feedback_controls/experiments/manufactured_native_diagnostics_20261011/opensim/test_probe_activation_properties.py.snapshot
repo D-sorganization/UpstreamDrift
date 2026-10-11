@@ -1,0 +1,309 @@
+from __future__ import annotations
+
+import importlib.util
+import builtins
+import inspect
+import math
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
+from unittest.mock import patch
+
+SCRIPT = Path(__file__).with_name("probe_activation_properties.py")
+SPEC = importlib.util.spec_from_file_location("probe_activation_properties", SCRIPT)
+assert SPEC is not None and SPEC.loader is not None
+probe = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(probe)
+LAUNCHER_SPEC = importlib.util.spec_from_file_location(
+    "run_supervised_probe", SCRIPT.with_name("run_supervised_probe.py")
+)
+assert LAUNCHER_SPEC is not None and LAUNCHER_SPEC.loader is not None
+launcher = importlib.util.module_from_spec(LAUNCHER_SPEC)
+LAUNCHER_SPEC.loader.exec_module(launcher)
+
+
+class FakeActivation:
+    def __init__(self, values: dict[str, float]) -> None:
+        self.values = values
+
+    def getConcreteClassName(self) -> str:
+        return "MuscleFirstOrderActivationDynamicModel"
+
+    def get_activation_time_constant(self) -> float:
+        return self.values["activation_time_constant_s"]
+
+    def get_deactivation_time_constant(self) -> float:
+        return self.values["deactivation_time_constant_s"]
+
+    def get_minimum_activation(self) -> float:
+        return self.values["minimum_activation"]
+
+
+class FakeMuscle:
+    def __init__(
+        self,
+        name: str,
+        values: dict[str, float],
+        class_name: str = probe.EXPECTED_SOURCE_CLASS,
+    ) -> None:
+        self.name = name
+        self.values = values
+        self.class_name = class_name
+
+    def getConcreteClassName(self) -> str:
+        return self.class_name
+
+    def getActivationModel(self) -> FakeActivation:
+        return FakeActivation(self.values)
+
+    def getAbsolutePathString(self) -> str:
+        return f"/forceset/{self.name}"
+
+    def getName(self) -> str:
+        return self.name
+
+    def getActivationTimeConstant(self) -> float:
+        return self.values["activation_time_constant_s"]
+
+    def getDeactivationTimeConstant(self) -> float:
+        return self.values["deactivation_time_constant_s"]
+
+    def getMinimumActivation(self) -> float:
+        return self.values["minimum_activation"]
+
+
+class FakeMuscleSet:
+    def __init__(self, rows: dict[str, FakeMuscle]) -> None:
+        self.rows = rows
+
+    def __iter__(self) -> Any:
+        return iter(self.rows.values())
+
+
+class ProbeTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.source = (
+            Path(__file__).parents[4]
+            / "Worktrees"
+            / "feedback-controls-main-integration-12202"
+            / "docs"
+            / "development"
+            / "feedback_controls"
+            / "experiments"
+            / "native_moco_refinement_solve_cecfcd98_root_20261011T080500Z"
+            / "solution_control_replay_inputs_final"
+            / "source.osim"
+        )
+        if not cls.source.exists():
+            cls.source = Path(
+                r"C:\Users\diete\Repositories\Worktrees\feedback-controls-main-integration-12202\docs\development\feedback_controls\experiments\native_moco_refinement_solve_cecfcd98_root_20261011T080500Z\solution_control_replay_inputs_final\source.osim"
+            )
+
+    def fake_sdk(self, values: dict[str, float] | None = None) -> Any:
+        values = values or dict(probe.FALLBACK_VALUES)
+        rows = {name: FakeMuscle(name, values) for name in probe.EXPECTED_MUSCLES}
+        model = SimpleNamespace(getMuscles=lambda: FakeMuscleSet(rows))
+        return SimpleNamespace(
+            __version__="4.6",
+            Model=lambda path: model,
+            Millard2012EquilibriumMuscle=SimpleNamespace(safeDownCast=lambda obj: obj),
+        )
+
+    def test_source_hash_and_two_muscle_native_contract(self) -> None:
+        self.assertTrue(self.source.exists())
+        self.assertEqual(probe.sha256_file(self.source), probe.EXPECTED_SOURCE_SHA256)
+        result = probe.collect_probe(
+            self.source, probe.EXPECTED_SOURCE_SHA256, self.fake_sdk()
+        )
+        self.assertEqual(result["opensim_version"], "4.6")
+        self.assertEqual(result["native_muscle_count"], 2)
+        self.assertEqual(
+            [row["name"] for row in result["native_observations"]],
+            ["flexor", "extensor"],
+        )
+        self.assertTrue(
+            all(row["matches_prior_fallback"] for row in result["native_observations"])
+        )
+        self.assertTrue(
+            all(
+                row["absolute_path"].startswith("/forceset/")
+                for row in result["native_observations"]
+            )
+        )
+
+    def test_source_hash_mismatch_fails_before_model_load(self) -> None:
+        fake = SimpleNamespace(
+            Model=lambda _path: self.fail("Model must not load on a hash mismatch")
+        )
+        with self.assertRaisesRegex(ValueError, "Source hash"):
+            probe.collect_probe(self.source, "0" * 64, fake)
+
+    def test_wrong_sdk_version_fails_before_model_load(self) -> None:
+        fake = SimpleNamespace(
+            __version__="4.5", Model=lambda _path: self.fail("Model must not load")
+        )
+        with self.assertRaisesRegex(ValueError, "Expected OpenSim 4.6"):
+            probe.collect_probe(self.source, probe.EXPECTED_SOURCE_SHA256, fake)
+
+    def test_native_muscle_inventory_must_be_exact_before_getters(self) -> None:
+        fake = self.fake_sdk()
+        fake.Model = lambda _path: SimpleNamespace(
+            getMuscles=lambda: FakeMuscleSet(
+                {"flexor": FakeMuscle("flexor", dict(probe.FALLBACK_VALUES))}
+            )
+        )
+        with self.assertRaisesRegex(ValueError, "exactly two native muscles"):
+            probe.collect_probe(self.source, probe.EXPECTED_SOURCE_SHA256, fake)
+
+    def test_native_muscle_names_must_match_source_inventory(self) -> None:
+        fake = self.fake_sdk()
+        fake.Model = lambda _path: SimpleNamespace(
+            getMuscles=lambda: FakeMuscleSet(
+                {
+                    name: FakeMuscle(name, dict(probe.FALLBACK_VALUES))
+                    for name in ("flexor", "unexpected")
+                }
+            )
+        )
+        with self.assertRaisesRegex(ValueError, "inventory differs"):
+            probe.collect_probe(self.source, probe.EXPECTED_SOURCE_SHA256, fake)
+
+    def test_probe_refuses_existing_output_before_native_import(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "already-there.json"
+            output.write_text("sentinel", encoding="utf-8")
+            with self.assertRaises(FileExistsError):
+                probe.require_fresh_output(output)
+            self.assertEqual(output.read_text(encoding="utf-8"), "sentinel")
+
+    def test_probe_main_refuses_existing_output_before_importing_opensim(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "already-there.json"
+            output.write_text("sentinel", encoding="utf-8")
+            with patch.object(
+                sys,
+                "argv",
+                ["probe", "--source", str(self.source), "--output", str(output)],
+            ):
+                original_import = builtins.__import__
+
+                def import_without_opensim(name: str, *args: Any, **kwargs: Any) -> Any:
+                    if name == "opensim":
+                        self.fail(
+                            "OpenSim import must not occur for an existing output"
+                        )
+                    return original_import(name, *args, **kwargs)
+
+                with patch("builtins.__import__", side_effect=import_without_opensim):
+                    with self.assertRaises(FileExistsError):
+                        probe.main()
+
+    def test_preflight_rejects_missing_inputs_and_fingerprint_drift(self) -> None:
+        with self.assertRaisesRegex(FileNotFoundError, "inputs missing"):
+            launcher.require_all_inputs_exist([Path("missing-probe-input")])
+        current = {str(path): launcher.sha256(path) for path in launcher.input_paths()}
+        launcher.verify_prepared_fingerprints(current)
+        sdk_path = str(launcher.SDK / "simulation.py")
+        drifted = {**current, sdk_path: "0" * 64}
+        with self.assertRaisesRegex(ValueError, "fingerprint"):
+            launcher.verify_prepared_fingerprints(drifted)
+
+    def test_existing_supervisor_signature_is_importable_without_opensim(self) -> None:
+        import sys
+
+        helper = launcher.load_supervisor()
+        signature = inspect.signature(helper._supervise_process_tree)
+        self.assertEqual(
+            tuple(signature.parameters),
+            ("command", "cwd", "timeout_seconds", "memory_limit_bytes", "env"),
+        )
+        self.assertEqual(
+            signature.parameters["env"].kind, inspect.Parameter.KEYWORD_ONLY
+        )
+        self.assertNotIn("opensim", sys.modules)
+
+    def test_supervisor_protocol_is_bounded_and_records_provenance(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output_root = Path(directory) / "new-run"
+            observed: dict[str, Any] = {}
+
+            def fake_supervisor(
+                command: tuple[str, ...],
+                cwd: Path,
+                timeout: float,
+                memory: int,
+                *,
+                env: dict[str, str],
+            ) -> tuple[int, str, str, int]:
+                observed.update(
+                    {
+                        "command": command,
+                        "cwd": cwd,
+                        "timeout": timeout,
+                        "memory": memory,
+                        "env": env,
+                    }
+                )
+                Path(command[5]).write_text('{"status":"fake"}\n', encoding="utf-8")
+                return 0, "fake stdout", "", 1234
+
+            result = launcher.run_prepared_probe(output_root, fake_supervisor)
+            self.assertEqual(result["status"], "completed")
+            self.assertTrue(result["provenance_unchanged"])
+            self.assertTrue(result["owned_tree_cleanup_verified"])
+            self.assertTrue(result["child_report_exists"])
+            self.assertEqual(observed["timeout"], 30.0)
+            self.assertEqual(observed["memory"], 1024**3)
+            self.assertTrue(set(launcher.THREAD_CAPS).issubset(observed["env"]))
+            self.assertEqual(observed["env"]["CASADIPATH"], str(launcher.SDK))
+
+    def test_launcher_refuses_existing_output_before_supervisor_call(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output_root = Path(directory) / "existing"
+            output_root.mkdir()
+            called = False
+
+            def forbidden(*_args: Any, **_kwargs: Any) -> Any:
+                nonlocal called
+                called = True
+                raise AssertionError("supervisor must not launch")
+
+            with self.assertRaises(FileExistsError):
+                launcher.run_prepared_probe(output_root, forbidden)
+            self.assertFalse(called)
+
+    def test_properties_must_be_finite_and_in_domain(self) -> None:
+        cases = (
+            {**probe.FALLBACK_VALUES, "activation_time_constant_s": math.nan},
+            {**probe.FALLBACK_VALUES, "deactivation_time_constant_s": math.inf},
+            {**probe.FALLBACK_VALUES, "minimum_activation": 1.0},
+            {**probe.FALLBACK_VALUES, "minimum_activation": -0.01},
+        )
+        for values in cases:
+            with self.subTest(values=values), self.assertRaises(ValueError):
+                probe.read_properties(FakeMuscle("flexor", values))
+
+    def test_muscle_activation_component_values_must_agree(self) -> None:
+        class Mismatch(FakeMuscle):
+            def getActivationModel(self) -> FakeActivation:
+                return FakeActivation(
+                    {**self.values, "activation_time_constant_s": 0.02}
+                )
+
+        with self.assertRaisesRegex(ValueError, "disagrees"):
+            probe.read_properties(Mismatch("flexor", dict(probe.FALLBACK_VALUES)))
+
+    def test_source_inventory_requires_exact_classes_and_names(self) -> None:
+        inventory = probe.source_inventory(self.source)
+        self.assertEqual(inventory["muscle_names"], ["extensor", "flexor"])
+        self.assertEqual(
+            inventory["explicit_activation_properties"], {"extensor": [], "flexor": []}
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

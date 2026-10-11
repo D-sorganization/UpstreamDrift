@@ -608,6 +608,26 @@ their explicit zero policy. See chapter52, the source-bound receipt and
 nor upgrades the 0.2 ms #12182 diagnostic to a physiological or full-horizon
 result. All 17 required variants and six ecosystems remain open.
 
+## F07 Manufactured Native Diagnostics (#12275)
+
+The compact source-bound evidence archive is `experiments/manufactured_native_diagnostics_20261011/`.
+It retains exact synthetic MuJoCo geometry/zero-effort, 20-microsecond feedback and
+10-millisecond refinement receipts, plus OpenSim 4.6 muscle-property, Pinocchio
+geometry/acceleration and Drake geometry observations, with failed attempts and
+pure-test snapshots. `artifact-manifest.json` binds each archived byte sequence
+to its original path and SHA-256; model/runtime binaries and private captures
+remain external. The package README states each result's limits. None establishes
+supported equilibrium, calibrated contact, capture accuracy, physiology, or
+production replay; all 17 model/variant rows remain unqualified.
+
+A separate folder, `experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/`,
+now retains one Drake zero-effort acceleration observation and its exact
+receipt, metadata, log, and observer snapshots. The q input is identical to
+the retained Pinocchio and MuJoCo candidate inputs; qdd differences are
+descriptive and have no acceptance threshold. This is a near-touch free-fall
+sample, not supported equilibrium or cross-engine qualification. The original
+52-entry archive and manifest remain unchanged; all 17 rows remain unqualified.
+
 ## Same-Input Lazy Package Exports (#11898)
 
 The `same_input` facade now resolves its established exports lazily. A clean

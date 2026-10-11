@@ -1,0 +1,355 @@
+from __future__ import annotations
+
+import numpy as np
+import pytest
+from types import ModuleType, SimpleNamespace
+
+from run_mujoco_v1_two_interval_pd_smoke_20261012 import (
+    _load_t01_contracts,
+    _record_and_replay_t01,
+    _serialize_reload_bundle,
+)
+from mujoco_v1_two_interval_pd_smoke import (
+    CONTROL_COORDINATE,
+    DT_SECONDS,
+    EFFORT_LIMIT_NM,
+    ManufacturedPDController,
+    ROOT_COORDINATES,
+    STEPS,
+    build_reference_q,
+    canonical_sha256,
+    controller_configuration,
+    expected_phase_call_counts,
+    validate_controller_call_history,
+    validate_feedback_replay_evidence,
+    validate_torso_rotational_mapping,
+)
+
+NAMES = (
+    *ROOT_COORDINATES,
+    "SpineInputX",
+    "SpineInputY",
+    CONTROL_COORDINATE,
+    *(f"joint_{i}" for i in range(32)),
+)
+
+
+def test_two_interval_pd_is_full_state_bounded_and_root_zero() -> None:
+    q0 = np.zeros(41)
+    reference = build_reference_q(NAMES, q0)
+    controller = ManufacturedPDController(NAMES, reference)
+    q = q0.copy()
+    v = q0.copy()
+    effort = controller(0.0, q, v)
+
+    assert effort.shape == (41,)
+    assert np.all(effort[:6] == 0.0)
+    target = NAMES.index(CONTROL_COORDINATE)
+    assert effort[target] == pytest.approx(1e-6)
+    assert np.count_nonzero(effort) == 1
+    assert abs(effort[target]) <= EFFORT_LIMIT_NM
+    assert len(controller.calls) == 1
+    np.testing.assert_array_equal(controller.calls[0]["q"], q)
+
+
+def test_pd_damping_reacts_to_rate_and_caps_declared_effort() -> None:
+    reference = build_reference_q(NAMES, np.zeros(41))
+    controller = ManufacturedPDController(NAMES, reference)
+    q = np.zeros(41)
+    v = np.zeros(41)
+    index = NAMES.index(CONTROL_COORDINATE)
+    v[index] = 0.01
+    damped = controller(0.0, q, v)
+    assert damped[index] == pytest.approx(0.0)
+
+    q[index] = -1.0
+    saturated = controller(DT_SECONDS, q, v)
+    assert saturated[index] == EFFORT_LIMIT_NM
+    assert np.all(saturated[:6] == 0.0)
+
+
+@pytest.mark.parametrize(
+    "coordinate_order,reference",
+    [
+        ((*ROOT_COORDINATES[1:], ROOT_COORDINATES[0], CONTROL_COORDINATE, *(f"joint_{i}" for i in range(34))), tuple(np.zeros(41))),
+        (NAMES, tuple(np.r_[np.zeros(40), np.nan])),
+        ((*ROOT_COORDINATES, "SpineInputX", "SpineInputY", "other", *(f"joint_{i}" for i in range(32))), tuple(np.zeros(41))),
+    ],
+)
+def test_pd_rejects_wrong_source_reference_identity(coordinate_order, reference) -> None:
+    with pytest.raises(ValueError):
+        ManufacturedPDController(tuple(coordinate_order), tuple(reference))
+
+
+def test_controller_configuration_and_reference_hashes_bind_distinct_inputs() -> None:
+    config = controller_configuration()
+    first = canonical_sha256(config)
+    changed = dict(config, kp=2 * config["kp"])
+    assert first != canonical_sha256(changed)
+    assert canonical_sha256({"target": [0.0, 1e-3]}) != canonical_sha256({"target": [0.0, 2e-3]})
+
+
+def test_pd_coordinate_uses_exact_source_primitive_mapping() -> None:
+    pairs = tuple((name, "Rz" if name == CONTROL_COORDINATE else "Rx") for name in NAMES)
+    validate_torso_rotational_mapping(NAMES, pairs)
+    wrong = tuple((name, "Ry" if name == CONTROL_COORDINATE else primitive) for name, primitive in pairs)
+    with pytest.raises(ValueError, match="Rz"):
+        validate_torso_rotational_mapping(NAMES, wrong)
+    with pytest.raises(ValueError, match="each named coordinate"):
+        validate_torso_rotational_mapping(NAMES, pairs[:-1] + (pairs[0],))
+
+
+def _synthetic_replay_evidence() -> dict[str, object]:
+    n = len(NAMES)
+    times = np.arange(STEPS + 1, dtype=np.float64) * DT_SECONDS
+    efforts = np.zeros((STEPS + 1, n))
+    idx = NAMES.index(CONTROL_COORDINATE)
+    efforts[:2, idx] = (1e-6, 2e-6)
+    efforts[-1] = efforts[-2]
+    q = np.zeros((STEPS + 1, n))
+    v = np.zeros_like(q)
+    return {
+        "coordinate_order": NAMES,
+        "times": times,
+        "frozen_efforts": efforts,
+        "recorded_q": q,
+        "recorded_v": v,
+        "replay_q": q.copy(),
+        "replay_v": v.copy(),
+        "controller_call_count_before_replay": STEPS,
+        "controller_call_count_after_replay": STEPS,
+    }
+
+
+def test_exact_t01_sentinel_and_controller_off_fresh_replay_contract() -> None:
+    evidence = _synthetic_replay_evidence()
+    validate_feedback_replay_evidence(**evidence)
+
+
+@pytest.mark.parametrize(
+    "mutation, message",
+    [
+        (lambda e: e["frozen_efforts"] .__setitem__((0, 0), 1.0), "root generalized efforts"),
+        (lambda e: e["frozen_efforts"].__setitem__((0, NAMES.index(CONTROL_COORDINATE)), EFFORT_LIMIT_NM * 2), "effort exceeds"),
+        (lambda e: e["frozen_efforts"].__setitem__((2, NAMES.index(CONTROL_COORDINATE)), 0.0), "terminal ZOH sentinel"),
+        (lambda e: e["replay_q"].__setitem__((1, NAMES.index(CONTROL_COORDINATE)), 1.0), "fresh controller-off replay state differs"),
+        (lambda e: e.update(controller_call_count_after_replay=STEPS + 1), "called the feedback controller"),
+    ],
+)
+def test_fresh_replay_evidence_rejects_mutated_history_or_state(mutation, message) -> None:
+    evidence = _synthetic_replay_evidence()
+    mutation(evidence)
+    with pytest.raises(ValueError, match=message):
+        validate_feedback_replay_evidence(**evidence)
+
+
+def test_call_budget_includes_hidden_closure_accelerations() -> None:
+    counts = expected_phase_call_counts(STEPS)
+    assert counts == {
+        "rk4_derivative_acceleration_calls": 64,
+        "closure_pose_rate_observations": 1,
+        "closure_pose_only_observations": 2,
+        "hidden_closure_acceleration_calls": 3,
+        "total_engine_acceleration_calls": 67,
+    }
+
+
+def test_source_shaped_fake_provider_runs_record_serialize_load_fresh_replay(tmp_path) -> None:
+    class FakePlant:
+        coordinate_order = NAMES
+
+        def __init__(self) -> None:
+            self.acceleration_calls = 0
+            self.pose_rate_calls = 0
+            self.pose_calls = 0
+
+        def acceleration(self, q, v, effort):
+            self.acceleration_calls += 1
+            return np.zeros(len(NAMES))
+
+        def closure_residuals(self, q, v):
+            self.pose_rate_calls += 1
+            return np.zeros(6), np.zeros(6)
+
+        def closure_pose_residual(self, q):
+            self.pose_calls += 1
+            return np.zeros(6)
+
+    class FakeContracts:
+        @staticmethod
+        def dumps_experiment_replay_bundle(bundle):
+            return __import__("json").dumps(
+                {
+                    "initial_state": [
+                        {"component_id": item.component_id, "values": list(item.values)}
+                        for item in bundle.initial_state
+                    ],
+                    "input_history": {
+                        "time_seconds": list(bundle.input_history.time_seconds),
+                        "values": [list(row) for row in bundle.input_history.values],
+                    },
+                },
+                sort_keys=True,
+            )
+
+        @staticmethod
+        def load_experiment_replay_bundle(serialized):
+            data = __import__("json").loads(serialized)
+            return SimpleNamespace(
+                initial_state=tuple(
+                    SimpleNamespace(component_id=item["component_id"], values=tuple(item["values"]))
+                    for item in data["initial_state"]
+                ),
+                input_history=SimpleNamespace(**data["input_history"]),
+            )
+
+    class FakeReplayAPI:
+        def __init__(self) -> None:
+            self.VectorPlant = lambda *_args, **_kwargs: FakePlant()
+            self.plants = []
+            self.replay_callback_count = None
+
+        def _new_plant(self):
+            plant = self.VectorPlant()
+            self.plants.append(plant)
+            return plant
+
+        def record_native_full_body_feedback(self, request, controller):
+            plant = self._new_plant()
+            q = np.zeros((STEPS + 1, len(NAMES)))
+            v = np.zeros_like(q)
+            times = np.arange(STEPS + 1) * DT_SECONDS
+            applied = np.zeros((STEPS, len(NAMES)))
+            plant.closure_residuals(q[0], v[0])
+            for i in range(STEPS):
+                applied[i] = controller(times[i], q[i], v[i])
+                for _ in range(32):
+                    plant.acceleration(q[i], v[i], applied[i])
+                plant.closure_pose_residual(q[i + 1])
+            values = np.vstack((applied, applied[-1]))
+            bundle = SimpleNamespace(
+                initial_state=(
+                    SimpleNamespace(component_id="qpos", values=tuple(q[0])),
+                    SimpleNamespace(component_id="qvel", values=tuple(v[0])),
+                ),
+                input_history=SimpleNamespace(time_seconds=tuple(times), values=tuple(map(tuple, values))),
+                model=SimpleNamespace(provider_sha256="provider", loaded_native_model_sha256="loaded"),
+                applied_input_sha256="input-digest",
+                policy_sha256="policy-digest",
+            )
+            return SimpleNamespace(
+                bundle=bundle,
+                time_seconds=times,
+                qpos=q,
+                qvel=v,
+                applied_generalized_efforts=applied,
+                initial_pose_closure_residual=np.zeros(6),
+                initial_rate_closure_residual=np.zeros(6),
+                pose_closure_residuals=np.zeros(STEPS),
+                applied_effort_sha256="effort-digest",
+                trajectory_sha256="trajectory-digest",
+            )
+
+        def replay_native_full_body_bundle(self, bundle, spec_path):
+            self.replay_callback_count = len(controller.calls)
+            plant = self._new_plant()
+            q = np.zeros((STEPS + 1, len(NAMES)))
+            v = np.zeros_like(q)
+            plant.closure_residuals(q[0], v[0])
+            efforts = np.asarray(bundle.input_history.values)
+            for i in range(STEPS):
+                for _ in range(32):
+                    plant.acceleration(q[i], v[i], efforts[i])
+                plant.closure_pose_residual(q[i + 1])
+            return SimpleNamespace(
+                qpos=q,
+                qvel=v,
+                applied_generalized_efforts=efforts[:-1],
+                initial_pose_closure_residual=np.zeros(6),
+                initial_rate_closure_residual=np.zeros(6),
+                pose_closure_residuals=np.zeros(STEPS),
+            )
+
+    api = FakeReplayAPI()
+    original_factory = api.VectorPlant
+    q0 = np.zeros(41)
+    v0 = np.zeros(41)
+    reference = build_reference_q(NAMES, q0)
+    controller = ManufacturedPDController(NAMES, reference)
+    bundle_path = tmp_path / "frozen-t01-bundle.json"
+    recording, replay, raw_bundle, record_plant, replay_plant, calls_before, counts = _record_and_replay_t01(
+        api,
+        FakeContracts,
+        request=object(),
+        controller=controller,
+        coordinate_order=NAMES,
+        q0=q0,
+        v0=v0,
+        spec_path=tmp_path / "source.json",
+        bundle_path=bundle_path,
+    )
+
+    assert bundle_path.read_bytes() == raw_bundle
+    assert api.VectorPlant is original_factory
+    assert record_plant is not replay_plant
+    assert calls_before == len(controller.calls) == STEPS
+    assert api.replay_callback_count == STEPS
+    assert _phase_counts(record_plant) == counts["rk4_derivative_acceleration_calls"]
+    assert _phase_counts(replay_plant) == counts["rk4_derivative_acceleration_calls"]
+    assert recording.bundle.model.provider_sha256 == "provider"
+    assert recording.bundle.model.loaded_native_model_sha256 == "loaded"
+    np.testing.assert_array_equal(replay.qpos, recording.qpos)
+    np.testing.assert_array_equal(replay.qvel, recording.qvel)
+
+
+def test_t01_contract_loader_uses_public_native_replay_contracts_module(monkeypatch) -> None:
+    src = ModuleType("src")
+    src.__path__ = []
+    engines = ModuleType("src.engines")
+    engines.__path__ = []
+    contracts_module = ModuleType("src.engines.native_replay_contracts")
+    sentinel = object()
+    contracts_module.native_replay_contract_types = lambda: sentinel
+    monkeypatch.setitem(__import__("sys").modules, "src", src)
+    monkeypatch.setitem(__import__("sys").modules, "src.engines", engines)
+    monkeypatch.setitem(
+        __import__("sys").modules,
+        "src.engines.native_replay_contracts",
+        contracts_module,
+    )
+
+    assert _load_t01_contracts() is sentinel
+
+
+def _phase_counts(plant) -> int:
+    return plant.direct_acceleration_calls
+
+
+def test_controller_calls_bind_interval_state_to_exact_applied_history() -> None:
+    q = np.zeros((STEPS + 1, len(NAMES)))
+    v = np.zeros_like(q)
+    target = NAMES.index(CONTROL_COORDINATE)
+    applied = np.zeros((STEPS, len(NAMES)))
+    applied[:, target] = (1e-6, 2e-6)
+    calls = [
+        {"time_s": index * DT_SECONDS, "q": q[index].tolist(), "v": v[index].tolist(), "effort": applied[index].tolist()}
+        for index in range(STEPS)
+    ]
+
+    validate_controller_call_history(
+        coordinate_order=NAMES,
+        calls=calls,
+        recorded_q=q,
+        recorded_v=v,
+        applied_efforts=applied,
+    )
+
+    calls[1]["effort"][target] = 3e-6
+    with pytest.raises(ValueError, match="differs from the effort applied"):
+        validate_controller_call_history(
+            coordinate_order=NAMES,
+            calls=calls,
+            recorded_q=q,
+            recorded_v=v,
+            applied_efforts=applied,
+        )
