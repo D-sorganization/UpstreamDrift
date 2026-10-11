@@ -1,5 +1,5 @@
 ---
-issue: 12244
+issue: 12271
 summary: "Add hash-bound one-pass nonuniform Moco mesh refinement planning"
 dl_state: "in_review"
 next_step: "Review committed pure planner and separately authorize any native child attempt."

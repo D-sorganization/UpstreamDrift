@@ -10,7 +10,7 @@ import argparse
 import hashlib
 import json
 import math
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
