@@ -1,0 +1,36 @@
+{
+  "body": "Clubhead",
+  "club": "iron7",
+  "head_triad_edges_m": [
+    0.039925422832120055, 0.10586487645047611, 0.12754347833512833
+  ],
+  "offsets_m": {
+    "Marker_2:2:1": [
+      -0.007327540324495248, -0.08631616596535785, -0.01714432071883919
+    ],
+    "Marker_2:2:2": [
+      0.037275077966665786, -0.011449684473765744, -0.0772524604048805
+    ],
+    "Marker_2:2:3": [
+      -0.047068573801067694, -0.08360904669160808, -0.014431176458904947
+    ],
+    "Marker_3:3:1": [
+      -0.520720025536925, -0.06863097474093219, -0.0018351083910104315
+    ],
+    "Marker_3:3:2": [
+      -0.5898717949605801, -0.04982548788730709, 0.034891412489872556
+    ],
+    "Marker_3:3:3": [
+      -0.6414131568446119, -0.06288050368017623, 0.008591084602100502
+    ]
+  },
+  "schema": "club-markers/1",
+  "source": {
+    "capture": "iron",
+    "capture_sha256": "00a70c1ec0a887c28f9c0397766904eb9e79dee9f6d2bbd0cbb0062445adf561",
+    "method": "static-seed calibration: ik.attachments_m of the --static-seeds run on the club's capture (the static trial places every marker, club cluster included)",
+    "receipt": "docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json",
+    "receipt_commit": "1bef55345715f5c4787ab80f2b54bc19736df633",
+    "receipt_sha256": "7e5492324f225a4501efb509b833a4c68de29f7134e6b7f23bb30d9b0f1720e3"
+  }
+}

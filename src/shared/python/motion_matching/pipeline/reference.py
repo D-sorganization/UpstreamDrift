@@ -14,6 +14,7 @@ from scipy.signal import butter, filtfilt
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.club_face_target import merge_axis_targets
+from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
 from src.shared.python.motion_matching.pipeline.turn_split import (
     lane_axis_targets,
     lane_split_weights,
@@ -313,8 +314,7 @@ def consistency_resolve(
         ground=lane.ground,
         prior_weight=prior_weight,
         iterations=iterations,
-        flat_feet_per_frame=lane.stance,
-        plant_stance=True,
+        **planted_stance(lane),
         prior_trajectory=q_smooth,
         bounds=lane.bounds,
         axis_targets_per_frame=merge_axis_targets(

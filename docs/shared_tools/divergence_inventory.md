@@ -84,8 +84,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 14 | 0 | 0 |
-| `model_generation` | 25 | 54 | 16 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 293 | 0 | 0 |
+| `model_generation` | 27 | 52 | 14 | 20 | 1 | 79 |
+| `motion_matching` | 0 | 0 | 0 | 294 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
@@ -133,7 +133,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `tour_baselines` | 0 | 0 | 0 | 18 | 0 | 0 |
 | `training` | 0 | 0 | 0 | 28 | 0 | 0 |
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
-| `ud_import_alias_policy.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `ui` | 0 | 0 | 0 | 29 | 9 | 0 |
 | `upstream_drift` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `upstream_drift_tools` | 0 | 0 | 0 | 0 | 1 | 0 |
@@ -143,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **398** | **275** | **123** | **1776** | **805** | **673** |
+| **Total** | **400** | **273** | **121** | **1776** | **805** | **673** |
 
 ## Diverged Files by Package
 
@@ -151,7 +150,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `__init__.py` | +716 |  | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
+| `__init__.py` | +708 |  | Dieter Olson 2026-09-26 | d-sorgcodexagent[bot] 2026-06-16 |
 
 ### Package `ai` (75 Diverged Files)
 
@@ -285,7 +284,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `contracts.py` | -709 |  | Dieter Olson 2026-10-10 | Dieter Olson 2026-08-20 |
+| `contracts.py` | -709 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 
 ### Package `gui_launcher` (4 Diverged Files)
 
@@ -300,29 +299,29 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `humanoid_character_builder/__init__.py` | +58 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-09-26 |
+| `humanoid_character_builder/__init__.py` | +30 |  | Dieter Olson 2026-09-26 | Dieter Olson 2026-09-26 |
 | `humanoid_character_builder/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/core/anthropometry.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/core/body_parameters.py` | +1288 |  | Dieter Olson 2026-08-09 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/core/model.py` | +478 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/generators/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/_makehuman_generator.py` | +21 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-06-20 |
+| `humanoid_character_builder/generators/_makehuman_generator.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
 | `humanoid_character_builder/generators/_mesh_types.py` | +1917 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/_primitive_generator.py` | +25 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-06-20 |
-| `humanoid_character_builder/generators/_smplx_generator.py` | +340 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-06-20 |
+| `humanoid_character_builder/generators/_primitive_generator.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
+| `humanoid_character_builder/generators/_smplx_generator.py` | +328 |  | Dieter Olson 2026-08-09 | Dieter Olson 2026-06-20 |
 | `humanoid_character_builder/generators/mesh_generator.py` | +380 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/mesh_generator_primitive.py` | +16 | yes | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/mesh_generator_smplx.py` | +16 | yes | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/generators/mesh_generator_primitive.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/generators/mesh_generator_smplx.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/generators/urdf_generator.py` | -442 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/interfaces/__init__.py` | +74 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/interfaces/api.py` | +36 | yes | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
+| `humanoid_character_builder/interfaces/api.py` | +28 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `humanoid_character_builder/mesh/primitive_inertia.py` | +108 |  | Dieter Olson 2026-10-10 | Dieter Olson 2026-08-20 |
+| `humanoid_character_builder/mesh/primitive_inertia.py` | +90 |  | Dieter Olson 2026-08-03 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/presets/__init__.py` | +226 |  | Dieter Olson 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/presets/loader.py` | +2871 |  | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/presets/loader.py` | +2867 |  | Dieter Olson 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/tests/test_api.py` | -423 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-26 |
 | `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/validation/physics_validator.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
@@ -331,60 +330,58 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `import_aliases.py` | -1577 |  | Dieter Olson 2026-10-10 | d-sorgclaudeagent[bot] 2026-09-07 |
+| `import_aliases.py` | -1577 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-07 |
 
-### Package `model_generation` (54 Diverged Files)
+### Package `model_generation` (52 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `model_generation/__init__.py` | +60 |  | d-sorgclaudeagent[bot] 2026-09-06 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/_convenience.py` | +12 | yes | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-06-20 |
+| `model_generation/_convenience.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
 | `model_generation/_lazy_map.py` | +546 |  | Dieter Olson 2026-09-19 | Dieter Olson 2026-04-26 |
-| `model_generation/api/__init__.py` | +8 | yes | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/api/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/api/rest_api.py` | +1096 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-06 |
-| `model_generation/api/rest_api_assets.py` | +275 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-25 |
+| `model_generation/api/rest_api_assets.py` | +206 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-25 |
 | `model_generation/api/rest_api_core.py` | +4240 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/api/rest_api_fastapi.py` | -27 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/api/rest_api_flask.py` | -72 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-06 |
-| `model_generation/api/rest_api_generation.py` | +363 |  | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/api/rest_api_generation.py` | +306 |  | Dieter Olson 2026-09-21 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/api/rest_api_support.py` | +457 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/builders/__init__.py` | +25 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/builders/base_builder.py` | +2068 |  | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/builders/manual_builder.py` | +20 | yes | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
-| `model_generation/builders/parametric_builder.py` | +14 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
-| `model_generation/builders/urdf_writer.py` | +1601 |  | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/builders/base_builder.py` | +2060 |  | d-sorgclaudeagent[bot] 2026-09-06 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/builders/manual_builder.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `model_generation/builders/parametric_builder.py` | +10 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `model_generation/builders/urdf_writer.py` | +1597 |  | Dieter Olson 2026-09-19 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/cli/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/cli/main.py` | +52 | yes | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
 | `model_generation/converters/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/converters/format_utils.py` | +28 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
-| `model_generation/converters/mjcf_converter.py` | +1743 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
+| `model_generation/converters/format_utils.py` | -5 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `model_generation/converters/mjcf_converter.py` | +1694 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/converters/simscape/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/converters/simscape/mdl_parser.py` | -32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `model_generation/converters/simscape/simscape_converter.py` | +12 | yes | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
-| `model_generation/converters/urdf_parser.py` | +7217 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
+| `model_generation/converters/simscape/simscape_converter.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `model_generation/converters/urdf_parser.py` | +7213 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/core/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/core/physics_validation.py` | +12 | yes | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-09-26 |
 | `model_generation/core/types.py` | +652 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
-| `model_generation/core/validation.py` | +29 |  | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/core/validation.py` | +21 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/editor/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/editor/editor_clipboard.py` | +231 |  | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/editor/editor_modifications.py` | +2637 |  | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/editor/editor_clipboard.py` | +227 |  | d-sorgclaudeagent[bot] 2026-09-06 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/editor/editor_modifications.py` | +2617 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/editor/editor_types.py` | +1022 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/editor/frankenstein_editor.py` | +334 |  | fleet-orchestrator 2026-10-10 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/editor/frankenstein_editor.py` | +330 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/editor/text_editor_diff_mixin.py` | +591 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-08-20 |
-| `model_generation/explorer/__init__.py` | -27 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
+| `model_generation/explorer/__init__.py` | -35 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `model_generation/explorer/model_explorer.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
 | `model_generation/export/__init__.py` | +438 |  | Dieter Olson 2026-09-19 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/humanoid/__init__.py` | +251 |  | Dieter Olson 2026-09-11 | Dieter Olson 2026-08-20 |
 | `model_generation/inertia/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/inertia/calculator.py` | -5844 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-09-26 |
+| `model_generation/inertia/calculator.py` | -5864 |  | Dieter Olson 2026-09-27 | Dieter Olson 2026-09-26 |
 | `model_generation/inertia/primitives.py` | +317 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/__init__.py` | +20 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/library/_rate_limiter.py` | +604 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/cache.py` | +1744 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/github_importer.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/library/model_library.py` | +246 |  | fleet-orchestrator 2026-10-10 | Dieter Olson 2026-08-20 |
+| `model_generation/library/model_library.py` | +242 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/repository.py` | +4968 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/unified_loader.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `model_generation/mesh/__init__.py` | +76 |  | Dieter Olson 2026-09-11 | Dieter Olson 2026-08-20 |
