@@ -337,6 +337,7 @@
       "sources": [
         "src/engines/physics_engines/opensim/python/tour_matching/cli.py",
         "src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py",
+        "src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py",
         "src/engines/physics_engines/opensim/python/tour_matching/native_moco_replay.py",
         "src/engines/physics_engines/opensim/python/tour_matching/native_moco_request.py",
         "src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py",
@@ -381,7 +382,7 @@
       ],
       "entrypoints": [
         {
-          "path": "src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py",
+          "path": "src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py",
           "symbol": "prepare_native_moco"
         },
         {
