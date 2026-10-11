@@ -363,7 +363,7 @@
     {
       "id": "UP-D1-native-mixed-marker-observation-inventory",
       "owner": "UpstreamDrift issue #12195",
-      "resolution": "Inventory provisional chapter49 and native_mixed_marker_observation.py: exact frozen T01 mixed replay input, one fresh native replay, complete ordered named-state restoration at exact saved knots, caller-bound PhysicalFrame/local-offset marker observations, and measured-clock/missingness scoring with no extrapolation. Actual OpenSim 4.6 constrained-mixed fixtures and portable unqualified-contract tests pass. This result is diagnostic only: it does not authenticate an execution receipt, admit F01, infer calibration, qualify contact/support, or establish private-capture or all-model parity. Calculation inventory remains empty and publication blocked."
+      "resolution": "Inventory Chapter 49 and native_mixed_marker_observation.py: source-bound fresh constrained mixed replay, complete named-state native marker FK, immutable masked observation alignment and scorer diagnostics. The native and portable contract tests establish software behavior only; marker registration, physical support/grip, physiology, capture matching, all-model parity and authenticated production execution remain unqualified."
     }
   ],
   "calculations": []
