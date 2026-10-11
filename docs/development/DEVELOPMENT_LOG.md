@@ -3265,3 +3265,7 @@ The follow-up recomputes and compares the full plan before solver setup and
 builds the post-solve mesh audit from the seeded grid in the child request.
 Pure JSON-reload and tampering regressions pass; there is still no native child
 solve or replay evidence.
+
+The next correction uses the OpenSim 4.6-compatible states-table insertion
+signature and restores exact declared initial values after interpolation; a
+strict fake-SWIG test covers the behavior without running the native solver.

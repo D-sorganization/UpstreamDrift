@@ -765,3 +765,10 @@ recomputes and compares the complete canonical plan, including source hashes,
 child mesh and preserved contract; changing a plan field while keeping its
 attempt ID is rejected. Pure regressions cover JSON reload, plan tampering and
 the distinction between plan data and request-only seed data.
+
+The saved-solution guess path exports its states as an OpenSim
+`TimeSeriesTable` before `insertStatesTrajectory`, matching the installed 4.6
+binding. It then restores each declared initial state value exactly and checks
+the readback, so interpolation roundoff cannot alter the fixed initial state.
+A fake-SWIG regression covers both the accepted table signature and exact
+initial-state restoration; no native child build or solve was run.

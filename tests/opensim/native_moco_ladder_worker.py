@@ -228,7 +228,8 @@ def _set_parent_solution_guess(
     solution = osim.MocoTrajectory(str(solution_path))
     controls = osim.TimeSeriesTable(str(controls_path))
     guess = solver.createGuess()
-    guess.insertStatesTrajectory(solution, True)
+    state_table = solution.exportToStatesTable()
+    guess.insertStatesTrajectory(state_table, True)
     child_times = tuple(float(value) for value in guess.getTime())
     expected_times = child_hs_grid(
         refinement["normalized_mesh_points"],
@@ -263,16 +264,34 @@ def _set_parent_solution_guess(
             raise ValueError("Moco guess changed an exact PWL control seed sample")
     if set(guess.getStateNames()) != set(solution.getStateNames()):
         raise ValueError("parent state channels do not bind every child state")
-    for name, initial_value in refinement["preserved_contract"][
-        "cold_start_named_state"
-    ].items():
-        values = tuple(float(value) for value in guess.getState(name))
-        if not values or values[0] != float(initial_value):
-            raise ValueError(
-                "parent state seed changed an exact declared initial state"
-            )
+    _restore_declared_initial_states(
+        guess,
+        refinement["preserved_contract"]["cold_start_named_state"],
+        osim,
+    )
     solver.setGuess(guess)
     return child_times
+
+
+def _restore_declared_initial_states(
+    guess: Any, named_state: dict[str, float], osim: Any
+) -> None:
+    state_names = set(guess.getStateNames())
+    if not set(named_state).issubset(state_names):
+        raise ValueError("declared cold states are absent from the parent trajectory")
+    for name, initial_value in named_state.items():
+        original = tuple(float(value) for value in guess.getState(name))
+        if not original or not math.isfinite(initial_value):
+            raise ValueError("declared cold state is empty or non-finite")
+        values = osim.Vector(len(original), 0.0)
+        for index, value in enumerate(original):
+            values[index] = float(initial_value) if index == 0 else value
+        guess.setState(name, values)
+        readback = tuple(float(value) for value in guess.getState(name))
+        if not readback or readback[0] != float(initial_value):
+            raise ValueError(
+                "Moco guess did not preserve the exact declared initial state"
+            )
 
 
 def _run_with_periodic_replay_stack_dumps(

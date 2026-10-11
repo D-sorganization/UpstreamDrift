@@ -15,5 +15,6 @@ thresholds, and interpolates persisted controls linearly onto every child
 endpoint and midpoint without trajectory resampling. It records parent and
 child provenance and remains physically unqualified until unchanged fresh
 replay passes. The worker recomputes the complete plan before solver setup and
-binds post-solve grid reporting to the child request. No native child solve or
-replay was run.
+binds post-solve grid reporting to the child request. Parent state guesses use
+the OpenSim states-table API and restore exact initial values after
+interpolation. No native child solve or replay was run.

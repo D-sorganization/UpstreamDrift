@@ -266,6 +266,121 @@ def test_refinement_grid_audit_reads_seed_grid_from_child_request() -> None:
         _build_mesh_grid_audit(plan, changed_request, grid)
 
 
+def test_parent_refinement_guess_exports_state_table_and_restores_exact_initial(
+    tmp_path: Path,
+) -> None:
+    from tests.opensim.native_moco_ladder_worker import _set_parent_solution_guess
+
+    parent = tmp_path / "parent"
+    parent.mkdir()
+    solution_path = parent / "solution.sto"
+    controls_path = parent / "time_only_controls.sto"
+    solution_path.write_bytes(b"parent solution")
+    controls_path.write_bytes(b"parent controls")
+    state_name = "/forceset/flexor/activation"
+
+    class FakeTable:
+        def __init__(self, labels, values, times):
+            self.labels = tuple(labels)
+            self.values = values
+            self.times = tuple(times)
+
+        def getColumnLabels(self):
+            return self.labels
+
+        def getIndependentColumn(self):
+            return self.times
+
+        def getDependentColumn(self, name):
+            return self.values[name]
+
+        def getNumRows(self):
+            return len(self.times)
+
+    state_table = FakeTable(
+        (state_name,), {state_name: (0.05000000000000001, 0.06)}, (0.0, 0.01)
+    )
+    control_table = FakeTable(
+        ("/forceset/flexor",), {"/forceset/flexor": (0.1, 0.2)}, (0.0, 0.01)
+    )
+
+    class FakeTrajectory:
+        def __init__(self, _path):
+            self.exported_table = state_table
+
+        def exportToStatesTable(self):
+            return self.exported_table
+
+        def getStateNames(self):
+            return (state_name,)
+
+    class FakeGuess:
+        def __init__(self):
+            self.states = {state_name: (0.05000000000000001, 0.055, 0.06)}
+            self.controls = {}
+
+        def insertStatesTrajectory(self, table, interpolate):
+            if not isinstance(table, FakeTable):
+                raise TypeError("insertStatesTrajectory expects TimeSeriesTable")
+            assert interpolate is True
+            self.inserted_state_table = table
+
+        def getTime(self):
+            return (0.0, 0.005, 0.01)
+
+        def getControlNames(self):
+            return ("/forceset/flexor",)
+
+        def getStateNames(self):
+            return (state_name,)
+
+        def getState(self, name):
+            return self.states[name]
+
+        def setState(self, name, values):
+            self.states[name] = tuple(values)
+
+        def setControl(self, name, values):
+            self.controls[name] = tuple(values)
+
+        def getControl(self, name):
+            return self.controls[name]
+
+    class FakeSolver:
+        def createGuess(self):
+            self.guess = FakeGuess()
+            return self.guess
+
+        def setGuess(self, guess):
+            self.guess = guess
+
+    class FakeOpenSim:
+        MocoTrajectory = FakeTrajectory
+        TimeSeriesTable = staticmethod(lambda _path: control_table)
+        Vector = staticmethod(lambda size, initial: [initial] * size)
+
+    refinement = {
+        "parent_hashes": {
+            "solution_sto": hashlib.sha256(solution_path.read_bytes()).hexdigest(),
+            "time_only_controls_sto": hashlib.sha256(
+                controls_path.read_bytes()
+            ).hexdigest(),
+        },
+        "normalized_mesh_points": (0.0, 1.0),
+        "parent_request": {
+            "horizon_seconds": 0.01,
+            "native_control_bounds": {"/forceset/flexor": [0.01, 1.0]},
+        },
+        "preserved_contract": {"cold_start_named_state": {state_name: 0.05}},
+    }
+    solver = FakeSolver()
+    result = _set_parent_solution_guess(solver, parent, refinement, FakeOpenSim)
+    assert result == (0.0, 0.005, 0.01)
+    assert solver.guess.inserted_state_table is state_table
+    assert solver.guess.states[state_name][0] == 0.05
+    assert solver.guess.states[state_name][1:] == (0.055, 0.06)
+
+
 def test_committed_activation_analysis_reproduces_retained_parent_bindings(
     tmp_path: Path,
 ) -> None:
