@@ -3,7 +3,8 @@ name: Realtime WS 24h Soak (Nightly)
 # 24-hour soak validation for the upstream-realtime Rust WS pub-sub.
 # Issue: #5235 (follow-up to #5214). NOT part of standard PR CI.
 #
-# Triggers: manual dispatch + daily 02:00 UTC schedule.
+# Triggers: manual dispatch + daily 02:00 UTC schedule (the schedule runs
+# only when the repo variable SOAK_RUNNER_AVAILABLE is 'true', #12286).
 # Runner: ubuntu-latest only (soak doesn't need cross-platform coverage).
 # Gating: the test module is skipped unless SOAK=1 is set in the env.
 # -----------------------------------------------------------------------------
@@ -42,6 +43,12 @@ concurrency:
 jobs:
   soak:
     name: 24h realtime soak
+    # No org runner carries d-sorg-fleet-soak yet, so a scheduled run would
+    # queue until GitHub expires it (#12286). Scheduled runs need the repo
+    # variable SOAK_RUNNER_AVAILABLE='true'; a manual dispatch always runs.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      vars.SOAK_RUNNER_AVAILABLE == 'true'
     runs-on: d-sorg-fleet-soak
     # 24 h + headroom for setup/teardown/artifact upload. GitHub-hosted
     # runners cap at 360 minutes; the nightly run uses the d-sorg-fleet-docker
