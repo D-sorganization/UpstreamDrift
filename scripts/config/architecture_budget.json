@@ -1210,24 +1210,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/independent_final_audit.py",
-      "symbol": "audit_cell",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - audit_cell exceeds function-lines budget (205 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/research/shot_pattern_analysis/phase2/validation/independent_pilot_audit.py",
-      "symbol": "main",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - main exceeds function-lines budget (245 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "docs/research/shot_pattern_analysis/phase2/validation/restore_final_control_archives.py",
       "symbol": "run",
       "rule": "function-lines",

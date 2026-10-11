@@ -202,65 +202,11 @@ def bootstrap_check(differences, saved, seed, maxima):
         compare(maxima, "bootstrap", bounds[:, i], [item["lower_95"], item["upper_95"]])
 
 
-def audit_cell(folder, config, execution, caches, baseline, maxima):
-    summary = json.loads((folder / "summary.json").read_text())
-    manifest = json.loads((folder / "manifest.json").read_text())
-    for name, digest in manifest["files_sha256"].items():
-        assert sha(folder / name) == digest, (folder.name, name, "hash")
-    start = json.loads((folder / "run_start.json").read_text())
-    assert (
-        start["config"] == config == summary["config"]
-        and start["execution"] == execution
-    )
-    result = {
-        "status": summary["status"],
-        "manifest_sha256": sha(folder / "manifest.json"),
-        "files_checked": len(manifest["files_sha256"]),
-    }
-    if summary["status"] == "unavailable":
-        assert summary["shot_rows"] == 0 and not (folder / "shots.csv.gz").exists()
-        return {**result, "reason": summary["reason"], "rows": 0}
-    assert (
-        summary["status"] == "completed" and summary["aim_adjustment_applied"] is False
-    )
-    receipt = json.loads((folder / "receipt.json").read_text())
-    assert (
-        receipt["execution"] == execution
-        and receipt["source_unchanged_during_run"]
-        and receipt["all_inputs_retained"]
-    )
-    data = pd.read_csv(folder / "shots.csv.gz", float_precision="round_trip")
-    assert set(data["status"]) <= {
-        "supported",
-        "off_face",
-        "delivery_out_of_range",
-        "delivery_nonfinite",
-        "delivery_nonapproaching",
-        "nonairborne_launch",
-    }
+def _audit_population(data, config, summary, noise, maxima):
+    """Audit every physical population before computing its shared support."""
     n = config["n_shots"]
-    assert len(data) == 3 * n == receipt["shot_rows"]
-    assert set(data["pattern"]) == set(PATTERNS)
-    noise = sample_paired_noise(
-        NoiseSpec(**config["noise"]), n_shots=n, seed=config["seed"]
-    )
-    input_info = summary["input_diagnostics"]
-    assert input_info["fields"] == list(NOISE_FIELDS) and input_info["paired_inputs"]
-    compare(
-        maxima,
-        "covariance",
-        np.cov(noise, rowvar=False),
-        input_info["realized_covariance"],
-    )
-    compare(
-        maxima,
-        "summary",
-        np.std(noise, axis=0, ddof=1),
-        input_info["realized_standard_deviations"],
-    )
     frames = {}
     supports = {}
-    radii = {}
     target = summary["target_x_m"]
     radius = config["target_radius_m"]
     for pattern in PATTERNS:
@@ -335,6 +281,20 @@ def audit_cell(folder, config, execution, caches, baseline, maxima):
             [stats["mean_downrange_error_m"], stats["mean_lateral_error_m"]],
         )
         covariance_check(good, saved["joint_delivery_outcome_diagnostics"], maxima)
+    return frames, supports
+
+
+def _audit_paired_population(
+    folder, summary, frames, supports, caches, baseline, maxima, result
+):
+    """Retain paired reductions, source-backed scoring, and bootstrap order."""
+    config = summary["config"]
+    n, target, radius = (
+        config["n_shots"],
+        summary["target_x_m"],
+        config["target_radius_m"],
+    )
+    radii = {}
     common = sorted(set.intersection(*supports.values()))
     paired = summary["paired_comparisons"]
     scoring = summary["course_scoring"]
@@ -344,7 +304,7 @@ def audit_cell(folder, config, execution, caches, baseline, maxima):
             "all_samples" if len(common) == n else "common_supported_indices_only"
         )
     result.update(
-        rows=len(data),
+        rows=sum(map(len, frames.values())),
         supported_rows=sum(map(len, supports.values())),
         paired_n=len(common),
         total_n=n,
@@ -407,6 +367,68 @@ def audit_cell(folder, config, execution, caches, baseline, maxima):
     }
     result["bootstrap_checked"] = selected
     return result
+
+
+def audit_cell(folder, config, execution, caches, baseline, maxima):
+    summary = json.loads((folder / "summary.json").read_text())
+    manifest = json.loads((folder / "manifest.json").read_text())
+    for name, digest in manifest["files_sha256"].items():
+        assert sha(folder / name) == digest, (folder.name, name, "hash")
+    start = json.loads((folder / "run_start.json").read_text())
+    assert (
+        start["config"] == config == summary["config"]
+        and start["execution"] == execution
+    )
+    result = {
+        "status": summary["status"],
+        "manifest_sha256": sha(folder / "manifest.json"),
+        "files_checked": len(manifest["files_sha256"]),
+    }
+    if summary["status"] == "unavailable":
+        assert summary["shot_rows"] == 0 and not (folder / "shots.csv.gz").exists()
+        return {**result, "reason": summary["reason"], "rows": 0}
+    assert (
+        summary["status"] == "completed" and summary["aim_adjustment_applied"] is False
+    )
+    receipt = json.loads((folder / "receipt.json").read_text())
+    assert (
+        receipt["execution"] == execution
+        and receipt["source_unchanged_during_run"]
+        and receipt["all_inputs_retained"]
+    )
+    data = pd.read_csv(folder / "shots.csv.gz", float_precision="round_trip")
+    assert set(data["status"]) <= {
+        "supported",
+        "off_face",
+        "delivery_out_of_range",
+        "delivery_nonfinite",
+        "delivery_nonapproaching",
+        "nonairborne_launch",
+    }
+    n = config["n_shots"]
+    assert len(data) == 3 * n == receipt["shot_rows"]
+    assert set(data["pattern"]) == set(PATTERNS)
+    noise = sample_paired_noise(
+        NoiseSpec(**config["noise"]), n_shots=n, seed=config["seed"]
+    )
+    input_info = summary["input_diagnostics"]
+    assert input_info["fields"] == list(NOISE_FIELDS) and input_info["paired_inputs"]
+    compare(
+        maxima,
+        "covariance",
+        np.cov(noise, rowvar=False),
+        input_info["realized_covariance"],
+    )
+    compare(
+        maxima,
+        "summary",
+        np.std(noise, axis=0, ddof=1),
+        input_info["realized_standard_deviations"],
+    )
+    frames, supports = _audit_population(data, config, summary, noise, maxima)
+    return _audit_paired_population(
+        folder, summary, frames, supports, caches, baseline, maxima, result
+    )
 
 
 def main():
