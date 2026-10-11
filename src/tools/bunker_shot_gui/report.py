@@ -656,7 +656,7 @@ def playability_text(playability: PlayabilityOutcome) -> str:
         cells = " ".join(
             ("   ---" if not np.isfinite(value) else f"{value:>6.2f}")
             + ("*" if flag else " ")
-            for value, flag in zip(row, flags, strict=True)
+            for value, flag in zip(list(row), flags, strict=True)
         )
         lines.append(f"  {angle:>5.1f} {cells}")
     lines.extend(("  (* inside the window, --- refused)", ""))

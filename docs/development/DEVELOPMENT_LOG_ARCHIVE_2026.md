@@ -1234,4 +1234,3 @@
 - **Paths:** docs/architecture/C4.md, scripts/architecture_map_contract.py
 - **Started:** 2026-09-10
 - **Last verified:** 2026-09-10 (`09f6d22da3`)
-
