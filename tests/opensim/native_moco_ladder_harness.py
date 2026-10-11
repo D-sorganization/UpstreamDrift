@@ -492,6 +492,7 @@ def _validate_retained_artifacts(
         "request_sha256",
         "saved_solution_sha256",
         "saved_time_only_controls_sha256",
+        "solution_serialization_audit_sha256",
         "fresh_replay_sha256",
     ):
         value = receipt.get(field)
@@ -511,6 +512,7 @@ def _validate_retained_artifacts(
         "witness/witness_time_only_controls.sto": "witness_controls_sha256",
         "solution.sto": "saved_solution_sha256",
         "time_only_controls.sto": "saved_time_only_controls_sha256",
+        "solution_serialization_audit.json": "solution_serialization_audit_sha256",
         "fresh_replay.json": "fresh_replay_sha256",
     }
     for filename, field in file_hashes.items():
@@ -530,6 +532,9 @@ def _validate_retained_artifacts(
         raise ValueError("bounded OpenSim runtime fingerprint is missing")
     _validate_request_rung_binding(request, receipt, rung)
     _validate_witness_request(request, receipt)
+    _validate_solution_serialization_audit(
+        directory / "solution_serialization_audit.json", request, receipt
+    )
     _validate_bounded_runtime_fingerprint(
         runtime_path, receipt["opensim_runtime_fingerprint_sha256"]
     )
@@ -704,6 +709,7 @@ def _validate_witness_request(request: dict[str, Any], receipt: dict[str, Any]) 
         or request.get("cold_start_residual_tolerance") != 1e-9
         or request.get("initial_q") != cold_state.get("/jointset/base/q/value")
         or request.get("witness_profile") != "constant-0.05-forward-integrated-v1"
+        or request.get("solution_serialization_max_ulps") != 8
         or request.get("witness_excitation_by_channel")
         != {"flexor": 0.05, "extensor": 0.05}
     ):
@@ -745,6 +751,64 @@ def _validate_witness_request(request: dict[str, Any], receipt: dict[str, Any]) 
         or any(right <= left for left, right in zip(knots, knots[1:], strict=False))
     ):
         raise ValueError("witness request does not retain its exact full 10 ms clock")
+
+
+def _validate_solution_serialization_audit(
+    path: Path, request: dict[str, Any], receipt: dict[str, Any]
+) -> None:
+    audit = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(audit, dict):
+        raise ValueError("solution STO round-trip audit is not an object")
+    arrays = audit.get("arrays")
+    if (
+        audit.get("schema") != "synthetic-solution-sto-roundtrip-v1"
+        or request.get("solution_serialization_max_ulps") != 8
+        or audit.get("maximum_allowed_ulps") != 8
+        or not isinstance(audit.get("maximum_ulp_error"), (int, float))
+        or isinstance(audit.get("maximum_ulp_error"), bool)
+        or not math.isfinite(audit["maximum_ulp_error"])
+        or audit["maximum_ulp_error"] > 8
+        or receipt.get("solution_serialization_audit") != audit
+        or not isinstance(arrays, dict)
+        or set(arrays) != {"time", "states", "controls"}
+        or not all(isinstance(array, dict) for array in arrays.values())
+        or not isinstance(audit.get("state_names"), list)
+        or not all(isinstance(name, str) for name in audit["state_names"])
+        or not isinstance(audit.get("control_names"), list)
+        or not all(isinstance(name, str) for name in audit["control_names"])
+        or set(audit.get("state_names", []))
+        != set(request.get("cold_start_named_state", {}))
+        or set(audit.get("control_names", []))
+        != {
+            f"/forceset/{name}"
+            for name in request.get("witness_excitation_by_channel", {})
+        }
+    ):
+        raise ValueError("solution STO round-trip audit is missing or over budget")
+    if any(
+        not isinstance(array.get(field), str)
+        or len(array[field]) != 64
+        or any(char not in "0123456789abcdef" for char in array[field])
+        for array in arrays.values()
+        for field in ("in_memory_sha256", "persisted_sha256")
+    ):
+        raise ValueError("solution STO round-trip audit hashes are invalid")
+    for array in arrays.values():
+        for field in ("max_absolute_error", "max_ulp_error"):
+            value = array.get(field)
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+                or value < 0.0
+            ):
+                raise ValueError("solution STO round-trip audit metrics are invalid")
+        if array["max_ulp_error"] > 8:
+            raise ValueError("solution STO round-trip array exceeds its ULP budget")
+    if audit["maximum_ulp_error"] != max(
+        array["max_ulp_error"] for array in arrays.values()
+    ):
+        raise ValueError("solution STO round-trip maximum does not match arrays")
 
 
 def _validate_bounded_runtime_fingerprint(path: Path, expected_sha256: str) -> None:

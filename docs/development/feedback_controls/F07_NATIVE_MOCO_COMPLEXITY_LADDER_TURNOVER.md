@@ -134,6 +134,60 @@ rules exclude worker logs. Their hashes are:
 | `worker.stderr.log`       | `920734f0dc5d744bf8dc74fe8d6831c02ab5004c7c535d9d3eab0345bb1bf373` |
 | `worker.stdout.log`       | `e7d2618ebf54c04d3da82be34647918e6534f9480e6d6261e36221e53331db36` |
 
+## Bounded Run at Corrected Checkpoint `5d8fe120773ca22df114b0d78b56e86bf2789934`
+
+One fresh invocation was authorized with 30 seconds per rung, solver
+parallelism 0, native thread limits 1, a 1 GiB sampled process-tree RSS stop,
+and stop-on-first-nonpass. The Python 3.13.5 supervisor used `psutil 7.0.0`;
+the worker used OpenSim `4.6-2026-06-22-85aaf64`. The `plain` rung's Moco solve
+succeeded in 5.904 seconds wall / 5.656 seconds CPU after 51 Ipopt iterations,
+with objective `3.175796576239704e-6` and a target endpoint of
+`0.30000558574001657` rad. The worker then failed after 10.642 seconds total
+while validating the saved controls clock. Peak sampled process-tree RSS was
+209,035,264 bytes (about 199.3 MiB). No optimized-solution replay or per-unit
+state-error comparison ran, and no later rung launched. A post-run process
+query found no Python ladder worker. No retry was made.
+
+The persisted `solution.sto` and `time_only_controls.sto` each contain 21 rows.
+Their serialized clocks compare exactly (maximum absolute difference 0), as do
+both saved control channels versus the corresponding columns in
+`solution.sto` (maximum difference 0). Reloading `solution.sto` as a
+`MocoTrajectory` also gives a clock exactly equal to the controls STO. Thus the
+failure is the in-memory `MocoSolution.getTimeMat()` versus a STO round-trip;
+that in-memory vector was not retained, so its exact mismatch or ULP error
+cannot be recovered from this run. No tolerance is relaxed. The next fix should
+make the persisted solution trajectory authoritative only after checking the
+in-memory clock, states, and controls against it under a predeclared maximum of
+8 float64 ULP per element. The audit records maximum absolute and ULP errors
+per array, channel names, and hashes of both in-memory and persisted arrays;
+the request fixes the ULP budget before the solve. The persisted 0 and 0.01
+second endpoints remain exact, and the separately saved replay-input controls
+must exactly match the persisted solution clock and control values. Tests now
+accept a one-ULP perturbation and reject truncated arrays, changed controls,
+non-finite data, and nine-ULP corruption. A read-only SDK check of the retained
+persisted solution confirmed identical 21-row solution/control clocks and
+control values; it cannot recover the original in-memory arrays. This TDD fix
+has not been run as a ladder and requires review before another solve attempt.
+
+At the authorized checkpoint, worker and harness SHA-256 values were
+`3ff8275bdea8057c68a7220fdcb89933102ca584a5c9d058b8cd9f895219e30c` and
+`d6374348fbee7acdcb44410facebac7bdf4ea1d139511a439cb66de3b37b6a4b`.
+The request binds source
+`6a098517bdba09b19b3eb99e4da7e795f27d10be8f42c0fca04fee20ce67e143` and native
+profile `189c5d07c24b6b8c993aedba8cb794dbe82925bb6b368fef98be1327c2057fbf`.
+Run files remain locally retained under
+`experiments/native_moco_ladder_5d8fe120/plain/`; worker logs are excluded by
+the repository's existing ignore rule:
+
+| Artifact                 | SHA-256                                                            |
+| ------------------------ | ------------------------------------------------------------------ |
+| `request.json`           | `cdb44cdce3df26ccd161eade7f18f6da7d2b52de5e44b0e4d9a103e4543389de` |
+| `progress.json`          | `9a1e4bba67309458f8ffe0f9fed7c275041b29979ba979c067659034e9c493db` |
+| `solution.sto`           | `f38c5c8c4cd94d8a009ad043fff9bd7d36c21e4f03062092398e8e18ef5d1e5c` |
+| `time_only_controls.sto` | `b5c65c34067a17e5964bf4e82d1e34268c7c40d747597657a2c98a70737ceb95` |
+| `worker.stderr.log`      | `913716ed6d8041846013525c3f0172f4743a18bbc86aab5ae0827bd4a64a8608` |
+| `worker.stdout.log`      | `a20d5039bd6859d95c7c8ee5a960a0ef42f11ef456063ff4ee84904507662f59` |
+
 The ladder remains a synthetic software feasibility diagnostic. Even a future
 successful solve and fresh replay would not qualify muscle physiology, the
 captured swing, independent excitation parity, or production readiness.

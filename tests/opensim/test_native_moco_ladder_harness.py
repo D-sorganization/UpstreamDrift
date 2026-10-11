@@ -142,6 +142,7 @@ def test_forward_witness_has_exact_saved_clock_and_nonzero_endpoint(
         json.dumps(metadata["native_mechanics_profile"])
     )
     assert round_trip["native_mechanics_profile_sha256"] == profile.profile_sha256
+    assert round_trip["solution_serialization_max_ulps"] == 8
     assert metadata["cold_start_named_state"] == declaration.named_state
     assert set(metadata["cold_start_state_units"]) == set(declaration.named_state)
     assert metadata["native_mechanics_profile"]["source_sha256"] == source_hash
@@ -278,6 +279,113 @@ def test_replay_audit_rejects_miss_wrong_direction_and_nonfinite() -> None:
         _compare_replayed_states(Solution(), nonfinite, names, times, 0.300005, 0.3)
 
 
+def test_solution_sto_roundtrip_allows_one_ulp_and_records_array_hashes(
+    tmp_path: Path,
+) -> None:
+    import numpy as np
+
+    from tests.opensim.native_moco_ladder_harness import (
+        _validate_solution_serialization_audit,
+    )
+    from tests.opensim.native_moco_ladder_worker import (
+        _audit_solution_roundtrip,
+        _require_solution_roundtrip,
+    )
+
+    memory = {
+        "state_names": ("/jointset/base/q/value",),
+        "control_names": ("/forceset/flexor",),
+        "time": np.asarray([0.0, 0.005, 0.01]),
+        "states": np.asarray([[0.3], [0.305], [0.31]]),
+        "controls": np.asarray([[0.1], [0.15], [0.2]]),
+    }
+    persisted = {
+        name: value.copy() if hasattr(value, "copy") else value
+        for name, value in memory.items()
+    }
+    persisted["states"][1, 0] = np.nextafter(persisted["states"][1, 0], np.inf)
+    persisted["time"][1] = np.nextafter(persisted["time"][1], np.inf)
+
+    audit = _audit_solution_roundtrip(memory, persisted)
+    _require_solution_roundtrip(audit)
+
+    assert audit["maximum_ulp_error"] == 1.0
+    assert audit["arrays"]["states"]["max_absolute_error"] > 0.0
+    assert (
+        audit["arrays"]["states"]["in_memory_sha256"]
+        != audit["arrays"]["states"]["persisted_sha256"]
+    )
+    assert audit["arrays"]["controls"]["max_absolute_error"] == 0.0
+    request = {
+        "solution_serialization_max_ulps": 8,
+        "cold_start_named_state": {"/jointset/base/q/value": 0.3},
+        "witness_excitation_by_channel": {"flexor": 0.05},
+    }
+    path = tmp_path / "solution_serialization_audit.json"
+    path.write_text(json.dumps(audit, sort_keys=True))
+    _validate_solution_serialization_audit(
+        path, request, {"solution_serialization_audit": audit}
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "time_count",
+        "time_value",
+        "control_count",
+        "control_value",
+        "too_many_ulps",
+        "nonfinite",
+    ],
+)
+def test_solution_sto_roundtrip_rejects_changed_or_over_budget_arrays(
+    mutation: str,
+) -> None:
+    import numpy as np
+
+    from tests.opensim.native_moco_ladder_worker import (
+        _audit_solution_roundtrip,
+        _require_solution_roundtrip,
+    )
+
+    memory = {
+        "state_names": ("q",),
+        "control_names": ("u",),
+        "time": np.asarray([0.0, 0.005, 0.01]),
+        "states": np.asarray([[0.3], [0.305], [0.31]]),
+        "controls": np.asarray([[0.1], [0.15], [0.2]]),
+    }
+    persisted = {
+        name: value.copy() if hasattr(value, "copy") else value
+        for name, value in memory.items()
+    }
+    if mutation == "time_count":
+        persisted["time"] = persisted["time"][:-1]
+    elif mutation == "time_value":
+        value = persisted["time"][1]
+        for _ in range(9):
+            value = np.nextafter(value, np.inf)
+        persisted["time"][1] = value
+    elif mutation == "control_count":
+        persisted["controls"] = persisted["controls"][:-1]
+    elif mutation == "control_value":
+        value = persisted["controls"][1, 0]
+        for _ in range(9):
+            value = np.nextafter(value, np.inf)
+        persisted["controls"][1, 0] = value
+    elif mutation == "nonfinite":
+        persisted["controls"][1, 0] = float("nan")
+    else:
+        value = persisted["states"][1, 0]
+        for _ in range(9):
+            value = np.nextafter(value, np.inf)
+        persisted["states"][1, 0] = value
+    with pytest.raises(ValueError, match="round-trip|ULP|clock|shape|non-finite"):
+        audit = _audit_solution_roundtrip(memory, persisted)
+        _require_solution_roundtrip(audit)
+
+
 def test_success_provenance_checks_feature_and_runtime_evidence(tmp_path: Path) -> None:
     components = {
         name: hashlib.sha256(name.encode()).hexdigest()
@@ -320,14 +428,36 @@ def test_saved_time_only_controls_reject_persisted_sto_mutation(tmp_path: Path) 
     controls = {"flexor": np.asarray([0.1, 0.2]), "extensor": np.asarray([0.3, 0.4])}
     _write_time_only_controls(osim, grid, controls, path)
     saved_grid, saved_controls = _load_time_only_controls(
-        osim, path, grid, ("flexor", "extensor")
+        osim, path, grid, ("flexor", "extensor"), controls
     )
     np.testing.assert_array_equal(saved_grid, grid)
     np.testing.assert_array_equal(saved_controls["flexor"], controls["flexor"])
     mutated = {**controls, "flexor": np.asarray([0.1, 1.2])}
     _write_time_only_controls(osim, grid, mutated, path)
     with pytest.raises(ValueError, match="out of bounds"):
-        _load_time_only_controls(osim, path, grid, ("flexor", "extensor"))
+        _load_time_only_controls(osim, path, grid, ("flexor", "extensor"), controls)
+
+
+def test_saved_controls_must_match_persisted_solution_values(tmp_path: Path) -> None:
+    import numpy as np
+
+    from tests.opensim.native_moco_ladder_worker import (
+        _load_time_only_controls,
+        _write_time_only_controls,
+    )
+
+    osim = pytest.importorskip("opensim")
+    grid = np.asarray([0.0, 0.01])
+    expected = {
+        "flexor": np.asarray([0.1, 0.2]),
+        "extensor": np.asarray([0.3, 0.4]),
+    }
+    changed = {name: values.copy() for name, values in expected.items()}
+    changed["flexor"][1] = 0.25
+    path = tmp_path / "time_only_controls.sto"
+    _write_time_only_controls(osim, grid, changed, path)
+    with pytest.raises(ValueError, match="differ from persisted solution"):
+        _load_time_only_controls(osim, path, grid, tuple(expected), expected)
 
 
 def test_ladder_rejects_success_exit_without_native_evidence(tmp_path: Path) -> None:

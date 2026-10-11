@@ -22,6 +22,8 @@ import numpy as np
 
 from tests.opensim.native_moco_ladder_harness import DEFAULT_RUNGS, build_synthetic_rung
 
+_SERIALIZATION_MAX_ULPS = 8
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -509,6 +511,7 @@ def _rung_config(
         "mesh_intervals": 10,
         "parallel": 0,
         "maximum_iterations": 300,
+        "solution_serialization_max_ulps": _SERIALIZATION_MAX_ULPS,
         "convergence_tolerance": 1e-6,
         "constraint_tolerance": 1e-7,
         "physical_qualification": "unqualified",
@@ -535,7 +538,7 @@ def _rung_config(
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     with path.open("w", encoding="utf-8", newline="\n") as stream:
-        json.dump(payload, stream, sort_keys=True, indent=2)
+        json.dump(payload, stream, sort_keys=True, indent=2, allow_nan=False)
         stream.write("\n")
         stream.flush()
         os.fsync(stream.fileno())
@@ -553,6 +556,118 @@ def _configure_solver(solver: Any) -> None:
     solver.set_optim_max_iterations(300)
     solver.set_optim_convergence_tolerance(1e-6)
     solver.set_optim_constraint_tolerance(1e-7)
+
+
+def _trajectory_arrays(trajectory: Any) -> dict[str, Any]:
+    state_names = tuple(str(name) for name in trajectory.getStateNames())
+    control_names = tuple(str(name) for name in trajectory.getControlNames())
+    return {
+        "state_names": state_names,
+        "control_names": control_names,
+        "time": np.asarray(trajectory.getTimeMat(), dtype=np.float64).reshape(-1),
+        "states": np.column_stack(
+            [
+                np.asarray(trajectory.getStateMat(name), dtype=np.float64).reshape(-1)
+                for name in state_names
+            ]
+        ),
+        "controls": np.column_stack(
+            [
+                np.asarray(trajectory.getControlMat(name), dtype=np.float64).reshape(-1)
+                for name in control_names
+            ]
+        ),
+    }
+
+
+def _audit_solution_roundtrip(
+    in_memory: dict[str, Any], persisted: dict[str, Any]
+) -> dict[str, Any]:
+    _validate_roundtrip_channels(in_memory)
+    _validate_roundtrip_channels(persisted)
+    for names_key in ("state_names", "control_names"):
+        if in_memory[names_key] != persisted[names_key]:
+            raise ValueError(f"serialized solution changed {names_key}")
+    arrays = {}
+    max_ulp_error = 0.0
+    for name in ("time", "states", "controls"):
+        left = np.asarray(in_memory[name], dtype=np.float64)
+        right = np.asarray(persisted[name], dtype=np.float64)
+        if left.shape != right.shape or left.size == 0:
+            raise ValueError(f"serialized solution changed {name} shape")
+        if not np.isfinite(left).all() or not np.isfinite(right).all():
+            raise ValueError(f"serialized solution contains non-finite {name}")
+        delta = np.abs(left - right)
+        spacing = np.spacing(np.maximum(np.abs(left), np.abs(right)))
+        ulp_error = np.divide(
+            delta,
+            spacing,
+            out=np.zeros_like(delta),
+            where=delta != 0.0,
+        )
+        maximum_ulp = float(np.max(ulp_error))
+        if not np.isfinite(delta).all() or not np.isfinite(ulp_error).all():
+            raise ValueError(f"serialized solution has invalid {name} round-trip error")
+        max_ulp_error = max(max_ulp_error, maximum_ulp)
+        arrays[name] = {
+            "max_absolute_error": float(np.max(delta)),
+            "max_ulp_error": maximum_ulp,
+            "in_memory_sha256": _array_sha256(left, in_memory, name),
+            "persisted_sha256": _array_sha256(right, persisted, name),
+        }
+    for trajectory in (in_memory, persisted):
+        time = np.asarray(trajectory["time"], dtype=np.float64)
+        if time[0] != 0.0 or time[-1] != 0.01:
+            raise ValueError("solution does not retain the exact requested clock")
+    return {
+        "schema": "synthetic-solution-sto-roundtrip-v1",
+        "maximum_allowed_ulps": _SERIALIZATION_MAX_ULPS,
+        "maximum_ulp_error": max_ulp_error,
+        "arrays": arrays,
+        "state_names": list(in_memory["state_names"]),
+        "control_names": list(in_memory["control_names"]),
+    }
+
+
+def _array_sha256(values: np.ndarray, trajectory: dict[str, Any], name: str) -> str:
+    digest = hashlib.sha256()
+    if name == "states":
+        labels = trajectory["state_names"]
+    elif name == "controls":
+        labels = trajectory["control_names"]
+    else:
+        labels = ("time",)
+    digest.update(json.dumps(labels, separators=(",", ":")).encode("utf-8"))
+    digest.update(np.ascontiguousarray(values, dtype=np.float64).tobytes())
+    return digest.hexdigest()
+
+
+def _validate_roundtrip_channels(trajectory: dict[str, Any]) -> None:
+    state_names = trajectory["state_names"]
+    control_names = trajectory["control_names"]
+    time = np.asarray(trajectory["time"])
+    states = np.asarray(trajectory["states"])
+    controls = np.asarray(trajectory["controls"])
+    if (
+        not state_names
+        or not control_names
+        or len(set(state_names)) != len(state_names)
+        or len(set(control_names)) != len(control_names)
+        or time.ndim != 1
+        or states.shape != (len(time), len(state_names))
+        or controls.shape != (len(time), len(control_names))
+    ):
+        raise ValueError("serialized solution changed trajectory shape or channels")
+
+
+def _require_solution_roundtrip(audit: dict[str, Any]) -> None:
+    if (
+        not math.isfinite(audit["maximum_ulp_error"])
+        or audit["maximum_ulp_error"] > _SERIALIZATION_MAX_ULPS
+    ):
+        raise ValueError(
+            "serialized solution exceeds the predeclared 8 float64 ULP budget"
+        )
 
 
 def _solve_and_export(
@@ -574,12 +689,18 @@ def _solve_and_export(
     solution.write(str(solution_path))
 
     started = _stage_start()
-    grid = np.asarray(solution.getTimeMat(), dtype=np.float64).reshape(-1)
+    in_memory = _trajectory_arrays(solution)
+    persisted_solution = osim.MocoTrajectory(str(solution_path))
+    persisted = _trajectory_arrays(persisted_solution)
+    roundtrip_audit = _audit_solution_roundtrip(in_memory, persisted)
+    audit_path = output / "solution_serialization_audit.json"
+    _write_json(audit_path, roundtrip_audit)
+    _require_solution_roundtrip(roundtrip_audit)
+    grid = persisted["time"]
+    control_names = persisted["control_names"]
     controls = {
-        name: np.asarray(
-            solution.getControlMat(f"/forceset/{name}"), dtype=np.float64
-        ).reshape(-1)
-        for name in ("flexor", "extensor")
+        name.removeprefix("/forceset/"): persisted["controls"][:, index]
+        for index, name in enumerate(control_names)
     }
     controls_path = output / "time_only_controls.sto"
     _write_time_only_controls(osim, grid, controls, controls_path)
@@ -588,7 +709,7 @@ def _solve_and_export(
 
     started = _stage_start()
     saved_grid, saved_controls = _load_time_only_controls(
-        osim, controls_path, grid, tuple(controls)
+        osim, controls_path, grid, tuple(controls), controls
     )
     stages["saved_replay_input_reload"] = _stage_finish(started)
     _write_progress(output, rung.name, stages)
@@ -604,12 +725,14 @@ def _solve_and_export(
     stages["replay_input_preflight"] = _stage_finish(started)
     _write_progress(output, rung.name, stages)
     return {
-        "solution": solution,
+        "solution": persisted_solution,
+        "solver_solution": solution,
         "grid": saved_grid,
         "controls": saved_controls,
         "solution_path": solution_path,
         "controls_path": controls_path,
         "bundle": bundle,
+        "serialization_audit_path": audit_path,
     }
 
 
@@ -634,6 +757,7 @@ def _load_time_only_controls(
     path: Path,
     expected_grid: np.ndarray,
     muscle_names: tuple[str, ...],
+    expected_controls: dict[str, np.ndarray],
 ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
     table = osim.TimeSeriesTable(str(path))
     independent = table.getIndependentColumn()
@@ -654,7 +778,9 @@ def _load_time_only_controls(
         if label.startswith("/forceset/")
     }
     expected_labels = tuple(f"/forceset/{name}" for name in muscle_names)
-    _validate_saved_control_data(grid, labels, controls, expected_grid, muscle_names)
+    _validate_saved_control_data(
+        grid, labels, controls, expected_grid, muscle_names, expected_controls
+    )
     if labels != expected_labels:
         raise ValueError("saved time-only controls changed ordered muscle channels")
     return grid, controls
@@ -666,6 +792,7 @@ def _validate_saved_control_data(
     controls: dict[str, np.ndarray],
     expected_grid: np.ndarray,
     muscle_names: tuple[str, ...],
+    expected_controls: dict[str, np.ndarray],
 ) -> None:
     expected_labels = tuple(f"/forceset/{name}" for name in muscle_names)
     if labels != expected_labels:
@@ -692,6 +819,12 @@ def _validate_saved_control_data(
             or np.any(values > 1.0)
         ):
             raise ValueError(f"saved controls for {name} are invalid or out of bounds")
+        if name not in expected_controls or not np.array_equal(
+            values, expected_controls[name]
+        ):
+            raise ValueError(
+                f"saved controls for {name} differ from persisted solution"
+            )
 
 
 def _fresh_native_replay(prepared: dict[str, Any], solved: dict, stages: dict) -> Path:
@@ -818,14 +951,18 @@ def _write_success_receipt(
     prepared: dict[str, Any], solved: dict, replay_path: Path, stages: dict, osim: Any
 ) -> None:
     solution = solved["solution"]
+    solver_solution = solved["solver_solution"]
     coordinate = prepared["config"]["target_coordinate"]
     achieved_q = float(solution.getStateMat(coordinate)[-1])
     output = prepared["config_path"].parent
     replay_evidence = json.loads(
         (output / "fresh_replay.json").read_text(encoding="utf-8")
     )
+    serialization_audit = json.loads(
+        solved["serialization_audit_path"].read_text(encoding="utf-8")
+    )
     runtime_path = _write_runtime_fingerprint(osim, output)
-    objective = float(solution.getObjective())
+    objective = float(solver_solution.getObjective())
     if not np.isfinite(objective):
         raise ValueError("native Moco solver objective must be finite")
     receipt = {
@@ -841,7 +978,7 @@ def _write_success_receipt(
         "initial_q": prepared["config"]["initial_q"],
         "achieved_q": achieved_q,
         "objective": objective,
-        "solver_status": str(solution.getStatus()),
+        "solver_status": str(solver_solution.getStatus()),
         "source_sha256": prepared["source_hash"],
         "worker_sha256": _sha256(Path(__file__).resolve()),
         "harness_builder_sha256": prepared["witness"]["builder_sha256"],
@@ -852,6 +989,10 @@ def _write_success_receipt(
         "request_sha256": _sha256(prepared["config_path"]),
         "saved_solution_sha256": _sha256(solved["solution_path"]),
         "saved_time_only_controls_sha256": _sha256(solved["controls_path"]),
+        "solution_serialization_audit_sha256": _sha256(
+            solved["serialization_audit_path"]
+        ),
+        "solution_serialization_audit": serialization_audit,
         "fresh_replay_sha256": _sha256(replay_path),
         "stage_metrics": stages,
         "physical_qualification": "unqualified",
