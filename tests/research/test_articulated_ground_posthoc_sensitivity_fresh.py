@@ -8,10 +8,14 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from scripts.research.proximal_distal_energy.articulated_ground_posthoc_sensitivity import (
     DATA,
     build_ground_posthoc_sensitivity,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_committed_record_matches_regenerated_record() -> None:
