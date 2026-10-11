@@ -144,15 +144,46 @@ def _audit_source_components(
         validate_native_contact_execution(
             model, contact_declaration, declaration.source_sha256
         )
-    declared_contact_paths = (
-        frozenset()
-        if contact_declaration is None
-        else frozenset(contact_declaration.force_paths)
+    components = tuple(model.getComponentsList())
+    _audit_component_policy(
+        components,
+        mechanical_paths,
+        wrapped_path_declaration is not None,
+        contact_declaration,
+        osim,
     )
+    registered = {
+        muscles.get(index).getAbsolutePathString() for index in range(muscles.getSize())
+    }
+    recursive = {
+        component.getAbsolutePathString()
+        for component in components
+        if osim.Muscle.safeDownCast(component) is not None
+    }
+    if registered != recursive or not registered:
+        raise ValueError("native muscle registry must cover every recursive muscle")
+    _audit_moving_path_points(components, declaration, osim, native_mechanics_profile)
+    _audit_source_constraints(model)
     delegated_paths = (
         set()
         if native_mechanics_profile is None
         else {item.absolute_path for item in native_mechanics_profile.components}
+    )
+    _audit_custom_joint_charts(model, delegated_paths, osim)
+
+
+def _audit_component_policy(
+    components: tuple[Any, ...],
+    mechanical_paths: frozenset[str],
+    wrapped_declared: bool,
+    contact_declaration: NativeContactExecutionDeclaration | None,
+    osim: Any,
+) -> None:
+    """Reject source components outside the declared replay ownership policy."""
+    declared_contact_paths = (
+        frozenset()
+        if contact_declaration is None
+        else frozenset(contact_declaration.force_paths)
     )
     wrapped_components = {
         "WrapCylinder",
@@ -162,16 +193,13 @@ def _audit_source_components(
         "PathWrapPoint",
         "ConditionalPathPoint",
     }
-    components = tuple(model.getComponentsList())
     for component in components:
         kind = component.getConcreteClassName()
         declared_mechanical = (
             kind == "CoordinateActuator"
             and component.getAbsolutePathString() in mechanical_paths
         )
-        declared_wrap_component = (
-            wrapped_path_declaration is not None and kind in wrapped_components
-        )
+        declared_wrap_component = wrapped_declared and kind in wrapped_components
         declared_contact_force = (
             component.getAbsolutePathString() in declared_contact_paths
         )
@@ -198,22 +226,21 @@ def _audit_source_components(
             and not declared_contact_force
         ):
             raise ValueError("non-muscle force is forbidden in this policy")
-    registered = {
-        muscles.get(index).getAbsolutePathString() for index in range(muscles.getSize())
-    }
-    recursive = {
-        component.getAbsolutePathString()
-        for component in components
-        if osim.Muscle.safeDownCast(component) is not None
-    }
-    if registered != recursive or not registered:
-        raise ValueError("native muscle registry must cover every recursive muscle")
-    _audit_moving_path_points(components, declaration, osim, native_mechanics_profile)
+
+
+def _audit_source_constraints(model: Any) -> None:
+    """Limit this cold-start constraint policy to native coordinate couplers."""
     constraints = model.getConstraintSet()
     for index in range(constraints.getSize()):
         constraint = constraints.get(index)
         if constraint.getConcreteClassName() != "CoordinateCouplerConstraint":
             raise ValueError("only coordinate couplers have this constraint policy")
+
+
+def _audit_custom_joint_charts(
+    model: Any, delegated_paths: set[str], osim: Any
+) -> None:
+    """Validate every non-delegated CustomJoint as the reviewed scalar chart."""
     joints = model.getJointSet()
     for index in range(joints.getSize()):
         joint = joints.get(index)
