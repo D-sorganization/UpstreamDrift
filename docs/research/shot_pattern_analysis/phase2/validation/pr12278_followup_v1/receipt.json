@@ -104,6 +104,10 @@
     "context-red.log": {
       "raw_sha256": "9eba65079a7f1126d757f4801221e5974bed7c8d4d90cd441b8a990f1af9c6a8",
       "gzip_sha256": "afb76abbb2b24ce006a24442177e93311e616768926d9edfdadbd42d32844990"
+    },
+    "scoped-prepr.log": {
+      "raw_sha256": "75be7e1f6d90a1aae3224252a774b39a2f0b6ead143d35c5ac3ecaf14f5669cf",
+      "gzip_sha256": "be6f0b7dc3ae74c4aef477758681565c41ef56b1b47af61064a8da52021e7734"
     }
   },
   "disposition": "Partial blocker repair; PR remains blocked; no complete-project or physical acceptance claim",
@@ -129,5 +133,56 @@
     },
     "tools_runtime": "matched exact86d0f28b1cc5acf61185e07e320c816c2d005512",
     "scope": "Registered source freshness and retrieval only; no physical or full repository acceptance"
-  }
+  },
+  "canonical_scoped_prepr": {
+    "command": "PYTHONPATH=<own checkout> QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy /tmp/shot-pattern-validation-venv-20261009/bin/python /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --from-ref 438eab1184447e6902a8c949ffe008c93b82f96d --to-ref 06cf210be0",
+    "from_ref": "438eab1184447e6902a8c949ffe008c93b82f96d",
+    "to_ref": "06cf210be0",
+    "exit_code": 1,
+    "pytest": {
+      "passed": 1501,
+      "failed": 14,
+      "skipped": 24,
+      "deselected": 1,
+      "seconds": 905.81
+    },
+    "failed_nodes": [
+      "tests/research/test_articulated_ground_posthoc_sensitivity.py::test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs",
+      "tests/research/test_bounded_event_reachability_evidence.py::test_registered_report_is_reproducible_and_source_current",
+      "tests/research/test_bounded_event_reachability_evidence.py::test_registered_arrays_exactly_match_recomputed_full_precision_evidence",
+      "tests/research/test_claim_numeric_registry.py::test_complete_registry_has_executable_numeric_traceability",
+      "tests/research/test_constraint_internal_force_diagnostics_evidence.py::test_registered_report_is_deterministic_and_source_bound",
+      "tests/research/test_forward_two_arm_evidence.py::test_committed_evidence_matches_executable_study",
+      "tests/research/test_moving_base_flexible_evidence.py::test_committed_artifacts_match_executable_study",
+      "tests/research/test_nonlinear_controller_comparison_registration.py::test_registration_is_committed_and_deterministic",
+      "tests/research/test_nonlinear_controller_plant_transport.py::test_committed_transport_report_is_deterministic_and_scope_limited",
+      "tests/research/test_nonlinear_controller_solver_qualification.py::test_committed_qualification_is_deterministic_and_scope_limited",
+      "tests/research/test_shaft_contribution_evidence.py::test_outputs_replay_with_declared_numerical_tolerance",
+      "tests/research/test_transmission_stability_audit.py::test_committed_transmission_stability_audit_is_fresh",
+      "tests/research/test_uncertainty_stability_audit.py::test_committed_stability_audit_is_fresh",
+      "tests/research/wave6_research/test_differentiable.py::TestContactDifferentiableEngine::test_apply_phase_smoothing"
+    ],
+    "failed_test_paths_in_scope_diff": [],
+    "scope_limit": "Unchanged-path classification only; baseline causes not reproduced. This delta gate does not supersede original full-study failed or incomplete gates, nor validate integration against newer remote head.",
+    "working_tree_note": "Later documentation/receipt and governed atlas input-hash updates were committed while gate ran; Python sources, fixtures, models.yaml and Tools pin did not change after gate start.",
+    "checks": {
+      "lint_format": "pass",
+      "diff_mypy": "pass",
+      "affected_tests": "fail",
+      "consistency_tests": "pass",
+      "import_policy": "pass; Semgrep unavailable advisory skip",
+      "policy_fragment_validators": "pass",
+      "fleet_policy": "fail",
+      "workflow_lint": "pass; no workflow changes"
+    },
+    "fleet_policy": "Missing verifying SHA for DL8869/9193; missing State/Owner DL9349;143 active >75; >200000 bytes"
+  },
+  "fetch_disposition": {
+    "completed": false,
+    "exit_code": 130,
+    "reason": "Own fetch stopped by SIGINT after32minutes; remote commit not locally integrated; no checkout reset or branch overwrite. Authoritative head and CI were read via GitHub REST.",
+    "remote_models_blob": "2ff7ffd67fdbd72ab7ca867450e4cbbe2e0ad6ab",
+    "local_base_models_blob": "2ff7ffd67fdbd72ab7ca867450e4cbbe2e0ad6ab"
+  },
+  "recorded_utc": "2026-10-11T15:43:21.642764+00:00"
 }

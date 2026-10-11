@@ -35,3 +35,20 @@ GUI/plotting/scoring responsibilities. Use temporary saved-row fixtures and
 mocked physics rather than rerunning the study or invoking publication CLIs.
 Record separate transition evidence; never rehash historical receipts or
 claim the refactored source produced the published release.
+
+## Completed Scoped Pre-PR Result
+
+The canonical runner completed with exit 1 for `438eab1184..06cf210be0`.
+Affected tests reported **1,501 passed, 14 failed, 24 skipped, one deselected**.
+All 14 failures are in unchanged research test files outside this repair diff;
+this is scope evidence only, not reproduced baseline causation. Lint/format,
+diff mypy, consistency, import policy, fragment/policy validators and applicable
+workflow lint passed. Semgrep was unavailable and advisory-skipped. Fleet
+development-log policy failed on the previously recorded field, WIP and size
+debt. Exact log, hashes and limitations are in `receipt.json`.
+
+This completed delta gate does not clear the original full-study gate or
+qualify integration onto the newer remote PR head. The follow-up fetch was
+stopped after 32 minutes; no remote branch was overwritten. Publishing remains
+pending the identity clarification. The frozen report remains unchanged while
+its conflicting size requirement awaits an explicit user decision.
