@@ -32,16 +32,22 @@ models. The declaration is not yet a request-level authorization for a
 particular private capture, and it cannot override unrelated source, state,
 constraint, or execution blockers.
 
+The inline source check uses a defused, namespace-disabled XML parse. This is
+needed because OpenSim serialization contains C++-qualified names such as
+`HuntCrossleyForce::ContactParametersSet`, which an XML Namespaces QName parser
+rejects. The source bytes are not rewritten. DTDs, entities, external
+resources, and file-reference elements or attributes remain rejected; the
+resource check inspects the local name of a literal prefixed element or
+attribute so a prefix cannot hide a file or `href` reference.
+
 ## Evidence and Limits
 
 OpenSim 4.6 synthetic fixtures exercise declared Smooth and Hunt-Crossley
 source closure, the corresponding sphere and half-space geometry identities,
 contact-free default rejection, source/component mutation rejection, and
-finite native wrench output from a constrained Smooth-contact replay. Existing
-legacy replay fixtures exercise both contact laws through the shared sampler.
-The generated Hunt-Crossley source fixture is rejected by the strict
-self-contained XML gate, so this evidence does not claim constrained
-Hunt-Crossley replay.
+finite native wrench output from constrained Smooth and Hunt-Crossley replays.
+Parser fixtures exercise OpenSim's C++-qualified serialized name
+alongside DTD, entity, external-resource, and prefixed-resource rejection.
 These are bounded software tests. They do not establish that either law or
 geometry is appropriate for a human capture, nor do they demonstrate a
 contact-bearing full-body Moco solve or full-horizon independent replay.
