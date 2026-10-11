@@ -176,12 +176,13 @@ def _audit_reference_convention(
 def _reference_state_declaration(
     request: NativeMocoRequest,
 ) -> ReferenceStateDeclaration:
+    bindings = request.bindings
     return ReferenceStateDeclaration(
         "offline-moco-prepared-state",
         "caller-declared-complete-named-continuous-state",
         "complete-named-state",
         request.model_sha256,
-        tuple(request.bindings.initial_state.items()),
+        tuple(bindings.initial_state.items()),
         request.config.t_start_s,
     )
 
