@@ -15,7 +15,7 @@ import math
 from pathlib import Path
 import time
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Protocol
 
 import numpy as np
 from defusedxml import ElementTree as SafeET
@@ -58,6 +58,7 @@ from .native_wrapped_path import (
 from .trc import read_trc, write_trc
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 from src.shared.python.estimation import dime_global_calibration
+from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_bytes
 
 
 def _sha(path: Path) -> str:
@@ -180,34 +181,153 @@ def _require_current_inputs(
     return registered
 
 
+_SOLVER_PROGRESS_GETTERS = {
+    "optim_solver": "get_optim_solver",
+    "optim_hessian_approximation": "get_optim_hessian_approximation",
+    "optim_sparsity_detection": "get_optim_sparsity_detection",
+    "optim_finite_difference_scheme": "get_optim_finite_difference_scheme",
+    "transcription_scheme": "get_transcription_scheme",
+    "multibody_dynamics_mode": "get_multibody_dynamics_mode",
+    "verbosity": "get_verbosity",
+    "parallel": "get_parallel",
+    "num_mesh_intervals": "get_num_mesh_intervals",
+    "optim_max_iterations": "get_optim_max_iterations",
+    "optim_convergence_tolerance": "get_optim_convergence_tolerance",
+    "optim_constraint_tolerance": "get_optim_constraint_tolerance",
+    "optim_ipopt_print_level": "get_optim_ipopt_print_level",
+}
+
+
+def _solver_progress_error(getter_name: str, error: Exception) -> dict[str, Any]:
+    """Format an observational getter error without changing its failure detail."""
+    return {
+        "getter": getter_name,
+        "status": "error",
+        "error_type": type(error).__name__,
+        "error_message": str(error)[:500],
+    }
+
+
+def _solver_progress_properties(
+    solver: Any, getter_names: Mapping[str, str] = _SOLVER_PROGRESS_GETTERS
+) -> dict[str, dict[str, Any]]:
+    """Capture actual solver getter outcomes without inventing missing values."""
+    result: dict[str, dict[str, Any]] = {}
+    for name, getter_name in getter_names.items():
+        try:
+            getter = getattr(solver, getter_name, None)
+        except Exception as error:  # noqa: BLE001 - introspection must remain observational
+            result[name] = _solver_progress_error(getter_name, error)
+            continue
+        if not callable(getter):
+            result[name] = {"getter": getter_name, "status": "missing"}
+            continue
+        try:
+            value = getter()
+        except Exception as error:  # noqa: BLE001 - introspection must remain observational
+            result[name] = _solver_progress_error(getter_name, error)
+            continue
+        if type(value) is float and not math.isfinite(value):
+            result[name] = {
+                "getter": getter_name,
+                "status": "nonfinite",
+                "value_type": "float",
+                "value_repr": repr(value),
+            }
+        elif value is None or type(value) in (str, bool, int, float):
+            result[name] = {
+                "getter": getter_name,
+                "status": "returned",
+                "value": value,
+                "value_type": type(value).__name__,
+            }
+        else:
+            result[name] = {
+                "getter": getter_name,
+                "status": "non_scalar",
+                "value_type": type(value).__name__,
+            }
+    return result
+
+
+def _atomic_write_progress(path: Path, payload: Mapping[str, Any]) -> None:
+    """Serialize finite progress JSON, then use shared atomic byte publication."""
+    encoded = (
+        json.dumps(dict(payload), sort_keys=True, allow_nan=False) + "\n"
+    ).encode("utf-8")
+    atomic_write_bytes(path, encoded)
+
+
+class _ProgressRecorder(Protocol):
+    def __call__(
+        self, stage: str, details: Mapping[str, Any] | None = None
+    ) -> None: ...
+
+
+def _make_progress_recorder(
+    request: NativeMocoRequest,
+    directory: Path,
+    wall: float,
+    cpu: float,
+    current_input_audit_elapsed_wall_seconds: float,
+) -> _ProgressRecorder:
+    """Bind one attempt's identity and clocks to its atomic event recorder."""
+    progress_path = directory / "native_moco_progress.json"
+    progress_events: list[dict[str, Any]] = []
+
+    def record_progress(stage: str, details: Mapping[str, Any] | None = None) -> None:
+        elapsed_wall = time.perf_counter() - wall
+        elapsed_cpu = time.process_time() - cpu
+        event: dict[str, Any] = {
+            "request_sha256": request.identity_sha256,
+            "source_sha256": request.model_sha256,
+            "sequence": len(progress_events),
+            "stage": stage,
+            "monotonic_seconds": time.perf_counter(),
+            "elapsed_wall_seconds": elapsed_wall,
+            "elapsed_cpu_seconds": elapsed_cpu,
+            "current_input_audit_elapsed_wall_seconds": (
+                current_input_audit_elapsed_wall_seconds
+            ),
+        }
+        if details is not None:
+            event.update(details)
+        progress_events.append(event)
+        payload: dict[str, Any] = {
+            "request_sha256": request.identity_sha256,
+            "source_sha256": request.model_sha256,
+            "stage": stage,
+            "monotonic_seconds": event["monotonic_seconds"],
+            "elapsed_wall_seconds": elapsed_wall,
+            "elapsed_cpu_seconds": elapsed_cpu,
+            "current_input_audit_elapsed_wall_seconds": (
+                current_input_audit_elapsed_wall_seconds
+            ),
+            "timer_origin": "solve_native_moco_after_current_input_audit",
+            "events": progress_events,
+        }
+        if details is not None:
+            payload.update(details)
+        _atomic_write_progress(progress_path, payload)
+
+    return record_progress
+
+
 def _native_solve_once(
     request: NativeMocoRequest,
     registered: Path,
     directory: Path,
     wall: float,
     cpu: float,
+    *,
+    current_input_audit_elapsed_wall_seconds: float = 0.0,
 ) -> NativeMocoSolve:
     """Run and read back one exact native solver attempt."""
     import opensim as osim
 
-    progress_path = directory / "native_moco_progress.json"
-
-    def record_progress(stage: str) -> None:
-        progress_path.write_text(
-            json.dumps(
-                {
-                    "request_sha256": request.identity_sha256,
-                    "source_sha256": request.model_sha256,
-                    "stage": stage,
-                    "elapsed_wall_seconds": time.perf_counter() - wall,
-                    "elapsed_cpu_seconds": time.process_time() - cpu,
-                },
-                sort_keys=True,
-                allow_nan=False,
-            )
-            + "\n",
-            encoding="utf-8",
-        )
+    record_progress = _make_progress_recorder(
+        request, directory, wall, cpu, current_input_audit_elapsed_wall_seconds
+    )
 
     record_progress("building-study")
 
@@ -229,7 +349,10 @@ def _native_solve_once(
     ).hexdigest()
     solver = osim.MocoCasADiSolver.safeDownCast(study.updSolver())
     solver.set_parallel(0)
-    record_progress("optimizing")
+    record_progress(
+        "optimizing",
+        {"solver_properties_after_set_parallel": _solver_progress_properties(solver)},
+    )
     solution = study.solve()
     record_progress("optimization-returned")
     success = bool(solution.success())
@@ -279,11 +402,20 @@ def solve_native_moco(
 ) -> NativeMocoSolve:
     """Solve prepared inputs, retaining failed native attempts as receipts."""
     directory = Path(output_dir)
+    input_audit_start = time.perf_counter()
     registered = _require_current_inputs(request, prepared, directory)
+    input_audit_elapsed = time.perf_counter() - input_audit_start
     wall = time.perf_counter()
     cpu = time.process_time()
     try:
-        result = _native_solve_once(request, registered, directory, wall, cpu)
+        result = _native_solve_once(
+            request,
+            registered,
+            directory,
+            wall,
+            cpu,
+            current_input_audit_elapsed_wall_seconds=input_audit_elapsed,
+        )
     except (RuntimeError, ValueError) as error:
         result = NativeMocoSolve(
             False,
