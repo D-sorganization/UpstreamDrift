@@ -73,7 +73,7 @@ def test_unavailable_reason_probes_worker_import(
     reason = MyoSuiteArenaBackend().unavailable_reason()
     assert reason is not None
     assert "MJRenderer" in reason
-    assert seen["argv"] == ["/fake/python", "-c", PROBE_CODE]
+    assert seen["argv"] == ["/fake/python", "-c", "import myosuite, mujoco"]
 
 
 def test_unavailable_reason_none_when_probe_passes(

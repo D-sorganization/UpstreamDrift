@@ -595,7 +595,7 @@
     },
     "reference_engine": "mujoco",
     "schema": "same-input-bundle/v1",
-    "spec_sha256": "e11ac6e652bd485e21a2314a02e8d02fed35316502f1902204e0e3fd084053ff",
+    "spec_sha256": "fd03382a3c19aee0a5814b713fd6ddb89e7145707ff016045ee92e5e16de3653",
     "steps": 1827
    },
    "bundle_sha256": "8018991eff65fa27c13cd8460c24817a505019cda723baf3082f4cc0af273776",
@@ -735,7 +735,7 @@
     "/home/dieterolson/fleet24/brick-sim-s31/ct/fx2-iron/runs/iron"
    ],
    "run_receipt_sha256": "beb6ee488abff56e8715109bdbdbe6d067a96646e9913b90a23696c28cc9b556",
-   "spec_sha256": "e11ac6e652bd485e21a2314a02e8d02fed35316502f1902204e0e3fd084053ff"
+   "spec_sha256": "fd03382a3c19aee0a5814b713fd6ddb89e7145707ff016045ee92e5e16de3653"
   }
  },
  "generator": "scripts/regenerate_club_face_fixtures.py",
