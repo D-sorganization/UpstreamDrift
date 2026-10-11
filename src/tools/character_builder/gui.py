@@ -36,7 +36,21 @@ _EXPORTS = (
     ("mjcf", "Export MJCF"),
     ("osim", "Export OpenSim"),
     ("gltf", "Export glTF"),
+    ("appearance", "Export Appearance"),
 )
+# (appearance choice name, appearance_library() key, combo label)
+_APPEARANCE_FIELDS = (
+    ("skin_tone", "skin_tones", "Skin Tone"),
+    ("clothing", "clothing", "Clothing"),
+    ("club_finish", "club_finishes", "Club Finish"),
+    ("headwear", "headwear", "Headwear"),
+    ("ground_material", "ground_materials", "Ground"),
+)
+
+
+def _library_options(library: dict[str, Any], key: str) -> list[str]:
+    """Pickable names for one appearance field (``list()`` keys a dict too)."""
+    return list(library[key])
 
 
 class CharacterBuilderWidget(QtWidgets.QWidget):
@@ -74,6 +88,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         )
         form.addRow("Club", self.club_combo)
         layout.addLayout(form)
+        layout.addWidget(self._build_appearance_group())
         self.summary = QtWidgets.QPlainTextEdit()
         self.summary.setReadOnly(True)
         layout.addWidget(self.summary, 1)
@@ -90,6 +105,39 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self.preset_combo.currentIndexChanged.connect(
             lambda _i: self._load_preset_into_form(self.preset_combo.currentData())
         )
+
+    def _build_appearance_group(self) -> QtWidgets.QGroupBox:
+        """Skin/clothing/club/headwear/ground combos, defaults from the library."""
+        group = QtWidgets.QGroupBox("Appearance")
+        form = QtWidgets.QFormLayout(group)
+        library = self.model.appearance_library()
+        defaults = self.model.appearance_document()
+        current = {
+            "skin_tone": defaults["skin_tone"],
+            "clothing": defaults["clothing"],
+            "club_finish": defaults["club_finish"],
+            "headwear": defaults["head"]["headwear"],
+            "ground_material": defaults["environment"]["ground_material"],
+        }
+        self.appearance_combos: dict[str, QtWidgets.QComboBox] = {}
+        for name, library_key, label in _APPEARANCE_FIELDS:
+            combo = QtWidgets.QComboBox()
+            combo.addItems(_library_options(library, library_key))
+            combo.setCurrentText(current[name])
+            combo.currentTextChanged.connect(
+                lambda text, n=name: self._on_appearance_change(n, text)
+            )
+            self.appearance_combos[name] = combo
+            form.addRow(label, combo)
+        return group
+
+    def _on_appearance_change(self, name: str, value: str) -> None:
+        try:
+            self.model.set_appearance(name, value)
+        except ValueError as exc:
+            self.status.setText(str(exc))
+            return
+        self.status.setText("")
 
     def _load_preset_into_form(self, preset_id: str | None) -> None:
         if preset_id is not None:
