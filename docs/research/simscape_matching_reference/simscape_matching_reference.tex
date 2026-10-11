@@ -5397,11 +5397,12 @@ drift apart. The hand-side frames are the committed address calibration
 
 An earlier draft of this slice placed the lead hand 0.015 m below the butt,
 with a lead \texttt{WeldConstraint} and a trail \texttt{WeldJoint} on a club
-whose origin was the butt. It was superseded when the OSV-9 club landed.
-Restoring a 0.015 m lead position would move both inverse-kinematics grip
-targets 0.017 m toward the butt and needs \texttt{msk\_club\_calibration} to be
-rerun for both models and both clubs; it awaits owner review. Reproduce:
-\texttt{python3 scripts/build\_humanoid\_osim.py}.
+whose origin was the butt. It was superseded when the OSV-9 club landed. The
+spec-derived 0.032 m offset for the lead hand was accepted by the owner
+(2026-10-11) and is resolved; reverting to a 0.015 m lead position would move
+both inverse-kinematics grip targets 0.017 m toward the butt and requires
+\texttt{msk\_club\_calibration} to be rerun for both models and both clubs.
+Reproduce: \texttt{python3 scripts/build\_humanoid\_osim.py}.
 
 \subsection{Closure Residual on the Canned Swing}
 Residual $=\lVert p_a-p_b\rVert$ of the two grip frames the closure ties, per
