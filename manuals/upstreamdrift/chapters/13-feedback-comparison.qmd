@@ -89,11 +89,18 @@ scoring and every physical qualification gate remain separate.
 
 The MuJoCo native-marker integration test exercises calibration from a
 full-state replay pose history, artifact revalidation against the capture
-clock, map construction, and propagation of the artifact digest into the
-existing replay receipt. This is fixture-level software integration evidence;
-it does not define production attachments or qualify a model. OpenSim's
-position-level geometry provider is not a full-state replay adapter, and the
-same end-to-end handoff is not yet tested for Drake or Pinocchio.
+clock, map construction, and a second fresh native replay. It then submits the
+actual marker output and synthetic observations through the existing F09
+observation scorer. The score receipt retains the calibration-artifact, map,
+native execution, output, observation, and alignment identities. This is
+fixture-level software integration evidence; it does not define production
+attachments or qualify a model. OpenSim's position-level geometry provider is
+not a full-state replay adapter. Drake and Pinocchio marker FK have separate
+native tests, but calibration-to-observation-score integration remains
+unverified for those runtimes.
+
+The calibrated replay-to-score handoff and its integrity limits are summarized
+in [chapter 49](49-calibrated-marker-replay-scoring.qmd).
 
 Reproduce with `python3 -m pytest -o addopts='' tests/opensim/test_frozen_marker_scoring.py tests/opensim/test_marker_calibration.py`.
 

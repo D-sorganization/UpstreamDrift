@@ -525,11 +525,23 @@ def test_drake_markers_use_native_fk_with_floating_base_and_local_offset(
     assert np.all(np.linalg.norm(positions[:, 0], axis=1) > 0)
     frame = plant.GetFrameByName("arm")
     replayed = replay_native_drake_torque_bundle(bundle, model_path)
+    pose_history = []
     for sample, qpos in enumerate(replayed.qpos):
         plant.SetPositions(context, qpos)
         pose = frame.CalcPoseInWorld(context)
+        pose_history.append(
+            {
+                "arm": (
+                    np.asarray(pose.rotation().matrix()).copy(),
+                    np.asarray(pose.translation()).copy(),
+                )
+            }
+        )
         expected = pose.translation() + pose.rotation().matrix() @ offset
         np.testing.assert_allclose(positions[sample, 0], expected, atol=1e-10)
+    _assert_calibration_replay_is_scored(
+        registry, binding, bundle, model_path, pose_history, "drake"
+    )
 
 
 def test_pinocchio_markers_use_native_fk_with_floating_base_and_local_offset(
@@ -637,24 +649,22 @@ def test_pinocchio_markers_use_native_fk_with_floating_base_and_local_offset(
             replay,
             (("marker-a", "unknown-frame", offset),),
         )
+    pose_history = []
+    frame_id = engine.model.getFrameId("arm")
     for sample, qpos in enumerate(replay.qpos):
-        yaw = 2.0 * math.atan2(qpos[5], qpos[6])
-        hinge = qpos[7]
-        rz = np.asarray(
-            [
-                [math.cos(yaw), -math.sin(yaw), 0.0],
-                [math.sin(yaw), math.cos(yaw), 0.0],
-                [0.0, 0.0, 1.0],
-            ]
+        pin.forwardKinematics(engine.model, engine.data, qpos)
+        pin.updateFramePlacements(engine.model, engine.data)
+        frame_pose = engine.data.oMf[frame_id]
+        pose_history.append(
+            {
+                "arm": (
+                    np.asarray(frame_pose.rotation).copy(),
+                    np.asarray(frame_pose.translation).copy(),
+                )
+            }
         )
-        ry = np.asarray(
-            [
-                [math.cos(hinge), 0.0, math.sin(hinge)],
-                [0.0, 1.0, 0.0],
-                [-math.sin(hinge), 0.0, math.cos(hinge)],
-            ]
-        )
-        expected = qpos[:3] + rz @ (
-            np.asarray([0.1, 0.0, 0.3]) + ry @ np.asarray(offset)
-        )
+        expected = frame_pose.translation + frame_pose.rotation @ np.asarray(offset)
         np.testing.assert_allclose(positions[sample, 0], expected, atol=1e-10)
+    _assert_calibration_replay_is_scored(
+        registry, binding, bundle, model_path, pose_history, "pinocchio"
+    )

@@ -36,10 +36,12 @@ The frozen `NativeMarkerAttachmentCalibrationArtifact` binds:
 - ordered native frame IDs, local offsets in metres, valid-sample counts,
   in-sample residuals, calibration method and pose-trajectory digest.
 
-`validate` recomputes capture/pose digests, estimates and residuals from the
-supplied inputs and requires callers to restate the expected pose-provider
-identity and capture frame/timebase. It rejects source, order, clock, provider,
-model or payload changes. It retains no observation arrays or local source paths. `as_dict`
+`validate` snapshots and revalidates the supplied capture arrays, recomputes
+capture/pose digests, estimates and residuals, and requires callers to restate
+the expected native engine, pose-provider identity, frame mapping, and capture
+frame/timebase. It rejects aliased-clock mutation, source, order, clock,
+provider, model or payload changes. It retains no observation arrays or local
+source paths. `as_dict`
 contains placement metadata and digests only. `to_native_marker_map` carries
 the artifact digest into the F09 map identity; the replay output still uses its
 own simulation-relative clock.
@@ -55,15 +57,28 @@ proof that the named native pose provider executed. A consumer must preserve
 the calibration artifact and independently verify its inputs before using the
 mapping in a scored result.
 
-The native MuJoCo marker test now exercises the complete software handoff:
-full-state replay supplies the pose history, the calibration artifact is fit
-and revalidated against that history and the capture clock, and the resulting
-map is consumed by the existing native marker replay. The receipt carries the
-calibration digest. This verifies wiring and identity propagation for that
-fixture only; it does not establish production marker attachments or extend
-full-state replay support to OpenSim. OpenSim's native geometry fixture remains
-position-level, and Drake/Pinocchio calibration-to-replay are not separately
-covered by this integration test.
+Issue #12178 extends that handoff through the existing observation scorer. The
+MuJoCo fixture runs a full-state replay to produce calibration poses, builds
+and revalidates the provisional artifact against the exact capture clock,
+constructs a map carrying the artifact digest, and executes a fresh native
+marker replay. The scorer consumes those positions with separate synthetic
+observations and records calibration, map, replay, output, observation, and
+alignment identities. Negative checks reject a changed pose clock and a
+tampered frozen offset. The resulting row remains unqualified and the complete
+17-row denominator remains present. This is fixture-level integration only;
+it does not establish production marker attachments or qualification.
+
+The focused calibration-to-score integration now also passes against actual
+Drake 1.57 and Pinocchio 4.1 SDKs. Pinocchio ran with ordinary source imports
+from an isolated copied test module. The minimal Drake environment could not
+import the broad Drake package initializer because `structlog` and then
+`simpleeval` were absent. Its native test therefore used a test-only namespace
+bootstrap for the two Drake package parents and loaded the real provider source
+and SDK; no physics/provider implementation was mocked. A temporary 65 KB
+`structlog` overlay did not make the full application bootstrap complete.
+Consequently these runs verify the native provider and scorer behavior, not the
+public deployment package bootstrap. OpenSim's native geometry provider
+remains position-level rather than a full-state replay adapter.
 
 No coordinate-retarget map is accepted as marker geometry. In particular,
 MyoSuite `coordinate_map_anthro.json` remains a coordinate map. Existing
@@ -86,3 +101,11 @@ Run the portable tests with the repository test configuration and the native
 test in the reviewed OpenSim 4.6 environment. Keep all manual/calculation
 inventory and release gates blocked until the governing review and independent
 evidence exist.
+
+For the replay-to-score integration, run the MuJoCo observation-qualification
+case and the two native FK cases in
+`tests/unit/engines/test_feedback_native_markers.py` with their actual SDKs.
+The Drake minimal-runtime namespace bootstrap is described in the turnover;
+it must not be presented as proof that the ordinary deployment package import
+works. These fixtures use synthetic observations and have no private-capture
+dependency.
