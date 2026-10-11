@@ -349,6 +349,8 @@ def test_refinement_supervisor_stub_uses_exact_single_rung_protocol(
 def test_refinement_supervisor_retains_bounded_failure_and_parent_bindings(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    import shutil
+
     from tests.opensim import native_moco_refinement_supervisor as supervisor
     from tests.opensim.native_moco_refinement import build_refinement_plan
 
@@ -357,9 +359,23 @@ def test_refinement_supervisor_retains_bounded_failure_and_parent_bindings(
         repository
         / "docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179"
     )
-    plan = build_refinement_plan(
-        evidence_root / "plain", evidence_root / "activation_residual_analysis.json"
+    analysis_path = tmp_path / "activation_residual_analysis.json"
+    shutil.copyfile(evidence_root / "activation_residual_analysis.json", analysis_path)
+    audit_source = (
+        evidence_root
+        / "diagnostic_retained_replay_fauldump_3e195b0e"
+        / "native_audit"
+        / "fresh_replay_diagnostic.json"
     )
+    audit_path = (
+        analysis_path.parent
+        / "diagnostic_retained_replay_fauldump_3e195b0e"
+        / "native_audit"
+        / "fresh_replay_diagnostic.json"
+    )
+    audit_path.parent.mkdir(parents=True)
+    shutil.copyfile(audit_source, audit_path)
+    plan = build_refinement_plan(evidence_root / "plain", analysis_path)
     plan_path = tmp_path / "exact-plan.json"
     plan_path.write_text(
         json.dumps(plan, sort_keys=True, indent=2, allow_nan=False) + "\n",
@@ -374,12 +390,13 @@ def test_refinement_supervisor_retains_bounded_failure_and_parent_bindings(
     )
 
     def failed_worker(root: Path, worker_python: str):
+        analysis_path.write_bytes(analysis_path.read_bytes() + b"\nchanged")
         command = supervisor._worker_argv(
             root / "plain", root / "refinement_plan.json", worker_python
         )
         return (
             supervisor.RungResult(
-                "plain", "timeout", None, 30.0, "wall timeout", 12, True
+                "plain", "worker_failed", None, 1.0, "worker exited 1", 12, True
             ),
             command,
         )
@@ -394,10 +411,11 @@ def test_refinement_supervisor_retains_bounded_failure_and_parent_bindings(
         repository,
     )
     retained = json.loads((output / "supervisor_result.json").read_text())
-    assert result["final_status"] == "timeout"
+    assert result["final_status"] == "provenance_changed"
     assert retained["result"]["owned_tree_cleanup_verified"] is True
     assert retained["parent_inputs_unchanged"] is True
     assert retained["plan_files_unchanged"] is True
+    assert retained["analysis_file_unchanged"] is False
     assert retained["retry_count"] == 0
 
 

@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_json
 from tests.opensim.native_moco_ladder_harness import (
     DEFAULT_RUNGS,
     RungResult,
@@ -37,6 +38,11 @@ def sha256_file(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _persist_json(path: Path, payload: dict[str, Any]) -> None:
+    validated = json.loads(json.dumps(payload, sort_keys=True, allow_nan=False))
+    atomic_write_json(path, validated)
 
 
 def _parent_hashes(parent: Path, analysis_path: Path) -> dict[str, str]:
@@ -155,6 +161,7 @@ def prepare_once(
         "staged_plan_sha256": sha256_file(staged_plan),
         "parent_directory": str(parent),
         "analysis_path": str(analysis_path),
+        "analysis_sha256_before": sha256_file(analysis_path),
         "parent_hashes_before": parent_before,
         "attempt_id": plan["attempt_id"],
         "refinement_parent_hashes": plan["parent_hashes"],
@@ -232,9 +239,7 @@ def run_attempt(
         for name in ("CASADIPATH", "PYTHONPATH", *THREAD_VARIABLES)
     }
     evidence["parent_python_version"] = sys.version
-    (output_root / "invocation.json").write_text(
-        json.dumps(evidence, sort_keys=True, indent=2) + "\n", encoding="utf-8"
-    )
+    _persist_json(output_root / "invocation.json", evidence)
     run_error = None
     try:
         result, actual_command = _run_one(output_root, worker_python)
@@ -248,6 +253,10 @@ def run_attempt(
     evidence["parent_hashes_after"] = actual_parent_hashes
     evidence["parent_inputs_unchanged"] = (
         actual_parent_hashes == evidence["parent_hashes_before"]
+    )
+    evidence["analysis_sha256_after"] = sha256_file(Path(evidence["analysis_path"]))
+    evidence["analysis_file_unchanged"] = (
+        evidence["analysis_sha256_after"] == evidence["analysis_sha256_before"]
     )
     evidence["source_hashes_after"] = _source_hashes(repo_root)
     evidence["source_files_unchanged"] = (
@@ -294,6 +303,7 @@ def run_attempt(
         evidence[key]
         for key in (
             "parent_inputs_unchanged",
+            "analysis_file_unchanged",
             "source_files_unchanged",
             "runtime_files_unchanged",
             "worker_interpreter_unchanged",
@@ -307,9 +317,7 @@ def run_attempt(
         if evidence["provenance_unchanged"]
         else "provenance_changed"
     )
-    (output_root / "supervisor_result.json").write_text(
-        json.dumps(evidence, sort_keys=True, indent=2) + "\n", encoding="utf-8"
-    )
+    _persist_json(output_root / "supervisor_result.json", evidence)
     return evidence
 
 
@@ -330,9 +338,7 @@ def run_stub(
     evidence["sdk_launched"] = False
     evidence["owned_tree_cleanup_verified"] = None
     evidence["worker_command"] = list(command)
-    (output_root / "stub_result.json").write_text(
-        json.dumps(evidence, sort_keys=True, indent=2) + "\n", encoding="utf-8"
-    )
+    _persist_json(output_root / "stub_result.json", evidence)
     return evidence
 
 
