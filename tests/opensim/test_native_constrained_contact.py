@@ -127,7 +127,10 @@ def test_exact_source_contact_declaration_replays_and_samples_native_wrench(
     assert np.isfinite((*wrench.force_n, *wrench.torque_nm, *wrench.point_m)).all()
 
 
-def test_contact_is_forbidden_without_exact_source_declaration(tmp_path: Path) -> None:
+@pytest.mark.parametrize("contact_kind", ["smooth", "hunt_crossley"])
+def test_contact_is_forbidden_without_exact_source_declaration(
+    tmp_path: Path, contact_kind: str
+) -> None:
     from src.engines.physics_engines.opensim.python.tour_matching.native_constrained_muscle import (
         build_constrained_muscle_bundle,
     )
@@ -139,13 +142,16 @@ def test_contact_is_forbidden_without_exact_source_declaration(tmp_path: Path) -
     )
     from tests.opensim.test_native_constrained_muscle import _controls
 
-    path, cold_start, _model, _osim = _contact_source(tmp_path)
+    path, cold_start, _model, _osim = _contact_source(tmp_path, contact_kind)
     grid = np.array([0.0, 0.001])
     mechanics = declare_native_mechanics_execution_profile(
         path, cold_start.source_sha256
     )
     wrapped = declare_wrapped_path_source(path)
-    with pytest.raises(ValueError, match="unreviewed constrained muscle component"):
+    with pytest.raises(
+        ValueError,
+        match="unreviewed constrained muscle component|native source XML must be self-contained",
+    ):
         build_constrained_muscle_bundle(
             cold_start,
             grid,

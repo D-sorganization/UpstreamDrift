@@ -39,6 +39,9 @@ source closure, the corresponding sphere and half-space geometry identities,
 contact-free default rejection, source/component mutation rejection, and
 finite native wrench output from a constrained Smooth-contact replay. Existing
 legacy replay fixtures exercise both contact laws through the shared sampler.
+The generated Hunt-Crossley source fixture is rejected by the strict
+self-contained XML gate, so this evidence does not claim constrained
+Hunt-Crossley replay.
 These are bounded software tests. They do not establish that either law or
 geometry is appropriate for a human capture, nor do they demonstrate a
 contact-bearing full-body Moco solve or full-horizon independent replay.
