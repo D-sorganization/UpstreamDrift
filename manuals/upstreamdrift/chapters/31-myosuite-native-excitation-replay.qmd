@@ -192,3 +192,17 @@ script and source-hashed receipt are in
 `docs/development/feedback_controls/F09G-MYOARM-FD-AUDIT-MJ38.json`.
 The bounded source/resource admission extension is tracked in F09h (#11950); see
 `docs/development/feedback_controls/F09H-NATIVE-RESOURCE-CLOSURE.md`.
+
+## Native Muscle Actuator Classification (#12249)
+
+`MyoSuiteMuscleAnalyzer` identifies muscle channels from the compiled native
+MuJoCo model's `actuator_dyntype`. It compares against the installed runtime's
+named `mujoco.mjtDyn.mjDYN_MUSCLE` enum, so filter dynamics are not mistaken for
+muscle channels. A native MuJoCo 3.8.0 mixed-actuator fixture verifies that the
+muscle is selected while filter and motor actuators are excluded, without
+registering a MyoSuite/Gym task.
+
+This check classifies compiled actuator dynamics only. It does not validate
+muscle anatomy, force/length physiology, actuator-to-capture correspondence,
+excitation replay, or cross-engine parity. The engine's existing compatibility
+fallback behavior is unchanged.
