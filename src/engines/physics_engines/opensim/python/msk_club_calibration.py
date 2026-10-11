@@ -19,8 +19,9 @@ address_poses.json``):
    weak pull toward the neutral pose.
 4. Each hand-side grip frame is the club grip frame seen from that hand at
    the solution, so both welds are exact at the address pose and the club
-   sits exactly where the generated model holds it: the shared face roll
-   then squares the face, which the tests check by OpenSim FK.
+   sits exactly where the generated model holds it: with the shared face
+   roll the face reproduces the capture's own address face (open or closed,
+   #12117), which the tests check by OpenSim FK.
 
 This module needs OpenSim and SciPy; :mod:`msk_club` reads its output.
 """

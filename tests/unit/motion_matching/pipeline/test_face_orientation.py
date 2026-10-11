@@ -58,18 +58,23 @@ def test_face_targets_cover_every_observed_capture_frame(
     assert lane.face_unavailable_reason is None
 
 
-def test_mismatched_head_triad_leaves_face_and_impact_unavailable() -> None:
-    """#12030: the driver triad offsets on the 7-iron capture fail closed."""
-    iron_spec = json.loads(
-        (
-            ROOT / "docs/development/full_body_models/full_body_spec_anthro_iron7.json"
-        ).read_text(encoding="utf-8")
+def _document_attachments(name: str) -> tuple[dict, dict]:
+    spec = json.loads(
+        (ROOT / "docs/development/full_body_models" / name).read_text(encoding="utf-8")
     )
-    iron_att = {
+    attachments = {
         label: (a["body"], tuple(a["offset_m"]))
-        for label, a in iron_spec["marker_attachments"].items()
+        for label, a in spec["marker_attachments"].items()
         if a["offset_m"] is not None
     }
+    return spec, attachments
+
+
+def test_mismatched_head_triad_leaves_face_and_impact_unavailable() -> None:
+    """#12030: the driver triad offsets on the 7-iron capture fail closed."""
+    iron_spec, iron_att = _document_attachments("full_body_spec_anthro_iron7.json")
+    _, driver_att = _document_attachments("full_body_spec_anthro_driver.json")
+    iron_att.update({m: driver_att[m] for m in cft.HEAD_TRIAD_LABELS})
     lane = Lane(tuple({**iron_att, **LEG_SEEDS}), capture_path("iron"))
     configure_lane(lane, iron_spec)
     lane.set_face_targets(iron_att, iron_spec, 3.0)
@@ -81,6 +86,18 @@ def test_mismatched_head_triad_leaves_face_and_impact_unavailable() -> None:
     assert lane.impact_split_reason.startswith("unavailable")
     with pytest.raises(ValueError, match="face weight"):
         lane.set_face_targets(iron_att, iron_spec, -1.0)
+
+
+def test_iron_document_triad_observes_the_iron_face() -> None:
+    """#12210: the 7-iron document's own cluster makes the face observable."""
+    iron_spec, iron_att = _document_attachments("full_body_spec_anthro_iron7.json")
+    lane = Lane(tuple({**iron_att, **LEG_SEEDS}), capture_path("iron"))
+    configure_lane(lane, iron_spec)
+    lane.set_face_targets(iron_att, iron_spec, 3.0)
+    assert lane.face_targets is not None
+    assert lane.face_unavailable_reason is None
+    lane.set_impact_split(iron_att, iron_spec)
+    assert lane.impact_index is not None
 
 
 def test_attach_face_report_records_the_unavailable_reason() -> None:

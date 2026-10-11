@@ -73,8 +73,10 @@ def impact_frame(
     the top is used, provided it is within ``ball_radius_m`` of address.
 
     Raises ``ValueError`` when no frame satisfies: impact after the top of the
-    backswing and clubhead height within ``height_tol_m`` of address. Never
-    returns an unchecked frame.
+    backswing, clubhead height within ``height_tol_m`` of address and the
+    clubhead within ``ball_radius_m`` of address. Never returns an unchecked
+    frame. A peak-speed frame at the address height but short of the ball (a
+    replay that peaks early, #12117) is not at the ball and is not returned.
     """
     from src.shared.python.motion_matching.loaders._align import detect_impact_index
 
@@ -87,21 +89,26 @@ def impact_frame(
     top = top_of_backswing_index(t, head)
     address = head[0]
 
-    def ok(i: int) -> bool:
-        return i > top and abs(head[i, 2] - address[2]) <= height_tol_m
+    def at_ball(i: int) -> bool:
+        return bool(
+            i > top
+            and abs(head[i, 2] - address[2]) <= height_tol_m
+            and np.linalg.norm(head[i] - address) <= ball_radius_m
+        )
 
     whole = detect_impact_index(t, head)
-    if ok(whole):
+    if at_ball(whole):
         return int(whole)
     # The face meets the ball where it returns closest to its address position.
     after = np.arange(top + 1, len(head))
     idx = int(after[np.argmin(np.linalg.norm(head[after] - address, axis=1))])
-    if ok(idx) and np.linalg.norm(head[idx] - address) <= ball_radius_m:
+    if at_ball(idx):
         return idx
     raise ValueError(
-        "no valid impact frame: peak-speed frame "
-        f"{whole} is not within {height_tol_m} m of the address height after the "
-        f"top of the backswing (frame {top}), and the head never returns to the ball"
+        f"no valid impact frame: peak-speed frame {whole} is not within "
+        f"{ball_radius_m} m of the ball and {height_tol_m} m of the address height "
+        f"after the top of the backswing (frame {top}), and the head never returns "
+        "to the ball"
     )
 
 
