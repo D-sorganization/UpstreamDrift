@@ -232,18 +232,12 @@ def build_broadie_approx_baseline() -> ExpectedStrokesBaselineV2:
     )
 
 
-def score_approach_endpoints(
+def _approach_course_rows(
     endpoints: dict[str, list[tuple[int, float, float]]],
-    *,
     target_x_m: float,
     green_radius_m: float,
-    seed: int = 20261008,
-) -> dict:
-    """Score aimed carry endpoints as an approach to a centered circular green.
-
-    The ball is assumed to stop at carry; all area outside the green is rough.
-    This hypothetical course has no roll, hazards, slope, or wind.
-    """
+) -> tuple[list[dict], list[tuple[str, int]]]:
+    """Validate geometry and map carry endpoints to ordered benchmark states."""
     if (
         not math.isfinite(target_x_m)
         or target_x_m <= 0
@@ -283,6 +277,22 @@ def score_approach_endpoints(
                 }
             )
             shot_keys.append((pattern, index))
+    return rows, shot_keys
+
+
+def score_approach_endpoints(
+    endpoints: dict[str, list[tuple[int, float, float]]],
+    *,
+    target_x_m: float,
+    green_radius_m: float,
+    seed: int = 20261008,
+) -> dict:
+    """Score aimed carry endpoints as an approach to a centered circular green.
+
+    The ball is assumed to stop at carry; all area outside the green is rough.
+    This hypothetical course has no roll, hazards, slope, or wind.
+    """
+    rows, shot_keys = _approach_course_rows(endpoints, target_x_m, green_radius_m)
     request = StrokesGainedRequestV1(
         start=CourseStateColumnsV1(
             lie_column="start_lie",

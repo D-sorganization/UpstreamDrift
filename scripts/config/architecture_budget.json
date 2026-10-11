@@ -1615,15 +1615,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/tools/shot_pattern_analysis/scoring.py",
-      "symbol": "score_approach_endpoints",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - score_approach_endpoints exceeds function-lines budget (121 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/sensitivity.py",
       "symbol": "render_sensitivity",
       "rule": "function-lines",
