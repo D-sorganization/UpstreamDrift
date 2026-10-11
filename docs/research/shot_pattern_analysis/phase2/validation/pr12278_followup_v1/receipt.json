@@ -14,11 +14,17 @@
   "focused_validation": {
     "root_four_modules": {
       "passed": 43,
-      "exit_code": 0
+      "exit_code": 0,
+      "runtime": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+      "checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-validation-followup/UpstreamDrift",
+      "command": "python -m pytest tests/scripts/test_monolith_register.py tests/research/test_shot_pattern_peer_handoff.py tests/research/test_supplement_publication_revision.py tests/research/test_supplement_revision_command.py -p no:pytestqt -q"
     },
     "registration_two_modules": {
       "passed": 54,
-      "exit_code": 0
+      "exit_code": 0,
+      "runtime": "/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python",
+      "checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-registration-followup/UpstreamDrift",
+      "command": "python -m pytest tests/help/test_tile_help_wiring.py tests/companion/test_companion_catalog.py --no-cov --tb=short -q"
     },
     "peer_reconstruction_after_format": {
       "passed": 2,
@@ -81,5 +87,12 @@
       "gzip_sha256": "ddce0be1b56a88657455b63233b9104eb88977e7003e825d6e12305e9bea268f"
     }
   },
-  "disposition": "Partial blocker repair; PR remains blocked; no complete-project or physical acceptance claim"
+  "disposition": "Partial blocker repair; PR remains blocked; no complete-project or physical acceptance claim",
+  "environment_overrides": {
+    "PYTHONPATH": "<own checkout root>",
+    "QT_QPA_PLATFORM": "offscreen",
+    "MPLBACKEND": "Agg",
+    "MUJOCO_GL": "egl",
+    "SDL_VIDEODRIVER": "dummy"
+  }
 }

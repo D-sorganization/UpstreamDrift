@@ -37,7 +37,7 @@
 
 - Preserve frozen science, baseline graphics, peer records, and armed Phase 1 PR state.
 - Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful compilation in the built-in LaTeX editor.
-- The 21-asset v3 inventory, published research prerelease, and fresh remote restoration are verified. Open a reviewable PR with explicit unresolved repository gates; do not claim merge readiness or waive protection.
+- The 21-asset v3 inventory, published research prerelease, and fresh remote restoration are verified. PR #12278 is open and blocked with explicit unresolved repository gates; do not claim merge readiness or waive protection.
 - Keep empirical validation #11984 deferred and compiler blocker #12120 open; close implementation issues only with qualifying merged evidence.
 
 ## Imported Peer Handoff Records Index

@@ -122,9 +122,10 @@ with 13 selected figures, and all 98 report links. The durable receipt is
    during tests, before a final summary; it is incomplete and does not replace
    the failed complete gate.
 3. The 21-asset v3 inventory is published at the research prerelease linked
-   above, and fresh remote download/member verification passed. Open/attach a
-   reviewable PR with explicit blocked gates, a Handoff section, and change
-   fragments. Never bypass hooks or protection.
+   above, and fresh remote download/member verification passed. PR #12278 is
+   open, attached, ready for review, and blocked, with a Handoff section and
+   change fragments. Continue the user-authorized validation follow-up; never
+   bypass hooks or protection.
    The first restoration attempt found a manifest-to-release-name mapping
    mismatch after all 21 asset hashes passed. Sol reviewed the corrected
    bijective size/SHA mapping; a fresh isolated rerun exited 0 with no asset
