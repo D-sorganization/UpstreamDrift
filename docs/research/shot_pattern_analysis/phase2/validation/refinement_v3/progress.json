@@ -56,14 +56,20 @@
   "affine_checks": "Quarto1.8.26 render; title case672 sources; render coverage253 URLs; article links/full site gate; 9 assets match; headless browser review; canonical consistency tests pass.",
   "local_delivery": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
   "architecture_issue": 12302,
-  "integration_work": "Committed statistics, impact/delivery adapters, scoring orchestration, approach state preparation, desktop layout/CLI requests, flight-panel layout and native rasterization decompositions. Active agents: report narrative/per-club split, paired social context, lean/sensitivity orchestration.",
+  "integration_work": "Committed paired comparison and social rendering, plot-region decomposition, matrix checkpoints, supplement pipeline and source-loader decomposition, report narrative/club appendix split with lossless archived source, and fifteen audit source snapshots. Active: final figure builder, final report builder and input assembly.",
   "focused_dry": "49 committed shot-pattern/kernel source files at19b7d6d: zero findings. Not a full repository gate.",
-  "architecture": "28 of67 new architecture exceptions removed;39 remain under issue12302. Additional flight-panel11-parameter violation fixed with6-parameter layout interface, without an exception.",
+  "architecture": "42 of67 new architecture exceptions removed;25 remain. Both new report/peer-record document-size waivers removed. Flight-panel parameter violation fixed without exception.",
   "performance": "Renderer vectorization committed e8a81e53fd;26 tests pass with original1ms limit unchanged (#12303).",
   "affinedrift_commit": "5fae3163493ca7ade3139b2da18ace2e3deac1c0",
-  "integration_head": "3202ce2246 followed by native rasterization checkpoint",
+  "integration_head": "8656a1b00de556d7daaa5e6984f2544b5c10da39",
   "upstream_merged_head": "aecd90783beab50cc091def25f13bbfdaeeb7834",
   "integration_report": "Fresh local Tectonic compile from integration sources plus14 tracked hash-verified figures succeeded:39 pages, no warnings; /tmp/shot-integration-report/shot_pattern_analysis.pdf SHA256 f589bbb54253666fbda5daaca3f651952a78db2665e660fea7b69da486f9799b. Desktop accepted version unchanged.",
   "post_merge_checks": "16 statistics/restoration/handoff checks;13 approach-scoring tests;50 adapter tests plus9 final checks;22 presentation/replay/layout tests;77 GUI-focused tests;20 native rasterization tests all passed. Relevant Ruff and rasterizer mypy pass. Full unchanged repository gates remain pending.",
-  "flight_layout_parity": "Exact RGBA hashes/axis text/ranges/line counts across4 cases; committed receipt flight_panel_layout_parity.json. Accepted PDF remains unchanged."
+  "flight_layout_parity": "Exact RGBA hashes/axis text/ranges/line counts across4 cases; committed receipt flight_panel_layout_parity.json. Accepted PDF remains unchanged.",
+  "checks_latest": "PDF exporter13 tests; paired social83 plus2 typing-focused render tests; comparison38 plus final hash checks; plot10 tests with5 exact RGBA cases; matrix35; pipeline35; loader9 plus exact JSON equality on26cells/4aliases; report split31; historical source archive integrity test. Relevant Ruff/mypy pass. Full unchanged repository gates remain pending.",
+  "figure_builder_regression": {
+    "issue": 12309,
+    "status": "Fix in progress: three legacy presentation/dpi writer calls raise TypeError; real interface regression tests and intended-output adapter parity required."
+  },
+  "report_split": "Four Markdown outputs below51,200 bytes; all original figure lines and C01-C24 numeric rows preserved; original historical receipt unchanged; separate layout-only receipt and deterministic gzip archive. No fresh scientific run claimed."
 }
