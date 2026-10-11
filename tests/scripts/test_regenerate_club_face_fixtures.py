@@ -27,6 +27,14 @@ def test_pipeline_argv_keeps_the_original_run_flags_and_the_weight() -> None:
         regen.pipeline_argv("owner", Path("o"), 3.0)
 
 
+@pytest.mark.parametrize("capture", sorted(regen.CAPTURE_RUNS))
+def test_fixture_runs_hold_the_measured_club_cluster_fixed(capture: str) -> None:
+    # The per-capture grip rotation is fitted on the fixed cluster; a free
+    # cluster re-absorbs it and moves the capture's own face (#12221).
+    argv = regen.pipeline_argv(capture, Path("r"), 3.0)
+    assert "--fix-club-markers" in argv and "--static-seeds" in argv
+
+
 def test_triad_offsets_must_sit_on_the_face_frame() -> None:
     labels = ("Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3")
     receipt = {

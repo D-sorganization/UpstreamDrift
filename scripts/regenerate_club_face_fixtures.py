@@ -44,13 +44,19 @@ FIXTURE_DT_S = 0.002
 #: frames set the foot yaw: the raw document turns the lead foot 29-30 deg (#12222).
 SCALED_SPEC = "full_body_spec_hipcal_scaled.json"
 #: capture -> (fixture club alias, document, extra pipeline flags of the
-#: original fixture runs, read back from their receipts).
+#: original fixture runs, read back from their receipts). The static trial
+#: holds the measured club cluster fixed: the per-capture grip rotation is
+#: fitted on it, and a free cluster moves the capture's own face (#12221).
 CAPTURE_RUNS: dict[str, tuple[str, str, tuple[str, ...]]] = {
-    "driver": ("driver", "full_body_spec_anthro_driver.json", ("--static-seeds",)),
+    "driver": (
+        "driver",
+        "full_body_spec_anthro_driver.json",
+        ("--static-seeds", "--fix-club-markers"),
+    ),
     "iron": (
         "iron7",
         "full_body_spec_anthro_iron7.json",
-        ("--static-seeds", "--zmp-filter"),
+        ("--static-seeds", "--zmp-filter", "--fix-club-markers"),
     ),
 }
 #: Address foot progression of every fixture run: the OSV-4 capture toe-out
