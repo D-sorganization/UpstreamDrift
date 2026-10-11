@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from src.tools.shot_pattern_analysis.matched_supplement_figures import PairFigureContext
+
 import csv
 import gzip
 import json
@@ -846,12 +848,9 @@ def test_pair_density_and_overhead_render_shared_condition_panels(
     }
     density_paths = _write_pair_density_figure(
         point_sets,
-        first=first,
-        second=second,
-        comparison="curve_strength",
-        first_label=first_label,
-        second_label=second_label,
-        target_x=12.0,
+        context=PairFigureContext(
+            first, second, "curve_strength", (first_label, second_label), 12.0
+        ),
         common_n=40,
         output_stem=tmp_path / "curve-density",
     )
@@ -865,12 +864,9 @@ def test_pair_density_and_overhead_render_shared_condition_panels(
     }
     overhead_paths = _write_pair_overhead_figure(
         trajectories,
-        first=first,
-        second=second,
-        comparison="curve_strength",
-        first_label=first_label,
-        second_label=second_label,
-        target_x=12.0,
+        context=PairFigureContext(
+            first, second, "curve_strength", (first_label, second_label), 12.0
+        ),
         output_stem=tmp_path / "curve-overhead",
     )
     assert {"png", "pdf", "svg"} == density_paths.keys()
@@ -995,12 +991,9 @@ def test_pair_density_long_caption_keeps_legend_clear_of_panel_titles(
     }
     paths = figures._write_pair_density_figure(
         point_sets,
-        first=first,
-        second=second,
-        comparison="curve_strength",
-        first_label="Curve ×1",
-        second_label="Curve ×2",
-        target_x=139.903,
+        context=PairFigureContext(
+            first, second, "curve_strength", ("Curve ×1", "Curve ×2"), 139.903
+        ),
         common_n=40,
         output_stem=tmp_path / "long-caption-density",
         formats=("svg",),
@@ -1064,12 +1057,13 @@ def test_pair_density_narrow_downrange_keeps_fade_title_clear_of_colorbar(tmp_pa
     }
     paths = _write_pair_density_figure(
         point_sets,
-        first=first,
-        second=second,
-        comparison="shaft_rotation_sd",
-        first_label="Rotation SD 1°",
-        second_label="Rotation SD 2°",
-        target_x=target,
+        context=PairFigureContext(
+            first,
+            second,
+            "shaft_rotation_sd",
+            ("Rotation SD 1°", "Rotation SD 2°"),
+            target,
+        ),
         common_n=40,
         output_stem=tmp_path / "narrow-density",
         formats=("svg",),

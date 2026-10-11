@@ -10,6 +10,8 @@ and social overhead figures:
 
 from __future__ import annotations
 
+from src.tools.shot_pattern_analysis.matched_supplement_figures import PairFigureContext
+
 from pathlib import Path
 from typing import Any
 
@@ -124,12 +126,9 @@ def test_academic_density_covariance_caption_containment_and_separation(
     output_stem = tmp_path / "density_cov_test"
     outputs = _write_pair_density_figure(
         point_sets,
-        first=first,
-        second=second,
-        comparison="curve_strength",
-        first_label=first_label,
-        second_label=second_label,
-        target_x=125.0,
+        context=PairFigureContext(
+            first, second, "curve_strength", (first_label, second_label), 125.0
+        ),
         common_n=10,
         output_stem=output_stem,
         formats=("png",),
@@ -222,12 +221,9 @@ def test_academic_and_social_overhead_covariance_caption_containment_and_separat
     output_stem = tmp_path / "overhead_cov_test"
     outputs = _write_pair_overhead_figure(
         trajectory_sets,
-        first=first,
-        second=second,
-        comparison="curve_strength",
-        first_label=first_label,
-        second_label=second_label,
-        target_x=125.0,
+        context=PairFigureContext(
+            first, second, "curve_strength", (first_label, second_label), 125.0
+        ),
         output_stem=output_stem,
         academic_formats=("png",),
         include_social=True,

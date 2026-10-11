@@ -10,6 +10,7 @@ import math
 import re
 import textwrap
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -442,44 +443,35 @@ def _has_carry_as_final_lie(cells: Sequence[Mapping[str, Any]]) -> bool:
     return False
 
 
-def _draw_metric(
-    cells: Sequence[Mapping[str, Any]],
-    leans: tuple[float, ...],
-    curves: tuple[float, ...],
-    metric: str,
-    selection_label: str,
-    output_stem: Path,
-    *,
-    dpi: int,
-    formats: Sequence[str],
-) -> dict[str, Path]:
-    import matplotlib
+@dataclass(frozen=True)
+class _MetricGrid:
+    """Matrix coordinates, saved cell lookup, and common color scale."""
 
-    matplotlib.use("Agg")
+    leans: tuple[float, ...]
+    curves: tuple[float, ...]
+    metric: str
+    by_key: Mapping[tuple[str, float, float], Mapping[str, Any]]
+    cmap: Any
+    norm: Any
+    course_contexts: Mapping[str, str | None]
+
+
+@dataclass(frozen=True)
+class _MetricContext:
+    """Scientific context derived once for all panels and their captions."""
+
+    target_context: str | None
+    derived_noise: str | None
+    carry_final_lie: bool
+    course_contexts: Mapping[str, str | None]
+
+
+def _metric_color_scale(values: Sequence[float], metric: str) -> tuple[Any, Any]:
+    """Keep supported fractions bounded and SG symmetric around zero."""
     import matplotlib.pyplot as plt
     from matplotlib.colors import TwoSlopeNorm
-    from matplotlib.patches import Rectangle
 
-    target_context = _derive_target_context(cells)
-    derived_noise = _derive_delivery_noise(cells)
-    carry_final_lie = _has_carry_as_final_lie(cells)
-    course_contexts = {club: _derive_course_context(cells, club) for club in CLUBS}
-
-    by_key = {
-        (
-            _config_value(cell, "club_id"),
-            float(_config_value(cell, "shaft_lean_deg")),
-            float(_config_value(cell, "curve_scale")),
-        ): cell
-        for cell in cells
-    }
-    values = [
-        value
-        for pattern in PATTERNS
-        for cell in cells
-        if (value := metric_value(cell, metric, pattern)) is not None
-    ]
-    title, cmap_name, colorbar_label = _METRICS[metric]
+    cmap_name = _METRICS[metric][1]
     cmap = plt.get_cmap(cmap_name).with_extremes(bad="#e5e7eb")
     norm: Any = None
     if values:
@@ -494,116 +486,133 @@ def _draw_metric(
                 high = low + max(abs(low) * 0.05, 1e-6)
             norm = plt.Normalize(vmin=low, vmax=high)
 
-    fig, axes = plt.subplots(3, 3, figsize=(16.5, 10.5), facecolor="white")
-    images = []
-    for row_index, pattern in enumerate(PATTERNS):
-        for col_index, club in enumerate(CLUBS):
-            axis = axes[row_index, col_index]
-            grid = np.full((len(leans), len(curves)), np.nan, dtype=float)
-            for i, lean in enumerate(leans):
-                for j, curve in enumerate(curves):
-                    cell = by_key[(club, lean, curve)]
-                    grid[i, j] = (
-                        np.nan
-                        if (value := metric_value(cell, metric, pattern)) is None
-                        else value
+    return cmap, norm
+
+
+def _annotate_metric_panel(
+    axis: Any, spec: _MetricGrid, club: str, pattern: str
+) -> None:
+    """Distinguish unavailable cells from supported metric annotations."""
+    from matplotlib.patches import Rectangle
+
+    leans, curves, metric = spec.leans, spec.curves, spec.metric
+    by_key, cmap, norm = spec.by_key, spec.cmap, spec.norm
+    for i, lean in enumerate(leans):
+        for j, curve in enumerate(curves):
+            cell = by_key[(club, lean, curve)]
+            value = metric_value(cell, metric, pattern)
+            if value is None:
+                axis.add_patch(
+                    Rectangle(
+                        (j - 0.5, i - 0.5),
+                        1,
+                        1,
+                        facecolor="#e5e7eb",
+                        edgecolor="#777777",
+                        linewidth=0.7,
+                        hatch="////",
+                        zorder=3,
                     )
-            masked: NDArray[np.float64] = np.ma.masked_invalid(grid)
-            if values and norm is not None:
-                image = axis.imshow(masked, cmap=cmap, norm=norm, aspect="auto")
-                images.append(image)
-            else:
-                axis.imshow(masked, cmap=cmap, vmin=0, vmax=1, aspect="auto")
-                axis.text(
-                    0.5,
-                    1.08,
-                    "No Available Values",
-                    transform=axis.transAxes,
-                    ha="center",
-                    fontsize=8,
-                    color="#555555",
                 )
-            axis.set_xticks(range(len(curves)), [f"×{curve:g}" for curve in curves])
-            axis.set_yticks(range(len(leans)), [f"{lean:g}°" for lean in leans])
-            if col_index == 0:
-                axis.set_ylabel(f"{pattern}\nShaft Lean")
-            if row_index == len(PATTERNS) - 1:
-                axis.set_xlabel("Curve Scale")
+                reason = cell.get("reason") or "metric unavailable"
+                label = "NOT RUN" if cell.get("status") == "not_run" else "UNAVAILABLE"
+                annotation = f"{label}\n{textwrap.fill(str(reason), width=30)}"
+                axis.text(
+                    j,
+                    i,
+                    annotation,
+                    ha="center",
+                    va="center",
+                    fontsize=7,
+                    color="#111827",
+                    zorder=4,
+                )
+            else:
+                annotation = _format_cell_metric(cell, metric, pattern, value)
+                text_color = _cell_text_color(cmap, norm, value)
+                axis.text(
+                    j,
+                    i,
+                    annotation,
+                    ha="center",
+                    va="center",
+                    fontsize=8,
+                    color=text_color,
+                    zorder=4,
+                )
 
-            club_ctx = course_contexts.get(club) if metric == "conditional_sg" else None
-            title_text = (
-                f"{_CLUB_LABELS[club]} — {pattern}\n{textwrap.fill(club_ctx, width=44)}"
-                if club_ctx
-                else f"{_CLUB_LABELS[club]} — {pattern}"
-            )
-            axis.set_title(
-                title_text,
-                fontsize=10 if club_ctx else 11,
-                fontweight="bold",
-            )
-            axis.set_xticks(np.arange(-0.5, len(curves), 1), minor=True)
-            axis.set_yticks(np.arange(-0.5, len(leans), 1), minor=True)
-            axis.grid(which="minor", color="white", linewidth=2)
-            axis.tick_params(which="minor", bottom=False, left=False)
-            for i, lean in enumerate(leans):
-                for j, curve in enumerate(curves):
-                    cell = by_key[(club, lean, curve)]
-                    value = metric_value(cell, metric, pattern)
-                    if value is None:
-                        axis.add_patch(
-                            Rectangle(
-                                (j - 0.5, i - 0.5),
-                                1,
-                                1,
-                                facecolor="#e5e7eb",
-                                edgecolor="#777777",
-                                linewidth=0.7,
-                                hatch="////",
-                                zorder=3,
-                            )
-                        )
-                        reason = cell.get("reason") or "metric unavailable"
-                        label = (
-                            "NOT RUN"
-                            if cell.get("status") == "not_run"
-                            else "UNAVAILABLE"
-                        )
-                        annotation = f"{label}\n{textwrap.fill(str(reason), width=30)}"
-                        axis.text(
-                            j,
-                            i,
-                            annotation,
-                            ha="center",
-                            va="center",
-                            fontsize=7,
-                            color="#111827",
-                            zorder=4,
-                        )
-                    else:
-                        annotation = _format_cell_metric(cell, metric, pattern, value)
-                        text_color = _cell_text_color(cmap, norm, value)
-                        axis.text(
-                            j,
-                            i,
-                            annotation,
-                            ha="center",
-                            va="center",
-                            fontsize=8,
-                            color=text_color,
-                            zorder=4,
-                        )
-            axis.set_xlim(-0.5, len(curves) - 0.5)
-            axis.set_ylim(len(leans) - 0.5, -0.5)
 
-    fig.suptitle(
-        f"Matched-Delivery Matrix: {title}",
-        x=0.06,
-        y=0.98,
-        ha="left",
-        fontsize=19,
+def _draw_metric_panel(
+    axis: Any,
+    spec: _MetricGrid,
+    pattern: str,
+    club: str,
+    row_index: int,
+    col_index: int,
+) -> Any:
+    """Draw one club/pattern matrix against shared coordinates and scale."""
+    leans, curves, metric = spec.leans, spec.curves, spec.metric
+    by_key, cmap, norm = spec.by_key, spec.cmap, spec.norm
+    course_contexts = spec.course_contexts
+    image = None
+    grid = np.full((len(leans), len(curves)), np.nan, dtype=float)
+    for i, lean in enumerate(leans):
+        for j, curve in enumerate(curves):
+            cell = by_key[(club, lean, curve)]
+            grid[i, j] = (
+                np.nan
+                if (value := metric_value(cell, metric, pattern)) is None
+                else value
+            )
+    masked: NDArray[np.float64] = np.ma.masked_invalid(grid)
+    if norm is not None:
+        image = axis.imshow(masked, cmap=cmap, norm=norm, aspect="auto")
+
+    else:
+        axis.imshow(masked, cmap=cmap, vmin=0, vmax=1, aspect="auto")
+        axis.text(
+            0.5,
+            1.08,
+            "No Available Values",
+            transform=axis.transAxes,
+            ha="center",
+            fontsize=8,
+            color="#555555",
+        )
+    axis.set_xticks(range(len(curves)), [f"×{curve:g}" for curve in curves])
+    axis.set_yticks(range(len(leans)), [f"{lean:g}°" for lean in leans])
+    if col_index == 0:
+        axis.set_ylabel(f"{pattern}\nShaft Lean")
+    if row_index == len(PATTERNS) - 1:
+        axis.set_xlabel("Curve Scale")
+
+    club_ctx = course_contexts.get(club) if metric == "conditional_sg" else None
+    title_text = (
+        f"{_CLUB_LABELS[club]} — {pattern}\n{textwrap.fill(club_ctx, width=44)}"
+        if club_ctx
+        else f"{_CLUB_LABELS[club]} — {pattern}"
+    )
+    axis.set_title(
+        title_text,
+        fontsize=10 if club_ctx else 11,
         fontweight="bold",
     )
+    axis.set_xticks(np.arange(-0.5, len(curves), 1), minor=True)
+    axis.set_yticks(np.arange(-0.5, len(leans), 1), minor=True)
+    axis.grid(which="minor", color="white", linewidth=2)
+    axis.tick_params(which="minor", bottom=False, left=False)
+    _annotate_metric_panel(axis, spec, club, pattern)
+    axis.set_xlim(-0.5, len(curves) - 0.5)
+    axis.set_ylim(len(leans) - 0.5, -0.5)
 
+    return image
+
+
+def _draw_metric_subtitle(
+    fig: Any, selection_label: str, context: _MetricContext
+) -> float:
+    """Allocate extra physical header space without shrinking matrix panels."""
+    target_context, derived_noise = context.target_context, context.derived_noise
     clean_label = selection_label
     if derived_noise and "noise SDs=" in clean_label:
         clean_label = re.sub(r";?\s*noise SDs=\[[^\]]*\]", "", clean_label).strip()
@@ -638,6 +647,19 @@ def _draw_metric(
         fontsize=10,
     )
 
+    return height_scale
+
+
+def _draw_metric_caption(
+    fig: Any,
+    cells: Sequence[Mapping[str, Any]],
+    metric: str,
+    context: _MetricContext,
+    height_scale: float,
+) -> None:
+    """Describe conditioning, target geometry, and hypothetical scoring limits."""
+    target_context = context.target_context
+    course_contexts, carry_final_lie = context.course_contexts, context.carry_final_lie
     caption_notes: list[str] = [
         "Unsupported or infeasible conditions are hatched and labeled. Landing metrics are model-conditional;",
     ]
@@ -678,6 +700,77 @@ def _draw_metric(
         fontsize=9,
         color="#333333",
     )
+
+
+def _draw_metric(
+    cells: Sequence[Mapping[str, Any]],
+    leans: tuple[float, ...],
+    curves: tuple[float, ...],
+    metric: str,
+    selection_label: str,
+    output_stem: Path,
+    *,
+    dpi: int,
+    formats: Sequence[str],
+) -> dict[str, Path]:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    target_context = _derive_target_context(cells)
+    derived_noise = _derive_delivery_noise(cells)
+    carry_final_lie = _has_carry_as_final_lie(cells)
+    course_contexts = {club: _derive_course_context(cells, club) for club in CLUBS}
+
+    by_key = {
+        (
+            _config_value(cell, "club_id"),
+            float(_config_value(cell, "shaft_lean_deg")),
+            float(_config_value(cell, "curve_scale")),
+        ): cell
+        for cell in cells
+    }
+    values = [
+        value
+        for pattern in PATTERNS
+        for cell in cells
+        if (value := metric_value(cell, metric, pattern)) is not None
+    ]
+    title, _, colorbar_label = _METRICS[metric]
+    cmap, norm = _metric_color_scale(values, metric)
+
+    fig, axes = plt.subplots(3, 3, figsize=(16.5, 10.5), facecolor="white")
+    grid_spec = _MetricGrid(leans, curves, metric, by_key, cmap, norm, course_contexts)
+    images = []
+    for row_index, pattern in enumerate(PATTERNS):
+        for col_index, club in enumerate(CLUBS):
+            image = _draw_metric_panel(
+                axes[row_index, col_index],
+                grid_spec,
+                pattern,
+                club,
+                row_index,
+                col_index,
+            )
+            if image is not None:
+                images.append(image)
+
+    fig.suptitle(
+        f"Matched-Delivery Matrix: {title}",
+        x=0.06,
+        y=0.98,
+        ha="left",
+        fontsize=19,
+        fontweight="bold",
+    )
+
+    context = _MetricContext(
+        target_context, derived_noise, carry_final_lie, course_contexts
+    )
+    height_scale = _draw_metric_subtitle(fig, selection_label, context)
+    _draw_metric_caption(fig, cells, metric, context, height_scale)
+
     fig.subplots_adjust(
         left=0.08,
         right=0.89 if images else 0.98,

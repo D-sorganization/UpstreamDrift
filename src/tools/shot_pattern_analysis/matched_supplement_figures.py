@@ -13,6 +13,7 @@ from typing import Any, Literal, Mapping
 import numpy as np
 
 from .academic_plots import (
+    FigureOptions,
     write_academic_dispersion_figure,
     write_overhead_trajectory_figure,
 )
@@ -222,6 +223,72 @@ def _cell_target_mode(ref: Mapping[str, Any]) -> str:
     return "Within-Lean Nominal Target"
 
 
+def _cell_figure_ledger(
+    ref: dict[str, Any],
+    label: str,
+    target_x: float,
+    metadata: dict[str, Any],
+    trajectory_paths: dict[str, Any],
+    output_dir: Path,
+    groups: tuple[tuple[str, dict[str, Path], str], ...],
+) -> list[dict[str, Any]]:
+    """Record supported endpoint counts separately from raw trajectory samples."""
+    ledger: list[dict[str, Any]] = []
+    for figure_group, paths, presentation in groups:
+        for kind, path in paths.items():
+            ledger.append(
+                {
+                    "figure_kind": f"{figure_group}_{kind}",
+                    "presentation": presentation,
+                    "source_kind": (
+                        "individual_supported_endpoints"
+                        if "density" in figure_group
+                        else "saved_illustrative_trajectories"
+                    ),
+                    "source_protocol": ref["source_protocol"],
+                    "cell": label,
+                    "target_x_m": target_x,
+                    "conditioning": (
+                        "individually supported endpoints by physical pattern"
+                        if "density" in figure_group
+                        else "saved raw trajectories, not paired by shot index"
+                    ),
+                    "valid_n_by_pattern": (
+                        metadata["valid_shots_by_pattern"]
+                        if "density" in figure_group
+                        else None
+                    ),
+                    "total_n_by_pattern": (
+                        metadata["total_shots_by_pattern"]
+                        if "density" in figure_group
+                        else None
+                    ),
+                    "saved_trajectory_samples_by_pattern": (
+                        {name: len(trajectory_paths[name]) for name in _PATTERNS}
+                        if "overhead" in figure_group
+                        else None
+                    ),
+                    "relative_path": str(path.relative_to(output_dir)),
+                    "sha256": _sha256(path),
+                }
+            )
+    return ledger
+
+
+def _load_cell_flight_samples(cell_dir: Path, cell: str) -> dict[str, Any]:
+    """Require saved trajectories for each physical pattern before rendering."""
+    flights_path = cell_dir / "flight_samples.json"
+    if not flights_path.is_file():
+        raise ValueError(f"figure source has no flight samples: {cell}")
+    flight_record = json.loads(flights_path.read_text(encoding="utf-8"))
+    trajectory_paths = flight_record.get("trajectories")
+    if not isinstance(trajectory_paths, dict) or set(trajectory_paths) != set(
+        _PATTERNS
+    ):
+        raise ValueError(f"flight samples lack pattern trajectories: {cell}")
+    return trajectory_paths
+
+
 def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str, Any]]:
     if ref.get("status") != "completed":
         return []
@@ -264,7 +331,7 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
             scenario=f"Cell: {label}",
             metadata=metadata,
             target_point_m=(target_x, 0.0),
-            presentation="academic",
+            options=FigureOptions(presentation="academic"),
         )
         density_social_paths = write_academic_dispersion_figure(
             arrays,
@@ -272,7 +339,7 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
             scenario=_condition_caption(ref, include_noise=False),
             metadata=social_metadata,
             target_point_m=(target_x, 0.0),
-            presentation="social",
+            options=FigureOptions(presentation="social"),
         )
     else:
         ledger.append(
@@ -287,22 +354,14 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
                 "total_n_by_pattern": metadata["total_shots_by_pattern"],
             }
         )
-    flights_path = cell_dir / "flight_samples.json"
-    if not flights_path.is_file():
-        raise ValueError(f"figure source has no flight samples: {ref['cell']}")
-    flight_record = json.loads(flights_path.read_text(encoding="utf-8"))
-    trajectory_paths = flight_record.get("trajectories")
-    if not isinstance(trajectory_paths, dict) or set(trajectory_paths) != set(
-        _PATTERNS
-    ):
-        raise ValueError(f"flight samples lack pattern trajectories: {ref['cell']}")
+    trajectory_paths = _load_cell_flight_samples(cell_dir, ref["cell"])
     overhead_paths = write_overhead_trajectory_figure(
         trajectory_paths,
         stem.with_name(stem.name + "_overhead"),
         target_x_m=target_x,
         scenario=f"Cell: {label}; Raw Simulator Flight Samples",
         metadata=_raw_flight_metadata(metadata),
-        presentation="academic",
+        options=FigureOptions(presentation="academic"),
     )
     overhead_social_paths = write_overhead_trajectory_figure(
         trajectory_paths,
@@ -310,51 +369,19 @@ def _render_cell_figures(ref: dict[str, Any], output_dir: Path) -> list[dict[str
         target_x_m=target_x,
         scenario=_condition_caption(ref, include_noise=False) + " · Raw Flight Samples",
         metadata=_raw_flight_metadata(social_metadata),
-        presentation="social",
+        options=FigureOptions(presentation="social"),
     )
-    for figure_group, paths, presentation in (
+    groups = (
         ("density", density_paths, "academic"),
         ("density_social", density_social_paths, "social"),
         ("overhead", overhead_paths, "academic"),
         ("overhead_social", overhead_social_paths, "social"),
-    ):
-        for kind, path in paths.items():
-            ledger.append(
-                {
-                    "figure_kind": f"{figure_group}_{kind}",
-                    "presentation": presentation,
-                    "source_kind": (
-                        "individual_supported_endpoints"
-                        if "density" in figure_group
-                        else "saved_illustrative_trajectories"
-                    ),
-                    "source_protocol": ref["source_protocol"],
-                    "cell": label,
-                    "target_x_m": target_x,
-                    "conditioning": (
-                        "individually supported endpoints by physical pattern"
-                        if "density" in figure_group
-                        else "saved raw trajectories, not paired by shot index"
-                    ),
-                    "valid_n_by_pattern": (
-                        metadata["valid_shots_by_pattern"]
-                        if "density" in figure_group
-                        else None
-                    ),
-                    "total_n_by_pattern": (
-                        metadata["total_shots_by_pattern"]
-                        if "density" in figure_group
-                        else None
-                    ),
-                    "saved_trajectory_samples_by_pattern": (
-                        {name: len(trajectory_paths[name]) for name in _PATTERNS}
-                        if "overhead" in figure_group
-                        else None
-                    ),
-                    "relative_path": str(path.relative_to(output_dir)),
-                    "sha256": _sha256(path),
-                }
-            )
+    )
+    ledger.extend(
+        _cell_figure_ledger(
+            ref, label, target_x, metadata, trajectory_paths, output_dir, groups
+        )
+    )
     return ledger
 
 
@@ -389,6 +416,17 @@ def _displayed_sample_indices(point_count: int, maximum: int = 600) -> np.ndarra
     if point_count < 1 or maximum < 1:
         raise ValueError("point_count and maximum must both be positive")
     return np.linspace(0, point_count - 1, min(point_count, maximum), dtype=int)
+
+
+@dataclass(frozen=True)
+class PairFigureContext:
+    """Bind the two saved conditions, display labels, and common physical target."""
+
+    first: dict[str, Any]
+    second: dict[str, Any]
+    comparison: str
+    labels: tuple[str, str]
+    target_x: float
 
 
 @dataclass
@@ -584,17 +622,15 @@ def _draw_pair_density_panels(
 def _write_pair_density_figure(
     point_sets: dict[str, list[tuple[float, float]]],
     *,
-    first: dict,
-    second: dict,
-    comparison: str,
-    first_label: str,
-    second_label: str,
-    target_x: float,
+    context: PairFigureContext,
     common_n: int,
     output_stem: Path,
     formats: tuple[str, ...] = ("png", "pdf", "svg"),
 ) -> dict[str, Path]:
     """Plot two conditions in six panels on common bins and density scale."""
+    first, second = context.first, context.second
+    comparison, target_x = context.comparison, context.target_x
+    first_label, second_label = context.labels
     import matplotlib.pyplot as plt
 
     estimate = shared_histogram_density(
@@ -797,17 +833,15 @@ def _create_pair_overhead_figure(
 def _write_pair_overhead_figure(
     trajectory_sets: dict[str, list[Any]],
     *,
-    first: dict,
-    second: dict,
-    comparison: str,
-    first_label: str,
-    second_label: str,
-    target_x: float,
+    context: PairFigureContext,
     output_stem: Path,
     academic_formats: tuple[str, ...] = ("png", "pdf", "svg"),
     include_social: bool = True,
 ) -> dict[str, Path]:
     """Write academic and dedicated 16:9 paired overhead exports."""
+    first, second = context.first, context.second
+    comparison, target_x = context.comparison, context.target_x
+    first_label, second_label = context.labels
     output_stem.parent.mkdir(parents=True, exist_ok=True)
     outputs: dict[str, Path] = {}
     if academic_formats:
@@ -914,12 +948,13 @@ def _render_pair_figures_core(
                     "density",
                     _write_pair_density_figure(
                         point_sets,
-                        first=first,
-                        second=second,
-                        comparison=comparison,
-                        first_label=first_label,
-                        second_label=second_label,
-                        target_x=target,
+                        context=PairFigureContext(
+                            first,
+                            second,
+                            comparison,
+                            (first_label, second_label),
+                            target,
+                        ),
                         common_n=len(common),
                         output_stem=stem.with_name(stem.name + "_density"),
                         formats=density_formats,
@@ -1049,12 +1084,13 @@ def _render_pair_figures_core(
                     "overhead",
                     _write_pair_overhead_figure(
                         trajectory_sets,
-                        first=first,
-                        second=second,
-                        comparison=comparison,
-                        first_label=first_label,
-                        second_label=second_label,
-                        target_x=target,
+                        context=PairFigureContext(
+                            first,
+                            second,
+                            comparison,
+                            (first_label, second_label),
+                            target,
+                        ),
                         output_stem=stem.with_name(stem.name + "_overhead"),
                         academic_formats=acad_formats,
                         include_social=inc_social,

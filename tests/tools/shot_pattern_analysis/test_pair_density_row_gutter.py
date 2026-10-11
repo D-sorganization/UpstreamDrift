@@ -7,6 +7,8 @@ and equal-aspect dispersion distributions such as Pitching Wedge and 7-Iron.
 
 from __future__ import annotations
 
+from src.tools.shot_pattern_analysis.matched_supplement_figures import PairFigureContext
+
 from pathlib import Path
 from typing import Any
 
@@ -117,12 +119,9 @@ def test_academic_density_row_gutter_has_readable_positive_clearance(
     output_stem = tmp_path / case_name
     outputs = _write_pair_density_figure(
         point_sets,
-        first=first_ref,
-        second=second_ref,
-        comparison="across_lean",
-        first_label="Lean 0°",
-        second_label="Lean 10°",
-        target_x=target_x_m,
+        context=PairFigureContext(
+            first_ref, second_ref, "across_lean", ("Lean 0°", "Lean 10°"), target_x_m
+        ),
         common_n=600,
         output_stem=output_stem,
     )

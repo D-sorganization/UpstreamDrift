@@ -84,3 +84,60 @@ def test_report_provenance_binds_noise_display_labels():
 
     expected = hashlib.sha256(Path(noise.__file__).read_bytes()).hexdigest()
     assert _report_source_hashes()["noise.py"] == expected
+
+
+def test_pair_figure_context_binds_labels_to_existing_references():
+    from dataclasses import FrozenInstanceError
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        PairFigureContext,
+    )
+
+    first, second = {"cell": "a"}, {"cell": "b"}
+    context = PairFigureContext(
+        first, second, "curve_strength", ("Curve ×1", "Curve ×2"), 125.0
+    )
+    assert context.first is first
+    assert context.second is second
+    assert context.labels == ("Curve ×1", "Curve ×2")
+    assert context.target_x == 125.0
+    with pytest.raises(FrozenInstanceError):
+        context.target_x = 126.0
+
+
+def test_cell_figure_ledger_separates_population_from_raw_flight_samples(tmp_path):
+    import hashlib
+    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+        _cell_figure_ledger,
+    )
+
+    path = tmp_path / "sample.png"
+    path.write_bytes(b"synthetic figure")
+    counts = {"Straight": 3, "Draw": 4, "Fade": 5}
+    metadata = {
+        "valid_shots_by_pattern": counts,
+        "total_shots_by_pattern": dict.fromkeys(counts, 10),
+    }
+    trajectories = {name: [None, None] for name in counts}
+    rows = _cell_figure_ledger(
+        {"source_protocol": "synthetic"},
+        "cell-a",
+        125.0,
+        metadata,
+        trajectories,
+        tmp_path,
+        (
+            ("density", {"png": path}, "academic"),
+            ("overhead", {"png": path}, "academic"),
+        ),
+    )
+    assert [row["figure_kind"] for row in rows] == ["density_png", "overhead_png"]
+    assert rows[0]["valid_n_by_pattern"] == counts
+    assert rows[0]["saved_trajectory_samples_by_pattern"] is None
+    assert rows[1]["valid_n_by_pattern"] is None
+    assert rows[1]["total_n_by_pattern"] is None
+    assert rows[1]["saved_trajectory_samples_by_pattern"] == dict.fromkeys(counts, 2)
+    assert rows[1]["conditioning"] == "saved raw trajectories, not paired by shot index"
+    assert all(row["relative_path"] == "sample.png" for row in rows)
+    assert all(
+        row["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest() for row in rows
+    )
