@@ -62,12 +62,8 @@ def _read(path: Path) -> dict[str, Any]:
 
 
 def _digest(value: Any) -> str:
-    return (
-        "sha256:"
-        + hashlib.sha256(
-            json.dumps(value, sort_keys=True, allow_nan=False).encode()
-        ).hexdigest()
-    )
+    encoded = json.dumps(value, sort_keys=True, allow_nan=False).encode("utf-8")
+    return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
 
 
 def impact_job_parents(library: NecromatcherLibrary, replay_id: str) -> dict[str, Any]:

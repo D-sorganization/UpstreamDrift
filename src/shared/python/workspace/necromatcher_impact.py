@@ -70,11 +70,10 @@ def _replay_parents(library: NecromatcherLibrary, replay_id: str, trace: Trace) 
         identity = _metadata_string(trace, name + "_id")
         digest = _metadata_string(trace, name + "_hash")
         asset = library.load_asset(identity)
-        if (
-            asset.kind != kind
-            or asset.session_id != replay.session_id
-            or asset.metadata["hash"] != digest
-        ):
+        mismatched_kind = asset.kind != kind
+        mismatched_session = asset.session_id != replay.session_id
+        mismatched_hash = asset.metadata["hash"] != digest
+        if mismatched_kind or mismatched_session or mismatched_hash:
             raise ValueError("Replay parent kind, session or hash differs")
         receipt.update({name + "_id": identity, name + "_hash": digest})
     return receipt
