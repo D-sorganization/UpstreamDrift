@@ -29,7 +29,7 @@ from numpy.typing import NDArray
 from src.tools.native_viewer_export.compositor import Image8, _check_image
 
 MAX_SAMPLES = 600  # source samples used for the curves (stride-thinned)
-STRIP_HEIGHT_FRAC = 0.24
+STRIP_HEIGHT_FRAC = 0.20  # keeps the strip below the impact card at 640x360
 STRIP_MARGIN_FRAC = 0.012
 HUD_CLEARANCE_PX = 52  # keep the HUD text lines (bottom edge) uncovered
 MIN_STRIP_PX = (160, 60)
