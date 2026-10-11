@@ -5,7 +5,7 @@ The single-frame and trajectory force-redistribution paths now set `converged` f
 ## Validation
 
 - Red: before the fix, the four parameterized status-8/status-9 cases failed because each otherwise-feasible candidate was reported converged.
-- Green: `py -3.12 -m pytest tests/unit/motion_matching/test_force_nullspace.py -q -n auto --timeout=60` �w^~)�t 23 passed.
+- Green: `py -3.12 -m pytest tests/unit/motion_matching/test_force_nullspace.py -q -n auto --timeout=60` : 23 passed.
 - Ruff check and format passed; file-size budget passed.
 - Design-manual governance passed with the repository's current `release=blocked-inventory-required` state.
 - MyPy with Python 3.12 reported 31 errors in 23 imported modules, including module-not-callable errors; this is not a clean scoped type-check result.
