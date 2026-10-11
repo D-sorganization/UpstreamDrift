@@ -695,7 +695,11 @@ def export_swing(
         counts[plans[0].suffix],
         glyph_counts=tuple(glyph_counts),
         frames_by_suffix=counts,
-        impact_card=card.to_dict() if card is not None else outcome,
+        impact_card=(
+            card.to_dict()
+            if card is not None
+            else (outcome if isinstance(outcome, str) else None)
+        ),
         ball=ball_record,
         inset_strip=(
             strip_outcome.record()
