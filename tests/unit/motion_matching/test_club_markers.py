@@ -23,7 +23,12 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DOCS = REPO_ROOT / "docs" / "development" / "full_body_models"
 CANDIDATE = DOCS / "evidence" / "native_candidates" / "returned81_candidate.json"
 IRON_MARKERS = DOCS / "evidence" / "club_markers" / "iron7.json"
+DRIVER_MARKERS = DOCS / "evidence" / "club_markers" / "driver.json"
 HEAD_TRIAD = ("Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3")
+CLUB_FILES = {
+    "iron7": (IRON_MARKERS, "full_body_spec_anthro_iron7.json", "iron"),
+    "driver": (DRIVER_MARKERS, "full_body_spec_anthro_driver.json", "driver"),
+}
 
 
 def _club_labels(attachments: dict) -> set[str]:
@@ -41,11 +46,13 @@ def _document(name: str) -> dict:
     return json.loads((DOCS / name).read_text(encoding="utf-8"))
 
 
-def test_committed_iron_document_carries_the_iron_cluster() -> None:
-    iron = load_club_markers(IRON_MARKERS)
-    attachments = _document("full_body_spec_anthro_iron7.json")["marker_attachments"]
-    assert _club_labels(attachments) == set(iron.offsets_m)
-    for label, offset in iron.offsets_m.items():
+@pytest.mark.parametrize("club", sorted(CLUB_FILES))
+def test_committed_document_carries_its_club_cluster(club: str) -> None:
+    markers_path, document_name, _ = CLUB_FILES[club]
+    markers = load_club_markers(markers_path)
+    attachments = _document(document_name)["marker_attachments"]
+    assert _club_labels(attachments) == set(markers.offsets_m)
+    for label, offset in markers.offsets_m.items():
         assert attachments[label]["offset_m"] == pytest.approx(list(offset), abs=0)
 
 
@@ -58,23 +65,38 @@ def test_iron_head_triad_is_not_the_driver_triad() -> None:
     assert max(abs(a - b) for a, b in zip(driver_edges, iron_edges, strict=True)) > 0.02
 
 
-def test_driver_document_keeps_the_native_candidate_cluster() -> None:
+def test_driver_cluster_is_the_native_head_triad_re_placed_rigidly() -> None:
+    # #12221: the static calibration keeps the native triad's shape and only
+    # moves it on the club, so the measured cluster is the same head.
     native = json.loads(CANDIDATE.read_text(encoding="utf-8"))
-    attachments = _document("full_body_spec_anthro_driver.json")["marker_attachments"]
-    for label, body, offset in zip(
-        native["marker_labels"],
-        native["marker_bodies"],
-        native["marker_offsets_m"],
-        strict=True,
-    ):
-        if body == CLUB_MARKER_BODY:
-            assert attachments[label]["offset_m"] == pytest.approx(offset, abs=0)
+    native_offsets = {
+        label: offset
+        for label, body, offset in zip(
+            native["marker_labels"],
+            native["marker_bodies"],
+            native["marker_offsets_m"],
+            strict=True,
+        )
+        if body == CLUB_MARKER_BODY
+    }
+    driver = load_club_markers(DRIVER_MARKERS)
+    assert set(driver.offsets_m) == set(native_offsets)
+    assert driver.head_triad_edges_m == pytest.approx(
+        _edges_m(native_offsets), abs=5e-4
+    )
+    moved = max(
+        float(np.linalg.norm(np.subtract(driver.offsets_m[k], native_offsets[k])))
+        for k in HEAD_TRIAD
+    )
+    assert moved > 0.01
 
 
-def test_iron_cluster_records_its_measured_source() -> None:
-    iron = load_club_markers(IRON_MARKERS)
-    assert iron.club == "iron7"
-    source = iron.source
+@pytest.mark.parametrize("club", sorted(CLUB_FILES))
+def test_cluster_records_its_measured_source(club: str) -> None:
+    markers_path, _, capture = CLUB_FILES[club]
+    markers = load_club_markers(markers_path)
+    assert markers.club == club
+    source = markers.source
     receipt = REPO_ROOT / source["receipt"]
     assert receipt.is_file()
     assert source["method"].startswith("static-seed calibration")
@@ -82,8 +104,10 @@ def test_iron_cluster_records_its_measured_source() -> None:
     # The receipt is regenerated on the new document, so the source is pinned
     # to the commit the calibrated offsets were read at.
     assert len(source["receipt_commit"]) == 40
-    assert source["capture"] == "iron"
-    assert iron.head_triad_edges_m == pytest.approx(_edges_m(iron.offsets_m), abs=1e-9)
+    assert source["capture"] == capture
+    assert markers.head_triad_edges_m == pytest.approx(
+        _edges_m(markers.offsets_m), abs=1e-9
+    )
 
 
 def test_derive_reads_the_calibrated_club_attachments(tmp_path: Path) -> None:
@@ -151,7 +175,8 @@ def test_marker_seeds_reject_a_partial_club_cluster() -> None:
 
 def test_assets_resolve_a_cluster_per_club() -> None:
     assert assets.get_club_markers("iron7") == IRON_MARKERS
-    # The native candidate's cluster is the driver's, so the driver has no file.
-    assert assets.get_club_markers("driver") is None
+    # #12221: the driver carries its static-calibrated cluster, not the native one.
+    assert assets.get_club_markers("driver") == DRIVER_MARKERS
+    assert assets.get_club_markers("wedge") is None
     with pytest.raises(FileNotFoundError):
         assets.get_club_markers("iron7", REPO_ROOT / "missing.json")

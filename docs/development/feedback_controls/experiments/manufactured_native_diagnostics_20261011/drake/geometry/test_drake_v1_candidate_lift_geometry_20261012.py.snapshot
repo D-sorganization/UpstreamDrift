@@ -1,0 +1,222 @@
+"""Pure source-shaped tests for the Drake geometry-only observer."""
+
+from __future__ import annotations
+
+from typing import NamedTuple
+
+import numpy as np
+import pytest
+
+from drake_v1_candidate_lift_geometry_20261012 import (
+    drake_contact_observation,
+    drake_weld_observation,
+    require_supported_drake_version,
+    svd_report,
+    verify_pydrake_origin,
+    verify_drake_sources,
+)
+
+
+ORDER = tuple(f"coordinate_{index}" for index in range(41))
+
+
+class Sample(NamedTuple):
+    contact_point_m: np.ndarray
+    normal_force_n: np.ndarray
+    friction_force_n: np.ndarray
+    penetration_m: float
+    penetration_rate_m_s: float
+
+
+class Frame:
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+class FakePlant:
+    def __init__(self, jacobian: np.ndarray) -> None:
+        self.jacobian = jacobian
+        self.lookups: list[str] = []
+
+    def GetFrameByName(self, name: str) -> Frame:
+        self.lookups.append(name)
+        return Frame(name)
+
+    def CalcJacobianSpatialVelocity(
+        self, context, wrt, frame_b, point, frame_a, expressed_in
+    ) -> np.ndarray:
+        assert context == "state"
+        assert wrt == "kV"
+        assert frame_b.name == "native_closure_b"
+        assert frame_a.name == "native_closure_a"
+        assert expressed_in.name == "native_closure_a"
+        assert np.array_equal(point, np.zeros(3))
+        return self.jacobian
+
+
+class FakeOwner:
+    coordinate_order = ORDER
+    context = "state"
+
+    def __init__(self, jacobian: np.ndarray) -> None:
+        self.plant = FakePlant(jacobian)
+        self.acceleration_calls = 0
+
+    @staticmethod
+    def closure_residuals(coordinates, rates):
+        assert tuple(coordinates) == ORDER
+        assert tuple(rates) == ORDER
+        return np.zeros(6), np.zeros(6)
+
+    @staticmethod
+    def named_columns(jacobian):
+        # The source adapter maps Drake's plant columns into spec order.
+        return np.asarray(jacobian)[:, np.arange(41)]
+
+    @staticmethod
+    def to_plant_velocities(values):
+        return values.copy()
+
+    def contact_forces(self, coordinates, rates):
+        assert tuple(coordinates) == ORDER
+        assert tuple(rates) == ORDER
+        return {
+            name: Sample(np.zeros(3), np.zeros(3), np.zeros(3), 0.0, 0.0)
+            for name in ("forefoot_l", "forefoot_r", "heel_l", "heel_r")
+        }
+
+    def accelerations(self, *_args):  # pragma: no cover - must remain unused
+        self.acceleration_calls += 1
+        raise AssertionError("geometry observer must not request acceleration")
+
+
+class FakeApi:
+    class JacobianWrtVariable:
+        kV = "kV"
+
+
+def test_drake_observer_uses_public_frames_jacobian_and_source_column_mapping() -> None:
+    jacobian = np.zeros((6, 41))
+    jacobian[:, :6] = np.eye(6)
+    owner = FakeOwner(jacobian)
+    report = drake_weld_observation(
+        owner,
+        FakeApi,
+        dict.fromkeys(ORDER, 0.0),
+        dict.fromkeys(ORDER, 0.0),
+        ORDER,
+    )
+    assert owner.plant.lookups == ["native_closure_a", "native_closure_b"]
+    assert report["native_spatial_jacobian_svd"]["shape"] == [6, 41]
+    assert report["native_spatial_jacobian_svd"]["rank"] == 6
+    assert report["closure_residual_and_direct_jacobian_rate_agree"] is True
+    assert owner.acceleration_calls == 0
+
+
+def test_drake_contact_observer_requires_exact_named_finite_samples() -> None:
+    report = drake_contact_observation(
+        FakeOwner(np.zeros((6, 41))),
+        dict.fromkeys(ORDER, 0.0),
+        dict.fromkeys(ORDER, 0.0),
+    )
+    assert report["sphere_count"] == 4
+    assert set(report["spheres"]) == {
+        "forefoot_l",
+        "forefoot_r",
+        "heel_l",
+        "heel_r",
+    }
+
+
+def test_drake_weld_rejects_nonfinite_residual_before_jacobian_query() -> None:
+    class InvalidOwner(FakeOwner):
+        @staticmethod
+        def closure_residuals(_coordinates, _rates):
+            bad = np.zeros(6)
+            bad[0] = np.nan
+            return bad, np.zeros(6)
+
+    owner = InvalidOwner(np.zeros((6, 41)))
+    with pytest.raises(ValueError, match="finite six-vectors"):
+        drake_weld_observation(
+            owner,
+            FakeApi,
+            dict.fromkeys(ORDER, 0.0),
+            dict.fromkeys(ORDER, 0.0),
+            ORDER,
+        )
+    assert owner.plant.lookups == []
+    assert owner.acceleration_calls == 0
+
+
+def test_drake_public_spatial_jacobian_rate_must_match_adapter_residual() -> None:
+    jacobian = np.zeros((6, 41))
+    jacobian[:, :6] = np.eye(6)
+    owner = FakeOwner(jacobian)
+    rates = dict.fromkeys(ORDER, 0.0)
+    rates[ORDER[0]] = 1.0
+    with pytest.raises(ValueError, match="does not match"):
+        drake_weld_observation(owner, FakeApi, dict.fromkeys(ORDER, 0.0), rates, ORDER)
+    assert owner.acceleration_calls == 0
+
+
+def test_source_hash_audit_rejects_missing_drake_file(tmp_path) -> None:
+    with pytest.raises(FileNotFoundError):
+        verify_drake_sources(tmp_path)
+
+
+def test_svd_report_rejects_wrong_dimension_or_nonfinite_values() -> None:
+    with pytest.raises(ValueError, match="finite matrix"):
+        svd_report(np.full((6, 41), np.nan))
+    with pytest.raises(ValueError, match="nonempty finite matrix"):
+        svd_report(np.empty((0, 41)))
+
+
+@pytest.mark.parametrize("version", ["1.57.0", "1.57.9"])
+def test_reviewed_drake_patch_series_is_accepted(version: str) -> None:
+    assert require_supported_drake_version(version) == version
+
+
+@pytest.mark.parametrize("version", ["1.56.0", "1.58.0", "1.57", "1.57.0.dev1"])
+def test_unreviewed_drake_versions_fail_closed(version: str) -> None:
+    with pytest.raises(RuntimeError, match="reviewed for 1.57.x"):
+        require_supported_drake_version(version)
+
+
+def test_installed_drake_inside_pinned_venv_is_accepted(tmp_path) -> None:
+    repo = tmp_path / "archive"
+    prefix = repo / ".venv312"
+    purelib = prefix / "lib/python3.12/site-packages"
+    package = purelib / "pydrake/__init__.py"
+    package.parent.mkdir(parents=True)
+    package.write_text("", encoding="utf-8")
+    assert (
+        verify_pydrake_origin(repo, prefix, purelib, package, "pydrake.multibody.plant")
+        == package.resolve()
+    )
+
+
+def test_drake_source_stub_is_rejected(tmp_path) -> None:
+    repo = tmp_path / "archive"
+    prefix = repo / ".venv312"
+    purelib = prefix / "lib/python3.12/site-packages"
+    stub = repo / "src/pydrake/__init__.py"
+    stub.parent.mkdir(parents=True)
+    stub.write_text("", encoding="utf-8")
+    with pytest.raises(ImportError, match="installed venv package"):
+        verify_pydrake_origin(repo, prefix, purelib, stub, "pydrake.multibody.plant")
+
+
+def test_drake_from_different_venv_is_rejected(tmp_path) -> None:
+    repo = tmp_path / "archive"
+    expected_prefix = repo / ".venv312"
+    other_prefix = tmp_path / "other-venv"
+    purelib = other_prefix / "lib/python3.12/site-packages"
+    package = purelib / "pydrake/__init__.py"
+    package.parent.mkdir(parents=True)
+    package.write_text("", encoding="utf-8")
+    with pytest.raises(ImportError, match="not the pinned archive"):
+        verify_pydrake_origin(
+            repo, other_prefix, purelib, package, "pydrake.multibody.plant"
+        )
+    assert expected_prefix != other_prefix

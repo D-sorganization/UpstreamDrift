@@ -1,0 +1,725 @@
+"""One-shot synthetic closure-assembly probe for exact full_body_spec_v1.
+
+This diagnostic is non-qualifying. It performs a bounded closure projection,
+but no control/trajectory optimization; it changes no model data and calls
+constrained acceleration only after explicit gates pass.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.metadata
+import json
+import math
+import os
+import platform
+import sys
+import tempfile
+import traceback
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+
+COMMIT = "9e5f87c4dd31fc3137fc204d98337633fa5c4855"
+MANIFEST_SHA256 = "c5ec40129d3b28368142eadfb33e8e1464f7c6e4d4505dd5a6d2f86870d4f569"
+OVERLAY_COMMIT = "92738d3cab3865bf727ba96a9cca9388d52ef955"
+OVERLAY_ARTIFACT = Path(
+    "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+    "facade_overlay_import_attempt2"
+)
+FACADE_INIT = Path("src/shared/python/motion_matching/same_input/__init__.py")
+FACADE_BEFORE_IMAGE_SHA256 = (
+    "bcbdb013df75947db80f979fd36f71aa06ef1890dd87c407c9d834bbc2233e26"
+)
+FACADE_OVERLAY_SHA256 = (
+    "e183d4d7b27799bd8790baa7e1c99d0aebeca9b709e0ec04554b8848059e1774"
+)
+FULL = Path("docs/development/full_body_models/full_body_spec_v1.json")
+NATIVE = Path("src/engines/physics_engines/pinocchio/python/native_model.py")
+CLOSURE = Path("src/shared/python/motion_matching/same_input/closure.py")
+CONTACT = Path("src/shared/python/motion_matching/contact_law.py")
+ACCEPTANCE = Path("src/shared/python/motion_matching/acceptance.py")
+FIXTURE_TEST = Path("tests/unit/motion_matching/test_pinocchio_full_body_builder.py")
+PYPROJECT = Path("pyproject.toml")
+TEST_BOOTSTRAP = Path("tests/conftest.py")
+BUNKER_INIT = Path("src/bunkershot3d/__init__.py")
+EXPECTED = {
+    FULL: "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    NATIVE: "782402d13c152c7bdd0bee76d7b084e3bef8a697cb5c5b0805021d0fd81c8a92",
+    CLOSURE: "77983f2018216d514d36d47d56d8f9c061f46ec69372189042c2ea4d3ad9679e",
+    CONTACT: "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c",
+    ACCEPTANCE: "6cf5330b1527c78b5de1c53e2cd220fd24445d61a1b273c2cc3007d7495d9ae4",
+    FIXTURE_TEST: "3f99fa206f3ae7c28b69bb68a0a4dd945ae7cda1995c2becc6e3bc09c85905da",
+    PYPROJECT: "c1866dde932edd353b22e57c79ad6d5e6352b22c728e75d13ae280430aec667a",
+    TEST_BOOTSTRAP: "39f7aa2143bb6d626d0b4420eb73b47169aa2724ef8610c6c84029c291ed1332",
+    BUNKER_INIT: "16fdb491cba2e67ca3574c8341aa6a393ae613c3845271c43ab6b2ca8255b39f",
+    FACADE_INIT: FACADE_OVERLAY_SHA256,
+}
+# Small asymmetric perturbations avoid the known all-zero upper-chain pose.
+# These are diagnostic seed values, not anatomical measurements or source limits.
+SEED_ANGLES_RAD = {
+    "HipInputX": 0.08, "HipInputY": -0.11, "HipInputZ": 0.06,
+    "SpineInputX": 0.05, "SpineInputY": -0.04, "TorsoInput": 0.08,
+    "LEInput": 0.10, "LFInput": 0.22,
+    "LScapInputX": 0.06, "LScapInputY": -0.08,
+    "LSInputX": 0.18, "LSInputY": -0.13, "LSInputZ": 0.09,
+    "LWInputX": 0.11, "LWInputY": -0.09,
+    "REInput": -0.08, "RFInput": -0.20,
+    "RScapInputX": -0.05, "RScapInputY": 0.09,
+    "RSInputX": -0.17, "RSInputY": 0.12, "RSInputZ": -0.08,
+    "RWInputX": -0.12, "RWInputY": 0.16,
+}
+BOOTSTRAP_ANGLE_ABS_MAX_RAD = 0.50
+BOOTSTRAP_ROOT_TRANSLATION_ABS_MAX_M = 1.50
+TARGET_MAX_FOOT_PENETRATION_M = 0.003
+MAX_PENETRATION_M = 0.010  # existing AcceptanceGates default
+MAX_NORMAL_FORCE_N = 3.0 * 80.0 * 9.81  # conservative diagnostic bound only
+MAX_CLOSURE_TRANSLATION_M = 0.005  # existing AcceptanceGates default
+MAX_CLOSURE_ROTATION_RAD = 0.05  # existing AcceptanceGates default
+
+
+def sha(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
+    """Atomically replace a JSON receipt and propagate write failures."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    encoded = json.dumps(json_safe(payload), indent=2, sort_keys=True, allow_nan=False) + "\n"
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent,
+            prefix=f".{path.name}.", suffix=".tmp", delete=False,
+        ) as stream:
+            temporary = Path(stream.name)
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    except Exception:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        raise
+
+
+def source_import_paths(repo: Path) -> tuple[Path, Path, Path]:
+    """Return the source roots used by tests/conftest.py, in precedence order."""
+    return (
+        (repo / "src").resolve(),
+        (repo / "src" / "shared" / "python").resolve(),
+        repo.resolve(),
+    )
+
+
+def install_source_import_paths(repo: Path) -> tuple[str, ...]:
+    paths = source_import_paths(repo)
+    if not all(path.is_dir() for path in paths):
+        raise RuntimeError("one or more documented source import roots are absent")
+    normalized = tuple(str(path) for path in paths)
+    for entry in normalized:
+        while entry in sys.path:
+            sys.path.remove(entry)
+    sys.path[:0] = normalized
+    return normalized
+
+
+def source_prismatic_axis_world(
+    specification: dict[str, Any], coordinate_name: str
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Derive a top-level prismatic primitive axis from the frozen source frames."""
+    matches = [
+        (joint, index, primitive)
+        for joint in specification["joints"]
+        for index, primitive in enumerate(joint["primitives"])
+        if primitive["coordinate"] == coordinate_name
+    ]
+    if len(matches) != 1:
+        raise ValueError(f"expected one source primitive for {coordinate_name}")
+    joint, primitive_index, primitive = matches[0]
+    if joint["parent"] != "world" or primitive["primitive"] not in {"Px", "Py", "Pz"}:
+        raise ValueError("root-height coordinate must be a world-parented prismatic primitive")
+    if any(
+        entry["primitive"] not in {"Px", "Py", "Pz"}
+        for entry in joint["primitives"][:primitive_index]
+    ):
+        raise ValueError("preceding root primitives rotate the translation axis")
+    transform = np.asarray(joint["parent_to_base"], dtype=float)
+    if transform.shape != (4, 4) or not np.isfinite(transform).all():
+        raise ValueError("root primitive parent transform is invalid")
+    rotation = transform[:3, :3]
+    if not np.allclose(rotation.T @ rotation, np.eye(3), rtol=0.0, atol=1e-10):
+        raise ValueError("root primitive parent rotation is not orthonormal")
+    primitive_axis = np.zeros(3)
+    primitive_axis[{"Px": 0, "Py": 1, "Pz": 2}[primitive["primitive"]]] = 1.0
+    axis_world = rotation @ primitive_axis
+    details = {
+        "joint_name": joint["name"],
+        "parent_body": joint["parent"],
+        "coordinate": coordinate_name,
+        "primitive": primitive["primitive"],
+        "primitive_index": primitive_index,
+        "parent_to_base_rotation": rotation.tolist(),
+        "axis_world": axis_world.tolist(),
+    }
+    return axis_world, details
+
+
+def root_translation_for_target_gap(
+    signed_gaps_m: dict[str, float],
+    ground_normal: np.ndarray,
+    translation_axis_world: np.ndarray,
+    target_penetration_m: float,
+) -> tuple[float, float]:
+    """Find the source-coordinate delta that sets the lowest signed gap."""
+    gaps = np.asarray(list(signed_gaps_m.values()), dtype=float)
+    normal = np.asarray(ground_normal, dtype=float)
+    axis = np.asarray(translation_axis_world, dtype=float)
+    if not signed_gaps_m or gaps.ndim != 1 or not np.isfinite(gaps).all():
+        raise ValueError("foot signed gaps must be a nonempty finite vector")
+    if normal.shape != (3,) or axis.shape != (3,) or not np.isfinite(np.r_[normal, axis]).all():
+        raise ValueError("ground normal and source translation axis must be finite 3-vectors")
+    slope = float(normal @ axis)
+    if not math.isfinite(slope) or slope <= 1e-8:
+        raise ValueError("source translation axis must move feet away from the ground")
+    if not math.isfinite(target_penetration_m) or target_penetration_m < 0:
+        raise ValueError("target penetration must be finite and nonnegative")
+    delta = (-target_penetration_m - float(np.min(gaps))) / slope
+    if not math.isfinite(delta):
+        raise ValueError("source root translation delta is not finite")
+    return delta, slope
+
+
+def verify_facade_overlay(repo: Path) -> dict[str, Any]:
+    """Bind the changed facade to the retained 9e base file and overlay receipt."""
+    binding_path = OVERLAY_ARTIFACT / "overlay_binding_and_import_result.json"
+    if not binding_path.is_file():
+        raise RuntimeError("source facade overlay binding receipt is missing")
+    binding = json.loads(binding_path.read_text(encoding="utf-8"))
+    overlay = binding.get("overlay")
+    if not isinstance(overlay, dict):
+        raise RuntimeError("source facade overlay metadata is missing")
+    before_image = Path(str(overlay.get("original_before_image_artifact", "")))
+    try:
+        before_image.resolve().relative_to(OVERLAY_ARTIFACT.resolve())
+    except ValueError as exc:
+        raise RuntimeError("facade before-image is outside the attempt artifact") from exc
+    expected_binding = {
+        "schema_version": "pinocchio-source-facade-overlay-import-check-v1",
+        "base_source_archive": str(repo.resolve()),
+        "base_source_commit": COMMIT,
+        "base_manifest_sha256": MANIFEST_SHA256,
+        "commit": OVERLAY_COMMIT,
+        "path": FACADE_INIT.as_posix(),
+        "original_before_image_sha256": FACADE_BEFORE_IMAGE_SHA256,
+        "applied_facade_sha256": FACADE_OVERLAY_SHA256,
+    }
+    actual_binding = {
+        "schema_version": binding.get("schema_version"),
+        "base_source_archive": binding.get("base_source_archive"),
+        "base_source_commit": binding.get("base_source_commit"),
+        "base_manifest_sha256": binding.get("base_manifest_sha256"),
+        "commit": overlay.get("commit"),
+        "path": overlay.get("path"),
+        "original_before_image_sha256": sha(before_image),
+        "applied_facade_sha256": sha(repo / FACADE_INIT),
+    }
+    if actual_binding != expected_binding:
+        raise RuntimeError(
+            f"source facade overlay identity mismatch: {actual_binding}"
+        )
+    if overlay.get("original_before_image_sha256") != FACADE_BEFORE_IMAGE_SHA256:
+        raise RuntimeError("overlay receipt does not bind its original before-image")
+    if overlay.get("applied_facade_sha256") != FACADE_OVERLAY_SHA256:
+        raise RuntimeError("overlay receipt does not bind the applied facade bytes")
+    if sha(repo / "manifest.json") != MANIFEST_SHA256:
+        raise RuntimeError("base source archive manifest changed after overlay")
+    return binding
+
+
+def verify_sources(repo: Path) -> dict[str, str]:
+    """Verify the frozen inputs and the one explicitly declared facade overlay."""
+    manifest = repo / "manifest.json"
+    if sha(manifest) != MANIFEST_SHA256:
+        raise RuntimeError("source archive manifest hash mismatch")
+    verify_facade_overlay(repo)
+    source_hashes = {str(path): sha(repo / path) for path in EXPECTED}
+    mismatch = {
+        path: {"expected": EXPECTED[Path(path)], "actual": digest}
+        for path, digest in source_hashes.items() if digest != EXPECTED[Path(path)]
+    }
+    if mismatch:
+        raise RuntimeError(f"source inputs differ from exact {COMMIT}: {mismatch}")
+    return source_hashes
+
+
+def import_native_support(repo: Path) -> tuple[Any, Any, Any, dict[str, Any]]:
+    paths = install_source_import_paths(repo)
+    import pinocchio as pin
+    import bunkershot3d
+    from src.engines.physics_engines.pinocchio.python.native_model import FullBodyPinocchioModel
+    from src.shared.python.motion_matching.same_input.closure import project_to_closure
+
+    expected_bunker_package = (repo / "src" / "bunkershot3d" / "__init__.py").resolve()
+    actual_bunker_package = Path(bunkershot3d.__file__).resolve()
+    if actual_bunker_package != expected_bunker_package:
+        raise RuntimeError(f"bunkershot3d resolved outside the exact source bundle: {actual_bunker_package}")
+    return pin, FullBodyPinocchioModel, project_to_closure, {
+        "source_import_paths": list(paths),
+        "bunkershot3d_package": str(actual_bunker_package),
+        "bunkershot3d_package_sha256": sha(actual_bunker_package),
+    }
+
+
+def json_safe(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(k): json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple, np.ndarray)):
+        return [json_safe(v) for v in value]
+    if isinstance(value, (float, np.floating)) and not math.isfinite(float(value)):
+        return "NaN" if math.isnan(float(value)) else ("+Infinity" if value > 0 else "-Infinity")
+    if isinstance(value, np.integer):
+        return int(value)
+    return value
+
+
+def svd_report(jacobian: Any) -> dict[str, Any]:
+    matrix = np.asarray(jacobian, dtype=float)
+    singular_values = np.linalg.svd(matrix, compute_uv=False)
+    tolerance = float(max(matrix.shape) * np.finfo(float).eps * singular_values[0])
+    return {
+        "shape": list(matrix.shape),
+        "all_finite": bool(np.isfinite(matrix).all()),
+        "singular_values": [float(x) for x in singular_values],
+        "numpy_default_rank_tolerance": tolerance,
+        "rank": int(np.linalg.matrix_rank(matrix)),
+    }
+
+
+def contact_report(owner: Any, coordinates: dict[str, float], rates: dict[str, float]) -> dict[str, Any]:
+    samples = owner.contact_forces(coordinates, rates)
+    rows: dict[str, Any] = {}
+    normal_total = 0.0
+    for name, sample in samples.items():
+        normal = np.asarray(sample.normal_force_n, dtype=float)
+        friction = np.asarray(sample.friction_force_n, dtype=float)
+        normal_total += float(np.linalg.norm(normal))
+        rows[name] = {
+            "penetration_m": float(sample.penetration_m),
+            "penetration_rate_m_s": float(sample.penetration_rate_m_s),
+            "contact_point_m": np.asarray(sample.contact_point_m, dtype=float).tolist(),
+            "normal_force_n": normal.tolist(),
+            "friction_force_n": friction.tolist(),
+            "all_finite": bool(np.isfinite(np.r_[normal, friction, sample.contact_point_m]).all()),
+        }
+    return {
+        "spheres": rows,
+        "max_penetration_m": max((float(s.penetration_m) for s in samples.values()), default=0.0),
+        "summed_normal_force_n": normal_total,
+    }
+
+
+def same_contact_geometry(before: dict[str, Any], after: dict[str, Any]) -> bool:
+    """Require closure assembly to leave the source foot/contact branch fixed."""
+    first, second = before["spheres"], after["spheres"]
+    if first.keys() != second.keys():
+        return False
+    for name in first:
+        for field in ("penetration_m", "penetration_rate_m_s"):
+            if not math.isclose(first[name][field], second[name][field], rel_tol=0, abs_tol=1e-12):
+                return False
+        for field in ("contact_point_m", "normal_force_n", "friction_force_n"):
+            if not np.allclose(first[name][field], second[name][field], rtol=0, atol=1e-12):
+                return False
+    return True
+
+
+class NativeClosureProjectionView:
+    """Adapt native refreshed weld data to the shared no-dynamics projector."""
+
+    def __init__(self, owner: Any, names: tuple[str, ...], pin_module: Any) -> None:
+        self.owner = owner
+        self.names = names
+        self.pin = pin_module
+
+    def _refresh(self, q: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        named = dict(zip(self.names, map(float, q), strict=True))
+        jacobian = self.owner.closure_force_jacobian(named).jacobian
+        # closure_force_jacobian refreshes c1Mc2 and the native velocity
+        # constraint Jacobian without invoking constraintDynamics. The public
+        # closure_position_linearization currently calls closure_residuals,
+        # which invokes constrained acceleration, so reproduce its documented
+        # native residual -log6(c1Mc2) from the refreshed Pinocchio placement.
+        # Never read closure_errors: it is explicitly stale until acceleration.
+        relative = self.owner.constraint_data[0].c1Mc2
+        pose = -np.asarray(self.pin.log6(relative).vector, dtype=float)
+        return pose, np.asarray(jacobian, dtype=float)
+
+    def closure_pose_residual(self, q: np.ndarray) -> np.ndarray:
+        return self._refresh(q)[0]
+
+    def closure_rate_matrix(self, q: np.ndarray) -> np.ndarray:
+        return self._refresh(q)[1]
+
+
+def _assemble_once(
+    repo: Path,
+    script: Path,
+    output: Path,
+    checkpoint: Any,
+) -> dict[str, Any]:
+    manifest = repo / "manifest.json"
+    source_hashes = verify_sources(repo)
+    checkpoint("source verification", "completed", {"source_hashes": source_hashes})
+    checkpoint("SDK import", "started", {})
+    pin, FullBodyPinocchioModel, project_to_closure, import_details = import_native_support(repo)
+    checkpoint("SDK import", "completed", import_details)
+
+    pin_version = str(getattr(pin, "__version__", "unknown"))
+    if pin_version != "3.8.0":
+        raise RuntimeError(f"expected Pinocchio 3.8.0, found {pin_version}")
+    pin_module = Path(pin.__file__).resolve()
+    native_binaries = sorted(
+        {
+            path.resolve()
+            for pattern in ("*.so", "*.so.*", "*.dylib", "*.dll", "*.pyd")
+            for path in pin_module.parent.rglob(pattern)
+            if path.is_file()
+        }
+    )
+    spec = json.loads((repo / FULL).read_text(encoding="utf-8"))
+    checkpoint("native model construction", "started", {})
+    owner = FullBodyPinocchioModel(spec)
+    checkpoint("native model construction", "completed", {
+        "coordinate_count": len(owner.coordinate_order),
+    })
+    names = owner.coordinate_order
+    if len(names) != 41 or set(SEED_ANGLES_RAD) - set(names):
+        raise RuntimeError("unexpected coordinate inventory for deterministic seed")
+    q_named = dict.fromkeys(names, 0.0)
+    q_named.update(SEED_ANGLES_RAD)
+    zero_named = dict.fromkeys(names, 0.0)
+
+    # Position the root using the exact source primitive axis and foot geometry.
+    gravity = np.asarray(spec["gravity_m_s2"], dtype=float)
+    normal = np.asarray(owner.ground.normal, dtype=float)
+    root_axis_world, root_axis_details = source_prismatic_axis_world(
+        spec, "TranslationInputZ"
+    )
+    if gravity.shape != (3,) or not np.isfinite(gravity).all():
+        raise RuntimeError("source gravity is invalid")
+    seed_contacts = contact_report(owner, q_named, zero_named)
+    ground_height = float(owner.ground.height_m)
+    surface_gaps = {
+        name: float(normal @ np.asarray(row["contact_point_m"]) - ground_height)
+        for name, row in seed_contacts["spheres"].items()
+    }
+    translation_delta, signed_gap_slope = root_translation_for_target_gap(
+        surface_gaps, normal, root_axis_world, TARGET_MAX_FOOT_PENETRATION_M
+    )
+    q_named["TranslationInputZ"] += translation_delta
+    predicted_shift = translation_delta * root_axis_world
+    initial_contacts = contact_report(owner, q_named, zero_named)
+    if initial_contacts["spheres"].keys() != seed_contacts["spheres"].keys():
+        raise RuntimeError("foot contact inventory changed during root translation")
+    point_shift_errors = {
+        name: float(np.max(np.abs(
+            np.asarray(initial_contacts["spheres"][name]["contact_point_m"])
+            - np.asarray(seed_contacts["spheres"][name]["contact_point_m"])
+            - predicted_shift
+        )))
+        for name in surface_gaps
+    }
+    actual_signed_gaps = {
+        name: float(normal @ np.asarray(row["contact_point_m"]) - ground_height)
+        for name, row in initial_contacts["spheres"].items()
+    }
+    target_penetration_verified = (
+        all(error <= 1e-8 for error in point_shift_errors.values())
+        and abs(initial_contacts["max_penetration_m"] - TARGET_MAX_FOOT_PENETRATION_M) <= 1e-8
+        and all(
+            abs(actual_signed_gaps[name] - (surface_gaps[name] + signed_gap_slope * translation_delta)) <= 1e-8
+            for name in surface_gaps
+        )
+    )
+    if not target_penetration_verified:
+        raise RuntimeError("source-axis root translation did not produce the declared target penetration")
+
+    seed = np.array([q_named[name] for name in names], dtype=float)
+    if abs(q_named["TranslationInputZ"]) > BOOTSTRAP_ROOT_TRANSLATION_ABS_MAX_M:
+        raise RuntimeError("geometry-derived root height exceeds diagnostic envelope")
+    initial_jac = owner.closure_force_jacobian(q_named)
+    initial_rank = svd_report(initial_jac.jacobian)
+    projection_view = NativeClosureProjectionView(owner, names, pin)
+    initial_pose, _ = projection_view._refresh(seed)
+    initial_velocity_error = initial_jac.jacobian @ np.zeros(len(names))
+    initial_pose = np.asarray(initial_pose, dtype=float)
+    initial_velocity_error = np.asarray(initial_velocity_error, dtype=float)
+    result: dict[str, Any] = {
+        "schema_version": "full-body-v1-synthetic-closure-assembly-diagnostic-v1",
+        "created_utc": datetime.now(UTC).isoformat(),
+        "qualification": "none; synthetic geometry-seeded diagnostic only",
+        "source_commit": COMMIT,
+        "manifest_sha256": MANIFEST_SHA256,
+        "source_hashes_before": source_hashes,
+        "script_sha256": sha(script),
+        "runtime": {
+            "python": sys.version,
+            "platform": platform.platform(),
+            "pinocchio_version": pin_version,
+            "pin_distribution_version": importlib.metadata.version("pin"),
+            "pin_module": str(pin_module),
+            "pin_module_sha256": sha(pin_module),
+            "native_binaries": [
+                {"path": str(path), "sha256": sha(path)} for path in native_binaries
+            ],
+            **import_details,
+        },
+        "source_coordinate_bounds": "not declared in full_body_spec_v1; model.configuration only enforces complete finite values",
+        "diagnostic_seed_envelope": {
+            "angular_coordinates_abs_max_rad": BOOTSTRAP_ANGLE_ABS_MAX_RAD,
+            "root_translation_abs_max_m": BOOTSTRAP_ROOT_TRANSLATION_ABS_MAX_M,
+            "seed_angles_rad": SEED_ANGLES_RAD,
+            "seed_root_height_method": "native foot-point geometry projected onto exact source TranslationInputZ axis",
+            "root_translation_coordinate_delta": translation_delta,
+            "root_translation_axis": root_axis_details,
+            "ground_normal_translation_slope": signed_gap_slope,
+            "predicted_world_point_shift_m": predicted_shift.tolist(),
+            "source_foot_signed_gaps_before_m": surface_gaps,
+            "source_foot_signed_gaps_after_m": actual_signed_gaps,
+            "per_foot_translation_derivative_error_max_m": point_shift_errors,
+            "target_penetration_verified": target_penetration_verified,
+            "target_max_foot_penetration_m": TARGET_MAX_FOOT_PENETRATION_M,
+        },
+        "input": {"initial_q_named": q_named, "initial_v_named": zero_named, "effort_named": zero_named},
+        "initial_contact": initial_contacts,
+        "initial_weld_jacobian": initial_rank,
+        "initial_weld_pose_error": initial_pose.tolist(),
+        "initial_weld_velocity_error": initial_velocity_error.tolist(),
+        "attempt": {"phase": "precondition", "status": "not_started"},
+    }
+    try:
+        gates = {
+            "initial_q_finite": bool(np.isfinite(seed).all()),
+            "initial_angles_in_diagnostic_envelope": all(
+                abs(q_named[name]) <= BOOTSTRAP_ANGLE_ABS_MAX_RAD
+                for name in names if not name.startswith("TranslationInput")
+            ),
+            "initial_contact_finite": all(row["all_finite"] for row in initial_contacts["spheres"].values()),
+            "initial_rank_six": initial_rank["rank"] == 6,
+            "initial_penetration_within_existing_budget": initial_contacts["max_penetration_m"] <= MAX_PENETRATION_M,
+            "initial_normal_force_within_conservative_diagnostic_bound": initial_contacts["summed_normal_force_n"] <= MAX_NORMAL_FORCE_N,
+        }
+        result["preconditions"] = gates
+        if not all(gates.values()):
+            raise RuntimeError(f"preprojection gate failed: {gates}")
+
+        result["attempt"] = {"phase": "shared closure projection", "status": "started"}
+        checkpoint("shared closure projection", "started", {
+            "initial_q_named": q_named,
+            "initial_v_named": zero_named,
+        })
+        projected = project_to_closure(projection_view, seed, np.zeros_like(seed))
+        final_q = np.asarray(projected.q, dtype=float)
+        final_v = np.asarray(projected.v, dtype=float)
+        final_named = dict(zip(names, map(float, final_q), strict=True))
+        final_rates = dict(zip(names, map(float, final_v), strict=True))
+        final_jac = owner.closure_force_jacobian(final_named)
+        final_pose, _ = projection_view._refresh(final_q)
+        final_velocity = final_jac.jacobian @ final_v
+        final_pose = np.asarray(final_pose, dtype=float)
+        final_velocity = np.asarray(final_velocity, dtype=float)
+        final_contacts = contact_report(owner, final_named, final_rates)
+        root_translation_error = max(
+            abs(final_named[name] - q_named[name])
+            for name in ("TranslationInputX", "TranslationInputY", "TranslationInputZ")
+        )
+        root_pose_error = max(
+            abs(final_named[name] - q_named[name])
+            for name in (
+                "TranslationInputX", "TranslationInputY", "TranslationInputZ",
+                "HipInputX", "HipInputY", "HipInputZ",
+            )
+        )
+        upper_coordinate_count = int(spec["upper_body_counts"]["coordinates"])
+        lower_coordinates_preserved = all(
+            abs(final_named[name] - q_named[name]) <= 1e-12
+            for name in names[upper_coordinate_count:]
+        )
+        contact_geometry_preserved = same_contact_geometry(initial_contacts, final_contacts)
+        angles_in_envelope = all(
+            abs(final_named[name]) <= BOOTSTRAP_ANGLE_ABS_MAX_RAD
+            for name in names if not name.startswith("TranslationInput")
+        )
+        post_gates = {
+            "final_qv_finite": bool(np.isfinite(np.r_[final_q, final_v]).all()),
+            "final_rank_six": svd_report(final_jac.jacobian)["rank"] == 6,
+            "translation_residual_within_existing_budget": float(np.max(np.abs(final_pose[:3]))) <= MAX_CLOSURE_TRANSLATION_M,
+            "rotation_residual_within_existing_budget": float(np.max(np.abs(final_pose[3:]))) <= MAX_CLOSURE_ROTATION_RAD,
+            "rate_residual_within_existing_tolerance": float(np.max(np.abs(final_velocity))) <= 1e-12,
+            "root_translation_preserved": root_translation_error <= 1e-12,
+            "root_pose_coordinates_preserved": root_pose_error <= 1e-12,
+            "lower_limb_coordinates_preserved": lower_coordinates_preserved,
+            "contact_geometry_and_force_preserved": contact_geometry_preserved,
+            "angular_coordinates_in_diagnostic_envelope": angles_in_envelope,
+            "final_contact_finite": all(row["all_finite"] for row in final_contacts["spheres"].values()),
+            "final_penetration_within_existing_budget": final_contacts["max_penetration_m"] <= MAX_PENETRATION_M,
+            "final_normal_force_within_conservative_diagnostic_bound": final_contacts["summed_normal_force_n"] <= MAX_NORMAL_FORCE_N,
+        }
+        result["assembly"] = {
+            "iterations": int(projected.iterations),
+            "pose_residual_before_max_abs": float(projected.pose_residual_before),
+            "pose_residual_after_max_abs": float(projected.pose_residual_after),
+            "rate_residual_before_max_abs": float(projected.rate_residual_before),
+            "rate_residual_after_max_abs": float(projected.rate_residual_after),
+            "root_translation_max_abs_change_m": root_translation_error,
+            "root_pose_coordinate_max_abs_change": root_pose_error,
+            "initial_q_named": q_named,
+            "final_q_named": final_named,
+            "final_v_named": final_rates,
+            "final_weld_jacobian": svd_report(final_jac.jacobian),
+            "final_weld_pose_error": final_pose.tolist(),
+            "final_weld_velocity_error": final_velocity.tolist(),
+            "final_contact": final_contacts,
+        }
+        checkpoint("shared closure projection", "completed", result["assembly"])
+        result["postconditions"] = post_gates
+        if not all(post_gates.values()):
+            raise RuntimeError(f"postprojection gate failed; constrained dynamics not called: {post_gates}")
+
+        result["attempt"] = {"phase": "native constrained acceleration", "status": "started"}
+        result["acceleration_attempts"] = 1
+        checkpoint("native constrained acceleration", "started", {
+            "acceleration_attempts": 1,
+            "final_q_named": final_named,
+            "final_v_named": final_rates,
+            "effort_named": zero_named,
+            "postconditions": post_gates,
+        })
+        acceleration = owner.accelerations(final_named, final_rates, zero_named)
+        acceleration_values = np.asarray([acceleration[name] for name in names], dtype=float)
+        result["attempt"] = {
+            "phase": "native constrained acceleration", "status": "returned",
+            "acceleration_all_finite": bool(np.isfinite(acceleration_values).all()),
+            "acceleration_by_coordinate": acceleration,
+        }
+        if not np.isfinite(acceleration_values).all():
+            result["attempt"]["status"] = "nonfinite"
+        checkpoint("native constrained acceleration", result["attempt"]["status"], {
+            "acceleration_attempts": 1,
+            "acceleration_all_finite": bool(np.isfinite(acceleration_values).all()),
+        })
+    except Exception as exc:
+        result["attempt"] = {
+            "phase": result.get("attempt", {}).get("phase", "precondition"),
+            "status": "raised", "exception_type": type(exc).__name__,
+            "message": str(exc)[:1000], "traceback": traceback.format_exc(limit=10)[-5000:],
+        }
+        checkpoint("diagnostic exception", "caught", result["attempt"])
+    after_hashes = {str(path): sha(repo / path) for path in EXPECTED}
+    result["source_hashes_after"] = after_hashes
+    result["source_inputs_unchanged_after_attempt"] = (
+        after_hashes == source_hashes
+        and sha(manifest) == MANIFEST_SHA256
+        and sha(repo / FACADE_INIT) == FACADE_OVERLAY_SHA256
+    )
+    result["status"] = (
+        "source_changed" if not result["source_inputs_unchanged_after_attempt"]
+        else "complete" if (
+            result.get("attempt", {}).get("status") == "returned"
+            and result.get("attempt", {}).get("acceleration_all_finite") is True
+        )
+        else "failed"
+    )
+    return result
+
+
+def assemble(repo: Path, script: Path, output: Path) -> dict[str, Any]:
+    """Run one diagnostic with atomic phase receipts and nonzero failures."""
+    checkpoint_path = output.with_name(output.name + ".checkpoint.json")
+    progress: dict[str, Any] = {
+        "schema_version": "full-body-v1-synthetic-closure-assembly-checkpoint-v1",
+        "source_commit": COMMIT,
+        "manifest_sha256": MANIFEST_SHA256,
+        "script_sha256": sha(script),
+        "acceleration_attempts": 0,
+        "events": [],
+    }
+
+    def record(phase: str, status: str, details: dict[str, Any]) -> None:
+        progress["events"].append({
+            "phase": phase,
+            "status": status,
+            "created_utc": datetime.now(UTC).isoformat(),
+            "details": details,
+        })
+        if phase == "native constrained acceleration" and status == "started":
+            progress["acceleration_attempts"] = 1
+        progress["last_phase"] = phase
+        progress["last_phase_status"] = status
+        write_json_atomic(checkpoint_path, progress)
+
+    record("source verification", "started", {})
+    try:
+        result = _assemble_once(repo, script, output, record)
+    except Exception as exc:
+        failed_phase = progress.get("last_phase", "source verification")
+        record("diagnostic exception", "uncaught", {
+            "exception_type": type(exc).__name__,
+            "message": str(exc)[:1000],
+            "traceback": traceback.format_exc(limit=10)[-5000:],
+        })
+        result = {
+            "schema_version": "full-body-v1-synthetic-closure-assembly-diagnostic-v1",
+            "created_utc": datetime.now(UTC).isoformat(),
+            "qualification": "none; synthetic geometry-seeded diagnostic only",
+            "source_commit": COMMIT,
+            "manifest_sha256": MANIFEST_SHA256,
+            "script_sha256": sha(script),
+            "attempt": {
+                "phase": failed_phase,
+                "status": "raised",
+                "exception_type": type(exc).__name__,
+                "message": str(exc)[:1000],
+            },
+            "acceleration_attempts": progress["acceleration_attempts"],
+            "status": "failed",
+        }
+    result["phase_checkpoints"] = progress["events"]
+    result["acceleration_attempts"] = progress["acceleration_attempts"]
+    write_json_atomic(output, result)
+    record("receipt finalization", "completed", {
+        "receipt_path": str(output),
+        "diagnostic_status": result["status"],
+    })
+    return result
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--imports-only", action="store_true")
+    args = parser.parse_args()
+    repo = args.repo_root.resolve()
+    if args.imports_only:
+        verify_sources(repo)
+        pin, _, _, details = import_native_support(repo)
+        pin_version = str(getattr(pin, "__version__", "unknown"))
+        if pin_version != "3.8.0":
+            raise RuntimeError(f"expected Pinocchio 3.8.0, found {pin_version}")
+        print(json.dumps({"status": "imports_ready", "pinocchio_version": pin_version, **details}))
+        return 0
+    receipt = assemble(repo, Path(__file__).resolve(), args.output.resolve())
+    print(json.dumps({"status": receipt["status"], "attempt": receipt["attempt"]["status"], "output": str(args.output.resolve())}))
+    return 0 if receipt["status"] == "complete" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

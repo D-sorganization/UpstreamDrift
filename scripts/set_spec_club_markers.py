@@ -24,6 +24,8 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import subprocess
+import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -67,12 +69,41 @@ def set_document_club_markers(markers_path: Path, document_path: Path) -> bool:
     return True
 
 
-def write_derived(receipt: Path, club: str, out: Path, commit: str | None) -> None:
-    """Derive the club cluster from ``receipt`` and write it to ``out``."""
-    label = receipt.resolve().relative_to(REPO_ROOT).as_posix()
-    markers = derive_club_markers(
-        receipt, club=club, receipt_label=label, receipt_commit=commit
+def read_receipt_bytes(
+    receipt: Path, commit: str | None, *, repo_root: Path = REPO_ROOT
+) -> bytes:
+    """Bytes of ``receipt`` at ``commit``, or in the worktree when it is None.
+
+    The receipts are regenerated on the new documents, so a pinned derivation
+    must read the revision it records. Raises ``ValueError`` when the receipt
+    is not tracked at ``commit``.
+    """
+    if commit is None:
+        return receipt.read_bytes()
+    label = receipt.resolve().relative_to(repo_root.resolve()).as_posix()
+    result = subprocess.run(  # noqa: S603, S607 - fixed argv
+        ["git", "-C", str(repo_root), "show", f"{commit}:{label}"],
+        capture_output=True,
+        timeout=60,
+        check=False,
     )
+    if result.returncode != 0:
+        raise ValueError(
+            f"--receipt-commit {commit}: {label} is not readable there: "
+            f"{result.stderr.decode(errors='replace').strip()}"
+        )
+    return result.stdout
+
+
+def write_derived(receipt: Path, club: str, out: Path, commit: str | None) -> None:
+    """Derive the club cluster from ``receipt`` (at ``commit``) into ``out``."""
+    label = receipt.resolve().relative_to(REPO_ROOT).as_posix()
+    with tempfile.TemporaryDirectory() as tmp:
+        pinned = Path(tmp) / "receipt.json"
+        pinned.write_bytes(read_receipt_bytes(receipt, commit))
+        markers = derive_club_markers(
+            pinned, club=club, receipt_label=label, receipt_commit=commit
+        )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(format_json(markers.to_document()) + "\n", encoding="utf-8")
 
@@ -83,7 +114,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     derive = sub.add_parser("derive", help="club-markers/1 file from a receipt")
     derive.add_argument("--club", required=True)
     derive.add_argument(
-        "--receipt-commit", default=None, help="commit the receipt was read at"
+        "--receipt-commit",
+        default=None,
+        help="read the receipt at this commit (and record it)",
     )
     derive.add_argument("receipt", type=Path)
     derive.add_argument("out", type=Path)

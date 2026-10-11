@@ -1,0 +1,291 @@
+from __future__ import annotations
+
+import hashlib
+import importlib
+import json
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
+
+import numpy as np
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+runner = importlib.import_module("run_pinocchio_same_input_t01_20261012")
+
+
+class FakePlant:
+    def __init__(self, names: tuple[str, ...], log: list[tuple[str, Any]]) -> None:
+        self.coordinate_order = names
+        self.log = log
+        self.calls = 0
+
+    def closure_residuals(
+        self, q: np.ndarray, v: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        self.log.append(("initial_closure", (q.copy(), v.copy())))
+        self.log.append(("hidden_acceleration", np.zeros(41)))
+        self.calls += 1
+        return np.zeros(6), np.zeros(6)
+
+    def closure_pose_residual(self, q: np.ndarray) -> np.ndarray:
+        self.log.append(("endpoint_closure", q.copy()))
+        self.log.append(("hidden_acceleration", np.zeros(41)))
+        self.calls += 1
+        return np.zeros(6)
+
+    def acceleration(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> np.ndarray:
+        self.log.append(("acceleration", tau.copy()))
+        self.calls += 1
+        return np.zeros(41)
+
+
+class RunnerContractTests(unittest.TestCase):
+    def synthetic_data(self) -> dict[str, Any]:
+        names = tuple(f"q{i}" for i in range(41))
+        times = np.arange(11, dtype=np.float64) * 0.001
+        q0 = np.arange(41, dtype=np.float64)
+        v0 = np.zeros(41)
+        efforts = np.zeros((10, 41))
+        efforts[:, 8] = np.arange(10) + 1.0
+        ref_q = np.tile(q0, (11, 1))
+        ref_v = np.zeros((11, 41))
+        return {
+            "channels": names,
+            "times": times,
+            "q0": q0,
+            "v0": v0,
+            "efforts": efforts,
+            "reference_q": ref_q,
+            "reference_v": ref_v,
+        }
+
+    def test_public_open_loop_policy_and_all_macro_samples_are_checked(self) -> None:
+        data = self.synthetic_data()
+        log: list[tuple[str, Any]] = []
+        plant = FakePlant(data["channels"], log)
+
+        def fake_open_loop(
+            p: FakePlant,
+            q0: np.ndarray,
+            v0: np.ndarray,
+            efforts: np.ndarray,
+            *,
+            dt_s: float,
+            policy: Any,
+        ) -> Any:
+            self.assertEqual(dt_s, 0.001)
+            self.assertEqual(
+                policy,
+                {"substeps": 8, "project": False, "stop_on_failure": False},
+            )
+            self.assertTrue(np.array_equal(q0, data["q0"]))
+            self.assertTrue(np.array_equal(v0, data["v0"]))
+            self.assertTrue(np.array_equal(efforts, data["efforts"]))
+            q = [q0.copy()]
+            v = [v0.copy()]
+            for row in efforts:
+                for _ in range(8):
+                    # Four RK4 stage evaluations per substep; held row is unchanged.
+                    for _stage in range(4):
+                        p.acceleration(q[-1], v[-1], row)
+                p.closure_pose_residual(q[-1])
+                q.append(q[-1].copy())
+                v.append(v[-1].copy())
+            return SimpleNamespace(
+                time_s=data["times"],
+                q=np.asarray(q),
+                v=np.asarray(v),
+                efforts=efforts.copy(),
+                pose_drift=np.zeros(10),
+            )
+
+        result = runner.execute_validated(
+            data,
+            plant_factory=lambda _spec: plant,
+            open_loop=fake_open_loop,
+            policy_factory=lambda **kw: kw,
+            spec_bytes=b"synthetic exact spec bytes",
+        )
+        self.assertEqual(len([x for x in log if x[0] == "acceleration"]), 320)
+        self.assertEqual(len([x for x in log if x[0] == "hidden_acceleration"]), 11)
+        self.assertEqual(len([x for x in log if x[0] == "endpoint_closure"]), 10)
+        self.assertEqual(len([x for x in log if x[0] == "initial_closure"]), 1)
+        held = [x[1][8] for x in log if x[0] == "acceleration"]
+        self.assertEqual(held, [float(k + 1) for k in range(10) for _ in range(32)])
+        self.assertEqual(
+            result["call_ledger_source_derived"]["total_adapter_accelerations"], 331
+        )
+        self.assertEqual(plant.calls, 331)
+        self.assertTrue(
+            all(not np.any(x[1]) for x in log if x[0] == "hidden_acceleration")
+        )
+        self.assertEqual(result["times"], data["times"].tolist())
+        self.assertFalse(result["projection"])
+
+    def test_wrong_macro_clock_is_rejected(self) -> None:
+        data = self.synthetic_data()
+        log: list[tuple[str, Any]] = []
+
+        def wrong_clock(*_args: Any, **_kwargs: Any) -> Any:
+            return SimpleNamespace(
+                time_s=data["times"] + 1e-9,
+                q=np.tile(data["q0"], (11, 1)),
+                v=np.tile(data["v0"], (11, 1)),
+                efforts=data["efforts"],
+                pose_drift=np.zeros(10),
+            )
+
+        with self.assertRaisesRegex(ValueError, "macro output clock"):
+            runner.execute_validated(
+                data,
+                plant_factory=lambda _s: FakePlant(data["channels"], log),
+                open_loop=wrong_clock,
+                policy_factory=lambda **kw: kw,
+                spec_bytes=b"s",
+            )
+
+    def test_changed_applied_input_is_rejected(self) -> None:
+        data = self.synthetic_data()
+        log: list[tuple[str, Any]] = []
+
+        def wrong_input(*_args: Any, **kwargs: Any) -> Any:
+            return SimpleNamespace(
+                time_s=data["times"],
+                q=np.tile(data["q0"], (11, 1)),
+                v=np.tile(data["v0"], (11, 1)),
+                efforts=data["efforts"][:, ::-1],
+                pose_drift=np.zeros(10),
+            )
+
+        with self.assertRaisesRegex(ValueError, "did not apply each frozen ZOH row"):
+            runner.execute_validated(
+                data,
+                plant_factory=lambda _s: FakePlant(data["channels"], log),
+                open_loop=wrong_input,
+                policy_factory=lambda **kw: kw,
+                spec_bytes=b"s",
+            )
+
+    def test_frozen_t01_payload_passes_without_native_import(self) -> None:
+        root = Path(
+            r"C:\Users\diete\Repositories\Worktrees\feedback-moco-state-binding-11791"
+        )
+        external = Path(
+            r"C:\Users\diete\Repositories\docs\development\feedback_controls_planning\mujoco_v1_zoh_history_refinement_20261011_root_attempt1"
+        )
+        bundle = json.loads(
+            (external / "frozen-t01-bundle.json").read_text(encoding="utf-8")
+        )
+        observation = json.loads(
+            (external / "native-observation.json").read_text(encoding="utf-8")
+        )
+        spec = json.loads(
+            (
+                root / "docs/development/full_body_models/full_body_spec_v1.json"
+            ).read_text(encoding="utf-8")
+        )
+        data = runner.validate_payload(bundle, observation, spec)
+        self.assertEqual(data["efforts"].shape, (10, 41))
+        self.assertEqual(data["times"].tolist(), (np.arange(11) * 0.001).tolist())
+
+    def test_clock_row_inventory_and_initial_state_mutations_fail(self) -> None:
+        root = Path(
+            r"C:\Users\diete\Repositories\Worktrees\feedback-moco-state-binding-11791"
+        )
+        external = Path(
+            r"C:\Users\diete\Repositories\docs\development\feedback_controls_planning\mujoco_v1_zoh_history_refinement_20261011_root_attempt1"
+        )
+        bundle = json.loads(
+            (external / "frozen-t01-bundle.json").read_text(encoding="utf-8")
+        )
+        observation = json.loads(
+            (external / "native-observation.json").read_text(encoding="utf-8")
+        )
+        spec = json.loads(
+            (
+                root / "docs/development/full_body_models/full_body_spec_v1.json"
+            ).read_text(encoding="utf-8")
+        )
+        bad_clock = json.loads(json.dumps(bundle))
+        bad_clock["input_history"]["time_seconds"][3] += 1e-8
+        with self.assertRaisesRegex(ValueError, "exact 11-sample"):
+            runner.validate_payload(bad_clock, observation, spec)
+        bad_row = json.loads(json.dumps(bundle))
+        bad_row["input_history"]["values"][0][8] += 1e-9
+        with self.assertRaisesRegex(ValueError, "input rows do not match"):
+            runner.validate_payload(bad_row, observation, spec)
+        bad_inventory = json.loads(json.dumps(bundle))
+        bad_inventory["input_history"]["channels"][0]["channel_id"] = "wrong"
+        with self.assertRaisesRegex(ValueError, "input channels"):
+            runner.validate_payload(bad_inventory, observation, spec)
+        bad_state = json.loads(json.dumps(bundle))
+        bad_state["initial_state"][0]["values"].pop()
+        with self.assertRaisesRegex(ValueError, "q0 must be finite"):
+            runner.validate_payload(bad_state, observation, spec)
+
+    def test_policy_identity_is_separate_and_deterministic(self) -> None:
+        self.assertEqual(
+            runner.POLICY_SHA256,
+            hashlib.sha256(
+                json.dumps(
+                    runner.POLICY, sort_keys=True, separators=(",", ":")
+                ).encode()
+            ).hexdigest(),
+        )
+        self.assertFalse(runner.POLICY["project"])
+        self.assertEqual(runner.POLICY["engine"], "pinocchio")
+        self.assertEqual(
+            runner.POLICY["input_policy"], "zero_order_hold_saved_rows_0_through_9"
+        )
+
+    def test_corrupt_bundle_digest_fails_before_source_access(self) -> None:
+        with self.assertRaisesRegex(ValueError, "bundle digest mismatch"):
+            runner.validate_artifacts(b"changed", b"", b"", Path("missing-source"))
+
+    def test_watchdog_cli_contract_and_fresh_output_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            output_parent = root / "attempt"
+            output_parent.mkdir()
+            parsed = runner.build_parser().parse_args(
+                [
+                    "--repo-root",
+                    str(root),
+                    "--output",
+                    str(output_parent / "result.json"),
+                ]
+            )
+            self.assertEqual(parsed.repo_root, root)
+            self.assertEqual(parsed.output, output_parent / "result.json")
+            runner.prepare_output_file(parsed.output)
+            parsed.output.write_text("receipt", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "overwrite"):
+                runner.prepare_output_file(parsed.output)
+
+    def test_three_public_module_origins_use_paths_not_digest_strings(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            for relative in (
+                runner.PLANT_PATH,
+                runner.INTEGRATOR_PATH,
+                runner.ADAPTER_PATH,
+            ):
+                expected = root / relative
+                expected.parent.mkdir(parents=True, exist_ok=True)
+                expected.touch()
+                runner.verify_module_origin(expected, root, relative)
+                wrong = root / "wrong-module.py"
+                wrong.touch()
+                with self.assertRaisesRegex(ValueError, "module origin mismatch"):
+                    runner.verify_module_origin(wrong, root, relative)
+            self.assertNotEqual(
+                runner.PLANT_PATH, runner.EXPECTED["source"][runner.PLANT_PATH]
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

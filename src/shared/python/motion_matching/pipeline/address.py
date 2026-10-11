@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import json
@@ -22,10 +23,13 @@ from src.shared.python.motion_matching.full_body_spec import (
     validate_full_body_spec,
 )
 from src.shared.python.motion_matching.hip_calibration import (
+    DEFAULT_HIP_ZERO_TWIST,
+    HIP_ZERO_TWIST_MODES,
     LATERAL_SEEDS_M,
     apply_hip_calibration,
     functional_hip_calibration,
     hip_rotation_zero,
+    select_hip_zero_twist,
 )
 from src.shared.python.motion_matching.marker_calibration import (
     PlacementPrior,
@@ -484,6 +488,30 @@ class HipCalibrationOptions:
     recalibrate_upper: bool = False
     foot_half_width_m: float | None = None
     torsional_patch_m: float | None = None
+    hip_zero_twist: str = DEFAULT_HIP_ZERO_TWIST
+
+    def __post_init__(self) -> None:
+        """Reject a zero-twist mode that skipped calibration cannot apply."""
+        if self.skip_hip_calibration and self.hip_zero_twist != DEFAULT_HIP_ZERO_TWIST:
+            raise ValueError(
+                "skip_hip_calibration keeps the input femur frames, so "
+                f"hip_zero_twist={self.hip_zero_twist!r} cannot be applied; "
+                f"use {DEFAULT_HIP_ZERO_TWIST!r} or calibrate the hips"
+            )
+
+
+def add_hip_zero_twist_argument(parser: argparse.ArgumentParser) -> None:
+    """Add ``--hip-zero-twist`` to a parser."""
+    parser.add_argument(
+        "--hip-zero-twist",
+        choices=HIP_ZERO_TWIST_MODES,
+        default=DEFAULT_HIP_ZERO_TWIST,
+        help=(
+            "where hip_rotation = 0 sits (#12042): 'capture' uses the measured "
+            "address thigh twist and reproduces the canonical receipts "
+            "(default); 'neutral' uses 0/0 so the +-40 deg bound is anatomical"
+        ),
+    )
 
 
 def _calibrate_ground_height(
@@ -542,7 +570,7 @@ def prepare_hip_spec(
     hip_cal = functional_hip_calibration(lane.points, lane.valid, labels, waist_offsets)
     # Foot progression on: remove the lateral-marker tilt from the zero twist
     # (#11737). Off: the legacy plane the canonical receipts were made with.
-    zero_twist = hip_rotation_zero(
+    measured_twist = hip_rotation_zero(
         lane.points,
         lane.valid,
         labels,
@@ -550,6 +578,7 @@ def prepare_hip_spec(
         calibration=hip_cal,
         lateral_marker_offsets_m=(0.0, 0.0) if lane.feet is None else LATERAL_SEEDS_M,
     )
+    zero_twist = select_hip_zero_twist(opts.hip_zero_twist, measured_twist)
     if opts.skip_hip_calibration:
         hip_spec = add_toe_spheres(dict(base_spec))
     else:
@@ -604,6 +633,8 @@ def prepare_hip_spec(
         "pelvis_axes_in_hip_frame": hip_cal.pelvis_axes,
         "waist_fit_max_residual_m": hip_cal.waist_fit_max_residual_m,
         "hip_zero_twist_deg": zero_twist.to_dict(),
+        "hip_zero_twist_mode": opts.hip_zero_twist,
+        "hip_zero_twist_measured_deg": measured_twist.to_dict(),
     }
     return hip_spec, qualification_note, hip_report, fixed, seeds_all
 

@@ -297,6 +297,59 @@ actual adapter, but do not qualify any registered production model. The
 calculation registry remains blocked; this execution interface is not a
 released matching calculation.
 
+F09c's full-body MuJoCo generalized-effort provider is a separate explicit
+binding, `mujoco-full-body-generalized-rk4`. It consumes a complete `qpos` and
+`qvel` state plus one zero-order-held `GENERALIZED_EFFORT` channel for every
+coordinate in the source spec's declared order. The six root efforts must be
+zero; the provider rejects nonzero root values before the shared integrator
+can zero them. Translation channels are in N and rotational channels in N*m.
+The provider runs the existing `VectorPlant` with the shared classical RK4
+integrator, eight fixed substeps per input interval, and projection disabled.
+The model-owned contact and dual-grip weld response is evaluated by the plant
+throughout the RK stages. This path uses engine accelerations; it does not call
+MuJoCo `mj_step`.
+
+Initialization uses the supplied complete position and velocity vectors
+without assembly, projection, reset, feedback callback, or hidden state
+restoration. Initial pose/rate residual vectors and the shared integrator's
+per-step maximum pose-residual magnitudes are returned without a new acceptance
+threshold. Consequently the replay can
+run an off-manifold seed and still remains unqualified. Its q/v-only state
+schema is accepted only for this exact built-in provider; existing direct-
+torque adapters retain their complete native numerical-state requirements.
+This is an open-loop consumer for an already-frozen generalized-effort
+history. It does not produce feedback, establish that a feedback producer
+created the history, qualify support/grip, validate physiology, or establish
+full-capture or cross-engine equivalence.
+
+### F09c State-Dependent ZOH Feedback Recording
+
+`record_native_full_body_feedback` is the producer paired with that
+consumer. It calls a declared Python feedback controller once at each fixed
+interval start, with detached copies of the complete current `q` and `v` state.
+The controller result must be a finite vector in the source coordinate order;
+all six root generalized efforts are checked as exactly zero before entering
+the shared integrator. The accepted vector is held unchanged over eight RK4
+substeps (four acceleration evaluations per substep) before the controller is
+called again. Each callback therefore produces 32 derivative-stage calls that
+see the same effort.
+
+The recorder returns the ordinary T01 generalized-effort bundle and a typed
+producer record binding the declared controller source, configuration and
+reference digests, exact source spec, fixed clock, complete initial `q/v`,
+generated trajectory, and applied-effort history. A typed
+`NativeFullBodyFeedbackRequest` carries the source path, initial state, fixed
+step count and timestep, controller provenance, and T01 model/variant/experiment
+identity. Its source/config/reference digests are caller-declared provenance,
+not proof that a law is reproducible or physically valid. Fresh replay consumes
+only the frozen T01 input bundle and does not invoke the feedback callback.
+Initial weld pose/rate residuals
+are observations with no acceptance threshold; no assembly, reset, or
+projection occurs. The current contract declares no generalized-effort bounds,
+so this recorder does not demonstrate bounded control. It remains an
+unqualified generated software trajectory and does not establish closed-loop
+capture matching, contact/grip adequacy, model support, or physiology.
+
 F09d (#11907) adds the next boundary: explicit model-owned forward kinematics
 from those native output configurations to named 3-D marker positions. Its
 ordered local-point map and source/loaded-model/provider identities are

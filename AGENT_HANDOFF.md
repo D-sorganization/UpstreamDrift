@@ -1,3 +1,19 @@
+# Active: 7-Iron MSK Grip Calibration, #12042
+
+- Branch `claude/12042-iron7-msk-cal` (stacked on #12247). `msk_club_grip_calibration.json` now has `iron7` entries for `golf_humanoid` (grip gaps 0.04 / 0.02 mm, landmark RMS 14.9 mm) and `golf_humanoid_scaled` (0.24 / 0.25 mm, 40.0 mm), from the existing `msk_club_calibration --club iron7` CLI. `render_msk_club.py` now draws and measures the `--club` it tracks: before, the viewer loaded `golf_humanoid.osim` with its committed driver, so a 7-iron render showed the driver.
+
+# Active: Neutral Hip Zero-Twist and the MSK Turn Render, #12042
+
+- Branch `claude/12042-turn-slices`. `hip_rotation_zero` places `hip_rotation = 0` at the measured address thigh twist, and the ±40° bound moves with it. The canonical specs carry +45/−26° (lead/trail), so the lead hip is pinned at +40° at impact. `--hip-zero-twist neutral` (opt-in; default `capture` keeps the canonical receipts) uses 0/0. Pelvis turn is then within 3.2° of the markers at top and impact on both captures, with IK 25.6/22.9 mm. FD is 51.2 mm on the driver, but 91.2 mm on the 7-iron (after impact). Evidence: `evidence/hip_zero_twist_12042/`; calc record in `hip_axis_mirroring.tex`, section "Neutral Hip Zero-Twist and the Pelvis at Impact".
+- `render_msk_club.py --capture --club --mode` tracks with the capture turn targets and planted feet (shared `msk_turn_targets.tracking_inputs`).
+- Open: owner decision on the `neutral` default (regenerates canonical receipts and fixtures); trail hip now reaches −40°; upper-trunk over-twist at the top (slice 7).
+
+# Active: Measured Driver Club Cluster, #12221
+
+- Branch `claude/12221-driver-cluster`, stacked on `claude/12221-fixed-triad`. `evidence/club_markers/driver.json` (from the calibrated `anthro_driver_seeds` receipt at `1bef553457`) is now in the driver document. `anthro_driver`, `anthro_driver_seeds` and `anthro_driver_drake`, the OpenSim driver export, the inventory hashes and the tutorial hash `4ee2c43d` are regenerated.
+- Fixed cluster, fixture flags: capture face 5.50 / 14.96° (the canonical frame), model impact face 16.13°, speed −3.6 %, peak −0.3 ms. The canonical seeds receipt reads 7.5 / 30.5 / 82.6 mm (was 6.4 / 29.5 / 80.8). The nominal driver reads 41.7 / 46.1 / 73.6 mm (was 42.6 / 52.7 / 97.3).
+- Open: the same-input export of the fixed driver run diverges at impact; refit `grip_rotation_deg`; decide whether `--fix-club-markers` should be the default. Calc record: "Measured Driver Club Cluster".
+
 # Native Wrapped-Path Closure Handoff — #12234
 
 `native_wrapped_path.py` carries a source-hash-bound declaration for
@@ -384,14 +400,6 @@ model, raw capture, native optimizer or replay was qualified by this slice.
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
-
-# Active: MyoSuite Native Muscle Actuator Classification — #12249
-
-`MyoSuiteMuscleAnalyzer` now compares compiled actuator dynamics to the
-installed MuJoCo `mjDYN_MUSCLE` enum. The actual MuJoCo 3.8.0 mixed-actuator
-fixture runs without Gym/MyoSuite registration. See the F09q turnover and
-canonical chapter 31. Classification does not qualify physiology, capture
-mapping, excitation replay, or cross-engine parity.
 
 # Active: Impact-Phase Bushing Grip, OSV-7 #11739
 
@@ -1232,9 +1240,25 @@ Full-clock private preflight retains unavailable passive admission and blocked
 independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
 support/grip, captured matching and parity gates remain open.
 
+The earlier 20-interval replay failed its speed, activation and fiber-length
+limits. Separately, the 21-interval child failed strict planned-clock validation
+at 9 of 43 values by one ULP. A later replay on those saved timestamps failed
+only the activation limit (`5.078110452592238e-5` versus `1e-8`); coordinate,
+speed, fiber-length and endpoint limits passed. This diagnostic does not repair
+the clock rejection or identify the activation discrepancy's cause. Exact
+attempts, hashes, limits and failures remain in the historical appendices
+linked from `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+The agent-context catalog is unchanged because its `vendor/ud-tools` junction
+escapes to the frozen `feedback-drake-native-11838` donor; the context CLI
+rejected that path and the donor was not traversed or modified.
+
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter
 exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
 provenance and validation. Full epic qualification remains open.
 Concurrent remote ledger refresh `7877625369` is retained through a normal merge;
 the generated ledger is refreshed from the restored immutable receipt bytes.
+
+## Manufactured Native Diagnostics — #12275
+
+Exact synthetic MuJoCo geometry/zero-effort, short feedback replay, OpenSim property, Pinocchio and Drake observations are retained at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/`. See its README and SHA-bound manifest. Failed attempts are preserved. No capture, equilibrium, contact calibration, physiology, production replay or 17-row/six-ecosystem qualification is implied; all production variants remain unqualified.
