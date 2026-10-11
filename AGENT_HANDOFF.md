@@ -4,6 +4,12 @@
 - `render_msk_club.py --capture --club --mode` tracks with the capture turn targets and planted feet (shared `msk_turn_targets.tracking_inputs`).
 - Open: owner decision on the `neutral` default (regenerates canonical receipts and fixtures); trail hip now reaches −40°; upper-trunk over-twist at the top (slice 7).
 
+# Active: Fixed Club Cluster in the Static Trial, #12221
+
+- Branch `claude/12221-fixed-triad`. Opt-in `--fix-club-markers` (needs `--static-seeds`) keeps the six `Clubhead` markers at the document's per-club offsets, so a grip rotation can no longer move the capture's own face through the static trial. Default receipts are unchanged.
+- Fixture flags at `87ba5b2f39`: 7-iron −15.6 % (control, corrected #12210 cluster) → −2.6 %, peak 0.0 ms, impact face 7.18 vs 3.21°. The driver document's cluster puts the capture address face at −20.8°, so it is not a valid face frame.
+- Next: a measured driver cluster (#12210 procedure), then refit `grip_rotation_deg` on the fixed clusters. Calc record: `simscape_matching_reference.tex`, "Fixed Club Cluster in the Static Trial".
+
 # Active: Club-Face Fixtures on the Current Spec, #12117
 
 - Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
@@ -356,6 +362,14 @@ model, raw capture, native optimizer or replay was qualified by this slice.
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
+
+# Active: MyoSuite Native Muscle Actuator Classification — #12249
+
+`MyoSuiteMuscleAnalyzer` now compares compiled actuator dynamics to the
+installed MuJoCo `mjDYN_MUSCLE` enum. The actual MuJoCo 3.8.0 mixed-actuator
+fixture runs without Gym/MyoSuite registration. See the F09q turnover and
+canonical chapter 31. Classification does not qualify physiology, capture
+mapping, excitation replay, or cross-engine parity.
 
 # Active: Impact-Phase Bushing Grip, OSV-7 #11739
 
@@ -1187,6 +1201,14 @@ three sampled poses. See chapter54 and
 `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md`. Keep the PR draft/unarmed until
 Tools #5503 and #12207 are integrated. No source anatomy, physiology,
 force/work chart, contact/grip, captured match or parity claim follows.
+
+## Explicitly Unqualified Moco Feasibility — #12225
+
+Draft PR #12228 contains the diagnostic opt-in and 51 actual native test passes.
+See `F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md` and canonical chapter 55.
+Full-clock private preflight retains unavailable passive admission and blocked
+independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
+support/grip, captured matching and parity gates remain open.
 
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter
