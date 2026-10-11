@@ -352,6 +352,8 @@
         "src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py",
         "src/engines/Simscape_Multibody_Models/python/native_owned_replay.py",
         "src/engines/native_replay_contracts.py",
+        "src/engines/feedback_native_execution.py",
+        "src/engines/physics_engines/mujoco/python/native_full_body_replay.py",
         "src/engines/physics_engines/mujoco/python/native_torque_replay.py",
         "src/engines/physics_engines/drake/python/native_torque_replay.py",
         "src/engines/physics_engines/pinocchio/python/native_torque_replay.py",
@@ -360,6 +362,7 @@
       ],
       "documentation": [
         "manuals/upstreamdrift/chapters/39-native-offline-muscle-matching.qmd",
+        "manuals/upstreamdrift/chapters/13-feedback-comparison.qmd",
         "manuals/upstreamdrift/chapters/56-native-diagnostic-execution-contract.qmd",
         "docs/development/feedback_controls/F07_NATIVE_DIAGNOSTIC_EXECUTION_CONTRACT_TURNOVER.md",
         "manuals/upstreamdrift/chapters/40-native-reference-conventions.qmd",
@@ -382,6 +385,8 @@
         "tests/opensim/test_native_reference_conventions.py",
         "tests/opensim/test_native_passive_readiness.py",
         "tests/unit/motion_matching/test_simscape_owned_native_replay.py",
+        "tests/unit/engines/test_feedback_native_execution.py",
+        "tests/unit/engines/mujoco/test_native_full_body_replay.py",
         "tests/opensim/test_native_constrained_contact.py"
       ],
       "entrypoints": [

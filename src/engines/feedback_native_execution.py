@@ -25,6 +25,9 @@ if TYPE_CHECKING:
     from src.engines.physics_engines.mujoco.python.native_torque_replay import (
         NativeTorqueReplay,
     )
+    from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
+        NativeFullBodyReplay,
+    )
     from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
         NativeMyoSuiteExcitationReplay,
     )
@@ -80,6 +83,7 @@ class NativeReplayExecution:
     receipt: NativeExecutionReceipt
     output: (
         NativeTorqueReplay
+        | NativeFullBodyReplay
         | NativeDrakeTorqueReplay
         | NativePinocchioTorqueReplay
         | NativeMyoSuiteExcitationReplay
@@ -289,11 +293,13 @@ def _validate_bundle(
         raise ValueError("observation and state-feedback access are forbidden")
     if bundle.policy.state_reset_allowed:
         raise ValueError("state resets are forbidden by native replay policy")
-    if (
-        bundle.input_history.input_kind
-        is not contracts.ActuationInputKind.ACTUATOR_TORQUE
-    ):
-        raise ValueError("current native adapters require actuator torque input")
+    expected_input_kind = (
+        contracts.ActuationInputKind.GENERALIZED_EFFORT
+        if binding.native_execution_provider_id == "mujoco-full-body-generalized-rk4"
+        else contracts.ActuationInputKind.ACTUATOR_TORQUE
+    )
+    if bundle.input_history.input_kind is not expected_input_kind:
+        raise ValueError("native adapter input kind differs from its provider contract")
     if (
         bundle.input_history.interpolation
         is not contracts.InputInterpolation.ZERO_ORDER_HOLD
@@ -302,7 +308,7 @@ def _validate_bundle(
     if bundle.input_history.timebase_id != "simulation_relative":
         raise ValueError("native replay requires simulation_relative time")
     if row.drive_mode is not DriveMode.TORQUE:
-        raise ValueError("actuator torque cannot satisfy a muscle-excitation row")
+        raise ValueError("effort input cannot satisfy a muscle-excitation row")
     model = bundle.model
     if model.engine_id != row.engine:
         raise ValueError("native adapter engine differs from inventory row")
@@ -345,6 +351,7 @@ def _validate_bundle(
 
 def _output_digest(
     output: NativeTorqueReplay
+    | NativeFullBodyReplay
     | NativeDrakeTorqueReplay
     | NativePinocchioTorqueReplay
     | NativeMyoSuiteExcitationReplay,
@@ -357,11 +364,16 @@ def _output_digest(
         "integration_states",
         "discrete_states",
         "applied_actuator_torques",
+        "applied_generalized_efforts",
         "generalized_actuator_torques",
+        "generalized_efforts",
         "muscle_activations",
         "actuator_controls",
         "wrapper_states",
         "applied_muscle_excitations",
+        "initial_pose_closure_residual",
+        "initial_rate_closure_residual",
+        "pose_closure_residuals",
     ):
         if not hasattr(output, name):
             continue
@@ -380,8 +392,11 @@ def _validate_output_type(row: ComparisonRow, output: Any) -> None:
         from src.engines.physics_engines.mujoco.python.native_torque_replay import (
             NativeTorqueReplay,
         )
+        from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
+            NativeFullBodyReplay,
+        )
 
-        if not isinstance(output, NativeTorqueReplay):
+        if not isinstance(output, (NativeTorqueReplay, NativeFullBodyReplay)):
             raise ValueError("MuJoCo native adapter returned an unknown output type")
     elif row.engine == "drake":
         from src.engines.physics_engines.drake.python.native_torque_replay import (
@@ -435,6 +450,7 @@ def validate_native_replay_output(
     binding: NativeAdapterBinding,
     bundle: Any,
     output: NativeTorqueReplay
+    | NativeFullBodyReplay
     | NativeDrakeTorqueReplay
     | NativePinocchioTorqueReplay
     | NativeMyoSuiteExcitationReplay,
@@ -442,13 +458,24 @@ def validate_native_replay_output(
     """Validate the adapter's complete actual output against the frozen bundle."""
     _validate_output_type(row, output)
     _validate_bundle(row, binding, bundle)
+    from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
+        NativeFullBodyReplay,
+        PROVIDER_ID as FULL_BODY_PROVIDER_ID,
+    )
+
+    if isinstance(output, NativeFullBodyReplay) != (
+        binding.native_execution_provider_id == FULL_BODY_PROVIDER_ID
+    ):
+        raise ValueError("native output type differs from its exact provider binding")
     times = np.asarray(output.time_seconds, dtype=np.float64)
     expected_times = np.asarray(bundle.input_history.time_seconds, dtype=np.float64)
-    applied_field = (
-        "applied_muscle_excitations"
-        if row.engine == "myosuite"
-        else "applied_actuator_torques"
-    )
+    input_kind = bundle.input_history.input_kind
+    if row.engine == "myosuite":
+        applied_field = "applied_muscle_excitations"
+    elif input_kind.value == "generalized_effort":
+        applied_field = "applied_generalized_efforts"
+    else:
+        applied_field = "applied_actuator_torques"
     inputs = np.asarray(getattr(output, applied_field), dtype=np.float64)
     expected_inputs = np.asarray(bundle.input_history.values[:-1], dtype=np.float64)
     qpos = np.asarray(output.qpos, dtype=np.float64)
@@ -460,7 +487,13 @@ def validate_native_replay_output(
     ):
         raise ValueError("native output actual inputs differ from frozen bundle")
     if row.engine != "myosuite":
-        generalized_effort = getattr(output, "generalized_actuator_torques", None)
+        generalized_effort = getattr(
+            output,
+            "generalized_efforts"
+            if input_kind.value == "generalized_effort"
+            else "generalized_actuator_torques",
+            None,
+        )
         if generalized_effort is None or np.asarray(generalized_effort).shape != (
             len(inputs),
             qvel.shape[1] if qvel.ndim == 2 else -1,
@@ -482,6 +515,7 @@ def _validate_native_output_state(
     row: ComparisonRow,
     bundle: Any,
     output: NativeTorqueReplay
+    | NativeFullBodyReplay
     | NativeDrakeTorqueReplay
     | NativePinocchioTorqueReplay
     | NativeMyoSuiteExcitationReplay,
@@ -501,7 +535,39 @@ def _validate_native_output_state(
     if qpos.shape[1] <= 0 or qvel.shape[1] <= 0:
         raise ValueError("native qpos and qvel dimensions must be positive")
     state_component = {item.component_id: item.values for item in bundle.initial_state}
-    if row.engine == "myosuite":
+    from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
+        NativeFullBodyReplay,
+    )
+
+    if isinstance(output, NativeFullBodyReplay):
+        if (
+            tuple(state_component) != ("qpos", "qvel")
+            or bundle.model.state_schema.schema_id != "mujoco-full-body-qv"
+            or bundle.model.state_schema.version != "1.0.0"
+        ):
+            raise ValueError("full-body replay requires complete qpos and qvel only")
+        if hasattr(output, "integration_states") or hasattr(output, "discrete_states"):
+            raise ValueError("full-body RK4 replay has no hidden integration state")
+        pose_residual = np.asarray(
+            output.initial_pose_closure_residual, dtype=np.float64
+        )
+        rate_residual = np.asarray(
+            output.initial_rate_closure_residual, dtype=np.float64
+        )
+        step_residuals = np.asarray(output.pose_closure_residuals, dtype=np.float64)
+        if (
+            pose_residual.ndim != 1
+            or pose_residual.size == 0
+            or rate_residual.ndim != 1
+            or rate_residual.size == 0
+            or step_residuals.shape != (len(times) - 1,)
+        ):
+            raise ValueError(
+                "full-body closure observations have incomplete dimensions"
+            )
+        auxiliary_name = ""
+        auxiliary: NDArray[np.float64] = np.empty((0, 0), dtype=np.float64)
+    elif row.engine == "myosuite":
         from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
             NativeMyoSuiteExcitationReplay,
         )
@@ -553,7 +619,7 @@ def _validate_native_output_state(
                 "native adapter cannot preserve every declared state component"
             )
         auxiliary = np.asarray(getattr(output, auxiliary_field), dtype=np.float64)
-    if row.engine != "pinocchio":
+    if row.engine != "pinocchio" and not isinstance(output, NativeFullBodyReplay):
         if (
             auxiliary.ndim != 2
             or auxiliary.shape[0] != len(times)
@@ -572,8 +638,10 @@ def _validate_native_output_state(
         raise ValueError(
             "native output initial physical state differs from frozen bundle"
         )
-    if row.engine != "pinocchio" and not np.array_equal(
-        auxiliary[0], state_component.get(auxiliary_name, ())
+    if (
+        row.engine != "pinocchio"
+        and not isinstance(output, NativeFullBodyReplay)
+        and not np.array_equal(auxiliary[0], state_component.get(auxiliary_name, ()))
     ):
         raise ValueError(
             "native output initial numerical state differs from frozen bundle"
@@ -884,11 +952,22 @@ def execute_native_replay_with_output(
     _validate_bundle(row, request.binding, request.bundle)
     output: (
         NativeTorqueReplay
+        | NativeFullBodyReplay
         | NativeDrakeTorqueReplay
         | NativePinocchioTorqueReplay
         | NativeMyoSuiteExcitationReplay
     )
     if (
+        row.engine == "mujoco"
+        and request.binding.native_execution_provider_id
+        == "mujoco-full-body-generalized-rk4"
+    ):
+        from src.engines.physics_engines.mujoco.python.native_full_body_replay import (
+            replay_native_full_body_bundle,
+        )
+
+        output = replay_native_full_body_bundle(request.bundle, request.model_path)
+    elif (
         row.engine == "mujoco"
         and request.binding.native_execution_provider_id
         == "mujoco-native-torque-replay"

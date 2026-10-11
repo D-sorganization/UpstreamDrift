@@ -10,11 +10,14 @@ and ordered channel identities. F01 inventory provider identity is retained
 separately in the receipt. The executor refuses unsupported or unavailable
 inventory rows, mixed drive semantics, missing required capabilities, stale
 bundle integrity, unexpected replay modes, state observation or feedback,
-reset-enabled policy, non-relative time, and inputs outside the current direct
-actuator-torque/ZOH adapters. The initial F09c adapters were MuJoCo and Drake;
-F09e #11914 adds the published Pinocchio native torque adapter without changing
-the bundle or inventory authority. Other engines and muscle excitation remain
-represented and blocking.
+reset-enabled policy, non-relative time, and inputs outside the reviewed
+adapters. The initial F09c adapters were MuJoCo and Drake; F09e #11914 adds
+the published Pinocchio native torque adapter without changing the bundle or
+inventory authority. The full-body MuJoCo child adds the exactly bound
+`mujoco-full-body-generalized-rk4` provider for coordinate-ordered
+`GENERALIZED_EFFORT` histories. It keeps complete q/v as its state instead of
+inheriting the direct-torque adapter's MuJoCo integration-cache schema. Other
+engines and muscle excitation remain represented and blocking.
 
 Post-step validation checks the exact initial physical and numerical state,
 full native time grid, applied torque samples, state/input/policy/model
@@ -55,13 +58,34 @@ are reconciled.
 ## Limitations and Next Handoff
 
 T01 v1 currently has reviewed direct torque paths for MuJoCo, Drake, and
-Pinocchio. The executor does not yet admit excitation, force, generalized-
-effort, externally forced, or shared-rigid-body-emulation rows. It does not
-execute OpenSim, MyoSuite, or Simscape. These rows remain required and
-unqualified.
+Pinocchio plus the specifically bound full-body MuJoCo generalized-effort
+consumer. It does not yet admit excitation, external-force, or
+shared-rigid-body-emulation rows. Required model rows remain unqualified.
 Actual native marker forward kinematics and anatomical attachment mapping
 belong to a following F09 child. Do not interpret `qpos`, `qvel`, or native
 integration-state arrays as marker positions.
+
+## F09c Full-Body Generalized-Effort Consumer
+
+`src/engines/physics_engines/mujoco/python/native_full_body_replay.py` builds
+and replays a T01 bundle against the exact full-body spec. Input channels cover
+the source coordinate order, with zero entries for all six root coordinates;
+the consumer rejects nonzero root efforts before the shared integrator can
+silently zero them. The existing `VectorPlant` evaluates its source-owned
+contact and dual-grip weld dynamics at every derivative call in the shared
+classical RK4 integrator. The provider uses eight fixed substeps per frozen
+interval and disables closure projection. It does not call `mj_step`, assemble
+or reset the seed, restore hidden state, or accept a feedback callback.
+
+The output carries the q/v trajectory, applied generalized efforts, initial
+pose/rate residual vectors, and the shared integrator's per-step maximum pose-
+residual magnitudes. Those observations have no new acceptance threshold; an
+off-manifold seed can be replayed diagnostically but is not
+promoted as source-consistent or physically qualified. The q/v-only schema is
+accepted only for this exact provider ID. Tests use mock-plant and synthetic
+T01 contract fixtures; no private driver/iron capture or production native
+full-body run was performed. This is an open-loop frozen-history consumer, not
+a feedback producer or evidence that a feedback producer made the history.
 
 Tests use no private capture, subject, or mocap data. No tolerances or
 physiological claims are introduced, and the calculation registry stays

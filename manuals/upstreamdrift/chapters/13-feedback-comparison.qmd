@@ -238,6 +238,31 @@ actual adapter, but do not qualify any registered production model. The
 calculation registry remains blocked; this execution interface is not a
 released matching calculation.
 
+F09c's full-body MuJoCo generalized-effort provider is a separate explicit
+binding, `mujoco-full-body-generalized-rk4`. It consumes a complete `qpos` and
+`qvel` state plus one zero-order-held `GENERALIZED_EFFORT` channel for every
+coordinate in the source spec's declared order. The six root efforts must be
+zero; the provider rejects nonzero root values before the shared integrator
+can zero them. Translation channels are in N and rotational channels in N*m.
+The provider runs the existing `VectorPlant` with the shared classical RK4
+integrator, eight fixed substeps per input interval, and projection disabled.
+The model-owned contact and dual-grip weld response is evaluated by the plant
+throughout the RK stages. This path uses engine accelerations; it does not call
+MuJoCo `mj_step`.
+
+Initialization uses the supplied complete position and velocity vectors
+without assembly, projection, reset, feedback callback, or hidden state
+restoration. Initial pose/rate residual vectors and the shared integrator's
+per-step maximum pose-residual magnitudes are returned without a new acceptance
+threshold. Consequently the replay can
+run an off-manifold seed and still remains unqualified. Its q/v-only state
+schema is accepted only for this exact built-in provider; existing direct-
+torque adapters retain their complete native numerical-state requirements.
+This is an open-loop consumer for an already-frozen generalized-effort
+history. It does not produce feedback, establish that a feedback producer
+created the history, qualify support/grip, validate physiology, or establish
+full-capture or cross-engine equivalence.
+
 F09d (#11907) adds the next boundary: explicit model-owned forward kinematics
 from those native output configurations to named 3-D marker positions. Its
 ordered local-point map and source/loaded-model/provider identities are

@@ -1,5 +1,19 @@
 # Feedback Controls Planning Turnover
 
+## F09c Full-Body MuJoCo Frozen Replay (#11898)
+
+The new `mujoco-full-body-generalized-rk4` provider binds a frozen T01 bundle
+to the full-body source spec and replays complete q/v state with all
+coordinate-ordered generalized-effort channels. Six root entries are required
+to be zero before entering the shared `VectorPlant` / fixed eight-substep RK4
+path. Projection, assembly, reset, hidden state, and feedback callbacks remain
+disabled; model-owned contact and weld forces are evaluated during the shared
+plant derivative calls. Initial and per-step closure residuals are observed
+without a new threshold. The provider consumes a frozen history; it does not
+implement the upstream feedback producer. Focused pure-contract tests pass;
+native full-body execution has not been run or qualified. See
+`F09C-NATIVE-EXECUTION.md` and canonical chapter 13.
+
 ## F07 Native Moco Physical-Body Preflight (#12205)
 
 The maintained OpenSim Moco runner now requires the existing source/native

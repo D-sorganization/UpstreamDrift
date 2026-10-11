@@ -10661,6 +10661,17 @@ The receipt retains `state_reset_allowed=False` separately from an unknown
 reset count when the adapter does not instrument that counter; policy is not
 reported as a measured zero.
 
+F09c also has an explicitly bound full-body MuJoCo generalized-effort path.
+It consumes the exact source coordinate order, complete q/v state, and frozen
+ZOH generalized efforts with zero root entries. The shared `VectorPlant` and
+RK4 integrator run eight fixed substeps with projection disabled; model-owned
+contact and weld dynamics are evaluated during the engine-acceleration calls.
+The path does not call `mj_step`, assemble/reset state, or accept a feedback
+callback. It reports closure residuals without adding a qualification
+threshold, accepts only q/v-only state under its exact provider identity, and
+remains unqualified. This consumer does not claim that it generated its input
+history or that the history is a full capture.
+
 ## Native Marker Positions From Replay States (F09d, #11907)
 
 `src/engines/feedback_native_markers.py` executes a frozen replay through the
