@@ -142,7 +142,7 @@ def _edit_synthetic_source(path: Path, rung: LadderRung) -> None:
         x_location.append(
             ET.fromstring(
                 "<SimmSpline name='function'><x>-1 0 1</x>"
-                "<y>-0.01 0 0.01</y></SimmSpline>"
+                "<y>-0.008 0 0.012</y></SimmSpline>"
             )
         )
 
@@ -202,6 +202,8 @@ def _derive_synthetic_cold_start(path: Path, rung: LadderRung):
 
     model = osim.Model(str(path))
     state = model.initSystem()
+    if "nonlinear_mpp" in rung.features:
+        _verify_native_mpp_curvature(model, state, osim)
     for index in range(model.getMuscles().getSize()):
         model.getMuscles().get(index).setActivation(state, 0.05)
     model.equilibrateMuscles(state)
@@ -229,6 +231,35 @@ def _derive_synthetic_cold_start(path: Path, rung: LadderRung):
         residual_tolerance=1e-9,
     )
     return path, declaration
+
+
+def _verify_native_mpp_curvature(model: Any, state: Any, osim: Any) -> None:
+    point_set = model.getMuscles().get("flexor").getGeometryPath().getPathPointSet()
+    guide = next(
+        osim.MovingPathPoint.safeDownCast(point_set.get(index))
+        for index in range(point_set.getSize())
+        if point_set.get(index).getName() == "guide"
+    )
+    coordinate = model.getCoordinateSet().get("q")
+    original_q = coordinate.getValue(state)
+    derivatives = []
+    step = 1e-4
+    try:
+        for center in (-0.5, 0.5):
+            coordinate.setValue(state, center - step, False)
+            model.realizePosition(state)
+            before = guide.getLocation(state).get(0)
+            coordinate.setValue(state, center + step, False)
+            model.realizePosition(state)
+            after = guide.getLocation(state).get(0)
+            derivatives.append((after - before) / (2.0 * step))
+    finally:
+        coordinate.setValue(state, original_q, False)
+        model.realizePosition(state)
+    if not all(math.isfinite(value) and value > 0 for value in derivatives):
+        raise ValueError("native moving-path spline is not strictly increasing")
+    if abs(derivatives[1] - derivatives[0]) <= 1e-5:
+        raise ValueError("native moving-path spline has no resolved curvature")
 
 
 @dataclass(frozen=True)

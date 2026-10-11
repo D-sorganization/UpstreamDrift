@@ -174,7 +174,7 @@ def _rung_config(
         "moving_path_simm_spline_knots": [-1.0, 0.0, 1.0]
         if "nonlinear_mpp" in features
         else [],
-        "moving_path_simm_spline_values": [-0.01, 0.0, 0.01]
+        "moving_path_simm_spline_values": [-0.008, 0.0, 0.012]
         if "nonlinear_mpp" in features
         else [],
         "conditional_point_active_range": [0.2, 0.4]
@@ -195,7 +195,8 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _flush_file(path: Path) -> None:
-    with path.open("rb") as stream:
+    with path.open("r+b") as stream:
+        stream.flush()
         os.fsync(stream.fileno())
 
 

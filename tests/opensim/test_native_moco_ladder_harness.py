@@ -41,6 +41,56 @@ def test_default_ladder_adds_one_feature_per_rung() -> None:
     )
 
 
+def test_moving_path_spline_is_bounded_monotone_and_curved() -> None:
+    from tests.opensim.native_moco_ladder_worker import _rung_config
+
+    config = _rung_config(DEFAULT_RUNGS[2], 0.300005, "a" * 64, 0.3)
+    knots = config["moving_path_simm_spline_knots"]
+    values = config["moving_path_simm_spline_values"]
+    slopes = [
+        (values[index + 1] - values[index]) / (knots[index + 1] - knots[index])
+        for index in range(len(knots) - 1)
+    ]
+    assert all(-0.02 <= value <= 0.02 for value in values)
+    assert all(slope > 0 for slope in slopes)
+    assert slopes[0] != slopes[1]
+
+
+def test_staged_model_flush_uses_writable_descriptor(tmp_path: Path) -> None:
+    from tests.opensim.native_moco_ladder_worker import _flush_file
+
+    path = tmp_path / "staged.osim"
+    path.write_bytes(b"native model bytes")
+    _flush_file(path)
+
+
+def test_native_loaded_mpp_curve_rejects_collinear_law(tmp_path: Path) -> None:
+    import shutil
+    import defusedxml.ElementTree as ET
+
+    from tests.opensim.native_moco_ladder_harness import build_synthetic_rung
+    from tests.opensim.native_moco_ladder_harness import _verify_native_mpp_curvature
+
+    osim = pytest.importorskip("opensim")
+    path, _ = build_synthetic_rung(DEFAULT_RUNGS[2], tmp_path / "curved")
+    staged = tmp_path / "staged.osim"
+    shutil.copyfile(path, staged)
+    from tests.opensim.native_moco_ladder_worker import _flush_file
+
+    _flush_file(staged)
+    model = osim.Model(str(staged))
+    _verify_native_mpp_curvature(model, model.initSystem(), osim)
+
+    tree = ET.parse(staged)
+    law = tree.find(".//MovingPathPoint[@name='guide']/x_location/SimmSpline/y")
+    assert law is not None
+    law.text = "-0.01 0 0.01"
+    tree.write(staged, encoding="utf-8", xml_declaration=True)
+    linear_model = osim.Model(str(staged))
+    with pytest.raises(ValueError, match="curvature"):
+        _verify_native_mpp_curvature(linear_model, linear_model.initSystem(), osim)
+
+
 def test_ladder_stops_after_first_worker_failure(tmp_path: Path) -> None:
     invocations: list[str] = []
 
