@@ -9,7 +9,7 @@ Save completed reports as `docs/operations/sanitation/sanitation-YYYY-MM-DD.md`.
 One sentence: what this sweep covered (worktrees, branches/PRs, temp
 artifacts, docs IA) and what it deliberately did not touch.
 
-## Preserved (fail-closed)
+## Preserved (Fail-Closed)
 
 List every item that was a candidate for cleanup but was **not** touched,
 and the specific guard that stopped it (dirty, open PR, locked, recent,
@@ -22,11 +22,11 @@ comes first so the fail-closed rule is visible, not implied.
 
 Actions actually taken this sweep, each reversible or already-safe
 (e.g. `git fetch --prune` of dead remote-tracking refs, archived-with-
-provenance temp artifacts). Do not list anything merely *proposed* here.
+provenance temp artifacts). Do not list anything merely _proposed_ here.
 
 - `<item>` — `<action taken>`
 
-## Findings (not actioned this sweep)
+## Findings (Not Actioned This Sweep)
 
 Structural issues observed but out of scope for a single safe pass —
 oversized files, missing scaffolding, drift against this playbook's own
@@ -37,10 +37,10 @@ unilateral fix.
 
 ## Numbers
 
-| Category                         | Count/Size |
+| Category                          | Count/Size |
 | --------------------------------- | ---------- |
 | Worktrees reviewed                |            |
-| Worktrees preserved (fail-closed)  |            |
+| Worktrees preserved (fail-closed) |            |
 | Stale remote-tracking refs pruned |            |
 | Local branches merged & removed   |            |
 | Temp artifacts archived           |            |

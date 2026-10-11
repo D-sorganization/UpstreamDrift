@@ -11,7 +11,7 @@ A scheduled sweep of worktree/branch/PR hygiene and root/docs clutter on
 touch other agents' worktrees, did not merge or admin-override anything,
 did not file bulk remediation issues.
 
-## Preserved (fail-closed)
+## Preserved (Fail-Closed)
 
 - 16 sibling `staff-worktrees/UpstreamDrift-run-*` entries — each is on a
   distinct `staff/<role>-task-*` branch, several with uncommitted or
@@ -41,7 +41,7 @@ did not file bulk remediation issues.
   branches already deleted upstream. Local ref-list hygiene only; no
   repository state changed, nothing to commit.
 
-## Findings (not actioned this sweep)
+## Findings (Not Actioned This Sweep)
 
 - **This playbook's own scaffolding was never created in UpstreamDrift.**
   `docs/fleet-sanitation.md` (source of truth, lives in
@@ -61,21 +61,21 @@ did not file bulk remediation issues.
   not a structural sanitation action — flagged for the document owner /
   Night Watch rather than edited here.
 - 17 concurrently open non-draft PRs is below this repo's stated
-  consolidation trigger (6+ open PRs *and* ≥70% runner use, or explicit
+  consolidation trigger (6+ open PRs _and_ ≥70% runner use, or explicit
   ask) only in the sense that consolidation is a `pr-remediator`/owner
   call, not a Sanitation Engineer action — noting the count for visibility,
   not proposing a merge.
 
 ## Numbers
 
-| Category                          | Count/Size |
-| ---------------------------------- | ---------- |
-| Worktrees reviewed                 | 17 (16 sibling + 1 own) |
-| Worktrees preserved (fail-closed)   | 16 (own excluded) |
-| Worktree-prune candidates deferred (unverifiable) | 1 |
-| Stale remote-tracking refs pruned  | ~20 |
-| Open non-draft PRs observed        | 17 |
-| Temp artifacts archived            | 0 (none found — root and `candidates/` both legitimate) |
+| Category                                          | Count/Size                                              |
+| ------------------------------------------------- | ------------------------------------------------------- |
+| Worktrees reviewed                                | 17 (16 sibling + 1 own)                                 |
+| Worktrees preserved (fail-closed)                 | 16 (own excluded)                                       |
+| Worktree-prune candidates deferred (unverifiable) | 1                                                       |
+| Stale remote-tracking refs pruned                 | ~20                                                     |
+| Open non-draft PRs observed                       | 17                                                      |
+| Temp artifacts archived                           | 0 (none found — root and `candidates/` both legitimate) |
 
 ## Handoff
 
