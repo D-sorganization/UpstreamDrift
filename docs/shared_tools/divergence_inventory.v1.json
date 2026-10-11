@@ -13,7 +13,7 @@
   "totals": {
     "identical": 399,
     "diverged": 274,
-    "ud-only": 1779,
+    "ud-only": 1780,
     "tools-only": 808,
     "spelling-only": 121
   },
@@ -483,7 +483,7 @@
     "lifting": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 27,
+      "ud-only": 28,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -504,7 +504,7 @@
     "model_appearance": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 14,
+      "ud-only": 15,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 294,
+      "ud-only": 295,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12681,7 +12681,19 @@
       "classification": "ud-only",
       "package": "lifting",
       "subpackage": "pack_audit",
-      "ud_bytes": 8013,
+      "ud_bytes": 8181,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/pack_audit/adapters/drake_bar_hold.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "pack_audit",
+      "ud_bytes": 7914,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12893,6 +12905,18 @@
       "spelling_only": false
     },
     {
+      "path": "lifting/pack_audit/start_conformance.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "pack_audit",
+      "ud_bytes": 14597,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "lifting/pack_audit/stills.py",
       "classification": "ud-only",
       "package": "lifting",
@@ -13041,7 +13065,7 @@
       "classification": "ud-only",
       "package": "model_appearance",
       "subpackage": "",
-      "ud_bytes": 15715,
+      "ud_bytes": 15476,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13065,7 +13089,19 @@
       "classification": "ud-only",
       "package": "model_appearance",
       "subpackage": "",
-      "ud_bytes": 7780,
+      "ud_bytes": 8367,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/grip_hand_mesh.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 18012,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15473,6 +15509,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/execution/grip_rotation.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "execution",
+      "ud_bytes": 3529,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/execution/mjx_export.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -15681,7 +15729,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 8591,
+      "ud_bytes": 11197,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16641,7 +16689,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 30185,
+      "ud_bytes": 30186,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

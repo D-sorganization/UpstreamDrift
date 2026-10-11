@@ -39,7 +39,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.model_appearance.club_shaft_mesh import tapered_tube
-from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.geometry import Mesh, concat_meshes
 
 Array = NDArray[np.float64]
 
@@ -216,15 +216,6 @@ def _weld(triangles: Array) -> Mesh:
     return mesh
 
 
-def _concat(*meshes: Mesh) -> Mesh:
-    verts, faces, base = [], [], 0
-    for mesh in meshes:
-        verts.append(mesh.vertices)
-        faces.append(mesh.faces + base)
-        base += len(mesh.vertices)
-    return Mesh(np.vstack(verts), np.vstack(faces))
-
-
 def shaft_direction_head(lie_deg: float) -> Array:
     """Unit sole-to-grip direction in the head frame (leans toward the heel)."""
     tau = math.radians(90.0 - lie_deg)
@@ -290,7 +281,7 @@ def load_club_head(name: str) -> ClubHeadMesh:
         loft,
         lie,
         head,
-        _concat(head, hosel),
+        concat_meshes(head, hosel),
         sole,
         direction,
         t_top,
