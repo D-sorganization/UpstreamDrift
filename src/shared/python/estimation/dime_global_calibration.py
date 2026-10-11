@@ -17,6 +17,7 @@ import numpy as np
 from scipy.optimize import least_squares
 
 from src.shared.python.core.contracts import PreconditionError, require
+from src.shared.python.core.physical_inertia import validate_physical_inertia
 from src.shared.python.estimation.identifiability import (
     IdentifiabilityReport,
     ParameterSpec,
@@ -115,37 +116,6 @@ class PhysicalGaugePolicy:
             PhysicalGauge.MASS_ANCHOR in self.active_gauges
             or PhysicalGauge.MEASURED_FORCE_ANCHOR in self.active_gauges
         )
-
-
-def validate_physical_inertia(tensor: np.ndarray) -> np.ndarray:
-    """Verify that a 3x3 inertia matrix is physically realizable.
-
-    Enforces:
-    1. Square 3x3 symmetric matrix.
-    2. Strict positive definiteness (all eigenvalues > 0).
-    3. Classical triangle inequalities:
-       I_1 + I_2 >= I_3 for sorted principal moments, independent of body axes.
-    """
-    arr = np.asarray(tensor, dtype=np.float64)
-    if arr.shape != (3, 3) or not np.all(np.isfinite(arr)):
-        raise PreconditionError("Inertia tensor must be finite 3x3 matrix")
-
-    if not np.allclose(arr, arr.T, atol=1e-7, rtol=0):
-        raise PreconditionError("Inertia tensor must be symmetric")
-
-    eigvals = np.linalg.eigvalsh(arr)
-    if np.any(eigvals <= 1e-9):
-        raise PreconditionError("Inertia tensor is not positive definite")
-
-    # Triangle inequalities on principal moments
-    first, second, third = (float(value) for value in eigvals)
-    tol = 1e-9
-    if first + second < third - tol:
-        raise PreconditionError(
-            "Inertia tensor violates triangle inequality on principal moments: "
-            f"I1={first}, I2={second}, I3={third}"
-        )
-    return arr
 
 
 @dataclass(frozen=True)

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "86d0f28b1cc5acf61185e07e320c816c2d005512",
+  "tools_pin": "6b6e4be55e7086a33db43b36d2632765be619bde",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -13,7 +13,7 @@
   "totals": {
     "identical": 400,
     "diverged": 273,
-    "ud-only": 1607,
+    "ud-only": 1608,
     "tools-only": 805,
     "spelling-only": 121
   },
@@ -245,7 +245,7 @@
     "core": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 23,
+      "ud-only": 24,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -6718,6 +6718,18 @@
       "spelling_only": false
     },
     {
+      "path": "core/physical_inertia.py",
+      "classification": "ud-only",
+      "package": "core",
+      "subpackage": "",
+      "ud_bytes": 1123,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "core/physics_constants.py",
       "classification": "ud-only",
       "package": "core",
@@ -7970,7 +7982,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 15129,
+      "ud_bytes": 14028,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16562,7 +16574,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 26953,
+      "ud_bytes": 28851,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16598,7 +16610,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 45056,
+      "ud_bytes": 45333,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16706,7 +16718,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 34053,
+      "ud_bytes": 34109,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

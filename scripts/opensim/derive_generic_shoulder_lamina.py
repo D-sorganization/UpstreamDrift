@@ -5,28 +5,12 @@ from __future__ import annotations
 import argparse
 from dataclasses import asdict
 import hashlib
-import importlib
 import json
 from pathlib import Path
-import sys
 
 
 def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def _external_provider(root: Path | None) -> None:
-    """Development-only exact Tools source injection before its gitlink merges."""
-    if root is None:
-        return
-    package = importlib.import_module("shared.python.humanoid_character_builder.mesh")
-    mesh_dir = root / "src/shared/python/humanoid_character_builder/mesh"
-    if not (mesh_dir / "triangle_lamina.py").is_file():
-        raise ValueError("external Tools source lacks the triangle lamina provider")
-    package.__path__.insert(0, str(mesh_dir))
-    for module in ("inertia_calculator", "triangle_lamina"):
-        sys.modules.pop(f"shared.python.humanoid_character_builder.mesh.{module}", None)
-    importlib.invalidate_caches()
 
 
 def main() -> None:
@@ -35,9 +19,7 @@ def main() -> None:
     parser.add_argument("--right-clavicle", required=True, type=Path)
     parser.add_argument("--right-scapula", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--development-tools-root", type=Path)
     args = parser.parse_args()
-    _external_provider(args.development_tools_root)
     from src.engines.physics_engines.opensim.python.tour_matching import (
         generic_shoulder_lamina as shoulder,
     )
@@ -67,6 +49,7 @@ def main() -> None:
         "registration_id": candidate.registration_id,
         "provider_sha256": candidate.lamina_provider_sha256,
         "representation_sha256": candidate.inertia_representation_sha256,
+        "provider_worker_sha256": candidate.provider_worker_sha256,
         "adapter_sha256": _sha(Path(shoulder.__file__)),
         "script_sha256": _sha(Path(__file__)),
         "meshes_sha256": candidate.geometry_sha256,
