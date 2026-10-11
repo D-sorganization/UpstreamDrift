@@ -69,6 +69,171 @@ def test_mesh_refinement_request_keeps_other_solver_contract_fixed() -> None:
         assert config["constraint_tolerance"] == 1e-7
 
 
+def test_bounded_refinement_marks_one_parent_cell_and_preserves_contract(
+    tmp_path: Path,
+) -> None:
+    from tests.opensim.native_moco_refinement import build_refinement_plan
+
+    parent = tmp_path / "parent"
+    parent.mkdir()
+    source = parent / "source.osim"
+    request_path = parent / "request.json"
+    solution = parent / "solution.sto"
+    controls = parent / "time_only_controls.sto"
+    source.write_bytes(b"source")
+    solution.write_bytes(b"solution")
+    controls.write_bytes(b"controls")
+    request = {
+        "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "mesh_intervals": 20,
+        "horizon_seconds": 0.01,
+        "target_coordinate": "/jointset/base/q/value",
+        "target_q": 0.300005,
+        "initial_q": 0.3,
+        "transcription_scheme": "hermite-simpson",
+        "interpolate_control_mesh_interior_points": True,
+        "replay_control_interpolation": "piecewise_linear",
+        "parallel": 0,
+        "maximum_iterations": 300,
+        "convergence_tolerance": 1e-6,
+        "constraint_tolerance": 1e-7,
+        "native_control_bounds": {"/forceset/flexor": [0.01, 1.0]},
+        "native_control_bounds_source": {
+            "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest()
+        },
+        "cold_start_named_state": {"/forceset/flexor/activation": 0.05},
+        "physical_qualification": "unqualified",
+        "solution_serialization_max_ulps": 8,
+    }
+    request_bytes = json.dumps(request).encode("utf-8")
+    request_path.write_bytes(request_bytes)
+    report_dir = tmp_path / "analysis"
+    audit_dir = (
+        report_dir / "diagnostic_retained_replay_fauldump_3e195b0e" / "native_audit"
+    )
+    audit_dir.mkdir(parents=True)
+    audit = audit_dir / "fresh_replay_diagnostic.json"
+    audit.write_bytes(b"audit")
+    channels = {}
+    for name in ("flexor", "extensor"):
+        pairs = [[0.0, 0.0] for _ in range(40)]
+        channels[name] = {
+            "full_cell_local_vs_accumulated_allocation": {
+                "local_scalar_minus_optimized_midpoint_endpoint": pairs[:20],
+                "cell_count": 20,
+            }
+        }
+    channels["flexor"]["full_cell_local_vs_accumulated_allocation"][
+        "local_scalar_minus_optimized_midpoint_endpoint"
+    ][0] = [1.15e-4, 9.4e-5]
+    report = {
+        "input_sha256": {
+            "source_osim": hashlib.sha256(source.read_bytes()).hexdigest(),
+            "request": hashlib.sha256(request_path.read_bytes()).hexdigest(),
+            "solution_sto": hashlib.sha256(solution.read_bytes()).hexdigest(),
+            "time_only_controls_sto": hashlib.sha256(controls.read_bytes()).hexdigest(),
+            "replay_audit": hashlib.sha256(audit.read_bytes()).hexdigest(),
+        },
+        "sample_count": 41,
+        "interval_count": 40,
+        "channels": channels,
+    }
+    report_path = report_dir / "activation_residual_analysis.json"
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+
+    plan = build_refinement_plan(parent, report_path)
+    assert plan["flagged_parent_cells"] == [0]
+    assert plan["normalized_mesh_points"][:4] == (0.0, 0.025, 0.05, 0.1)
+    assert len(plan["normalized_mesh_points"]) - 1 == 21
+    assert plan["preserved_contract"]["initial_q"] == request["initial_q"]
+    assert plan["preserved_contract"]["objective"] == "MocoControlGoal(effort)"
+    assert plan["control_seed"]["interpolation"] == "piecewise_linear"
+    assert "lower local activation" in plan["interpretation"]
+    errors = channels["extensor"]["full_cell_local_vs_accumulated_allocation"][
+        "local_scalar_minus_optimized_midpoint_endpoint"
+    ]
+    errors[7] = [2e-8, 0.0]
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    interior_plan = build_refinement_plan(parent, report_path)
+    assert interior_plan["flagged_parent_cells"] == [0, 7]
+    assert 0.375 in interior_plan["normalized_mesh_points"]
+    assert len(interior_plan["normalized_mesh_points"]) - 1 == 22
+    errors[1:5] = [[2e-8, 0.0] for _ in range(4)]
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    with pytest.raises(ValueError, match="cell cap"):
+        build_refinement_plan(parent, report_path)
+    errors[1:5] = [[0.0, 0.0] for _ in range(4)]
+    errors[7] = [0.0, 0.0]
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    request_path.write_bytes(request_bytes + b" ")
+    with pytest.raises(ValueError, match="parent inputs"):
+        build_refinement_plan(parent, report_path)
+    request_path.write_bytes(request_bytes)
+    controls.write_bytes(b"changed controls")
+    with pytest.raises(ValueError, match="parent inputs"):
+        build_refinement_plan(parent, report_path)
+    controls.write_bytes(b"controls")
+    source.write_bytes(b"changed parent")
+    with pytest.raises(ValueError, match="parent inputs"):
+        build_refinement_plan(parent, report_path)
+
+
+def test_refinement_mesh_and_piecewise_linear_control_contracts() -> None:
+    from tests.opensim.native_moco_refinement import (
+        child_hs_grid,
+        make_refined_mesh,
+        piecewise_linear_samples,
+        validate_normalized_mesh,
+    )
+
+    mesh = validate_normalized_mesh([0.0, 0.025, 0.05, 0.1, 1.0])
+    assert child_hs_grid(mesh, 0.01)[:4] == pytest.approx(
+        (0.0, 0.000125, 0.00025, 0.000375)
+    )
+    _, interior = make_refined_mesh(20, [7])
+    assert 0.375 in interior
+    assert len(interior) - 1 == 21
+    assert piecewise_linear_samples([0.0, 1.0], [0.0, 2.0], [0.0, 0.25, 1.0]) == (
+        0.0,
+        0.5,
+        2.0,
+    )
+    for invalid in ([0.0, 1.0, 0.5], [0.0, float("nan"), 1.0], [0.1, 1.0]):
+        with pytest.raises(ValueError):
+            validate_normalized_mesh(invalid)
+
+
+def test_committed_activation_analysis_reproduces_retained_parent_bindings(
+    tmp_path: Path,
+) -> None:
+    from scripts.opensim.analyze_retained_activation_residual import analyze
+
+    repository = Path(__file__).resolve().parents[2]
+    experiment = (
+        repository
+        / "docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain"
+    )
+    audit = (
+        experiment.parent
+        / "diagnostic_retained_replay_fauldump_3e195b0e"
+        / "native_audit"
+        / "fresh_replay_diagnostic.json"
+    )
+    result = analyze(experiment, audit, tmp_path / "reproduced.json")
+    assert result["status"] == "offline_diagnostic_only"
+    assert (
+        result["input_sha256"]["source_osim"]
+        == hashlib.sha256((experiment / "source.osim").read_bytes()).hexdigest()
+    )
+    allocation = result["channels"]["flexor"][
+        "full_cell_local_vs_accumulated_allocation"
+    ]
+    assert allocation["cell_count"] == 20
+    assert allocation["local_scalar_minus_optimized_midpoint_endpoint"][0][
+        0
+    ] == pytest.approx(1.1531598344965976e-4, rel=1e-10)
+
+
 @pytest.mark.parametrize("value", [True, 0, -1, 101, 1.5])
 def test_mesh_interval_count_rejects_invalid_values(value: object) -> None:
     from tests.opensim.native_moco_ladder_harness import _validate_mesh_intervals

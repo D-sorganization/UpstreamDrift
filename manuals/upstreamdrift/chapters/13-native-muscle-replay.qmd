@@ -266,3 +266,36 @@ timeouts, implementation hashes and reproduction details are retained in
 These bounded synthetic runs establish neither full-body muscle feasibility
 nor physiology, capture matching, production replay, OpenSim muscle
 qualification, or 17-variant/six-ecosystem parity. All remain unqualified.
+
+### Bounded Nonuniform Refinement Plan
+
+The separate pure planner in
+`tests/opensim/native_moco_refinement.py` consumes the hash-bound parent source,
+request, optimized solution, persisted time-only controls, replay audit and
+offline activation report. It marks a full Hermite-Simpson cell when the
+absolute local scalar activation midpoint or endpoint discrepancy exceeds the
+indicative `1e-8` threshold. For the retained mesh-20 case, only cell 0 is
+marked. The deterministic child mesh inserts its midpoint at normalized time
+`0.025` (physical time `0.00025 s`), giving 21 intervals. The planner permits
+at most four flagged cells and caps the child at 24 intervals; mismatched
+inputs, invalid grids and cap overflow fail before a worker starts. One child
+attempt is bound to its parent hashes, with no silent selection among excess
+indicators.
+
+The worker applies OpenSim Moco's user-defined normalized mesh API and seeds
+states from the retained parent trajectory, checking the exact declared initial
+values. It evaluates saved controls by piecewise-linear interpolation at every
+child endpoint and midpoint and writes those values directly into the guess.
+Control trajectory resampling, which could alter the PWL input law, is not
+used. Source-derived control bounds, horizon, initial named state, effort
+objective, transcription, midpoint-control interpolation, solver limits and
+replay thresholds remain bound in the attempt record. The 30-second wall
+limit, 1 GiB sampled soft RSS threshold and stop-on-failure policy remain
+unchanged.
+
+This is a bounded refinement design, not a native run or success claim. A
+smaller activation indicator does not guarantee solver convergence or replay
+acceptance, and cannot qualify fiber lengths, kinematics, physiology, capture
+matching or production behavior. The child still requires the unchanged
+independent fresh replay checks. Native API and time-grid integration remain
+unverified pending separate review.

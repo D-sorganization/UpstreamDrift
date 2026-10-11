@@ -721,3 +721,40 @@ discrepancy numerically but do not establish why it occurs. The extensor local
 endpoint discrepancy maximum is `1.7235e-10`. All inputs retain the same
 source/request/solution/control/replay hashes; the new report SHA-256 is
 `1195cdf39855accfd761e41410d8b23121cafbb28f0407d69e3a479d1e136116`.
+
+## Bounded Nonuniform Refinement Design
+
+The five public synthetic parent inputs are retained byte-for-byte under
+`experiments/native_moco_mesh20_e1548c5179/`: `plain/source.osim`,
+`plain/request.json`, `plain/solution.sto`, `plain/time_only_controls.sto`, and
+`diagnostic_retained_replay_fauldump_3e195b0e/native_audit/fresh_replay_diagnostic.json`.
+The test `test_committed_activation_analysis_reproduces_retained_parent_bindings`
+recomputes the offline analysis from these files. The current plan binds their
+hashes and the analysis report before creating a child attempt.
+
+The pure one-pass planner uses an indicative `1e-8` absolute local activation
+indicator. In the retained case it marks full Hermite-Simpson cell 0 and inserts
+normalized mesh point `0.025` (physical time `0.00025 s`), making 21 intervals.
+The generic planner accepts up to four flagged parent cells and caps the child
+mesh at 24 intervals. It rejects stale source, request, solution, control or
+replay-audit bytes, malformed meshes and cap overflow without dropping marked
+cells. Repeating the same attempt ID collides with its existing output path,
+preventing an automatic second attempt.
+
+The child configuration uses Moco's nonuniform normalized mesh, carries state
+initialization from the saved parent trajectory, and seeds each control by
+piecewise-linear interpolation of the persisted control STO at every child
+endpoint and midpoint. It does not resample controls. It preserves the parent
+source, horizon, initial-state declaration, target, effort objective, native
+control bounds, Hermite-Simpson scheme, midpoint-control policy, solver limits
+and replay thresholds. The existing isolated-worker 30-second wall and 1 GiB
+sampled soft RSS controls remain in effect; attempt provenance keeps parent and
+child hashes, worker command, timeout or failure status, elapsed time and
+sampled peak when present.
+
+This committed code and its pure tests are a refinement plan only. No refined
+native solve or replay has run, and no native API/time-grid acceptance is
+claimed. A smaller local activation indicator is not a guarantee of convergence
+or replay acceptance and does not qualify fiber lengths, kinematics, or
+physiology. Any later child still has to pass the unchanged independent replay
+checks and receive a separate review before execution.

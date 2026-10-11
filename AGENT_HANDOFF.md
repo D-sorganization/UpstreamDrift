@@ -1229,8 +1229,13 @@ fresh replay and segmented scalar PWL integration by up to `1.1532e-4`.
 Fresh replay and scalar integration agree within `2.5751e-8`. The XML omits
 activation constants; calculations use OpenSim 4.6 source defaults, not
 installed-binary readback. This does not identify cause or qualify the failed
-replay. No optimizer retry is authorized; see canonical chapter13 and
+replay. The bounded nonuniform refinement is implemented and pure-tested, but
+has not been run; native API/time-grid acceptance and any child solve/replay
+remain unverified and require separate review. See canonical chapter13 and
 `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+The agent-context catalog is unchanged because its `vendor/ud-tools` junction
+escapes to the frozen `feedback-drake-native-11838` donor; the context CLI
+rejected that path and the donor was not traversed or modified.
 
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter

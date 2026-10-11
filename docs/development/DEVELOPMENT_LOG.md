@@ -3244,3 +3244,19 @@ complete native integration state. This is synthetic controller evidence,
 not a hard deadline, measured capture fit or full-body qualification;
 the F05 parent and canonical manual publication remain blocked. Read
 chapter 26 and `F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
+## Bounded Nonuniform Moco Refinement Plan (#12244; 2026-10-10)
+
+The 20-cell synthetic Moco parent inputs are retained byte-for-byte and the
+offline activation report reproduces from those committed source, request,
+solution, control and replay-audit artifacts. A pure source-bound planner marks
+the observed full Hermite-Simpson cells, caps one child pass at four marked
+cells and 24 intervals, and rejects evidence/hash or grid mismatches. The worker
+uses the normalized custom mesh and parent state seed, then linearly samples
+the persisted controls at every child endpoint and midpoint without control
+trajectory resampling. Pure planner/interpolation regressions pass. No native
+child solve or replay was run; solver API/time-grid acceptance and all physical
+qualification remain open. The context catalog could not be refreshed here:
+its `vendor/ud-tools` junction escapes this checkout to the frozen
+`feedback-drake-native-11838` donor, and the context CLI correctly rejects that
+path. See the #12244 change fragment, chapter 13 and F07 ladder turnover.

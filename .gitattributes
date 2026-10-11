@@ -12,6 +12,11 @@ tests/fixtures/launch_monitor/longitudinal_attested_v1.csv text eol=lf
 *.cff text eol=lf
 *.sh text eol=lf
 *.osim text eol=lf
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain/source.osim -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain/request.json -text
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain/solution.sto -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain/time_only_controls.sto -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/diagnostic_retained_replay_fauldump_3e195b0e/native_audit/fresh_replay_diagnostic.json -text
 requirements*.lock text eol=lf
 
 # Exclude archived legacy code from language statistics

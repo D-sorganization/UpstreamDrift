@@ -552,7 +552,46 @@ def _validate_retained_artifacts(
         raise ValueError("fresh replay evidence is not bound to time-only controls")
     if replay.get("physical_qualification") != "unqualified":
         raise ValueError("synthetic software replay must remain physically unqualified")
+    _validate_refinement_receipt(directory, request, receipt)
     return request, replay
+
+
+def _validate_refinement_receipt(
+    directory: Path, request: dict[str, Any], receipt: dict[str, Any]
+) -> None:
+    request_plan = request.get("mesh_refinement")
+    receipt_plan = receipt.get("mesh_refinement")
+    if request_plan is None and receipt_plan is None:
+        return
+    audit_path = directory / "mesh_grid_audit.json"
+    if not isinstance(request_plan, dict) or not isinstance(receipt_plan, dict):
+        raise ValueError("refinement request and success receipt must both bind a plan")
+    if not audit_path.is_file():
+        raise ValueError("refinement success is missing its mesh-grid audit")
+    audit = json.loads(audit_path.read_text(encoding="utf-8"))
+    from tests.opensim.native_moco_refinement import child_hs_grid
+
+    expected_grid = list(
+        child_hs_grid(
+            request_plan["normalized_mesh_points"], request["horizon_seconds"]
+        )
+    )
+    if (
+        receipt_plan.get("attempt_id") != request_plan.get("attempt_id")
+        or receipt_plan.get("parent_hashes") != request_plan.get("parent_hashes")
+        or receipt_plan.get("analysis_sha256") != request_plan.get("analysis_sha256")
+        or receipt_plan.get("normalized_mesh_points")
+        != request_plan.get("normalized_mesh_points")
+        or receipt_plan.get("mesh_grid_audit_sha256") != _sha256(audit_path)
+        or audit.get("attempt_id") != request_plan.get("attempt_id")
+        or audit.get("parent_hashes") != request_plan.get("parent_hashes")
+        or audit.get("planned_normalized_mesh_points")
+        != request_plan.get("normalized_mesh_points")
+        or audit.get("planned_time_grid_seconds") != expected_grid
+        or audit.get("solution_time_grid_seconds") != expected_grid
+        or audit.get("exact_solution_grid_match") is not True
+    ):
+        raise ValueError("refinement receipt does not bind the planned native grid")
 
 
 def _validate_replay_result(
@@ -844,6 +883,7 @@ def worker_command(
     directory: Path,
     python_executable: str = sys.executable,
     mesh_intervals: int = 10,
+    refinement_plan: Path | None = None,
 ) -> tuple[str, ...]:
     """Return the isolated worker command for one rung."""
     mesh_intervals = _validate_mesh_intervals(mesh_intervals)
@@ -858,7 +898,121 @@ def worker_command(
     )
     if mesh_intervals != 10:
         command += ("--mesh-intervals", str(mesh_intervals))
+    if refinement_plan is not None:
+        command += ("--refinement-plan", str(refinement_plan))
     return command
+
+
+def run_refinement_attempt(
+    parent: Path,
+    analysis_path: Path,
+    output_root: Path,
+    *,
+    worker_python: str = sys.executable,
+) -> RungResult:
+    """Run one child attempt from hash-validated retained evidence."""
+    from tests.opensim.native_moco_refinement import build_refinement_plan
+
+    plan = build_refinement_plan(parent, analysis_path)
+    if plan["status"] != "planned":
+        raise ValueError(
+            "retained activation indicators did not mark a refinement cell"
+        )
+    output_root.mkdir(parents=True, exist_ok=True)
+    directory = output_root / plan["attempt_id"]
+    directory.mkdir(parents=True, exist_ok=False)
+    plan_path = directory / "refinement_plan.json"
+    plan_path.write_text(
+        json.dumps(plan, sort_keys=True, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    rung = LadderRung("plain", ())
+    command = worker_command(
+        rung,
+        directory,
+        worker_python,
+        plan["parent_request"]["mesh_intervals"],
+        plan_path,
+    )
+    attempt = {
+        "schema": "native-moco-refinement-attempt-v1",
+        "attempt_id": plan["attempt_id"],
+        "parent_hashes": plan["parent_hashes"],
+        "analysis_sha256": plan["analysis_sha256"],
+        "plan_sha256": _sha256(plan_path),
+        "harness_sha256": _sha256(Path(__file__)),
+        "worker_sha256": _sha256(
+            Path(__file__).with_name("native_moco_ladder_worker.py")
+        ),
+        "worker_command": list(command),
+        "working_directory": str(Path(__file__).resolve().parents[2]),
+        "nonsecret_environment": _refinement_environment_snapshot(),
+        "status": "started",
+        "attempt_limit": 1,
+        "maximum_refined_parent_cells": plan["maximum_refined_parent_cells"],
+        "maximum_child_intervals": plan["maximum_child_intervals"],
+        "wall_limit_seconds": 30.0,
+        "sampled_rss_soft_threshold_bytes": 1024**3,
+        "physical_qualification": "unqualified",
+    }
+    attempt_path = directory / "attempt_provenance.json"
+    attempt_path.write_text(
+        json.dumps(attempt, sort_keys=True, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    result = _run_one_rung(rung, directory, command, 30.0)
+    attempt.update(
+        {
+            "status": result.status,
+            "stop_reason": result.detail,
+            "elapsed_wall_seconds": result.elapsed_seconds,
+            "peak_sampled_tree_rss_bytes": result.peak_sampled_tree_rss_bytes,
+            "result_receipt_sha256": result.receipt_sha256,
+            "owned_process_tree_cleanup_verified": True,
+            "child_artifact_sha256": _refinement_artifact_hashes(directory),
+        }
+    )
+    attempt_path.write_text(
+        json.dumps(attempt, sort_keys=True, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return result
+
+
+def _refinement_artifact_hashes(directory: Path) -> dict[str, str]:
+    names = (
+        "worker.stdout.log",
+        "worker.stderr.log",
+        "progress.json",
+        "source.osim",
+        "request.json",
+        "solution_serialization_audit.json",
+        "solution.sto",
+        "time_only_controls.sto",
+        "mesh_grid_audit.json",
+        "fresh_replay.json",
+        "receipt.json",
+    )
+    return {
+        name: _sha256(directory / name)
+        for name in names
+        if (directory / name).is_file()
+    }
+
+
+def _refinement_environment_snapshot() -> dict[str, str]:
+    names = (
+        "CASADIPATH",
+        "PYTHONPATH",
+        "MYPYPATH",
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+        "BLIS_NUM_THREADS",
+    )
+    return {name: os.environ[name] for name in names if name in os.environ}
 
 
 def _validate_mesh_intervals(value: object) -> int:

@@ -25,6 +25,11 @@ from tests.opensim.native_moco_ladder_harness import (
     _validate_mesh_intervals,
     build_synthetic_rung,
 )
+from tests.opensim.native_moco_refinement import (
+    build_refinement_plan,
+    child_hs_grid,
+    piecewise_linear_samples,
+)
 
 _SERIALIZATION_MAX_ULPS = 8
 
@@ -51,14 +56,26 @@ def _write_progress(
     _write_json(path, {"rung": rung, "stage_metrics": stages})
 
 
-def run_rung(rung_name: str, output: Path, mesh_intervals: int = 10) -> None:
+def run_rung(
+    rung_name: str,
+    output: Path,
+    mesh_intervals: int = 10,
+    refinement_plan_path: Path | None = None,
+) -> None:
     import opensim as osim
 
     rung = next(item for item in DEFAULT_RUNGS if item.name == rung_name)
     # The supervisor creates the per-rung directory before launching us.
     output.mkdir(parents=True, exist_ok=True)
     stages: dict[str, dict[str, float]] = {}
-    prepared = _prepare_rung(rung, output, stages, osim, mesh_intervals)
+    refinement = (
+        json.loads(refinement_plan_path.read_text(encoding="utf-8"))
+        if refinement_plan_path is not None
+        else None
+    )
+    prepared = _prepare_rung(
+        rung, output, stages, osim, mesh_intervals, refinement=refinement
+    )
     solved = _solve_and_export(prepared, stages, osim)
     replay_path = _fresh_native_replay(prepared, solved, stages)
     _write_success_receipt(prepared, solved, replay_path, stages, osim)
@@ -124,6 +141,93 @@ def run_saved_replay_diagnostic(source_run: Path, output: Path) -> None:
         },
     )
     _write_diagnostic_stage(output, "audit_written")
+
+
+def _validate_refinement_request(
+    refinement: dict[str, Any], staged_source_sha256: str, child_config: dict[str, Any]
+) -> None:
+    parent = Path(refinement["parent_directory"])
+    analysis = Path(refinement["analysis_path"])
+    checked = build_refinement_plan(parent, analysis)
+    if checked["attempt_id"] != refinement.get("attempt_id"):
+        raise ValueError("refinement plan no longer matches its retained evidence")
+    if staged_source_sha256 != refinement["parent_hashes"].get("source_osim"):
+        raise ValueError("refinement child source differs from parent source bytes")
+    parent_request = refinement["parent_request"]
+    preserved = refinement["preserved_contract"]
+    if any(
+        child_config.get(key) != value
+        for key, value in preserved.items()
+        if key != "objective"
+    ):
+        raise ValueError("refinement changed a bound objective or solver contract")
+    if (
+        parent_request.get("objective", "MocoControlGoal(effort)")
+        != preserved["objective"]
+    ):
+        raise ValueError("refinement objective differs from retained parent")
+
+
+def _set_parent_solution_guess(
+    solver: Any, parent: Path, refinement: dict[str, Any], osim: Any
+) -> tuple[float, ...]:
+    """Seed states from the parent trajectory and controls by exact PWL values."""
+    hashes = refinement["parent_hashes"]
+    solution_path = parent / "solution.sto"
+    controls_path = parent / "time_only_controls.sto"
+    if (
+        _sha256(solution_path) != hashes["solution_sto"]
+        or _sha256(controls_path) != hashes["time_only_controls_sto"]
+    ):
+        raise ValueError("parent solution or persisted controls changed before seeding")
+    solution = osim.MocoTrajectory(str(solution_path))
+    controls = osim.TimeSeriesTable(str(controls_path))
+    guess = solver.createGuess()
+    guess.insertStatesTrajectory(solution, True)
+    child_times = tuple(float(value) for value in guess.getTime())
+    expected_times = child_hs_grid(
+        refinement["normalized_mesh_points"],
+        refinement["parent_request"]["horizon_seconds"],
+    )
+    if child_times != expected_times:
+        raise ValueError("native child guess grid differs from the planned HS grid")
+    parent_times = tuple(float(value) for value in controls.getIndependentColumn())
+    labels = tuple(str(value) for value in controls.getColumnLabels())
+    if not labels or set(labels) != set(guess.getControlNames()):
+        raise ValueError(
+            "parent saved controls do not bind every child control channel"
+        )
+    bounds = refinement["parent_request"].get("native_control_bounds")
+    if not isinstance(bounds, dict) or set(bounds) != set(labels):
+        raise ValueError("parent request does not bind every persisted control bound")
+    for name in labels:
+        column = controls.getDependentColumn(name)
+        source_values = tuple(
+            float(column[index]) for index in range(controls.getNumRows())
+        )
+        lower, upper = bounds[name]
+        if any(not lower <= value <= upper for value in source_values):
+            raise ValueError("persisted control seed falls outside its native bounds")
+        values = piecewise_linear_samples(parent_times, source_values, child_times)
+        vector = osim.Vector(len(values), 0.0)
+        for index, value in enumerate(values):
+            vector[index] = value
+        guess.setControl(name, vector)
+        readback = tuple(float(value) for value in guess.getControl(name))
+        if readback != values:
+            raise ValueError("Moco guess changed an exact PWL control seed sample")
+    if set(guess.getStateNames()) != set(solution.getStateNames()):
+        raise ValueError("parent state channels do not bind every child state")
+    for name, initial_value in refinement["preserved_contract"][
+        "cold_start_named_state"
+    ].items():
+        values = tuple(float(value) for value in guess.getState(name))
+        if not values or values[0] != float(initial_value):
+            raise ValueError(
+                "parent state seed changed an exact declared initial state"
+            )
+    solver.setGuess(guess)
+    return child_times
 
 
 def _run_with_periodic_replay_stack_dumps(
@@ -221,7 +325,98 @@ def _load_saved_replay_inputs(
 
 
 def _prepare_rung(
-    rung: Any, output: Path, stages: dict, osim: Any, mesh_intervals: int = 10
+    rung: Any,
+    output: Path,
+    stages: dict,
+    osim: Any,
+    mesh_intervals: int = 10,
+    *,
+    refinement: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    source, declaration, source_hash = _stage_rung_source(
+        rung, output, stages, refinement
+    )
+    prepared = _prepare_rung_model(
+        rung, output, stages, source, declaration, source_hash, osim
+    )
+    config = _build_rung_config(
+        rung,
+        source,
+        source_hash,
+        declaration,
+        prepared["profile"],
+        prepared["witness"],
+        prepared["control_bounds"],
+        mesh_intervals,
+        refinement,
+    )
+    study, solver, config_path = _configure_rung_problem(
+        rung,
+        source,
+        declaration,
+        prepared["witness"],
+        prepared["target_q"],
+        prepared["control_bounds"],
+        config,
+        output,
+        refinement,
+        osim,
+        stages,
+        mesh_intervals,
+    )
+    return {
+        "rung": rung,
+        "source": source,
+        "source_hash": source_hash,
+        "declaration": declaration,
+        "profile": prepared["profile"],
+        "wrapped": prepared["wrapped"],
+        "target_q": prepared["target_q"],
+        "config": config,
+        "config_path": config_path,
+        "study": study,
+        "solver": solver,
+        "refinement": refinement,
+        "witness": prepared["witness"],
+    }
+
+
+def _stage_rung_source(
+    rung: Any, output: Path, stages: dict, refinement: dict[str, Any] | None
+) -> tuple[Path, Any, str]:
+    from tests.opensim.native_moco_ladder_harness import (
+        _derive_synthetic_cold_start,
+    )
+
+    started = _stage_start()
+    source = output / "source.osim"
+    if refinement is None:
+        built_path, declaration = build_synthetic_rung(rung, output / "build")
+        shutil.copyfile(built_path, source)
+    else:
+        parent_source = Path(refinement["parent_directory"]) / "source.osim"
+        if _sha256(parent_source) != refinement["parent_hashes"]["source_osim"]:
+            raise ValueError("refinement parent source changed before child staging")
+        shutil.copyfile(parent_source, source)
+        declaration = _derive_synthetic_cold_start(source, rung)
+    _flush_file(source)
+    declaration = replace(declaration, model_path=source)
+    source_hash = _sha256(source)
+    if source_hash != declaration.source_sha256:
+        raise ValueError("staged source differs from the fresh declaration")
+    stages["source_build_and_state_equilibration"] = _stage_finish(started)
+    _write_progress(output, rung.name, stages)
+    return source, declaration, source_hash
+
+
+def _prepare_rung_model(
+    rung: Any,
+    output: Path,
+    stages: dict,
+    source: Path,
+    declaration: Any,
+    source_hash: str,
+    osim: Any,
 ) -> dict[str, Any]:
     from src.engines.physics_engines.opensim.python.tour_matching.native_mechanics_profile import (
         declare_native_mechanics_execution_profile,
@@ -233,18 +428,6 @@ def _prepare_rung(
         audit_wrapped_path_source,
         declare_wrapped_path_source,
     )
-
-    started = _stage_start()
-    built_path, declaration = build_synthetic_rung(rung, output / "build")
-    source = output / "source.osim"
-    shutil.copyfile(built_path, source)
-    _flush_file(source)
-    declaration = replace(declaration, model_path=source)
-    source_hash = _sha256(source)
-    if source_hash != declaration.source_sha256:
-        raise ValueError("staged source differs from the fresh declaration")
-    stages["source_build_and_state_equilibration"] = _stage_finish(started)
-    _write_progress(output, rung.name, stages)
 
     started = _stage_start()
     profile = declare_native_mechanics_execution_profile(source, source_hash)
@@ -268,15 +451,38 @@ def _prepare_rung(
     )
     stages["fixed_excitation_forward_witness"] = _stage_finish(started)
     _write_progress(output, rung.name, stages)
-    target_q = witness["target_q"]
-    initial_q = witness["initial_q"]
+    return {
+        "profile": profile,
+        "wrapped": wrapped,
+        "witness": witness,
+        "target_q": witness["target_q"],
+        "control_bounds": _native_control_bounds(
+            osim.Model(str(source)),
+            {f"/forceset/{name}" for name in witness["controls"]},
+        ),
+    }
+
+
+def _build_rung_config(
+    rung: Any,
+    source: Path,
+    source_hash: str,
+    declaration: Any,
+    profile: Any,
+    witness: dict[str, Any],
+    control_bounds: dict[str, tuple[float, float]],
+    mesh_intervals: int,
+    refinement: dict[str, Any] | None,
+) -> dict[str, Any]:
     config = _rung_config(
-        rung, target_q, source_hash, initial_q, mesh_intervals=mesh_intervals
+        rung,
+        witness["target_q"],
+        source_hash,
+        witness["initial_q"],
+        mesh_intervals=mesh_intervals,
     )
-    model = osim.Model(str(source))
-    control_bounds = _native_control_bounds(
-        model, {f"/forceset/{name}" for name in witness["controls"]}
-    )
+    if refinement is not None:
+        config["mesh_refinement"] = _refinement_request_fields(refinement)
     config["native_control_bounds"] = {
         name: list(bounds) for name, bounds in control_bounds.items()
     }
@@ -286,6 +492,38 @@ def _prepare_rung(
         "property": "Muscle.min_control/max_control",
     }
     config.update(_witness_request_metadata(declaration, profile, witness))
+    if refinement is not None:
+        _validate_refinement_request(refinement, source_hash, config)
+    return config
+
+
+def _refinement_request_fields(refinement: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "attempt_id": refinement["attempt_id"],
+        "parent_hashes": refinement["parent_hashes"],
+        "analysis_sha256": refinement["analysis_sha256"],
+        "flagged_parent_cells": refinement["flagged_parent_cells"],
+        "normalized_mesh_points": refinement["normalized_mesh_points"],
+        "preserved_contract": refinement["preserved_contract"],
+        "control_seed": refinement["control_seed"],
+        "status": "attempted_unqualified_until_fresh_replay_passes",
+    }
+
+
+def _configure_rung_problem(
+    rung: Any,
+    source: Path,
+    declaration: Any,
+    witness: dict[str, Any],
+    target_q: float,
+    control_bounds: dict[str, tuple[float, float]],
+    config: dict[str, Any],
+    output: Path,
+    refinement: dict[str, Any] | None,
+    osim: Any,
+    stages: dict,
+    mesh_intervals: int,
+) -> tuple[Any, Any, Path]:
     started = _stage_start()
     study, solver = _build_witness_seeded_problem(
         source,
@@ -299,27 +537,24 @@ def _prepare_rung(
         interpolate_control_mesh_interior_points=config[
             "interpolate_control_mesh_interior_points"
         ],
+        normalized_mesh_points=(
+            refinement["normalized_mesh_points"] if refinement is not None else None
+        ),
     )
-    config["actual_solver_settings"] = _actual_solver_settings(solver)
+    if refinement is not None:
+        parent = Path(refinement["parent_directory"])
+        guess_grid = _set_parent_solution_guess(solver, parent, refinement, osim)
+        config["mesh_refinement"]["native_guess_time_grid_seconds"] = list(guess_grid)
+    config["actual_solver_settings"] = _actual_solver_settings(
+        solver,
+        refinement["normalized_mesh_points"] if refinement is not None else None,
+    )
     _validate_actual_solver_settings(config)
     config_path = output / "request.json"
     _write_json(config_path, config)
     stages["preflight_and_solver_setup"] = _stage_finish(started)
     _write_progress(output, rung.name, stages)
-    return {
-        "rung": rung,
-        "source": source,
-        "source_hash": source_hash,
-        "declaration": declaration,
-        "profile": profile,
-        "wrapped": wrapped,
-        "target_q": target_q,
-        "config": config,
-        "config_path": config_path,
-        "study": study,
-        "solver": solver,
-        "witness": witness,
-    }
+    return study, solver, config_path
 
 
 def _build_feasible_witness(
@@ -542,6 +777,7 @@ def _build_witness_seeded_problem(
     mesh_intervals: int = 10,
     transcription_scheme: str = "hermite-simpson",
     interpolate_control_mesh_interior_points: bool = True,
+    normalized_mesh_points: list[float] | None = None,
 ) -> tuple[Any, Any]:
     from src.engines.physics_engines.opensim.python.tour_matching.moco_initial_bindings import (
         MocoInitialBindings,
@@ -589,6 +825,7 @@ def _build_witness_seeded_problem(
         mesh_intervals,
         transcription_scheme,
         interpolate_control_mesh_interior_points,
+        normalized_mesh_points=normalized_mesh_points,
     )
     _set_witness_guess(solver, witness, state_bounds, optimal, osim)
     return study, solver
@@ -820,13 +1057,24 @@ def _configure_solver(
     mesh_intervals: int = 10,
     transcription_scheme: str = "hermite-simpson",
     interpolate_control_mesh_interior_points: bool = True,
+    *,
+    normalized_mesh_points: list[float] | None = None,
 ) -> None:
     mesh_intervals = _validate_mesh_intervals(mesh_intervals)
     if transcription_scheme != "hermite-simpson":
         raise ValueError("synthetic ladder requires Hermite-Simpson transcription")
     if not isinstance(interpolate_control_mesh_interior_points, bool):
         raise TypeError("control midpoint interpolation setting must be boolean")
-    solver.set_num_mesh_intervals(mesh_intervals)
+    if normalized_mesh_points is None:
+        solver.set_num_mesh_intervals(mesh_intervals)
+    else:
+        from tests.opensim.native_moco_refinement import validate_normalized_mesh
+
+        points = validate_normalized_mesh(normalized_mesh_points)
+        setter = getattr(solver, "setMesh", None)
+        if not callable(setter):
+            raise RuntimeError("installed Moco solver does not expose setMesh")
+        setter(list(points))
     solver.set_transcription_scheme(transcription_scheme)
     solver.set_interpolate_control_mesh_interior_points(
         interpolate_control_mesh_interior_points
@@ -837,8 +1085,10 @@ def _configure_solver(
     solver.set_optim_constraint_tolerance(1e-7)
 
 
-def _actual_solver_settings(solver: Any) -> dict[str, Any]:
-    return {
+def _actual_solver_settings(
+    solver: Any, normalized_mesh_points: list[float] | None = None
+) -> dict[str, Any]:
+    result = {
         "mesh_intervals": int(solver.get_num_mesh_intervals()),
         "transcription_scheme": str(solver.get_transcription_scheme()),
         "interpolate_control_mesh_interior_points": bool(
@@ -846,6 +1096,9 @@ def _actual_solver_settings(solver: Any) -> dict[str, Any]:
         ),
         "parallel": int(solver.get_parallel()),
     }
+    if normalized_mesh_points is not None:
+        result["requested_normalized_mesh_points"] = list(normalized_mesh_points)
+    return result
 
 
 def _validate_actual_solver_settings(config: dict[str, Any]) -> None:
@@ -857,6 +1110,11 @@ def _validate_actual_solver_settings(config: dict[str, Any]) -> None:
         ],
         "parallel": config["parallel"],
     }
+    refinement = config.get("mesh_refinement")
+    if isinstance(refinement, dict):
+        expected["requested_normalized_mesh_points"] = refinement[
+            "normalized_mesh_points"
+        ]
     if config.get("actual_solver_settings") != expected:
         raise ValueError("native solver settings differ from the bound request")
 
@@ -1017,6 +1275,31 @@ def _solve_and_export(
     _write_json(audit_path, roundtrip_audit)
     _require_solution_roundtrip(roundtrip_audit)
     grid = persisted["time"]
+    mesh_grid_audit_path = None
+    if prepared.get("refinement") is not None:
+        refinement = prepared["refinement"]
+        expected_grid = np.asarray(
+            child_hs_grid(
+                refinement["normalized_mesh_points"],
+                refinement["parent_request"]["horizon_seconds"],
+            ),
+            dtype=np.float64,
+        )
+        mesh_grid_audit_path = output / "mesh_grid_audit.json"
+        grid_audit = {
+            "schema": "native-moco-refinement-solution-grid-v1",
+            "attempt_id": refinement["attempt_id"],
+            "parent_hashes": refinement["parent_hashes"],
+            "planned_normalized_mesh_points": refinement["normalized_mesh_points"],
+            "planned_time_grid_seconds": expected_grid.tolist(),
+            "seed_time_grid_seconds": refinement["native_guess_time_grid_seconds"],
+            "solution_time_grid_seconds": grid.tolist(),
+            "exact_solution_grid_match": bool(np.array_equal(grid, expected_grid)),
+            "physical_qualification": "unqualified",
+        }
+        _write_json(mesh_grid_audit_path, grid_audit)
+        if not grid_audit["exact_solution_grid_match"]:
+            raise ValueError("optimized trajectory differs from the planned HS grid")
     control_names = persisted["control_names"]
     controls = {
         name.removeprefix("/forceset/"): persisted["controls"][:, index]
@@ -1053,6 +1336,7 @@ def _solve_and_export(
         "controls_path": controls_path,
         "bundle": bundle,
         "serialization_audit_path": audit_path,
+        "mesh_grid_audit_path": mesh_grid_audit_path,
     }
 
 
@@ -1434,6 +1718,20 @@ def _write_success_receipt(
         "stage_metrics": stages,
         "physical_qualification": "unqualified",
     }
+    if prepared.get("refinement") is not None:
+        refinement = prepared["refinement"]
+        grid_path = solved.get("mesh_grid_audit_path")
+        if grid_path is None or not grid_path.is_file():
+            raise ValueError("refinement success omitted its native mesh-grid audit")
+        receipt["mesh_refinement"] = {
+            "attempt_id": refinement["attempt_id"],
+            "parent_hashes": refinement["parent_hashes"],
+            "analysis_sha256": refinement["analysis_sha256"],
+            "mesh_grid_audit_sha256": _sha256(grid_path),
+            "flagged_parent_cells": refinement["flagged_parent_cells"],
+            "normalized_mesh_points": refinement["normalized_mesh_points"],
+            "physical_qualification": "unqualified",
+        }
     _write_json(output / "receipt.json", receipt)
 
 
@@ -1465,6 +1763,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--replay-existing", type=Path)
     parser.add_argument("--mesh-intervals", type=int, default=10)
+    parser.add_argument("--refinement-plan", type=Path)
     args = parser.parse_args()
     if args.replay_existing is not None:
         if args.rung is not None:
@@ -1473,7 +1772,12 @@ def main() -> None:
         return
     if args.rung is None:
         parser.error("--rung is required unless --replay-existing is supplied")
-    run_rung(args.rung, args.output, _validate_mesh_intervals(args.mesh_intervals))
+    run_rung(
+        args.rung,
+        args.output,
+        _validate_mesh_intervals(args.mesh_intervals),
+        args.refinement_plan,
+    )
 
 
 if __name__ == "__main__":

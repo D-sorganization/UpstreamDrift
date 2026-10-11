@@ -68,6 +68,10 @@ docs/development/full_body_models/evidence/head_gaze/fd_neck_tracking.json
 docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
 # Preserve report bytes whose SHA-256 is recorded in the Moco ladder turnover.
 docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/activation_residual_analysis.json
+# Preserve the exact retained-parent request and replay audit bytes used by the
+# source-bound activation report and one-pass refinement reproduction test.
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain/request.json
+docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/diagnostic_retained_replay_fauldump_3e195b0e/native_audit/fresh_replay_diagnostic.json
 # #12191/#12198: canonical ground-support evidence retains its recorded hashes.
 docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json
 docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json
