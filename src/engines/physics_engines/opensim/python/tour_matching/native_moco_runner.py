@@ -63,9 +63,19 @@ class NativeMocoRequest:
     excluded_markers: Mapping[str, str]
     constrained_cold_start: DeclaredColdStart | None = None
     mixed_actuation: MixedActuationProfile | None = None
+    allow_unqualified_passive_diagnostic: bool = False
 
     def __post_init__(self) -> None:
         self.config.validate()
+        if not isinstance(self.allow_unqualified_passive_diagnostic, bool):
+            raise TypeError("passive diagnostic disposition must be boolean")
+        if (
+            self.allow_unqualified_passive_diagnostic
+            and self.passive_policy is not None
+        ):
+            raise ValueError(
+                "diagnostic disposition requires unavailable passive policy"
+            )
         if self.mixed_actuation is not None:
             if not isinstance(self.mixed_actuation, MixedActuationProfile):
                 raise TypeError("mixed Moco requires a typed actuation profile")
@@ -125,7 +135,7 @@ class NativeMocoRequest:
         """Bind every caller policy and placement across all execution stages."""
         registration = self.registration
         declared = self.constrained_cold_start
-        payload = {
+        payload: dict[str, Any] = {
             "model_path": str(self.model_path.resolve()),
             "trc_path": str(self.trc_path.resolve()),
             "guess_path": str(self.states_guess_path.resolve()),
@@ -173,6 +183,8 @@ class NativeMocoRequest:
                 "residual_tolerance": declared.residual_tolerance,
             },
         }
+        if self.allow_unqualified_passive_diagnostic:
+            payload["allow_unqualified_passive_diagnostic"] = True
         return hashlib.sha256(
             json.dumps(payload, sort_keys=True, allow_nan=False).encode()
         ).hexdigest()
@@ -200,6 +212,7 @@ class NativeMocoPreparation:
     wall_seconds: float
     cpu_seconds: float
     qualification: str = "not-qualified-for-muscle-matching"
+    allow_unqualified_passive_diagnostic: bool = False
 
     @property
     def ready_for_software_solve(self) -> bool:
@@ -207,7 +220,14 @@ class NativeMocoPreparation:
         return (
             self.physical_body_inertia_qualified
             and self.physical_body_inertia_sha256 is not None
-            and not self.blockers
+            and (
+                not self.blockers
+                or (
+                    self.allow_unqualified_passive_diagnostic
+                    and self.passive_observation_sha256 is not None
+                    and self.blockers == ("passive-policy-unavailable",)
+                )
+            )
         )
 
 
@@ -632,6 +652,7 @@ def prepare_native_moco(
         tuple(dict.fromkeys(blockers)),
         time.perf_counter() - wall,
         time.process_time() - cpu,
+        allow_unqualified_passive_diagnostic=request.allow_unqualified_passive_diagnostic,
     )
     (directory / "preparation.json").write_text(
         json.dumps(asdict(report), indent=2, allow_nan=False) + "\n", encoding="utf-8"
@@ -706,6 +727,11 @@ def _require_current_inputs(
     """Reject any source, observation or preparation drift before native work."""
     if request.identity_sha256 != prepared.request_sha256:
         raise ValueError("Native Moco request changed after preparation")
+    if (
+        request.allow_unqualified_passive_diagnostic
+        != prepared.allow_unqualified_passive_diagnostic
+    ):
+        raise ValueError("Native Moco diagnostic disposition changed after preparation")
     if (
         not prepared.physical_body_inertia_qualified
         or prepared.physical_body_inertia_sha256 is None
