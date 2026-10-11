@@ -12,3 +12,7 @@ The pre-fix builder raises TypeError on legacy presentation/dpi keywords. Parity
 Validation: 22 focused tests pass, including all three native writer interfaces and four byte-identical ledger fixtures. An explicitly adapted pre-refactor baseline matches density rows, captions, and RGBA pixels.
 
 The historical pilot diagnostic renderer had the same obsolete writer interface. Its bins=48 setting now uses FigureOptions and passes a native writer regression test; archived receipt parity is separately tested with explicit fixture adapters.
+
+The historical footer-review renderer now passes a typed PairSocialContext to the current pair writer. Synthetic checks preserve the six point populations, context, and geometry diagnostics; native-writer coverage verifies real PNG/PDF/SVG assets. The original source-transition guard and frozen artifacts remain unchanged.
+
+The new native integration render measured74.18 seconds and exceeded the default60-second watchdog. It is marked slow with a240-second test-only watchdog; measurements are recorded on #12309 (comment6114197016). Existing numerical tolerances and the1ms performance budget are unchanged.

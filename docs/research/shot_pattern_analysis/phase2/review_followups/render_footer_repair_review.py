@@ -8,15 +8,11 @@ import json
 from pathlib import Path
 
 from matplotlib.figure import Figure
-from matplotlib.text import Text
-from PIL import Image
 
-from src.tools.shot_pattern_analysis import matched_supplement_figures as figures
 from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
-from src.tools.shot_pattern_analysis.matched_pair_social import (
-    write_pair_social_density,
+from docs.research.shot_pattern_analysis.phase2.review_followups import (
+    footer_review_helpers,
 )
-from src.tools.shot_pattern_analysis.matched_report import load_validated_cell
 
 
 def sha(path: Path) -> str:
@@ -45,136 +41,27 @@ def run(main: Path, output: Path) -> None:
         if k != key
     )
     source_paths = sorted(Path("src/tools/shot_pattern_analysis").glob("*.py")) + [
-        Path(__file__).resolve()
+        Path(__file__).resolve(),
+        Path(footer_review_helpers.__file__).resolve(),
     ]
     sources = {str(p): sha(p) for p in source_paths}
-    inputs, rendered, artifacts, previews = {}, [], {}, {}
+    inputs: dict[str, dict[str, str]] = {}
+    rendered: list[footer_review_helpers.FigureGeometry] = []
+    artifacts: dict[str, str] = {}
+    previews: dict[str, str] = {}
     original_save = Figure.savefig
 
     def save(figure, path, *args, **kwargs):
         if str(path).endswith(".png"):
-            figure.canvas.draw()
-            renderer = figure.canvas.get_renderer()
-            footer = figure.texts[-1].get_window_extent(renderer)
-            issues = []
-            min_clearance = float("inf")
-            for axis in figure.axes[:-1]:
-                decoration = axis.get_tightbbox(renderer)
-                min_clearance = min(min_clearance, decoration.y0 - footer.y1)
-                if decoration.overlaps(footer):
-                    issues.append("footer overlaps decorated axes")
-                for legend in figure.legends:
-                    if legend.get_window_extent(renderer).overlaps(
-                        axis.title.get_window_extent(renderer)
-                    ):
-                        issues.append("legend overlaps panel title")
-            for panel in range(2):
-                main_axis, right_axis = figure.axes[3 * panel + 1 : 3 * panel + 3]
-                for left in main_axis.get_xticklabels():
-                    for right in right_axis.get_xticklabels():
-                        if (
-                            left.get_visible()
-                            and right.get_visible()
-                            and left.get_text()
-                            and right.get_text()
-                            and left.get_window_extent(renderer).overlaps(
-                                right.get_window_extent(renderer)
-                            )
-                        ):
-                            issues.append("main and marginal tick labels overlap")
-            font_pixels = [
-                t.get_fontsize() * 1080 / (72 * figure.get_figwidth())
-                for t in figure.findobj(Text)
-                if t.get_visible() and t.get_text().strip()
-            ]
-            if min(font_pixels) < 11:
-                issues.append("per-line font size below 11 em-pixels at 1080")
-            for text in figure.texts:
-                box = text.get_window_extent(renderer)
-                if (
-                    box.x0 < 0
-                    or box.y0 < 0
-                    or box.x1 > figure.bbox.width
-                    or box.y1 > figure.bbox.height
-                ):
-                    issues.append("figure caption outside canvas")
-            rendered.append(
-                {
-                    "path": str(path),
-                    "issues": issues,
-                    "minimum_font_em_px_at_1080": min(font_pixels),
-                    "minimum_footer_clearance_pt": min_clearance * 72 / figure.dpi,
-                }
-            )
+            rendered.append(footer_review_helpers.inspect_figure(figure, path))
         return original_save(figure, path, *args, **kwargs)
 
     Figure.savefig = save  # type: ignore[method-assign,assignment]
     try:
         for club in ("driver", "seven_iron", "pitching_wedge"):
-            refs, loaded = [], []
-            for sd in (1, 2):
-                name = f"{club}_lean0_curve1_rotation{sd}_combined2"
-                directory = data / name
-                inputs[name] = {
-                    p: sha(directory / p)
-                    for p in ("manifest.json", "summary.json", "shots.csv.gz")
-                }
-                summary = load_validated_cell(
-                    directory, plan["cells"][name], plan["execution"]
-                )
-                refs.append(
-                    {
-                        "cell": name,
-                        "source_root": str(data),
-                        "source_protocol": "original_primary/1",
-                        "status": "completed",
-                        "config": summary["config"],
-                        "summary": summary,
-                    }
-                )
-                loaded.append(
-                    figures._supported_endpoints(directory / "shots.csv.gz", 10000)[0]
-                )
-            common = sorted(
-                set.intersection(
-                    *(
-                        {i for i, _, _ in endpoints[p]}
-                        for endpoints in loaded
-                        for p in ("Straight", "Draw", "Fade")
-                    )
-                )
+            footer_review_helpers.render_club(
+                club, data, output, plan, inputs, artifacts, previews, sha
             )
-            labels = tuple(
-                figures._pair_condition_label("shaft_rotation_sd", ref) for ref in refs
-            )
-            points = {}
-            for label, endpoints in zip(labels, loaded, strict=True):
-                for pattern, rows in endpoints.items():
-                    by_index = {i: (x, y) for i, x, y in rows}
-                    points[f"{pattern} · {label}"] = [by_index[i] for i in common]
-            paths = write_pair_social_density(
-                points,
-                output / club,
-                condition_labels=labels,  # type: ignore[arg-type]  # Exactly two SD refs above.
-                scenario=figures._pair_social_scenario("shaft_rotation_sd", *refs),
-                social_club=club.replace("_", " ").title(),
-                target_point_m=(refs[0]["summary"]["target_x_m"], 0),
-                total_n=10000,
-                delivery_noise=figures._noise_profile_description(
-                    "combined2", refs[0]["config"]["noise"]
-                ),
-            )
-            for path in paths.values():
-                artifacts[str(path.relative_to(output))] = sha(path)
-                if path.suffix == ".png":
-                    with Image.open(path) as image:
-                        preview = image.resize(
-                            (1080, round(image.height * 1080 / image.width)),
-                            Image.Resampling.LANCZOS,
-                        )
-                        preview_path = path.with_name(path.stem + "_1080px.png")
-                        preview.save(preview_path)
-                    previews[str(preview_path.relative_to(output))] = sha(preview_path)
     finally:
         Figure.savefig = original_save  # type: ignore[method-assign]
     assert all(sha(Path(p)) == digest for p, digest in sources.items())

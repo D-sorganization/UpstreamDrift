@@ -1199,15 +1199,6 @@
       "issue": 11739,
       "reason": "Issue #11739: OSV-7 export_full_body_osim gained the contact-grip options (9 parameters).",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "docs/research/shot_pattern_analysis/phase2/review_followups/render_footer_repair_review.py",
-      "symbol": "run",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - run exceeds function-lines budget (176 > 100).",
-      "expires_on": "2026-12-31"
     }
   ]
 }

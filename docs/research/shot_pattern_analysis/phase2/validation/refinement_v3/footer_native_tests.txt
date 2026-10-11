@@ -1,0 +1,48 @@
+........                                                                 [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-refinement-integration/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-refinement-integration/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-refinement-integration/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-refinement-integration/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-refinement-integration/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-refinement-integration/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+1.89s call     tests/research/test_footer_review_helpers.py::test_footer_geometry_helper_reports_clearance_and_overlap
+1.16s setup    tests/research/test_footer_review_helpers.py::test_footer_geometry_helper_reports_clearance_and_overlap
+0.16s teardown tests/research/test_shot_pattern_archive_restoration_helpers.py::test_restoration_run_receipt_contract_without_touching_saved_data[docs.research.shot_pattern_analysis.phase2.validation.restore_final_primary_archives-final_v1-final_primary_v1-independent_primary_final_audit.json-324-8100000-counts0]
+0.15s call     tests/research/test_shot_pattern_archive_restoration_helpers.py::test_verified_archive_restoration_checks_before_load_and_preserves_bytes
+0.14s teardown tests/research/test_shot_pattern_archive_restoration_helpers.py::test_restoration_byte_mismatch_keeps_legacy_failure_text_and_cleans_temp
+0.07s call     tests/research/test_shot_pattern_archive_restoration_helpers.py::test_restoration_byte_mismatch_keeps_legacy_failure_text_and_cleans_temp
+0.07s setup    tests/research/test_shot_pattern_archive_restoration_helpers.py::test_verified_archive_restoration_checks_before_load_and_preserves_bytes
+0.07s setup    tests/research/test_shot_pattern_archive_restoration_helpers.py::test_restoration_run_receipt_contract_without_touching_saved_data[docs.research.shot_pattern_analysis.phase2.validation.restore_final_primary_archives-final_v1-final_primary_v1-independent_primary_final_audit.json-324-8100000-counts0]
+0.07s teardown tests/research/test_shot_pattern_archive_restoration_helpers.py::test_restoration_run_receipt_contract_without_touching_saved_data[docs.research.shot_pattern_analysis.phase2.validation.restore_final_control_archives-control_final_v1-final_control_v1-independent_control_final_audit.json-72-1560000-counts1]
+0.07s setup    tests/research/test_shot_pattern_archive_restoration_helpers.py::test_restoration_run_receipt_contract_without_touching_saved_data[docs.research.shot_pattern_analysis.phase2.validation.restore_final_control_archives-control_final_v1-final_control_v1-independent_control_final_audit.json-72-1560000-counts1]
+0.06s teardown tests/research/test_shot_pattern_archive_restoration_helpers.py::test_unsafe_archive_is_rejected_before_temporary_extraction
+0.06s call     tests/research/test_shot_pattern_archive_restoration_helpers.py::test_restoration_run_receipt_contract_without_touching_saved_data[docs.research.shot_pattern_analysis.phase2.validation.restore_final_primary_archives-final_v1-final_primary_v1-independent_primary_final_audit.json-324-8100000-counts0]
+0.05s teardown tests/research/test_shot_pattern_archive_restoration_helpers.py::test_audit_completion_gate_binds_exact_cell_and_row_totals
+0.05s teardown tests/research/test_shot_pattern_archive_restoration_helpers.py::test_verified_archive_restoration_checks_before_load_and_preserves_bytes
+0.04s setup    tests/research/test_shot_pattern_archive_restoration_helpers.py::test_restoration_byte_mismatch_keeps_legacy_failure_text_and_cleans_temp
+0.04s teardown tests/research/test_shot_pattern_archive_restoration_helpers.py::test_report_binding_rejects_status_or_source_identity_drift
+0.02s call     tests/research/test_shot_pattern_archive_restoration_helpers.py::test_restoration_run_receipt_contract_without_touching_saved_data[docs.research.shot_pattern_analysis.phase2.validation.restore_final_control_archives-control_final_v1-final_control_v1-independent_control_final_audit.json-72-1560000-counts1]
+0.02s call     tests/research/test_shot_pattern_archive_restoration_helpers.py::test_unsafe_archive_is_rejected_before_temporary_extraction
+0.02s setup    tests/research/test_shot_pattern_archive_restoration_helpers.py::test_unsafe_archive_is_rejected_before_temporary_extraction
+0.02s setup    tests/research/test_shot_pattern_archive_restoration_helpers.py::test_report_binding_rejects_status_or_source_identity_drift

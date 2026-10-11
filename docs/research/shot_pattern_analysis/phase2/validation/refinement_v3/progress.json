@@ -9,18 +9,9 @@
   "replay_sha256": "93fb01c874c007f4af7badc6603d887bddd90a02aaa5a4e1d478f26ad73dbdcd",
   "affinedrift_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-affinedrift-publication",
   "affinedrift_issue": 5004,
-  "affinedrift_status": "Owner-authorized generated reconciliation marks3verified merged scopes shipped; active77->74, other111entries preserved. CanonicalprePR passes publication4a1e6d31 andhandoff221aef68; final frozenhead0e33178d gate running48658. No push/deployment yet.",
-  "upstream_status": "PR12278 remains unmerged. Latest remote head integrated in merge c69fc7eefe, retaining refined report and hardened asset restoration. Full repository validation remains outstanding.",
+  "affinedrift_status": "Final-head canonical pre-PR passed at0e33178d; branch pushed. Publication PR is next; public deployment unverified. Owner-approved generated reconciliation preserved all111other entries and limits.",
+  "upstream_status": "PR12278 remains unmerged. Integration includes aecd90783b; newer remote2921f4b756be92f56257300dc6dd4db1af63b391 not yet integrated. Fetch session56550 remains active; pack is growing. Full pre-PR after final cleanup and remote reconciliation remains outstanding.",
   "live_processes": {
-    "full_repository_dry": {
-      "session_id": 21581,
-      "log": "/tmp/shot-pattern-full-dry-final.log",
-      "scope": "Original approved baseline; all tracked src inputs stable during scan"
-    },
-    "affinedrift_final_prepr": {
-      "session_id": 48658,
-      "log": "/tmp/shot-affine-prepr-final-head.log"
-    },
     "fetch_latest_upstream": {
       "session_id": 56550,
       "log": "/tmp/shot-pattern-fetch-current.log",
@@ -29,10 +20,9 @@
     }
   },
   "next": [
-    "Finish remaining architecture and report-size corrections with unchanged behavior",
-    "Run unchanged full repository DRY and pre-PR validation",
-    "Resolve publication development-log gate through governed process",
-    "Push and merge safely; verify public report, assets and social preview"
+    "Reconcile fetched remote PR2921f4b and inspect stopped follow-up e426bac0dd for useful unmerged repairs",
+    "Run unchanged full pre-PR; inherited development-log issue11935 remains blocking",
+    "Open ready AffineDrift publication PR and arm protected merge; public verification remains a later session"
   ],
   "upstream_dry_issue": 12299,
   "checks": "Presentation/replay/social tests passed; matrix CLI28/provenanceCLI21; viewport24; plot option+academic suite and matched GUI suite exit0; Ruff on changed batches passes.",
@@ -72,9 +62,9 @@
   "affine_checks": "Quarto1.8.26 render; title case672 sources; render coverage253 URLs; article links/full site gate; 9 assets match; headless browser review; canonical consistency tests pass.",
   "local_delivery": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
   "architecture_issue": 12302,
-  "integration_work": "Final figure API migration and historical audit/graphics decomposition committed with archived-output parity. Active: final primary/control archive restoration and footer review helpers.",
+  "integration_work": "Archive restoration refactor committed4831146c7d; final footer helper uses PairSocialContext and all9footer/archive tests pass, including native9asset+3preview rendering.",
   "focused_dry": "49 committed shot-pattern/kernel source files at19b7d6d: zero findings. Not a full repository gate.",
-  "architecture": "64 of67 new architecture exceptions removed;3 remain. Both new document-size waivers removed. No new waivers or relaxed limits.",
+  "architecture": "All67new #12278 architecture exceptions removed; both new document-size waivers removed. Changed-file architecture passes; no new waivers or relaxed limits.",
   "performance": "Renderer vectorization committed e8a81e53fd;26 tests pass with original1ms limit unchanged (#12303).",
   "affinedrift_commit": "0e33178d",
   "integration_head": "14301b569b12187bbe74ead8e55ec4c9b98451ad",
@@ -97,5 +87,21 @@
     "bytes": 336131,
     "size_ceiling": 200000,
     "status": "Inherited metadata and state repair requires governed resolution; no waiver applied."
+  },
+  "full_repository_dry": {
+    "status": "passed",
+    "exit_code": 0,
+    "receipt": "full_repository_dry.txt",
+    "baseline": "Original approved baseline unchanged;594 historical fingerprints;164 advisory reductions",
+    "scope": "All tracked src inputs; source stable during scan"
+  },
+  "footer_native_test": {
+    "artifacts": 9,
+    "previews": 3,
+    "measured_seconds": 74.18,
+    "default_timeout_seconds": 60,
+    "new_slow_test_watchdog_seconds": 240,
+    "evidence": "https://github.com/D-sorganization/UpstreamDrift/issues/12309#issuecomment-6114197016",
+    "note": "Final root suite exited0 with the committed slow-test watchdog; see footer_native_tests.txt. Ruff and scoped mypy pass."
   }
 }
