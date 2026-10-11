@@ -1,0 +1,46 @@
+{
+  "status": "active",
+  "recorded_at_utc": "2026-10-11T23:07:58.346453+00:00",
+  "checkpoint": "adc1fb0627",
+  "branch": "codex/shot-pattern-safe-followup",
+  "source_commit": "ef0f14a36b37f24a0e77fe09db3a30969d9af910",
+  "integration": "Merged2921f4b756 cleanly at35a6c8774c; fetch of newer remote9c9000 remains active. No force push.",
+  "fixture_repair": {
+    "commit": "ef0f14a36b",
+    "change": "Include copied research scripts in frozen fixture source hashes",
+    "verification": "Previously red origin/runtime test + four drift tests pass; both verifier modules subsequently exit0 with exact Tools pin initialized",
+    "production_changes": false
+  },
+  "dependency_pin": "6b6e4be55e7086a33db43b36d2632765be619bde",
+  "preservation": {
+    "simulation_rerun": false,
+    "desktop_pdf_sha256": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+    "pages": 39,
+    "replay_ids_per_pattern": 100,
+    "selected_cells": 5,
+    "native_axis_contract": "horizontal lateral x; vertical downrange y"
+  },
+  "incomplete_gate_attempts": [
+    {
+      "reason": "Stopped before final summary because dependency checkout was empty; not acceptance"
+    },
+    {
+      "reason": "Inherited runtime had Deprecated3.0.0 despite locked1.3.1; mypy failed parsing third-party Python3.12 syntax with target3.11. Stopped affected tests before final summary. A separate environment now installs exact Deprecated1.3.1 and wrapt2.2.1."
+    }
+  ],
+  "current_validation": "Locked-environment canonical mypy gate running; complete pre-PR remains pending after latest remote reconciliation.",
+  "development_log_blocker": {
+    "issue": 11935,
+    "owned_by_other_session": true,
+    "modified": false
+  },
+  "affinedrift": {
+    "pr": 5005,
+    "source_review_commit": "6f0d81eb",
+    "audit_commit": "f5ee7c1d",
+    "full_gates": "running",
+    "public_routes": "All four expected routes returned404; deployment acceptance pending"
+  },
+  "protected_merge": "pending",
+  "overall_complete": false
+}

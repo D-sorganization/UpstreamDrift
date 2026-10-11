@@ -37,6 +37,8 @@
 
 ## Do-Not List and Next Steps
 
+- **Successor Integration**: Own branch `codex/shot-pattern-safe-followup` merges `2921f4b756` and repairs the frozen verifier fixture at `ef0f14a36b`; both verifier modules pass with the exact Tools pin. Newer remote `9c9000` is still fetching. Full gates remain pending; two environment-incomplete attempts are preserved separately. See [Successor Progress](docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/progress.json). AffineDrift #5005 metadata and scoped audit repairs are committed locally, full gates running; public routes remain 404.
+
 - Preserve frozen science, baseline graphics, peer records, and armed Phase 1 PR state.
 - Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful compilation in the built-in LaTeX editor.
 - PR #12278 remains unmerged. Integration branch `codex/shot-pattern-refinement-integration` includes remote `aecd90783b`; newer remote `2921f4b756` still needs reconciliation (active fetch session56550). Full repository DRY passes with the original approved baseline (#12299); receipt `phase2/validation/refinement_v3/full_repository_dry.txt`. All67 new architecture exceptions and both document-size waivers are removed (#12302). Current39-page report compiles from14 tracked hash-verified figures. Figure API regression #12309 has native writer tests. Full pre-PR remains outstanding; inherited main development-log issue #11935 has207 findings and143 active entries against75. AffineDrift final pre-PR passes at `0e33178d`, branch pushed; publication/deployment still pending. Follow `phase2/validation/refinement_v3/progress.json`; do not rerun frozen simulations.
