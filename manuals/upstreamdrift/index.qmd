@@ -101,3 +101,10 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/47-native-zero-custom-mtp-reduction.qmd >}}
 
+{{< include chapters/50-native-exact-557-excitation-diagnostic.qmd >}}
+
+{{< include chapters/52-native-source-body-inertia.qmd >}}
+
+{{< include chapters/53-native-moco-physical-preflight.qmd >}}
+
+{{< include chapters/54-generic-shoulder-triangle-lamina.qmd >}}
