@@ -6,6 +6,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import math
 from pathlib import Path
+from typing import TypedDict, Unpack
 
 import numpy as np
 
@@ -26,6 +27,50 @@ class PairSocialContext:
     delivery_noise: str | None = None
     source_protocols: tuple[str, str] | None = None
     target_modes: tuple[str, str] | None = None
+
+
+class _LegacyPairContext(TypedDict, total=False):
+    condition_labels: tuple[str, str]
+    scenario: str
+    social_club: str
+    target_point_m: tuple[float, float]
+    total_n: int
+    delivery_noise: str | None
+    source_protocols: tuple[str, str] | None
+    target_modes: tuple[str, str] | None
+
+
+def _resolve_pair_context(
+    context: PairSocialContext | None, legacy: _LegacyPairContext
+) -> PairSocialContext:
+    allowed = _LegacyPairContext.__annotations__
+    if unexpected := legacy.keys() - allowed.keys():
+        raise ValueError(
+            f"unknown pair context fields: {', '.join(sorted(unexpected))}"
+        )
+    if context is not None:
+        if legacy:
+            raise ValueError("use either context or legacy context keywords")
+        return context
+    required = {
+        "condition_labels",
+        "scenario",
+        "social_club",
+        "target_point_m",
+        "total_n",
+    }
+    if missing := required - legacy.keys():
+        raise ValueError(f"missing pair context fields: {', '.join(sorted(missing))}")
+    return PairSocialContext(
+        condition_labels=legacy["condition_labels"],
+        scenario=legacy["scenario"],
+        social_club=legacy["social_club"],
+        target_point_m=legacy["target_point_m"],
+        total_n=legacy["total_n"],
+        delivery_noise=legacy.get("delivery_noise"),
+        source_protocols=legacy.get("source_protocols"),
+        target_modes=legacy.get("target_modes"),
+    )
 
 
 def _validate_context_labels(context: PairSocialContext) -> None:
@@ -159,7 +204,8 @@ def write_pair_social_density(
     point_sets: Mapping[str, Sequence[tuple[float, float]] | np.ndarray],
     output_stem: Path,
     *,
-    context: PairSocialContext,
+    context: PairSocialContext | None = None,
+    **legacy_context: Unpack[_LegacyPairContext],
 ) -> dict[str, Path]:
     """Export three two-panel figures, preserving all supplied coordinates.
 
@@ -170,6 +216,7 @@ def write_pair_social_density(
     between conditions. Scales can differ between physical-pattern figures.
     No flights, density algorithm, aim transformation or resampling are added.
     """
+    context = _resolve_pair_context(context, legacy_context)
     _validate_context_labels(context)
     target_str, protocol_str = _target_descriptions(context)
     condition_labels = context.condition_labels

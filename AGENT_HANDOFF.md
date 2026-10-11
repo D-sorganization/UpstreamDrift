@@ -37,7 +37,7 @@
 
 ## Do-Not List and Next Steps
 
-- **Successor Integration**: Own branch `codex/shot-pattern-safe-followup` merges `2921f4b756` and repairs the frozen verifier fixture at `ef0f14a36b`; both verifier modules pass with the exact Tools pin. Incoming remote `9c9000` is merged into the worktree; all conflicts are resolved and staged for validation. Full gates remain pending; two environment-incomplete attempts are preserved separately. See [Successor Progress](docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/progress.json). AffineDrift #5005 metadata and scoped audit repairs are committed locally, full gates running; public routes remain 404.
+- **Successor Integration**: Own branch `codex/shot-pattern-safe-followup` merges `2921f4b756` and repairs the frozen verifier fixture at `ef0f14a36b`; both verifier modules pass with the exact Tools pin. Incoming remote `9c9000` is merged into the worktree; all conflicts are resolved at `cb4948eb1b`. Frozen writer keyword compatibility is restored with four red-to-green tests and Astra review; final canonical validation remains pending. Full gates remain pending; two environment-incomplete attempts are preserved separately. See [Successor Progress](docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/progress.json). AffineDrift #5005 metadata and scoped audit repairs are committed locally, full gates running; public routes remain 404.
 
 - Preserve frozen science, baseline graphics, peer records, and armed Phase 1 PR state.
 - Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful compilation in the built-in LaTeX editor.

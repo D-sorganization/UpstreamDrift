@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-11T23:29:07.151914+00:00",
+  "recorded_at_utc": "2026-10-11T23:45:39.534095+00:00",
   "checkpoint": "adc1fb0627",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "ef0f14a36b37f24a0e77fe09db3a30969d9af910",
@@ -40,8 +40,11 @@
     "pr": 5005,
     "source_review_commit": "6f0d81eb",
     "audit_commit": "f5ee7c1d",
-    "full_gates": "running",
-    "public_routes": "All four expected routes returned404; deployment acceptance pending"
+    "full_gates": "CI running; local Python suite timed out in unchanged dynamics with60s watchdog; local fullrender running",
+    "public_routes": "All four expected routes returned404; deployment acceptance pending",
+    "pushed_commit": "94831b9ef2837939960e9dfa6f58ca999c78db7b",
+    "canonical_pre_pr": "PASS",
+    "ci_run": "https://github.com/D-sorganization/AffineDrift/actions/runs/38185152476"
   },
   "protected_merge": "pending",
   "overall_complete": false,
@@ -56,7 +59,24 @@
     "ruff": "PASS",
     "format": "PASS",
     "first_test_attempt": "Timeout during Numba compilation after four passes; not completed, no assertion failure observed",
-    "non_numba_subset": "running",
-    "scientific_review": "Astra found no scientific parameter/results/tolerance change"
-  }
+    "non_numba_subset": "Timed out in Matplotlib SVG export; not completed",
+    "scientific_review": "Astra found no scientific parameter/results/tolerance change",
+    "contact": "Static checks2PASS; numerical node timed out during Numba compilation before/after standalone warmup; exact logs preserved, no acceptance"
+  },
+  "postmerge_pre_pr_attempt": {
+    "result": "FAILED MYPY; affected-tests stopped before summary after source repair began",
+    "mypy_errors": 7,
+    "checked_source_files": 148,
+    "receipt": "postmerge-writer-api-red-incomplete.txt.gz",
+    "receipt_sha256": "e23d5c022c10cbbba4e3a0a3ee305f9b65b9f73f12fba69bd5be243fe160dd77",
+    "not_full_acceptance": true
+  },
+  "writer_api_repair": {
+    "red": "Two legacy writer calls raised TypeError",
+    "green": "Four compatibility tests pass; scoped mypy4files PASS; Ruff and format PASS",
+    "review": "Astra accepted compatibility defaults/pass-through/mixed-input rejection; no science changes",
+    "receipt": "writer_api_compatibility.txt",
+    "canonical_postfix": "pending"
+  },
+  "dry_postmerge_attempt": "Stopped without summary when writer source repair began; no pass claimed. Approved baseline bytes remain unchanged; rerun after final source commit."
 }

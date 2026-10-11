@@ -11,7 +11,7 @@ import textwrap
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Literal, TypedDict, Unpack, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -41,6 +41,28 @@ class FigureOptions:
     region_masses: Sequence[float] = (0.50, 0.80, 0.95)
     presentation: Literal["academic", "social"] = "academic"
     dpi: int = 300
+
+
+class _LegacyFigureOptions(TypedDict, total=False):
+    bins: int | tuple[int, int]
+    region_masses: Sequence[float]
+    presentation: Literal["academic", "social"]
+    dpi: int
+
+
+def _resolve_figure_options(
+    options: FigureOptions | None, legacy: _LegacyFigureOptions
+) -> FigureOptions:
+    allowed = _LegacyFigureOptions.__annotations__
+    if unexpected := legacy.keys() - allowed.keys():
+        raise ValueError(
+            f"unknown figure option fields: {', '.join(sorted(unexpected))}"
+        )
+    if options is not None:
+        if legacy:
+            raise ValueError("use either options or legacy figure keywords")
+        return options
+    return FigureOptions(**legacy)
 
 
 def _validate_figure_options(scenario: str, dpi: int, presentation: str) -> None:
@@ -743,7 +765,8 @@ def write_academic_dispersion_figure(
     scenario: str,
     metadata: Mapping[str, Any],
     target_point_m: tuple[float, float],
-    options: FigureOptions = FigureOptions(),
+    options: FigureOptions | None = None,
+    **legacy_options: Unpack[_LegacyFigureOptions],
 ) -> dict[str, Path]:
     """Export raw endpoint density with marginals and empirical HDR contours.
 
@@ -763,10 +786,13 @@ def write_academic_dispersion_figure(
             speed, SDs, matched residual, and any additional controls).
         target_point_m: Target in the same coordinate frame as the endpoints.
         options: Common histogram, HDR, layout, and export controls.
+        legacy_options: Earlier presentation and DPI keywords accepted for
+            saved reproduction scripts; do not combine with options.
 
     Returns:
         Paths keyed by ``png``, ``pdf`` and ``svg``.
     """
+    options = _resolve_figure_options(options, legacy_options)
     bins = options.bins
     region_masses = options.region_masses
     presentation = options.presentation
