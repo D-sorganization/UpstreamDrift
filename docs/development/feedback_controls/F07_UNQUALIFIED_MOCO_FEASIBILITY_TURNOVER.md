@@ -93,3 +93,35 @@ arms, record requested and achieved coordinates, and compare force, length and
 speed across independent stencils before interpreting guide work. Missing
 guide-work budgets retain an unqualified result. Exact private source hashes,
 knots and receipts remain in the private repository.
+
+## Main Integration and Versioned Native Probe
+
+The branch now includes main through the merged #12202 marker-observation
+integration, preserving its native named-state observer and diagnostic-only
+scoring contract. Chapter 49 is included in the canonical manual, with an
+explicit unresolved calculation-inventory entry. This does not change the
+empty approved calculation inventory or blocked manual release.
+
+The separate private v2 retry is committed and published in private PR #12
+at `ea16fe6d86f52acade76c917fe63e357f266d00d`. It used public implementation
+`4e28a17dc2a8fe80b64c1001dbf1e39408bd789b`, not this branch's earlier policy.
+Software admission passed and runtime was viable only on [0, 0.001] s; physical
+qualification stayed unqualified. No optimizer or independent replay ran.
+The preserved 654-frame reference clock is not a full-horizon execution claim.
+Native-worker peak memory is unknown; the launcher-only sample does not
+verify the proposed descendant memory cap. Original negative receipts remain
+bound to their original implementations. Tools #5510 is merged; the exact
+provider consumer rebind is tracked separately by UpstreamDrift #12246.
+
+The driver and iron capture files provide marker kinematics without declared
+force-platform or analog channels. Separate force, grip, contact and passive
+calibration evidence remains outstanding. Numerical diagnostics may continue
+under explicit assumptions, without force/physiology qualification or
+promotion of any of the 17 required model/variant parity rows.
+
+After this main integration, 62 actual OpenSim 4.6 and portable contract tests
+passed with no skips: mixed constrained replay/marker observation, Moco
+diagnostics and inertia preflight, and native path-work auditing. All five
+parent-relative central gates passed; the affected-test mapper selected no
+tests in that separate system-interpreter run. Context check and canonical
+manual governance passed. No physical acceptance is inferred from these checks.
