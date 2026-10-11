@@ -201,7 +201,9 @@ def test_render_cell_figures_exports_dedicated_canonical_social_assets(
     assert "Fixed-Target Control" in social_call["metadata"]["Matched Target"]
 
     overhead_social_call = next(
-        kwargs for _, kwargs in calls["overhead"] if kwargs["options"].presentation == "social"
+        kwargs
+        for _, kwargs in calls["overhead"]
+        if kwargs["options"].presentation == "social"
     )
     assert "Protocol" in overhead_social_call["metadata"]
     assert overhead_social_call["metadata"]["Protocol"] == ref["source_protocol"]
@@ -303,23 +305,24 @@ def test_render_pair_figures_exports_canonical_social_density_with_physical_patt
     # Check social density call
     assert len(social_calls) == 1
     passed_points, passed_stem, kwargs = social_calls[0]
-    assert kwargs["condition_labels"] == ("Rotation SD 1°", "Rotation SD 2°")
-    assert kwargs["social_club"] == "Driver"
-    assert kwargs["total_n"] == 10_000
-    assert kwargs["target_point_m"] == (180.0, 0.0)
-    assert "Path SD 0.5°" in kwargs["delivery_noise"]
-    assert "Speed SD 2 mph" in kwargs["delivery_noise"]
-    assert "Strike SD 0.25 in" in kwargs["delivery_noise"]
-    assert "Fixed:" in kwargs["scenario"]
-    assert kwargs["source_protocols"] == (
+    assert set(kwargs) == {"context"}
+    context = kwargs["context"]
+    assert context.condition_labels == ("Rotation SD 1°", "Rotation SD 2°")
+    assert context.social_club == "Driver"
+    assert context.total_n == 10_000
+    assert context.target_point_m == (180.0, 0.0)
+    assert "Path SD 0.5°" in context.delivery_noise
+    assert "Speed SD 2 mph" in context.delivery_noise
+    assert "Strike SD 0.25 in" in context.delivery_noise
+    assert "Fixed:" in context.scenario
+    assert context.source_protocols == (
         first["source_protocol"],
         second["source_protocol"],
     )
-    assert kwargs["target_modes"] == (
+    assert context.target_modes == (
         "Fixed-Target Control",
         "Fixed-Target Control",
     )
-    assert "context" not in kwargs
 
     # Check that point_sets passed to social wrapper use exact common coordinates
     for pattern in ("Straight", "Draw", "Fade"):
@@ -631,16 +634,17 @@ def test_render_pair_figures_cross_protocol_passes_ordered_protocols(
 
     assert len(social_calls) == 1
     kwargs = social_calls[0]
-    assert kwargs["source_protocols"] == (
+    assert set(kwargs) == {"context"}
+    context = kwargs["context"]
+    assert context.source_protocols == (
         "original_primary/1",
         "pw-control-face-bounds/1",
     )
-    assert kwargs["target_modes"] == (
+    assert context.target_modes == (
         "Within-Lean Nominal Target",
         "Fixed-Target Control",
     )
-    assert kwargs["target_point_m"] == (180.0, 0.0)
-    assert "context" not in kwargs
+    assert context.target_point_m == (180.0, 0.0)
 
     # Missing actual protocol should fail clearly without protocol_id fallback
     bad_pair_first = dict(first)

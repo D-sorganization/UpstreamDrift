@@ -25,7 +25,7 @@ from .matched_figure_identity import (
 )
 from .density import DensityComparison, shared_histogram_density
 from .matched_matrix import PROFILES
-from .matched_pair_social import write_pair_social_density
+from .matched_pair_social import PairSocialContext, write_pair_social_density
 from .matched_report import load_individually_supported_endpoints
 from .matched_sensitivity import _supported_endpoints
 from .provenance import manifest_files_match
@@ -53,6 +53,7 @@ __all__ = [
 ]
 
 _PATTERNS = ("Straight", "Draw", "Fade")
+_StyledCondition = tuple[str, dict[str, Any], Literal["solid", "dashed"]]
 
 
 def _sha256(path: Path) -> str:
@@ -666,7 +667,7 @@ def _write_pair_density_figure(
 def _decorate_pair_overhead(
     figure: Any,
     trajectory_sets: dict[str, list[Any]],
-    conditions: tuple[tuple[str, dict, str], tuple[str, dict, str]],
+    conditions: tuple[_StyledCondition, _StyledCondition],
     comparison: str,
     target_x: float,
     social: bool,
@@ -790,10 +791,10 @@ def _create_pair_overhead_figure(
     )
     figure.subplots_adjust(top=0.70, bottom=0.19, left=0.085, right=0.98, wspace=0.13)
     colors = {"Straight": "#286090", "Draw": "#c66a19", "Fade": "#7b4a9e"}
-    conditions: tuple[
-        tuple[str, dict[str, Any], Literal["solid", "dashed"]],
-        tuple[str, dict[str, Any], Literal["solid", "dashed"]],
-    ] = ((first_label, first, "solid"), (second_label, second, "dashed"))
+    conditions: tuple[_StyledCondition, _StyledCondition] = (
+        (first_label, first, "solid"),
+        (second_label, second, "dashed"),
+    )
     for col, pattern in enumerate(_PATTERNS):
         axis = axes[0][col]
         for condition_name, _ref, style in conditions:
@@ -1007,16 +1008,18 @@ def _render_pair_social_density(
     paths = write_pair_social_density(
         point_sets,
         stem.with_name(stem.name + "_density"),
-        condition_labels=context.labels,
-        scenario=pair_scenario,
-        social_club=social_club,
-        target_point_m=(context.target_x, 0.0),
-        total_n=int(first["config"]["n_shots"]),
-        delivery_noise=_noise_profile_description(
-            _condition(first)["profile"], first["config"]["noise"]
+        context=PairSocialContext(
+            condition_labels=context.labels,
+            scenario=pair_scenario,
+            social_club=social_club,
+            target_point_m=(context.target_x, 0.0),
+            total_n=int(first["config"]["n_shots"]),
+            delivery_noise=_noise_profile_description(
+                _condition(first)["profile"], first["config"]["noise"]
+            ),
+            source_protocols=(first["source_protocol"], second["source_protocol"]),
+            target_modes=(m0, m1),
         ),
-        source_protocols=(first["source_protocol"], second["source_protocol"]),
-        target_modes=(m0, m1),
     )
     return _pair_density_ledger(request, paths, common_n, social=True)
 

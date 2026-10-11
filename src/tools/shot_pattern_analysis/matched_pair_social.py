@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 import math
 from pathlib import Path
 
@@ -13,28 +14,27 @@ from .academic_plots import FigureOptions, write_academic_dispersion_figure
 _PATTERNS = ("Straight", "Draw", "Fade")
 
 
-def write_pair_social_density(
-    point_sets: Mapping[str, Sequence[tuple[float, float]] | np.ndarray],
-    output_stem: Path,
-    *,
-    condition_labels: tuple[str, str],
-    scenario: str,
-    social_club: str,
-    target_point_m: tuple[float, float],
-    total_n: int,
-    delivery_noise: str | None = None,
-    source_protocols: tuple[str, str] | None = None,
-    target_modes: tuple[str, str] | None = None,
-) -> dict[str, Path]:
-    """Export three two-panel figures, preserving all supplied coordinates.
+@dataclass(frozen=True)
+class PairSocialContext:
+    """The saved comparison labels, target, and population for social figures."""
 
-    The caller must supply the identical common shot indices from all six
-    populations, in the same order. This presentation layer checks shapes,
-    counts and finite coordinates; upstream saved-data validation establishes
-    shot identities. Each figure shares axes, histogram bins and density scales
-    between conditions. Scales can differ between physical-pattern figures.
-    No flights, density algorithm, aim transformation or resampling are added.
-    """
+    condition_labels: tuple[str, str]
+    scenario: str
+    social_club: str
+    target_point_m: tuple[float, float]
+    total_n: int
+    delivery_noise: str | None = None
+    source_protocols: tuple[str, str] | None = None
+    target_modes: tuple[str, str] | None = None
+
+
+def _validate_context_labels(context: PairSocialContext) -> None:
+    condition_labels = context.condition_labels
+    scenario = context.scenario
+    social_club = context.social_club
+    delivery_noise = context.delivery_noise
+    source_protocols = context.source_protocols
+    target_modes = context.target_modes
     if (
         not isinstance(condition_labels, (tuple, list, Sequence))
         or isinstance(condition_labels, (str, bytes))
@@ -74,6 +74,12 @@ def write_pair_social_density(
         ):
             raise ValueError("target_modes must be a pair of two non-empty strings")
 
+
+def _target_descriptions(context: PairSocialContext) -> tuple[str, str | None]:
+    condition_labels = context.condition_labels
+    target_point_m = context.target_point_m
+    target_modes = context.target_modes
+    source_protocols = context.source_protocols
     if (
         not isinstance(target_point_m, (tuple, list, Sequence))
         or isinstance(target_point_m, (str, bytes))
@@ -115,6 +121,14 @@ def write_pair_social_density(
             f"{condition_labels[1]}: {source_protocols[1]}"
         )
 
+    return target_str, protocol_str
+
+
+def _validated_points(
+    point_sets: Mapping[str, Sequence[tuple[float, float]] | np.ndarray],
+    condition_labels: tuple[str, str],
+    total_n: int,
+) -> tuple[dict[str, np.ndarray], int]:
     if isinstance(total_n, bool) or not isinstance(total_n, int) or total_n < 2:
         raise ValueError("total_n must be an integer >= 2")
     expected = {
@@ -138,6 +152,33 @@ def write_pair_social_density(
             "six common populations must have identical counts in [2, total_n]"
         )
     common_n = next(iter(counts))
+    return arrays, common_n
+
+
+def write_pair_social_density(
+    point_sets: Mapping[str, Sequence[tuple[float, float]] | np.ndarray],
+    output_stem: Path,
+    *,
+    context: PairSocialContext,
+) -> dict[str, Path]:
+    """Export three two-panel figures, preserving all supplied coordinates.
+
+    The caller must supply the identical common shot indices from all six
+    populations, in the same order. This presentation layer checks shapes,
+    counts and finite coordinates; upstream saved-data validation establishes
+    shot identities. Each figure shares axes, histogram bins and density scales
+    between conditions. Scales can differ between physical-pattern figures.
+    No flights, density algorithm, aim transformation or resampling are added.
+    """
+    _validate_context_labels(context)
+    target_str, protocol_str = _target_descriptions(context)
+    condition_labels = context.condition_labels
+    scenario = context.scenario
+    social_club = context.social_club
+    target_point_m = context.target_point_m
+    total_n = context.total_n
+    delivery_noise = context.delivery_noise
+    arrays, common_n = _validated_points(point_sets, condition_labels, total_n)
     outputs: dict[str, Path] = {}
     for pattern in _PATTERNS:
         points = {label: arrays[f"{pattern} · {label}"] for label in condition_labels}
@@ -165,4 +206,4 @@ def write_pair_social_density(
     return outputs
 
 
-__all__ = ["write_pair_social_density"]
+__all__ = ["PairSocialContext", "write_pair_social_density"]

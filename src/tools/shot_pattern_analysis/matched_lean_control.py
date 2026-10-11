@@ -8,6 +8,7 @@ import gzip
 import json
 import math
 import os
+from dataclasses import dataclass
 from itertools import combinations
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -560,43 +561,31 @@ def _paired_effect_modification(
     return paired_mean_difference(interaction_b, interaction_a, seed=seed)
 
 
-def analyze_explicit_source_pair(
-    first_source: dict,
-    second_source: dict,
-    *,
-    comparison_kind: str,
-    target_x_m: float,
-    transition_receipt_path: Path | None = None,
-    transition_receipt_sha256: str | None = None,
-) -> dict:
-    """Pair two validated source cells without conflating their protocols.
+@dataclass(frozen=True)
+class _SourceCell:
+    reference: dict
+    directory: Path
+    config: dict
+    summary: dict
+    plan: dict
 
-    Delivered values are centered on each pattern's saved nominal and club
-    preset before the underlying Gaussian errors are compared. Comparisons use
-    only the intersection supported in all six pattern-by-source populations.
-    """
-    if comparison_kind not in (
-        "across_lean",
-        "curve_strength",
-        "shaft_rotation_sd",
-        "speed_bound",
-    ):
-        raise ValueError("unknown explicit source comparison kind")
-    if not math.isfinite(target_x_m) or target_x_m <= 0:
-        raise ValueError("comparison target must be finite and positive")
-    directory_a, config_a, summary_a, plan_a = _reload_explicit_source(first_source)
-    directory_b, config_b, summary_b, plan_b = _reload_explicit_source(second_source)
-    scoring_sources = _paired_scoring_source_hashes()
-    execution_a = plan_a.get("execution")
-    execution_b = plan_b.get("execution")
-    if not isinstance(execution_a, dict) or not isinstance(execution_b, dict):
-        raise ValueError("paired source plans must bind execution snapshots")
-    transition_sha = _execution_transition(
-        execution_a,
-        execution_b,
-        transition_receipt_path,
-        transition_receipt_sha256,
-    )
+
+@dataclass(frozen=True)
+class _PairedPopulation:
+    endpoints_a: dict
+    endpoints_b: dict
+    common_indices: list[int]
+    unsupported_a: dict
+    unsupported_b: dict
+    max_error: float
+    input_error_note: str
+
+
+def _validate_pair_differences(
+    first: _SourceCell, second: _SourceCell, comparison_kind: str
+) -> set[str]:
+    config_a, config_b = first.config, second.config
+    plan_a, plan_b = first.plan, second.plan
     differences = _config_differences(
         _comparison_config(config_a), _comparison_config(config_b)
     )
@@ -614,7 +603,7 @@ def analyze_explicit_source_pair(
     elif comparison_kind == "curve_strength":
         expected_differences = {"curve_scale", "target_x_m", "match_face_bounds_deg"}
         if _is_reviewed_driver_curve_control(
-            config_a, config_b, plan_a, plan_b, first_source.get("source_protocol")
+            config_a, config_b, plan_a, plan_b, first.reference.get("source_protocol")
         ):
             expected_differences.add("match_speed_factors")
     elif comparison_kind == "shaft_rotation_sd":
@@ -637,6 +626,12 @@ def analyze_explicit_source_pair(
         raise ValueError(
             "speed bounds differ outside the declared driver control protocol"
         )
+    return differences
+
+
+def _validate_pair_conditions(
+    config_a: dict, config_b: dict, comparison_kind: str
+) -> None:
     club_a, club_b = config_a["club"], config_b["club"]
     if comparison_kind == "across_lean":
         if (
@@ -684,6 +679,13 @@ def analyze_explicit_source_pair(
                 raise ValueError(
                     "speed-bound pair must compare the shared lower bound and 1.25/1.30 upper factors"
                 )
+
+
+def _validate_pair_target(
+    first: _SourceCell, second: _SourceCell, target_x_m: float
+) -> None:
+    config_a, config_b = first.config, second.config
+    summary_a, summary_b = first.summary, second.summary
     if (
         config_a["n_shots"] != config_b["n_shots"]
         or config_a["seed"] != config_b["seed"]
@@ -700,6 +702,14 @@ def analyze_explicit_source_pair(
     )
     for summary in (summary_a, summary_b):
         _verify_actual_nominal_target(summary, target_x_m, tolerance)
+
+
+def _paired_population(
+    first: _SourceCell, second: _SourceCell, comparison_kind: str
+) -> _PairedPopulation:
+    config_a, config_b = first.config, second.config
+    summary_a, summary_b = first.summary, second.summary
+    directory_a, directory_b = first.directory, second.directory
     errors_a, unsupported_a = _primitive_errors_by_pattern(
         directory_a / "shots.csv.gz", config_a, summary_a
     )
@@ -731,8 +741,44 @@ def analyze_explicit_source_pair(
             )
         )
     )
+    return _PairedPopulation(
+        endpoints_a,
+        endpoints_b,
+        common_indices,
+        unsupported_a,
+        unsupported_b,
+        max_error,
+        input_error_note,
+    )
+
+
+def _explicit_source_receipt(source: dict) -> dict:
+    return {
+        "protocol_id": source["source_protocol"],
+        "cell": source.get("alias_of_primary", source.get("cell")),
+        "execution_kind": source["execution_kind"],
+        "alias_cell": source.get("alias_cell"),
+        "source_plan_sha256": source["source_plan_sha256"],
+        "source_cell_manifest_sha256": source["source_cell_manifest_sha256"],
+        "source_csv_sha256": source["source_csv_sha256"],
+    }
+
+
+def _explicit_pair_receipt(
+    sources: tuple[dict, dict],
+    n_total: int,
+    population: _PairedPopulation,
+    comparison_kind: str,
+    target_x_m: float,
+    scoring_sources: dict,
+    transition_sha: str | None,
+    differences: set[str],
+) -> dict:
+    first_source, second_source = sources
+    common_indices = population.common_indices
+    unsupported_a, unsupported_b = population.unsupported_a, population.unsupported_b
+    max_error, input_error_note = population.max_error, population.input_error_note
     n_common = len(common_indices)
-    n_total = config_a["n_shots"]
     status = "available" if n_common == n_total else "conditional_only"
     if n_common < 2:
         status = "unavailable"
@@ -754,30 +800,8 @@ def analyze_explicit_source_pair(
         "source_protocols": [protocol_a, protocol_b],
         "source_transition_receipt_sha256": transition_sha,
         "sources": [
-            {
-                "protocol_id": protocol_a,
-                "cell": first_source.get("alias_of_primary", first_source.get("cell")),
-                "execution_kind": first_source["execution_kind"],
-                "alias_cell": first_source.get("alias_cell"),
-                "source_plan_sha256": first_source["source_plan_sha256"],
-                "source_cell_manifest_sha256": first_source[
-                    "source_cell_manifest_sha256"
-                ],
-                "source_csv_sha256": first_source["source_csv_sha256"],
-            },
-            {
-                "protocol_id": protocol_b,
-                "cell": second_source.get(
-                    "alias_of_primary", second_source.get("cell")
-                ),
-                "execution_kind": second_source["execution_kind"],
-                "alias_cell": second_source.get("alias_cell"),
-                "source_plan_sha256": second_source["source_plan_sha256"],
-                "source_cell_manifest_sha256": second_source[
-                    "source_cell_manifest_sha256"
-                ],
-                "source_csv_sha256": second_source["source_csv_sha256"],
-            },
+            _explicit_source_receipt(first_source),
+            _explicit_source_receipt(second_source),
         ],
         "unsupported_by_source_and_pattern": {
             "first": unsupported_a,
@@ -787,103 +811,280 @@ def analyze_explicit_source_pair(
         "patterns": {},
         "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
     }
-    if n_common >= 2:
-        common_index_set = set(common_indices)
-        endpoint_maps = []
-        for endpoints in (endpoints_a, endpoints_b):
-            endpoint_maps.append(
-                {
-                    pattern: [
-                        (index, x, y)
-                        for index, x, y in sorted(endpoints[pattern])
-                        if index in common_index_set
-                    ]
-                    for pattern in PATTERNS
-                }
-            )
-        for pattern in PATTERNS:
-            map_a = {index: (x, y) for index, x, y in endpoints_a[pattern]}
-            map_b = {index: (x, y) for index, x, y in endpoints_b[pattern]}
-            before = [(index, *map_a[index]) for index in common_indices]
-            after = [(index, *map_b[index]) for index in common_indices]
-            metrics = _paired_pattern_metrics(
-                before,
-                after,
-                club_id=club_a["club_id"],
-                target_x_m=target_x_m,
-                radius_m=float(config_a["target_radius_m"]),
+    return result
+
+
+def _populate_explicit_metrics(
+    result: dict,
+    first: _SourceCell,
+    second: _SourceCell,
+    population: _PairedPopulation,
+    target_x_m: float,
+    comparison_kind: str,
+) -> None:
+    config_a, config_b = first.config, second.config
+    club_a, club_b = config_a["club"], config_b["club"]
+    endpoints_a, endpoints_b = population.endpoints_a, population.endpoints_b
+    common_indices = population.common_indices
+    common_index_set = set(common_indices)
+    endpoint_maps = []
+    for endpoints in (endpoints_a, endpoints_b):
+        endpoint_maps.append(
+            {
+                pattern: [
+                    (index, x, y)
+                    for index, x, y in sorted(endpoints[pattern])
+                    if index in common_index_set
+                ]
+                for pattern in PATTERNS
+            }
+        )
+    for pattern in PATTERNS:
+        map_a = {index: (x, y) for index, x, y in endpoints_a[pattern]}
+        map_b = {index: (x, y) for index, x, y in endpoints_b[pattern]}
+        before = [(index, *map_a[index]) for index in common_indices]
+        after = [(index, *map_b[index]) for index in common_indices]
+        metrics = _paired_pattern_metrics(
+            before,
+            after,
+            club_id=club_a["club_id"],
+            target_x_m=target_x_m,
+            radius_m=float(config_a["target_radius_m"]),
+            seed=int(config_a["seed"]),
+        )
+        metrics["physical_pattern"] = pattern
+        metrics["first_condition"] = {
+            "shaft_lean_deg": club_a["shaft_lean_deg"],
+            "curve_scale": config_a["curve_scale"],
+            "shaft_rotation_sd_deg": config_a["noise"]["standard_deviations"][0],
+        }
+        metrics["second_condition"] = {
+            "shaft_lean_deg": club_b["shaft_lean_deg"],
+            "curve_scale": config_b["curve_scale"],
+            "shaft_rotation_sd_deg": config_b["noise"]["standard_deviations"][0],
+        }
+        metrics["role_mapping"] = {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation",
+        }
+        metrics["first_curve_scale"] = config_a["curve_scale"]
+        metrics["second_curve_scale"] = config_b["curve_scale"]
+        result["patterns"][pattern] = metrics
+    if comparison_kind in ("across_lean", "curve_strength", "shaft_rotation_sd"):
+        _populate_effect_modification(
+            result, endpoint_maps, config_a, config_b, target_x_m
+        )
+
+
+def _populate_effect_modification(
+    result: dict,
+    endpoint_maps: list[dict],
+    config_a: dict,
+    config_b: dict,
+    target_x_m: float,
+) -> None:
+    club_a, club_b = config_a["club"], config_b["club"]
+    try:
+        score_a = score_course_endpoint_vectors(
+            endpoint_maps[0],
+            club_id=club_a["club_id"],
+            target_x_m=target_x_m,
+            green_radius_m=float(config_a["target_radius_m"]),
+        )
+        score_b = score_course_endpoint_vectors(
+            endpoint_maps[1],
+            club_id=club_b["club_id"],
+            target_x_m=target_x_m,
+            green_radius_m=float(config_b["target_radius_m"]),
+        )
+        effects = {
+            pattern: _paired_effect_modification(
+                score_a.scores["Straight"],
+                score_a.scores[pattern],
+                score_b.scores["Straight"],
+                score_b.scores[pattern],
                 seed=int(config_a["seed"]),
             )
-            metrics["physical_pattern"] = pattern
-            metrics["first_condition"] = {
-                "shaft_lean_deg": club_a["shaft_lean_deg"],
-                "curve_scale": config_a["curve_scale"],
-                "shaft_rotation_sd_deg": config_a["noise"]["standard_deviations"][0],
-            }
-            metrics["second_condition"] = {
-                "shaft_lean_deg": club_b["shaft_lean_deg"],
-                "curve_scale": config_b["curve_scale"],
-                "shaft_rotation_sd_deg": config_b["noise"]["standard_deviations"][0],
-            }
-            metrics["role_mapping"] = {
-                "Straight": "physical pattern at first condition",
-                "Draw": "same physical pattern at second condition",
-                "Fade": "duplicate of first condition for paired scorer shape only; not an observation",
-            }
-            metrics["first_curve_scale"] = config_a["curve_scale"]
-            metrics["second_curve_scale"] = config_b["curve_scale"]
-            result["patterns"][pattern] = metrics
-        if comparison_kind in ("across_lean", "curve_strength", "shaft_rotation_sd"):
-            try:
-                score_a = score_course_endpoint_vectors(
-                    endpoint_maps[0],
-                    club_id=club_a["club_id"],
-                    target_x_m=target_x_m,
-                    green_radius_m=float(config_a["target_radius_m"]),
-                )
-                score_b = score_course_endpoint_vectors(
-                    endpoint_maps[1],
-                    club_id=club_b["club_id"],
-                    target_x_m=target_x_m,
-                    green_radius_m=float(config_b["target_radius_m"]),
-                )
-                effects = {
-                    pattern: _paired_effect_modification(
-                        score_a.scores["Straight"],
-                        score_a.scores[pattern],
-                        score_b.scores["Straight"],
-                        score_b.scores[pattern],
-                        seed=int(config_a["seed"]),
-                    )
-                    for pattern in ("Draw", "Fade")
-                }
-                result["course_scoring_effect_modification"] = effects
-                result["course_scoring_effect_modification_scope"] = (
-                    "(curve−Straight) in the second condition minus (curve−Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit"
-                )
-                result["course_scoring_provenance"] = {
-                    "source_backed_status": "available",
-                    "scenario_id": score_a.scenario_id,
-                    "baseline": score_a.baseline,
-                    "api_evaluated_states_per_condition": score_a.api_evaluated_states,
-                    "index_order": "ascending_common_shot_index",
-                }
-            except ValueError as exc:
-                result["course_scoring_effect_modification"] = {
-                    "status": "unavailable",
-                    "reason": str(exc),
-                }
-    _recheck_explicit_source(first_source, directory_a)
-    _recheck_explicit_source(second_source, directory_b)
+            for pattern in ("Draw", "Fade")
+        }
+        result["course_scoring_effect_modification"] = effects
+        result["course_scoring_effect_modification_scope"] = (
+            "(curve−Straight) in the second condition minus (curve−Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit"
+        )
+        result["course_scoring_provenance"] = {
+            "source_backed_status": "available",
+            "scenario_id": score_a.scenario_id,
+            "baseline": score_a.baseline,
+            "api_evaluated_states_per_condition": score_a.api_evaluated_states,
+            "index_order": "ascending_common_shot_index",
+        }
+    except ValueError as exc:
+        result["course_scoring_effect_modification"] = {
+            "status": "unavailable",
+            "reason": str(exc),
+        }
+
+
+def analyze_explicit_source_pair(
+    first_source: dict,
+    second_source: dict,
+    *,
+    comparison_kind: str,
+    target_x_m: float,
+    transition_receipt_path: Path | None = None,
+    transition_receipt_sha256: str | None = None,
+) -> dict:
+    """Pair two validated source cells without conflating their protocols.
+
+    Delivered values are centered on each pattern's saved nominal and club
+    preset before the underlying Gaussian errors are compared. Comparisons use
+    only the intersection supported in all six pattern-by-source populations.
+    """
+    if comparison_kind not in (
+        "across_lean",
+        "curve_strength",
+        "shaft_rotation_sd",
+        "speed_bound",
+    ):
+        raise ValueError("unknown explicit source comparison kind")
+    if not math.isfinite(target_x_m) or target_x_m <= 0:
+        raise ValueError("comparison target must be finite and positive")
+    first = _SourceCell(first_source, *_reload_explicit_source(first_source))
+    second = _SourceCell(second_source, *_reload_explicit_source(second_source))
+    scoring_sources = _paired_scoring_source_hashes()
+    execution_a, execution_b = first.plan.get("execution"), second.plan.get("execution")
+    if not isinstance(execution_a, dict) or not isinstance(execution_b, dict):
+        raise ValueError("paired source plans must bind execution snapshots")
+    transition_sha = _execution_transition(
+        execution_a, execution_b, transition_receipt_path, transition_receipt_sha256
+    )
+    differences = _validate_pair_differences(first, second, comparison_kind)
+    _validate_pair_conditions(first.config, second.config, comparison_kind)
+    _validate_pair_target(first, second, target_x_m)
+    population = _paired_population(first, second, comparison_kind)
+    result = _explicit_pair_receipt(
+        (first_source, second_source),
+        first.config["n_shots"],
+        population,
+        comparison_kind,
+        target_x_m,
+        scoring_sources,
+        transition_sha,
+        differences,
+    )
+    if len(population.common_indices) >= 2:
+        _populate_explicit_metrics(
+            result, first, second, population, target_x_m, comparison_kind
+        )
+    _recheck_explicit_source(first_source, first.directory)
+    _recheck_explicit_source(second_source, second.directory)
     if _paired_scoring_source_hashes() != scoring_sources:
         raise RuntimeError("paired scoring source changed during analysis")
     _execution_transition(
-        execution_a,
-        execution_b,
-        transition_receipt_path,
-        transition_receipt_sha256,
+        execution_a, execution_b, transition_receipt_path, transition_receipt_sha256
     )
     return result
+
+
+def _lean_pair_metrics(
+    endpoints_a: dict, endpoints_b: dict, common: list[int], descriptor: dict, seed: int
+) -> dict:
+    """Reduce paired endpoints in the historical physical-pattern order."""
+    club_id = descriptor["club_id"]
+    target, radius = descriptor["target_x_m"], descriptor["target_radius_m"]
+    lean_a, lean_b = descriptor["leans_deg"]
+    metrics = {}
+    for pattern in PATTERNS:
+        before_map = {i: (x, y) for i, x, y in endpoints_a[pattern]}
+        after_map = {i: (x, y) for i, x, y in endpoints_b[pattern]}
+        before = [(i, *before_map[i]) for i in common]
+        after = [(i, *after_map[i]) for i in common]
+        metrics[pattern] = _paired_pattern_metrics(
+            before,
+            after,
+            club_id=club_id,
+            target_x_m=target,
+            radius_m=radius,
+            seed=seed,
+        )
+        metrics[pattern].update(
+            physical_pattern=pattern,
+            earlier_lean_deg=lean_a,
+            later_lean_deg=lean_b,
+        )
+    return metrics
+
+
+def _analyze_lean_pair(
+    matrix_root: Path, descriptor: dict, members: dict, loaded: dict, seed: int
+) -> dict:
+    """Resolve one planned pair and retain its six-population eligibility."""
+    lean_a, lean_b = descriptor["leans_deg"]
+    target = descriptor["target_x_m"]
+    n_shots = descriptor["total_per_physical_population"]
+    if lean_a not in members or lean_b not in members:
+        return {
+            **descriptor,
+            "status": "unavailable",
+            "reason": "lean_not_planned",
+        }
+    name_a, _ = members[lean_a]
+    name_b, _ = members[lean_b]
+    descriptor["cells"] = [name_a, name_b]
+    if (
+        loaded[name_a]["status"] != "completed"
+        or loaded[name_b]["status"] != "completed"
+    ):
+        return {
+            **descriptor,
+            "status": "unavailable",
+            "reason": "one_or_both_cells_unavailable",
+            "cell_statuses": [
+                loaded[name_a]["status"],
+                loaded[name_b]["status"],
+            ],
+        }
+    summary_a, summary_b = loaded[name_a], loaded[name_b]
+    if (
+        float(summary_a["target_x_m"]) != target
+        or float(summary_b["target_x_m"]) != target
+    ):
+        raise ValueError("saved cells do not share the declared common target")
+    endpoints_a, invalid_a = _supported_endpoints(
+        matrix_root / name_a / "shots.csv.gz", n_shots
+    )
+    endpoints_b, invalid_b = _supported_endpoints(
+        matrix_root / name_b / "shots.csv.gz", n_shots
+    )
+    common = sorted(
+        {i for i, _, _ in endpoints_a["Straight"]}
+        & {i for i, _, _ in endpoints_b["Straight"]}
+    )
+    if len(common) < 2:
+        return {
+            **descriptor,
+            "status": "unavailable",
+            "reason": "fewer_than_two_common_supported_shots",
+            "common_supported_n": len(common),
+            "unsupported_by_cell_and_pattern": {
+                name_a: invalid_a,
+                name_b: invalid_b,
+            },
+        }
+    metrics = _lean_pair_metrics(endpoints_a, endpoints_b, common, descriptor, seed)
+    return {
+        **descriptor,
+        "status": "available" if len(common) == n_shots else "conditional_only",
+        "common_supported_n": len(common),
+        "physical_eligible_rows": 6 * len(common),
+        "unsupported_by_cell_and_pattern": {
+            name_a: invalid_a,
+            name_b: invalid_b,
+        },
+        "conditioning": "same shot indices supported in all six physical populations",
+        "patterns": metrics,
+    }
 
 
 def analyze_across_lean(matrix_root: Path) -> dict:
@@ -941,98 +1142,8 @@ def analyze_across_lean(matrix_root: Path) -> dict:
                 "difference_direction": "later_lean_minus_earlier_lean",
                 "total_per_physical_population": n_shots,
             }
-            if lean_a not in members or lean_b not in members:
-                pairs.append(
-                    {
-                        **descriptor,
-                        "status": "unavailable",
-                        "reason": "lean_not_planned",
-                    }
-                )
-                continue
-            name_a, _ = members[lean_a]
-            name_b, _ = members[lean_b]
-            descriptor["cells"] = [name_a, name_b]
-            if (
-                loaded[name_a]["status"] != "completed"
-                or loaded[name_b]["status"] != "completed"
-            ):
-                pairs.append(
-                    {
-                        **descriptor,
-                        "status": "unavailable",
-                        "reason": "one_or_both_cells_unavailable",
-                        "cell_statuses": [
-                            loaded[name_a]["status"],
-                            loaded[name_b]["status"],
-                        ],
-                    }
-                )
-                continue
-            summary_a, summary_b = loaded[name_a], loaded[name_b]
-            if (
-                float(summary_a["target_x_m"]) != target
-                or float(summary_b["target_x_m"]) != target
-            ):
-                raise ValueError("saved cells do not share the declared common target")
-            endpoints_a, invalid_a = _supported_endpoints(
-                matrix_root / name_a / "shots.csv.gz", n_shots
-            )
-            endpoints_b, invalid_b = _supported_endpoints(
-                matrix_root / name_b / "shots.csv.gz", n_shots
-            )
-            common = sorted(
-                {i for i, _, _ in endpoints_a["Straight"]}
-                & {i for i, _, _ in endpoints_b["Straight"]}
-            )
-            if len(common) < 2:
-                pairs.append(
-                    {
-                        **descriptor,
-                        "status": "unavailable",
-                        "reason": "fewer_than_two_common_supported_shots",
-                        "common_supported_n": len(common),
-                        "unsupported_by_cell_and_pattern": {
-                            name_a: invalid_a,
-                            name_b: invalid_b,
-                        },
-                    }
-                )
-                continue
-            metrics = {}
-            for pattern in PATTERNS:
-                before_map = {i: (x, y) for i, x, y in endpoints_a[pattern]}
-                after_map = {i: (x, y) for i, x, y in endpoints_b[pattern]}
-                before = [(i, *before_map[i]) for i in common]
-                after = [(i, *after_map[i]) for i in common]
-                metrics[pattern] = _paired_pattern_metrics(
-                    before,
-                    after,
-                    club_id=club_id,
-                    target_x_m=target,
-                    radius_m=radius,
-                    seed=seed,
-                )
-                metrics[pattern].update(
-                    physical_pattern=pattern,
-                    earlier_lean_deg=lean_a,
-                    later_lean_deg=lean_b,
-                )
             pairs.append(
-                {
-                    **descriptor,
-                    "status": "available"
-                    if len(common) == n_shots
-                    else "conditional_only",
-                    "common_supported_n": len(common),
-                    "physical_eligible_rows": 6 * len(common),
-                    "unsupported_by_cell_and_pattern": {
-                        name_a: invalid_a,
-                        name_b: invalid_b,
-                    },
-                    "conditioning": "same shot indices supported in all six physical populations",
-                    "patterns": metrics,
-                }
+                _analyze_lean_pair(matrix_root, descriptor, members, loaded, seed)
             )
     if _sha256(plan_path) != plan_hash or any(
         not manifest_files_match(matrix_root / name / "manifest.json")

@@ -1426,24 +1426,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/tools/shot_pattern_analysis/matched_lean_control.py",
-      "symbol": "analyze_explicit_source_pair",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - analyze_explicit_source_pair exceeds function-lines budget (324 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_lean_control.py",
-      "symbol": "analyze_across_lean",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - analyze_across_lean exceeds function-lines budget (174 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/matched_matrix.py",
       "symbol": "run_matched_matrix",
       "rule": "function-lines",
@@ -1459,33 +1441,6 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 12278,
       "reason": "Issue #12278: shot pattern analysis integration - run_matched_matrix exceeds parameters budget (13 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_pair_social.py",
-      "symbol": "write_pair_social_density",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - write_pair_social_density exceeds function-lines budget (150 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_pair_social.py",
-      "symbol": "write_pair_social_density",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - write_pair_social_density exceeds parameters budget (10 > 8).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/tools/shot_pattern_analysis/matched_sensitivity.py",
-      "symbol": "analyze_saved_sensitivity",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - analyze_saved_sensitivity exceeds function-lines budget (103 > 100).",
       "expires_on": "2026-12-31"
     },
     {

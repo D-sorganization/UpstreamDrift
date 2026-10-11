@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import os
+from collections.abc import Iterator
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -74,6 +75,38 @@ def _supported_endpoints(
     }, invalid
 
 
+def _sensitivity_cases(club_id: str) -> Iterator[tuple[str, dict[str, float]]]:
+    """Return the ordered hypothetical-course grid for one scoring preset."""
+    if club_id == "driver":
+        return (
+            (
+                f"width{half:g}_hole{hole:g}",
+                {"fairway_half_width_m": half, "hole_distance_m": hole},
+            )
+            for half in (10.0, 15.0, 20.0)
+            for hole in (350.0, 400.0, 450.0)
+        )
+    if club_id in ("seven_iron", "pitching_wedge"):
+        return (
+            (f"radius{radius:g}", {"green_radius_m": radius})
+            for radius in (10.0, 15.0, 20.0)
+        )
+    raise ValueError("saved club is not a supported scoring preset")
+
+
+def _recheck_sensitivity_inputs(
+    cell_dir: Path, plan_path: Path, provenance: dict
+) -> None:
+    """Reject source or saved-input drift after all scenarios have been scored."""
+    if _source_hashes() != provenance["source_sha256"]:
+        raise RuntimeError("scoring source changed during sensitivity analysis")
+    if not manifest_files_match(cell_dir / "manifest.json") or any(
+        _sha256(plan_path if name == "matrix_plan.json" else cell_dir / name) != digest
+        for name, digest in provenance["input_sha256"].items()
+    ):
+        raise RuntimeError("saved input changed during sensitivity analysis")
+
+
 def analyze_saved_sensitivity(cell_dir: Path, plan_path: Path) -> dict:
     """Re-score common supported landings; retain every unsupported count."""
     cell_dir = Path(cell_dir)
@@ -138,22 +171,7 @@ def analyze_saved_sensitivity(cell_dir: Path, plan_path: Path) -> dict:
     target_x_m = float(summary["target_x_m"])
     seed = config["seed"]
     scenarios = {}
-    if club_id == "driver":
-        cases = (
-            (
-                f"width{half:g}_hole{hole:g}",
-                {"fairway_half_width_m": half, "hole_distance_m": hole},
-            )
-            for half in (10.0, 15.0, 20.0)
-            for hole in (350.0, 400.0, 450.0)
-        )
-    elif club_id in ("seven_iron", "pitching_wedge"):
-        cases = (
-            (f"radius{radius:g}", {"green_radius_m": radius})
-            for radius in (10.0, 15.0, 20.0)
-        )
-    else:
-        raise ValueError("saved club is not a supported scoring preset")
+    cases = _sensitivity_cases(club_id)
     for name, dimensions in cases:
         try:
             scenarios[name] = score_course_endpoints(
@@ -165,13 +183,7 @@ def analyze_saved_sensitivity(cell_dir: Path, plan_path: Path) -> dict:
             )
         except ValueError as exc:
             scenarios[name] = {"status": "unavailable", "reason": str(exc)}
-    if _source_hashes() != provenance["source_sha256"]:
-        raise RuntimeError("scoring source changed during sensitivity analysis")
-    if not manifest_files_match(cell_dir / "manifest.json") or any(
-        _sha256(plan_path if name == "matrix_plan.json" else cell_dir / name) != digest
-        for name, digest in provenance["input_sha256"].items()
-    ):
-        raise RuntimeError("saved input changed during sensitivity analysis")
+    _recheck_sensitivity_inputs(cell_dir, plan_path, provenance)
     return {
         **provenance,
         "status": "available" if common_n == n_shots else "conditional_only",
