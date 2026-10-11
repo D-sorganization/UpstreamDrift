@@ -69,3 +69,34 @@ def test_native_binary_requires_exactly_one_extension(tmp_path) -> None:
     (tmp_path / "second.pyd").write_bytes(b"second")
     with pytest.raises(RuntimeError, match="exactly one"):
         resolve_native_binary(origin)
+
+
+def test_matched_snapshot_binds_shared_matrix_cli_and_rejects_its_changes(
+    monkeypatch,
+) -> None:
+    from pathlib import Path
+
+    from src.tools.shot_pattern_analysis import matrix_cli
+    from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
+
+    helper = Path(matrix_cli.__file__).resolve()
+    key = "src/tools/shot_pattern_analysis/matrix_cli.py"
+    before = matched_source_snapshot()
+    assert (
+        before["source_sha256"][key] == hashlib.sha256(helper.read_bytes()).hexdigest()
+    )
+
+    original_read = Path.read_bytes
+
+    def altered_helper_bytes(path):
+        payload = original_read(path)
+        return (
+            payload + b"\n# changed CLI defaults\n"
+            if path.resolve() == helper
+            else payload
+        )
+
+    monkeypatch.setattr(Path, "read_bytes", altered_helper_bytes)
+    after = matched_source_snapshot()
+    with pytest.raises(RuntimeError, match="source changed"):
+        assert_source_unchanged(before, after)

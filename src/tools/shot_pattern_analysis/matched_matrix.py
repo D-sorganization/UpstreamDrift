@@ -14,6 +14,7 @@ import numpy as np
 from .matched_config import matched_preset
 from .matched_export import execute_and_export, matched_source_snapshot
 from .matched_runner import ExperimentConfig
+from .matrix_cli import add_matrix_arguments
 from .noise import NoiseSpec
 from .provenance import assert_source_unchanged, manifest_files_match
 
@@ -320,17 +321,10 @@ def run_matched_matrix(
     return results
 
 
-def main() -> None:
+def build_parser() -> argparse.ArgumentParser:
+    """Build the existing command-line interface without starting a study."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("output", type=Path)
-    parser.add_argument("--stage", choices=("pilot", "final"), default="pilot")
-    parser.add_argument("--shots", type=int, default=32)
-    parser.add_argument("--acceptance", type=Path)
-    parser.add_argument("--shard-index", type=int, default=0)
-    parser.add_argument("--shard-count", type=int, default=1)
-    parser.add_argument(
-        "--figures", choices=("none", "selected", "all"), default="selected"
-    )
+    add_matrix_arguments(parser)
     parser.add_argument(
         "--common-targets",
         type=Path,
@@ -359,6 +353,11 @@ def main() -> None:
         "--supplement-protocol",
         help="versioned protocol label for a selected supplement",
     )
+    return parser
+
+
+def main() -> None:
+    parser = build_parser()
     args = parser.parse_args()
     targets = (
         json.loads(args.common_targets.read_text()) if args.common_targets else None

@@ -51,6 +51,7 @@ def matched_source_snapshot() -> dict:
             "noise.py",
             "nominal_matching.py",
             "matched_supplement.py",
+            "matrix_cli.py",
             "density.py",
             "academic_plots.py",
         )
