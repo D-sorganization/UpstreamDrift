@@ -6,7 +6,8 @@ The goal is active after the user resumed. All 10.44 million attempted simulatio
 rows are complete. Do not rerun simulations. The scientific report, all assigned
 baseline PNG reviews, and the 49 selective density-layout replacement reviews
 are complete within their recorded scopes. Exact aggregate coverage accepts 2,304 pair PNGs and 104 cell PNGs.
-Repository gate failures and remote delivery remain explicit below.
+Repository gate failures and verified research prerelease delivery remain
+explicit below.
 
 Astra accepted the narrative after 406 numeric/count checks and 52 bound-source
 hash checks: `validation/final_narrative_independent_review_v8/review.json`.
@@ -91,11 +92,17 @@ supplement files by inventory, size, and hash. This is offline evidence, not
 remote delivery. Its receipt is
 `/tmp/shot-pattern-delivery-resume/local_fresh_restoration_receipt_v2.json`.
 
-The reader publication tree must map the repaired child directory to
-`supplement_report_v1/`, matching the unchanged report's existing links. All 98
-unique supplemental report links resolve in the child. Keep the original study
-baseline separate and intact. Remote upload must be followed by a fresh download,
-trusted manifest comparison, and full archive/member verification.
+The reader publication tree maps the repaired child directory to
+`supplement_report_v1/`, matching the unchanged report's existing links. All
+98 supplemental report link occurrences and 98 unique targets resolve in the
+child. Keep the original study baseline separate and intact. The research
+prerelease is published at
+[shot-pattern-phase2-research-2026-10-10](https://github.com/D-sorganization/UpstreamDrift/releases/tag/shot-pattern-phase2-research-2026-10-10),
+bound to DELIVERY checkpoint `cb5eff6dcd9df7d878f10578078b6fea69c8b681`.
+Fresh download verification passed for all 21 assets, the primary/control/
+supplement inventories (690/548/6,465 members), the 15-member source archive
+with 13 selected figures, and all 98 report links. The durable receipt is
+`validation/artifact_delivery_v3/remote-restoration-v3.json.gz`.
 
 ## Remaining Gates and Blockers
 
@@ -112,16 +119,24 @@ trusted manifest comparison, and full archive/member verification.
    Focused base-commit checks reproduce 38 nonpassing statuses among the 41
    original nodes; the other three pass in isolation at both base and delivery.
    Their full-suite failures remain unresolved; see `validation/baseline_gate_audit_v1/`.
-3. The illustrated PDF and source ZIP are staged and verified in the 21-asset
-   v3 inventory. Local source restoration passes. Fresh remote download and
-   complete member verification remain required.
-   Then push and open/attach a reviewable PR with explicit blocked gates, a Handoff
-   section, and change fragments. Never bypass hooks or protection.
+   A corrected-PYTHONPATH full pre-PR attempt later terminated with exit 143
+   during tests, before a final summary; it is incomplete and does not replace
+   the failed complete gate.
+3. The 21-asset v3 inventory is published at the research prerelease linked
+   above, and fresh remote download/member verification passed. Open/attach a
+   reviewable PR with explicit blocked gates, a Handoff section, and change
+   fragments. Never bypass hooks or protection.
+   The first restoration attempt found a manifest-to-release-name mapping
+   mismatch after all 21 asset hashes passed. Sol reviewed the corrected
+   bijective size/SHA mapping; a fresh isolated rerun exited 0 with no asset
+   changes. `validation/artifact_delivery_v3/remote_verification_summary.json`
+   records both attempts; the gzip remote-restoration receipt records the
+   successful full byte verification.
 4. The illustrated article has a successful local Tectonic CLI compile and accepted
    33-page visual review. The separate built-in LaTeX editor remains blocked before
    parsing by its bundle fetch failure (#12120); local CLI success does not resolve
    that editor issue. The accepted PDF and source archive are included in the verified v3
-   inventory; remote delivery remains unverified.
+   inventory; remote restoration is verified by the receipt above.
 
 ## Scientific Limits and Reproduction
 
@@ -135,5 +150,6 @@ no per-round or universal best-pattern claim is justified. Empirical validation
 #11984 remains deferred. Unsupported cases remain visible.
 
 Historical stop and intermediate execution details are preserved in git and
-Turnover; this document gives current state only. No new remote push, release,
-or Phase Two PR is claimed until its own delivery receipt exists.
+Turnover; this document gives current state only. The prerelease is a research
+artifact delivery, not production or merge acceptance. The Phase Two PR remains
+to be opened with unresolved repository gates disclosed.

@@ -248,8 +248,11 @@ Successful finalization writes `REPORT_SUPPLEMENT_PUBLICATION_REVISION.json`.
 Then use `--supplement-dir "$study_child"` in the final-report command above.
 The report records both child and immutable parent receipt identities. Preserve
 the parent, child, verifier pin, approved review and its evidence for restoration.
-At this documentation checkpoint, staging/finalization and full publication
-review have not yet run; representative rendering evidence is not their substitute.
+That was the earlier v5 recovery checkpoint. The completed v6 parent and accepted
+`phase2/supplement_report_v2_layout_repair/` child now have strict-loader,
+measured-clearance, visual, and native-format review receipts in
+[Current Resume Handoff](RESUME_HANDOFF.md). This historical procedure is not an
+instruction to rerun or replace the accepted child.
 
 ## Acceptance After Rebuilding
 
@@ -271,8 +274,14 @@ CSV and manifest members under their original canonical directory names.
 and [Fresh-Restoration Evidence](validation/publication_primary_bundles_v1/restoration.json)
 currently qualify the local primary bundle: 690 members and 689 figure outputs.
 [Control Fresh-Restoration Evidence](validation/publication_control_bundles_v1/restoration.json)
-qualifies all 548 control members and 547 figure outputs. Supplemental bundles,
-remote publication and downloaded-byte verification remain pending. No download URL is claimed before those actions.
+qualifies all 548 control members and 547 figure outputs. The repaired
+supplemental bundle passes local verification and fresh offline restoration for
+all 6,465 files. In addition, the 21-asset research prerelease has passed fresh
+remote-download verification, including all restored bundle members and source
+archive figures. See [Remote Restoration Evidence](validation/artifact_delivery_v3/remote-restoration-v3.json.gz)
+and the [published release](https://github.com/D-sorganization/UpstreamDrift/releases/tag/shot-pattern-phase2-research-2026-10-10).
+This transport verification does not repeat visual review or clear repository
+gates.
 
 After downloading every ZIP named by a bundle's manifest, place the ZIPs and
 its `archive_manifest.json` together. Use the existing
