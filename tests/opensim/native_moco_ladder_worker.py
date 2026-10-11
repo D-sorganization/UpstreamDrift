@@ -230,7 +230,7 @@ def _set_parent_solution_guess(
     guess = solver.createGuess()
     state_table = solution.exportToStatesTable()
     guess.insertStatesTrajectory(state_table, True)
-    child_times = tuple(float(value) for value in guess.getTime())
+    child_times = _native_vector_values(guess.getTime(), guess.getNumTimes())
     expected_times = child_hs_grid(
         refinement["normalized_mesh_points"],
         refinement["parent_request"]["horizon_seconds"],
@@ -259,7 +259,7 @@ def _set_parent_solution_guess(
         for index, value in enumerate(values):
             vector[index] = value
         guess.setControl(name, vector)
-        readback = tuple(float(value) for value in guess.getControl(name))
+        readback = _native_vector_values(guess.getControl(name), len(values))
         if readback != values:
             raise ValueError("Moco guess changed an exact PWL control seed sample")
     if set(guess.getStateNames()) != set(solution.getStateNames()):
@@ -268,30 +268,37 @@ def _set_parent_solution_guess(
         guess,
         refinement["preserved_contract"]["cold_start_named_state"],
         osim,
+        len(child_times),
     )
     solver.setGuess(guess)
     return child_times
 
 
 def _restore_declared_initial_states(
-    guess: Any, named_state: dict[str, float], osim: Any
+    guess: Any, named_state: dict[str, float], osim: Any, time_count: int
 ) -> None:
     state_names = set(guess.getStateNames())
     if not set(named_state).issubset(state_names):
         raise ValueError("declared cold states are absent from the parent trajectory")
     for name, initial_value in named_state.items():
-        original = tuple(float(value) for value in guess.getState(name))
+        original = _native_vector_values(guess.getState(name), time_count)
         if not original or not math.isfinite(initial_value):
             raise ValueError("declared cold state is empty or non-finite")
         values = osim.Vector(len(original), 0.0)
         for index, value in enumerate(original):
             values[index] = float(initial_value) if index == 0 else value
         guess.setState(name, values)
-        readback = tuple(float(value) for value in guess.getState(name))
+        readback = _native_vector_values(guess.getState(name), time_count)
         if not readback or readback[0] != float(initial_value):
             raise ValueError(
                 "Moco guess did not preserve the exact declared initial state"
             )
+
+
+def _native_vector_values(vector: Any, size: int) -> tuple[float, ...]:
+    if size < 0:
+        raise ValueError("native vector size cannot be negative")
+    return tuple(float(vector[index]) for index in range(size))
 
 
 def _run_with_periodic_replay_stack_dumps(

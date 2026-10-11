@@ -328,6 +328,9 @@ def test_parent_refinement_guess_exports_state_table_and_restores_exact_initial(
         def getTime(self):
             return (0.0, 0.005, 0.01)
 
+        def getNumTimes(self):
+            return 3
+
         def getControlNames(self):
             return ("/forceset/flexor",)
 
@@ -379,6 +382,78 @@ def test_parent_refinement_guess_exports_state_table_and_restores_exact_initial(
     assert solver.guess.inserted_state_table is state_table
     assert solver.guess.states[state_name][0] == 0.05
     assert solver.guess.states[state_name][1:] == (0.055, 0.06)
+
+
+def test_actual_parent_refinement_sdk_seed_uses_native_trajectory_api() -> None:
+    import numpy as np
+
+    osim = pytest.importorskip("opensim")
+    from tests.opensim.native_moco_ladder_harness import _sha256
+    from tests.opensim.native_moco_refinement import (
+        build_refinement_plan,
+        child_hs_grid,
+    )
+    from tests.opensim.native_moco_ladder_worker import _set_parent_solution_guess
+
+    repository = Path(__file__).resolve().parents[2]
+    parent = (
+        repository
+        / "docs/development/feedback_controls/experiments/native_moco_mesh20_e1548c5179/plain"
+    )
+    analysis = parent.parent / "activation_residual_analysis.json"
+    plan = build_refinement_plan(parent, analysis)
+    assert plan["flagged_parent_cells"] == [0]
+    assert _sha256(parent / "solution.sto") == plan["parent_hashes"]["solution_sto"]
+    solution = osim.MocoTrajectory(str(parent / "solution.sto"))
+    state_names = tuple(str(value) for value in solution.getStateNames())
+    control_names = tuple(str(value) for value in solution.getControlNames())
+    multiplier_names = tuple(str(value) for value in solution.getMultiplierNames())
+    parameter_names = tuple(str(value) for value in solution.getParameterNames())
+    times = child_hs_grid(
+        plan["normalized_mesh_points"], plan["parent_request"]["horizon_seconds"]
+    )
+    time_vector = osim.Vector(len(times), 0.0)
+    for index, value in enumerate(times):
+        time_vector[index] = value
+    state_values = osim.Matrix(len(times), len(state_names), 0.0)
+    control_values = osim.Matrix(len(times), len(control_names), 0.0)
+    multiplier_values = osim.Matrix(len(times), len(multiplier_names), 0.0)
+    parameter_values = osim.RowVector(len(parameter_names), 0.0)
+    guess = osim.MocoTrajectory(
+        time_vector,
+        list(state_names),
+        list(control_names),
+        list(multiplier_names),
+        list(parameter_names),
+        state_values,
+        control_values,
+        multiplier_values,
+        parameter_values,
+    )
+
+    class StubSolver:
+        def createGuess(self):
+            return guess
+
+        def setGuess(self, value):
+            self.guess = value
+
+    solver = StubSolver()
+    seeded_times = _set_parent_solution_guess(solver, parent, plan, osim)
+    assert len(seeded_times) == 43
+    assert (
+        tuple(
+            float(solver.guess.getTime()[index])
+            for index in range(solver.guess.getNumTimes())
+        )
+        == times
+    )
+    assert tuple(str(value) for value in solver.guess.getStateNames()) == state_names
+    assert (
+        tuple(str(value) for value in solver.guess.getControlNames()) == control_names
+    )
+    for name, value in plan["preserved_contract"]["cold_start_named_state"].items():
+        assert float(solver.guess.getState(name)[0]) == value
 
 
 def test_committed_activation_analysis_reproduces_retained_parent_bindings(

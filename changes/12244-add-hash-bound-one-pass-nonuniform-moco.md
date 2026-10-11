@@ -17,4 +17,6 @@ child provenance and remains physically unqualified until unchanged fresh
 replay passes. The worker recomputes the complete plan before solver setup and
 binds post-solve grid reporting to the child request. Parent state guesses use
 the OpenSim states-table API and restore exact initial values after
-interpolation. No native child solve or replay was run.
+interpolation. An installed OpenSim 4.6 data-bearing trajectory seeder smoke
+passed under the bounded process supervisor; it did not initialize a model or
+call a solver or replay. No native child solve or replay was run.

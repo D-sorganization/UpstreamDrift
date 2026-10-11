@@ -3269,3 +3269,11 @@ solve or replay evidence.
 The next correction uses the OpenSim 4.6-compatible states-table insertion
 signature and restores exact declared initial values after interpolation; a
 strict fake-SWIG test covers the behavior without running the native solver.
+
+An installed OpenSim 4.6 API smoke also passed for the committed parent STOs:
+the states table inserted into a native 43-row `MocoTrajectory`, controls were
+PWL-seeded, and cold initial values matched exactly. It ran under the 30-second
+owned-tree supervisor with 140 MB sampled peak, and called no model init, solve,
+or replay. A first malformed empty-trajectory smoke crashed in a SWIG setter;
+the corrected data-bearing constructor passed. Actual solver acceptance remains
+unverified.

@@ -772,3 +772,16 @@ binding. It then restores each declared initial state value exactly and checks
 the readback, so interpolation roundoff cannot alter the fixed initial state.
 A fake-SWIG regression covers both the accepted table signature and exact
 initial-state restoration; no native child build or solve was run.
+
+An installed OpenSim 4.6 binding smoke then loaded the committed parent
+solution and control STOs, inserted an exported state `TimeSeriesTable` into a
+native data-bearing `MocoTrajectory` with 43 time rows, and seeded both control
+channels through a stub solver. Exact initial values were read back. The run
+used the existing process-tree supervisor (30-second wall limit, 1 GiB sampled
+RSS threshold; 140 MB peak) and made no model initialization, study solve, or
+replay call. An earlier smoke-test attempt populated an empty trajectory with
+per-state setters and crashed inside the SWIG setter; the data-bearing native
+constructor fixed that test setup. This API smoke does not validate an actual
+Moco solver guess or child solve.
+
+The first corrected-constructor probe then exposed a separate SWIG vector-iteration defect: iteration over the native 43-element time vector attempted index 43 and failed. The worker now reads native vectors by explicit indices bounded by the reported size; the same installed-SDK seed smoke passed after that correction. Both failed probe outputs remain preserved in their original experiment locations. The successful smoke still uses a stub solver and does not establish actual solver acceptance.
