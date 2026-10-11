@@ -152,6 +152,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 872 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
+| 866 | `src/engines/feedback_observation_qualification.py` |
 | 865 | `src/shared/python/signal_toolkit/fitting.py` |
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
