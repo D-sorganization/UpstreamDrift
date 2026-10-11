@@ -99,8 +99,16 @@ def test_valid_physical_body_audit_is_bound_to_preparation(
 
 
 def test_rotated_unphysical_body_cannot_reach_moco_solve(
-    muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
+    muscle_fixture: tuple[Path, dict[str, float]],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    import src.engines.physics_engines.opensim.python.tour_matching.native_moco_runner as runner
+
+    def fail_if_probe_runs(*args: object, **kwargs: object) -> tuple[str, float, float]:
+        raise AssertionError("invalid physical inertia must block native integration")
+
+    monkeypatch.setattr(runner, "_native_short_capability_probe", fail_if_probe_runs)
     request = _request(muscle_fixture, tmp_path)
     tree = ElementTree.parse(request.model_path)
     inertia = tree.find("./Model/BodySet/objects/Body/inertia")
