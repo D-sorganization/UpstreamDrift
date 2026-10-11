@@ -658,11 +658,14 @@ def _validate_full_body_output_state(
     )
 
     state_ids = tuple(item.component_id for item in bundle.initial_state)
-    schema = bundle.model.state_schema
+    model = bundle.model
+    schema = model.state_schema
+    schema_id = schema.schema_id
+    schema_version = schema.version
     if (
         state_ids != ("qpos", "qvel")
-        or schema.schema_id != "mujoco-full-body-qv"
-        or schema.version != "1.0.0"
+        or schema_id != "mujoco-full-body-qv"
+        or schema_version != "1.0.0"
     ):
         raise ValueError("full-body replay requires complete qpos and qvel only")
     if hasattr(output, "integration_states") or hasattr(output, "discrete_states"):
