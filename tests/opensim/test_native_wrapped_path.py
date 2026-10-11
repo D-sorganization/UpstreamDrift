@@ -10,6 +10,9 @@ import numpy as np
 import pytest
 from defusedxml import ElementTree as ET
 
+# Every test in this module exercises native OpenSim source or geometry APIs.
+pytest.importorskip("opensim")
+
 from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
     DeclaredColdStart,
 )

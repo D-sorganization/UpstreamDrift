@@ -231,6 +231,7 @@ def test_native_mechanics_profile_is_source_and_component_bound(
 def test_native_mechanics_profile_crosses_moco_export_and_fresh_replay(
     tmp_path: Path,
 ) -> None:
+    pytest.importorskip("opensim")
     if os.environ.get("UPSTREAMDRIFT_NATIVE_PROFILE_LIFECYCLE_CHILD") != "1":
         child_root = tmp_path / "bounded-profile-lifecycle"
         child_root.mkdir()
