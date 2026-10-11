@@ -1250,3 +1250,7 @@ exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
 provenance and validation. Full epic qualification remains open.
 Concurrent remote ledger refresh `7877625369` is retained through a normal merge;
 the generated ledger is refreshed from the restored immutable receipt bytes.
+
+## Manufactured Native Diagnostics — #12275
+
+Exact synthetic MuJoCo geometry/zero-effort, short feedback replay, OpenSim property, Pinocchio and Drake observations are retained at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/`. See its README and SHA-bound manifest. Failed attempts are preserved. No capture, equilibrium, contact calibration, physiology, production replay or 17-row/six-ecosystem qualification is implied; all production variants remain unqualified.

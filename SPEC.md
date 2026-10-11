@@ -11225,3 +11225,7 @@ poses. Chapter54 and `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md` retain exact
 hashes, exclusions and reproduction. Tools #5503 and #12207 are pending;
 physiology, native force/work over a chart, contact/grip, head/markers,
 private full-horizon matching and all17/six-engine qualification remain open.
+
+## Manufactured Native Diagnostics Evidence (#12275)
+
+The hash-bound evidence package at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/` preserves compact probe/test snapshots, exact receipts, and supervisor metadata for synthetic MuJoCo, OpenSim, Pinocchio, and Drake observations. It includes recorded failures and does not copy raw private captures, model binaries, or vendor runtimes. The OpenSim 4.6 property probe observed activation/deactivation constants and minimum activation for exactly two named synthetic muscles; short feedback replay and same-pose geometry/acceleration observations remain narrowly scoped. See the package README and manifest for source, runtime, and byte identities. No production model/variant is qualified; supported contact, calibration, physiology, capture matching, complete muscular replay, and six-ecosystem parity remain open.

@@ -396,3 +396,25 @@ unchanged. Numerical summaries match the previous final-source report. This is
 offline analysis only; no native SDK, solver, or replay ran, and no physical or
 capture qualification is implied. The new report is
 `docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated_source_c247a4cf.json`.
+
+## Bounded Manufactured Native Diagnostics (#12275)
+
+The hash-bound archive at
+`docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/`
+retains source-linked synthetic geometry, acceleration, activation-property,
+feedback-recording and fresh-replay observations across MuJoCo, OpenSim,
+Pinocchio and Drake. Its manifest records exact receipt bytes and source paths;
+model inputs and runtime binaries are referenced by hash rather than copied.
+The OpenSim 4.6 read-only probe queried two named Millard muscles and observed
+activation constants of 0.01 s, 0.04 s and a 0.01 minimum activation. It did
+not initialize or integrate the model. The short MuJoCo feedback replays and
+single-state Pinocchio/Drake observations are described with their units,
+source identities and limits in the archive README.
+
+These are bounded synthetic diagnostics. Near-zero residuals at one manufactured
+pose and exact short-horizon numerical replay do not establish supported
+equilibrium, calibrated contact, anatomy, physiological feasibility, capture
+matching or full-horizon open-loop muscular replay. The related geometry and
+zero-effort outputs are not cross-engine equality tests. Every one of the 17
+production model/variant rows remains unqualified; F07/F08 acceptance remains
+open.

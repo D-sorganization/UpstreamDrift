@@ -51,3 +51,10 @@ docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecf
 docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_inputs_final/source.osim -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
 docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/supervisor_result.json -text whitespace=cr-at-eol
 docs/development/feedback_controls/experiments/native_moco_refinement_solve_cecfcd98_root_20261011T080500Z/solution_control_replay_diagnostic_3bc787e36d_root/retained_replay/offline_activation_residual_analysis_midpointvalidated_source_c247a4cf.json -text whitespace=cr-at-eol
+
+## Preserve immutable synthetic native diagnostics and historical source snapshots byte-for-byte.
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.json -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.log -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.meta.txt -text whitespace=cr-at-eol
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.snapshot -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/opensim/PROTOCOL.md -text whitespace=cr-at-eol

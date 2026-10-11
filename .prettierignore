@@ -103,3 +103,4 @@ docs/development/full_body_models/evidence/head_gaze/fd_neck_closed_loop.json
 
 ## Preserve generated matched-swing status freshness bytes.
 docs/development/matched_swing_program/README.md
+docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/**/*.json

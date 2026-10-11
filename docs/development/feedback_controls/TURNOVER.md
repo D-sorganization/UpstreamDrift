@@ -587,3 +587,15 @@ their explicit zero policy. See chapter52, the source-bound receipt and
 `F07_NATIVE_BODY_INERTIA_TURNOVER.md`. This gate neither changes source data
 nor upgrades the 0.2 ms #12182 diagnostic to a physiological or full-horizon
 result. All 17 required variants and six ecosystems remain open.
+
+## F07 Manufactured Native Diagnostics (#12275)
+
+The compact source-bound evidence archive is `experiments/manufactured_native_diagnostics_20261011/`.
+It retains exact synthetic MuJoCo geometry/zero-effort, 20-microsecond feedback and
+10-millisecond refinement receipts, plus OpenSim 4.6 muscle-property, Pinocchio
+geometry/acceleration and Drake geometry observations, with failed attempts and
+pure-test snapshots. `artifact-manifest.json` binds each archived byte sequence
+to its original path and SHA-256; model/runtime binaries and private captures
+remain external. The package README states each result's limits. None establishes
+supported equilibrium, calibrated contact, capture accuracy, physiology, or
+production replay; all 17 model/variant rows remain unqualified.
