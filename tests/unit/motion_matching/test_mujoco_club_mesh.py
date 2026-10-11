@@ -93,3 +93,75 @@ def test_plain_visual_layer_shows_the_mesh_head_not_the_ellipsoid(key) -> None:
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i) or ""
         if "Clubface" in name:
             assert model.geom_type[i] != mujoco.mjtGeom.mjGEOM_ELLIPSOID
+
+
+#: Grip tube radii (``club_assembly``): the hands clear the thinner end at
+#: least, and sit within the 3 mm pad band of the thicker end at most.
+GRIP_RADII_M = (0.0105, 0.0118)
+MAX_PAD_CLEARANCE_M = 0.003
+MAX_CENTROID_OFF_AXIS_M = 0.01
+MIN_WRAP_COVERAGE = 0.9
+
+
+def _world_mesh_vertices(mujoco, model, data, suffix: str) -> np.ndarray:
+    """World vertices of the one mesh geom whose mesh name ends with ``suffix``."""
+    for g in range(model.ngeom):
+        mesh_id = model.geom_dataid[g]
+        if model.geom_type[g] != mujoco.mjtGeom.mjGEOM_MESH or mesh_id < 0:
+            continue
+        name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_MESH, mesh_id) or ""
+        if name.endswith(suffix):
+            adr, num = model.mesh_vertadr[mesh_id], model.mesh_vertnum[mesh_id]
+            local = model.mesh_vert[adr : adr + num].astype(float)
+            rot = data.geom_xmat[g].reshape(3, 3)
+            return local @ rot.T + data.geom_xpos[g]
+    raise AssertionError(f"no mesh geom ending with {suffix!r}")
+
+
+def _grip_axis(grip: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Centroid and unit axis of the grip tube's world vertices."""
+    centre = grip.mean(axis=0)
+    _, _, vt = np.linalg.svd(grip - centre)
+    return centre, vt[0]
+
+
+def _assert_hand_wraps_grip(mujoco, model, data) -> None:
+    centre, axis = _grip_axis(_world_mesh_vertices(mujoco, model, data, "_grip"))
+    for hand in ("lead_hand", "trail_hand"):
+        verts = _world_mesh_vertices(mujoco, model, data, hand)
+        rel = verts - centre
+        perp = rel - np.outer(rel @ axis, axis)
+        radial = np.linalg.norm(perp, axis=1)
+        assert radial.min() >= GRIP_RADII_M[0], (hand, radial.min())
+        assert radial.min() <= GRIP_RADII_M[1] + MAX_PAD_CLEARANCE_M, hand
+        off_axis = float(np.linalg.norm(perp.mean(axis=0)))
+        assert off_axis < MAX_CENTROID_OFF_AXIS_M, (hand, off_axis)
+        ref = perp[np.argmax(radial)] / radial.max()
+        other = np.cross(axis, ref)
+        near = radial < GRIP_RADII_M[1] + 0.03
+        az = np.degrees(np.arctan2(perp[near] @ other, perp[near] @ ref)) % 360.0
+        coverage = len(np.unique((az // 10).astype(int))) / 36.0
+        assert coverage >= MIN_WRAP_COVERAGE, (hand, coverage)
+
+
+@pytest.mark.parametrize("visual", ["appearance", "plain"])
+@pytest.mark.parametrize("key", sorted(SPECS))
+def test_grip_hands_wrap_the_grip_in_the_world(key, visual) -> None:
+    """Both curled-finger hands ride the club body, wrapped on its grip (OSV-2).
+
+    ``plain`` is the ``visual=True`` export that MyoSuite renders. Visual
+    only: masses, inertias and the dynamics match the plain physics export.
+    """
+    mujoco = pytest.importorskip("mujoco")
+    raw = SPECS[key].read_bytes()
+    plain = mujoco.MjModel.from_xml_string(exporter.export_full_body_mjcf(raw)[0])
+    kwargs = {"appearance": DOC} if visual == "appearance" else {"visual": True}
+    model = mujoco.MjModel.from_xml_string(
+        exporter.export_full_body_mjcf(raw, **kwargs)[0]
+    )
+    np.testing.assert_array_equal(model.body_mass, plain.body_mass)
+    np.testing.assert_array_equal(model.body_inertia, plain.body_inertia)
+    data = mujoco.MjData(model)
+    data.qpos[:] = np.random.default_rng(5).normal(scale=0.1, size=model.nq)
+    mujoco.mj_forward(model, data)
+    _assert_hand_wraps_grip(mujoco, model, data)
