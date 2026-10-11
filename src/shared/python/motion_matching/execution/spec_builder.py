@@ -13,6 +13,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -454,7 +455,8 @@ def scale_leg_mass(
     if not np.isfinite(leg_mass_kg) or leg_mass_kg <= 0:
         raise ValueError(f"leg mass must be positive and finite, got {leg_mass_kg}")
     legs = {f"{name}_{side}" for name in LEG_BODIES for side in ("r", "l")}
-    factor = leg_mass_kg / sum(bodies[name]["mass"] for name in legs)
+    # fsum is correctly rounded: builtin sum differs on 3.11 and 3.12+.
+    factor = leg_mass_kg / math.fsum(bodies[name]["mass"] for name in legs)
     return {
         name: (
             {**body, "mass": body["mass"] * factor, "inertia": body["inertia"] * factor}
@@ -466,7 +468,7 @@ def scale_leg_mass(
 
 
 def _body_mass_without_club(document: Mapping[str, Any]) -> float:
-    solids = sum(s["mass_kg"] for b in document["bodies"] for s in b["solids"])
+    solids = math.fsum(s["mass_kg"] for b in document["bodies"] for s in b["solids"])
     return float(solids - document["club"]["total_mass_kg"])
 
 

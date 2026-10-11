@@ -20,9 +20,13 @@ from src.shared.python.humanoid_character_builder.spec_export import (
 )
 from src.shared.python.motion_matching.execution import assets
 from src.shared.python.motion_matching.execution.spec_builder import (
+    LEG_BODIES,
     compose_anthropometric_document,
     read_osim,
     scale_leg_mass,
+)
+from src.shared.python.motion_matching.execution.spec_builder import (
+    _body_mass_without_club as _builder_body_mass_without_club,
 )
 
 pytestmark = pytest.mark.unit
@@ -100,6 +104,24 @@ def test_mass_below_upper_body_mass_is_rejected() -> None:
     # The upper body alone (fixed hands and joint solid) outweighs 2 kg.
     with pytest.raises(ValueError, match="leg mass"):
         _compose(2.0, match_subject_mass=True)
+
+
+def test_mass_sums_do_not_depend_on_python_version() -> None:
+    """Sums are correctly rounded, so the spec hash matches on 3.11 and 3.12+.
+
+    Python 3.12 made the builtin ``sum`` compensated; on 3.11 ten masses of
+    0.1 kg sum to 0.9999999999999999. CI's 3.11 then compiled another spec
+    SHA than 3.13 did (#12199).
+    """
+    legs = {f"{n}{s}" for n in LEG_BODIES for s in LEG_SUFFIXES}
+    bodies = {name: {"mass": 0.1, "inertia": np.ones(3)} for name in legs}
+    scaled = scale_leg_mass(bodies, 1.0)
+    assert {body["mass"] for body in scaled.values()} == {0.1}
+    document = {
+        "bodies": [{"solids": [{"mass_kg": 0.1}]} for _ in range(10)],
+        "club": {"total_mass_kg": 0.0},
+    }
+    assert _builder_body_mass_without_club(document) == 1.0
 
 
 @pytest.mark.parametrize("leg_mass_kg", [0.0, -1.0, float("nan")])
