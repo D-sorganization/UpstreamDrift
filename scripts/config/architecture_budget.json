@@ -1444,15 +1444,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/shared/python/physics/impact_model/models.py",
-      "symbol": "SpringDamperImpactModel.solve",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 12278,
-      "reason": "Issue #12278: shot pattern analysis integration - SpringDamperImpactModel.solve exceeds function-lines budget (102 > 100).",
-      "expires_on": "2026-12-31"
-    },
-    {
       "path": "src/tools/shot_pattern_analysis/academic_plots.py",
       "symbol": "write_academic_dispersion_figure",
       "rule": "function-lines",
