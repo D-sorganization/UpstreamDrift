@@ -412,6 +412,7 @@ Foot yaw has no coordinate of its own: it is pelvis yaw plus `hip_rotation_*` (p
 1. The shared address seed (`address_feet.seed_document_feet`) solves `hip_rotation_*` against forward kinematics at pelvis yaw 0 and writes them into the document's `address_seed_deg`, so every engine that reads the seed (MuJoCo, Drake, Pinocchio, MyoSuite) starts from the same feet. OpenSim starts from `tour_matching/address.py` (`toe_out_deg=`), solved against OpenSim forward kinematics because its hip rotation is mirrored.
 2. After the multi-start address fit, `refine_foot_progression` moves `hip_rotation_*` by the measured sensitivity (central difference, sign-safe) and re-solves with a prior weight of 1000 on the two hip-rotation coordinates. The prior is soft: the markers can overrule it; the stance spheres stay pinned flat by the solver. It converges to 0.5 degrees (the issue asks for 2).
 3. The per-engine multi-start `hip_rotation` seeds of -20/0/+20 are not applied when the option is on.
+4. The swing keeps the calibrated address feet (#12222). Every trajectory solve plants its stance spheres where they first touch (`plant_stance`); with the option on, `address_feet.planted_stance` also sets `anchor_stance_at_init`, so the plant starts at the solve's start pose instead of the first frame's own fit. This applies to the swing IK (which starts at the calibrated address), the consistency re-solve, the shooting refit and the ZMP filter, so each pass keeps the feet of its input's first frame. Without it, each pass re-fitted frame 0 and the 7-iron trail toe-out drifted −0.88 → −1.40 → −2.23 degrees across the three passes (target −0.37). With the option off, the anchors still come from the first frame's fit, so `off` receipts are unchanged.
 
 ### Why
 
@@ -434,12 +435,14 @@ The tour players are not at 20 degrees per foot (the trail foot is close to squa
 
 **Measured outcome on the tour driver capture (MuJoCo, full pipeline address stage).** Legacy seed: lead 41.7, trail -2.8 degrees (capture 16.4 and 4.0). With `--foot-progression capture`: lead 37.0, trail 4.05 degrees. The trail foot reaches the capture; the lead foot does not, because `hip_rotation_l` reaches its -40 degree limit while the marker fit's leg posture (hip adduction -14.6 degrees) contributes the rest of the yaw (sensitivity about 0.85 degrees of foot yaw per degree of hip rotation, so about -64 degrees would be needed). The lead-foot target is therefore NOT met in the full fit; the shared FK seed alone reaches both feet within 2 degrees (unit-tested). An address solve that also trades hip adduction against stance-width markers is the open follow-up (still 15-32 degrees off after OSV-6).
 
-Foot yaw through the swing is not constrained; it follows the matched solution and contact (the balance work in #11667 handles slip). The time series and the finish value are reported, not controlled.
+While a foot is in stance, its yaw is held at the address value (step 4). Once it leaves stance, foot yaw is not constrained: it follows the matched solution and contact (the balance work in #11667 handles slip). The time series and the finish value are reported, not controlled. In the follow-through, the lead foot turns to about 82 degrees and the trail foot to between −133 and −158 degrees.
+
+**Club-Face Fixtures (#12222).** `scripts/regenerate_club_face_fixtures.py` runs with `--foot-progression capture`. It commits each run's hip-calibrated, scaled document as `tests/fixtures/club_face/spec_<club>.json`, because the calibrated hip frames set the foot yaw: the raw document's FK of the same pose turns the lead foot 29–30 degrees and lifts it 10–11 cm off the floor. Fixture frame 0 against the capture (MuJoCo FK): driver 16.64 / 3.57 against 16.37 / 4.03 degrees, 7-iron 15.43 / −0.96 against 15.00 / −0.37 degrees. `tests/unit/motion_matching/test_club_face_fixture_feet.py` holds them to 2 degrees and the feet to 5 cm.
 
 ### Evidence Receipt
 
 - [`evidence/foot_progression/capture_report.json`](evidence/foot_progression/capture_report.json)
-- Tests: `tests/unit/motion_matching/test_foot_progression.py`, `tests/unit/motion_matching/pipeline/test_address_feet.py`, `tests/opensim/test_golf_address.py`.
+- Tests: `tests/unit/motion_matching/test_foot_progression.py`, `tests/unit/motion_matching/pipeline/test_address_feet.py`, `tests/opensim/test_golf_address.py`, `tests/unit/motion_matching/test_club_face_fixture_feet.py`, `tests/unit/motion_matching/test_full_body_markers.py::test_stance_anchored_at_the_start_pose_holds_the_first_frame`.
 
 ## 16. Compliant Bushing Grip Model (OSV-7 Phase 1)
 

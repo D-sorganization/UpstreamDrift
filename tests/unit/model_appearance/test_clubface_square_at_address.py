@@ -465,21 +465,7 @@ def test_face_tracks_the_capture_at_address_and_top(engine: str, capture: str) -
     _assert_face_tracks(engine, capture, ("address_deg", "top_deg"))
 
 
-IRON_IMPACT_FACE_GAP = pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "#12221: the 7-iron fixture (#12117, 657c811bcd) meets the ball 10.97 deg "
-        "open against the capture-B face of 3.21 deg (gap 7.77 deg, limit 5 deg); "
-        "the club sits 25-40 deg rotated in the hands, which pins the wrists on "
-        "their ulnar bound through the release"
-    ),
-)
-
-
-@pytest.mark.parametrize(
-    "capture",
-    [pytest.param("A"), pytest.param("B", marks=IRON_IMPACT_FACE_GAP)],
-)
+@pytest.mark.parametrize("capture", sorted(CAPTURES))
 @pytest.mark.parametrize("engine", sorted(ENGINES))
 def test_face_tracks_the_capture_at_impact(engine: str, capture: str) -> None:
     _assert_face_tracks(engine, capture, ("impact_deg",))
@@ -496,11 +482,13 @@ IMPACT_SPEED_TOL = 0.03
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "GCV-20 #11767 acceptance not met: the fixtures regenerated for #12117 "
-        "(657c811bcd) reach the ball at -6.1 % (driver, 48.18 / 51.32 m/s) and "
-        "-10.2 % (7-iron, 37.07 / 41.26 m/s) against the 3 % limit, with the "
-        "peak -4.0 ms and -14.6 ms early against 5 ms; the wrists sit on their "
-        "ulnar bound through the release (#12221)"
+        "GCV-20 #11767 acceptance not met: the fixtures regenerated on the "
+        "capture address feet (#12222, 4bd77f5818) reach the ball at -5.1 % "
+        "(driver, 48.73 / 51.32 m/s) and -3.9 % (7-iron, 39.64 / 41.26 m/s) "
+        "against the 3 % limit; the peak timing passes (-1.8 ms and -3.9 ms "
+        "against 5 ms). On the #12117 fixtures the free-wrist IK asked for "
+        "48-54 deg of lead ulnar deviation at impact against the 40 deg "
+        "bound (#12221)"
     ),
 )
 @pytest.mark.parametrize("capture", sorted(CAPTURES))
