@@ -87,6 +87,25 @@ measure refinement and full-horizon time-to-accepted costs. Required engines
 and full-body/muscle variants remain in the denominator while unsupported.
 No private capture match or new preview video is claimed by this slice.
 
+## Ordinary Native-Adapter Import (2026-10-10)
+
+The public Drake and Drake-Python package facades defer implementation imports
+until their exported symbols are accessed. This lets the native replay adapter
+load without eagerly importing the separate Drake physics-engine wrapper,
+motion-matching implementation, pydrake, or the optional `bunkershot3d`
+wrench dependency. The existing public `Engine` and Drake-Python exports remain
+listed on their facades and resolve through lazy attribute access.
+
+`tests/unit/engines/test_drake_native_import_isolation.py` uses a clean
+subprocess with only the repository root on `PYTHONPATH` and rejects attempts
+to import pydrake or bunkershot3d during adapter import. On the retained Drake
+1.57.0/Python 3.12 environment, the original synthetic native replay suite
+passed all 11 tests with only the repository root on `PYTHONPATH` and
+`--noconftest`; no test-only package namespace bootstrap was used. This
+verifies the source-checkout import and native replay path, not an installed
+wheel, arbitrary application deployment, full-body physics, or capture
+qualification.
+
 ## Merge-Group Seam Regression (2026-10-09)
 
 The first merge-group failed during Rust toolchain installation, before tests.

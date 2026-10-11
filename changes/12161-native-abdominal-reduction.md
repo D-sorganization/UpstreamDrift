@@ -1,6 +1,5 @@
 ---
 issue: 12161
-kind: feature
 summary: Guard partial BUET abdominal zero-translation reduction with native source and state verification.
 ---
 
