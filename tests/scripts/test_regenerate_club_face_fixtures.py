@@ -35,6 +35,38 @@ def test_fixture_runs_hold_the_measured_club_cluster_fixed(capture: str) -> None
     assert "--fix-club-markers" in argv and "--static-seeds" in argv
 
 
+def test_previous_fixture_is_measured_on_its_own_committed_model(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # After a document change the old joint angles only describe the old
+    # swing on the old scaled document, committed beside the fixture (#12221).
+    import numpy as np
+
+    npz = tmp_path / "swing_q_iron7.npz"
+    np.savez_compressed(npz, q=np.zeros((3, 2), dtype=np.float32))
+    old_spec = tmp_path / "spec_iron7.json"
+    old_spec.write_text("{}", encoding="utf-8")
+    seen: dict[str, object] = {}
+
+    def fake_measure(run_dir, q, dt_s, model_spec=None):  # noqa: ANN001, ANN202
+        seen.update(run_dir=run_dir, shape=q.shape, model_spec=model_spec)
+        return {"faces": {}}
+
+    monkeypatch.setattr(regen, "measure_swing", fake_measure)
+    record = regen._previous_fixture_record(npz, old_spec, tmp_path / "run")  # noqa: SLF001
+    assert seen == {
+        "run_dir": tmp_path / "run",
+        "shape": (3, 2),
+        "model_spec": old_spec,
+    }
+    assert record["fixture_sha256"] == regen._sha256(npz)  # noqa: SLF001
+    assert record["model_spec_sha256"] == regen._sha256(old_spec)  # noqa: SLF001
+    assert (
+        regen._previous_fixture_record(tmp_path / "none.npz", old_spec, tmp_path)
+        is None
+    )  # noqa: SLF001
+
+
 def test_triad_offsets_must_sit_on_the_face_frame() -> None:
     labels = ("Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3")
     receipt = {

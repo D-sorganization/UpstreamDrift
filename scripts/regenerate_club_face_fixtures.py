@@ -121,21 +121,24 @@ def _git_head() -> str:
     return out.stdout.strip()
 
 
-def measure_swing(run_dir: Path, q: np.ndarray, dt_s: float) -> dict[str, Any]:
+def measure_swing(
+    run_dir: Path, q: np.ndarray, dt_s: float, model_spec: Path | None = None
+) -> dict[str, Any]:
     """Face events and clubhead speed timing of ``q`` and of the capture triad.
 
-    The model uses MuJoCo FK of the run's scaled document; the capture face
-    comes from the run's calibrated head triad. Impact is the sub-sample
-    passage of the face centre through the ball, each swing on its own clock.
-    Returns ``{"faces": {...}, "speed_timing": {...}}``, each keyed by
-    ``model`` and ``capture`` (speed timing: GCV-20, #11767).
+    The model uses MuJoCo FK of the run's scaled document, or of
+    ``model_spec`` when given (a previous fixture's own document); the
+    capture face comes from the run's calibrated head triad. Impact is the
+    sub-sample passage of the face centre through the ball, each swing on its
+    own clock. Returns ``{"faces": {...}, "speed_timing": {...}}``, each keyed
+    by ``model`` and ``capture`` (speed timing: GCV-20, #11767).
     """
     from dataclasses import asdict
 
     from src.shared.python.model_appearance import club_face as cf
     from src.shared.python.motion_matching import club_face_target as cft
 
-    kin, lane, spec, attachments = _run_kinematics(run_dir)
+    kin, lane, spec, attachments = _run_kinematics(run_dir, model_spec)
     cap_n, cap_c = cft.observe_capture_face(
         lane.points, lane.valid, lane.labels, attachments, spec
     )
@@ -154,13 +157,15 @@ def measure_swing(run_dir: Path, q: np.ndarray, dt_s: float) -> dict[str, Any]:
     }
 
 
-def _run_kinematics(run_dir: Path) -> tuple[Any, Any, dict[str, Any], dict]:
+def _run_kinematics(
+    run_dir: Path, spec_path: Path | None = None
+) -> tuple[Any, Any, dict[str, Any], dict]:
     from src.shared.python.motion_matching.pipeline.constants import capture_path
     from src.shared.python.motion_matching.pipeline.lane import Lane
     from src.shared.python.motion_matching.pipeline.plant import get_plant
 
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
-    spec_path = run_dir / SCALED_SPEC
+    spec_path = spec_path or run_dir / SCALED_SPEC
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
     attachments = {
         label: (a["body"], tuple(a["offset_m"]))
@@ -189,19 +194,32 @@ def _model_face(
     return np.array(normals), np.array(centres)
 
 
+def _previous_fixture_record(
+    npz_path: Path, spec_path: Path, run_dir: Path
+) -> dict[str, Any] | None:
+    """Measure the fixture being replaced on its own committed document.
+
+    Its joint angles describe the old swing only on the old scaled document
+    (``spec_<club>.json``); on a changed document they can miss the ball.
+    Returns ``None`` when there is no previous fixture.
+    """
+    if not npz_path.is_file():
+        return None
+    old_q = np.load(npz_path)["q"].astype(float)
+    return {
+        "fixture_sha256": _sha256(npz_path),
+        "model_spec_sha256": _sha256(spec_path),
+        **measure_swing(run_dir, old_q, FIXTURE_DT_S, model_spec=spec_path),
+    }
+
+
 def write_fixtures(
     capture: str, run_dir: Path, bundle_path: Path, argv: list[str]
 ) -> dict[str, Any]:
     """Overwrite the club's fixtures and return its provenance record."""
     club = CAPTURE_RUNS[capture][0]
     npz_path = FIXTURES / f"swing_q_{club}.npz"
-    before = None
-    if npz_path.is_file():
-        old_q = np.load(npz_path)["q"].astype(float)
-        before = {
-            "fixture_sha256": _sha256(npz_path),
-            **measure_swing(run_dir, old_q, FIXTURE_DT_S),
-        }
+    before = _previous_fixture_record(npz_path, FIXTURES / f"spec_{club}.json", run_dir)
     with np.load(bundle_path, allow_pickle=False) as bundle:
         reference = np.asarray(bundle["reference_q"], dtype=float)
         manifest = json.loads(str(bundle["manifest"]))
