@@ -899,6 +899,47 @@ def test_preparation_witness_evidence_uses_persisted_witness_keys(
         _preparation_witness_evidence(witness)
 
 
+def test_refinement_staging_unpacks_native_cold_start_helper_contract(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from dataclasses import dataclass
+
+    import tests.opensim.native_moco_ladder_harness as ladder_harness
+    from tests.opensim.native_moco_ladder_worker import (
+        _sha256,
+        _stage_rung_source,
+    )
+
+    @dataclass(frozen=True)
+    class FakeDeclaration:
+        model_path: Path
+        source_sha256: str
+
+    parent = tmp_path / "parent"
+    parent.mkdir()
+    parent_source = parent / "source.osim"
+    parent_source.write_bytes(b"source-bound synthetic model")
+    output = tmp_path / "child"
+    output.mkdir()
+    plan = {
+        "parent_directory": str(parent),
+        "parent_hashes": {"source_osim": _sha256(parent_source)},
+    }
+
+    def derive(path: Path, _rung: LadderRung) -> tuple[Path, FakeDeclaration]:
+        return path, FakeDeclaration(path, _sha256(path))
+
+    monkeypatch.setattr(ladder_harness, "_derive_synthetic_cold_start", derive)
+    stages: dict = {}
+    source, declaration, source_hash = _stage_rung_source(
+        DEFAULT_RUNGS[0], output, stages, plan
+    )
+    assert declaration.model_path == source
+    assert source == output / "source.osim"
+    assert source.read_bytes() == parent_source.read_bytes()
+    assert declaration.source_sha256 == source_hash == _sha256(source)
+
+
 def test_ladder_stops_after_first_worker_failure(tmp_path: Path) -> None:
     invocations: list[str] = []
 

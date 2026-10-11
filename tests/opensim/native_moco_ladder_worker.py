@@ -469,7 +469,9 @@ def _stage_rung_source(
         if _sha256(parent_source) != refinement["parent_hashes"]["source_osim"]:
             raise ValueError("refinement parent source changed before child staging")
         shutil.copyfile(parent_source, source)
-        declaration = _derive_synthetic_cold_start(source, rung)
+        derived_source, declaration = _derive_synthetic_cold_start(source, rung)
+        if Path(derived_source).resolve() != source.resolve():
+            raise ValueError("cold-start helper returned a different staged source")
     _flush_file(source)
     declaration = replace(declaration, model_path=source)
     source_hash = _sha256(source)
