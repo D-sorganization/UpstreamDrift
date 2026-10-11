@@ -145,9 +145,7 @@ def _impact_frame(run: Path) -> int:
     return int(receipt["ik"]["impact_split"]["frame"])
 
 
-def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    log = logging.getLogger("grip_fit")
+def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", type=Path, action="append", required=True)
     parser.add_argument(
@@ -160,7 +158,49 @@ def main() -> None:
         "address-weight",
     ):
         parser.add_argument(f"--{option}", type=int, default=0)
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def _side_stacks(
+    runs: dict[str, dict],
+    side: str,
+    coords: tuple[str, ...],
+    base: np.ndarray,
+    args: argparse.Namespace,
+    receipt: dict,
+) -> list[np.ndarray]:
+    """Weighted fit input of one side per run, after checking that the chain
+    rebuilt from the matched angles equals the reconstruction."""
+    stacks = []
+    for name, r in runs.items():
+        stack = r["sides"][side][0]
+        order = list(r["document"]["coordinate_order"])
+        matched = r["q"][:, [order.index(c) for c in coords]]
+        # The match may sit on the far Euler branch (cock beyond 90 deg);
+        # the chain rebuilt from its angles must equal the reconstruction.
+        check = float(np.abs(grip_fit.wrist_rotation(matched, base) - stack).max())
+        if check > 1e-6:
+            raise RuntimeError(f"{name} {side}: rebuilt chain differs by {check}")
+        receipt["runs"][name][f"{side}_frames_on_far_euler_branch"] = int(
+            (np.abs(matched[:, 1]) > np.pi / 2).sum()
+        )
+        stacks.append(
+            grip_fit.weighted_frames(
+                stack,
+                r["impact"],
+                window_frames=args.window_frames,
+                window_weight=args.window_weight,
+                address_frames=args.address_frames,
+                address_weight=args.address_weight,
+            )
+        )
+    return stacks
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    log = logging.getLogger("grip_fit")
+    args = _parse_args()
     windowed = args.window_frames * args.window_weight > 0
     runs: dict[str, dict] = {}
     for run in args.run:
@@ -194,29 +234,7 @@ def main() -> None:
         "sides": {},
     }
     for side, (_, base, coords) in next(iter(runs.values()))["sides"].items():
-        stacks = []
-        for name, r in runs.items():
-            stack = r["sides"][side][0]
-            order = list(r["document"]["coordinate_order"])
-            matched = r["q"][:, [order.index(c) for c in coords]]
-            # The match may sit on the far Euler branch (cock beyond 90 deg);
-            # the chain rebuilt from its angles must equal the reconstruction.
-            check = float(np.abs(grip_fit.wrist_rotation(matched, base) - stack).max())
-            if check > 1e-6:
-                raise RuntimeError(f"{name} {side}: rebuilt chain differs by {check}")
-            receipt["runs"][name][f"{side}_frames_on_far_euler_branch"] = int(
-                (np.abs(matched[:, 1]) > np.pi / 2).sum()
-            )
-            stacks.append(
-                grip_fit.weighted_frames(
-                    stack,
-                    r["impact"],
-                    window_frames=args.window_frames,
-                    window_weight=args.window_weight,
-                    address_frames=args.address_frames,
-                    address_weight=args.address_weight,
-                )
-            )
+        stacks = _side_stacks(runs, side, coords, base, args, receipt)
         fit = grip_fit.fit_grip_rotation(
             np.concatenate(stacks), base, [ranges[c] for c in coords]
         )
