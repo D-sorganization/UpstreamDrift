@@ -18,10 +18,21 @@ reimplemented here). Per run it lays out::
 or an unavailable engine stops the run with a message (``--skip-unavailable``
 records the engine as unavailable in the manifest and renders the rest).
 
-Known gaps, recorded in the manifest and not drawn as zero: the synchronised
-inset plot strips (GRF in body weights and CoP trace; net force and couple) and
-the GCV-17 impact-parameter card are not yet rendered by the shared exporter.
-Full clips are generated once the stale committed fixtures are refreshed
+The grf/ and club_forces/ clips carry the GCV-17 impact parameter card from the
+impact frame onward (``native_viewer_export.impact_card``); each manifest clip
+entry records the card (``impact_card.rows``) or the reason it is unavailable.
+
+They also carry a synchronised inset plot strip with a moving time cursor
+(``native_viewer_export.inset_strip``): ``grf/`` shows the vertical ground
+reaction of the left foot, right foot and net in body weights plus the net CoP
+(X, Y in metres); ``club_forces/`` shows the net grip force (N) and couple
+(N m). The curves come once per swing from the source samples; unavailable
+samples are gaps, never zero. Each manifest clip entry records the strip
+(``inset_strip``: panels and per-curve sample counts) or the reason it is
+unavailable. ``clean/`` carries neither the card nor a strip.
+
+No known gaps remain in the exporter; the manifest still lists ``known_gaps``
+(empty). Full clips are generated once the stale committed fixtures are refreshed
 (#12223, #12230); this script only renders what its inputs support.
 """
 
@@ -57,10 +68,7 @@ CRF: Final[int] = 18
 DEFAULT_SPEEDS: Final[str] = "1,0.5"
 IMPACT_WINDOW_S: Final[float] = 0.4
 IMPACT_SPEED: Final[float] = 0.1
-KNOWN_GAPS: Final[tuple[str, ...]] = (
-    "inset plot strips (GRF in BW with CoP trace; net force and couple)",
-    "GCV-17 impact parameter card on the impact frame",
-)
+KNOWN_GAPS: Final[tuple[str, ...]] = ()
 
 
 @dataclass(frozen=True)
@@ -70,6 +78,16 @@ class ClipKind:
     views: tuple[str, ...]
     overlays: bool
     grip: bool = False
+
+    @property
+    def impact_card(self) -> bool:
+        """The GCV-17 card rides on the overlay clips; ``clean`` stays clean."""
+        return self.overlays
+
+    @property
+    def inset_strip(self) -> bool:
+        """GRF strip on ``grf``, grip strip on ``club_forces``; none on ``clean``."""
+        return self.overlays
 
 
 CLIP_KINDS: Final[dict[str, ClipKind]] = {
@@ -205,6 +223,8 @@ def settings_for(plan: ShowcasePlan, kind: str) -> Any:
         crf=CRF,
         overlays=spec.overlays,
         grip=spec.grip,
+        impact_card=spec.impact_card,
+        inset_strip=spec.inset_strip,
         multiview=False,
         **extra,
     )
@@ -264,6 +284,10 @@ def _clip_entry(
     )
     if result.grip_json is not None:
         entry["grip_json"] = result.grip_json.relative_to(out_dir).as_posix()
+    if result.impact_card is not None:  # card record, or why it is unavailable
+        entry["impact_card"] = result.impact_card
+    if result.inset_strip is not None:  # strip record, or why it is unavailable
+        entry["inset_strip"] = result.inset_strip
     return entry
 
 

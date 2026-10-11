@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 import math
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -143,6 +144,116 @@ class HudInfo:
         if self.legend:
             out.append(self.legend)
         return out
+
+
+_CARD_POSITIONS = ("right", "left")
+_CARD_TITLE = "Impact Parameters"
+_CARD_GREY = (190, 190, 190)
+_CARD_ALPHA = 0.62
+_CARD_REASON_CHARS = 46
+
+
+def _short(reason: str) -> str:
+    """``reason`` limited to the panel width, marked with ``...`` when cut."""
+    if len(reason) <= _CARD_REASON_CHARS:
+        return reason
+    return reason[: _CARD_REASON_CHARS - 3].rstrip() + "..."
+
+
+def _card_value_text(row: Any) -> str:
+    """Value text of a card row; ``None`` is shown as unavailable, never as 0."""
+    if row.value is None:
+        return "unavailable"
+    unit = f" {row.unit}" if row.unit else ""
+    if row.unit == "m":
+        text = f"{row.value:+.3f}{unit}"
+    elif row.unit in ("deg", "mm"):
+        text = f"{row.value:+.1f}{unit}"
+    elif row.unit:
+        text = f"{row.value:.1f}{unit}"
+    else:
+        text = f"{row.value:.2f}"
+    return f"{text} ({row.note})" if row.note else text
+
+
+def _card_lines(card: Any) -> list[tuple[str, str, bool]]:
+    """``(label, value, unavailable)`` lines of ``card`` (reasons as sub-lines)."""
+    if not card.available or not card.rows:
+        reason = str(card.reason or "no rows")
+        return [("Unavailable", "", True), (_short(reason), "", True)]
+    lines: list[tuple[str, str, bool]] = []
+    for row in card.rows:
+        lines.append((row.label, _card_value_text(row), row.value is None))
+        if row.value is None and row.reason:
+            lines.append(("  " + _short(str(row.reason)), "", True))
+    return lines
+
+
+def _card_metrics(
+    shape: tuple[int, ...], card: Any, position: str
+) -> tuple[tuple[int, int, int, int], int, list[tuple[str, str, bool]]]:
+    if position not in _CARD_POSITIONS:
+        raise ValueError(f"position must be one of {_CARD_POSITIONS}, got {position!r}")
+    height, width = int(shape[0]), int(shape[1])
+    size = max(11, height // 45)
+    font = _font(size)
+    pad, line_h = size // 2 + 2, size + 6
+    lines = _card_lines(card)
+    title_w = font.getlength(_CARD_TITLE)
+    text_w = max(
+        title_w,
+        *(
+            font.getlength(label) + font.getlength(value) + 2 * pad
+            for label, value, _ in lines
+        ),
+    )
+    box_w = min(width, int(text_w + 2 * pad))
+    box_h = min(height, int(2 * pad + line_h * (len(lines) + 1)))
+    margin = max(6, width // 80)
+    x0 = width - margin - box_w if position == "right" else margin
+    y0 = margin
+    return (x0, y0, x0 + box_w, y0 + box_h), size, lines
+
+
+def impact_card_bbox(
+    shape: tuple[int, ...], card: Any, *, position: str = "right"
+) -> tuple[int, int, int, int]:
+    """Pixel box ``(x0, y0, x1, y1)`` the card panel occupies in a frame of ``shape``."""
+    return _card_metrics(shape, card, position)[0]
+
+
+def draw_impact_card(img: Image8, card: Any, *, position: str = "right") -> Image8:
+    """Return a copy of ``img`` with the GCV-17 impact card panel drawn on it.
+
+    ``card`` is the shared :class:`ImpactCard`; rows whose ``value`` is ``None``
+    are listed as ``unavailable`` with their reason, never as zero. The panel is
+    semi-transparent and sits on the right (or left) edge so the golfer stays
+    visible; only pixels inside :func:`impact_card_bbox` change.
+    """
+    _check_image(img)
+    if not hasattr(card, "rows") or not hasattr(card, "available"):
+        raise TypeError("card must be an ImpactCard")
+    (x0, y0, x1, y1), size, lines = _card_metrics(img.shape, card, position)
+    out = img.copy()
+    region = out[y0:y1, x0:x1].astype(np.float32) * (1.0 - _CARD_ALPHA)
+    pil = Image.fromarray(region.astype(np.uint8))
+    draw = ImageDraw.Draw(pil)
+    font = _font(size)
+    pad, line_h = size // 2 + 2, size + 6
+    draw.text((pad, pad), _CARD_TITLE, font=font, fill=_YELLOW)
+    for i, (label, value, unavailable) in enumerate(lines, start=1):
+        y = pad + i * line_h
+        colour = _CARD_GREY if unavailable else _WHITE
+        draw.text((pad, y), label, font=font, fill=colour)
+        if value:
+            draw.text(
+                (x1 - x0 - pad - font.getlength(value), y),
+                value,
+                font=font,
+                fill=_YELLOW if unavailable else _WHITE,
+            )
+    out[y0:y1, x0:x1] = np.asarray(pil)
+    return out
 
 
 def draw_hud(img: Image8, hud: HudInfo, *, size: int = HUD_SIZE_PX) -> Image8:
