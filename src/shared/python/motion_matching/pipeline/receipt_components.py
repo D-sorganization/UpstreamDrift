@@ -157,6 +157,16 @@ class HipCalibrationReceipt(BaseModel):
         description="Calibrated hip coordinate zero-twist offset angles for right and left hips",
         json_schema_extra={"unit": "deg", "stage": "address"},
     )
+    hip_zero_twist_mode: str | None = Field(
+        None,
+        description="Hip zero-twist mode applied: capture (measured) or neutral",
+        json_schema_extra={"unit": "text", "stage": "address"},
+    )
+    hip_zero_twist_measured_deg: dict[str, float] | None = Field(
+        None,
+        description="Measured address thigh-twist offsets before mode selection",
+        json_schema_extra={"unit": "deg", "stage": "address"},
+    )
 
 
 class ClubReceipt(BaseModel):

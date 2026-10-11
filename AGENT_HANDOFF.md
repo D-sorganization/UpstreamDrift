@@ -1236,6 +1236,18 @@ Full-clock private preflight retains unavailable passive admission and blocked
 independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
 support/grip, captured matching and parity gates remain open.
 
+The earlier 20-interval replay failed its speed, activation and fiber-length
+limits. Separately, the 21-interval child failed strict planned-clock validation
+at 9 of 43 values by one ULP. A later replay on those saved timestamps failed
+only the activation limit (`5.078110452592238e-5` versus `1e-8`); coordinate,
+speed, fiber-length and endpoint limits passed. This diagnostic does not repair
+the clock rejection or identify the activation discrepancy's cause. Exact
+attempts, hashes, limits and failures remain in the historical appendices
+linked from `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+The agent-context catalog is unchanged because its `vendor/ud-tools` junction
+escapes to the frozen `feedback-drake-native-11838` donor; the context CLI
+rejected that path and the donor was not traversed or modified.
+
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter
 exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
