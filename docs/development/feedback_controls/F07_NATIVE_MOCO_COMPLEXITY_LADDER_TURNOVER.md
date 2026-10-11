@@ -593,3 +593,88 @@ supervisor wrapper mistakenly read `_WorkerTimeout.reason` instead of its
 `stop_reason`, after process-tree termination had completed. Thus the durable
 worker stage and wall-timeout reason are known, but the wrapper did not persist
 the sampled peak RSS. No replay acceptance or qualification is inferred.
+
+## Completed Retained-Input Replay Diagnostic at Harness `3e195b0e`
+
+After adding scoped `faulthandler.dump_traceback_later(10, repeat=True)` around
+the retained replay call, with cancellation in `finally`, exactly one
+no-optimizer diagnostic was authorized at commit
+`3e195b0e863a869cd5e0e66259203346ccb11508`. The source, request, solution and
+saved-control inputs were re-hashed before launch and matched the mesh-20
+identities above. The fresh worker reached `audit_written` and exited 0. The
+existing process-tree supervisor recorded a 210,214,912-byte sampled peak,
+below its unchanged 1 GiB soft threshold, and verified owned-tree cleanup. A
+post-run process scan found no matching Python worker. The stack trace file is
+empty because replay completed before the first 10-second dump. Supervisor
+stdout/stderr were retained. No solver or optimizer was invoked.
+
+The full 41-knot saved-input replay **failed** its unchanged per-unit limits.
+The target endpoint predicate passed: optimized target
+`0.30000558574001657` rad, replay endpoint `0.30000558954459644` rad, residual
+`3.804579873367686e-9` rad. Maximum errors were `3.804579817856535e-9` rad for
+coordinates (limit `2e-7`), `1.0189039163566779e-6` rad/s for speeds (limit
+`1e-7`), `1.1531595562106617e-4` for activations (limit `1e-8`), and
+`1.2169215853896631e-6` m for fiber lengths (limit `1e-7`). The failed-unit
+peak errors occurred at or near the final knot for speed and fiber length, and
+at the initial replay step for activation. The audit retains timewise named
+state arrays and hashes; its SHA-256 is
+`ad6f872d5f385f67a8ff60e014cd9d330f7311f4b2b4f49c7407e9bf5653f1db`.
+
+The saved flexor/extensor control samples were applied exactly at every audit
+sample (`max_applied_control_sample_error = 0`). This establishes knot-value
+identity, not equality of the continuous control law between knots. The request
+declares Hermite-Simpson transcription with control-mesh interior interpolation
+enabled, while fresh replay uses piecewise-linear interpolation of the saved
+knots. A read-only OpenSim 4.6 property inspection of the exact source found
+both Millard muscles retain activation dynamics, default activation `0.05`,
+activation time constant `0.01` s, deactivation time constant `0.04` s, and
+source excitation bounds `[0.01, 1.0]`. This is a candidate numerical
+transcription/control-representation difference, not a demonstrated cause:
+the optimized/replay activation divergence is visible at the first 0.25 ms
+sample even though applied controls agree there, and this diagnostic did not
+retain an independent continuous-input integration trace. Solver feasibility
+and physical qualification remain unestablished.
+
+The tool-observed end-to-end command wall time was 7.6 seconds; the supervisor
+receipt does not separately time native replay, so no native replay duration is
+claimed. Its stdout reports 300 realizations, 47 accepted / 63 attempted
+Runge-Kutta-Merson steps, and 63 integrator iterations. The trace file is empty
+(SHA-256 of the empty file); this is consistent with completion before 10 s,
+but does not give a stage duration.
+
+The complete retained invocation is under
+`experiments/native_moco_mesh20_e1548c5179/diagnostic_retained_replay_fauldump_3e195b0e/`.
+The invocation manifest SHA-256 is
+`525831d63e32ace8b2eea67d009f4d727097bd059d604f9a270b0dfc41586edf`; supervisor
+result is `4c188ed0d80e8d7ac8de02672376103a401d5b2bf239e7a676b6f69d679df659`,
+progress is `fe4caa35f2d72feae8bcc044e853012ee786f23f076abaeee7f11ed42d921864`,
+and stdout is `bb98c739736ebde04ab5e593340edd39fd6e4e11dc0452345fc0dceabb5bbe9d`.
+The empty stderr and stack files both hash to
+`e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`. The
+worker and harness source hashes are respectively
+`826bb8311a0fdf9e9612b7bcd146a33bc6915529264a2bd8db4fa4da747673af` and
+`ff19221e4bc8823e5c87e5007108b88d799a9148953fb9e3b8e22839cc4d0c2a`. The
+retained source, request, solution and controls stayed byte-identical to their
+pre-run hashes. No tolerance changed, and no additional native run is implied.
+
+## Next Diagnostic Proposal (Read-Only Analysis First)
+
+The current result distinguishes saved-control fresh replay from the
+Moco-transcribed state trajectory; it does not show that optimized states are
+the realized states of the persisted control law. A narrowly scoped next step
+is to calculate the muscle activation ODE defect over each retained knot
+interval from the exact source properties, optimized activation knots and
+saved PWL excitation. A read-only midpoint estimate on the first 0.25 ms
+interval gives the optimized flexor activation secant `5.21445 s^-1` versus
+`3.29255 s^-1` from `(mean excitation - mean activation)/0.01 s`; the fresh
+replay secant is `5.67572 s^-1`. This is a screening residual only: it uses a
+midpoint approximation to a piecewise-linear input and the conventional
+two-time-constant first-order law, so it must be checked against the exact
+native law before interpretation. Bind the method, state/control columns, and
+units to the source/request hashes; report intervalwise residuals and any
+control-mesh midpoint law actually represented by Moco. Do not change the
+fixed acceptance limits or call this trajectory acceptance. For the user goal of
+controller-to-independent-open-loop replay, the existing forward-integrated
+controlled-baseline API is a more direct positive control: compare its saved
+PWL law and fresh replay independently before attributing this Moco-only
+disagreement. Any such run needs separate review and authorization.

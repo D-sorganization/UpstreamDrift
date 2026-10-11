@@ -15,10 +15,14 @@ complete named cold state, solver settings, serialized arrays and fresh replay
 inputs in the request/evidence chain. The 10-interval OpenSim 4.6 solve
 converged, but independent replay failed speed, activation and fiber-length
 limits. A 20-interval solve converged with 41 saved nodes, but integrated replay
-and a separate retained-input replay both stopped at the fixed 30-second wall
-deadline before state errors were recorded. The separate supervisor could not
-persist sampled peak RSS; the stage receipt proves the native replay call had
-begun. Solver convergence is distinct from replay acceptance. The common-knot
+and two earlier retained-input diagnostics stopped at the fixed 30-second wall
+deadline before state errors were recorded. A later, separately authorized
+retained-input replay finished and failed the speed, activation and fiber-length
+limits while passing the coordinate endpoint predicate. Its timewise audit
+records peak errors of `1.0189e-6` rad/s, `1.1532e-4` activation and
+`1.2169e-6` m; sampled peak RSS was 210,214,912 bytes. Applied control samples
+exactly matched saved knots, but this does not prove equality of the continuous
+control law. Solver convergence is distinct from replay acceptance. The common-knot
 optimized coordinates agree closely while controls differ materially, so the
 mesh comparison does not establish the cause of replay-state error. Chapter 13
 and `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md` retain exact equations,

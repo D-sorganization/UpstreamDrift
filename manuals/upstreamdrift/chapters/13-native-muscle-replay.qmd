@@ -171,14 +171,31 @@ failed replay, not a successful model match.
 
 At 20 intervals, the optimizer also returned `Solve_Succeeded` in 122
 iterations, objective $4.1654698156426359\times10^{-6}$, and endpoint
-$0.3000055857400166$ rad. The worker reached its 30-second supervisor deadline
-during the integrated replay and wrote no replay audit. A separate bounded
-no-optimizer replay loaded the exact retained solution and controls, entered
-the fresh native replay call, and also reached its 30-second deadline before
-writing state errors. Its sampled peak RSS was not recorded because the
-one-off supervisor wrapper failed to serialize its timeout field. Both owned
-worker trees were reaped; this is an incomplete diagnostic, not evidence that
-mesh-20 replay passed or failed its numerical thresholds.
+$0.3000055857400166$ rad. The integrated replay reached its 30-second
+supervisor deadline without writing a replay audit. An earlier separate
+no-optimizer replay also reached that deadline, but a wrapper bookkeeping bug
+lost its sampled peak RSS. A corrected, separately authorized diagnostic
+loaded the exact retained source, request, solution and controls, completed
+fresh native replay, and recorded its full timewise state audit. The endpoint
+predicate passed with residual $3.80458\times10^{-9}$ rad; the replay failed
+speed ($1.01890\times10^{-6}$ rad/s versus $10^{-7}$), activation
+($1.15316\times10^{-4}$ versus $10^{-8}$), and fiber length
+($1.21692\times10^{-6}$ m versus $10^{-7}$) limits. Coordinate error was
+$3.80458\times10^{-9}$ rad, within its $2\times10^{-7}$ limit. The fixed
+30-second/1 GiB sampled-peak guard was unchanged; this diagnostic returned
+within the wall budget at 210,214,912-byte sampled peak RSS and verified owned
+process-tree cleanup.
+
+The replay applied the saved excitation values exactly at every sampled knot.
+The request uses Hermite-Simpson transcription with control-mesh interior
+interpolation; replay uses piecewise-linear interpolation of saved knots.
+Those observations make continuous control representation a testable
+candidate for the discrepancy, but do not prove it is causal. Exact source
+activation/deactivation time constants were read as 0.01/0.04 s; an independent
+intervalwise activation-law residual and a positive forward-integrated control
+baseline would be needed to distinguish transcription defects from a replay
+input or model behavior issue. This completed audit is a failed replay, not a
+qualification result.
 
 The 10- and 20-interval optimized coordinate traces differ by at most
 $5.66\times10^{-11}$ rad at common time knots, while flexor controls differ by

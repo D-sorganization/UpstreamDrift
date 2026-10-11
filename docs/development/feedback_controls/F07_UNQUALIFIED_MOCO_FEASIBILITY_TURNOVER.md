@@ -140,12 +140,15 @@ The 10-interval, 0.01-second solve converged, but independent fresh replay
 failed speed, activation and fiber-length limits; its coordinate endpoint
 remained within tolerance. A 20-interval solve also converged, with 41 nodes,
 but its integrated replay stopped at the 30-second deadline before recording
-state errors. One retained-input no-optimizer diagnostic loaded and hash-checked
-the same source, request, solution and controls, entered the fresh native replay
-call, and reached the same wall deadline without an audit. Its supervisor
-terminated the owned process tree, but a wrapper bookkeeping error prevented
-recording sampled peak RSS. Do not infer replay success, failure magnitudes or a
-causal discretization defect from this incomplete diagnostic.
+state errors. Two earlier retained-input diagnostics also timed out before an
+audit. One later corrected no-optimizer diagnostic loaded the exact source,
+request, solution and controls and completed fresh replay under the same
+deadline. It failed the existing speed, activation, and fiber-length limits
+while passing the coordinate endpoint predicate; its full audit records
+timewise errors and sampled peak RSS 210,214,912 bytes. Saved control values
+matched exactly at sampled knots, but that does not establish continuous
+control equivalence or a cause for the replay discrepancy. No successful
+replay or scientific qualification follows from these synthetic runs.
 
 At common mesh times, optimized q traces differ by at most
 $5.66\times10^{-11}$ rad, while flexor commands differ by up to $0.03523$.

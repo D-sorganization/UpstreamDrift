@@ -1218,6 +1218,16 @@ Full-clock private preflight retains unavailable passive admission and blocked
 independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
 support/grip, captured matching and parity gates remain open.
 
+The bounded synthetic mesh-20 solve still has a failed independent replay.
+One corrected retained-input diagnostic completed under the unchanged 30-second
+limit and recorded full timewise state errors; endpoint target passed, while
+speed, activation and fiber-length thresholds failed. Saved excitation values
+matched at sampled knots, which does not establish continuous input equivalence.
+The next read-only step is an exact source-bound activation-law residual over
+the retained intervals and a comparison to the existing forward-integrated
+controlled baseline. No optimizer retry or qualification follows from this
+result; see canonical chapter13 and `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter
 exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
