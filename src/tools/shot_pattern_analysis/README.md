@@ -22,10 +22,17 @@ the [Nominal Matching Bounds Supplement](../../../docs/research/shot_pattern_ana
 and [Turnover](../../../docs/research/shot_pattern_analysis/phase2/TURNOVER.md).
 The phase-one section below preserves the historical controls.
 The original and supplemental final matrices are complete, and their saved-data
-independent audits and archive-restoration checks have passed. Final figure
-regeneration and publication review are underway; no final study conclusion is
-claimed until the complete report is reviewed. The linked design PDF is a
-reviewed design snapshot, not the final results report. See the
+independent audits and archive-restoration checks have passed. The revised
+39-page illustrated report has been reviewed for local document delivery, with
+lateral dispersion on the horizontal axis and downrange distance on the vertical
+axis. Its expanded methods and separate verified 100-shot flight replays preserve
+the original simulation statistics. The finding is conditional: no shot shape
+wins across all modeled clubs and delivery distributions. Repository release
+gates and publication of the revised edition remain open. The linked design PDF
+is a design snapshot; the editable results source is the separate
+[Illustrated Research Article](../../../docs/research/shot_pattern_analysis/shot_pattern_analysis.tex).
+See the [Current Refinement Status](../../../docs/research/shot_pattern_analysis/phase2/validation/refinement_v3/progress.json),
+and the
 [Saved-Data Reproduction Guide](../../../docs/research/shot_pattern_analysis/phase2/REPRODUCING.md)
 and [Final Report Status](../../../docs/research/shot_pattern_analysis/phase2/REPORT.md).
 
