@@ -1148,4 +1148,15 @@ force/work chart, contact/grip, captured match or parity claim follows.
 
 ## Explicitly Unqualified Moco Feasibility — #12225
 
-See docs/development/feedback_controls/F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md and canonical chapter55. Diagnostic opt-in retains unavailable passive admission and all other gates; no capture or muscle-matching qualification follows.
+Draft PR #12228 contains the diagnostic opt-in and 51 actual native test passes.
+See `F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md` and canonical chapter 55.
+Full-clock private preflight retains unavailable passive admission and blocked
+independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
+support/grip, captured matching and parity gates remain open.
+
+The #12198 CI receipt-preservation follow-up restores two canonical
+ground-support receipts to their recorded hashes and adds explicit formatter
+exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
+provenance and validation. Full epic qualification remains open.
+Concurrent remote ledger refresh `7877625369` is retained through a normal merge;
+the generated ledger is refreshed from the restored immutable receipt bytes.

@@ -39,3 +39,23 @@ Its default Python lacks OpenSim and skipped 30 native cases; the separate
 51-test SDK regression above supplies actual native evidence. Manual governance,
 architecture budget, agent-context check/evaluation (12/12), LoD and DRY
 no-growth checks passed. Generated context was refreshed after the annotation.
+
+## Published State and Next Native Dependency
+
+Draft PR #12228 publishes this diagnostic mode. The private full-clock driver
+preflight used all 654 capture knots, 24 fitting markers, explicit exclusions
+and the complete 1,226-state prepared pose. It retained both
+`passive-policy-unavailable` and `independent-native-replay-unavailable`; no
+optimizer was started. The existing constrained replay source policy rejects
+external resources and the native Mesh class. Read-only inventory distinguishes
+attached visual assets from wrapped muscle mechanics and confirms no contact
+geometry in this candidate. #12231 owns strict, hash-bound visual asset closure;
+it cannot exempt mechanical resources or qualify support, grip or wrapped paths.
+Detailed marker calibration, state arrays and receipts remain private.
+
+The parent #12198 receipt-preservation fix is merged into this branch with
+remote history retained. Its 149-row evidence ledger now matches canonical
+receipt hashes. Scientific qualification and all 17 required parity rows remain
+unchanged. Tools provider publication is tracked by draft Tools #5510; its
+implementation hash changed after a type-only fix and needs a separate consumer
+rebind. Preserve frozen older provider receipts under their original identities.
