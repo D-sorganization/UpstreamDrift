@@ -48,7 +48,7 @@ from .native_contact_policy import (
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
-_VERSION = "2.0.0"
+_VERSION = "2.1.0"
 _ACCURACY = 1e-8
 _ALLOWED_COMPONENTS = native_muscle_bundle._COMPONENTS | {
     "CoordinateCouplerConstraint",
@@ -211,6 +211,9 @@ def _audit_component_policy(
     }
     for component in components:
         kind = component.getConcreteClassName()
+        structural_weld = kind == "WeldJoint"
+        if structural_weld:
+            _audit_structural_weld_joint(component, osim)
         declared_mechanical = (
             kind == "CoordinateActuator"
             and component.getAbsolutePathString() in mechanical_paths
@@ -225,6 +228,7 @@ def _audit_component_policy(
         }
         if (
             kind not in _ALLOWED_COMPONENTS
+            and not structural_weld
             and not declared_mechanical
             and not declared_wrap_component
             and not declared_contact_force
@@ -242,6 +246,43 @@ def _audit_component_policy(
             and not declared_contact_force
         ):
             raise ValueError("non-muscle force is forbidden in this policy")
+
+
+def _audit_structural_weld_joint(component: Any, osim: Any) -> None:
+    """Admit only native, zero-DOF welds joining two named physical frames."""
+    joint = osim.WeldJoint.safeDownCast(component)
+    if joint is None:
+        raise ValueError("structural WeldJoint needs its native concrete class")
+    if joint.numCoordinates() != 0:
+        raise ValueError("structural WeldJoint must have zero coordinates")
+
+    parent = osim.PhysicalFrame.safeDownCast(joint.getParentFrame())
+    child = osim.PhysicalFrame.safeDownCast(joint.getChildFrame())
+    if parent is None:
+        raise ValueError("structural WeldJoint needs a valid parent frame")
+    if child is None:
+        raise ValueError("structural WeldJoint needs a valid child frame")
+    allowed_frame_types = {"Body", "Ground", "PhysicalOffsetFrame"}
+    if parent.getConcreteClassName() not in allowed_frame_types:
+        raise ValueError("structural WeldJoint parent frame type is not reviewed")
+    if child.getConcreteClassName() not in allowed_frame_types:
+        raise ValueError("structural WeldJoint child frame type is not reviewed")
+    parent_path = parent.getAbsolutePathString()
+    child_path = child.getAbsolutePathString()
+    if (
+        not isinstance(parent_path, str)
+        or not parent_path.startswith("/")
+        or "/../" in parent_path
+    ):
+        raise ValueError("structural WeldJoint needs a valid parent frame path")
+    if (
+        not isinstance(child_path, str)
+        or not child_path.startswith("/")
+        or "/../" in child_path
+    ):
+        raise ValueError("structural WeldJoint needs a valid child frame path")
+    if parent_path == child_path:
+        raise ValueError("structural WeldJoint needs distinct frames")
 
 
 def _audit_source_constraints(model: Any) -> None:
