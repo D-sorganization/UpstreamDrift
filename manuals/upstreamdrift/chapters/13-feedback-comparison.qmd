@@ -263,6 +263,34 @@ history. It does not produce feedback, establish that a feedback producer
 created the history, qualify support/grip, validate physiology, or establish
 full-capture or cross-engine equivalence.
 
+### F09c State-Dependent ZOH Feedback Recording
+
+`record_native_full_body_feedback` is the producer paired with that
+consumer. It calls a declared Python feedback controller once at each fixed
+interval start, with detached copies of the complete current `q` and `v` state.
+The controller result must be a finite vector in the source coordinate order;
+all six root generalized efforts are checked as exactly zero before entering
+the shared integrator. The accepted vector is held unchanged over eight RK4
+substeps (four acceleration evaluations per substep) before the controller is
+called again. Each callback therefore produces 32 derivative-stage calls that
+see the same effort.
+
+The recorder returns the ordinary T01 generalized-effort bundle and a typed
+producer record binding the declared controller source, configuration and
+reference digests, exact source spec, fixed clock, complete initial `q/v`,
+generated trajectory, and applied-effort history. A typed
+`NativeFullBodyFeedbackRequest` carries the source path, initial state, fixed
+step count and timestep, controller provenance, and T01 model/variant/experiment
+identity. Its source/config/reference digests are caller-declared provenance,
+not proof that a law is reproducible or physically valid. Fresh replay consumes
+only the frozen T01 input bundle and does not invoke the feedback callback.
+Initial weld pose/rate residuals
+are observations with no acceptance threshold; no assembly, reset, or
+projection occurs. The current contract declares no generalized-effort bounds,
+so this recorder does not demonstrate bounded control. It remains an
+unqualified generated software trajectory and does not establish closed-loop
+capture matching, contact/grip adequacy, model support, or physiology.
+
 F09d (#11907) adds the next boundary: explicit model-owned forward kinematics
 from those native output configurations to named 3-D marker positions. Its
 ordered local-point map and source/loaded-model/provider identities are

@@ -87,6 +87,19 @@ T01 contract fixtures; no private driver/iron capture or production native
 full-body run was performed. This is an open-loop frozen-history consumer, not
 a feedback producer or evidence that a feedback producer made the history.
 
+The paired `record_native_full_body_feedback` producer records a Python
+state-dependent controller once at each fixed interval start. It passes
+detached copies of complete q/v, validates a finite full-coordinate effort and
+exact zero on the six root entries before the shared integrator, and holds the
+validated vector over eight RK4 substeps (32 acceleration-stage calls) before
+the next controller call. The producer returns the ordinary T01 frozen-input
+bundle and a separate typed provenance/trajectory record; fresh replay never
+calls the controller. Controller source/configuration/reference digests are
+caller-declared provenance. The recorder declares no generalized-effort
+bounds, does not project/reset the initial state, and applies no closure
+acceptance threshold. Manufactured-plant tests verify this software boundary
+only; no native full-body execution or physical qualification follows.
+
 Tests use no private capture, subject, or mocap data. No tolerances or
 physiological claims are introduced, and the calculation registry stays
 blocked.

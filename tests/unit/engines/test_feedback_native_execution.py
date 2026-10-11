@@ -381,6 +381,20 @@ def test_full_body_rk4_receipt_accepts_qv_only_and_remains_unqualified(
             bundle,
             replace(output, generalized_efforts=np.zeros((2, 1))),
         )
+    with pytest.raises(ValueError, match="actual inputs differ from frozen bundle"):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, applied_generalized_efforts=np.zeros((2, 1))),
+        )
+    with pytest.raises(ValueError, match="nonfinite evidence"):
+        validate_native_replay_output(
+            row,
+            full_binding,
+            bundle,
+            replace(output, initial_pose_closure_residual=np.full(6, np.nan)),
+        )
     output.pose_closure_residuals[0] = 0.25
     changed_closure_receipt = validate_native_replay_output(
         row, full_binding, bundle, output

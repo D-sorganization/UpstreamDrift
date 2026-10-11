@@ -8,7 +8,10 @@ not call ``mj_step`` and does not qualify the model or trajectory.
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
+import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypeAlias
@@ -20,6 +23,7 @@ from src.shared.python.motion_matching.same_input import (
     ROOT_COORDINATES,
     StepPolicy,
     VectorPlant,
+    integrate,
     open_loop,
 )
 
@@ -31,6 +35,84 @@ PROVIDER_ID = "mujoco-full-body-generalized-rk4"
 PROVIDER_VERSION = "1.0.0"
 _SUBSTEPS = 8
 DUAL_GRIP_WELD_CLOSURE_DIMENSION = 6
+_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+
+
+@dataclass(frozen=True)
+class DeclaredFullBodyFeedbackPolicy:
+    """Caller-declared controller source and frozen input provenance."""
+
+    name: str
+    version: str
+    source_path: Path
+    source_sha256: str
+    configuration_sha256: str
+    reference_sha256: str
+
+    def __post_init__(self) -> None:
+        if any(
+            not isinstance(value, str) or not value.strip()
+            for value in (self.name, self.version)
+        ):
+            raise ValueError("feedback policy name and version must be nonempty")
+        for value in (
+            self.source_sha256,
+            self.configuration_sha256,
+            self.reference_sha256,
+        ):
+            if not isinstance(value, str) or _SHA256_PATTERN.fullmatch(value) is None:
+                raise ValueError("feedback policy digests must be lowercase SHA-256")
+        object.__setattr__(
+            self, "source_path", Path(self.source_path).resolve(strict=True)
+        )
+
+
+@dataclass(frozen=True)
+class NativeFullBodyFeedbackRequest:
+    """Complete source, initial-state, clock and T01 identity for recording."""
+
+    spec_path: Path
+    q0: Array
+    v0: Array
+    steps: int
+    dt_s: float
+    controller_policy: DeclaredFullBodyFeedbackPolicy
+    model_id: str
+    variant_id: str
+    experiment_id: str
+
+
+@dataclass(frozen=True)
+class _FeedbackRunContext:
+    request: NativeFullBodyFeedbackRequest
+    path: Path
+    spec_bytes: bytes
+    coordinate_order: tuple[str, ...]
+    q_initial: Array
+    v_initial: Array
+    function: Any
+    implementation: tuple[Path, Any]
+    root_indices: NDArray[np.intp]
+    controller_digest: str
+
+
+@dataclass(frozen=True)
+class NativeFullBodyFeedbackRecording:
+    """Feedback-produced T01 inputs and their unqualified producer evidence."""
+
+    bundle: Any
+    controller_policy: DeclaredFullBodyFeedbackPolicy
+    time_seconds: Array
+    qpos: Array
+    qvel: Array
+    applied_generalized_efforts: Array
+    pose_closure_residuals: Array
+    initial_pose_closure_residual: Array
+    initial_rate_closure_residual: Array
+    controller_sha256: str
+    applied_effort_sha256: str
+    trajectory_sha256: str
+    qualification_status: str = "unqualified"
 
 
 @dataclass(frozen=True)
@@ -157,22 +239,8 @@ def integrate_full_body_history(
     )
     if isinstance(substeps, bool) or not isinstance(substeps, int) or substeps < 1:
         raise ValueError("substeps must be a positive integer")
-    q = np.asarray(q0, dtype=np.float64)
-    v = np.asarray(v0, dtype=np.float64)
-    expected_shape = (len(plant.coordinate_order),)
-    if q.shape != expected_shape or v.shape != expected_shape:
-        raise ValueError("complete named position and velocity state is required")
-    if not np.isfinite(q).all() or not np.isfinite(v).all():
-        raise ValueError("initial position and velocity state must be finite")
-    initial_pose, initial_rate = plant.closure_residuals(q, v)
-    if np.asarray(initial_pose).shape != (
-        DUAL_GRIP_WELD_CLOSURE_DIMENSION,
-    ) or np.asarray(initial_rate).shape != (DUAL_GRIP_WELD_CLOSURE_DIMENSION,):
-        raise ValueError(
-            "initial dual-grip weld closure observations must have six components"
-        )
-    if not np.isfinite(initial_pose).all() or not np.isfinite(initial_rate).all():
-        raise ValueError("initial closure observation must be finite")
+    q, v = _complete_initial_state(q0, v0, len(plant.coordinate_order))
+    initial_pose, initial_rate = _initial_closure_observation(plant, q, v)
     rollout = open_loop(
         plant,
         q,
@@ -216,6 +284,279 @@ def integrate_full_body_history(
         rollout.pose_drift,
         input_sha256,
         policy_sha256,
+    )
+
+
+def _immutable_array(values: Array) -> Array:
+    copied = np.asarray(values, dtype=np.float64)
+    return np.frombuffer(copied.tobytes(), dtype=np.float64).reshape(copied.shape)
+
+
+def _complete_initial_state(q0: Array, v0: Array, nv: int) -> tuple[Array, Array]:
+    q = np.asarray(q0, dtype=np.float64).copy()
+    v = np.asarray(v0, dtype=np.float64).copy()
+    expected_shape = (nv,)
+    if q.shape != expected_shape or v.shape != expected_shape:
+        raise ValueError("complete named position and velocity state is required")
+    if not np.isfinite(q).all() or not np.isfinite(v).all():
+        raise ValueError("initial position and velocity state must be finite")
+    return q, v
+
+
+def _initial_closure_observation(
+    plant: VectorPlant, q: Array, v: Array
+) -> tuple[Array, Array]:
+    pose, rate = plant.closure_residuals(q, v)
+    pose = np.asarray(pose, dtype=np.float64)
+    rate = np.asarray(rate, dtype=np.float64)
+    if pose.shape != (DUAL_GRIP_WELD_CLOSURE_DIMENSION,) or rate.shape != (
+        DUAL_GRIP_WELD_CLOSURE_DIMENSION,
+    ):
+        raise ValueError(
+            "initial dual-grip weld closure observations must have six components"
+        )
+    if not np.isfinite(pose).all() or not np.isfinite(rate).all():
+        raise ValueError("initial closure observation must be finite")
+    return pose.copy(), rate.copy()
+
+
+def _feedback_callable_source(controller: Callable[..., Any]) -> tuple[Any, Any]:
+    function = (
+        controller if inspect.isfunction(controller) else type(controller).__call__
+    )
+    source_path = inspect.getsourcefile(function)
+    code = getattr(function, "__code__", None)
+    if source_path is None or code is None:
+        raise ValueError("feedback controller must have inspectable Python source")
+    return function, (Path(source_path).resolve(strict=True), code)
+
+
+def _verify_feedback_callable(
+    controller: Callable[..., Any],
+    policy: DeclaredFullBodyFeedbackPolicy,
+    function: Any,
+    implementation: tuple[Path, Any],
+) -> None:
+    current_function, current_implementation = _feedback_callable_source(controller)
+    if current_function is not function or current_implementation != implementation:
+        raise ValueError("feedback controller implementation changed during recording")
+    source_path, _code = implementation
+    if source_path != policy.source_path:
+        raise ValueError("feedback callable differs from declared source file")
+    if _sha256(source_path.read_bytes()) != policy.source_sha256:
+        raise ValueError("feedback controller source differs from declared digest")
+
+
+def _array_sha256(values: Array) -> str:
+    array = np.ascontiguousarray(values, dtype=np.float64)
+    digest = hashlib.sha256()
+    digest.update(json.dumps(array.shape, separators=(",", ":")).encode())
+    digest.update(array.tobytes())
+    return digest.hexdigest()
+
+
+def record_native_full_body_feedback(
+    request: NativeFullBodyFeedbackRequest,
+    controller: Callable[[float, Array, Array], Array],
+) -> NativeFullBodyFeedbackRecording:
+    """Record one state-dependent generalized effort per fixed interval.
+
+    The feedback callback sees detached copies of the current state.
+    Its validated output is held by the shared RK4 integrator with the same
+    eight substeps used by fresh full-body replay. This records an unqualified
+    source run and creates the ordinary T01 frozen-input bundle; replay never
+    invokes the callback.
+    """
+    context = _prepare_feedback_context(request, controller)
+    rollout, applied_history, initial_pose, initial_rate = _integrate_feedback(
+        context, controller
+    )
+    return _build_feedback_recording(
+        context, rollout, applied_history, initial_pose, initial_rate
+    )
+
+
+def _prepare_feedback_context(
+    request: NativeFullBodyFeedbackRequest,
+    controller: Callable[[float, Array, Array], Array],
+) -> _FeedbackRunContext:
+    if type(request.steps) is not int or request.steps <= 0:
+        raise ValueError("feedback step budget must be a positive integer")
+    if not np.isfinite(request.dt_s) or request.dt_s <= 0.0:
+        raise ValueError("feedback timestep must be finite and positive")
+    if not callable(controller) or not isinstance(
+        request.controller_policy, DeclaredFullBodyFeedbackPolicy
+    ):
+        raise TypeError("feedback requires a callable and declared policy provenance")
+
+    path = Path(request.spec_path)
+    spec_bytes = path.read_bytes()
+    coordinate_order = tuple(json.loads(spec_bytes)["coordinate_order"])
+    if coordinate_order[: len(ROOT_COORDINATES)] != ROOT_COORDINATES:
+        raise ValueError(
+            "source coordinate order must begin with the six root coordinates"
+        )
+    _source_coordinate_effort_units(spec_bytes)
+    nv = len(coordinate_order)
+    q_initial, v_initial = _complete_initial_state(request.q0, request.v0, nv)
+
+    function, implementation = _feedback_callable_source(controller)
+    policy = request.controller_policy
+    _verify_feedback_callable(controller, policy, function, implementation)
+    controller_digest = _controller_policy_sha256(policy)
+    roots = np.asarray(
+        [coordinate_order.index(name) for name in ROOT_COORDINATES], dtype=np.intp
+    )
+    return _FeedbackRunContext(
+        request,
+        path,
+        spec_bytes,
+        coordinate_order,
+        q_initial,
+        v_initial,
+        function,
+        implementation,
+        roots,
+        controller_digest,
+    )
+
+
+def _controller_policy_sha256(policy: DeclaredFullBodyFeedbackPolicy) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            {
+                "name": policy.name,
+                "version": policy.version,
+                "source_path": str(policy.source_path),
+                "source_sha256": policy.source_sha256,
+                "configuration_sha256": policy.configuration_sha256,
+                "reference_sha256": policy.reference_sha256,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def _integrate_feedback(
+    context: _FeedbackRunContext,
+    controller: Callable[[float, Array, Array], Array],
+) -> tuple[Any, Array, Array, Array]:
+    request = context.request
+    policy = request.controller_policy
+    plant = VectorPlant("mujoco", context.spec_bytes, kkt_regularization=0.0)
+    initial_pose, initial_rate = _initial_closure_observation(
+        plant, context.q_initial, context.v_initial
+    )
+    applied: list[Array] = []
+
+    def effort_source(index: int, time_s: float, q: Array, v: Array) -> Array:
+        if index != len(applied) or not np.isfinite(time_s):
+            raise ValueError("feedback integrator interval order is invalid")
+        _verify_feedback_callable(
+            controller, policy, context.function, context.implementation
+        )
+        q_snapshot = np.asarray(q, dtype=np.float64).copy()
+        v_snapshot = np.asarray(v, dtype=np.float64).copy()
+        # Copy immediately because conversion can invoke caller-defined __array__.
+        effort = np.asarray(
+            controller(time_s, q_snapshot, v_snapshot), dtype=np.float64
+        ).copy()
+        _verify_feedback_callable(
+            controller, policy, context.function, context.implementation
+        )
+        if (
+            effort.shape != (len(context.coordinate_order),)
+            or not np.isfinite(effort).all()
+        ):
+            raise ValueError("feedback effort must be a finite full-coordinate vector")
+        if np.any(effort[context.root_indices] != 0.0):
+            raise ValueError("feedback root generalized efforts must be exactly zero")
+        applied.append(effort.copy())
+        return effort
+
+    rollout = integrate(
+        plant,
+        context.q_initial,
+        context.v_initial,
+        effort_source,
+        steps=request.steps,
+        dt_s=float(request.dt_s),
+        policy=StepPolicy(substeps=_SUBSTEPS, project=False, stop_on_failure=False),
+    )
+    if len(applied) != request.steps or rollout.efforts.shape != (
+        request.steps,
+        len(context.coordinate_order),
+    ):
+        raise ValueError("feedback recorder did not cover every requested interval")
+    applied_history = np.stack(applied)
+    if not np.array_equal(rollout.efforts, applied_history):
+        raise ValueError("integrator applied efforts differ from feedback snapshots")
+    if (
+        rollout.q.shape != (request.steps + 1, len(context.coordinate_order))
+        or rollout.v.shape != (request.steps + 1, len(context.coordinate_order))
+        or not np.isfinite(rollout.q).all()
+        or not np.isfinite(rollout.v).all()
+        or rollout.pose_drift.shape != (request.steps,)
+        or not np.isfinite(rollout.pose_drift).all()
+    ):
+        raise ValueError("feedback integration produced incomplete or nonfinite state")
+    if context.path.read_bytes() != context.spec_bytes:
+        raise ValueError("source spec changed during feedback recording")
+    return rollout, applied_history, initial_pose, initial_rate
+
+
+def _build_feedback_recording(
+    context: _FeedbackRunContext,
+    rollout: Any,
+    applied_history: Array,
+    initial_pose: Array,
+    initial_rate: Array,
+) -> NativeFullBodyFeedbackRecording:
+    request = context.request
+    policy = request.controller_policy
+    steps = request.steps
+    times = np.arange(steps + 1, dtype=np.float64) * float(request.dt_s)
+    frozen_efforts = np.vstack((applied_history, applied_history[-1]))
+    bundle = build_native_full_body_bundle(
+        context.path,
+        context.q_initial,
+        context.v_initial,
+        times,
+        frozen_efforts,
+        model_id=request.model_id,
+        variant_id=request.variant_id,
+        experiment_id=request.experiment_id,
+    )
+    from src.engines.native_replay_contracts import (
+        native_replay_contract_types,
+        validate_native_replay_bundle,
+    )
+
+    contracts = native_replay_contract_types()
+    bundle = validate_native_replay_bundle(bundle, contracts)
+    _validate_full_body_input_contract(bundle, context.spec_bytes, contracts)
+    if bundle.model.source_model_sha256 != _sha256(context.spec_bytes):
+        raise ValueError("T01 bundle source identity differs from feedback source")
+    bundled_values = np.asarray(bundle.input_history.values, dtype=np.float64)
+    if not np.array_equal(bundled_values, frozen_efforts):
+        raise ValueError("T01 bundle differs from the recorded applied effort history")
+
+    return NativeFullBodyFeedbackRecording(
+        bundle,
+        policy,
+        _immutable_array(times),
+        _immutable_array(rollout.q),
+        _immutable_array(rollout.v),
+        _immutable_array(applied_history),
+        _immutable_array(rollout.pose_drift),
+        _immutable_array(initial_pose),
+        _immutable_array(initial_rate),
+        context.controller_digest,
+        _array_sha256(applied_history),
+        hashlib.sha256(
+            (_array_sha256(rollout.q) + _array_sha256(rollout.v)).encode("ascii")
+        ).hexdigest(),
     )
 
 
