@@ -30,3 +30,21 @@ the requested geometric study. The prior built-in editor compiler failure
 (#12120) is separate from successful local CLI PDF generation. Current revision
 compilation and visual-review results belong in `review.json` alongside this
 file, when available.
+
+## Presentation Branch Handoff
+
+Branch: `codex/shot-pattern-presentation-v2`. Initial presentation commit:
+`b896b17927`. This branch has not been pushed or opened as a duplicate study PR.
+The canonical Repository_Management pre-PR runner against baseline `661eead69b`
+exited 1; its complete log is `pre_pr_b896b17927.log.gz`. Affected tests reported
+375 passes, 3 failures, and 4 skips. Failures were in unchanged Matplotlib
+performance and bunker-viewport provider tests; baseline causation was not
+independently reproduced. Consistency tests passed. The fleet development-log
+gate failed. The new renderer's NumPy index typing error is repaired separately
+and verified with focused checks; that does not clear the full gate.
+
+Next: integrate these presentation-only commits into the study delivery through
+a new validation session, reconcile the existing PR head without overwriting
+peer work, and clear the required gates before pushing. Preserve all frozen
+numerical data and original release payloads. The revised PDFs are delivered
+locally on the Desktop; this revision has no new public release URL.

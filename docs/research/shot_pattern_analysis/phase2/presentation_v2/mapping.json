@@ -115,7 +115,7 @@
   "graphical_summary": "presentation_v2/summary.pdf",
   "summary_numbers_source": "shot_pattern_analysis.tex: Selected Relative-SG Ranges and Pointwise Interval Directions",
   "presentation_source_sha256": {
-    "render.py": "01956c51def860f37e61acab65c01a88431c0dc37c89a3262ab3bcbb07981421",
+    "render.py": "0c74994d7f1f43eeb44e77b6c970331f1caf9feeb573e9e1f05a7741adcecab8",
     "summary.py": "9351b009d71b5b2d152e2c6c07b2c5fe620580e5a058eda469487aae21190b7a"
   }
 }

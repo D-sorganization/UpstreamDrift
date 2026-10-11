@@ -120,7 +120,8 @@ def _density(
     xc = (xedges[:-1] + xedges[1:]) / 2
     yc = (yedges[:-1] + yedges[1:]) / 2
     for mass, style in masses:
-        threshold = order[min(np.searchsorted(cumulative, mass), len(order) - 1)]
+        index = min(int(np.searchsorted(cumulative, mass)), len(order) - 1)
+        threshold = order[index]
         if threshold > 0 and threshold < hist.max():
             ax.contour(
                 xc,

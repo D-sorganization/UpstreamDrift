@@ -15,5 +15,11 @@
   "render": {
     "command": "MPLBACKEND=Agg /home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python -m docs.research.shot_pattern_analysis.phase2.presentation_v2.render",
     "outcome": "exit 0; 13 mapped replacement PDFs and 13 companion PNGs plus summary PDF and PNG"
-  }
+  },
+  "typing_repair": {
+    "change": "Convert NumPy search index to Python int before indexing; no numerical change",
+    "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python -m mypy docs/research/shot_pattern_analysis/phase2/presentation_v2/render.py docs/research/shot_pattern_analysis/phase2/presentation_v2/summary.py",
+    "outcome": "exit 0; Success: no issues found in 2 source files"
+  },
+  "post_repair_checks": "7 focused tests pass; Ruff check and format check pass"
 }
