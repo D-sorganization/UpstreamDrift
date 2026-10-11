@@ -145,7 +145,9 @@ def _write_figures(
         "valid_shots_by_pattern": {n: len(v) for n, v in points.items()},
         "total_shots_by_pattern": dict.fromkeys(points, cfg.n_shots),
     }
-    scenario = f"{cfg.club.club_id.replace('_', ' ').title()} | Curve ×{cfg.curve_scale:g} | Geometric Model"
+    club = cfg.club
+    club_title = club.club_id.replace("_", " ").title()
+    scenario = f"{club_title} | Curve ×{cfg.curve_scale:g} | Geometric Model"
     _check_cancelled(cancelled)
     density = write_academic_dispersion_figure(
         points,

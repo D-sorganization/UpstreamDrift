@@ -594,17 +594,11 @@ class MainWidget(QtWidgets.QWidget):
         self.matched_study.action_bar.cancelled.connect(self._matched_worker_idle)
 
     def _legacy_worker_idle(self, *_args: object) -> None:
-        if (
-            not self.action_bar.is_running
-            and not self.matched_study.action_bar.is_running
-        ):
+        if not self.action_bar.is_running and not self.matched_study.is_running:
             self.deleteLater()
 
     def _matched_worker_idle(self, *_args: object) -> None:
-        if (
-            not self.action_bar.is_running
-            and not self.matched_study.action_bar.is_running
-        ):
+        if not self.action_bar.is_running and not self.matched_study.is_running:
             self.deleteLater()
 
     def resizeEvent(self, event: QtGui.QResizeEvent | None) -> None:

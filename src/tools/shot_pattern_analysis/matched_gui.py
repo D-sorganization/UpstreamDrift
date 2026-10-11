@@ -521,14 +521,11 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         self._update_assumption()
 
     def _update_assumption(self) -> None:
-        context = (
-            "Custom"
-            if self.club_config.club_id == "custom"
-            else self.club_config.club_id.replace("_", " ").title()
-        )
+        club_id = self.club_config.club_id
+        context = "Custom" if club_id == "custom" else club_id.replace("_", " ").title()
         preset = (
-            matched_preset(self.club_config.club_id)
-            if self.club_config.club_id in {"driver", "seven_iron", "pitching_wedge"}
+            matched_preset(club_id)
+            if club_id in {"driver", "seven_iron", "pitching_wedge"}
             else None
         )
         modified = preset is not None and any(
@@ -929,6 +926,11 @@ class MatchedStudyWidget(QtWidgets.QWidget):
                 self.status_label.setText(f"Configuration loaded from {path}")
             except (OSError, ValueError, TypeError, KeyError) as exc:
                 self.status_label.setText(f"Could not load configuration: {exc}")
+
+    @property
+    def is_running(self) -> bool:
+        """Return whether the asynchronous study worker is running."""
+        return self.action_bar.is_running
 
     def cleanup(self) -> bool:
         self._closed = True
