@@ -217,3 +217,39 @@ def add_glyphs_to_scene(
             dropped += 1
 
     return SceneGlyphReceipt(added=added, dropped=dropped)
+
+
+def add_ball_to_scene(
+    scene: mujoco.MjvScene,
+    position_m: npt.ArrayLike,
+    radius_m: float,
+    rgba: tuple[float, float, float, float] = (0.97, 0.97, 0.95, 1.0),
+) -> bool:
+    """Draw a decorative sphere (the golf ball) into a MuJoCo render scene.
+
+    The sphere lives only in ``scene`` (the render buffer): it is not part of
+    the model, so mass, bodies and dynamics are unchanged (GCV-13, #11719).
+    Returns ``False`` when the scene buffer is full.
+
+    Preconditions: ``position_m`` is a finite 3-vector and ``radius_m`` is
+    positive and finite (``ValueError``).
+    """
+    if not isinstance(scene, mujoco.MjvScene):
+        raise TypeError(f"scene must be a mujoco.MjvScene, got {type(scene).__name__}")
+    pos = np.asarray(position_m, dtype=np.float64)
+    if pos.shape != (3,) or not np.isfinite(pos).all():
+        raise ValueError("position_m must be a finite 3-vector")
+    if not np.isfinite(radius_m) or radius_m <= 0.0:
+        raise ValueError(f"radius_m must be positive and finite, got {radius_m}")
+    if scene.ngeom >= scene.maxgeom:
+        return False
+    mujoco.mjv_initGeom(
+        scene.geoms[scene.ngeom],
+        int(mujoco.mjtGeom.mjGEOM_SPHERE),
+        np.array([radius_m, 0.0, 0.0]),
+        pos,
+        np.eye(3).ravel(),
+        np.asarray(rgba, dtype=np.float32),
+    )
+    scene.ngeom += 1
+    return True
