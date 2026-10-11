@@ -31,6 +31,10 @@ from .native_prepared_state import (
     _apply_declared_locks,
     observe_declared_native_sample,
 )
+from .native_wrapped_path import (
+    WrappedPathDeclaration,
+    validate_wrapped_path_declaration,
+)
 
 if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
@@ -98,9 +102,22 @@ def _audit_source_components(
     muscles: Any,
     declaration: DeclaredColdStart,
     mechanical_paths: frozenset[str] = frozenset(),
+    wrapped_path_declaration: WrappedPathDeclaration | None = None,
 ) -> None:
     import opensim as osim
 
+    if wrapped_path_declaration is not None:
+        validate_wrapped_path_declaration(
+            model, wrapped_path_declaration, declaration.source_sha256
+        )
+    wrapped_components = {
+        "WrapCylinder",
+        "WrapEllipsoid",
+        "WrapSphere",
+        "PathWrap",
+        "PathWrapPoint",
+        "ConditionalPathPoint",
+    }
     components = tuple(model.getComponentsList())
     for component in components:
         kind = component.getConcreteClassName()
@@ -108,7 +125,14 @@ def _audit_source_components(
             kind == "CoordinateActuator"
             and component.getAbsolutePathString() in mechanical_paths
         )
-        if kind not in _ALLOWED_COMPONENTS and not declared_mechanical:
+        declared_wrap_component = (
+            wrapped_path_declaration is not None and kind in wrapped_components
+        )
+        if (
+            kind not in _ALLOWED_COMPONENTS
+            and not declared_mechanical
+            and not declared_wrap_component
+        ):
             raise ValueError(f"unreviewed constrained muscle component: {kind}")
         if osim.Controller.safeDownCast(component) is not None:
             raise ValueError("source controller is forbidden in excitation replay")
@@ -172,6 +196,7 @@ def _owned_prepared(
     declaration: DeclaredColdStart,
     grid: NDArray[np.float64],
     controls: Mapping[str, NDArray[np.float64]],
+    wrapped_path_declaration: WrappedPathDeclaration | None = None,
 ) -> Any:
     """Yield a fresh model with one time-only player and explicit lock recipe."""
     from contextlib import contextmanager
@@ -188,7 +213,12 @@ def _owned_prepared(
 
         def before_initialize(model: Any) -> None:
             model.finalizeConnections()
-            _audit_source_components(model, model.getMuscles(), declaration)
+            _audit_source_components(
+                model,
+                model.getMuscles(),
+                declaration,
+                wrapped_path_declaration=wrapped_path_declaration,
+            )
             muscles = model.getMuscles()
             names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
             if len(set(names)) != len(names) or set(names) != set(controls):
@@ -226,9 +256,14 @@ def _bundle_for(
     grid: NDArray[np.float64],
     controls: Mapping[str, NDArray[np.float64]],
     experiment_id: str,
+    wrapped_path_declaration: WrappedPathDeclaration | None = None,
 ) -> ExperimentReplayBundle:
     contracts = native_replay_contract_types()
-    with _owned_prepared(declaration, grid, controls) as (model, state, _audit):
+    with _owned_prepared(declaration, grid, controls, wrapped_path_declaration) as (
+        model,
+        state,
+        _audit,
+    ):
         muscles = model.getMuscles()
         names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
         state_names = tuple(declaration.named_state)
@@ -256,7 +291,13 @@ def _bundle_for(
             initialization_policy_version=_VERSION,
             contact_policy_id="native-coupler-lock-no-contact",
             contact_policy_version=_VERSION,
-            contact_policy_sha256=_admission_identity(declaration, adapter_sha),
+            contact_policy_sha256=_admission_identity(
+                declaration,
+                adapter_sha,
+                wrapped_path_declaration.declaration_sha256
+                if wrapped_path_declaration is not None
+                else None,
+            ),
         )
         values = tuple(
             (name, (declaration.named_state[name],)) for name in state_names
@@ -287,6 +328,7 @@ def build_constrained_muscle_bundle(
     excitations: Mapping[str, NDArray[np.float64]],
     *,
     experiment_id: str = "native-constrained-muscle-replay",
+    wrapped_path_declaration: WrappedPathDeclaration | None = None,
 ) -> ExperimentReplayBundle:
     """Bind native source, complete initial muscle state and declared constraints."""
     if (
@@ -303,11 +345,20 @@ def build_constrained_muscle_bundle(
     )
     if grid[0] != declaration.time_seconds or grid[0] != 0.0:
         raise ValueError("T01 constrained muscle clock must start at zero")
-    return _bundle_for(declaration, grid, controls, experiment_id)
+    return _bundle_for(
+        declaration,
+        grid,
+        controls,
+        experiment_id,
+        wrapped_path_declaration,
+    )
 
 
 def replay_constrained_muscle_bundle(
-    bundle: ExperimentReplayBundle, declaration: DeclaredColdStart
+    bundle: ExperimentReplayBundle,
+    declaration: DeclaredColdStart,
+    *,
+    wrapped_path_declaration: WrappedPathDeclaration | None = None,
 ) -> ConstrainedMuscleReplay:
     """Independently reconstruct and replay the same frozen excitation policy."""
     import opensim as osim
@@ -330,7 +381,11 @@ def replay_constrained_muscle_bundle(
         snapshot.write_bytes(raw)
         frozen = replace(declaration, model_path=snapshot)
         expected = build_constrained_muscle_bundle(
-            frozen, grid, controls, experiment_id=bundle.experiment_id
+            frozen,
+            grid,
+            controls,
+            experiment_id=bundle.experiment_id,
+            wrapped_path_declaration=wrapped_path_declaration,
         )
         for field in (
             "model",
@@ -343,7 +398,11 @@ def replay_constrained_muscle_bundle(
                 raise ValueError(
                     "native constrained muscle policy or input identity differs"
                 )
-        with _owned_prepared(frozen, grid, controls) as (model, state, initial_audit):
+        with _owned_prepared(frozen, grid, controls, wrapped_path_declaration) as (
+            model,
+            state,
+            initial_audit,
+        ):
             muscles = model.getMuscles()
             names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
             state_names = tuple(declaration.named_state)

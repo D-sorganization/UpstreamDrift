@@ -1,0 +1,70 @@
+# Native Wrapped-Path Closure
+
+This provisional F07 calculation records the opt-in source closure for native
+OpenSim muscle paths that use wrapping geometry. It establishes a narrow
+software-admission and native-observation contract. It does not establish
+anatomical correctness, physiological plausibility, path worklessness, guide
+work bounds, contact or grip, or an accepted full-capture endpoint. Publication
+remains blocked.
+
+## Exact Source Declaration
+
+For a model byte sequence $B$, the source identity is
+$h_s = \operatorname{SHA256}(B)$. The declaration binds $h_s$ and an ordered,
+duplicate-free inventory of supported native components. Each wrap object
+records its absolute component path, concrete type, parent frame, translation,
+body-fixed XYZ rotation, active flag, quadrant, dimensions, and hash of its
+native component serialization. The current shape profile is limited to
+`WrapCylinder`, `WrapEllipsoid`, and `WrapSphere`.
+
+Each `PathWrap` records its absolute path and owner, exact target path and name,
+method, range, and component serialization hash. Its target must be one of the
+declared wrap objects. The current method profile is `hybrid`; the range is
+either the native `(-1, -1)` sentinel or an ordered pair of nonnegative integer
+indices. Each `ConditionalPathPoint` records its owner, exact coordinate path,
+strictly increasing active range, and component serialization hash. All
+floating-point geometry and range values must be finite. These checks close
+the named source declarations; they do not prove the target geometry is
+anatomically correct.
+
+Before constrained replay, the native model is reloaded and its complete
+declaration is compared to the caller's source-bound declaration. Any source
+hash change, unsupported shape or method, unresolved target, mismatched target
+name/path, or changed component serialization blocks execution. In the default
+path, wrapped components remain rejected unless the caller explicitly supplies
+the typed declaration. The declaration hash is retained in the replay
+admission identity so it cannot be silently substituted on replay.
+
+## Native Route Observation
+
+When a reference state is supplied, the audit reuses the maintained native
+reference observer to report the actual evaluated route and conditional-point
+state. The observation is tied to the same source hash and does not alter the
+source, repair a route, or extrapolate beyond sampled states. A route observed
+at one state does not prove global path smoothness or worklessness over a full
+coordinate chart. Missing global route-transition and guide-work evidence is
+an unqualified diagnostic finding requiring the shared explicit diagnostic
+opt-in in Chapter 56; it does not authorize a physiological claim.
+
+Nonfinite geometry, an inconsistent native path, or a failed source closure is
+an execution blocker. Unqualified work or transition evidence is recorded
+separately from execution viability. This profile does not admit nonlinear
+`MovingPathPoint` laws, generalized `CustomJoint` functions, contact forces, or
+other unreviewed components; their complete typed native source closure remains
+a separate dependency.
+
+## Native Fixture Evidence and Limits
+
+`tests/opensim/test_native_wrapped_path.py` exercises actual OpenSim 4.6 native
+wrapping for cylinders, ellipsoids, and spheres; verifies source-hash and
+PathWrap-link mutation rejection; observes a conditional path point on both
+sides of its declared range; verifies default rejection; and performs an
+opt-in constrained replay. These fixtures establish implementation behavior
+for the declared synthetic cases only. They do not validate external model
+resources, the frozen full-body capture, global route work budgets, or human
+muscle limits.
+
+The shared diagnostic contract in Chapter 56 is a dependency for runner-level
+request serialization and finding aggregation. Until that dependency is
+integrated and the governed checks pass, this chapter remains provisional and
+the calculation inventory is not promoted.

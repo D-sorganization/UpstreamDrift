@@ -1,3 +1,18 @@
+# Native Wrapped-Path Closure Handoff — #12234
+
+`native_wrapped_path.py` carries a source-hash-bound declaration for
+WrapCylinder/WrapEllipsoid/WrapSphere geometry, exact PathWrap targets and
+owners, and ConditionalPathPoint coordinate ranges. The constrained muscle
+path remains default-reject unless the caller supplies the declaration. Native
+reference observation reports the evaluated route without changing it. It
+does not prove global worklessness or guide-work bounds and makes no
+physiological claim. Eleven OpenSim 4.6 wrapped-path fixtures pass; the
+existing coupled Moco solver fixture passes when `CASADIPATH` and single-thread
+BLAS variables point to the pinned SDK runtime. The shared Chapter 56 typed
+findings/request integration is pending and is a merge dependency before this
+lane is publishable. See provisional Chapter 57 and
+`docs/development/native_wrapped_path_diagnostic.qmd`.
+
 # Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
 
 - Branch `claude/12039-drake-address-parity`. Drake's dual-grip weld rotation row was the small-angle vee with Jacobian `J_a - J_b` (up to 0.84 off finite differences); MuJoCo's is the principal log with its exact Jacobian. Both now use `full_body_ik._closure_rotation_row`; Drake `closure_error` reports the principal angle. Tests: `tests/unit/motion_matching/test_drake_mujoco_ik_parity.py`.
