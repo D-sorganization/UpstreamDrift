@@ -439,12 +439,46 @@ def marker_seeds(
     return {label: seeds[label] for label in tracked_labels()}
 
 
+def scale_leg_mass(
+    bodies: Mapping[str, dict[str, Any]], leg_mass_kg: float
+) -> dict[str, dict[str, Any]]:
+    """Scale the ``read_osim`` leg bodies to a total of ``leg_mass_kg`` (#12199).
+
+    Every leg body's mass and inertia take one factor, so the Rajagopal mass
+    distribution, centres of mass and geometry are kept (uniform density
+    scaling). Other bodies are returned unchanged.
+
+    Raises:
+        ValueError: ``leg_mass_kg`` is not a positive finite number.
+    """
+    if not np.isfinite(leg_mass_kg) or leg_mass_kg <= 0:
+        raise ValueError(f"leg mass must be positive and finite, got {leg_mass_kg}")
+    legs = {f"{name}_{side}" for name in LEG_BODIES for side in ("r", "l")}
+    factor = leg_mass_kg / sum(bodies[name]["mass"] for name in legs)
+    return {
+        name: (
+            {**body, "mass": body["mass"] * factor, "inertia": body["inertia"] * factor}
+            if name in legs
+            else body
+        )
+        for name, body in bodies.items()
+    }
+
+
+def _body_mass_without_club(document: Mapping[str, Any]) -> float:
+    solids = sum(s["mass_kg"] for b in document["bodies"] for s in b["solids"])
+    return float(solids - document["club"]["total_mass_kg"])
+
+
 def _build_aligned_leg_extension(
     osim_path: Path,
     stature_m: float,
     hip_frame: dict[str, Any],
+    leg_mass_kg: float | None = None,
 ) -> tuple[Any, list[str], float]:
     bodies, joints = read_osim(osim_path)
+    if leg_mass_kg is not None:
+        bodies = scale_leg_mass(bodies, leg_mass_kg)
     rotation, hip_half = pelvis_alignment_for(stature_m)
     hips = np.array(
         [joints["hip_r"]["parent_translation"], joints["hip_l"]["parent_translation"]]
@@ -631,6 +665,13 @@ def compose_anthropometric_document(
     the club's ``Clubhead`` marker file (``assets.get_club_markers``); a
     non-driver club without one raises ``ValueError``. Postcondition: the
     document passed ``validate_full_body_spec`` inside ``derive_full_body_spec``.
+
+    ``match_subject_mass`` (kwarg, default ``False``) scales the Rajagopal
+    legs with :func:`scale_leg_mass` so that the body mass without the club
+    equals ``mass_kg`` (#12199); the legs carry what the upper body does not.
+    It raises ``ValueError`` when the upper body alone reaches ``mass_kg``.
+    Without it the legs keep the reference Rajagopal masses, which the
+    capture reference builds and their receipts pin.
     """
     trunk_scale = float(kwargs.get("trunk_scale", 1.0))
     arm_scale = float(kwargs.get("arm_scale", 1.0))
@@ -656,8 +697,13 @@ def compose_anthropometric_document(
     )
 
     hip_frame = next(f for f in upper["frames"] if f["name"] == "Hip")
+    leg_mass_kg = (
+        mass_kg - _body_mass_without_club(upper)
+        if kwargs.get("match_subject_mass", False)
+        else None
+    )
     extension, notes, hip_half = _build_aligned_leg_extension(
-        osim_path, stature_m, hip_frame
+        osim_path, stature_m, hip_frame, leg_mass_kg
     )
     contact = _create_contact_spec()
     club_offsets, club_markers_path = _club_marker_offsets(
@@ -669,6 +715,11 @@ def compose_anthropometric_document(
         if club_markers_path
         else ""
     )
+    if leg_mass_kg is not None:
+        club_note += (
+            f"; Rajagopal legs scaled to {leg_mass_kg:.3f} kg so the body "
+            "without the club matches the subject mass (#12199)"
+        )
 
     document = derive_full_body_spec(
         upper,
