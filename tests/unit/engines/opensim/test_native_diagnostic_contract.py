@@ -8,6 +8,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_diagnostic_
     ExecutionEffect,
     NativeDiagnosticFinding,
     NativeDiagnosticPolicy,
+    NativeQualificationContext,
     PhysicalQualification,
     RuntimePhase,
     RuntimeViability,
@@ -38,6 +39,27 @@ def _finding(
     )
 
 
+def _execution_audits() -> tuple[NativeDiagnosticFinding, ...]:
+    return tuple(
+        NativeDiagnosticFinding(
+            code=code,
+            source_sha256=SOURCE,
+            execution_effect=ExecutionEffect.PROCEED,
+            qualification_effect=QualificationEffect.OBSERVATION,
+        )
+        for code in (
+            DiagnosticCode.NATIVE_SOURCE_IDENTITY_VERIFIED,
+            DiagnosticCode.NATIVE_STATE_RECONSTRUCTED,
+            DiagnosticCode.NATIVE_CONSTRAINTS_RECONSTRUCTED,
+            DiagnosticCode.NATIVE_INPUT_BINDINGS_VERIFIED,
+            DiagnosticCode.NATIVE_MARKER_BINDINGS_VERIFIED,
+            DiagnosticCode.NATIVE_PHYSICAL_INERTIA_ADMITTED,
+            DiagnosticCode.NATIVE_MECHANICS_EVALUATED,
+            DiagnosticCode.NATIVE_SHORT_PROBE_COMPLETED,
+        )
+    )
+
+
 def test_qualification_finding_is_independent_and_requires_source_bound_opt_in() -> (
     None
 ):
@@ -57,10 +79,11 @@ def test_qualification_finding_is_independent_and_requires_source_bound_opt_in()
     opted_in = assess_native_diagnostic(
         REQUEST,
         SOURCE,
-        (finding,),
+        (finding, *_execution_audits()),
         policy=policy,
         runtime_viability=RuntimeViability.VIABLE,
         runtime_phase=RuntimePhase.SHORT_CAPABILITY_PROBE,
+        runtime_window_seconds=(0.0, 0.01),
         native_runtime_sha256="e" * 64,
         runtime_evidence_sha256="d" * 64,
     )
@@ -112,6 +135,7 @@ def test_explicit_opt_in_never_waives_execution_blockers() -> None:
         policy=policy,
         runtime_viability=RuntimeViability.VIABLE,
         runtime_phase=RuntimePhase.SHORT_CAPABILITY_PROBE,
+        runtime_window_seconds=(0.0, 0.01),
         native_runtime_sha256="e" * 64,
         runtime_evidence_sha256="d" * 64,
     )
@@ -157,6 +181,43 @@ def test_policy_cannot_opt_in_to_a_blocking_finding() -> None:
         )
 
 
+def test_qualification_context_binds_allowed_codes_to_evidence_provenance() -> None:
+    finding = NativeDiagnosticFinding(
+        code=DiagnosticCode.SUPPORT_CONTACT_GRIP_UNQUALIFIED,
+        source_sha256=SOURCE,
+        evidence_sha256="c" * 64,
+        execution_effect=ExecutionEffect.PROCEED,
+        qualification_effect=QualificationEffect.UNQUALIFIED,
+    )
+    context = NativeQualificationContext(
+        source_sha256=SOURCE,
+        findings=(finding,),
+        provenance_references=(("c" * 64, ("private://component-inventory",)),),
+    )
+    assert context.findings == (finding,)
+
+    with pytest.raises(ValueError, match="lacks provenance"):
+        NativeQualificationContext(
+            source_sha256=SOURCE,
+            findings=(finding,),
+            provenance_references=(("d" * 64, ("private://other",)),),
+        )
+
+    blocking = NativeDiagnosticFinding(
+        code=DiagnosticCode.NATIVE_SOURCE_IDENTITY_INVALID,
+        source_sha256=SOURCE,
+        evidence_sha256="c" * 64,
+        execution_effect=ExecutionEffect.BLOCK,
+        qualification_effect=QualificationEffect.NONE,
+    )
+    with pytest.raises(ValueError, match="code or evidence"):
+        NativeQualificationContext(
+            source_sha256=SOURCE,
+            findings=(blocking,),
+            provenance_references=(("c" * 64, ("private://source",)),),
+        )
+
+
 def test_nonviable_or_unattempted_native_trajectory_cannot_run_optimizer() -> None:
     finding = _finding()
     policy = NativeDiagnosticPolicy(
@@ -177,6 +238,9 @@ def test_nonviable_or_unattempted_native_trajectory_cannot_run_optimizer() -> No
                 if viability is RuntimeViability.NOT_ATTEMPTED
                 else RuntimePhase.SHORT_CAPABILITY_PROBE
             ),
+            runtime_window_seconds=(
+                None if viability is RuntimeViability.NOT_ATTEMPTED else (0.0, 0.01)
+            ),
             native_runtime_sha256=(
                 None if viability is RuntimeViability.NOT_ATTEMPTED else "e" * 64
             ),
@@ -195,6 +259,7 @@ def test_viable_runtime_requires_phase_and_both_exact_evidence_identities() -> N
             (),
             runtime_viability=RuntimeViability.VIABLE,
             runtime_phase=RuntimePhase.SHORT_CAPABILITY_PROBE,
+            runtime_window_seconds=(0.0, 0.01),
             runtime_evidence_sha256="d" * 64,
         )
 
@@ -204,6 +269,7 @@ def test_viable_runtime_requires_phase_and_both_exact_evidence_identities() -> N
         (),
         runtime_viability=RuntimeViability.VIABLE,
         runtime_phase=RuntimePhase.OPTIMIZATION,
+        runtime_window_seconds=(0.0, 0.01),
         native_runtime_sha256="e" * 64,
         runtime_evidence_sha256="d" * 64,
     )

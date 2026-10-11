@@ -19,6 +19,14 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_moco_runner
     prepare_native_moco,
     solve_native_moco,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.native_diagnostic_contract import (
+    DiagnosticCode,
+    ExecutionEffect,
+    NativeDiagnosticFinding,
+    NativeDiagnosticPolicy,
+    NativeQualificationContext,
+    QualificationEffect,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.native_moco_replay import (
     export_native_moco_bundle,
     replay_native_moco_bundle,
@@ -158,6 +166,84 @@ def test_file_request_explicit_opt_in_round_trips(
         request.identity_sha256
         == replace(ordinary, allow_unqualified_passive_diagnostic=True).identity_sha256
     )
+
+
+def test_typed_source_bound_policy_round_trips_without_changing_default_identity(
+    muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
+) -> None:
+    ordinary = _request(muscle_fixture, tmp_path)
+    assert ordinary.identity_sha256 == replace(ordinary).identity_sha256
+    path = tmp_path / "typed-policy.json"
+    _write_request(ordinary, path)
+    payload = json.loads(path.read_text())
+    payload["diagnostic_policy"] = {
+        "source_sha256": ordinary.model_sha256,
+        "allowed_unqualified_findings": ["passive_policy_unavailable"],
+        "provenance": "reviewed bounded diagnostic request",
+    }
+    path.write_text(json.dumps(payload))
+
+    loaded = load_native_moco_request(path)
+
+    assert loaded.diagnostic_policy == NativeDiagnosticPolicy(
+        source_sha256=ordinary.model_sha256,
+        allowed_unqualified_findings=(DiagnosticCode.PASSIVE_POLICY_UNAVAILABLE,),
+        provenance="reviewed bounded diagnostic request",
+    )
+    assert loaded.identity_sha256 != ordinary.identity_sha256
+    assert loaded.effective_diagnostic_policy == loaded.diagnostic_policy
+
+
+def test_source_bound_qualification_context_round_trips_strictly(
+    muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
+) -> None:
+    ordinary = _request(muscle_fixture, tmp_path)
+    evidence = "c" * 64
+    context = NativeQualificationContext(
+        source_sha256=ordinary.model_sha256,
+        findings=(
+            NativeDiagnosticFinding(
+                code=DiagnosticCode.SUPPORT_CONTACT_GRIP_UNQUALIFIED,
+                source_sha256=ordinary.model_sha256,
+                evidence_sha256=evidence,
+                execution_effect=ExecutionEffect.PROCEED,
+                qualification_effect=QualificationEffect.UNQUALIFIED,
+            ),
+        ),
+        provenance_references=((evidence, ("private://component-inventory",)),),
+    )
+    with_context = replace(ordinary, qualification_context=context)
+    path = tmp_path / "qualification-context.json"
+    _write_request(ordinary, path)
+    payload = json.loads(path.read_text())
+    payload["qualification_context"] = {
+        "source_sha256": context.source_sha256,
+        "findings": [
+            {
+                "code": context.findings[0].code.value,
+                "source_sha256": context.findings[0].source_sha256,
+                "evidence_sha256": evidence,
+                "execution_effect": "proceed",
+                "qualification_effect": "unqualified",
+            }
+        ],
+        "provenance_references": [
+            {
+                "evidence_sha256": evidence,
+                "references": ["private://component-inventory"],
+            }
+        ],
+    }
+    path.write_text(json.dumps(payload))
+    loaded = load_native_moco_request(path)
+    assert loaded.qualification_context == context
+    assert loaded.identity_sha256 == with_context.identity_sha256
+    assert loaded.identity_sha256 != ordinary.identity_sha256
+
+    payload["qualification_context"]["findings"][0]["execution_effect"] = "block"
+    path.write_text(json.dumps(payload))
+    with pytest.raises(ValueError, match="effect is not registered"):
+        load_native_moco_request(path)
 
 
 def test_supplied_limits_cannot_be_overridden_by_diagnostic_disposition(

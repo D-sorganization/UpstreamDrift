@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import hashlib
 import json
 from pathlib import Path
@@ -22,6 +22,12 @@ from .native_moco_runner import (
     _sha,
     _require_current_inputs,
     _solution_names,
+)
+from .native_diagnostic_contract import (
+    NativeDiagnosticAssessment,
+    RuntimePhase,
+    RuntimeViability,
+    native_diagnostic_assessment_from_json_dict,
 )
 from .native_muscle_bundle import (
     build_native_muscle_replay_bundle,
@@ -54,6 +60,7 @@ class NativeMocoExport:
     output_times: NDArray[np.float64]
     wall_seconds: float
     cpu_seconds: float
+    diagnostic_assessment: NativeDiagnosticAssessment | None = None
 
 
 @dataclass(frozen=True)
@@ -72,6 +79,7 @@ class NativeMocoScore:
     wall_seconds: float
     cpu_seconds: float
     qualification: str = "synthetic-or-exploratory-executed-match-only"
+    diagnostic_assessment: NativeDiagnosticAssessment | None = None
 
 
 def _solution(
@@ -227,6 +235,7 @@ def export_native_moco_bundle(
         output,
         time.perf_counter() - wall,
         time.process_time() - cpu,
+        solved.diagnostic_assessment,
     )
     (directory / "export.json").write_text(
         json.dumps(
@@ -325,6 +334,15 @@ def replay_native_moco_bundle(
             applied_excitations=result.applied_excitations,
         )
     np.savez(evidence, **arrays)
+    if exported.diagnostic_assessment is None:
+        raise ValueError("Native export lost its typed diagnostic assessment")
+    replay_assessment = replace(
+        exported.diagnostic_assessment,
+        runtime_viability=RuntimeViability.VIABLE,
+        runtime_phase=RuntimePhase.FULL_REPLAY,
+        runtime_window_seconds=(float(result.times[0]), float(result.times[-1])),
+        runtime_evidence_sha256=_sha(evidence),
+    )
     (directory / "replay.json").write_text(
         json.dumps(
             {
@@ -335,6 +353,7 @@ def replay_native_moco_bundle(
                 "wall_seconds": time.perf_counter() - wall,
                 "cpu_seconds": time.process_time() - cpu,
                 "qualification": "independent-native-input-reproduction-only",
+                "diagnostic_assessment": replay_assessment.to_json_dict(),
             },
             indent=2,
             allow_nan=False,
@@ -436,6 +455,17 @@ def score_native_moco_replay(
     objective = solved.objective
     if objective is None or not np.isfinite(objective):
         raise ValueError("Saved native solution has no finite objective")
+    replay_receipt = json.loads((directory / "replay.json").read_text(encoding="utf-8"))
+    replay_assessment = native_diagnostic_assessment_from_json_dict(
+        replay_receipt["diagnostic_assessment"]
+    )
+    if (
+        replay_assessment.request_sha256 != request.identity_sha256
+        or replay_assessment.source_sha256 != request.model_sha256
+    ):
+        raise ValueError(
+            "Native replay diagnostic assessment is bound to another request"
+        )
     result = NativeMocoScore(
         rmse,
         int(capture.valid.sum()),
@@ -448,6 +478,7 @@ def score_native_moco_replay(
         geometry_sha,
         time.perf_counter() - wall,
         time.process_time() - cpu,
+        diagnostic_assessment=replay_assessment,
     )
     (directory / "score.json").write_text(
         json.dumps(asdict(result), indent=2, allow_nan=False) + "\n",

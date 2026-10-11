@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass
 from enum import StrEnum
 import hashlib
 import json
+import math
 import re
 
 
@@ -63,6 +64,19 @@ class DiagnosticCode(StrEnum):
     NATIVE_REPLAY_CAPABILITY_UNAVAILABLE = "native_replay_capability_unavailable"
     NATIVE_OBSERVATION_INVALID = "native_observation_invalid"
     NATIVE_CHART_PROOF_UNAVAILABLE = "native_chart_proof_unavailable"
+    NATIVE_SOURCE_IDENTITY_VERIFIED = "native_source_identity_verified"
+    NATIVE_STATE_RECONSTRUCTED = "native_state_reconstructed"
+    NATIVE_CONSTRAINTS_RECONSTRUCTED = "native_constraints_reconstructed"
+    NATIVE_INPUT_BINDINGS_VERIFIED = "native_input_bindings_verified"
+    NATIVE_MARKER_BINDINGS_VERIFIED = "native_marker_bindings_verified"
+    NATIVE_PHYSICAL_INERTIA_ADMITTED = "native_physical_inertia_admitted"
+    NATIVE_MECHANICS_EVALUATED = "native_mechanics_evaluated"
+    NATIVE_SHORT_PROBE_COMPLETED = "native_short_probe_completed"
+    SOURCE_CONDITIONAL_ANATOMICAL_HYPOTHESIS = (
+        "source_conditional_anatomical_hypothesis"
+    )
+    SUPPORT_CONTACT_GRIP_UNQUALIFIED = "support_contact_grip_unqualified"
+    MARKER_REGISTRATION_PROVISIONAL = "marker_registration_provisional"
 
 
 class DiagnosticSoftwareAdmission(StrEnum):
@@ -224,7 +238,74 @@ _EXPECTED_EFFECTS: dict[DiagnosticCode, tuple[ExecutionEffect, QualificationEffe
         ExecutionEffect.REQUIRES_OPT_IN,
         QualificationEffect.UNQUALIFIED,
     ),
+    DiagnosticCode.NATIVE_SOURCE_IDENTITY_VERIFIED: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.OBSERVATION,
+    ),
+    DiagnosticCode.NATIVE_STATE_RECONSTRUCTED: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.OBSERVATION,
+    ),
+    DiagnosticCode.NATIVE_CONSTRAINTS_RECONSTRUCTED: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.OBSERVATION,
+    ),
+    DiagnosticCode.NATIVE_INPUT_BINDINGS_VERIFIED: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.OBSERVATION,
+    ),
+    DiagnosticCode.NATIVE_MARKER_BINDINGS_VERIFIED: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.OBSERVATION,
+    ),
+    DiagnosticCode.NATIVE_PHYSICAL_INERTIA_ADMITTED: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.OBSERVATION,
+    ),
+    DiagnosticCode.NATIVE_MECHANICS_EVALUATED: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.OBSERVATION,
+    ),
+    DiagnosticCode.NATIVE_SHORT_PROBE_COMPLETED: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.OBSERVATION,
+    ),
+    DiagnosticCode.SOURCE_CONDITIONAL_ANATOMICAL_HYPOTHESIS: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.UNQUALIFIED,
+    ),
+    DiagnosticCode.SUPPORT_CONTACT_GRIP_UNQUALIFIED: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.UNQUALIFIED,
+    ),
+    DiagnosticCode.MARKER_REGISTRATION_PROVISIONAL: (
+        ExecutionEffect.PROCEED,
+        QualificationEffect.UNQUALIFIED,
+    ),
 }
+
+_REQUIRED_EXECUTION_AUDITS = frozenset(
+    {
+        DiagnosticCode.NATIVE_SOURCE_IDENTITY_VERIFIED,
+        DiagnosticCode.NATIVE_STATE_RECONSTRUCTED,
+        DiagnosticCode.NATIVE_CONSTRAINTS_RECONSTRUCTED,
+        DiagnosticCode.NATIVE_INPUT_BINDINGS_VERIFIED,
+        DiagnosticCode.NATIVE_MARKER_BINDINGS_VERIFIED,
+        DiagnosticCode.NATIVE_PHYSICAL_INERTIA_ADMITTED,
+        DiagnosticCode.NATIVE_MECHANICS_EVALUATED,
+        DiagnosticCode.NATIVE_SHORT_PROBE_COMPLETED,
+    }
+)
+
+
+def diagnostic_effects(
+    code: DiagnosticCode,
+) -> tuple[ExecutionEffect, QualificationEffect]:
+    """Return the immutable registry disposition for a validated diagnostic code."""
+    if not isinstance(code, DiagnosticCode):
+        raise TypeError("diagnostic code must be a DiagnosticCode")
+    return _EXPECTED_EFFECTS[code]
+
 
 _OPT_IN_CODES = frozenset(
     code
@@ -306,6 +387,61 @@ class NativeDiagnosticPolicy:
 
 
 @dataclass(frozen=True)
+class NativeQualificationContext:
+    """Optional source-specific physical gaps with exact evidence provenance."""
+
+    source_sha256: str
+    findings: tuple[NativeDiagnosticFinding, ...]
+    provenance_references: tuple[tuple[str, tuple[str, ...]], ...]
+
+    def __post_init__(self) -> None:
+        _require_sha256(self.source_sha256, "qualification context source SHA-256")
+        if not isinstance(self.findings, tuple) or not self.findings:
+            raise ValueError("qualification context requires typed findings")
+        if (
+            not isinstance(self.provenance_references, tuple)
+            or not self.provenance_references
+        ):
+            raise ValueError("qualification context requires provenance references")
+        provenance_by_evidence: dict[str, tuple[str, ...]] = {}
+        for evidence_sha256, references in self.provenance_references:
+            _require_sha256(evidence_sha256, "qualification evidence SHA-256")
+            if (
+                not isinstance(references, tuple)
+                or not references
+                or any(
+                    not isinstance(reference, str) or not reference.strip()
+                    for reference in references
+                )
+            ):
+                raise ValueError(
+                    "each qualification evidence digest requires provenance"
+                )
+            provenance_by_evidence[evidence_sha256] = references
+        allowed = {
+            DiagnosticCode.SOURCE_CONDITIONAL_ANATOMICAL_HYPOTHESIS,
+            DiagnosticCode.SUPPORT_CONTACT_GRIP_UNQUALIFIED,
+            DiagnosticCode.MARKER_REGISTRATION_PROVISIONAL,
+        }
+        for finding in self.findings:
+            if not isinstance(finding, NativeDiagnosticFinding):
+                raise TypeError("qualification context findings must be typed")
+            if finding.source_sha256 != self.source_sha256:
+                raise ValueError("qualification finding source differs from context")
+            if finding.code not in allowed or finding.evidence_sha256 is None:
+                raise ValueError(
+                    "qualification context code or evidence is unsupported"
+                )
+            if finding.evidence_sha256 not in provenance_by_evidence:
+                raise ValueError("qualification finding evidence lacks provenance")
+            if _EXPECTED_EFFECTS[finding.code] != (
+                finding.execution_effect,
+                finding.qualification_effect,
+            ):
+                raise ValueError("qualification finding differs from registry effects")
+
+
+@dataclass(frozen=True)
 class NativeDiagnosticAssessment:
     """Three independent outcomes retained with the exact request and source."""
 
@@ -316,10 +452,13 @@ class NativeDiagnosticAssessment:
     runtime_viability: RuntimeViability
     physical_qualification: PhysicalQualification
     runtime_phase: RuntimePhase | None = None
+    runtime_window_seconds: tuple[float, float] | None = None
     allowed_unqualified_findings: tuple[DiagnosticCode, ...] = ()
     policy_sha256: str | None = None
     native_runtime_sha256: str | None = None
     runtime_evidence_sha256: str | None = None
+    blocker_receipt_sha256: str | None = None
+    qualification_provenance_references: tuple[tuple[str, tuple[str, ...]], ...] = ()
 
     def __post_init__(self) -> None:
         _require_sha256(self.request_sha256, "request SHA-256")
@@ -356,11 +495,41 @@ class NativeDiagnosticAssessment:
             raise TypeError("physical qualification must be a PhysicalQualification")
         if self.native_runtime_sha256 is not None:
             _require_sha256(self.native_runtime_sha256, "native runtime SHA-256")
+        if self.blocker_receipt_sha256 is not None:
+            _require_sha256(self.blocker_receipt_sha256, "blocker receipt SHA-256")
+        if not isinstance(self.qualification_provenance_references, tuple):
+            raise TypeError("qualification provenance references must be typed pairs")
+        provenance = dict(self.qualification_provenance_references)
+        for digest, references in self.qualification_provenance_references:
+            _require_sha256(digest, "qualification provenance evidence SHA-256")
+            if (
+                not isinstance(references, tuple)
+                or not references
+                or any(
+                    not isinstance(reference, str) or not reference.strip()
+                    for reference in references
+                )
+            ):
+                raise ValueError("qualification provenance references must be nonblank")
+        for finding in self.findings:
+            if (
+                finding.code
+                in {
+                    DiagnosticCode.SOURCE_CONDITIONAL_ANATOMICAL_HYPOTHESIS,
+                    DiagnosticCode.SUPPORT_CONTACT_GRIP_UNQUALIFIED,
+                    DiagnosticCode.MARKER_REGISTRATION_PROVISIONAL,
+                }
+                and finding.evidence_sha256 not in provenance
+            ):
+                raise ValueError(
+                    "qualification finding is missing its provenance reference"
+                )
         if self.runtime_viability is RuntimeViability.NOT_ATTEMPTED:
             if (
                 self.runtime_evidence_sha256 is not None
                 or self.native_runtime_sha256 is not None
                 or self.runtime_phase is not None
+                or self.runtime_window_seconds is not None
             ):
                 raise ValueError("unattempted runtime cannot carry execution evidence")
         else:
@@ -372,6 +541,20 @@ class NativeDiagnosticAssessment:
                 raise ValueError("attempted runtime requires native runtime identity")
             if self.runtime_phase is None:
                 raise ValueError("attempted runtime requires an explicit phase")
+            if (
+                not isinstance(self.runtime_window_seconds, tuple)
+                or len(self.runtime_window_seconds) != 2
+                or any(
+                    isinstance(value, bool)
+                    or not isinstance(value, (float, int))
+                    or not math.isfinite(value)
+                    for value in self.runtime_window_seconds
+                )
+                or self.runtime_window_seconds[1] <= self.runtime_window_seconds[0]
+            ):
+                raise ValueError(
+                    "attempted runtime requires an exact finite time window"
+                )
             _require_sha256(self.runtime_evidence_sha256, "runtime evidence SHA-256")
         expected_admission = (
             DiagnosticSoftwareAdmission.BLOCKED
@@ -400,6 +583,10 @@ class NativeDiagnosticAssessment:
         if self.runtime_viability is not RuntimeViability.VIABLE:
             return False
         if self.runtime_phase is not RuntimePhase.SHORT_CAPABILITY_PROBE:
+            return False
+        if not _REQUIRED_EXECUTION_AUDITS.issubset(
+            {finding.code for finding in self.findings}
+        ):
             return False
         allowed = set(self.allowed_unqualified_findings)
         return all(
@@ -430,6 +617,7 @@ class NativeDiagnosticAssessment:
             "runtime_phase": (
                 None if self.runtime_phase is None else self.runtime_phase.value
             ),
+            "runtime_window_seconds": self.runtime_window_seconds,
             "physical_qualification": self.physical_qualification.value,
             "explicit_opt_in": self.explicit_opt_in,
             "allowed_unqualified_findings": sorted(
@@ -439,7 +627,88 @@ class NativeDiagnosticAssessment:
             "execution_permitted": self.execution_permitted,
             "native_runtime_sha256": self.native_runtime_sha256,
             "runtime_evidence_sha256": self.runtime_evidence_sha256,
+            "blocker_receipt_sha256": self.blocker_receipt_sha256,
+            "qualification_provenance_references": [
+                {"evidence_sha256": digest, "references": references}
+                for digest, references in self.qualification_provenance_references
+            ],
         }
+
+
+def native_diagnostic_assessment_from_json_dict(
+    payload: dict[str, object],
+) -> NativeDiagnosticAssessment:
+    """Revalidate a serialized assessment instead of trusting receipt JSON."""
+    required = {
+        "request_sha256",
+        "source_sha256",
+        "findings",
+        "software_admission",
+        "runtime_viability",
+        "runtime_phase",
+        "runtime_window_seconds",
+        "physical_qualification",
+        "allowed_unqualified_findings",
+        "policy_sha256",
+        "native_runtime_sha256",
+        "runtime_evidence_sha256",
+        "blocker_receipt_sha256",
+        "qualification_provenance_references",
+    }
+    if not isinstance(payload, dict) or set(payload) != required | {
+        "explicit_opt_in",
+        "execution_permitted",
+    }:
+        raise ValueError(
+            "serialized native assessment fields are incomplete or unknown"
+        )
+    if not isinstance(payload["findings"], list):
+        raise ValueError("serialized assessment findings must be an array")
+    findings: list[NativeDiagnosticFinding] = []
+    for raw in payload["findings"]:
+        if not isinstance(raw, dict):
+            raise ValueError("serialized assessment finding must be an object")
+        findings.append(
+            NativeDiagnosticFinding(
+                code=DiagnosticCode(raw["code"]),
+                source_sha256=raw["source_sha256"],
+                component_path=raw["component_path"],
+                evidence_sha256=raw["evidence_sha256"],
+                execution_effect=ExecutionEffect(raw["execution_effect"]),
+                qualification_effect=QualificationEffect(raw["qualification_effect"]),
+            )
+        )
+    raw_refs = payload["qualification_provenance_references"]
+    if not isinstance(raw_refs, list):
+        raise ValueError("serialized qualification provenance must be an array")
+    provenance = tuple(
+        (item["evidence_sha256"], tuple(item["references"]))
+        for item in raw_refs
+        if isinstance(item, dict) and set(item) == {"evidence_sha256", "references"}
+    )
+    if len(provenance) != len(raw_refs):
+        raise ValueError("serialized qualification provenance entry is malformed")
+    window = payload["runtime_window_seconds"]
+    return NativeDiagnosticAssessment(
+        request_sha256=payload["request_sha256"],
+        source_sha256=payload["source_sha256"],
+        findings=tuple(findings),
+        software_admission=DiagnosticSoftwareAdmission(payload["software_admission"]),
+        runtime_viability=RuntimeViability(payload["runtime_viability"]),
+        physical_qualification=PhysicalQualification(payload["physical_qualification"]),
+        runtime_phase=None
+        if payload["runtime_phase"] is None
+        else RuntimePhase(payload["runtime_phase"]),
+        runtime_window_seconds=None if window is None else tuple(window),
+        allowed_unqualified_findings=tuple(
+            DiagnosticCode(code) for code in payload["allowed_unqualified_findings"]
+        ),
+        policy_sha256=payload["policy_sha256"],
+        native_runtime_sha256=payload["native_runtime_sha256"],
+        runtime_evidence_sha256=payload["runtime_evidence_sha256"],
+        blocker_receipt_sha256=payload["blocker_receipt_sha256"],
+        qualification_provenance_references=provenance,
+    )
 
 
 def assess_native_diagnostic(
@@ -450,8 +719,11 @@ def assess_native_diagnostic(
     policy: NativeDiagnosticPolicy | None = None,
     runtime_viability: RuntimeViability = RuntimeViability.NOT_ATTEMPTED,
     runtime_phase: RuntimePhase | None = None,
+    runtime_window_seconds: tuple[float, float] | None = None,
     runtime_evidence_sha256: str | None = None,
     native_runtime_sha256: str | None = None,
+    blocker_receipt_sha256: str | None = None,
+    qualification_provenance_references: tuple[tuple[str, tuple[str, ...]], ...] = (),
 ) -> NativeDiagnosticAssessment:
     """Bind generated findings to a request, exact source and diagnostic policy."""
     _require_sha256(source_sha256, "assessment source SHA-256")
@@ -490,10 +762,13 @@ def assess_native_diagnostic(
         runtime_viability=runtime_viability,
         physical_qualification=physical_qualification,
         runtime_phase=runtime_phase,
+        runtime_window_seconds=runtime_window_seconds,
         allowed_unqualified_findings=allowed,
         policy_sha256=None if policy is None else policy.identity_sha256,
         native_runtime_sha256=native_runtime_sha256,
         runtime_evidence_sha256=runtime_evidence_sha256,
+        blocker_receipt_sha256=blocker_receipt_sha256,
+        qualification_provenance_references=qualification_provenance_references,
     )
 
 
@@ -504,9 +779,12 @@ __all__ = [
     "NativeDiagnosticAssessment",
     "NativeDiagnosticFinding",
     "NativeDiagnosticPolicy",
+    "NativeQualificationContext",
     "PhysicalQualification",
     "QualificationEffect",
     "RuntimePhase",
     "RuntimeViability",
     "assess_native_diagnostic",
+    "diagnostic_effects",
+    "native_diagnostic_assessment_from_json_dict",
 ]

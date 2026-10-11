@@ -15,6 +15,21 @@ from .native_moco_runner import NativeMocoRequest
 from .native_prepared_state import DeclaredColdStart
 from .native_mixed_actuation import ActuationRole, MixedChannel, MixedActuationProfile
 from .native_passive_readiness import MusclePassiveLimits, PassiveReadinessPolicy
+from .native_diagnostic_contract import (
+    DiagnosticCode,
+    ExecutionEffect,
+    NativeDiagnosticFinding,
+    NativeDiagnosticPolicy,
+    NativeQualificationContext,
+    QualificationEffect,
+    diagnostic_effects,
+)
+from .native_wrapped_path import (
+    ConditionalPathPointIdentity,
+    PathWrapIdentity,
+    WrapObjectIdentity,
+    WrappedPathDeclaration,
+)
 from .registration import CaptureRegistration
 
 
@@ -145,6 +160,175 @@ def _parse_mixed_profile(mixed_data: Any) -> MixedActuationProfile | None:
     return mixed
 
 
+def _parse_diagnostic_policy(data: Any) -> NativeDiagnosticPolicy | None:
+    if data is None:
+        return None
+    checked = _keys(
+        data,
+        {"source_sha256", "allowed_unqualified_findings", "provenance"},
+        {"source_sha256", "allowed_unqualified_findings", "provenance"},
+    )
+    findings = checked["allowed_unqualified_findings"]
+    if not isinstance(findings, list) or any(
+        not isinstance(code, str) for code in findings
+    ):
+        raise ValueError("Diagnostic allowlist must be a JSON string array")
+    try:
+        codes = tuple(DiagnosticCode(code) for code in findings)
+    except ValueError as exc:
+        raise ValueError(
+            "Diagnostic allowlist contains an unknown finding code"
+        ) from exc
+    return NativeDiagnosticPolicy(
+        source_sha256=checked["source_sha256"],
+        allowed_unqualified_findings=codes,
+        provenance=checked["provenance"],
+    )
+
+
+def _parse_qualification_context(data: Any) -> NativeQualificationContext | None:
+    if data is None:
+        return None
+    checked = _keys(
+        data,
+        {"source_sha256", "findings", "provenance_references"},
+        {"source_sha256", "findings", "provenance_references"},
+    )
+    if not isinstance(checked["findings"], list) or not isinstance(
+        checked["provenance_references"], list
+    ):
+        raise ValueError("Qualification context findings and references must be arrays")
+    findings: list[NativeDiagnosticFinding] = []
+    for raw in checked["findings"]:
+        item = _keys(
+            raw,
+            {
+                "code",
+                "source_sha256",
+                "component_path",
+                "evidence_sha256",
+                "execution_effect",
+                "qualification_effect",
+            },
+            {"code", "source_sha256", "evidence_sha256"},
+        )
+        try:
+            code = DiagnosticCode(item["code"])
+        except (ValueError, TypeError) as exc:
+            raise ValueError(
+                "Qualification context has an unknown finding code"
+            ) from exc
+        execution, qualification = diagnostic_effects(code)
+        if "execution_effect" in item and item["execution_effect"] != execution.value:
+            raise ValueError("Qualification context execution effect is not registered")
+        if (
+            "qualification_effect" in item
+            and item["qualification_effect"] != qualification.value
+        ):
+            raise ValueError(
+                "Qualification context qualification effect is not registered"
+            )
+        findings.append(
+            NativeDiagnosticFinding(
+                code=code,
+                source_sha256=item["source_sha256"],
+                component_path=item.get("component_path"),
+                evidence_sha256=item["evidence_sha256"],
+                execution_effect=execution,
+                qualification_effect=qualification,
+            )
+        )
+    provenance: list[tuple[str, tuple[str, ...]]] = []
+    for raw_reference in checked["provenance_references"]:
+        item = _keys(
+            raw_reference,
+            {"evidence_sha256", "references"},
+            {"evidence_sha256", "references"},
+        )
+        if not isinstance(item["references"], list):
+            raise ValueError("Qualification provenance references must be arrays")
+        provenance.append((item["evidence_sha256"], tuple(item["references"])))
+    return NativeQualificationContext(
+        source_sha256=checked["source_sha256"],
+        findings=tuple(findings),
+        provenance_references=tuple(provenance),
+    )
+
+
+def _parse_wrapped_path_declaration(data: Any) -> WrappedPathDeclaration | None:
+    if data is None:
+        return None
+    checked = _keys(
+        data,
+        {
+            "schema_version",
+            "source_sha256",
+            "wrap_objects",
+            "path_wraps",
+            "conditional_points",
+        },
+        {
+            "schema_version",
+            "source_sha256",
+            "wrap_objects",
+            "path_wraps",
+            "conditional_points",
+        },
+    )
+    wraps = tuple(
+        WrapObjectIdentity(
+            **{
+                **item,
+                "translation_m": tuple(item["translation_m"]),
+                "xyz_body_rotation_rad": tuple(item["xyz_body_rotation_rad"]),
+                "shape_parameters": tuple(
+                    (str(name), float(value))
+                    for name, value in item["shape_parameters"]
+                ),
+            }
+        )
+        for raw in checked["wrap_objects"]
+        for item in (
+            _keys(
+                raw,
+                {field.name for field in fields(WrapObjectIdentity)},
+                {field.name for field in fields(WrapObjectIdentity)},
+            ),
+        )
+    )
+    path_wraps = tuple(
+        PathWrapIdentity(**{**item, "range_indices": tuple(item["range_indices"])})
+        for raw in checked["path_wraps"]
+        for item in (
+            _keys(
+                raw,
+                {field.name for field in fields(PathWrapIdentity)},
+                {field.name for field in fields(PathWrapIdentity)},
+            ),
+        )
+    )
+    conditional_points = tuple(
+        ConditionalPathPointIdentity(
+            **{**item, "active_range": tuple(item["active_range"])}
+        )
+        for raw in checked["conditional_points"]
+        for item in (
+            _keys(
+                raw,
+                {field.name for field in fields(ConditionalPathPointIdentity)},
+                {field.name for field in fields(ConditionalPathPointIdentity)},
+            ),
+        )
+    )
+    return WrappedPathDeclaration(
+        checked["schema_version"],
+        checked["source_sha256"],
+        wraps,
+        path_wraps,
+        conditional_points,
+    )
+
+
 def load_native_moco_request(path: Path) -> NativeMocoRequest:
     """Read explicit files, mapping and policies without deriving anatomy."""
     request_path = Path(path).resolve()
@@ -206,6 +390,9 @@ def load_native_moco_request(path: Path) -> NativeMocoRequest:
         declared,
         _parse_mixed_profile(payload.get("mixed_actuation")),
         payload.get("allow_unqualified_passive_diagnostic", False),
+        _parse_diagnostic_policy(payload.get("diagnostic_policy")),
+        _parse_wrapped_path_declaration(payload.get("wrapped_path_declaration")),
+        _parse_qualification_context(payload.get("qualification_context")),
     )
 
 
