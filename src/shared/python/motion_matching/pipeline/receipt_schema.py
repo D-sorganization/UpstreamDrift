@@ -35,6 +35,8 @@ from .receipt_components import (
     StaticTrialReport,
     ToeSphereReceipt,
 )
+from src.shared.python.swing_comparison.turn import validate_turn_block
+
 from .receipt_docs import render_receipts_markdown
 from .receipt_provenance import (
     CHAIN_CONTRACT_VERSION as CHAIN_CONTRACT_VERSION,
@@ -318,6 +320,13 @@ def validate_receipt(document: dict[str, Any]) -> Receipt:
         dynamics = document.get("dynamics", {})
         if not isinstance(dynamics, dict) or "reference_zmp" not in dynamics:
             raise ValueError("dynamics.reference_zmp: Field required")
+
+    if "turn" in document:
+        # Structure only (issue #12042): shoulder/trunk/pelvis turn block, no thresholds.
+        try:
+            validate_turn_block(document["turn"])
+        except (TypeError, ValueError) as err:
+            raise ValueError(f"turn: {err}") from err
 
     try:
         return Receipt.model_validate(document)

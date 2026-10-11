@@ -25,6 +25,7 @@ from defusedxml import ElementTree as SafeET
 from src.engines.physics_engines.opensim.python import club_visuals
 from src.shared.python.contracts import ensure, require
 from src.shared.python.model_appearance.club_assembly import ClubAssembly
+from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE, Hand
 from src.shared.python.motion_matching.club_models import (
     DRIVER,
     IRON_7,
@@ -33,11 +34,10 @@ from src.shared.python.motion_matching.club_models import (
 
 VISUAL_FRAME_NAME: str = "club_visual_frame"
 
-# OpenSim hand grip anatomical offsets on the club shaft (metres from butt origin)
-# Hand R (trail hand) is distally placed ~0.06 m down the shaft
-TRAIL_HAND_OFFSET_M: float = -0.06
-# Hand L (lead hand) is proximally placed ~0.025 m down the shaft
-LEAD_HAND_OFFSET_M: float = -0.025
+# OpenSim hand grip offsets on the club shaft (metres from the butt origin, -y
+# toward the head).  Single source: the shared grip pose (OSV-2, #11728).
+TRAIL_HAND_OFFSET_M: float = DEFAULT_GRIP_POSE.club_y_m(Hand.TRAIL)
+LEAD_HAND_OFFSET_M: float = DEFAULT_GRIP_POSE.club_y_m(Hand.LEAD)
 
 
 def has_visual_club(model_input: Path | str | ET.ElementTree) -> bool:
@@ -72,8 +72,8 @@ def get_club_frame_offsets(spec: ClubSpec) -> dict[str, tuple[float, float, floa
     - Origin (0, 0, 0) is at the butt end / grip origin of the shaft.
     - Shaft points along the negative Y axis toward -length_m.
     - Clubhead is positioned at (0, -length_m, 0).
-    - Trail hand (R) grip sits at (0, -0.06, 0).
-    - Lead hand (L) grip sits at (0, -0.025, 0).
+    - Trail hand (R) grip sits at (0, TRAIL_HAND_OFFSET_M, 0).
+    - Lead hand (L) grip sits at (0, LEAD_HAND_OFFSET_M, 0), above the trail hand.
 
     Preconditions:
     - spec must be a valid ClubSpec with length_m > 0.

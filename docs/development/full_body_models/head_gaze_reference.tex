@@ -36,6 +36,24 @@ the common feasible set is $\{0, 0.1, 0.2\}$. At $w = 0.1$, $\gamma$ falls from
 20.2$^\circ$ to 8.5$^\circ$ (driver) and from 18.6$^\circ$ to 6.1$^\circ$ (iron), for
 0.6 and 1.3~mm of marker RMS. Qualified receipts keep $w = 0$. The table and the
 reproduction commands are in \texttt{HEAD\_GAZE\_REFERENCE.md}.
+\section{Forward-Dynamics Neck Tracking}
+With \texttt{--fd-neck gaze}, after the feasibility filters, each frame of the tracked
+reference solves
+$\min_{x} \lVert R_h(q_k; x)\, a - d_k \rVert^2 + \epsilon^2 \lVert x - q_{k,\mathrm{neck}} \rVert^2$,
+$\epsilon = 0.01$, inside the neck ranges, with $R_h$ from the model's own forward
+kinematics and $d_k$ the scheduled direction from the eye point (evaluated twice, the
+second time from the solved neck). The neck columns are low-passed at the tracking cutoff
+and clipped into range. The computed-torque replay then tracks this neck; head markers do
+not drive it, and it is never measured data. Replay schedule error RMS from address to
+impact falls from 20.3$^\circ$ to 1.8$^\circ$ (driver) and from 19.0$^\circ$ to
+1.2$^\circ$ (7-iron). Through the release it is 15.4$^\circ$ and 6.3$^\circ$, because the
+neck reference is open loop and the replay's torso error after impact reaches the head.
+The neck yaw saturates at $\pm 80^\circ$ on 213 and 114 of 654 frames. Head-marker RMS
+doubles. Published head rotation at the top of the backswing is
+$-33.6 \pm 9.1^\circ$ (driver) and $-25.4 \pm 11.1^\circ$ (7-iron) for 12 female
+professionals (Zhang, Liu and Liu 2026, doi:10.3389/fspor.2026.1867187), so tour heads
+turn with the torso. The table, evidence file and commands are in
+\texttt{HEAD\_GAZE\_REFERENCE.md}.
 \section{Results and Limitations}
 See \texttt{HEAD\_GAZE\_REFERENCE.md} for the weight sweep on the capture-A driver
 (marker RMS 28.0 to 33.8~mm; $\theta_{\mathrm{gaze}}$ RMS 21.3$^\circ$ to 0.8$^\circ$ at $w = 10$),

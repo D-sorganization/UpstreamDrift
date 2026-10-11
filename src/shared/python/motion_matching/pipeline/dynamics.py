@@ -38,6 +38,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
 )
 from src.shared.python.motion_matching.pipeline.reference import (
     marker_errors,
+    smooth_lane,
     smooth_reference,
 )
 from src.shared.python.motion_matching.pipeline.fd_phase import (
@@ -83,17 +84,41 @@ def validate_tracking_backend(name: str) -> str:
     return key
 
 
+def lane_reference_zmp(
+    sim: fs.FullBodySimulator, lane: Any, q: np.ndarray
+) -> dict[str, Any]:
+    """:func:`fs.reference_zmp` of ``q`` on the lane's times and ground, its
+    rates split at the capture impact (``lane.impact_time_s``; unsplit when
+    the lane has none) like the replay controller's (GCV-20, #12117)."""
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
+
+    return fs.reference_zmp(
+        sim,
+        lane.times,
+        q,
+        lane.ground,
+        split_time_s=getattr(lane, "impact_time_s", None),
+    )
+
+
 def build_tracking_controller(
     sim: fs.FullBodySimulator,
     times: np.ndarray,
     q_track: np.ndarray,
     *,
     tracking_backend: str = "kkt",
+    split_time_s: float | None = None,
 ):
-    """Build a computed-torque controller for the selected tracking backend."""
+    """Build a computed-torque controller for the selected tracking backend.
+
+    ``split_time_s`` (ball impact, GCV-20) splits the kkt controller's
+    reference rates at impact; the other backends do not support it.
+    """
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 
     tracking_backend = validate_tracking_backend(tracking_backend)
+    if split_time_s is not None and tracking_backend != "kkt":
+        raise ValueError(f"split_time_s needs the kkt backend, not {tracking_backend}")
     if tracking_backend == "mj-inverse":
         from src.engines.physics_engines.mujoco.python.inverse_dynamics import (
             tracking_controller_mj_inverse,
@@ -125,7 +150,13 @@ def build_tracking_controller(
             config=wrench_config,
         )
     return fs.tracking_controller(
-        sim, times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
+        sim,
+        times,
+        q_track,
+        omega_rad_s=OMEGA_RAD_S,
+        zeta=1.0,
+        balance=BALANCE,
+        split_time_s=split_time_s,
     )
 
 
@@ -175,6 +206,10 @@ def replay(
 ) -> tuple[fs.SimulationRecord, np.ndarray]:
     """Track ``q_track`` with computed torque from preloaded feet.
 
+    When the lane located the capture impact, the ball's collision force is
+    applied to the clubhead (``lane.ball_impact``) and the kkt controller's
+    reference rates are split there (GCV-20, #11767).
+
     Args:
         sim: Full-body forward simulator.
         lane: Coordination lane providing times.
@@ -189,11 +224,16 @@ def replay(
     tracking_backend = validate_tracking_backend(tracking_backend)
     q0 = fs.preload_feet(sim, q_track[0])
     v0 = sim.consistent_velocity(q0, np.gradient(q_track, lane.times, axis=0)[0])
+    impact = getattr(lane, "ball_impact", None)
+    if impact is not None:
+        impact = impact.at_address(q0, sim.frame_poses)
+    split = getattr(lane, "impact_time_s", None) if tracking_backend == "kkt" else None
     controller = build_tracking_controller(
         sim,
         lane.times,
         q_track,
         tracking_backend=tracking_backend,
+        split_time_s=split,
     )
     rate_hz = lane.rate_hz
     record = sim.run(
@@ -203,6 +243,7 @@ def replay(
         duration_s=float(lane.times[-1]),
         dt_s=DT_S,
         record_every=int(round(1.0 / (rate_hz * DT_S))),
+        impact=impact,
     )
     sim_q = np.array(
         [
@@ -333,7 +374,7 @@ def shooting_fit(
         root_err = np.sqrt(
             np.einsum("ij,ij->i", diff, diff)
         )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-        zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+        zmp = lane_reference_zmp(sim, lane, q_track)
         idx_1_4s = int(round(1.4 * rate_hz))
         root_error_1_4s_m = (
             float(root_err[idx_1_4s]) if idx_1_4s < len(root_err) else None
@@ -399,8 +440,8 @@ def shooting_fit(
             axis_targets_per_frame=lane_axis_targets(lane),
             marker_weights=lane_split_weights(lane),
         )
-        q_track = smooth_reference(q_fit, rate_hz, TRACKING_CUTOFF_HZ)
-    zmp = fs.reference_zmp(sim, lane.times, best_q, lane.ground)
+        q_track = smooth_lane(q_fit, lane, TRACKING_CUTOFF_HZ)
+    zmp = lane_reference_zmp(sim, lane, best_q)
     report = {
         "locked": list(SHOOTING_LOCKED),
         "relaxation": gain,
@@ -469,8 +510,8 @@ def zmp_filter(
             axis_targets_per_frame=lane_axis_targets(lane),
             marker_weights=lane_split_weights(lane),
         )
-        q_track = smooth_reference(q_new, rate_hz, TRACKING_CUTOFF_HZ)
-        zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+        q_track = smooth_lane(q_new, lane, TRACKING_CUTOFF_HZ)
+        zmp = lane_reference_zmp(sim, lane, q_track)
         errors = marker_errors(kin, q_track, lane.points)
         passes.append(
             {
@@ -774,5 +815,6 @@ def build_dynamics_report(
         "peak_joint_torque_n_m": float(np.abs(record.tau).max()),
         "lowest_sphere_height_min_m": float(record.lowest_sphere_height_m.min()),
         "lowest_sphere_height_max_m": float(record.lowest_sphere_height_m.max()),
+        "ball_impact": getattr(record, "ball_impact", None),
     }
     return report, sim_errors

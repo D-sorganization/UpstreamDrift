@@ -2,6 +2,12 @@
 
 ## Status and Expanded Goal
 
+Physical inertia helper correction #12183 is documented in canonical chapter 51.
+Sorted principal moments make triangle feasibility independent of coordinate
+rotation; absolute symmetry tolerance prevents scale-dependent masking. This
+is a numerical contract fix with unchanged tensor values, not native model
+admission, anatomy validation or permission to repair imported parameters.
+
 Planning specification, 2026-10-08. Governing epic: [UpstreamDrift #11784](https://github.com/D-sorganization/UpstreamDrift/issues/11784); shared provider epic: [Tools #5460](https://github.com/D-sorganization/Tools/issues/5460). No capture, control algorithm or physiological model is qualified by this document.
 
 The program covers **all six current engines and their applicable model variants**: MuJoCo, Drake, Pinocchio/Crocoddyl, OpenSim, MyoSuite and Simscape. Track torque-driven, muscle-driven, rigid/flexible-club and reduced/full-body variants explicitly; a reduced-model success does not qualify a full-body model. New registered models inherit capability and parity conformance. The final product target is **muscle-driven OpenSim matching the available mocap**, with full-state, controller-off excitation replay and best defensible cross-engine biomechanical parity. Saved torque replay remains an essential intermediate gate.
@@ -38,6 +44,8 @@ Rigid contact uses formulation-appropriate unilateral and complementarity checks
 6. **Optional NMPC.** Add warm-started constrained receding-horizon control only if its tracking/robustness benefit justifies measured latency. Fixed-budget timeout, infeasibility and failed-step behavior are public contracts; a verified stabilizing fallback is explicit. Compare against TVLQR/task impedance and predictive sampling where existing backends support it. Do not promise real time before hardware-specific evidence.
 7. **Translate to Muscles.** Use MocoInverse/CMC only as prescribed-motion diagnostics or warm starts. Use MocoTrack or MocoStudy for dynamically free muscle-driven tracking and joint excitation optimization over time. Per-frame torque-to-muscle allocation can be dynamically infeasible and is insufficient. Check the installed Moco version's Controller support: some versioned guides disallow OpenSim Controllers inside optimization, so use compatible problem terms or an outer forward-simulation controller.
 8. **Verify Pure Replay.** Independently instantiate the engine, load only the frozen initial state, model and applied-input bundle, disable feedback and measurement access, and integrate continuously. Do not reset states at windows, overwrite q/v, stabilize by measured trajectories or rerun the controller offline during replay.
+
+The optional bounded search implementation has one numerical boundary: a finite candidate plan is evaluated for a finite cost and a vector of signed hard margins (nonnegative means feasible). The existing F02 torque rollout supplies the first evaluator; native muscle/motor adapters must supply their own state scaling, exact post-mapping command ordering, physics, source identity and hard criteria. The shared SLSQP loop enforces plan bounds, counts prediction and vector-constraint preparation calls against one cooperative budget, then independently re-evaluates a proposed solution before returning it. A returned plan is only a numerical proposal. The caller separately admits a safe fallback and must promote a candidate through fresh native execution and independent saved-input replay before making a physical matching claim. The loop does not supply marker attachments, physiology, contact validity or a hard real-time guarantee.
 
 ## OpenSim Muscle Endpoint
 
@@ -143,3 +151,20 @@ Adopt the existing canonical model/variant/capability registry and stable engine
 [Astra Architecture Review](ASTRA_REVIEW.md) refines this design and its acceptance criteria. Record dynamics/contact/integration/actuator/restart implementations; common-model parity cannot qualify native muscle/contact replay. Required capabilities remain required when unavailable. Version full state, manifold operations, input boundaries and actual executed policies rather than silently broadening Euclidean torque fixtures.
 
 An optimized collocation trajectory must pass uninterrupted native integration and refinement checks. Score frozen nominal feedforward separately from replay of total feedback-generated input. Reserve/root assistance requires peak/RMS, integrated absolute effort and separate positive/negative work; zero signed work cannot prove muscle-only operation. Declare exact versus noisy/estimated/delayed state and validate that information pattern. Gain and recruitment estimates remain nonunique and require held-out perturbation and parameter/objective sensitivity evidence.
+
+## Constrained Mixed OpenSim Moco Boundary (#12173)
+
+The narrowly tested OpenSim composition is opt-in: a caller supplies an exact
+declared cold start, lock targets, constraint enforcement, coordinate charts
+and optional linear chart inequalities alongside the mixed muscle/mechanical
+profile. The native source constraints are retained and observed at each
+replay knot. Moco coordinate boxes must fit the declared chart; linear rules
+are checked by conservative interval extrema. A fresh replay rejects native
+Manager projection of the exact requested named-state seed or initial time.
+Mixed commands remain distinct from physical outputs: muscle excitation is
+dimensionless with nonlinear force in N, while CoordinateActuator commands
+are scaled into N or N\*m according to native coordinate motion. The strict
+muscle-only default is unchanged. The 40 ms synthetic Moco/replay regression
+is software-path evidence, not a private capture, production anatomy/physics
+qualification, or release. See canonical chapter48 and
+`F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
