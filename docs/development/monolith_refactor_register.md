@@ -150,6 +150,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 872 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
+| 866 | `src/engines/feedback_observation_qualification.py` |
 | 865 | `src/shared/python/signal_toolkit/fitting.py` |
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
@@ -161,6 +162,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
 | 846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m` |
 | 844 | `src/shared/python/config/model_pack_manifest.py` |
+| 844 | `src/shared/python/motion_matching/pipeline/address.py` |
 | 843 | `src/shared/python/motion_pipeline/orchestrator.py` |
 | 842 | `src/shared/python/gui_pkg/help_content.py` |
 | 841 | `src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py` |
@@ -168,7 +170,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 837 | `src/bunkershot3d/calibration/f1_shear_cell.py` |
 | 836 | `src/shared/python/ai/gui/assistant/panel.py` |
 | 836 | `src/shared/python/perturbation/cross_engine_runner.py` |
-| 835 | `src/shared/python/motion_matching/pipeline/address.py` |
 | 834 | `src/shared/python/engine_core/engine_probes.py` |
 | 833 | `src/shared/python/ui/qt/widgets/signal_toolkit_ui_mixin.py` |
 | 831 | `src/bunkershot3d/solvers/mpm/constitutive.py` |
@@ -188,6 +189,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 813 | `src/robotics/control/whole_body/wbc_controller.py` |
 | 813 | `src/shared/python/gui_pkg/help_system.py` |
 | 813 | `src/tools/model_explorer/urdf_code_editor.py` |
+| 812 | `src/engines/physics_engines/opensim/python/tour_matching/model_variants.py` |
 | 812 | `src/tools/starting_pose_matcher/live_view_controller.py` |
 | 811 | `src/engines/physics_engines/drake/python/src/pose_editor_tab.py` |
 | 811 | `src/tools/model_explorer/joint_manipulator.py` |
