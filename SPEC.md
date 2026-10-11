@@ -1,3 +1,25 @@
+## Explicitly Unqualified Moco Feasibility (#12225)
+
+The native runner accepts a default-false boolean diagnostic disposition only
+when passive physiological limits are unavailable. True is request-bound and
+retained in preparation; the unavailable-policy blocker remains visible, and
+all other source, physical, state, chart, observation and control gates remain
+mandatory. No supplied limits can be overridden, and independent excitation
+replay grants no muscle-matching qualification. Chapter55 and F07 unqualified
+feasibility turnover record TDD, native execution and remaining full-capture gates.
+
+## Native Path-Work Consistency Diagnostic (F07, #11856)
+
+The original single-pin diagnostic in `scripts/diagnostics/native_path_work.py`
+observes native unit-tension force, length and lengthening speed against refined
+geometry derivatives, with serialized model and actual runtime identities. A
+moving point followed by a fixed point on the same body reproduces a force/length
+difference; fixed-point controls agree. This is a workless-identity audit, not
+proof of a runtime defect. Physiological fitting, donor path/input-domain
+validation, contact, complete-state full-capture replay, and manual release remain
+blocked. Canonical calculation reference:
+`manuals/upstreamdrift/chapters/24-native-path-work.qmd`.
+
 ## Coordinate-Invariant Physical Inertia Contract (#12183)
 
 The existing DIME inertia helper checks triangle feasibility on sorted principal
@@ -15,6 +37,15 @@ Keep admitted Tools 86d0f28 and one private replay contract identity. Canonical
 chapter 39 and F10i turnover separate actual affected runtime checks, optional SDK
 skips, capture-loader DLL failures and the outstanding full-model scientific gates.
 Reference-conventions chapter is now 40; project MyoSuite remains chapter 38.
+
+## MyoSuite Native Muscle Actuator Classification (#12249)
+
+`MyoSuiteMuscleAnalyzer` uses the installed MuJoCo named `mjDYN_MUSCLE` enum to
+select native muscle actuators. The native MuJoCo 3.8.0 regression mixes muscle,
+filter, and motor actuators without requiring Gym or MyoSuite environment
+registration. This fixes actuator-type classification only; it does not qualify
+muscle physiology, capture mapping, excitation replay, or engine parity. See
+chapter 31 and the F09q turnover.
 
 ## Project MyoSuite Bounded Native Command Solve (F09n)
 
@@ -11142,4 +11173,3 @@ poses. Chapter54 and `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md` retain exact
 hashes, exclusions and reproduction. Tools #5503 and #12207 are pending;
 physiology, native force/work over a chart, contact/grip, head/markers,
 private full-horizon matching and all17/six-engine qualification remain open.
-
