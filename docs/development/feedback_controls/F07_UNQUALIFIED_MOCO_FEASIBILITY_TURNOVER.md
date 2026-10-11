@@ -59,3 +59,30 @@ receipt hashes. Scientific qualification and all 17 required parity rows remain
 unchanged. Tools provider publication is tracked by draft Tools #5510; its
 implementation hash changed after a type-only fix and needs a separate consumer
 rebind. Preserve frozen older provider receipts under their original identities.
+
+## Mesh-Free Full-Clock Checkpoint and Mechanical Audit
+
+The private numerical derivative removes exactly 106 Body-owned visual Mesh
+nodes. Native equivalence checks preserve all 1,226 named initial states, 64
+markers, 17 constraints, physical body properties and non-Mesh components.
+Fresh reconstruction of the source-bound capture state passes the unchanged
+strict cold-start tolerance. This is a conditional numerical derivative;
+the original visual model and resource receipts remain preserved privately.
+Four generated assets and ten pinned Hamner assets are verified; 92 inherited
+BUET visual assets remain unresolved. No filename substitute is authoritative.
+
+Its full 654-knot driver preflight still retains both unavailable-policy and
+independent-replay blockers. A separate two-knot zero-excitation constrained
+replay diagnostic rejects `WrapCylinder` as the first unsupported mechanical
+component. No optimizer ran, and removing visual nodes does not admit wraps,
+custom joint charts, moving guides, support or grip.
+
+Issue #12233 owns source-bound MovingPathPoint chart and guide-work auditing.
+The eight private moving points use knee-dependent SimmSpline functions;
+their terminal segment connects different femur/tibia frames, unlike the
+earlier same-body moving-guide synthetic diagnostic. Source topology alone
+does not establish workless transmission. Preserve native force-defined moment
+arms, record requested and achieved coordinates, and compare force, length and
+speed across independent stencils before interpreting guide work. Missing
+guide-work budgets retain an unqualified result. Exact private source hashes,
+knots and receipts remain in the private repository.
