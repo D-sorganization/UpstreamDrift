@@ -1,3 +1,9 @@
+# Active: Neutral Hip Zero-Twist and the MSK Turn Render, #12042
+
+- Branch `claude/12042-turn-slices`. `hip_rotation_zero` places `hip_rotation = 0` at the measured address thigh twist, and the ±40° bound moves with it. The canonical specs carry +45/−26° (lead/trail), so the lead hip is pinned at +40° at impact. `--hip-zero-twist neutral` (opt-in; default `capture` keeps the canonical receipts) uses 0/0. Pelvis turn is then within 3.2° of the markers at top and impact on both captures, with IK 25.6/22.9 mm. FD is 51.2 mm on the driver, but 91.2 mm on the 7-iron (after impact). Evidence: `evidence/hip_zero_twist_12042/`; calc record in `hip_axis_mirroring.tex`, section "Neutral Hip Zero-Twist and the Pelvis at Impact".
+- `render_msk_club.py --capture --club --mode` tracks with the capture turn targets and planted feet (shared `msk_turn_targets.tracking_inputs`).
+- Open: owner decision on the `neutral` default (regenerates canonical receipts and fixtures); trail hip now reaches −40°; upper-trunk over-twist at the top (slice 7).
+
 # Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
 
 - Branch `claude/12039-drake-address-parity`. Drake's dual-grip weld rotation row was the small-angle vee with Jacobian `J_a - J_b` (up to 0.84 off finite differences); MuJoCo's is the principal log with its exact Jacobian. Both now use `full_body_ik._closure_rotation_row`; Drake `closure_error` reports the principal angle. Tests: `tests/unit/motion_matching/test_drake_mujoco_ik_parity.py`.

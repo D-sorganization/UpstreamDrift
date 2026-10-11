@@ -514,8 +514,9 @@ fitting deficit, not a difference in the line definition. At impact
 $\tau$ over the first 24 frames, and \texttt{apply\_hip\_calibration} rotates
 each femur frame about its long axis by $\tau$. The coordinate zero is
 therefore the measured address twist, and the fixed $\pm40^\circ$ range of
-\texttt{hip\_rotation} (\texttt{range\_of\_motion.LOWER\_LIMB\_RANGES\_DEG})
-becomes a window shifted by $\tau$ in pelvis-relative terms. Without the
+\texttt{hip\_rotation} (the lower-limb ranges of
+\texttt{range\_of\_motion}) becomes a window shifted by $\tau$ in
+pelvis-relative terms. Without the
 lateral-marker correction (Section~\ref{sec:zero}), the canonical
 \texttt{--static-seeds} specs carry $\tau = +45.1 / -25.7^\circ$ (lead /
 trail, capture-A) and $+46.7 / -21.9^\circ$ (capture-B). The address stance
@@ -542,10 +543,12 @@ FD is the whole-swing marker RMS, with address-to-impact / after-impact in
 brackets. Receipts: \path{docs/development/full_body_models/evidence/hip_zero_twist_12042/}.
 
 \begin{center}
-\small
+\footnotesize
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lcccccc}
 \toprule
-Run & Pelvis & Upper trunk & Shoulder girdle & \texttt{hip\_rotation\_l} at impact & Address / IK (mm) & FD (mm) \\
+Run & Pelvis & Upper & Shoulder & Lead hip rot. & Address / IK & FD \\
+ & & trunk & girdle & at impact & (mm) & (mm) \\
 \midrule
 Driver, capture & $-0.5$ / $+9.7$ & $+18.3$ / $+4.0$ & $+14.6$ / $-5.5$ & $40.0$ & 6.3 / 29.5 & 80.8 (34.2 / 145.0) \\
 Driver, neutral & $+3.2$ / $+2.5$ & $+17.7$ / $+5.6$ & $+12.0$ / $-9.0$ & $27.0$ & 5.3 / 25.6 & 51.2 (31.6 / 83.8) \\
