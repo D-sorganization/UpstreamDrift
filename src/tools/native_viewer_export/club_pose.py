@@ -90,5 +90,5 @@ def face_axes(body: Array, centre_body: Array, normal_body: Array) -> FaceWorld:
     if length < 1e-9:
         raise ValueError("face normal is parallel to the shaft")
     toe = toe / length
-    grip = np.cross(toe, normal)
+    grip = np.asarray(np.cross(toe, normal), dtype=np.float64)
     return FaceWorld(rot @ centre_body + body[:3, 3], normal, toe, grip)
