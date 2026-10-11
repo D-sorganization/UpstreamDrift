@@ -89,6 +89,10 @@ class SolveTrajectoryOptions:
     frames: Sequence[int] | None = None
     flat_feet_per_frame: Sequence[Sequence[str]] | None = None
     plant_stance: bool = False
+    #: Seed the stance anchors from ``q_init`` instead of the first frame's
+    #: own fit, so a calibrated address start keeps its feet (#12222).
+    #: Requires ``plant_stance``.
+    anchor_stance_at_init: bool = False
     prior_trajectory: Array | None = None
     restarts: int = 0
     restart_threshold_m: float = 0.0
@@ -1003,6 +1007,8 @@ class BaseFullBodyIK:
             raise ValueError("flat_feet_per_frame needs one entry per capture frame")
         if opts.plant_stance and opts.flat_feet_per_frame is None:
             raise ValueError("plant_stance needs flat_feet_per_frame")
+        if opts.anchor_stance_at_init and not opts.plant_stance:
+            raise ValueError("anchor_stance_at_init needs plant_stance")
         prior: Array | None = None
         if opts.prior_trajectory is not None:
             prior = np.asarray(opts.prior_trajectory, dtype=float)
@@ -1061,7 +1067,11 @@ class BaseFullBodyIK:
         rng = np.random.default_rng(0)
         q = np.asarray(q_init, dtype=float)
         fits: list[PoseFit] = []
-        anchors: dict[str, Array] = {}
+        anchors: dict[str, Array] = (
+            dict(self.sphere_ground_points(q, ground))
+            if opts.anchor_stance_at_init
+            else {}
+        )
 
         for k in indices:
             if opts.restart_seed_per_frame:
