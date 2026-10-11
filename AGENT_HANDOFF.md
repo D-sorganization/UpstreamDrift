@@ -40,6 +40,19 @@
 - The 21-asset v3 inventory, published research prerelease, and fresh remote restoration are verified. Open a reviewable PR with explicit unresolved repository gates; do not claim merge readiness or waive protection.
 - Keep empirical validation #11984 deferred and compiler blocker #12120 open; close implementation issues only with qualifying merged evidence.
 
+# Active: Adopted Per-Capture Grip Rotation, #12221
+
+- Branch `claude/12221-grip-adopt`, stacked on #12270. Applies the fitted `grip_rotation_deg` to `full_body_spec_anthro_driver.json` only; calibrated driver commands now add `--fix-club-markers`. Driver receipts regenerated on ControlTower (address / IK / dynamics, mm): `anthro_driver_seeds` 11.0 / 30.3 / 82.0, `anthro_driver_drake` 11.0 / 30.3 / 86.3 (dynamics worse), `anthro_driver` 50.9 / 46.5 / 71.9. Replay is sensitive at 3 to 15 mm to tiny parameter changes (CANONICAL_RUN.md §2A).
+- Driver club-face fixture regenerated at `9fe74740a5` (impact speed -2.5 %, peak 4.4 ms early, face 16.88 / 14.96 deg; meets GCV-20 and OSV-10); #12266 no longer blocks it. The MSK driver grip calibration and both `golf_humanoid*.osim` clubs were regenerated from it (`rebuild_club`). The OpenSim bushing grip exceeds its 2 deg / 50 N full-swing bounds only in the 6 ms ball-impact window (2.62 deg, 51.3 N): strict xfail, decision on #12272.
+- 7-iron deferred: document, OpenSim export and receipts unchanged (4.0 / 28.4 / 109.9 and 41.5 / 45.2 / 104.9). Its refit passes on the tracked swing but its same-input export gives -5.0 %, -5.1 ms, 8.71 deg face, which would redden eight face tests; fit receipt stays committed for a follow-up.
+- The PR awaits the owner decision on making `--fix-club-markers` the calibrated default.
+
+# Active: Per-Capture Grip Refit on the Fixed Clusters, #12221
+
+- Branch `claude/12221-grip-refit`, stacked on #12265. Landed: refit tooling (`grip_fit.weighted_frames`, `compose_rotation_deg`, `apply_grip_rotation`, `scripts/set_spec_grip_rotation.py`), the per-capture fit receipts `fit_grip_rotation_receipt_driver.json` / `_iron7.json`, and the evidence. Documents are NOT changed.
+- Fixture flags with the cluster fixed: driver speed −1.9 %, face gap 0.56°; 7-iron −1.9 %, 0.62°; no wrist on its bound at address. The refit is invalid with the cluster free (static trial moves the capture face). Calc record: "Per-Capture Grip Rotation on the Fixed Clusters".
+- Open: owner decision on `--fix-club-markers` default; then apply with `scripts/set_spec_grip_rotation.py` and regenerate receipts; #12266 blocks the driver fixture export.
+
 # Active: 7-Iron MSK Grip Calibration, #12042
 
 - Branch `claude/12042-iron7-msk-cal` (stacked on #12247). `msk_club_grip_calibration.json` now has `iron7` entries for `golf_humanoid` (grip gaps 0.04 / 0.02 mm, landmark RMS 14.9 mm) and `golf_humanoid_scaled` (0.24 / 0.25 mm, 40.0 mm), from the existing `msk_club_calibration --club iron7` CLI. `render_msk_club.py` now draws and measures the `--club` it tracks: before, the viewer loaded `golf_humanoid.osim` with its committed driver, so a 7-iron render showed the driver.
