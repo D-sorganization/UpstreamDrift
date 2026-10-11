@@ -149,8 +149,12 @@ register or approve a released engineering calculation.
 ## Uncertainty and Release Boundary
 
 The inventory declares a flexible-club requirement but currently records its
-support as unknown. OpenSim's eight-muscle variant factory and MyoSuite's
-upstream myo_sim anatomy are declared, not calibrated full-swing physiology.
+support as unknown. The legacy OpenSim golf muscle-variant factory retains eight
+target names, but it advertises executable muscle support only from source-bound
+native readback; the shipped golf model currently reads back zero muscles.
+MyoSuite's upstream myo_sim anatomy is also declared, not calibrated full-swing
+physiology. See [native OpenSim variant capability
+readback](41-opensim-native-muscle-capability.qmd).
 Provider/model hashes identify code and files, not physical validity. Model
 parameters, observation clocks, camera/marker registration, contact forces,
 muscle redundancy, and EMG coverage remain unqualified until independent

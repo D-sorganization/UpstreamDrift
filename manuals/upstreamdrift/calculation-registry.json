@@ -7,8 +7,8 @@
   "blockers": [
     {
       "id": "UP-D1-native-muscle-asset-admission-inventory",
-      "owner": "UpstreamDrift issue #11819, F07 #11791",
-      "resolution": "Inventory tour_matching/model_admission.py and _native_model_inventory.py with provisional chapter 18-native-model-admission.qmd. Pinned XML declarations and native initialize/component/state observations remain structurally observed and scientifically unqualified. Effective muscle options, recursive component inventories and caller-declared attachment/coordinate maps do not prove anatomy, capacity, complete resources, licensing, equilibrium, contact physics or independent replay. Loaded serialization/runtime hashes do not close compiled binary/resource provenance. Synthetic native and 520-declaration source tests do not qualify an external full-body model. F07/F08 and all-model six-engine matching remain open."
+      "owner": "UpstreamDrift issues #11819 and #12148, F07 #11791",
+      "resolution": "Inventory tour_matching/model_admission.py, _native_model_inventory.py and model_variants.py with provisional chapters 18-native-model-admission.qmd and 41-opensim-native-muscle-capability.qmd. Pinned XML declarations and native initialize/component/state observations remain structurally observed and scientifically unqualified. The legacy eight-name muscle target list is not executable support: actuator/state/capability claims require source-bound native readback; unavailable SDK is unknown and the shipped golf source currently reads back zero muscles. Effective muscle options, recursive component inventories and caller-declared attachment/coordinate maps do not prove anatomy, capacity, complete resources, licensing, equilibrium, contact physics or independent replay. Loaded serialization/runtime hashes do not close compiled binary/resource provenance. Synthetic native and 520-declaration source tests do not qualify an external full-body model. F07/F08 and all-model six-engine matching remain open."
     },
     {
       "id": "UP-D1-distributed-feedback-inventory",
