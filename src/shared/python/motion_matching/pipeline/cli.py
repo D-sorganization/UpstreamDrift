@@ -276,6 +276,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="place every marker from a neutral-spine static trial",
     )
     parser.add_argument(
+        "--fix-club-markers",
+        action="store_true",
+        help="keep the club cluster at the document's per-club offsets in the "
+        "static trial (needs --static-seeds; #12221)",
+    )
+    parser.add_argument(
         "--engine",
         default="mujoco",
         help="plant physics engine (mujoco, drake, pinocchio)",
@@ -584,6 +590,7 @@ def _calibrate_and_scale(
             hipcal_path=hipcal_path,
             static_seeds=args.static_seeds,
             fit_closure=args.fit_closure,
+            fix_club_markers=args.fix_club_markers,
             log=log,
         )
     )
