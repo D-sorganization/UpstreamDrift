@@ -1,0 +1,434 @@
+"""Prepare one source-bound Pinocchio kinematics observation at the lifted q.
+
+This probe compares separately reported geometry at the identical candidate
+configuration. It performs no closure correction, optimizer, acceleration, or
+trajectory integration and makes no equality or qualification claim.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.metadata
+import json
+import math
+import platform
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, Mapping
+
+import numpy as np
+
+import pinocchio_fullbody_source_assembly_20261012 as source_setup
+
+
+SPEC = source_setup.FULL
+UPPER = Path(
+    "docs/development/simscape_tour_matching/native_evidence/"
+    "native_geometry_spec_9967.json"
+)
+EXTERNAL_INPUT_DIRECTORY = Path(
+    "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+    "mujoco_v1_candidate_lift_20261011_root_attempt2"
+)
+CANDIDATE = EXTERNAL_INPUT_DIRECTORY / "returned81_candidate.json"
+OBSERVATION_SHA256 = "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3"
+OBSERVATION = Path(
+    "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+    "mujoco_v1_candidate_lift_20261011_root_attempt2/native-observation.json"
+)
+CANDIDATE_SHA256 = "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf"
+UPPER_SHA256 = "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d"
+EXPECTED_SPEC_SHA256 = (
+    "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3"
+)
+SOURCE_HELPER_SHA256 = (
+    "2d619a9540920cf7093af61a1cbc8cdf865b0ca7cc56c968c631e2f879c78cb3"
+)
+CONTACT_LAW_SHA256 = "1edc287e4d4d12a58558f6fc62f4bd9d291908f4dcade4232bb6644883dbe43c"
+NATIVE_MODEL_SHA256 = "782402d13c152c7bdd0bee76d7b084e3bef8a697cb5c5b0805021d0fd81c8a92"
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def validate_external_candidate_path(candidate: Path, repo: Path) -> None:
+    """Keep later candidate evidence outside the immutable source archive."""
+    candidate_root = candidate.resolve()
+    source_root = repo.resolve()
+    if candidate_root == source_root or source_root in candidate_root.parents:
+        raise ValueError("candidate JSON must remain an external telemetry input")
+    if not candidate_root.is_file():
+        raise FileNotFoundError(f"external candidate JSON is missing: {candidate_root}")
+
+
+def verify_artifact(path: Path, expected_sha256: str, label: str) -> str:
+    """Check existence and exact digest before any native model import."""
+    if not path.is_file():
+        raise FileNotFoundError(f"required {label} is missing: {path}")
+    actual = sha256_file(path)
+    if actual != expected_sha256:
+        raise ValueError(f"{label} SHA-256 mismatch: {actual}")
+    return actual
+
+
+def candidate_named_state(
+    observation: Mapping[str, Any],
+    coordinate_order: tuple[str, ...],
+    candidate_names: tuple[str, ...],
+) -> tuple[dict[str, float], dict[str, float]]:
+    """Bind the retained 41-vector to exact source order and zero rates."""
+    if len(set(coordinate_order)) != len(coordinate_order):
+        raise ValueError("source coordinate order contains duplicate names")
+    if (
+        not candidate_names
+        or coordinate_order[: len(candidate_names)] != candidate_names
+    ):
+        raise ValueError("candidate coordinate names are not the source-order prefix")
+    after = observation.get("after_shift")
+    before = observation.get("before_shift")
+    if not isinstance(after, Mapping) or not isinstance(before, Mapping):
+        raise ValueError("candidate observation must contain before/after states")
+    values = np.asarray(after.get("q"), dtype=np.float64)
+    prior = np.asarray(before.get("q"), dtype=np.float64)
+    rates = np.asarray(observation.get("full_rate_vector"), dtype=np.float64)
+    if (
+        values.shape != (len(coordinate_order),)
+        or prior.shape != values.shape
+        or rates.shape != values.shape
+        or not np.isfinite(np.r_[values, prior, rates]).all()
+    ):
+        raise ValueError(
+            "candidate q and zero-rate vectors must match source coordinates"
+        )
+    if np.any(rates != 0.0):
+        raise ValueError("candidate parity probe requires the retained zero-rate state")
+    deltas = observation.get("synthetic_floor_translation", {}).get(
+        "root_coordinate_deltas_native_units"
+    )
+    if not isinstance(deltas, Mapping):
+        raise ValueError("candidate source lacks its declared root-translation delta")
+    root_names = ("TranslationInputX", "TranslationInputY", "TranslationInputZ")
+    if set(deltas) != set(root_names):
+        raise ValueError(
+            "candidate receipt must declare exactly the three root translation deltas"
+        )
+    if not all(name in coordinate_order for name in root_names):
+        raise ValueError(
+            "source coordinate order lacks the three named root translations"
+        )
+    changed = {
+        name
+        for name, old, new in zip(coordinate_order, prior, values, strict=True)
+        if old != new
+    }
+    expected_changed = {name for name, delta in deltas.items() if float(delta) != 0.0}
+    lower_names = set(coordinate_order[len(candidate_names) :])
+    if changed & lower_names:
+        raise ValueError("candidate changed lower-limb coordinates")
+    if not changed.issubset(root_names):
+        raise ValueError(
+            "candidate changed coordinates outside the declared root translation"
+        )
+    if changed != expected_changed:
+        raise ValueError(
+            "lifted candidate changed coordinates outside the declared root translation"
+        )
+    for name in root_names:
+        index = coordinate_order.index(name)
+        if not math.isclose(
+            float(values[index] - prior[index]),
+            float(deltas[name]),
+            rel_tol=0.0,
+            abs_tol=1e-12,
+        ):
+            raise ValueError(
+                "candidate root-translation delta does not match q vectors"
+            )
+    upper_count = len(candidate_names)
+    if np.any(values[upper_count:] != 0.0):
+        raise ValueError(
+            "candidate lower-limb coordinates are not exact source defaults"
+        )
+    return (
+        {
+            name: float(value)
+            for name, value in zip(coordinate_order, values, strict=True)
+        },
+        {
+            name: float(value)
+            for name, value in zip(coordinate_order, rates, strict=True)
+        },
+    )
+
+
+def svd_report(matrix: Any) -> dict[str, Any]:
+    value = np.asarray(matrix, dtype=np.float64)
+    if value.ndim != 2 or not np.isfinite(value).all():
+        raise ValueError("weld Jacobian must be a finite matrix")
+    singular = np.linalg.svd(value, compute_uv=False)
+    tolerance = float(max(value.shape) * np.finfo(np.float64).eps * singular[0])
+    return {
+        "shape": list(value.shape),
+        "singular_values": [float(item) for item in singular],
+        "numpy_default_rank_tolerance": tolerance,
+        "rank": int(np.linalg.matrix_rank(value)),
+        "condition_2": float(singular[0] / singular[-1]) if singular[-1] else None,
+    }
+
+
+def pinocchio_weld_observation(
+    owner: Any,
+    pin: Any,
+    coordinates: Mapping[str, float],
+    rates: Mapping[str, float],
+    coordinate_order: tuple[str, ...],
+) -> dict[str, Any]:
+    """Read placement and native rate Jacobian using the pinned source API.
+
+    The exact 9e implementation of `closure_force_jacobian` performs only
+    configuration, joint Jacobians, constraint-data refresh, and the native
+    constraint Jacobian query. It does not call the separate acceleration-
+    backed `closure_residuals` method.
+    """
+    native = owner.closure_force_jacobian(coordinates)
+    jacobian = np.asarray(native.jacobian, dtype=np.float64)
+    if tuple(native.names) != coordinate_order or jacobian.shape != (
+        6,
+        len(coordinate_order),
+    ):
+        raise ValueError("Pinocchio weld Jacobian names/shape differ from source order")
+    if not np.isfinite(jacobian).all():
+        raise ValueError("Pinocchio weld Jacobian contains nonfinite entries")
+    relative_pose = owner.constraint_data[0].c1Mc2
+    # Pinocchio reports -log6(c1Mc2); its components are in the local weld
+    # constraint frame. MuJoCo's retained receipt uses its own documented
+    # six-vector convention. Values are reported independently, never equated.
+    residual = -np.asarray(pin.log6(relative_pose).vector, dtype=np.float64)
+    velocity = np.asarray([rates[name] for name in coordinate_order], dtype=np.float64)
+    rate_residual = jacobian @ velocity
+    if (
+        residual.shape != (6,)
+        or rate_residual.shape != (6,)
+        or not np.isfinite(np.r_[residual, rate_residual]).all()
+    ):
+        raise ValueError("Pinocchio weld residuals must be finite six-vectors")
+    return {
+        "pose_residual_minus_log6_c1Mc2_local_frame_m_rad": residual.tolist(),
+        "rate_residual_native_constraint_jacobian_times_named_rates": rate_residual.tolist(),
+        "native_rate_jacobian": svd_report(jacobian),
+    }
+
+
+def pinocchio_contact_observation(
+    owner: Any, coordinates: Mapping[str, float], rates: Mapping[str, float]
+) -> dict[str, Any]:
+    """Report the four sphere samples under the shared source contact law."""
+    samples = owner.contact_forces(coordinates, rates)
+    rows: dict[str, Any] = {}
+    for name, sample in samples.items():
+        point = np.asarray(sample.contact_point_m, dtype=np.float64)
+        normal = np.asarray(sample.normal_force_n, dtype=np.float64)
+        friction = np.asarray(sample.friction_force_n, dtype=np.float64)
+        if (
+            any(item.shape != (3,) for item in (point, normal, friction))
+            or not np.isfinite(
+                np.r_[
+                    point,
+                    normal,
+                    friction,
+                    sample.penetration_m,
+                    sample.penetration_rate_m_s,
+                ]
+            ).all()
+        ):
+            raise ValueError(f"Pinocchio contact sample {name} is malformed")
+        rows[name] = {
+            "penetration_m": float(sample.penetration_m),
+            "penetration_rate_m_s": float(sample.penetration_rate_m_s),
+            "contact_point_world_m": point.tolist(),
+            "normal_force_n": normal.tolist(),
+            "friction_force_n": friction.tolist(),
+        }
+    return {"spheres": rows, "sphere_count": len(rows)}
+
+
+def observe(repo: Path, output: Path, script_path: Path) -> dict[str, Any]:
+    """Run the kinematics-only cross-engine observation once."""
+    if output.exists():
+        raise FileExistsError("output receipt path must be fresh; no overwrite")
+    source_hashes = source_setup.verify_sources(repo)
+    validate_external_candidate_path(CANDIDATE, repo)
+    observation_sha = verify_artifact(
+        OBSERVATION, OBSERVATION_SHA256, "candidate-lift observation receipt"
+    )
+    candidate_sha = verify_artifact(
+        CANDIDATE, CANDIDATE_SHA256, "external candidate JSON"
+    )
+    upper_path = repo / UPPER
+    upper_sha = verify_artifact(upper_path, UPPER_SHA256, "upper-body source geometry")
+    spec_sha = verify_artifact(
+        repo / SPEC, EXPECTED_SPEC_SHA256, "full-body source specification"
+    )
+    setup_sha = sha256_file(Path(source_setup.__file__).resolve())
+    if setup_sha != SOURCE_HELPER_SHA256:
+        raise ValueError("source-bound Pinocchio setup helper hash mismatch")
+    if (
+        source_hashes.get(
+            "src/engines/physics_engines/pinocchio/python/native_model.py"
+        )
+        != NATIVE_MODEL_SHA256
+    ):
+        raise ValueError("native Pinocchio model hash mismatch")
+    if (
+        source_hashes.get("src/shared/python/motion_matching/contact_law.py")
+        != CONTACT_LAW_SHA256
+    ):
+        raise ValueError("shared contact-law hash mismatch")
+
+    payload = json.loads(OBSERVATION.read_text(encoding="utf-8"))
+    candidate = json.loads(CANDIDATE.read_text(encoding="utf-8"))
+    if payload.get("source", {}).get("candidate_sha256") != CANDIDATE_SHA256:
+        raise ValueError("lift receipt does not bind the expected candidate source")
+    if payload.get("source", {}).get("spec_sha256") != EXPECTED_SPEC_SHA256:
+        raise ValueError("lift receipt does not bind the expected full-body spec")
+
+    pin, model_type, _, import_details = source_setup.import_native_support(repo)
+    if str(getattr(pin, "__version__", "unknown")) != "3.8.0":
+        raise RuntimeError("expected Pinocchio 3.8.0")
+    upper = json.loads(upper_path.read_text(encoding="utf-8"))
+    from src.shared.python.motion_matching.full_body_spec import load_full_body_spec
+
+    spec = load_full_body_spec(repo / SPEC, upper)
+    order = tuple(spec["coordinate_order"])
+    if len(order) != 41:
+        raise ValueError(
+            "full-body source coordinate order must contain 41 coordinates"
+        )
+    q_named, v_named = candidate_named_state(
+        payload, order, tuple(candidate["coordinate_names"])
+    )
+    owner = model_type(spec)
+    weld = pinocchio_weld_observation(owner, pin, q_named, v_named, order)
+    contacts = pinocchio_contact_observation(owner, q_named, v_named)
+    if contacts["sphere_count"] != 4:
+        raise ValueError("source contact inventory must contain exactly four spheres")
+    result = {
+        "schema_version": "pinocchio-mujoco-candidate-lift-geometry-parity-v1",
+        "created_utc": datetime.now(UTC).isoformat(),
+        "status": "observed_kinematics_only",
+        "qualification": "none; manufactured source-bound pose, zero-rate geometry observations only",
+        "source_commit": source_setup.COMMIT,
+        "base_manifest_sha256": source_setup.MANIFEST_SHA256,
+        "source_hashes": source_hashes,
+        "source_setup_helper_sha256": setup_sha,
+        "probe_script_sha256": sha256_file(script_path),
+        "candidate_lift_observation_sha256": observation_sha,
+        "candidate_lift_observation_path": str(OBSERVATION),
+        "candidate_json_external_input": True,
+        "candidate_json_path": str(CANDIDATE),
+        "candidate_source_sha256": candidate_sha,
+        "full_body_spec_sha256": spec_sha,
+        "runtime": {
+            "python": sys.version,
+            "platform": platform.platform(),
+            "pinocchio_version": str(pin.__version__),
+            "pin_distribution_version": importlib.metadata.version("pin"),
+            "source_imports": import_details,
+        },
+        "input": {
+            "coordinate_order": list(order),
+            "candidate_upper_coordinate_names": list(candidate["coordinate_names"]),
+            "q_after_lift_named": q_named,
+            "rates_named": v_named,
+            "lower_limb_coordinates_exact_zero": all(
+                value == 0.0
+                for value in list(q_named.values())[
+                    len(candidate["coordinate_names"]) :
+                ]
+            ),
+            "rates_exact_zero": all(value == 0.0 for value in v_named.values()),
+        },
+        "mujoco_reference": {
+            "pose_vector_convention": "retained MuJoCo source receipt field weld_pose_residual_m_rad; reported as recorded, no cross-engine component equality asserted",
+            "pose_residual_m_rad": payload["after_shift"]["weld_pose_residual_m_rad"],
+            "rate_vector_convention": "retained MuJoCo source receipt field weld_rate_residual_m_s_rad_s; reported as recorded",
+            "rate_residual_m_s_rad_s": payload["after_shift"][
+                "weld_rate_residual_m_s_rad_s"
+            ],
+            "jacobian_rank": payload["after_shift"]["jacobian_rank"],
+            "jacobian_singular_values": payload["after_shift"][
+                "jacobian_singular_values"
+            ],
+            "sphere_contacts": payload["after_shift"]["spheres"],
+        },
+        "pinocchio_observation": {"weld": weld, "contact_law": contacts},
+        "contact_inventory_comparison": {
+            "mujoco_sphere_names": sorted(payload["after_shift"]["spheres"]),
+            "pinocchio_sphere_names": sorted(contacts["spheres"]),
+            "same_named_sphere_inventory": set(payload["after_shift"]["spheres"])
+            == set(contacts["spheres"]),
+            "force_or_residual_equality_asserted": False,
+        },
+        "execution_limits": {
+            "closure_correction": False,
+            "projection": False,
+            "optimizer": False,
+            "acceleration_or_dynamics": False,
+            "trajectory_integration": False,
+            "contact_equilibrium_claim": False,
+            "cross_engine_residual_equality_gate": False,
+        },
+    }
+    hashes_after = source_setup.verify_sources(repo)
+    artifact_hashes_after = {
+        "candidate_observation": sha256_file(OBSERVATION),
+        "candidate_source": sha256_file(CANDIDATE),
+        "upper_geometry": sha256_file(upper_path),
+        "full_body_spec": sha256_file(repo / SPEC),
+        "source_setup_helper": sha256_file(Path(source_setup.__file__).resolve()),
+        "probe_script": sha256_file(script_path),
+    }
+    artifact_hashes_before = {
+        "candidate_observation": observation_sha,
+        "candidate_source": candidate_sha,
+        "upper_geometry": upper_sha,
+        "full_body_spec": spec_sha,
+        "source_setup_helper": setup_sha,
+        "probe_script": result["probe_script_sha256"],
+    }
+    result["source_hashes_after"] = hashes_after
+    result["artifact_hashes_before"] = artifact_hashes_before
+    result["artifact_hashes_after"] = artifact_hashes_after
+    result["source_and_artifacts_unchanged"] = (
+        source_hashes == hashes_after
+        and artifact_hashes_before == artifact_hashes_after
+    )
+    if not result["source_and_artifacts_unchanged"]:
+        result["status"] = "provenance_changed"
+    source_setup.write_json_atomic(output, result)
+    return result
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    result = observe(
+        args.repo_root.resolve(), args.output.resolve(), Path(__file__).resolve()
+    )
+    print(
+        json.dumps({"status": result["status"], "output": str(args.output.resolve())})
+    )
+    return 0 if result["status"] == "observed_kinematics_only" else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

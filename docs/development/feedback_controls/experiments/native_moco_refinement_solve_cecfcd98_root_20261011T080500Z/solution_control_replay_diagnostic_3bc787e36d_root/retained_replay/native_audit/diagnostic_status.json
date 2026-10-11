@@ -1,0 +1,6 @@
+{
+  "acceptance_failures": [
+    "unit_error_exceeds:activations"
+  ],
+  "status": "failed"
+}
