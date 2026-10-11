@@ -363,6 +363,14 @@ model, raw capture, native optimizer or replay was qualified by this slice.
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
 
+# Active: MyoSuite Native Muscle Actuator Classification — #12249
+
+`MyoSuiteMuscleAnalyzer` now compares compiled actuator dynamics to the
+installed MuJoCo `mjDYN_MUSCLE` enum. The actual MuJoCo 3.8.0 mixed-actuator
+fixture runs without Gym/MyoSuite registration. See the F09q turnover and
+canonical chapter 31. Classification does not qualify physiology, capture
+mapping, excitation replay, or cross-engine parity.
+
 # Active: Impact-Phase Bushing Grip, OSV-7 #11739
 
 - Branch `claude/osv-7-impact-grip`. The OpenSim bushing grip is driven over 0 to 1.8 s by the OSV-10 fits (`tests/fixtures/club_face/swing_q_*.npz`), mapped by name with `grip_contact.load_coordinate_swing`. Loop closure is below 0.001 mm and hand speeds are within 12 % of the measured wrist markers.
@@ -1193,6 +1201,14 @@ three sampled poses. See chapter54 and
 `F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md`. Keep the PR draft/unarmed until
 Tools #5503 and #12207 are integrated. No source anatomy, physiology,
 force/work chart, contact/grip, captured match or parity claim follows.
+
+## Explicitly Unqualified Moco Feasibility — #12225
+
+Draft PR #12228 contains the diagnostic opt-in and 51 actual native test passes.
+See `F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md` and canonical chapter 55.
+Full-clock private preflight retains unavailable passive admission and blocked
+independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
+support/grip, captured matching and parity gates remain open.
 
 The #12198 CI receipt-preservation follow-up restores two canonical
 ground-support receipts to their recorded hashes and adds explicit formatter
