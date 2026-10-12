@@ -21,7 +21,7 @@ from .matched_sensitivity import _source_hashes, _supported_endpoints
 from .provenance import manifest_files_match, publish_new_text, sha256_file
 from .scenario_scoring import score_course_endpoints
 from .course_score_vectors import score_course_endpoint_vectors
-from .uncertainty import paired_mean_difference
+from .uncertainty import PUBLICATION_RESAMPLES, paired_mean_difference
 
 PATTERNS = PATTERN_NAMES
 LEANS = (0.0, 5.0, 10.0)
@@ -59,6 +59,7 @@ def _paired_pattern_metrics(
     target_x_m: float,
     radius_m: float,
     seed: int,
+    resamples: int = PUBLICATION_RESAMPLES,
 ) -> dict:
     a: np.ndarray = np.asarray([(x, y) for _, x, y in before], dtype=float)
     b: np.ndarray = np.asarray([(x, y) for _, x, y in after], dtype=float)
@@ -66,15 +67,16 @@ def _paired_pattern_metrics(
     radial_b = np.hypot(b[:, 0] - target_x_m, b[:, 1])
     result = {
         "radial_error_difference_m": paired_mean_difference(
-            radial_b, radial_a, seed=seed
+            radial_b, radial_a, seed=seed, resamples=resamples
         ),
         "squared_target_error_difference_m2": paired_mean_difference(
-            radial_b**2, radial_a**2, seed=seed
+            radial_b**2, radial_a**2, seed=seed, resamples=resamples
         ),
         "containment_fraction_difference": paired_mean_difference(
             (radial_b <= radius_m).astype(float),
             (radial_a <= radius_m).astype(float),
             seed=seed,
+            resamples=resamples,
         ),
         "role_mapping": {
             "Straight": "physical pattern at earlier lean",
@@ -540,6 +542,7 @@ def _paired_effect_modification(
     curved_b: np.ndarray,
     *,
     seed: int,
+    resamples: int = PUBLICATION_RESAMPLES,
 ) -> dict:
     """Bootstrap (curve−straight)_B − (curve−straight)_A by shared index."""
     arrays = tuple(
@@ -554,7 +557,9 @@ def _paired_effect_modification(
         raise ValueError("effect modification inputs must be equal finite vectors")
     interaction_b = arrays[3] - arrays[2]
     interaction_a = arrays[1] - arrays[0]
-    return paired_mean_difference(interaction_b, interaction_a, seed=seed)
+    return paired_mean_difference(
+        interaction_b, interaction_a, seed=seed, resamples=resamples
+    )
 
 
 @dataclass(frozen=True)
@@ -817,6 +822,7 @@ def _populate_explicit_metrics(
     population: _PairedPopulation,
     target_x_m: float,
     comparison_kind: str,
+    resamples: int = PUBLICATION_RESAMPLES,
 ) -> None:
     config_a, config_b = first.config, second.config
     club_a, club_b = config_a["club"], config_b["club"]
@@ -847,6 +853,7 @@ def _populate_explicit_metrics(
             target_x_m=target_x_m,
             radius_m=float(config_a["target_radius_m"]),
             seed=int(config_a["seed"]),
+            resamples=resamples,
         )
         metrics["physical_pattern"] = pattern
         metrics["first_condition"] = {
@@ -869,7 +876,7 @@ def _populate_explicit_metrics(
         result["patterns"][pattern] = metrics
     if comparison_kind in ("across_lean", "curve_strength", "shaft_rotation_sd"):
         _populate_effect_modification(
-            result, endpoint_maps, config_a, config_b, target_x_m
+            result, endpoint_maps, config_a, config_b, target_x_m, resamples
         )
 
 
@@ -879,6 +886,7 @@ def _populate_effect_modification(
     config_a: dict,
     config_b: dict,
     target_x_m: float,
+    resamples: int = PUBLICATION_RESAMPLES,
 ) -> None:
     club_a, club_b = config_a["club"], config_b["club"]
     try:
@@ -901,6 +909,7 @@ def _populate_effect_modification(
                 score_b.scores["Straight"],
                 score_b.scores[pattern],
                 seed=int(config_a["seed"]),
+                resamples=resamples,
             )
             for pattern in ("Draw", "Fade")
         }
@@ -930,6 +939,7 @@ def analyze_explicit_source_pair(
     target_x_m: float,
     transition_receipt_path: Path | None = None,
     transition_receipt_sha256: str | None = None,
+    resamples: int = PUBLICATION_RESAMPLES,
 ) -> dict:
     """Pair two validated source cells without conflating their protocols.
 
@@ -955,6 +965,8 @@ def analyze_explicit_source_pair(
     transition_sha = _execution_transition(
         execution_a, execution_b, transition_receipt_path, transition_receipt_sha256
     )
+    if resamples < 1:
+        raise ValueError("resamples must be positive")
     differences = _validate_pair_differences(first, second, comparison_kind)
     _validate_pair_conditions(first.config, second.config, comparison_kind)
     _validate_pair_target(first, second, target_x_m)
@@ -971,7 +983,7 @@ def analyze_explicit_source_pair(
     )
     if len(population.common_indices) >= 2:
         _populate_explicit_metrics(
-            result, first, second, population, target_x_m, comparison_kind
+            result, first, second, population, target_x_m, comparison_kind, resamples
         )
     _recheck_explicit_source(first_source, first.directory)
     _recheck_explicit_source(second_source, second.directory)

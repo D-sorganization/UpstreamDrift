@@ -20,7 +20,11 @@ from .core import PATTERNS, AnalysisConfig, AnalysisResult, ShotRecord
 from .dispersion_stats import landing_dispersion
 from .provenance import source_snapshot
 from .range_control import equal_range_endpoint, equal_range_summary
-from .uncertainty import paired_hit_difference, paired_variance_ratio
+from .uncertainty import (
+    PUBLICATION_RESAMPLES,
+    paired_hit_difference,
+    paired_variance_ratio,
+)
 
 _COLORS = {"Straight": "#83d7ff", "Draw": "#f8bf58", "Fade": "#e98ac0"}
 _LIMITATION = (
@@ -416,7 +420,7 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
         },
         "bootstrap": {
             "method": "Paired percentile bootstrap; curved/straight lateral variance",
-            "resamples": 500,
+            "resamples": PUBLICATION_RESAMPLES,
             "confidence": 0.95,
             "scope": "Monte Carlo sampling only; excludes model and parameter uncertainty",
         },

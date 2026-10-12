@@ -21,7 +21,11 @@ from .scoring import (
 )
 from .provenance import sha256_file
 from .scoring_cache import source_backed_score_cache
-from .uncertainty import paired_mean_difference
+from .uncertainty import (
+    DEFAULT_BOOTSTRAP_SEED,
+    PUBLICATION_RESAMPLES,
+    paired_mean_difference,
+)
 
 
 def score_course_endpoints(
@@ -32,7 +36,8 @@ def score_course_endpoints(
     hole_distance_m: float = 400.0,
     fairway_half_width_m: float = 15.0,
     green_radius_m: float = 15.0,
-    seed: int = 20261008,
+    seed: int = DEFAULT_BOOTSTRAP_SEED,
+    resamples: int = PUBLICATION_RESAMPLES,
 ) -> dict:
     """Score paired aimed endpoints on an explicitly hypothetical flat hole.
 
@@ -60,7 +65,10 @@ def score_course_endpoints(
     }
     paired = {
         name: paired_mean_difference(
-            vectors.scores[name], vectors.scores["Straight"], seed=seed
+            vectors.scores[name],
+            vectors.scores["Straight"],
+            seed=seed,
+            resamples=resamples,
         )
         for name in ("Draw", "Fade")
     }

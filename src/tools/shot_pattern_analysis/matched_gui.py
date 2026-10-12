@@ -674,26 +674,9 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         if payload.get("schema") != self.CONFIG_SCHEMA:
             raise ValueError("unsupported matched-study config schema")
         values = {key: value for key, value in payload.items() if key != "schema"}
-        club_values = dict(values["club"])
-        club_values["inertia_diagonal_kg_m2"] = tuple(
-            club_values["inertia_diagonal_kg_m2"]
-        )
-        club = MatchedConfig(**club_values)
-        noise_values = values["noise"]
-        noise = NoiseSpec(
-            tuple(noise_values["standard_deviations"]),
-            tuple(tuple(row) for row in noise_values["correlation"])
-            if noise_values.get("correlation") is not None
-            else None,
-        )
         from .matched_runner import ExperimentConfig
 
-        request = ExperimentConfig(
-            club=club,
-            noise=noise,
-            **{k: v for k, v in values.items() if k not in {"club", "noise"}},
-        )
-        self._apply_request(request)
+        self._apply_request(ExperimentConfig.from_dict(values))
 
     def _apply_request(self, request: Any) -> None:
         self._validate_import_display(request)

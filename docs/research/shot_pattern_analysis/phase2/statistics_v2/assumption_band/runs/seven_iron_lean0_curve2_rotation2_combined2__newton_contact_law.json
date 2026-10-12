@@ -1,0 +1,74 @@
+{
+  "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+  "variant": "newton_contact_law",
+  "config": {
+    "club": {
+      "club_id": "seven_iron",
+      "club_speed_mps": 36.0,
+      "loft_deg": 34.0,
+      "lie_deg": 63.0,
+      "shaft_lean_deg": 0.0,
+      "attack_angle_deg": -4.0,
+      "clubhead_mass_kg": 0.272,
+      "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
+      "cg_depth_m": 0.01,
+      "face_half_width_m": 0.035,
+      "face_half_height_m": 0.023,
+      "bulge_radius_m": 0.0,
+      "roll_radius_m": 0.0,
+      "cor": 0.83,
+      "friction_coefficient": 0.4,
+      "contact_law": "maximum_dissipation_newton",
+      "steps_per_compression": 128,
+      "contact_backend": "auto",
+      "dt_s": 0.02,
+      "max_time_s": 12.0,
+      "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
+    },
+    "noise": {
+      "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0],
+      "correlation": null
+    },
+    "n_shots": 10000,
+    "seed": 20261009,
+    "curve_scale": 2.0,
+    "target_x_m": null,
+    "match_tolerance_m": 0.05,
+    "target_radius_m": 15.0,
+    "match_face_bounds_deg": null,
+    "match_speed_factors": [0.75, 1.25]
+  },
+  "resamples": 2000,
+  "status": "conditional_only",
+  "target_x_m": 127.88194166336223,
+  "paired_n": 9996,
+  "paired_benefit_vs_straight": {
+    "Draw": {
+      "estimate": -0.00114472325560744,
+      "lower_95": -0.0014617356991524623,
+      "upper_95": -0.0008505475621123843
+    },
+    "Fade": {
+      "estimate": 0.00218363827057445,
+      "lower_95": 0.0019505879637726168,
+      "upper_95": 0.0024135435767808737
+    }
+  },
+  "mean_radial_error_difference_vs_straight": {
+    "Draw": {
+      "estimate": 0.012909780289692875,
+      "lower_95": 0.01087568594475174,
+      "upper_95": 0.015066979279235969
+    },
+    "Fade": {
+      "estimate": -0.031441607796281565,
+      "lower_95": -0.033612301595992815,
+      "upper_95": -0.02929151837840494
+    }
+  },
+  "supported_by_pattern": {
+    "Straight": 9996,
+    "Draw": 9996,
+    "Fade": 9996
+  }
+}

@@ -1,0 +1,638 @@
+{
+  "schema": "shot-pattern-rescored-contrasts/1",
+  "resamples": 2000,
+  "source_sha256": {
+    "matched_sensitivity.py": "677f90946494558cb5959af5af2c7ee0e5d940599191998c268e6e1ce33dd9de",
+    "matched_report.py": "33d92a099123259fa8f456b9bd674aad4bb569bbd34953ebac03f767b205d151",
+    "scenario_scoring.py": "730eb5dfe289e507dd1228e5b6af5d218e6904259b40967ea0fa74e9fadba9a2",
+    "scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "scoring.py": "d1670fe47397d885e5365c9402f28e2a1784485d19ef04fe94ba6362fff48fd2",
+    "uncertainty.py": "15901419993c758cdce4a7108a439e1dc769995b71476bff36e668d30bc75035",
+    "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1"
+  },
+  "scope": "(curve - Straight) in the second condition minus (curve - Straight) in the first, paired on the six-population common supported shots; Monte Carlo sampling only.",
+  "contrasts": {
+    "E01": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "driver_lean0_curve1_rotation1_shaft_only",
+        "driver_lean0_curve1_rotation2_shaft_only"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "available",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0028180068958573046,
+          "lower_95": 0.0023703619249166395,
+          "upper_95": 0.003290927177296941
+        },
+        "Fade": {
+          "estimate": -0.0012933794105451592,
+          "lower_95": -0.0016570708378168411,
+          "upper_95": -0.0009246344369920702
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "7f27353d289f3482a394b7e76583449286ed806be2f221f4c7048e86d077f4b7",
+          "source_csv_sha256": "5361a0db5ec21a204065160b5c88be95cc9d88776c6ed22be6f2d11c6a69d8dc"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "1234076d52f81edbdbc0210661e437aabb5fbf009e16b361ca246a74490b03e6",
+          "source_csv_sha256": "24a3509c525869a000552a12a37f4def44fb908a25e6b19538d24735ec24dd24"
+        }
+      ]
+    },
+    "E02": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "driver_lean0_curve1_rotation2_shaft_only",
+        "driver_lean0_curve2_rotation2_shaft_only"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "available",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.004905032591681015,
+          "lower_95": 0.00437176817561401,
+          "upper_95": 0.005439816249981192
+        },
+        "Fade": {
+          "estimate": -0.00023541937361689288,
+          "lower_95": -0.0005663606717119732,
+          "upper_95": 9.329878343612068e-5
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "1234076d52f81edbdbc0210661e437aabb5fbf009e16b361ca246a74490b03e6",
+          "source_csv_sha256": "24a3509c525869a000552a12a37f4def44fb908a25e6b19538d24735ec24dd24"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b1b7b45851091bc7f34414ba3cf6cc57a055baa94fb582f8a8a045f615482ad1",
+          "source_csv_sha256": "ea7f05fd5927b05acd076922aae4d99e448dd0ec261355deeafad973aaa4b3c0"
+        }
+      ]
+    },
+    "E03": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "driver_lean0_curve1_rotation1_combined2",
+        "driver_lean0_curve1_rotation2_combined2"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "available",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.002168248544520088,
+          "lower_95": 0.0016233071066926185,
+          "upper_95": 0.002680023242100785
+        },
+        "Fade": {
+          "estimate": -0.0009698727685856757,
+          "lower_95": -0.0014396667872652934,
+          "upper_95": -0.0004979775316046014
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c81ec05db850fff61cc2e12d921ab003fbd8daab04a2db6c99cb6345f6a99c9c",
+          "source_csv_sha256": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "e3c312ff56c6285e803348792cc8e520813cb4acdfcd402d0001718ac6c51073",
+          "source_csv_sha256": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d"
+        }
+      ]
+    },
+    "E04": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "driver_lean0_curve1_rotation2_combined2",
+        "driver_lean0_curve2_rotation2_combined2"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "available",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.004487149875537121,
+          "lower_95": 0.003937481330456317,
+          "upper_95": 0.005064704350633376
+        },
+        "Fade": {
+          "estimate": 9.2985393232592e-5,
+          "lower_95": -0.00027386633465902277,
+          "upper_95": 0.00046184858563667045
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "e3c312ff56c6285e803348792cc8e520813cb4acdfcd402d0001718ac6c51073",
+          "source_csv_sha256": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b268743fd6b01fa887e647d6f1ab5d29c4657a6283254c5256396dcb15ae0dba",
+          "source_csv_sha256": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76"
+        }
+      ]
+    },
+    "E05": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "seven_iron_lean0_curve1_rotation1_shaft_only",
+        "seven_iron_lean0_curve1_rotation2_shaft_only"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "available",
+      "target_x_m": 127.88194166336235,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 6.4485471218489035e-6,
+          "lower_95": -7.302063631914756e-5,
+          "upper_95": 4.9357780961393666e-5
+        },
+        "Fade": {
+          "estimate": 1.999968811025618e-5,
+          "lower_95": -6.0719816499139404e-5,
+          "upper_95": 0.00013304390847614897
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "6dd067c21dd6ad4c3c68f39ea6a1137f404077f084c4127c1e29232a7e44340d",
+          "source_csv_sha256": "dd3a8f4f94d3c6ed5d47984fea72b1409329ee622d8cd259f1f07c6ed15e1763"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3580f65b4d4d19295d04cdd76cab89cdf3cf5998ac5c8f45478a3b8f0227520f",
+          "source_csv_sha256": "3046d2ac0e0521aca132b44b29d61faf6b4b87064b20ef8244d6f95e4444f57b"
+        }
+      ]
+    },
+    "E06": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "seven_iron_lean0_curve1_rotation2_shaft_only",
+        "seven_iron_lean0_curve2_rotation2_shaft_only"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "available",
+      "target_x_m": 127.88194166336235,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0002108861249960735,
+          "lower_95": 6.885165251815802e-5,
+          "upper_95": 0.00036060320605274884
+        },
+        "Fade": {
+          "estimate": 0.001514678528792121,
+          "lower_95": 0.0014329270974327876,
+          "upper_95": 0.0016311605838773846
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3580f65b4d4d19295d04cdd76cab89cdf3cf5998ac5c8f45478a3b8f0227520f",
+          "source_csv_sha256": "3046d2ac0e0521aca132b44b29d61faf6b4b87064b20ef8244d6f95e4444f57b"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "e43c7cc3af83d433a9fc0825d904dcfa9b3def4a7fde214b48149ae269c7babd",
+          "source_csv_sha256": "ad0352190ef9d4db2f3be075db58bddd788ae8817cce07149546d73e51f9050f"
+        }
+      ]
+    },
+    "E07": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "seven_iron_lean0_curve1_rotation1_combined2",
+        "seven_iron_lean0_curve1_rotation2_combined2"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "conditional_only",
+      "target_x_m": 127.88194166336235,
+      "common_six_n": 9996,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": -6.027502181628796e-5,
+          "lower_95": -0.00028927684162666326,
+          "upper_95": 0.0001555642991275521
+        },
+        "Fade": {
+          "estimate": 0.000217539684880919,
+          "lower_95": -5.8165234113700454e-5,
+          "upper_95": 0.0005075193415471592
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "0e3b119e8b3842758fe614122f81d25d6d402ddc5a29b8ad653bbc9a2a2950fb",
+          "source_csv_sha256": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3fd95f290c14757eebc963c932f0b283cd8207d50c43e05c661357d65bbfc102",
+          "source_csv_sha256": "b16f41b07ae36f889aab9305669b725388f41d62e4cbbcf2c65b2f3df07d8953"
+        }
+      ]
+    },
+    "E08": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "seven_iron_lean0_curve1_rotation2_combined2",
+        "seven_iron_lean0_curve2_rotation2_combined2"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "conditional_only",
+      "target_x_m": 127.88194166336235,
+      "common_six_n": 9996,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": -0.0002475919060323463,
+          "lower_95": -0.0004943879007167445,
+          "upper_95": 1.1321046623105803e-5
+        },
+        "Fade": {
+          "estimate": 0.0011829007931870577,
+          "lower_95": 0.0009783116434075026,
+          "upper_95": 0.0013708148641233934
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3fd95f290c14757eebc963c932f0b283cd8207d50c43e05c661357d65bbfc102",
+          "source_csv_sha256": "b16f41b07ae36f889aab9305669b725388f41d62e4cbbcf2c65b2f3df07d8953"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "58275723fba1a0e767a5d0a00928f850e265ddc210965073df7dab4718eddee1",
+          "source_csv_sha256": "d078ff414f85308ca32f58478da8d1006da5b79298e452df5be947f4f0c44e86"
+        }
+      ]
+    },
+    "E09": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+        "pitching_wedge_lean0_curve1_rotation2_shaft_only"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "available",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0010926831924960153,
+          "lower_95": 0.0010276202319096893,
+          "upper_95": 0.001157561663125492
+        },
+        "Fade": {
+          "estimate": -0.001037096289165767,
+          "lower_95": -0.0011027126954496515,
+          "upper_95": -0.0009723383119665852
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "a10d87e329e46e4edaf49b860f38b07dffbbd1acd80e755ccb3309b124389eff",
+          "source_csv_sha256": "75ba66e1a9463335ad422cc5ae1ca01c878a7cb2361bcea4d990c4dd839f424d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c50db5d761ec95e5fcdc4aaae0f3c87b747aa68e641a8a845fd506acffbbebf8",
+          "source_csv_sha256": "86fa7a72e64b460436d4c5cc3dfe7b3992cd535276c74d606984334c4f485430"
+        }
+      ]
+    },
+    "E10": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+        "pitching_wedge_lean0_curve2_rotation2_shaft_only"
+      ],
+      "source_protocols": ["original_control/1", "pw-primary-face-bounds/1"],
+      "status": "available",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0055904915250099,
+          "lower_95": 0.0055316340151458,
+          "upper_95": 0.005650237049770371
+        },
+        "Fade": {
+          "estimate": -0.0054790198292634,
+          "lower_95": -0.0055365293311511275,
+          "upper_95": -0.005420079298566004
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c50db5d761ec95e5fcdc4aaae0f3c87b747aa68e641a8a845fd506acffbbebf8",
+          "source_csv_sha256": "86fa7a72e64b460436d4c5cc3dfe7b3992cd535276c74d606984334c4f485430"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        }
+      ]
+    },
+    "E11": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "pitching_wedge_lean0_curve1_rotation1_combined2",
+        "pitching_wedge_lean0_curve1_rotation2_combined2"
+      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
+      "status": "conditional_only",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 9999,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.00038931530362772474,
+          "lower_95": 0.00022364264868277248,
+          "upper_95": 0.0005602420895505798
+        },
+        "Fade": {
+          "estimate": -0.00042761049247152697,
+          "lower_95": -0.0005481598527096314,
+          "upper_95": -0.00031562084840445033
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ddfb29baa84601abc460d9a1f7134aa6bd60a1a108d275c3b2ba74ddcdd21f4e",
+          "source_csv_sha256": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ccc8a06f1c98fc08aa5ab70b2e27800d35506b1b17c349e4bf2e14554fdc3b4c",
+          "source_csv_sha256": "9d089f3b70b0cb5ddeeabe1ff309cfec960c5ed78368d4b764f3dea2315a3eee"
+        }
+      ]
+    },
+    "E12": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "pitching_wedge_lean0_curve1_rotation2_combined2",
+        "pitching_wedge_lean0_curve2_rotation2_combined2"
+      ],
+      "source_protocols": ["original_control/1", "pw-primary-face-bounds/1"],
+      "status": "conditional_only",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 9999,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0005620856518476551,
+          "lower_95": 0.00041959210699309287,
+          "upper_95": 0.0007189217549238488
+        },
+        "Fade": {
+          "estimate": -0.00029346307415259936,
+          "lower_95": -0.0004959059597595492,
+          "upper_95": -0.00010794107828167266
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ccc8a06f1c98fc08aa5ab70b2e27800d35506b1b17c349e4bf2e14554fdc3b4c",
+          "source_csv_sha256": "9d089f3b70b0cb5ddeeabe1ff309cfec960c5ed78368d4b764f3dea2315a3eee"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        }
+      ]
+    },
+    "F1": {
+      "comparison_kind": "across_lean",
+      "cells": [
+        "driver_lean0_curve2_rotation2_combined2",
+        "driver_lean5_curve2_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "driver-control-speed-bounds/1"
+      ],
+      "status": "conditional_only",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 9940,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.005980075434717973,
+          "lower_95": 0.004849005299311208,
+          "upper_95": 0.007060628560778899
+        },
+        "Fade": {
+          "estimate": -0.00139744977274586,
+          "lower_95": -0.002319957068376065,
+          "upper_95": -0.00045430487777683526
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b268743fd6b01fa887e647d6f1ab5d29c4657a6283254c5256396dcb15ae0dba",
+          "source_csv_sha256": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76"
+        },
+        {
+          "protocol_id": "driver-control-speed-bounds/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+          "source_cell_manifest_sha256": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+          "source_csv_sha256": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758"
+        }
+      ]
+    },
+    "F2": {
+      "comparison_kind": "across_lean",
+      "cells": [
+        "pitching_wedge_lean0_curve2_rotation2_combined2",
+        "pitching_wedge_lean5_curve2_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "pw-primary-face-bounds/1",
+        "pw-control-face-bounds/1"
+      ],
+      "status": "conditional_only",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 9999,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": -0.0003513244825749293,
+          "lower_95": -0.0005618620130234146,
+          "upper_95": -0.00013259228201186986
+        },
+        "Fade": {
+          "estimate": 0.0006868011750515063,
+          "lower_95": 0.00047945787267671597,
+          "upper_95": 0.000902934074844211
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ]
+    }
+  }
+}
