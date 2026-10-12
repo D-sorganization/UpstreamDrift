@@ -504,7 +504,7 @@
     "model_appearance": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 15,
+      "ud-only": 16,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -13065,7 +13065,7 @@
       "classification": "ud-only",
       "package": "model_appearance",
       "subpackage": "",
-      "ud_bytes": 6348,
+      "ud_bytes": 6549,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13126,6 +13126,18 @@
       "package": "model_appearance",
       "subpackage": "",
       "ud_bytes": 18012,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/grip_hands.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 5965,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
