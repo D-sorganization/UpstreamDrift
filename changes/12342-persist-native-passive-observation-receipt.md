@@ -8,3 +8,7 @@ paths: "src/engines/physics_engines/opensim/python/tour_matching/native_passive_
 ---
 
 Native preparation persists its already-returned passive-readiness audit atomically, with request, source, loaded-model, runtime, prepared-state, observer and optional policy identities. The solve consumer verifies the receipt and complete muscle coverage before use. Missing or stale evidence blocks the software-solve path. This receipt is not a complete restart-state artifact or a physical qualification; passive policy and all broader scientific gates remain unchanged.
+
+The fail-closed muscle inventory validation is factored into a focused helper in
+`native_passive_receipt.py`; its identity and coverage checks retain their
+existing order and error behavior.

@@ -348,6 +348,8 @@
         "src/engines/physics_engines/opensim/python/tour_matching/moco_initial_bindings.py",
         "src/engines/physics_engines/opensim/python/tour_matching/native_reference_conventions.py",
         "src/engines/physics_engines/opensim/python/tour_matching/native_passive_readiness.py",
+        "src/engines/physics_engines/opensim/python/tour_matching/native_passive_receipt.py",
+        "src/engines/physics_engines/opensim/python/tour_matching/native_body_inertia.py",
         "src/engines/physics_engines/opensim/python/tour_matching/native_muscle_bundle.py",
         "src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py",
         "src/engines/Simscape_Multibody_Models/python/native_owned_replay.py",
@@ -367,7 +369,9 @@
         "docs/development/feedback_controls/F10I-NATIVE-PLATFORM-INTEGRATION-PLAN.md",
         "docs/development/feedback_controls/F10I-NATIVE-PLATFORM-INTEGRATION-TURNOVER.md",
         "manuals/upstreamdrift/chapters/58-native-contact-source-closure.qmd",
-        "docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md"
+        "docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md",
+        "docs/development/feedback_controls/F07_PASSIVE_READINESS_TURNOVER.md",
+        "docs/development/feedback_controls/F07_NATIVE_NO_PROBE_PREPARATION_TURNOVER.md"
       ],
       "tests": [
         "tests/integration/test_native_feedback_platform.py",
@@ -381,6 +385,9 @@
         "tests/opensim/test_native_muscle_bundle.py",
         "tests/opensim/test_native_reference_conventions.py",
         "tests/opensim/test_native_passive_readiness.py",
+        "tests/opensim/test_native_passive_receipt.py",
+        "tests/opensim/test_native_moco_inertia_preflight.py",
+        "tests/unit/engines/opensim/test_native_moco_probe_mode.py",
         "tests/unit/motion_matching/test_simscape_owned_native_replay.py",
         "tests/opensim/test_native_constrained_contact.py"
       ],
