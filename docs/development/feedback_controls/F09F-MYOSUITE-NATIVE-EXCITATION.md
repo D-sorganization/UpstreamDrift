@@ -87,6 +87,24 @@ re-executed this source revision. The earlier runtime result remains evidence
 only for the exact source bytes copied into its disposable overlay; it is not
 evidence for the current adapter revision or a production golf model.
 
+## Inventory Preflight Evidence Classification (#11945)
+
+`model_inventory._native_myosuite` compiles the committed golfer MJCF with bare
+`mujoco.MjModel.from_xml_path` and runs `mj_forward`. Its result is labelled
+`evidence_kind = "mujoco_mjcf_compile"`, `backend = "mujoco"`,
+`myosuite_gym_provider = False`, and the receipt's LOAD_COMPILE message states
+that it is not a MyoSuite Gym provider, exercised no registered task, and
+implies no replay qualification. `require_myosuite_gym_provider_evidence`
+rejects any result not labelled `myosuite_gym_provider` with
+`ProviderEvidenceConflationError`, so compile evidence cannot be admitted as
+provider availability. Driver/iron package entries, hashes, asset checks and the
+all-engine denominator are unchanged; asset readiness stays separate from
+provider/runtime availability. Tests:
+`tests/unit/engines/test_model_inventory.py::TestMyoSuiteProbeEvidenceClassification`.
+Remaining production-binding evidence for driver/iron: a registered Gym
+environment, declared model path, supported wrapper chain, native muscle
+mapping, normalization policy and complete captured state.
+
 ## Follow-Up
 
 The generic MyoSuite engine's legacy four-tuple `step()` interpretation remains
