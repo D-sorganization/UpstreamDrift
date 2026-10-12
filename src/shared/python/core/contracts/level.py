@@ -9,8 +9,11 @@ Controls how Design by Contract checks behave at runtime via the
 
 from __future__ import annotations
 
+import enum
+
 from src.shared.python._contracts_level import (
     ContractLevel,
+    _contract_level_value,
     _resolve_contract_level as _shared_resolve_contract_level,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -40,12 +43,13 @@ DBC_LEVEL: ContractLevel = _contract_state["level"]  # type: ignore[assignment]
 CONTRACTS_ENABLED: bool = _contract_state["enabled"]  # type: ignore[assignment]
 
 
-def set_contract_level(level: ContractLevel) -> None:
-    """Set the global contract enforcement level at runtime.
+def set_contract_level(level: enum.Enum) -> None:
+    """Set this core subsystem's level from a compatible enum value.
 
     Args:
-        level: The desired enforcement level.
+        level: An enum whose value is off, warn, or enforce.
     """
+    level = ContractLevel(_contract_level_value(level))
     _contract_state["level"] = level
     _contract_state["enabled"] = level != ContractLevel.OFF
     logger.info("Contract enforcement level set to %s", level.value)

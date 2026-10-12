@@ -12,8 +12,10 @@ This module is UD-owned so we do not edit the Tools child copy
 from __future__ import annotations
 
 import importlib
+import enum
 import sys
 from collections.abc import Callable
+from types import ModuleType
 from typing import Any
 
 from src.shared.python.import_aliases import (
@@ -22,13 +24,16 @@ from src.shared.python.import_aliases import (
     _coalesce_loaded_aliases,
     _DOWNSTREAM_SRC_ALIAS_ROOTS,
 )
+from src.shared.python._contracts_level import (
+    _contract_level_for_module,
+    _contract_level_value,
+)
 
 __all__ = [
     "UD_CANONICAL_SRC_ROOTS",
     "UdSharedImportAliasFinder",
     "install_contract_level_alias_sync",
     "install_ud_canonical_shared_import_aliases",
-    "sync_contract_level_aliases",
 ]
 
 _CONTRACT_MODULE_NAMES = frozenset(
@@ -55,29 +60,24 @@ class UdSharedImportAliasFinder(SharedImportAliasFinder):
         return super()._parse(fullname)
 
 
-def sync_contract_level_aliases(
+def _sync_contract_level_aliases(
     level: Any,
     *,
     primary_state: Any,
 ) -> None:
-    """Mirror ``DBC_LEVEL`` onto every loaded contracts module spelling."""
-    from src.shared.python.contracts import ContractLevel
-
-    contracts_enabled = level != ContractLevel.OFF
+    """Mirror DBC_LEVEL onto every loaded contracts module spelling."""
+    updates: list[tuple[ModuleType, enum.Enum, bool, Any]] = []
     for mod_name in _CONTRACT_MODULE_NAMES:
         module = sys.modules.get(mod_name)
         if module is None:
             continue
-        module_level_type = getattr(module, "ContractLevel", None)
-        module_level = (
-            module_level_type(level.value)
-            if module_level_type is not None
-            and not isinstance(level, module_level_type)
-            else level
+        module_level, contracts_enabled, state = _contract_level_for_module(
+            level, module
         )
-        module.DBC_LEVEL = module_level  # type: ignore[attr-defined]
-        module.CONTRACTS_ENABLED = contracts_enabled  # type: ignore[attr-defined]
-        state = getattr(module, "_ContractState", None)
+        updates.append((module, module_level, contracts_enabled, state))
+    for target_module, module_level, contracts_enabled, state in updates:
+        target_module.DBC_LEVEL = module_level  # type: ignore[attr-defined]
+        target_module.CONTRACTS_ENABLED = contracts_enabled  # type: ignore[attr-defined]
         if state is not None and state is not primary_state:
             state.level = module_level
 
@@ -88,19 +88,15 @@ def install_contract_level_alias_sync() -> None:
     original: Callable[[Any], None] = contracts.set_contract_level
     if getattr(original, "_ud_contract_level_sync_installed", False):
         return
-    if getattr(original, "_ud_includes_peer_sync", False):
-        original._ud_contract_level_sync_installed = True  # type: ignore[attr-defined]
-        return
     primary_state = contracts._ContractState
 
     def set_contract_level_with_sync(level: Any) -> None:
-        local_level = (
-            level
-            if isinstance(level, contracts.ContractLevel)
-            else contracts.ContractLevel(level.value)
+        normalized = contracts.ContractLevel(_contract_level_value(level))
+        original(normalized)
+        _sync_contract_level_aliases(
+            contracts.get_contract_level(),
+            primary_state=primary_state,
         )
-        original(local_level)
-        sync_contract_level_aliases(local_level, primary_state=primary_state)
 
     set_contract_level_with_sync._ud_contract_level_sync_installed = True  # type: ignore[attr-defined]
     contracts.set_contract_level = set_contract_level_with_sync  # type: ignore[attr-defined]
