@@ -95,6 +95,8 @@ def set_contract_level(level: ContractLevel) -> None:
     """Set the global contract enforcement level at runtime."""
     import sys
 
+    if not isinstance(level, ContractLevel):
+        level = ContractLevel(level.value)
     _ContractState.level = level
     # Update module-level aliases so existing references see the new values
     current_module = sys.modules[__name__]
