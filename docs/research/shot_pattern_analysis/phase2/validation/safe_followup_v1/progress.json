@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T06:04:40.585578+00:00",
+  "recorded_at_utc": "2026-10-12T08:19:44.545270+00:00",
   "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
@@ -612,5 +612,21 @@
         "uncompressed_sha256": "631fbce346bd2d8e16b8fd430a959280d9c3c21c54f696f45eca1074dc2338fe"
       }
     ]
+  },
+  "latest_combined_gate": {
+    "source": "0c612812cb22819c81a5cde57e2f915c380f97f0",
+    "passes": 7482,
+    "failures": 1,
+    "skipped": 377,
+    "deselected": 43,
+    "xpassed": 1,
+    "subtests": 21,
+    "remaining_test_failure": "Impact provider metadata awaits published Tools pin and served-bundle verification",
+    "policy_failure": "Imported development log exceeded active-count and byte limits; reviewed official reconciliation applied, content validator green, portfolio WIP warning retained"
+  },
+  "development_log_reconciliation": {
+    "review": "Astra approved exact public-API candidate and byte preservation",
+    "plan": "docs/development/provenance/shot-pattern-devlog-reconciliation/plan.json",
+    "qualification": "Metadata-only; no new fleet-runtime, scientific or physical acceptance"
   }
 }
