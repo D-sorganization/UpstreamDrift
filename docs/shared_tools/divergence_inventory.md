@@ -110,7 +110,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `qt_utils` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `realtime` | 0 | 2 | 0 | 4 | 0 | 2 |
-| `reporting` | 0 | 2 | 0 | 5 | 0 | 2 |
+| `reporting` | 0 | 2 | 0 | 9 | 0 | 2 |
 | `rotation_transforms` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `safe_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `safe_pandas_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
@@ -141,7 +141,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **399** | **274** | **121** | **1614** | **808** | **673** |
+| **Total** | **399** | **274** | **121** | **1618** | **808** | **673** |
 
 ## Diverged Files by Package
 
