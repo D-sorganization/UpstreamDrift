@@ -114,3 +114,6 @@ docs/development/full_body_models/evidence/hip_zero_twist_12042/iron/receipt.jso
 
 # Preserve byte-exact native observation data in the separate #12275 attempt.
 docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/drake-zero-effort.json
+# #11745/#11747: lift parity records written by scripts/measure_lift_*_parity.py;
+# the generator's float serialization is the evidence, so Prettier must not rewrite it.
+docs/development/lifting/evidence/back_squat/*_parity.json

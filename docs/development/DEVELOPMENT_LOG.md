@@ -22,14 +22,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11792 (parent #11784; implementation children #12342, #12343 and #12353)
-- **PR:** #12355 (draft; related readiness work in #12344)
-- **Branch:** feat/native-passive-observation-receipt-12342
-- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py, src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py, src/engines/physics_engines/opensim/python/tour_matching/native_passive_receipt.py, tests/opensim/test_native_passive_receipt.py, tests/unit/engines/opensim/test_native_path_optimizer_domains.py, manuals/upstreamdrift/chapters/24-native-path-work.qmd, manuals/upstreamdrift/chapters/33-native-passive-readiness.qmd, docs/development/feedback_controls/F07_PASSIVE_READINESS_TURNOVER.md
-- **Started:** 2026-10-11
-- **Last verified:** 2026-10-12 at 9a0c1508c676245426e6535a222c6cc8f6afbb5f; affected tests 50 passed, 16 skipped, 2 warnings. The pre-PR output reported gate completion, but its inner exit code was not retained. Fleet Policy reported SKIP because the repository-local validator entrypoint is absent; the direct pinned Tools Development Log validator passed after this update with a portfolio warning: 21 in-progress entries exceed the golf cap of 8; rows owned by others were left unchanged.
-- **Summary:** Software work adds source-bound optimizer-domain checks and persists the returned passive-readiness observation without changing its scientific digest or qualification meaning. The current diagnostic uses a requested forward finite-difference setting; no native solve, optimum, learned replay, or physical qualification is established. All 17 registered model/variant rows remain unqualified.
-- **Next step:** Complete the reviewed no-probe preparation, then address physiological policy and require solver readback plus a full-clock replay before any qualification claim.
+- **Issue:** #11792 (parent #11784; implementation children #12342, #12343, and #12353)
+- **PR:** #12344 (merged); #12355 (open); #12367 (open)
+- **Branch:** fix/native-path-connection-finalization-12233-20261012 (#12344); feat/native-passive-observation-receipt-12342 (#12355); feat/native-no-probe-12353-20261012 (#12367)
+- **Started:** 2026-10-09 (parent issue opened)
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py; src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py; src/engines/physics_engines/opensim/python/tour_matching/native_passive_receipt.py; tests/opensim/test_native_passive_receipt.py; tests/unit/engines/opensim/test_native_path_optimizer_domains.py; tests/unit/engines/opensim/test_native_moco_probe_mode.py; manuals/upstreamdrift/chapters/24-native-path-work.qmd; manuals/upstreamdrift/chapters/33-native-passive-readiness.qmd; docs/development/feedback_controls/F07_PATH_WORK_TURNOVER.md; docs/development/feedback_controls/F07_PASSIVE_READINESS_TURNOVER.md
+- **Last verified:** 2026-10-12 at f7a0ad630f9f9142cadb4e816d03f91379a354fb; pinned QA pre-PR passed all gates (307 passed, 29 skipped, 16 warnings). Semgrep and Fleet Policy were skipped because their local tools/entrypoints were unavailable. The run made no native calls.
+- **Summary:** Software/readiness work finalizes native connections before optimizer-domain and passive audits, persists the passive-readiness observation without changing its scientific digest, and provides a preparation mode that avoids forward integration. It does not establish a solve, optimum, learned replay, or physical qualification. All 17 registered model/variant rows remain unqualified.
+- **Next step:** Complete and review the combined no-probe preparation, then address physiological policy and require solver readback plus a full-clock replay before any qualification claim.
 
 ### DL-#11719 · GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export
 
@@ -441,13 +441,13 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** codex
 - **Issue:** owner-requested documentation review; tracked by PR #11083
 - **PR:** #11083
-- **Branch:** `docs/motion-matching-board-review`
-- **Paths:** `docs/development/2026-09-28-motion-matching-board-review.md`
+- **Branch:** docs/motion-matching-board-review
+- **Paths:** docs/development/2026-09-28-motion-matching-board-review.md
 - **Started:** 2026-09-28
 - **Shipped:** 2026-09-29
 - **Last verified:** 2026-10-12 at 64962e8d6b6263d5fb32bb1444712b28a9df4433 (remote merge verification only; no tests or native runs)
 - **Summary:** Evidence-backed engine/model review, recent GS3DX improvements, 18 issue proposals, anatomical Home-budget options and historical-video readiness; no implementation or qualification claim.
-- **Next step:** The documentation review is shipped. Resulting implementation proposals remain separate, independently tracked issues.
+- **Next step:** The documentary review is shipped; its implementation proposals remain separately tracked and open. No qualification claim.
 
 ### DL-#11080 · Product Review for the Expert Panel
 
