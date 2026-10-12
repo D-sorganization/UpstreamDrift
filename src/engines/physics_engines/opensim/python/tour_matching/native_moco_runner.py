@@ -32,6 +32,7 @@ from .native_passive_readiness import (
     PassiveReadinessPolicy,
     audit_native_passive_readiness,
 )
+from .native_passive_receipt import validate_native_passive_observation_receipt
 from .native_reference_conventions import (
     ReferenceStateDeclaration,
     audit_source_reference,
@@ -171,6 +172,37 @@ def _require_current_inputs(
         if _sha(path) != expected:
             raise ValueError("Source, observation or guess changed after preparation")
     _require_physical_body_audit(request, prepared, directory)
+    if (
+        prepared.passive_observation_sha256 is not None
+        or request.allow_unqualified_passive_diagnostic
+    ):
+        reference = prepared.passive_observation_receipt
+        if reference is None:
+            raise ValueError("Passive observation receipt is missing")
+        if reference.audit_sha256 != prepared.passive_observation_sha256:
+            raise ValueError("Passive observation digest changed after preparation")
+        if (
+            prepared.native_runtime_sha256 is None
+            or prepared.loaded_model_sha256 is None
+        ):
+            raise ValueError("Passive observation source identities are incomplete")
+        observer_sha256 = _sha(
+            Path(audit_native_passive_readiness.__code__.co_filename)
+        )
+        validate_native_passive_observation_receipt(
+            directory,
+            reference,
+            request_sha256=request.identity_sha256,
+            source_sha256=prepared.source_sha256 or "",
+            loaded_model_sha256=prepared.loaded_model_sha256,
+            runtime_sha256=prepared.native_runtime_sha256,
+            policy_sha256=(
+                request.passive_policy.identity_sha256
+                if request.passive_policy is not None
+                else None
+            ),
+            observer_sha256=observer_sha256,
+        )
     registered = directory / "registered.trc"
     if _sha(registered) != prepared.registered_trc_sha256:
         raise ValueError("Registered marker reference changed after preparation")

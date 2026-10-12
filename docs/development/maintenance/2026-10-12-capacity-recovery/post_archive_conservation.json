@@ -1,0 +1,68 @@
+{
+  "baseline_current_entries": 144,
+  "baseline_archive_entries": 179,
+  "after_current_entries": 76,
+  "after_archive_entries": 247,
+  "moved_entries": 68,
+  "preexisting_duplicate_ids": {
+    "DL-#10336": 2
+  },
+  "baseline_combined_unique_ids": 322,
+  "after_combined_unique_ids": 322,
+  "baseline_and_after_id_multiplicities_equal": true,
+  "non_target_records_semantically_conserved": false,
+  "previous_archive_raw_bytes": 218446,
+  "previous_archive_raw_sha256": "ff19451640b913ad056967f9a6c9e5cb5af813c9b7ba90262709aa677307ddf8",
+  "previous_archive_exact_body_suffix_preserved": true,
+  "new_archive_raw_bytes": 280375,
+  "new_archive_sha256": "7bb3560a62361e67619aac89fac76b216cf0e826cf0ca859374e3aa7912d6b82",
+  "current_log_raw_bytes": 162340,
+  "current_log_sha256": "9d8a0467e3a1ab346a04235a4157eb634ff643c2c700e2a390441dec2adb8adc",
+  "10783_state": "shipped",
+  "10783_next_step": "The UpstreamDrift software guard is complete; the three canonical-function exceptions expire 2026-10-23. Broader fleet rollout remains separately tracked in Repository_Management #1687.",
+  "11792_state": "in_progress",
+  "first_archiver_exit": 0,
+  "second_archiver_exit": 0,
+  "second_pass_noop": true,
+  "no_duplicate_claim": "DL-#10336 was already duplicated once across current log plus the pre-existing archive; this maintenance preserved that multiplicity and did not edit either record.",
+  "non_target_records_semantically_conserved_except_approved_heading_normalization": true,
+  "approved_heading_normalization": {
+    "action": "single_heading_title_case_normalization",
+    "observed_at_utc": "2026-10-12T09:32:12.930054+00:00",
+    "repository": "D-sorganization/UpstreamDrift",
+    "base_commit": "8e9b4b974b98d0f1006514a121b3b0807ed42d9c",
+    "maintenance_commit_before_correction": "7bb8ae05f057fb2597ab3ca0d59dce7d9b96cb9b",
+    "archive_path": "docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md",
+    "line_number": 791,
+    "normalizer": {
+      "path": "C:\\Users\\diete\\Repositories\\Repository_Management\\shared_scripts\\document_title_case.py",
+      "raw_sha256": "c6ec3c3243bb08dec0f0a31a5bf9306d3d948e40522f73bf97b8caa3f6f5131d",
+      "function": "expected_title",
+      "source_commit": "b67af31d5d313403c2a7f6f1b5aeeb0de3882a0e",
+      "git_blob": "c9a01ec2581df8d22ddad7af5a20a3570c0f4b9c"
+    },
+    "before": {
+      "line_utf8_json": "### DL-#11556 \u00b7 Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.\n",
+      "line_bytes_hex": "23232320444c2d23313135353620c2b7204369285365637572697479293a2052652d56656e646f7220666f726b5f70725f72756e6e65725f67756172642e707920616e64204e657720666f726b5f70725f67756172645f616e616c797369732e70792046726f6d205265706f7369746f72795f4d616e6167656d656e742028524d2331393936293a2053616d652d5265706f2069663a204578656d7074696f6e20616e642053696e6b2d426173656420486561642d436865636b6f757420416e616c797369732e0a",
+      "line_sha256": "32c6e2b9b78cbb61ae285257bea7a4f2da8ef3c6f1982be9876c0ee7b0e2b21b",
+      "archive_bytes": 280375,
+      "archive_sha256": "c4789e2dbfd4f810149becafcc69be3294d1acbecae15e9fc943c5a7c28754e5",
+      "line_string_includes_terminator": true
+    },
+    "after": {
+      "line_utf8_json": "### DL-#11556 \u00b7 Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo If: Exemption and Sink-Based Head-Checkout Analysis.\n",
+      "line_bytes_hex": "23232320444c2d23313135353620c2b7204369285365637572697479293a2052652d56656e646f7220666f726b5f70725f72756e6e65725f67756172642e707920616e64204e657720666f726b5f70725f67756172645f616e616c797369732e70792046726f6d205265706f7369746f72795f4d616e6167656d656e742028524d2331393936293a2053616d652d5265706f2049663a204578656d7074696f6e20616e642053696e6b2d426173656420486561642d436865636b6f757420416e616c797369732e0a",
+      "line_sha256": "c649befb1a88775d44cf53a657e2e0cef50f04624bd3fc32f711be33045560d7",
+      "archive_bytes": 280375,
+      "archive_sha256": "7bb3560a62361e67619aac89fac76b216cf0e826cf0ca859374e3aa7912d6b82",
+      "line_string_includes_terminator": true
+    },
+    "only_difference": {
+      "old": "Same-Repo if:",
+      "new": "Same-Repo If:"
+    },
+    "source_record": "The heading was present in the pre-mutation live Development Log and absent from the pre-existing 2026 archive; it was moved by the approved zero-day archiver.",
+    "preservation": "All other archive bytes and all non-heading Development Log fields remain byte-identical; original heading is preserved in the pre-mutation snapshot."
+  },
+  "conservation_note": "Entry-ID multiset is exactly conserved; only DL-#11556 heading case changed after the first pre-PR gate. All metadata fields and every other record/byte remain unchanged. The inherited DL-#10336 multiplicity remains two."
+}
