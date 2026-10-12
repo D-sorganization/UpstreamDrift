@@ -2,14 +2,49 @@
 
 import json
 import math
+import hashlib
+import platform
 from dataclasses import asdict, replace
 from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 import pytest
+import scipy
 
 pytestmark = pytest.mark.unit
+
+_FIXTURE_DIR = Path(__file__).parent / "fixtures"
+_HISTORICAL_FIXTURE = "adapter_refactor_reference.json"
+_HISTORICAL_SHA256 = "0403629f476ae9f01b50afe9060fd2e6d0b41b4f463aad213fec032c6af245fa"
+_CI_LOCK_FIXTURE = "adapter_refactor_reference_scipy_1_15_3.json"
+_CI_LOCK_SHA256 = "2340fb22609bc17eac72ccd4f621bbe187edeff9be0bd26d062f89b1bce90d93"
+_PY311_FIXTURE = "adapter_refactor_reference_py311_scipy_1_15_3.json"
+_PY311_SHA256 = "8922892320bea6ea9f10bedb0f6793fcd3d972d88149ffa48650cde06e8219fe"
+_SUPPORTED_RUNTIMES = {
+    ("3.11", "2.2.6", "1.15.3"): (_PY311_FIXTURE, _PY311_SHA256),
+    ("3.12", "2.2.6", "1.15.3"): (_CI_LOCK_FIXTURE, _CI_LOCK_SHA256),
+    ("3.12", "2.2.6", "1.18.1"): (_HISTORICAL_FIXTURE, _HISTORICAL_SHA256),
+}
+
+
+def _reference_for_runtime(
+    python_version: str, numpy_version: str, scipy_version: str
+) -> tuple[str, str]:
+    python_minor = ".".join(python_version.split(".")[:2])
+    versions = (python_minor, numpy_version, scipy_version)
+    try:
+        return _SUPPORTED_RUNTIMES[versions]
+    except KeyError as exc:
+        raise ValueError(f"Unsupported adapter golden runtime: {versions}") from exc
+
+
+def _read_hash_bound_reference(path: Path, expected_sha256: str) -> dict:
+    contents = path.read_bytes()
+    actual_sha256 = hashlib.sha256(contents).hexdigest()
+    if actual_sha256 != expected_sha256:
+        raise ValueError(f"Adapter golden fixture hash mismatch: {path.name}")
+    return json.loads(contents)
 
 
 def _json_value(value):
@@ -191,10 +226,60 @@ def _adapter_receipt():
 
 
 def test_adapters_match_fixed_pre_refactor_synthetic_receipt():
-    reference = json.loads(
-        (Path(__file__).parent / "fixtures/adapter_refactor_reference.json").read_text()
+    filename, sha256 = _reference_for_runtime(
+        platform.python_version(), np.__version__, scipy.__version__
     )
+    reference = _read_hash_bound_reference(_FIXTURE_DIR / filename, sha256)
     assert json.dumps(_adapter_receipt()) == json.dumps(reference["receipt"])
+
+
+def test_adapter_golden_provenance_is_bound_to_original_fixture():
+    original = _read_hash_bound_reference(
+        _FIXTURE_DIR / _HISTORICAL_FIXTURE, _HISTORICAL_SHA256
+    )
+    ci_lock = _read_hash_bound_reference(
+        _FIXTURE_DIR / _CI_LOCK_FIXTURE, _CI_LOCK_SHA256
+    )
+    py311 = _read_hash_bound_reference(_FIXTURE_DIR / _PY311_FIXTURE, _PY311_SHA256)
+    provenance = ci_lock["provenance"]
+    assert provenance["source_commit"] == "de9ece2b99121e6f0c5a18f85e9331012d80a7b0"
+    assert provenance["source_tree"] == "d0fca9395abdaca6d1075ba5ce2343ed0b361ba7"
+    assert provenance["harness_sha256"] == (
+        "53a3ba0ef97e120afa778d0eb8e1e38849d8264e2f1bbcdbf1bd18d584fa6d4e"
+    )
+    assert provenance["historical_fixture_sha256"] == _HISTORICAL_SHA256
+    assert provenance["source_sha256"] == original["provenance"]["source_sha256"]
+    assert len(provenance["loaded_historical_source_sha256"]) == 65
+    assert (
+        py311["provenance"]["loaded_historical_source_sha256"]
+        == provenance["loaded_historical_source_sha256"]
+    )
+    assert (
+        py311["provenance"]["source_sha256"] == original["provenance"]["source_sha256"]
+    )
+    assert py311["provenance"]["harness_sha256"] == provenance["harness_sha256"]
+    assert py311["receipt"] == ci_lock["receipt"]
+    assert (
+        provenance["python"],
+        provenance["numpy"],
+        provenance["scipy"],
+    ) == ("3.12.13", "2.2.6", "1.15.3")
+    assert (
+        py311["provenance"]["python"],
+        py311["provenance"]["numpy"],
+        py311["provenance"]["scipy"],
+    ) == ("3.11.15", "2.2.6", "1.15.3")
+
+
+def test_adapter_golden_rejects_unreviewed_runtime_and_modified_fixture(tmp_path):
+    with pytest.raises(ValueError, match="Unsupported adapter golden runtime"):
+        _reference_for_runtime("3.12.13", "2.2.6", "1.99.0")
+    with pytest.raises(ValueError, match="Unsupported adapter golden runtime"):
+        _reference_for_runtime("3.13.0", "2.2.6", "1.15.3")
+    modified = tmp_path / _CI_LOCK_FIXTURE
+    modified.write_bytes((_FIXTURE_DIR / _CI_LOCK_FIXTURE).read_bytes() + b" ")
+    with pytest.raises(ValueError, match="golden fixture hash mismatch"):
+        _read_hash_bound_reference(modified, _CI_LOCK_SHA256)
 
 
 @pytest.mark.parametrize(
