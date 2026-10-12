@@ -123,7 +123,7 @@ python -c "from pathlib import Path; from src.shared.python.motion_matching.jobs
 
 - Club-only profiles do not satisfy full-body G3 acceptance (native program #10363).
 - Neural speed program (#10603) does not inherit success from club-only classical matching (#10602).
-- Do not close epic #10602 while mandatory native fits remain missing for unqualified / missing_runtime / unsupported matrix cells.
+- Do not close #10363 while mandatory native fits remain missing for unqualified / missing_runtime / unsupported matrix cells; the native-receipt cells were moved there from the closed epic #10602.
 
 ## Evidence Links
 
