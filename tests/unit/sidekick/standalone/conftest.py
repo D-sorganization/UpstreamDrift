@@ -94,7 +94,16 @@ def _install_canonical_tools_paths() -> None:
         raise RuntimeError(
             f"canonical Tools contracts did not resolve: {contract_origin}"
         )
-    sys.modules["contracts"] = parent_contracts
+    for name in (
+        "contracts",
+        "shared.python.contracts",
+        "src.shared.python.contracts",
+    ):
+        sys.modules[name] = parent_contracts
+    for name in ("shared.python", "src.shared.python"):
+        package = sys.modules.get(name)
+        if package is not None:
+            package.contracts = parent_contracts  # type: ignore[attr-defined]
 
 
 _ensure_numpy_stub()
