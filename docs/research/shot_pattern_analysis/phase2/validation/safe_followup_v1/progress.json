@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T12:03:53.973423+00:00",
-  "checkpoint": "0e078eacc4490a8c4b227136e8c78a10b9387f0b",
+  "recorded_at_utc": "2026-10-12T12:36:37.079522+00:00",
+  "checkpoint": "79ce24756f9b177e45b1f3c243a7393a8b7ec9ae",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "0e078eacc4490a8c4b227136e8c78a10b9387f0b",
+  "source_commit": "79ce24756f9b177e45b1f3c243a7393a8b7ec9ae",
   "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7588 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge and final deployed mobile acceptance remain pending.",
+  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -615,9 +615,9 @@
     ]
   },
   "latest_combined_gate": {
-    "source": "0e078eacc4490a8c4b227136e8c78a10b9387f0b",
+    "source": "79ce24756f9b177e45b1f3c243a7393a8b7ec9ae",
     "status": "PASS all eight canonical gates with Semgrep available",
-    "passes": 7588,
+    "passes": 7594,
     "skipped": 377,
     "deselected": 43,
     "xpassed": 1,
@@ -630,14 +630,19 @@
     "selection": "Unmodified canonical affected-test selection; historical fixture consumers and new strict historical-path resolver tests included. Earlier whole-research failure remains preserved; no whole research-suite pass is claimed.",
     "receipts": [
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-integrity-followup-canonical-prepr.txt.gz",
-        "sha256": "f1ceb265d10725ce754ef9f1ebd0fc7c2d605f9b4a79ed0be6bba715afc33699",
-        "uncompressed_sha256": "8f165a704a5a8499bd9f0a43ac2039c7081501eaf4297c5885fe3be8c69380ea"
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-capacity-portability-final-prepr.txt.gz",
+        "sha256": "89d343138a8c8adf55af1fbceb1e9d5bc6f0dd5333911bc6b8235050e9c6a105",
+        "uncompressed_sha256": "309a9379ea46946b2170f97ea8b421f1c9b5e4898113be318c0575492e7366aa"
       },
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-semgrep-integrity-followup-delta.txt.gz",
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-capacity-portability-semgrep.txt.gz",
         "sha256": "bc7ac8336308ff36765ffffbcfa5d2d0cd4169fe79fee45641c6de6e381b423c",
         "uncompressed_sha256": "b8c39973d45c5a45713c3042a98614b6ed295252b7fc1bb76cf65b963659f7f4"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/history-free-verifier-test.txt.gz",
+        "sha256": "1b2dee11f711bc6068195ec6d4f8cbdece8fe323d85eb069f386765c8dd52925",
+        "scope": "Twelve unit verifier cases in isolated history-free checkout; no production Git fallback added."
       }
     ]
   },
@@ -1076,7 +1081,7 @@
     "repair": "Function-scoped unit transport accepts only six literal commit/path requests and repository cwd; validates compressed and raw hashes before returning original archived Git bytes. No ambient fallback. Production Git retrieval/source authentication/AST/numerical assertions unchanged.",
     "validation": "17 focused verifier/integrity cases pass, including wrong commit/path/cwd/command and corrupt stored/raw data. Separately, production full-history retrieval reproduces84 exact comparisons and3 source projections. Astra independently verified all6 original Git blob identities and deterministic archives.",
     "scope": "Unit-test portability only; no live Git retrieval claim from injected unit transport and no scientific qualification renewed.",
-    "status": "Focused checks pass; updated complete canonical gate and protected CI pending."
+    "status": "Focused and history-free unit checks and complete stable-source canonical pass; protected updated CI pending."
   },
   "latest_main_capacity_reconciliation": {
     "main": "8a22fd99a86f76e0fd1e42989a4e0ae1843a76df",
@@ -1084,6 +1089,6 @@
     "scope": "Only retain already-completed9507 correction alongside incoming already-completed10783 correction; all76 parsed entry titles/fields conserved except these independently evidenced state updates.",
     "archive": "Both branch and main archives are byte-identical:SHA25673675e99cd33bd54b3ec8804c29bc5b8adabbc4636ab57ca4c3f6493fa84f85d. No duplicate move.",
     "validation": "Official development-log validator passes; existing22-entry portfolio WIP warning retained. Both original active logs are lossless gzip; detailed merge proof committed.",
-    "gate": "Updated complete canonical and protected CI pending."
+    "gate": "Complete stable-source canonical passes; protected updated CI pending."
   }
 }
