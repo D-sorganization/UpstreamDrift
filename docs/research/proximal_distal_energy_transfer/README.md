@@ -47,6 +47,11 @@ double-pendulum evaluation has run. See
 [`NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md`](NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md),
 [`NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md`](NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md),
 and [`NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md`](NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md).
+The current authority amendment is recorded in the editable
+[`Nonlinear-Controller Registration Authority Amendment`](nonlinear_controller_registration_amendment_20261011.tex);
+it requires fresh qualification and leaves historical results unchanged. The
+editable [`Uncertainty and Control Stability Audit Reference`](uncertainty_stability_audit_reference.tex)
+records the separate stability audit's calculation and evidence boundaries.
 
 Open research materials for a study of proximal-to-distal (P→D) energy
 transfer in the golf swing. The study combines a literature synthesis
@@ -308,7 +313,9 @@ the finding-by-finding record in
 | [`NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md`](NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md)               | Prospective matched comparison, ranking suppression, and execution boundary                    |
 | [`NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md`](NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md)                     | Manufactured projected-iLQR mechanics, falsifiers, and unavailable-solver boundary             |
 | [`NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md`](NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md)                               | Controller-facing state/control transport and canonical ODE parity limits                      |
-| [`data/nonlinear_controller_comparison_registration.json`](data/nonlinear_controller_comparison_registration.json) | Digest-bound outcome-blind comparison registration                                             |
+| [`data/nonlinear_controller_comparison_registration.json`](data/nonlinear_controller_comparison_registration.json) | Historical digest-bound comparison registration                                                |
+| [`data/nonlinear_controller_comparison_registration_20261011.json`](data/nonlinear_controller_comparison_registration_20261011.json) | Current prospective comparison registration; fresh qualification required                     |
+| [`data/nonlinear_controller_registration_amendment_20261011.json`](data/nonlinear_controller_registration_amendment_20261011.json) | Exact old/new authority digests and unchanged-protocol record                                 |
 | [`data/nonlinear_controller_solver_qualification.json`](data/nonlinear_controller_solver_qualification.json)       | Deterministic manufactured solver qualification evidence                                       |
 | [`data/nonlinear_controller_plant_transport.json`](data/nonlinear_controller_plant_transport.json)                 | Deterministic shared-equation plant-step transport evidence                                    |
 | [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md)                             | Claim, alternative-explanation, model-discrepancy, and falsifier register                      |
@@ -350,9 +357,7 @@ python3 -m scripts.research.proximal_distal_energy.run_event_topology_channel_ma
 python3 -m scripts.research.proximal_distal_energy.make_event_topology_robustness_figure
 python3 scripts/research/proximal_distal_energy/register_event_topology_robustness_claims.py
 python3 -m scripts.research.proximal_distal_energy.nonlinear_controller_registration write
-python3 -m scripts.research.proximal_distal_energy.nonlinear_controller_qualification write
-python3 -m scripts.research.proximal_distal_energy.nonlinear_controller_plant_transport write
-python3 scripts/research/proximal_distal_energy/register_nonlinear_controller_claims.py
+python3 -m pytest -q -n 0 tests/research/test_nonlinear_controller_registration_amendment.py tests/research/test_nonlinear_controller_solver_qualification.py tests/research/test_nonlinear_controller_plant_transport.py
 python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
 python3 -m scripts.research.proximal_distal_energy.run_grf_drift_study
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
