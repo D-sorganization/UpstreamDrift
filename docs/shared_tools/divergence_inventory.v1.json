@@ -24597,7 +24597,7 @@
       "classification": "ud-only",
       "package": "reporting",
       "subpackage": "swing_report",
-      "ud_bytes": 4797,
+      "ud_bytes": 4923,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
