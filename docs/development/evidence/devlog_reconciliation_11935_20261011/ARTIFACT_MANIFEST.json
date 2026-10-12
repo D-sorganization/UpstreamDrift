@@ -17,14 +17,14 @@
       "sha256": "ff19451640b913ad056967f9a6c9e5cb5af813c9b7ba90262709aa677307ddf8"
     },
     {
-      "path": "DEVELOPMENT_LOG_RECONCILIATION_SOURCE_ORIGINAL_20261011.md",
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_SOURCE_ORIGINAL_20261011.md.snapshot",
       "bytes": 336131,
       "sha256": "d9268879c0527199ae588dcf91a93a50556d1f29dac28924a658a2a43bca4bdb"
     },
     {
       "path": "archive/DEVELOPMENT_LOG_RECONCILIATION_11935_20261011.md",
-      "bytes": 8433,
-      "sha256": "f4dc87ad1f0a2b4a1eedf3cc2fbefd4b66cab176921fe278e30b2b27a4130ec1"
+      "bytes": 8728,
+      "sha256": "2187761542917bb4ab2da7b7e399fe9829d53a298d9949aed5261a2f27b289d8"
     },
     {
       "path": "archive/DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
