@@ -1,12 +1,26 @@
 ---
 issue: 12139
 summary: "Prevent protocol collisions in supplemental figure paths and require unchanged numerical bytes before recovery rendering."
-dl_state: "in_progress"
-next_step: "Monitor guarded v6, verify complete outputs, then deliver the reviewed saved-data publication."
+dl_state: "in_review"
+next_step: "Complete the final canonical gate and live publication verification, then deliver through protected merge; no merge claimed yet."
 title: "Protocol-Qualified Supplemental Figure Identity"
-branch: "codex/shot-pattern-matched-delivery"
+branch: "codex/shot-pattern-main-integration"
 paths: "src/tools/shot_pattern_analysis/matched_supplement_figures.py,src/tools/shot_pattern_analysis/matched_supplement_pipeline.py"
 ---
+
+## Current Review Checkpoint
+
+2026-10-12: Integrated on `codex/shot-pattern-main-integration` for review; not yet merged. The [protocol identity qualification](../docs/research/shot_pattern_analysis/phase2/validation/protocol_identity_final_qualification_v1/review.json) records the naming and guard qualification, including the preserved numerical source identities. The later [final PNG coverage receipt](../docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/final_png_coverage_receipt.json) supplies the completed saved-data graphical review scope. Interrupted v5 remains rejected; neither receipt authorizes a new Monte Carlo run or renews model validity.
+
+Complete the final canonical gate and live publication verification before protected merge. This checkpoint does not close deferred physical validation, renew historical scientific approvals, or claim completed integration acceptance.
+
+## Historical Checkpoint
+
+The prior checkpoint is preserved below as history, not current acceptance.
+
+Prior state: `in_progress`. Prior branch: `codex/shot-pattern-matched-delivery`.
+
+Prior next step: Monitor guarded v6, verify complete outputs, then deliver the reviewed saved-data publication.
 
 Interrupted v5 is rejected and hash-preserved. Forty filename collision groups affect 80 records; all seven numerical artifacts match reviewed prior bytes. AGY owns naming TDD; Astra owns numeric parity and ledger guards. No final publication acceptance or Monte Carlo rerun.
 
