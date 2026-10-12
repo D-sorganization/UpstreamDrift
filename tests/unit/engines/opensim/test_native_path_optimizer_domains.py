@@ -1,7 +1,9 @@
 """Native MPP optimizer intervals exclude conditional-point activity ranges."""
 
-import pytest
+from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
 
 from src.engines.physics_engines.opensim.python.tour_matching.native_path_work_audit import (
     NativePathWorkIdentity,
@@ -178,6 +180,10 @@ class _OpenSim:
 class _Model:
     def __init__(self, components):
         self.components = components
+        self.finalize_calls = 0
+
+    def finalizeConnections(self):
+        self.finalize_calls += 1
 
     def getComponentsList(self):
         return self.components
@@ -277,6 +283,14 @@ def test_preparation_blocks_probe_when_optimizer_exceeds_source_domain(
     monkeypatch.setitem(
         sys.modules, "opensim", SimpleNamespace(Model=lambda _path: model)
     )
+    domain_results = []
+
+    def record_domains(*_args):
+        result = {"/jointset/knee/knee_angle": (-0.4, 0.3)}
+        domain_results.append(result)
+        return result
+
+    monkeypatch.setattr(preparation, "native_path_optimizer_domains", record_domains)
     monkeypatch.setattr(preparation, "_declared_chart_blockers", lambda _request: [])
     monkeypatch.setattr(preparation, "_native_runtime_identity", lambda _osim: "b" * 64)
     monkeypatch.setattr(
@@ -306,6 +320,8 @@ def test_preparation_blocks_probe_when_optimizer_exceeds_source_domain(
     result = preparation._native_preparation(request, run_probe=True)
 
     assert "native-moco-path-optimizer-domain-invalid" in result[3]
+    assert model.finalize_calls == 1
+    assert domain_results == [{"/jointset/knee/knee_angle": (-0.4, 0.3)}]
     assert probe_calls == [False]
     assert result[6] is False
 
@@ -461,3 +477,152 @@ def test_fixed_optimizer_box_is_allowed_only_inside_source_domain(
         )
         == expected
     )
+
+
+def _run_preparation_with_lifecycle_spies(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    *,
+    fail_finalize: bool,
+    use_declared_cold_start: bool = True,
+) -> tuple[tuple[object, ...], list[str], object]:
+    from contextlib import nullcontext
+    from hashlib import sha256
+    import sys
+
+    from src.engines.physics_engines.opensim.python.tour_matching import (
+        native_moco_preparation as preparation,
+    )
+
+    events = []
+    model_path = tmp_path / "lifecycle.osim"
+    payload = b"lifecycle model"
+    model_path.write_bytes(payload)
+
+    class Model:
+        def finalizeConnections(self):
+            events.append("finalize")
+            if fail_finalize:
+                raise RuntimeError("connection finalization failed")
+
+        def initSystem(self):
+            events.append("initSystem")
+            raise AssertionError("finalization must not initialize the model")
+
+    model = Model()
+    monkeypatch.setitem(
+        sys.modules, "opensim", SimpleNamespace(Model=lambda _path: model)
+    )
+    monkeypatch.setattr(preparation, "_declared_chart_blockers", lambda _request: [])
+    monkeypatch.setattr(
+        preparation,
+        "_native_runtime_identity",
+        lambda _osim: events.append("runtime") or "b" * 64,
+    )
+    monkeypatch.setattr(
+        preparation,
+        "_native_path_optimizer_blockers",
+        lambda *_args: events.append("domain") or [],
+    )
+    monkeypatch.setattr(
+        preparation,
+        "_audit_loaded_model_components",
+        lambda *_args: events.append("components") or [],
+    )
+    monkeypatch.setattr(
+        preparation,
+        "reconstruct_declared_cold_start",
+        lambda _declared: (
+            events.append("reconstruct")
+            or nullcontext(SimpleNamespace(model=model, state=object()))
+        ),
+    )
+    monkeypatch.setattr(
+        preparation,
+        "_audit_native_state_bindings",
+        lambda *_args: events.append("state") or "c" * 64,
+    )
+    monkeypatch.setattr(
+        preparation,
+        "_audit_native_passive",
+        lambda *_args: events.append("passive") or (None, []),
+    )
+    monkeypatch.setattr(
+        preparation,
+        "_audit_reference_convention",
+        lambda *_args: events.append("reference") or ("d" * 64, []),
+    )
+
+    def probe(*_args):
+        events.append("probe")
+        return "e" * 64, True, 0.0, 0.1, None
+
+    monkeypatch.setattr(preparation, "_probe_native_state_if_eligible", probe)
+    from src.engines.physics_engines.opensim.python.tour_matching import (
+        muscle_replay,
+    )
+
+    monkeypatch.setattr(
+        muscle_replay,
+        "_restore_continuous_state",
+        lambda *_args: events.append("restore") or (object(), None, None),
+    )
+    request = SimpleNamespace(
+        model_path=model_path,
+        model_sha256=sha256(payload).hexdigest(),
+        constrained_cold_start=object() if use_declared_cold_start else None,
+        bindings=SimpleNamespace(state_bounds={}, initial_state={}),
+        passive_policy=None,
+        mixed_actuation=None,
+        config=SimpleNamespace(t_start_s=0.0),
+    )
+    return preparation._native_preparation(request, run_probe=True), events, model
+
+
+def test_native_preparation_finalizes_before_all_native_audits(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    result, events, model = _run_preparation_with_lifecycle_spies(
+        monkeypatch, tmp_path, fail_finalize=False
+    )
+
+    assert result[3] == []
+    assert events == [
+        "finalize",
+        "domain",
+        "runtime",
+        "components",
+        "reconstruct",
+        "state",
+        "passive",
+        "reference",
+        "probe",
+    ]
+
+
+@pytest.mark.parametrize("use_declared_cold_start", [True, False])
+def test_native_preparation_finalization_failure_stops_all_later_native_work(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    use_declared_cold_start: bool,
+) -> None:
+    result, events, _model = _run_preparation_with_lifecycle_spies(
+        monkeypatch,
+        tmp_path,
+        fail_finalize=True,
+        use_declared_cold_start=use_declared_cold_start,
+    )
+
+    assert result == (
+        None,
+        None,
+        None,
+        ["native-moco-path-optimizer-domain-invalid"],
+        None,
+        None,
+        False,
+        None,
+        None,
+        None,
+    )
+    assert events == ["finalize"]

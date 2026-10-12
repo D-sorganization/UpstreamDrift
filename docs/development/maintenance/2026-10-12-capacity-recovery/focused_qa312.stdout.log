@@ -1,0 +1,39 @@
+.....                                                                    [100%]
+============================== warnings summary ===============================
+tests\conftest.py:540
+  C:\Users\diete\Repositories\UpstreamDrift-worktrees\codex-devlog-capacity-12391-20261012\tests\conftest.py:540: PytestWarning: Skipping optional test collection for c:/users/diete/repositories/upstreamdrift-worktrees/codex-devlog-capacity-12391-20261012/tests/unit/calc_backend because required optional imports are missing: src.shared.python.calc_backend.contracts.acid_gas_dewpoint
+    _warn_optional_collection_skip(collection_path)
+
+tests\conftest.py:540
+  C:\Users\diete\Repositories\UpstreamDrift-worktrees\codex-devlog-capacity-12391-20261012\tests\conftest.py:540: PytestWarning: Skipping optional test collection for c:/users/diete/repositories/upstreamdrift-worktrees/codex-devlog-capacity-12391-20261012/tests/unit/process_calculators because required optional imports are missing: sidekick.process_calculators.acid_gas_dewpoint_calculator
+    _warn_optional_collection_skip(collection_path)
+
+tests\conftest.py:540
+  C:\Users\diete\Repositories\UpstreamDrift-worktrees\codex-devlog-capacity-12391-20261012\tests\conftest.py:540: PytestWarning: Skipping optional test collection for c:/users/diete/repositories/upstreamdrift-worktrees/codex-devlog-capacity-12391-20261012/tests/unit/signal_toolkit because required optional imports are missing: src.shared.python.signal_toolkit.core
+    _warn_optional_collection_skip(collection_path)
+
+tests\conftest.py:540
+  C:\Users\diete\Repositories\UpstreamDrift-worktrees\codex-devlog-capacity-12391-20261012\tests\conftest.py:540: PytestWarning: Skipping optional test collection for c:/users/diete/repositories/upstreamdrift-worktrees/codex-devlog-capacity-12391-20261012/tests/unit/test_calc_backend_protocols.py because required optional imports are missing: src.shared.python.calc_backend.contracts.acid_gas_dewpoint
+    _warn_optional_collection_skip(collection_path)
+
+tests\conftest.py:540
+  C:\Users\diete\Repositories\UpstreamDrift-worktrees\codex-devlog-capacity-12391-20261012\tests\conftest.py:540: PytestWarning: Skipping optional test collection for c:/users/diete/repositories/upstreamdrift-worktrees/codex-devlog-capacity-12391-20261012/tests/unit/test_dataset_generator.py because required optional imports are missing: src.shared.python.data_processing.processor.DatasetInfo, src.shared.python.data_io.dataset_generator.SimulationSample
+    _warn_optional_collection_skip(collection_path)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================ slowest 20 durations =============================
+2.06s call     tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_published_catalog_passes_configured_hook
+1.82s call     tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_configured_hook_rejects_invalid_publication[premature_activation]
+1.70s call     tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_configured_hook_rejects_invalid_publication[dual_catalog]
+1.57s call     tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_configured_hook_rejects_invalid_publication[missing_checker]
+0.16s setup    tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_published_catalog_passes_configured_hook
+0.07s setup    tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_configured_hook_rejects_invalid_publication[missing_checker]
+0.06s setup    tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_configured_hook_rejects_invalid_publication[dual_catalog]
+0.05s setup    tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_configured_hook_rejects_invalid_publication[premature_activation]
+0.05s setup    tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_installed_bundle_matches_published_receipt
+0.02s call     tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_installed_bundle_matches_published_receipt
+0.01s teardown tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_configured_hook_rejects_invalid_publication[dual_catalog]
+0.01s teardown tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_configured_hook_rejects_invalid_publication[missing_checker]
+0.01s teardown tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_configured_hook_rejects_invalid_publication[premature_activation]
+0.01s teardown tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_installed_bundle_matches_published_receipt
+0.01s teardown tests/unit/repo_hygiene/test_deferred_catalog_hook.py::test_published_catalog_passes_configured_hook

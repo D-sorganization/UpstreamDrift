@@ -16,10 +16,10 @@ Units SI, ground normal z. Parameters in `WRENCH_QP_SETTINGS` (`pipeline/dynamic
 
 ## Acceptance
 
-| Criterion | Result |
-| --- | --- |
-| Reproduces the baseline within 1 mm on a feasible reference | Met only with the plant's own cone (no margin): replay difference below 1 mm. Not met with the conservative cone (friction 0.6, 10 mm CoP margin). |
-| Post-impact pelvis yaw error below 8 degrees on both clubs | **Not met.** The QP leaves the yaw error at the baseline value on both clubs (driver 34.5, iron 19.4 degrees); torsional friction (#11671) is the lever that moved it. |
+| Criterion                                                   | Result                                                                                                                                                                 |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Reproduces the baseline within 1 mm on a feasible reference | Met only with the plant's own cone (no margin): replay difference below 1 mm. Not met with the conservative cone (friction 0.6, 10 mm CoP margin).                     |
+| Post-impact pelvis yaw error below 8 degrees on both clubs  | **Not met.** The QP leaves the yaw error at the baseline value on both clubs (driver 34.5, iron 19.4 degrees); torsional friction (#11671) is the lever that moved it. |
 
 ## Why It Had No Effect
 

@@ -117,3 +117,6 @@ docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_
 # #11745/#11747: lift parity records written by scripts/measure_lift_*_parity.py;
 # the generator's float serialization is the evidence, so Prettier must not rewrite it.
 docs/development/lifting/evidence/back_squat/*_parity.json
+
+# Preserve byte-exact, hash-bound maintenance evidence receipts.
+docs/development/maintenance/2026-10-12-capacity-recovery/*.json

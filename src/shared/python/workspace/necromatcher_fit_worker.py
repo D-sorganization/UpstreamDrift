@@ -2,64 +2,409 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import json
 import logging
 from pathlib import Path
 import sys
+import time
 from typing import Any
+
+if __name__ == "__main__":
+    import mujoco  # noqa: F401 -- clean worker loads SDK before workspace/native helpers
 
 import numpy as np
 
 from src.shared.python.motion_matching.historical_fit import (
+    AdditionalImageResiduals,
+    ShaftAxisEvidence,
+    ShaftAxisResidualTerm,
     CameraProjection,
     CaptureImageEvidence,
     ImageFitConfig,
     ImageFitInputs,
     ImageFitResult,
+    ImageSplineStart,
     fit_image_trajectory,
     read_capture_evidence,
 )
 from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
+from src.shared.python.estimation import CubicHermiteSplineTrajectory, SolverTelemetry
 from .necromatcher import NecromatcherLibrary
-from .necromatcher_fit_jobs import fit_execution_stamp
-from .necromatcher_native import load_native_fit_binding
+from .necromatcher_fit_jobs import (
+    fit_execution_stamp,
+    _shaft_record,
+    _parse_shaft_recipe,
+    _verify_shaft_request,
+)
+from .necromatcher_shaft_evidence import BoundShaftEvidence, load_shaft_image_residuals
+from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
+from .necromatcher_spline import preserved_fit_spline, verify_preserved_fit_samples
+from .necromatcher_fit_metrics import (
+    dense_reprojection_metrics as _dense_reprojection_metrics,
+)
+from .necromatcher_contacts import contact_schedule_binding
+from .necromatcher_fit_records import (
+    build_native_fit_payload as _build_fit_payload,
+    native_research_blockers as _research_blockers,  # noqa: F401 -- compatibility
+)
+from .necromatcher_fit_telemetry import write_worker_telemetry
 
 logger = logging.getLogger(__name__)
 
 
-def _dense_reprojection_metrics(
+def _compute_operation(
+    operation: str,
     native: MatchingPlant,
-    camera: CameraProjection,
     attachments: dict[str, Any],
-    evidence: CaptureImageEvidence,
-    q: np.ndarray,
-    fit_indices: tuple[int, ...],
-) -> dict[str, float | None]:
-    residuals = np.array(
-        [
-            camera.residual(
-                native.marker_positions(pose, attachments), observed, weights
-            )
-            for pose, observed, weights in zip(
-                q, evidence.observed_pixels, evidence.confidence, strict=True
-            )
-        ]
-    )
-    held_out = np.array([index not in fit_indices for index in evidence.frame_indices])
-    result: dict[str, float | None] = {}
-    for name, selected in (
-        ("dense_rms_pixels", np.ones(len(q), dtype=bool)),
-        ("held_out_rms_pixels", held_out),
+    camera: CameraProjection,
+    inputs: ImageFitInputs,
+    config: ImageFitConfig,
+    initial_spline: ImageSplineStart | None = None,
+    additional_images: AdditionalImageResiduals | None = None,
+) -> ImageFitResult:
+    if operation == "fit":
+        arguments = (native, attachments, camera, inputs, config, initial_spline)
+        return (
+            fit_image_trajectory(*arguments, additional_images)
+            if additional_images is not None
+            else fit_image_trajectory(*arguments)
+        )
+    if operation not in ("author_initialization", "restrict_initialization"):
+        raise ValueError("Unknown native fit operation")
+    restricted = operation == "restrict_initialization"
+    if restricted and (
+        initial_spline is None or config.initialization_policy != "strict"
     ):
-        weight = float(np.sum(evidence.confidence[selected]))
-        result[name] = (
-            float(np.sqrt(np.sum(residuals[selected] ** 2) / weight))
-            if weight > 0
-            else None
+        raise ValueError("Restriction initialization requires a strict preserved start")
+    if not restricted and initial_spline is not None:
+        raise ValueError("Preserved spline requires fit operation")
+    if (
+        not restricted
+        and config.initialization_policy != "authored_range_project_zero_slopes"
+    ):
+        raise ValueError(
+            "Author operation requires explicit authored initialization policy"
+        )
+    from src.shared.python.motion_matching.historical_fit import (
+        initialize_image_trajectory,
+    )
+
+    result = (
+        initialize_image_trajectory(
+            native,
+            attachments,
+            camera,
+            inputs,
+            config,
+            initial_spline,
+            additional_images,
+        )
+        if additional_images is not None
+        else (
+            initialize_image_trajectory(
+                native, attachments, camera, inputs, config, initial_spline
+            )
+            if restricted
+            else initialize_image_trajectory(
+                native, attachments, camera, inputs, config
+            )
+        )
+    )
+    if (
+        result.optimizer_ran is not False
+        or result.converged is not False
+        or (
+            result.initialization is not None
+            if restricted
+            else result.initialization is None
+        )
+    ):
+        raise ValueError(
+            "Author initialization returned a contradictory execution receipt"
         )
     return result
+
+
+def _range_provenance(
+    binding: NativeFitBinding, config: ImageFitConfig, operation: str
+) -> dict[str, Any]:
+    configured = {
+        name: (lower, upper) for name, lower, upper in config.coordinate_bounds
+    }
+    if not configured and operation == "fit":
+        return {"range_source": "none"}
+    authored = binding.authored_coordinate_bounds()
+    if configured != dict(authored.named_bounds):
+        if operation == "author_initialization":
+            raise ValueError(
+                "Author initialization requires all exact native authored ranges"
+            )
+        return {"range_source": "custom_coordinate_bounds"}
+    if not configured:
+        raise ValueError(
+            "Author initialization requires nonempty native authored ranges"
+        )
+    return authored.to_record()
+
+
+def _preserved_start(
+    binding: NativeFitBinding, options: dict[str, Any], source_times: np.ndarray
+) -> ImageSplineStart:
+    source = binding.fit
+    original = source["evidence"]["original_fit"]
+    start = preserved_fit_spline(source)
+    if start is None:
+        raise ValueError("Parent lacks a preserved physical spline")
+    if start.model_sha != binding.plant.plant_sha or start.coordinate_order != tuple(
+        binding.plant.coordinate_order
+    ):
+        raise ValueError(
+            "Parent preserved spline model or coordinate order differs from binding"
+        )
+    if start.free_coordinates != tuple(original["free_coordinates"]):
+        raise ValueError(
+            "Parent preserved spline free coordinate order differs from record"
+        )
+    if len(start.knot_times) != options["knot_count"]:
+        raise ValueError("Preserved spline knot count differs from explicit request")
+    if (start.knot_times[0], start.knot_times[-1]) != (
+        source_times[0],
+        source_times[-1],
+    ):
+        raise ValueError(
+            "Preserved spline source clock interval differs from requested evidence"
+        )
+    verify_preserved_fit_samples(source, start)
+    return start
+
+
+def _worker_inputs(
+    binding: NativeFitBinding,
+    options: dict[str, Any],
+    evidence: CaptureImageEvidence,
+    samples: np.ndarray,
+    restricted_start: ImageSplineStart | None = None,
+) -> tuple[ImageFitInputs, ImageSplineStart | None]:
+    mode = options.get("initialization_source", "sampled_parent")
+    if mode not in ("sampled_parent", "preserved_spline", "restricted_spline"):
+        raise ValueError("Unknown refit initialization source")
+    config = ImageFitConfig.from_record(options["config"])
+    start = None
+    if mode == "restricted_spline":
+        if (
+            options.get("operation") != "restrict_initialization"
+            or config.initialization_policy != "strict"
+        ):
+            raise ValueError(
+                "Restricted spline requires restriction operation and strict policy"
+            )
+        start = _checked_restricted_start(
+            binding, options, evidence.source_times, restricted_start
+        )
+    elif (
+        restricted_start is not None
+        or options.get("operation") == "restrict_initialization"
+    ):
+        raise ValueError("Restriction start requires restricted spline mode")
+    if mode == "preserved_spline":
+        if (
+            options.get("operation", "fit") != "fit"
+            or config.initialization_policy != "strict"
+        ):
+            raise ValueError(
+                "Preserved spline requires fit operation and strict policy"
+            )
+        start = _preserved_start(binding, options, evidence.source_times)
+    knots = (
+        np.asarray(start.knot_times)
+        if start is not None
+        else np.linspace(
+            evidence.source_times[0], evidence.source_times[-1], options["knot_count"]
+        )
+    )
+    return ImageFitInputs(
+        evidence.source_times,
+        evidence.observed_pixels,
+        evidence.confidence,
+        samples[0],
+        np.asarray(options["coordinate_scales"]),
+        tuple(binding.fit["evidence"]["original_fit"]["free_coordinates"]),
+        knots,
+        None if start is not None else samples,
+    ), start
+
+
+def _checked_restricted_start(
+    binding: NativeFitBinding,
+    options: dict[str, Any],
+    source_times: np.ndarray,
+    start: ImageSplineStart | None,
+) -> ImageSplineStart:
+    """Match the authenticated restriction to the compiled model and evidence."""
+    if not isinstance(start, ImageSplineStart):
+        raise ValueError("Restriction initialization requires a typed restricted start")
+    if (
+        start.model_sha != binding.plant.plant_sha
+        or start.coordinate_order != tuple(binding.plant.coordinate_order)
+        or start.free_coordinates
+        != tuple(binding.fit["evidence"]["original_fit"]["free_coordinates"])
+        or len(start.knot_times) != options["knot_count"]
+        or (start.knot_times[0], start.knot_times[-1])
+        != (source_times[0], source_times[-1])
+    ):
+        raise ValueError(
+            "Restricted spline differs from compiled model, coordinates, knots or clock"
+        )
+    return start
+
+
+def _request_restriction(
+    library: NecromatcherLibrary, request: dict[str, Any]
+) -> ImageSplineStart | None:
+    """Re-derive the queued receipt before any compiled binding is loaded."""
+    from .necromatcher_spline_restriction import validate_spline_restriction_request
+
+    restriction = validate_spline_restriction_request(library, request)
+    return None if restriction is None else restriction.restricted_start
+
+
+def _load_refit_binding(
+    library: NecromatcherLibrary, request: dict[str, Any]
+) -> tuple[NativeFitBinding, AdditionalImageResiduals | None]:
+    if "shaft_images" not in request:
+        return load_native_fit_binding(library, request["source_fit_id"]), None
+    recipe = request["shaft_images"]
+    declared, weight = _parse_shaft_recipe(recipe)
+    evidence = declared.evidence
+    binding, bundle = load_shaft_image_residuals(
+        library, request["source_fit_id"], evidence, weight
+    )
+    bound = BoundShaftEvidence(
+        evidence,
+        bundle.source_identity.source_clock_sha256,
+        len(evidence.frames),
+        sum(frame.segment.status == "observed" for frame in evidence.frames),
+    )
+    if _shaft_record(bound, recipe["unknown_visibility_weight"]) != recipe:
+        raise ValueError("Worker shaft recipe binding differs from queue admission")
+    return binding, bundle
+
+
+def _prepare_refit_inputs(
+    library: NecromatcherLibrary, request: dict[str, Any]
+) -> tuple[
+    NativeFitBinding,
+    AdditionalImageResiduals | None,
+    ImageFitInputs,
+    ImageSplineStart | None,
+    dict[str, Any],
+    dict[str, Any] | None,
+]:
+    """Close bounded source authentication before any fitting or initialization."""
+    from .necromatcher_fit_jobs import _verify_scope_request
+
+    with library.authenticated_read():
+        _verify_scope_request(library, request)
+        restricted_start = _request_restriction(library, request)
+        binding, additional_images = _load_refit_binding(library, request)
+        source = binding.fit
+        options = request["options"]
+        operation = options.get("operation", "fit")
+        config = ImageFitConfig.from_record(options["config"])
+        ranges = _range_provenance(binding, config, operation)
+        indices = tuple(options["frame_indices"])
+        # Reuse native XML, camera and attachment validation from the review path.
+        binding.project(indices[0])
+        camera, attachments = binding.review_inputs()
+        samples = np.asarray(source["q"])[
+            [source["frame_indices"].index(i) for i in indices]
+        ]
+        with CaptureReview(library, source["capture_id"]) as review:
+            contact_binding = contact_schedule_binding(config, source, review)
+            evidence = read_capture_evidence(
+                review,
+                tuple(attachments),
+                indices,
+                unknown_visibility_weight=options["unknown_visibility_weight"],
+            )
+            inputs, initial_spline = (
+                _worker_inputs(binding, options, evidence, samples, restricted_start)
+                if restricted_start is not None
+                else _worker_inputs(binding, options, evidence, samples)
+            )
+    return binding, additional_images, inputs, initial_spline, ranges, contact_binding
+
+
+def _finish_refit(
+    library: NecromatcherLibrary,
+    request: dict[str, Any],
+    binding: NativeFitBinding,
+    additional_images: AdditionalImageResiduals | None,
+    result: ImageFitResult,
+    stamp: dict[str, Any],
+    ranges: dict[str, Any],
+    contact_binding: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Freshly authenticate output dependencies, closing before result delivery."""
+    from .necromatcher_fit_jobs import _verify_scope_request
+
+    source, options = binding.fit, request["options"]
+    indices = tuple(options["frame_indices"])
+    native = binding.plant
+    camera, attachments = binding.review_inputs()
+    with library.authenticated_read():
+        _request_restriction(library, request)
+        if (
+            library.load_asset(request["source_fit_id"]).metadata["hash"]
+            != request["source_fit_hash"]
+        ):
+            raise ValueError("Warm-start fit differs before result delivery")
+        with CaptureReview(library, source["capture_id"]) as review:
+            dense_indices = (
+                tuple(range(indices[0], indices[-1] + 1))
+                if "source_scope" in request
+                else tuple(
+                    i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
+                )
+            )
+            dense = read_capture_evidence(
+                review,
+                tuple(attachments),
+                dense_indices,
+                unknown_visibility_weight=options["unknown_visibility_weight"],
+            )
+            q = result.evaluate_source_times(dense.source_times)
+            frames = [review.frame(i)["frame"] for i in dense_indices]
+        closure = np.array([native.closure_residuals(pose) for pose in q])
+        if additional_images is not None:
+            term = additional_images.terms[0]
+            if not isinstance(term, ShaftAxisResidualTerm):
+                raise ValueError("Native shaft worker requires a typed shaft term")
+            request = {**request, "shaft_axis": term.axis.to_record()}
+            _verify_shaft_request(
+                library,
+                library.load_fit(request["source_fit_id"]),
+                request["shaft_images"],
+            )
+        output = _build_fit_payload(
+            request,
+            source,
+            result,
+            (dense_indices, frames, q),
+            stamp,
+            float(np.max(np.linalg.norm(closure, axis=1))),
+            ranges,
+        )
+        _verify_scope_request(library, request, output)
+        output["evidence"]["original_fit"].update(
+            _dense_reprojection_metrics(native, camera, attachments, dense, q, indices)
+        )
+        output["provenance"]["coordinate_bounds_provenance"] = ranges
+        if contact_binding is not None:
+            output["provenance"]["contact_schedule_binding"] = contact_binding
+    return output
 
 
 def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
@@ -74,153 +419,92 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
             "Native worker implementation or runtime differs from launch stamp"
         )
     library = NecromatcherLibrary(request["library_root"])
-    identity = request["source_fit_id"]
-    if library.load_asset(identity).metadata["hash"] != request["source_fit_hash"]:
+    if (
+        library.load_asset(request["source_fit_id"]).metadata["hash"]
+        != request["source_fit_hash"]
+    ):
         raise ValueError("Warm-start fit differs from launch identity")
-    binding = load_native_fit_binding(library, identity)
-    source = binding.fit
-    options = request["options"]
-    indices = tuple(options["frame_indices"])
-    # Reuse native XML, camera and attachment validation from the review path.
-    binding.project(indices[0])
-    original = source["evidence"]["original_fit"]
-    native = binding.plant
-    camera, attachments = binding.review_inputs()
-    samples = np.asarray(source["q"])[
-        [source["frame_indices"].index(i) for i in indices]
-    ]
-    with CaptureReview(library, source["capture_id"]) as review:
-        evidence = read_capture_evidence(
-            review,
-            tuple(attachments),
-            indices,
-            unknown_visibility_weight=options["unknown_visibility_weight"],
-        )
-        inputs = ImageFitInputs(
-            evidence.source_times,
-            evidence.observed_pixels,
-            evidence.confidence,
-            samples[0],
-            np.asarray(options["coordinate_scales"]),
-            tuple(original["free_coordinates"]),
-            np.linspace(
-                evidence.source_times[0],
-                evidence.source_times[-1],
-                options["knot_count"],
-            ),
-            samples,
-        )
-        result = fit_image_trajectory(
-            native,
-            attachments,
-            camera,
-            inputs,
-            ImageFitConfig.from_record(options["config"]),
-        )
-        dense_indices = tuple(
-            i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
-        )
-        dense = read_capture_evidence(
-            review,
-            tuple(attachments),
-            dense_indices,
-            unknown_visibility_weight=options["unknown_visibility_weight"],
-        )
-        q = result.evaluate_source_times(dense.source_times)
-        frames = [review.frame(i)["frame"] for i in dense_indices]
-    closure = np.array([native.closure_residuals(pose) for pose in q])
-    output = _build_fit_payload(
-        request,
-        source,
-        result,
-        (dense_indices, frames, q),
-        stamp,
-        float(np.max(np.linalg.norm(closure, axis=1))),
+    binding, additional_images, inputs, initial_spline, ranges, contact_binding = (
+        _prepare_refit_inputs(library, request)
     )
-    output["evidence"]["original_fit"].update(
-        _dense_reprojection_metrics(native, camera, attachments, dense, q, indices)
+    options = request["options"]
+    camera, attachments = binding.review_inputs()
+    arguments = (
+        options.get("operation", "fit"),
+        binding.plant,
+        attachments,
+        camera,
+        inputs,
+        ImageFitConfig.from_record(options["config"]),
+        initial_spline,
+    )
+    result = (
+        _compute_operation(*arguments, additional_images)
+        if additional_images is not None
+        else _compute_operation(*arguments)
+    )
+    output = _finish_refit(
+        library,
+        request,
+        binding,
+        additional_images,
+        result,
+        stamp,
+        ranges,
+        contact_binding,
     )
     if fit_execution_stamp()["source_sha256"] != expected["source_sha256"]:
         raise ValueError("Native worker implementation changed during execution")
     return output
 
 
-def _build_fit_payload(
+def _emit_telemetry(
+    path: Path,
     request: dict[str, Any],
-    source: dict[str, Any],
-    result: ImageFitResult,
-    dense_output: tuple[tuple[int, ...], list[dict[str, Any]], np.ndarray],
-    stamp: dict[str, Any],
-    max_grip: float,
-) -> dict[str, Any]:
-    original = source["evidence"]["original_fit"]
-    attachments = original["attachments"]
-    options = request["options"]
-    indices = options["frame_indices"]
-    dense_indices, frames, q = dense_output
-    blockers = [
-        "monocular_research_only",
-        "physical_clock_unknown",
-        "camera_unqualified",
-        "independent_dynamics_not_replayed",
-        "anatomical_ranges_not_enforced",
-    ]
-    if not result.converged:
-        blockers.append("optimizer_not_converged")
-    output = {
-        **source,
-        "frame_indices": list(dense_indices),
-        "frames": frames,
-        "q": q.tolist(),
-        "provenance": {
-            "native_definition": source["provenance"]["native_definition"],
-            "warm_start_provenance": source["provenance"],
-            "description": "Source-stamped native warm-start research refit",
-            "warm_start_fit_id": request["source_fit_id"],
-            "warm_start_fit_hash": request["source_fit_hash"],
-            "request_options": options,
-            "execution_stamp": request["execution_stamp"],
-            "worker_stamp": {
-                key: stamp[key]
-                for key in ("started_at_utc", "source_sha256", "runtime_sha256")
-            },
-        },
-        "evidence": {
-            "rejection_reasons": blockers,
-            "original_fit": {
-                "camera": original["camera"],
-                "attachments": attachments,
-                "free_coordinates": list(result.free_coordinates),
-                "coordinate_order": list(result.coordinate_order),
-                "frame_indices": list(indices),
-                "source_times": result.source_times.tolist(),
-                "q": result.q.tolist(),
-                "knot_times": result.knot_times.tolist(),
-                "spline_coefficients": result.spline_coefficients.tolist(),
-                "initial_rms_pixels": result.initial_rms_pixels,
-                "rms_pixels": result.rms_pixels,
-                "converged": result.converged,
-                "message": result.optimizer_message,
-                "config": asdict(ImageFitConfig.from_record(options["config"])),
-                "max_grip_separation_m": max_grip,
-                "constraint_assessment": {
-                    "tested_times": result.constraint_times.tolist(),
-                    "row_labels": list(result.constraint_row_labels),
-                    "scaled_residuals": result.constraint_residuals.tolist(),
-                    "maximum_dimensionless_residual": result.maximum_constraint_residual,
-                    "continuous_certified": False,
-                },
-            },
-        },
-    }
-    return output
+    fit: dict[str, Any] | None,
+    elapsed: float,
+    reason: str,
+) -> None:
+    """Optional transport faults never replace a primary computation outcome."""
+    try:
+        write_worker_telemetry(path, request, fit, elapsed, reason)
+    except (OSError, ValueError, TypeError, KeyError):
+        logger.exception(
+            "Optional telemetry publication failed; primary outcome retained"
+        )
+        if fit is not None:
+            try:
+                original = fit["evidence"]["original_fit"]
+                if not isinstance(original, dict):
+                    raise TypeError("Original fit evidence must be a mapping")
+                value = SolverTelemetry.from_record(original.get("solver_telemetry"))
+                original["solver_telemetry"] = replace(
+                    value,
+                    worker_elapsed_s=None,
+                    unavailable_reason="worker_telemetry_publication_failed",
+                ).to_record()
+            except (ValueError, TypeError, KeyError):
+                logger.exception(
+                    "Malformed result telemetry retained for strict admission rejection"
+                )
 
 
 def main() -> None:
     """Serve one trusted local request and return its finite JSON fit."""
+    started = time.perf_counter()
+    request = None
+    request_path = None
     try:
-        request = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+        request_path = Path(sys.argv[1])
+        request = json.loads(request_path.read_text(encoding="utf-8"))
         fit = compute_native_refit(request)
+        _emit_telemetry(
+            request_path,
+            request,
+            fit,
+            time.perf_counter() - started,
+            "Worker computed fit payload",
+        )
         sys.stdout.write(json.dumps({"fit": fit}, allow_nan=False))
     except (
         OSError,
@@ -230,7 +514,11 @@ def main() -> None:
         IndexError,
         RuntimeError,
         ImportError,
-    ):
+    ) as exc:
+        if request is not None and request_path is not None:
+            _emit_telemetry(
+                request_path, request, None, time.perf_counter() - started, str(exc)
+            )
         logger.exception("Native research refit failed")
         raise SystemExit(1) from None
 

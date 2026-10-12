@@ -3,7 +3,7 @@
 ## Scope and Ownership
 
 Child #11912 extends geometry #11903 under F07 #11791 and F08 #11792. Canonical
-authority is chapter29. The existing Kabsch provider, frozen capture contract,
+authority is chapter64. The existing Kabsch provider, frozen capture contract,
 static marker calibration and native bounded IK are reused. No new capture
 parser, anatomical alias or physics provider was created. Full implementation
 and scientific acceptance remain open.

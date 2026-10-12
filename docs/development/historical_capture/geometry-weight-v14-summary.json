@@ -1,0 +1,388 @@
+{
+  "schema": "necromatcher/geometry-weight-v14-independent-assessment/1",
+  "producer": "dafab40c107dbcd22d1c3a91bfcc79b102076f65",
+  "input_receipt_sha256": "sha256:81b22233538366bf920bb6c8ce9b9219c8c09bc43ed96fa081f3c6b34303d4ae",
+  "frozen_driver_sha256": "sha256:c87ab4fe9e626b835a0a4757d84c273b757f9ef630187291e53832906dfdb00a",
+  "audit_script_sha256": "sha256:d945530cfc94a329e7d1c904b865142ae505c86778078398f144964e1769a16b",
+  "both_runs_verified": true,
+  "optimization_performed": false,
+  "scientific_acceptance": false,
+  "continuous_certified": false,
+  "physical_time_qualified": false,
+  "source_runtime_parent_artifact_evidence_brackets_verified": true,
+  "matched_protocol": {
+    "geometry_times": 78,
+    "rows": 936,
+    "configured_weight_and_mass_factor": 4.0,
+    "residual_and_jacobian_factor": 2.0,
+    "coverage_factor": 1.0,
+    "same_start_and_prior": true,
+    "not_a_pure_coverage_change": true,
+    "added_image_points": 0
+  },
+  "matched_comparison": {
+    "continuous_certified": false,
+    "coverage_factor": 1.0,
+    "declared_factor": "collective_position_rotation_ground_weights4x",
+    "penalty_mass_factor": 4.0,
+    "same_start_prior_camera_evidence_coverage": true,
+    "scientific_acceptance": false,
+    "variant_minus_control": {
+      "dense_original_rms_pixels": -0.4950549462060927,
+      "maximum_sampled_grip_gap_m": -0.0015319841589352895,
+      "maximum_sampled_grip_rotation_rad": -0.015220512016016442,
+      "maximum_sampled_ground_penetration_m": 0.0009216160542785193
+    }
+  },
+  "independent_assessment_sha256": "sha256:0bc1525fd4e8b3b289a1608ce567960ca68d32f27c884965a308c252d2c6779e",
+  "ground_diagnosis_sha256": "sha256:9dfc897af4a0d4eaac3ddd0ffe8583021f58c97b37c7488f913ab59dfc3098bd",
+  "desktop_copy_receipt_sha256": "sha256:fc6046bbffe4ce44e357ae906e5d6f41044e6204744fe681c0e1ee3ddd962f0d",
+  "desktop_evidence_directory": "Geometry-Weight V14 Numerical Evidence",
+  "v14_overlay_executed": false,
+  "runs": [
+    {
+      "role": "control",
+      "fit_id": "tiger-geometry-weight-control-fit-v14",
+      "fit_sha256": "sha256:d64a5769dcc771d3a381c9a9641e4d4e208452d77830782eecd06f7ed461cf7f",
+      "metrics": {
+        "fit_id": "tiger-geometry-weight-control-fit-v14",
+        "fit_hash": "sha256:d64a5769dcc771d3a381c9a9641e4d4e208452d77830782eecd06f7ed461cf7f",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 23.210721876177193,
+        "dense_original_rms_pixels": 26.01759076454368,
+        "maximum_sampled_grip_gap_m": 0.003730506740906892,
+        "maximum_sampled_grip_rotation_rad": 0.027860547301452224,
+        "maximum_sampled_ground_penetration_m": 0.0029380217679163684,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false,
+        "coordinate_extrema": {
+          "bounded_coordinates": [
+            "SpineInputX",
+            "SpineInputY",
+            "TorsoInput",
+            "LEInput",
+            "LFInput",
+            "LScapInputX",
+            "LScapInputY",
+            "LWInputX",
+            "LWInputY",
+            "REInput",
+            "RFInput",
+            "RScapInputX",
+            "RScapInputY",
+            "RWInputX",
+            "RWInputY",
+            "NeckInputX",
+            "NeckInputY",
+            "NeckInputZ",
+            "hip_flexion_r",
+            "hip_adduction_r",
+            "hip_rotation_r",
+            "knee_angle_r",
+            "ankle_angle_r",
+            "subtalar_angle_r",
+            "mtp_angle_r",
+            "hip_flexion_l",
+            "hip_adduction_l",
+            "hip_rotation_l",
+            "knee_angle_l",
+            "ankle_angle_l",
+            "subtalar_angle_l",
+            "mtp_angle_l"
+          ],
+          "unbounded_coordinates": [
+            "TranslationInputX",
+            "TranslationInputY",
+            "TranslationInputZ",
+            "HipInputX",
+            "HipInputY",
+            "HipInputZ",
+            "LSInputX",
+            "LSInputY",
+            "LSInputZ",
+            "RSInputX",
+            "RSInputY",
+            "RSInputZ"
+          ],
+          "violating_coordinates": []
+        },
+        "q_bound_certificate": {
+          "conservative_bernstein_q_domain_verified": true,
+          "continuous_nonlinear_certified": false,
+          "method": "canonical_HermiteBoundsDomain.encode",
+          "reason": "Canonical Bernstein domain and scalar extrema agree"
+        }
+      },
+      "targets": {
+        "checks": {
+          "dense_rms_nonregression": true,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": true,
+          "sampled_grip_angle": true,
+          "sampled_nonpenetration": false
+        },
+        "research_targets_met": false,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "parent_progress_targets": {
+        "checks": {
+          "dense_rms_nonregression": true,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": true,
+          "sampled_grip_angle": true,
+          "sampled_nonpenetration": false
+        },
+        "research_targets_met": false,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "driver_job_elapsed_wall_s": 37.779120899998816,
+      "optimizer_ran": true,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "fresh_full_audit": {
+        "filename": "geometry-weight-v14-independent-assessment-tiger-geometry-weight-control-fit-v14-audit.json",
+        "sha256": "sha256:113686da1fd5c34a3bce95b8432480c24ab46cc3589ea91d5b44957c156c6ce6"
+      },
+      "objective_nodes": {
+        "time_count": 78,
+        "total_fixed_constraint_rows": 936,
+        "saved_scaled_rows_independently_recomputed": true
+      },
+      "ground_failure": {
+        "time": 18.284933333333335,
+        "pts_rational": {
+          "numerator": 137137,
+          "denominator": 7500
+        },
+        "kind": "source_frame",
+        "source_frame_indices": [98],
+        "sphere": "heel_l",
+        "penetration_m": 0.0029380217679163684,
+        "phase": {
+          "phase_index": 1,
+          "start_pts": [53053, 3000],
+          "end_pts": [37037, 2000],
+          "active_pins": ["heel_l"]
+        }
+      },
+      "node_2mm_target_already_violated": true,
+      "nearby_objective_probes": [
+        {
+          "time": 18.24823,
+          "distance_from_finite_audit_worst": 0.03670333333333531,
+          "sphere": "heel_l",
+          "minimum_height_m": -0.0027874631672427166,
+          "penetration_m": 0.0027874631672427166,
+          "phase": {
+            "phase_index": 1,
+            "start_pts": [53053, 3000],
+            "end_pts": [37037, 2000],
+            "active_pins": ["heel_l"]
+          }
+        },
+        {
+          "time": 18.351666666666667,
+          "distance_from_finite_audit_worst": 0.06673333333333176,
+          "sphere": "heel_l",
+          "minimum_height_m": -0.0018879697906724613,
+          "penetration_m": 0.0018879697906724613,
+          "phase": {
+            "phase_index": 1,
+            "start_pts": [53053, 3000],
+            "end_pts": [37037, 2000],
+            "active_pins": ["heel_l"]
+          }
+        }
+      ]
+    },
+    {
+      "role": "variant",
+      "fit_id": "tiger-geometry-weight-variant-fit-v14",
+      "fit_sha256": "sha256:873c46633a48b4b228d2211344ba4ac4fbc629214a8deff3806dd36f1be73a8a",
+      "metrics": {
+        "fit_id": "tiger-geometry-weight-variant-fit-v14",
+        "fit_hash": "sha256:873c46633a48b4b228d2211344ba4ac4fbc629214a8deff3806dd36f1be73a8a",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 22.89927496408797,
+        "dense_original_rms_pixels": 25.522535818337587,
+        "maximum_sampled_grip_gap_m": 0.0021985225819716025,
+        "maximum_sampled_grip_rotation_rad": 0.012640035285435782,
+        "maximum_sampled_ground_penetration_m": 0.0038596378221948877,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false,
+        "coordinate_extrema": {
+          "bounded_coordinates": [
+            "SpineInputX",
+            "SpineInputY",
+            "TorsoInput",
+            "LEInput",
+            "LFInput",
+            "LScapInputX",
+            "LScapInputY",
+            "LWInputX",
+            "LWInputY",
+            "REInput",
+            "RFInput",
+            "RScapInputX",
+            "RScapInputY",
+            "RWInputX",
+            "RWInputY",
+            "NeckInputX",
+            "NeckInputY",
+            "NeckInputZ",
+            "hip_flexion_r",
+            "hip_adduction_r",
+            "hip_rotation_r",
+            "knee_angle_r",
+            "ankle_angle_r",
+            "subtalar_angle_r",
+            "mtp_angle_r",
+            "hip_flexion_l",
+            "hip_adduction_l",
+            "hip_rotation_l",
+            "knee_angle_l",
+            "ankle_angle_l",
+            "subtalar_angle_l",
+            "mtp_angle_l"
+          ],
+          "unbounded_coordinates": [
+            "TranslationInputX",
+            "TranslationInputY",
+            "TranslationInputZ",
+            "HipInputX",
+            "HipInputY",
+            "HipInputZ",
+            "LSInputX",
+            "LSInputY",
+            "LSInputZ",
+            "RSInputX",
+            "RSInputY",
+            "RSInputZ"
+          ],
+          "violating_coordinates": []
+        },
+        "q_bound_certificate": {
+          "conservative_bernstein_q_domain_verified": true,
+          "continuous_nonlinear_certified": false,
+          "method": "canonical_HermiteBoundsDomain.encode",
+          "reason": "Canonical Bernstein domain and scalar extrema agree"
+        }
+      },
+      "targets": {
+        "checks": {
+          "dense_rms_nonregression": true,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": true,
+          "sampled_grip_angle": true,
+          "sampled_nonpenetration": false
+        },
+        "research_targets_met": false,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "parent_progress_targets": {
+        "checks": {
+          "dense_rms_nonregression": true,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": true,
+          "sampled_grip_angle": true,
+          "sampled_nonpenetration": false
+        },
+        "research_targets_met": false,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "driver_job_elapsed_wall_s": 30.596361999982037,
+      "optimizer_ran": true,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "fresh_full_audit": {
+        "filename": "geometry-weight-v14-independent-assessment-tiger-geometry-weight-variant-fit-v14-audit.json",
+        "sha256": "sha256:19c6ac038eb6c2a747402f246497bc83526e04c6a3e84f6d93e9cbe39dd44c24"
+      },
+      "objective_nodes": {
+        "time_count": 78,
+        "total_fixed_constraint_rows": 936,
+        "saved_scaled_rows_independently_recomputed": true
+      },
+      "ground_failure": {
+        "time": 17.934583333333332,
+        "pts_rational": {
+          "numerator": 43043,
+          "denominator": 2400
+        },
+        "kind": "adjacent_source_midpoint",
+        "source_frame_indices": [87, 88],
+        "sphere": "toe_r",
+        "penetration_m": 0.0038596378221948877,
+        "phase": {
+          "phase_index": 1,
+          "start_pts": [53053, 3000],
+          "end_pts": [37037, 2000],
+          "active_pins": ["heel_l"]
+        }
+      },
+      "node_2mm_target_already_violated": false,
+      "nearby_objective_probes": [
+        {
+          "time": 17.994643333333336,
+          "distance_from_finite_audit_worst": 0.060060000000003555,
+          "sphere": "toe_r",
+          "minimum_height_m": -0.0013799121616318508,
+          "penetration_m": 0.0013799121616318508,
+          "phase": {
+            "phase_index": 1,
+            "start_pts": [53053, 3000],
+            "end_pts": [37037, 2000],
+            "active_pins": ["heel_l"]
+          }
+        },
+        {
+          "time": 17.86785,
+          "distance_from_finite_audit_worst": 0.06673333333333176,
+          "sphere": "toe_r",
+          "minimum_height_m": -0.0009129658904739948,
+          "penetration_m": 0.0009129658904739948,
+          "phase": {
+            "phase_index": 1,
+            "start_pts": [53053, 3000],
+            "end_pts": [37037, 2000],
+            "active_pins": ["heel_l"]
+          }
+        }
+      ]
+    }
+  ]
+}

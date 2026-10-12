@@ -13,7 +13,7 @@
   "totals": {
     "identical": 397,
     "diverged": 276,
-    "ud-only": 1620,
+    "ud-only": 1681,
     "tools-only": 808,
     "spelling-only": 123
   },
@@ -133,14 +133,14 @@
     "biomechanics": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 37,
+      "ud-only": 38,
       "tools-only": 0,
       "spelling-only": 0
     },
     "body_part_viz": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 35,
+      "ud-only": 38,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -266,7 +266,7 @@
     "data_io": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 30,
+      "ud-only": 31,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -336,7 +336,7 @@
     "estimation": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 40,
+      "ud-only": 44,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -483,7 +483,7 @@
     "lifting": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 30,
+      "ud-only": 33,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 296,
+      "ud-only": 306,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -693,7 +693,7 @@
     "reporting": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 9,
+      "ud-only": 19,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -910,7 +910,7 @@
     "workspace": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 36,
+      "ud-only": 62,
       "tools-only": 0,
       "spelling-only": 0
     }
@@ -3345,7 +3345,7 @@
       "classification": "ud-only",
       "package": "anthropometrics",
       "subpackage": "",
-      "ud_bytes": 21126,
+      "ud_bytes": 21201,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -3369,7 +3369,7 @@
       "classification": "ud-only",
       "package": "anthropometrics",
       "subpackage": "readers",
-      "ud_bytes": 9270,
+      "ud_bytes": 9349,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -4145,6 +4145,18 @@
       "spelling_only": false
     },
     {
+      "path": "biomechanics/swing_posture_metrics.py",
+      "classification": "ud-only",
+      "package": "biomechanics",
+      "subpackage": "",
+      "ud_bytes": 8322,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "biomechanics/ztcf.py",
       "classification": "ud-only",
       "package": "biomechanics",
@@ -4373,6 +4385,18 @@
       "spelling_only": false
     },
     {
+      "path": "body_part_viz/overlay_options.py",
+      "classification": "ud-only",
+      "package": "body_part_viz",
+      "subpackage": "",
+      "ud_bytes": 1262,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "body_part_viz/persistence.py",
       "classification": "ud-only",
       "package": "body_part_viz",
@@ -4389,7 +4413,7 @@
       "classification": "ud-only",
       "package": "body_part_viz",
       "subpackage": "renderers",
-      "ud_bytes": 325,
+      "ud_bytes": 661,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -4402,6 +4426,18 @@
       "package": "body_part_viz",
       "subpackage": "renderers",
       "ud_bytes": 9457,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "body_part_viz/renderers/projective_renderer.py",
+      "classification": "ud-only",
+      "package": "body_part_viz",
+      "subpackage": "renderers",
+      "ud_bytes": 9964,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -4425,7 +4461,7 @@
       "classification": "ud-only",
       "package": "body_part_viz",
       "subpackage": "shapes",
-      "ud_bytes": 526,
+      "ud_bytes": 574,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -4474,6 +4510,18 @@
       "package": "body_part_viz",
       "subpackage": "shapes",
       "ud_bytes": 1544,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "body_part_viz/shapes/box_shape.py",
+      "classification": "ud-only",
+      "package": "body_part_viz",
+      "subpackage": "shapes",
+      "ud_bytes": 2002,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7257,7 +7305,7 @@
       "classification": "ud-only",
       "package": "data_io",
       "subpackage": "",
-      "ud_bytes": 25393,
+      "ud_bytes": 25471,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7294,6 +7342,18 @@
       "package": "data_io",
       "subpackage": "",
       "ud_bytes": 14316,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "data_io/native_dll_guard.py",
+      "classification": "ud-only",
+      "package": "data_io",
+      "subpackage": "",
+      "ud_bytes": 3963,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7353,7 +7413,7 @@
       "classification": "ud-only",
       "package": "data_io",
       "subpackage": "",
-      "ud_bytes": 24950,
+      "ud_bytes": 25036,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7893,7 +7953,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 17344,
+      "ud_bytes": 17895,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8129,6 +8189,30 @@
       "spelling_only": false
     },
     {
+      "path": "estimation/hermite_bounds.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "",
+      "ud_bytes": 11872,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/hermite_initialization.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "",
+      "ud_bytes": 5755,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "estimation/identifiability.py",
       "classification": "ud-only",
       "package": "estimation",
@@ -8157,7 +8241,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 34306,
+      "ud_bytes": 37906,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8170,6 +8254,18 @@
       "package": "estimation",
       "subpackage": "mosaic",
       "ud_bytes": 515,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/mosaic/activation_dynamics.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "mosaic",
+      "ud_bytes": 7131,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8325,7 +8421,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 23914,
+      "ud_bytes": 24082,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8338,6 +8434,18 @@
       "package": "estimation",
       "subpackage": "",
       "ud_bytes": 17711,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/solver_telemetry.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "",
+      "ud_bytes": 4360,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10185,7 +10293,7 @@
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "adapters",
-      "ud_bytes": 7062,
+      "ud_bytes": 7124,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10317,7 +10425,7 @@
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "",
-      "ud_bytes": 14404,
+      "ud_bytes": 17702,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -11601,7 +11709,7 @@
       "classification": "ud-only",
       "package": "humanoid_character_builder",
       "subpackage": "presets",
-      "ud_bytes": 1869,
+      "ud_bytes": 1777,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12610,6 +12718,30 @@
       "package": "lifting",
       "subpackage": "",
       "ud_bytes": 5374,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/barbell_bushing.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "",
+      "ud_bytes": 22612,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/barbell_runs.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "",
+      "ud_bytes": 15174,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14501,6 +14633,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/analytic_muscle_replay_spec.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 20090,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/anatomical_meshes.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -15681,7 +15825,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 43327,
+      "ud_bytes": 43691,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15813,7 +15957,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "historical_fit",
-      "ud_bytes": 554,
+      "ud_bytes": 2540,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15857,11 +16001,83 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/historical_fit/contact_schedule.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 7318,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/historical_fit/contracts.py",
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "historical_fit",
-      "ud_bytes": 12960,
+      "ud_bytes": 21436,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/historical_fit/shaft_fragment_diagnostics.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 13338,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/historical_fit/shaft_geometry.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 6185,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/historical_fit/shaft_observations.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 9129,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/historical_fit/shaft_residuals.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 12907,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/historical_fit/shaft_row_timing.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 9057,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15873,7 +16089,31 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "historical_fit",
-      "ud_bytes": 12386,
+      "ud_bytes": 26370,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/historical_fit/spline_expansion.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 5652,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/historical_fit/spline_restriction.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 6504,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16185,7 +16425,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "jobs",
-      "ud_bytes": 3110,
+      "ud_bytes": 5074,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16493,6 +16733,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/marker_kinematics.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 2619,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/marker_projection.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -16725,7 +16977,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 3511,
+      "ud_bytes": 3740,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16941,7 +17193,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 5607,
+      "ud_bytes": 5872,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17829,7 +18081,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 25305,
+      "ud_bytes": 25393,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -18477,7 +18729,7 @@
       "classification": "ud-only",
       "package": "motion_pipeline",
       "subpackage": "sources",
-      "ud_bytes": 14487,
+      "ud_bytes": 14522,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -18789,7 +19041,7 @@
       "classification": "ud-only",
       "package": "myofullbody",
       "subpackage": "",
-      "ud_bytes": 20269,
+      "ud_bytes": 20631,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -21813,7 +22065,7 @@
       "classification": "ud-only",
       "package": "physics",
       "subpackage": "impact_model",
-      "ud_bytes": 5834,
+      "ud_bytes": 6354,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24333,7 +24585,55 @@
       "classification": "ud-only",
       "package": "reporting",
       "subpackage": "swing_report",
-      "ud_bytes": 500,
+      "ud_bytes": 1010,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/__main__.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 203,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/adapters_base.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 3008,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/builder.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 11371,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/cli.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 4923,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24353,11 +24653,83 @@
       "spelling_only": false
     },
     {
+      "path": "reporting/swing_report/exporter.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 6896,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/plot_render.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 2974,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/plots.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 5486,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "reporting/swing_report/policy.py",
       "classification": "ud-only",
       "package": "reporting",
       "subpackage": "swing_report",
       "ud_bytes": 1870,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/selection.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 4673,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/series_csv.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 6334,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/summary_md.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 3582,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24861,7 +25233,7 @@
       "classification": "ud-only",
       "package": "shadow_tracker",
       "subpackage": "",
-      "ud_bytes": 16116,
+      "ud_bytes": 16214,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -25785,7 +26157,7 @@
       "classification": "ud-only",
       "package": "sidekick",
       "subpackage": "lab",
-      "ud_bytes": 19446,
+      "ud_bytes": 19591,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -30261,7 +30633,7 @@
       "classification": "ud-only",
       "package": "simulation_backends",
       "subpackage": "",
-      "ud_bytes": 7711,
+      "ud_bytes": 7837,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37569,7 +37941,7 @@
       "classification": "ud-only",
       "package": "validation_pkg",
       "subpackage": "",
-      "ud_bytes": 15597,
+      "ud_bytes": 15683,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37749,7 +38121,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 9148,
+      "ud_bytes": 12272,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37761,7 +38133,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 12433,
+      "ud_bytes": 12483,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37829,6 +38201,18 @@
       "spelling_only": false
     },
     {
+      "path": "workspace/historical_research.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 20548,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "workspace/installed_journeys.py",
       "classification": "ud-only",
       "package": "workspace",
@@ -37857,7 +38241,31 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 18434,
+      "ud_bytes": 23233,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_authenticated_read.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 6485,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_caption.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 12963,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37877,11 +38285,35 @@
       "spelling_only": false
     },
     {
+      "path": "workspace/necromatcher_capture_identity.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 6532,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "workspace/necromatcher_constraints.py",
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
       "ud_bytes": 6213,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_contacts.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 3662,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37905,7 +38337,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 4580,
+      "ud_bytes": 14827,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37917,7 +38349,43 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 10166,
+      "ud_bytes": 22492,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_fit_metrics.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 1402,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_fit_records.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 15903,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_fit_telemetry.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 5250,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37929,7 +38397,127 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 8563,
+      "ud_bytes": 19439,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_golf.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 18752,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_hypothesis.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 13300,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_hypothesis_contracts.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 11722,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_hypothesis_worker.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 6692,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_impact.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 11132,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_impact_contracts.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 5423,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_impact_execution.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 2525,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_impact_jobs.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 18911,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_impact_receipt.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 12312,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_impact_worker.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 9287,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37941,7 +38529,19 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 6820,
+      "ud_bytes": 9046,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_native_worker.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 2496,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37997,11 +38597,23 @@
       "spelling_only": false
     },
     {
+      "path": "workspace/necromatcher_ranges.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 6496,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "workspace/necromatcher_refits.py",
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 6185,
+      "ud_bytes": 9238,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -38045,11 +38657,83 @@
       "spelling_only": false
     },
     {
+      "path": "workspace/necromatcher_scope_import.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 2794,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_shaft_evidence.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 7107,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_shape_overlay.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 7732,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_source_scope.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 19546,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_spline.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 3819,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/necromatcher_spline_restriction.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 17239,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "workspace/necromatcher_video.py",
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 17664,
+      "ud_bytes": 36049,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -38073,7 +38757,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 19987,
+      "ud_bytes": 35608,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -38085,7 +38769,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 5317,
+      "ud_bytes": 5828,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -38157,7 +38841,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 16402,
+      "ud_bytes": 16709,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -38187,8 +38871,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38200,8 +38884,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38213,8 +38897,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "686ae960aac9f9009097c4f510040ac98e61e792"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38226,8 +38910,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "08c9aeef09e797d2083cfbcf3d3ed04e88349d71"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38238,9 +38922,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-18",
-        "commit": "120fba7b304a327e02d0d4257f68c1f33bb215c8"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38251,9 +38935,9 @@
         "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-25",
-        "commit": "95ed6b47857e9a47211ab1973d02b28beae718bc"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38264,9 +38948,9 @@
         "commit": "535f093eaac7eab86ef173327127691e7182214b"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38278,8 +38962,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38291,8 +38975,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "08c9aeef09e797d2083cfbcf3d3ed04e88349d71"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38303,9 +38987,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38317,8 +39001,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38330,8 +39014,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38342,9 +39026,9 @@
         "commit": "535f093eaac7eab86ef173327127691e7182214b"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-18",
-        "commit": "120fba7b304a327e02d0d4257f68c1f33bb215c8"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38356,8 +39040,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38369,8 +39053,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38381,9 +39065,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38394,9 +39078,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-18",
-        "commit": "120fba7b304a327e02d0d4257f68c1f33bb215c8"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38407,9 +39091,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-17",
-        "commit": "dc8744d600997b7169e1cf318eebb9272aaf52a9"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38421,8 +39105,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "662c0bbd69ed99f1d5a84761b0e4917127da980a"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38433,9 +39117,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-19",
-        "commit": "efde45798c302e22c1dae84405af5f0164dbab7c"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38447,8 +39131,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "686ae960aac9f9009097c4f510040ac98e61e792"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38459,9 +39143,9 @@
         "commit": "6fc8146a61e58183a81a4c1c395d34c6abaf31f6"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-08-25",
-        "commit": "f89ffb2af4f6e790e55082afcc36db6dc6be44a9"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38472,9 +39156,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-17",
-        "commit": "dc8744d600997b7169e1cf318eebb9272aaf52a9"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38486,8 +39170,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38499,8 +39183,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38512,8 +39196,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38525,8 +39209,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38538,8 +39222,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38550,9 +39234,9 @@
         "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-25",
-        "commit": "95ed6b47857e9a47211ab1973d02b28beae718bc"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38564,8 +39248,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38577,8 +39261,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38590,8 +39274,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38602,9 +39286,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-21",
-        "commit": "e62e4ffeb708bc6aeee668e0000e68f8377080eb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38616,8 +39300,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38628,9 +39312,9 @@
         "commit": "80a5e2b4f40c7aab041b3ea38fff964ffbafe3c4"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-25",
-        "commit": "95ed6b47857e9a47211ab1973d02b28beae718bc"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38642,8 +39326,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38655,8 +39339,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38667,9 +39351,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-21",
-        "commit": "e62e4ffeb708bc6aeee668e0000e68f8377080eb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38680,9 +39364,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-21",
-        "commit": "e62e4ffeb708bc6aeee668e0000e68f8377080eb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38694,8 +39378,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "fb2a55e77861a86390c208e4e6d560e511c08403"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38707,8 +39391,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "fb2a55e77861a86390c208e4e6d560e511c08403"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38720,8 +39404,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "fb2a55e77861a86390c208e4e6d560e511c08403"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38733,8 +39417,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "fb2a55e77861a86390c208e4e6d560e511c08403"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38745,9 +39429,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-21",
-        "commit": "e62e4ffeb708bc6aeee668e0000e68f8377080eb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38758,9 +39442,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-21",
-        "commit": "e62e4ffeb708bc6aeee668e0000e68f8377080eb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38771,9 +39455,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-21",
-        "commit": "e62e4ffeb708bc6aeee668e0000e68f8377080eb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38784,9 +39468,9 @@
         "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-25",
-        "commit": "1a8f012fb9d239bda7c079f769c98dd718d736fb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38797,9 +39481,9 @@
         "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-25",
-        "commit": "1a8f012fb9d239bda7c079f769c98dd718d736fb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38810,9 +39494,9 @@
         "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-25",
-        "commit": "1a8f012fb9d239bda7c079f769c98dd718d736fb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38823,9 +39507,9 @@
         "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-25",
-        "commit": "1a8f012fb9d239bda7c079f769c98dd718d736fb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38837,8 +39521,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "c1d01c5221037bc6effd1654d899826cfffc56ea"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38850,8 +39534,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "c1d01c5221037bc6effd1654d899826cfffc56ea"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38863,8 +39547,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "c1d01c5221037bc6effd1654d899826cfffc56ea"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38876,8 +39560,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "c1d01c5221037bc6effd1654d899826cfffc56ea"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38889,8 +39573,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38901,9 +39585,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38914,9 +39598,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38928,8 +39612,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38941,8 +39625,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38954,8 +39638,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38967,8 +39651,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "686ae960aac9f9009097c4f510040ac98e61e792"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38979,9 +39663,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-08-25",
-        "commit": "f89ffb2af4f6e790e55082afcc36db6dc6be44a9"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -38993,8 +39677,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39005,9 +39689,9 @@
         "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-25",
-        "commit": "95ed6b47857e9a47211ab1973d02b28beae718bc"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39019,8 +39703,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "4341316dfb6a3d9353ac88c7badecd60e8c79771"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39032,8 +39716,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "4341316dfb6a3d9353ac88c7badecd60e8c79771"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39044,9 +39728,9 @@
         "commit": "089091a5f9d1cafc590684eff0675960e0f97547"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-03",
-        "commit": "951d718a4cd4cab70a589775a8c691bb1cfa4674"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39057,9 +39741,9 @@
         "commit": "089091a5f9d1cafc590684eff0675960e0f97547"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-03",
-        "commit": "951d718a4cd4cab70a589775a8c691bb1cfa4674"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39070,9 +39754,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-05-16",
-        "commit": "d5eec901cd3902101b4c214590afa1ade72eb6db"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39083,9 +39767,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-21",
-        "commit": "e62e4ffeb708bc6aeee668e0000e68f8377080eb"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39096,9 +39780,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-03",
-        "commit": "951d718a4cd4cab70a589775a8c691bb1cfa4674"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39109,9 +39793,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39123,8 +39807,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39136,8 +39820,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "48d6b6a486df9941af24ab4a0fccdcf9d58e31f9"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39148,9 +39832,9 @@
         "commit": "089091a5f9d1cafc590684eff0675960e0f97547"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-03",
-        "commit": "951d718a4cd4cab70a589775a8c691bb1cfa4674"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39161,9 +39845,9 @@
         "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-25",
-        "commit": "95ed6b47857e9a47211ab1973d02b28beae718bc"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39175,8 +39859,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "d5afb0e1e205f4fa75d795954b98b5ec99f9801a"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39187,9 +39871,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "c1aea52087589bba520d88dbd8086e9d0bc06fae"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39201,8 +39885,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39213,9 +39897,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39227,8 +39911,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "d5afb0e1e205f4fa75d795954b98b5ec99f9801a"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39239,9 +39923,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-06-12",
-        "commit": "ded171d265fe6f64d0f12f7367a2d9b7cb2c08d7"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39253,8 +39937,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "d5afb0e1e205f4fa75d795954b98b5ec99f9801a"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39266,8 +39950,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39279,8 +39963,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39291,9 +39975,9 @@
         "commit": "6dd40e2019fcc6c14dacef335e61e42a273e367c"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-22",
-        "commit": "dc5291949dc65ff7b32a7f17bc7e21c5aeeaa9e7"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39304,9 +39988,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39318,8 +40002,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "d5afb0e1e205f4fa75d795954b98b5ec99f9801a"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39330,9 +40014,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39343,9 +40027,9 @@
         "commit": "6dd40e2019fcc6c14dacef335e61e42a273e367c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-05-15",
-        "commit": "33d83fad2b3061e6e1e9309625990a1483907479"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39356,9 +40040,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39369,9 +40053,9 @@
         "commit": "745a045fae162f0d050568f5875b480be3c8ba00"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39382,9 +40066,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39396,8 +40080,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39409,8 +40093,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39422,8 +40106,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39435,8 +40119,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39448,8 +40132,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39461,8 +40145,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39474,8 +40158,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39487,8 +40171,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39500,8 +40184,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39512,9 +40196,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39526,8 +40210,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39538,9 +40222,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39551,9 +40235,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39564,9 +40248,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39577,9 +40261,9 @@
         "commit": "9e8995763cf4cc685021d3ccac88b483e8450cc7"
       },
       "tools": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-20",
-        "commit": "54d47b4dc98072e54c381e445e8669b4e65db96c"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39590,9 +40274,9 @@
         "commit": "1616c7be8c6e11494e213f6b804e6f575f7896aa"
       },
       "tools": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-20",
-        "commit": "54d47b4dc98072e54c381e445e8669b4e65db96c"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39603,9 +40287,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39616,9 +40300,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39629,9 +40313,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-05",
-        "commit": "74ef85b8263a74270bb6432a8128c76c9d10d635"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39642,9 +40326,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39655,9 +40339,9 @@
         "commit": "6e13c3d9977027ff0da15001c4a21ac4893a72d6"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "29982cdb6f8b34ad7a1969b06cfed0ea35fbbecf"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39668,9 +40352,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-26",
-        "commit": "3678409fc51024150ab28970b72e3b468935f345"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39682,8 +40366,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39695,8 +40379,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39708,8 +40392,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39720,9 +40404,9 @@
         "commit": "6e743d9c9e12961ce7c407e0ef78bbecd5e2ca88"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39733,9 +40417,9 @@
         "commit": "6dd40e2019fcc6c14dacef335e61e42a273e367c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39747,8 +40431,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39759,9 +40443,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-20",
-        "commit": "3c00d7f95851030d98343c9d422720787883b981"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39773,8 +40457,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39785,9 +40469,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-20",
-        "commit": "3c00d7f95851030d98343c9d422720787883b981"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39798,9 +40482,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-20",
-        "commit": "3c00d7f95851030d98343c9d422720787883b981"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39812,8 +40496,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39825,8 +40509,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39838,8 +40522,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39850,9 +40534,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39864,8 +40548,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39876,9 +40560,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39890,8 +40574,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39902,9 +40586,9 @@
         "commit": "f7ffe7f9fb72a00edce566c705ec109eb5112880"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39928,9 +40612,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39942,8 +40626,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39955,8 +40639,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39967,9 +40651,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-26",
-        "commit": "3678409fc51024150ab28970b72e3b468935f345"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -39993,9 +40677,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40007,8 +40691,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40019,9 +40703,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "f8b94bfe9cbca193d1c513bef59b5bdd996c4c6a"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40033,8 +40717,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40045,9 +40729,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-20",
-        "commit": "3c00d7f95851030d98343c9d422720787883b981"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40058,9 +40742,9 @@
         "commit": "2ad5bc7aabdfe0a7251a270a3d4df021e95f5269"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-04-26",
-        "commit": "158f6f4c95a49f42c3a50e321a9055f12fcecf68"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40072,8 +40756,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40084,9 +40768,9 @@
         "commit": "1a45c4ad4009e8efffa09956d230d725be55c965"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "a02874e82894f43342d8b3134922e1efb4a4afd6"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40097,9 +40781,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40111,8 +40795,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40123,9 +40807,9 @@
         "commit": "1a45c4ad4009e8efffa09956d230d725be55c965"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40136,9 +40820,9 @@
         "commit": "1a45c4ad4009e8efffa09956d230d725be55c965"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "a02874e82894f43342d8b3134922e1efb4a4afd6"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40150,8 +40834,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40163,8 +40847,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40176,8 +40860,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40189,8 +40873,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40201,9 +40885,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40214,9 +40898,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40228,8 +40912,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40241,8 +40925,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40253,9 +40937,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40267,8 +40951,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40279,9 +40963,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40292,9 +40976,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40306,8 +40990,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40318,9 +41002,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40331,9 +41015,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40344,9 +41028,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40358,8 +41042,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40371,8 +41055,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40383,9 +41067,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-26",
-        "commit": "3678409fc51024150ab28970b72e3b468935f345"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40396,9 +41080,9 @@
         "commit": "90a921c70e117bdc9671a171e6c669ec2a532d2c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40410,8 +41094,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40423,8 +41107,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40436,8 +41120,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40449,8 +41133,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40462,8 +41146,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40475,8 +41159,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40487,9 +41171,9 @@
         "commit": "feb4902c94567652afb9d7d35c0dcd85edc969a6"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40500,9 +41184,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40513,9 +41197,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-20",
-        "commit": "3c00d7f95851030d98343c9d422720787883b981"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40527,8 +41211,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40539,9 +41223,9 @@
         "commit": "8e41f794c9e51319d6e53650a58d96462bb061bf"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40553,8 +41237,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40565,9 +41249,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-26",
-        "commit": "3678409fc51024150ab28970b72e3b468935f345"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40578,9 +41262,9 @@
         "commit": "90a921c70e117bdc9671a171e6c669ec2a532d2c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40592,8 +41276,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40604,9 +41288,9 @@
         "commit": "711afe5d0696d8ab34f73a68ad9d85080d8c3432"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40617,9 +41301,9 @@
         "commit": "c9a9c7446b0f2d9cf0ec20ab94f298b41a9610f5"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40631,8 +41315,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40643,9 +41327,9 @@
         "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40656,9 +41340,9 @@
         "commit": "711afe5d0696d8ab34f73a68ad9d85080d8c3432"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40669,9 +41353,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40682,9 +41366,9 @@
         "commit": "8e41f794c9e51319d6e53650a58d96462bb061bf"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40695,9 +41379,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-03-15",
-        "commit": "5af09a829405b29389a52904b203c9a93e949a83"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40708,9 +41392,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-04-19",
-        "commit": "415dc5e967a9e70e63612df9a2810e21fa483ce3"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40721,9 +41405,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-26",
-        "commit": "3678409fc51024150ab28970b72e3b468935f345"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40734,9 +41418,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-28",
-        "commit": "ee659979623ac1d95c7939d6b8c84cff25f75ef1"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40747,9 +41431,9 @@
         "commit": "f16e72f6c0605013f89e01122388f6aad337aa2b"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-28",
-        "commit": "ee659979623ac1d95c7939d6b8c84cff25f75ef1"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40760,9 +41444,9 @@
         "commit": "f16e72f6c0605013f89e01122388f6aad337aa2b"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-28",
-        "commit": "ee659979623ac1d95c7939d6b8c84cff25f75ef1"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40773,9 +41457,9 @@
         "commit": "ed815a1615c22c1d3ae41d85e1b72aaecfecf2eb"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-07",
-        "commit": "69aeeed8327540261c27abf747e70477289e726c"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40787,8 +41471,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-09-08",
-        "commit": "b64a70f394cf9cf77266512e094239237c87d3b0"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40799,9 +41483,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-05-15",
-        "commit": "15745bf91bbda27b01c48372264c3bf48c40c6ce"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40812,9 +41496,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40825,9 +41509,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-06-15",
-        "commit": "08ec0412c4569cd2b39572d638fdf4ba1fd9f76e"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40838,9 +41522,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-29",
-        "commit": "95800a5647603bf1211a98b0899674540cc16151"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40851,9 +41535,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-07",
-        "commit": "20fff16ac154981da8365ed09f083dd823aeef0f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40864,9 +41548,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-05",
-        "commit": "21126ef38925863afb30ea71370c91be45ca2f6d"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40878,8 +41562,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40891,8 +41575,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40903,9 +41587,9 @@
         "commit": "6dd40e2019fcc6c14dacef335e61e42a273e367c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-23",
-        "commit": "002c3a05d9ad154511953f7685b036200a1da4cf"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40917,21 +41601,21 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
       "path": "sidekick/lab/bio/c3d_reader.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "date": "2026-10-12",
+        "commit": "57f8bc9f54bf892b589673a63a731d9ddc66c70a"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-05",
-        "commit": "6da2cd6e1662f860f9d9c6bbd69b8cacfb8bc0ec"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40942,9 +41626,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40956,8 +41640,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40969,8 +41653,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40981,9 +41665,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -40994,9 +41678,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-20",
-        "commit": "bd97c93bb45a861f67b652d1cac8636bdf9db404"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41007,9 +41691,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-04",
-        "commit": "5438b9277830dc6834570fffa4f8ef10a9146152"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41020,9 +41704,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-20",
-        "commit": "3c00d7f95851030d98343c9d422720787883b981"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41033,9 +41717,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-20",
-        "commit": "3c00d7f95851030d98343c9d422720787883b981"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41046,9 +41730,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-06-15",
-        "commit": "7039a04712ccad7a605024cb3c4feab90ce26f5b"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41059,9 +41743,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "32b0513e89aec767725515e76911b4edb8f9ae69"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41072,9 +41756,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "32b0513e89aec767725515e76911b4edb8f9ae69"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41085,9 +41769,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-04",
-        "commit": "5438b9277830dc6834570fffa4f8ef10a9146152"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41099,8 +41783,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41111,9 +41795,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41124,9 +41808,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "6a3b686914ca096071044a6b94fac755bc6af837"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41137,9 +41821,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41150,9 +41834,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41163,9 +41847,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41176,9 +41860,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41189,9 +41873,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41203,8 +41887,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41215,9 +41899,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-05",
-        "commit": "37ef8c31d27c2d4961daa029c34ae8059a5bef10"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41229,8 +41913,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41241,9 +41925,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "6a3b686914ca096071044a6b94fac755bc6af837"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41254,9 +41938,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-23",
-        "commit": "ab5ec5674080c53da3501560337d4e226901e9bf"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41267,9 +41951,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-24",
-        "commit": "6e3e6c42baac8fc9c9543b9223a43ea50199cc9a"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41281,8 +41965,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41294,8 +41978,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41307,8 +41991,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41319,9 +42003,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-06-12",
-        "commit": "868b549dd91eba03c36868f205e026d9b668dede"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41333,8 +42017,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-09-09",
-        "commit": "2c9a8d6c963cec2f140f2ee17469d27e506a3ba1"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41345,9 +42029,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-05",
-        "commit": "21126ef38925863afb30ea71370c91be45ca2f6d"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41358,9 +42042,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "6a3b686914ca096071044a6b94fac755bc6af837"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41371,9 +42055,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41384,9 +42068,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "6a3b686914ca096071044a6b94fac755bc6af837"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41397,9 +42081,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-04",
-        "commit": "5438b9277830dc6834570fffa4f8ef10a9146152"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41411,8 +42095,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-14",
-        "commit": "58f7708c1cfc939a149ad8d8eebf733f3868ee1b"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41423,9 +42107,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41436,9 +42120,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41449,9 +42133,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-06-12",
-        "commit": "67d743043dc582effd56484c3c19ab558907b081"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41462,9 +42146,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "32b0513e89aec767725515e76911b4edb8f9ae69"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41476,8 +42160,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41488,9 +42172,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "de6ec7bdeee5883065b3ff5decb5461946bd1f88"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41502,8 +42186,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41514,9 +42198,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41527,9 +42211,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-05",
-        "commit": "37ef8c31d27c2d4961daa029c34ae8059a5bef10"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41540,9 +42224,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41553,9 +42237,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-07-26",
-        "commit": "4744422d39aea03f5b6f59c8908f5e79ce246d92"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41566,9 +42250,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41580,8 +42264,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41592,9 +42276,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41605,9 +42289,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41618,9 +42302,9 @@
         "commit": "6dd40e2019fcc6c14dacef335e61e42a273e367c"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41632,8 +42316,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41644,9 +42328,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "90dd7a1fe6d5ab6e02bda2f6dc8f4e6a30fe78fd"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41657,9 +42341,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41670,9 +42354,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-06-12",
-        "commit": "416368136ce26454fdb2f743ab71e06a0272a5d1"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41683,9 +42367,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-06-12",
-        "commit": "416368136ce26454fdb2f743ab71e06a0272a5d1"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41697,8 +42381,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41710,8 +42394,8 @@
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41722,9 +42406,9 @@
         "commit": "2acdbbdfa28c0a3c3e3db58efc35e87333597868"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-24",
-        "commit": "648b87447cd39e389098b383a02c9ab40d540619"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41735,9 +42419,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41748,9 +42432,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -41761,9 +42445,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     }
   ]

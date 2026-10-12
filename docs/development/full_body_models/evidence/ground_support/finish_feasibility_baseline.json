@@ -10,14 +10,8 @@
   },
   "anthro_driver_seeds": {
     "description": "finish-window feasibility of the tracked reference (the load its inverse dynamics demands) and of the simulation (the load the plant delivers); reference friction uses the net ground reaction, the simulation the larger of the two feet; an unloaded frame is never inside the support polygon",
-    "window_s": [
-      1.0,
-      1.8138888888888889
-    ],
-    "zmp_window_s": [
-      1.0,
-      1.5
-    ],
+    "window_s": [1.0, 1.8138888888888889],
+    "zmp_window_s": [1.0, 1.5],
     "friction_limit_mu": 0.8,
     "friction_saturation_fraction": 0.95,
     "min_load_bw": 0.1,
@@ -48,14 +42,8 @@
   },
   "anthro_iron_seeds_zmp": {
     "description": "finish-window feasibility of the tracked reference (the load its inverse dynamics demands) and of the simulation (the load the plant delivers); reference friction uses the net ground reaction, the simulation the larger of the two feet; an unloaded frame is never inside the support polygon",
-    "window_s": [
-      1.0,
-      1.8272980501392757
-    ],
-    "zmp_window_s": [
-      1.0,
-      1.5
-    ],
+    "window_s": [1.0, 1.8272980501392757],
+    "zmp_window_s": [1.0, 1.5],
     "friction_limit_mu": 0.8,
     "friction_saturation_fraction": 0.95,
     "min_load_bw": 0.1,

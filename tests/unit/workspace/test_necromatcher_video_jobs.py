@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from pathlib import Path
 from threading import Event
 import time
@@ -12,6 +13,12 @@ from zipfile import ZipFile
 import pytest
 
 pytestmark = pytest.mark.unit
+
+
+def _freeze_execution_stamp(jobs, monkeypatch):
+    """Isolate fake-worker availability tests from concurrent source edits."""
+    stamp = jobs.fit_execution_stamp()
+    monkeypatch.setattr(jobs, "fit_execution_stamp", lambda: stamp)
 
 
 def _wait(session, run):
@@ -62,6 +69,7 @@ def _fake_export(request_path, budget, cancelled):
 def test_video_job_success_reopens_and_checks_zip(fit_case, monkeypatch):
     from src.shared.python.workspace import necromatcher_video_jobs as jobs
 
+    _freeze_execution_stamp(jobs, monkeypatch)
     library, source, _ = fit_case
     library.add_fit("source", "practice", source)
     monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
@@ -85,6 +93,11 @@ def test_video_job_success_reopens_and_checks_zip(fit_case, monkeypatch):
         session.close()
     reopened = jobs.NativeVideoSession(library)
     try:
+        recalled = reopened.stored_runs("source")
+        assert len(recalled) == 1 and recalled[0]["run_id"] == run
+        assert recalled[0]["status"] == "succeeded"
+        assert recalled[0]["acceptance"] == "rejected"
+        assert reopened.view_for_fit("source", run) == recalled[0]
         assert reopened.view(run)["download_available"]
         assert not reopened.view(run)["control_available"]
         assert reopened.download(run).is_file()
@@ -128,6 +141,31 @@ def test_video_job_cancel_and_one_owned_active_job(fit_case, monkeypatch):
             session.download(run)
     finally:
         session.close()
+
+
+def test_reopened_research_overlay_cannot_claim_acceptance(fit_case, monkeypatch):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+
+    _freeze_execution_stamp(jobs, monkeypatch)
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
+    session = jobs.NativeVideoSession(library)
+    try:
+        run = session.submit("source")["run_id"]
+        assert _wait(session, run)["status"] == "succeeded"
+    finally:
+        session.close()
+    manifest_path = library.root / "video-runs" / run / "run_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["acceptance"] = "accepted"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    reopened = jobs.NativeVideoSession(library)
+    try:
+        with pytest.raises(ValueError, match="research|acceptance"):
+            reopened.view_for_fit("source", run)
+    finally:
+        reopened.close()
 
 
 def test_video_job_failure_has_no_download(fit_case, monkeypatch):
@@ -321,6 +359,108 @@ def test_json_polling_preserves_missing_and_malformed_errors(tmp_path):
         jobs._read(path)
 
 
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "output",
+        "parent",
+        "parent_fit",
+        "parent_capture",
+        "missing",
+        "extra",
+        "symlink",
+        "metadata",
+        "malformed_metadata",
+    ],
+)
+def test_polling_invalidates_changed_artifacts_without_hashing(
+    fit_case, monkeypatch, mutation
+):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+
+    _freeze_execution_stamp(jobs, monkeypatch)
+
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
+    session = jobs.NativeVideoSession(library)
+    try:
+        run = session.submit("source")["run_id"]
+        assert _wait(session, run)["download_available"]
+        overlay = library.root / "video-runs" / run / "overlay"
+        if mutation == "output":
+            (overlay / "overlay.mp4").write_bytes(b"changed")
+        elif mutation.startswith("parent"):
+            identity = {
+                "parent": "model-v1",
+                "parent_fit": "source",
+                "parent_capture": "capture-v1",
+            }[mutation]
+            Path(library.load_asset(identity).path).write_bytes(b"changed")
+        elif mutation == "missing":
+            (overlay / "frame-000000.png").unlink()
+        elif mutation == "extra":
+            (overlay / "extra.txt").write_text("undeclared")
+        elif mutation == "metadata":
+            actual_assets = library.assets
+
+            def changed_assets(swing):
+                assets = deepcopy(actual_assets(swing))
+                next(
+                    asset for asset in assets if asset.dataset_id == "model-v1"
+                ).metadata["hash"] = "changed"
+                return assets
+
+            monkeypatch.setattr(library, "assets", changed_assets)
+        elif mutation == "malformed_metadata":
+            from src.shared.python.core.contracts.exceptions import StateError
+
+            def malformed_assets(swing):
+                raise StateError("Malformed relevant project metadata")
+
+            monkeypatch.setattr(library, "assets", malformed_assets)
+        else:
+            target = overlay / "overlay.mp4"
+            actual = Path.is_symlink
+            # Windows privilege restrictions do not weaken the symlink guard test.
+            monkeypatch.setattr(
+                Path, "is_symlink", lambda path: path == target or actual(path)
+            )
+        view = session.view(run)
+        assert view["execution_verified"]
+        assert not view["download_available"]
+        assert view["artifact_state"] == "changed_or_unverified"
+    finally:
+        session.close()
+
+
+def test_polling_uses_metadata_and_ignores_unrelated_fit_versions(
+    fit_case, monkeypatch
+):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+
+    _freeze_execution_stamp(jobs, monkeypatch)
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
+    session = jobs.NativeVideoSession(library)
+    try:
+        run = session.submit("source")["run_id"]
+        assert _wait(session, run)["download_available"]
+        library.add_fit("unrelated", "practice", source)
+
+        def no_verification(*args, **kwargs):
+            raise AssertionError("Polling must not fully hash parents or output")
+
+        monkeypatch.setattr(jobs, "_parents", no_verification)
+        monkeypatch.setattr(jobs, "_outputs", no_verification)
+        monkeypatch.setattr(library, "load_asset", no_verification)
+        for _ in range(3):
+            assert session.view(run)["download_available"]
+    finally:
+        session.close()
+
+
 def test_force_layer_is_validated_recorded_and_forwarded_to_the_worker(
     fit_case, monkeypatch
 ):
@@ -353,6 +493,75 @@ def test_force_layer_is_validated_recorded_and_forwarded_to_the_worker(
         assert calls[0]["force_sampler_factory"] is worker.mujoco_force_sampler
     finally:
         session.close()
+
+
+def test_legacy_completion_requires_explicit_download_verification(
+    fit_case, monkeypatch
+):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+
+    _freeze_execution_stamp(jobs, monkeypatch)
+
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
+    session = jobs.NativeVideoSession(library)
+    try:
+        run = session.submit("source")["run_id"]
+        assert _wait(session, run)["download_available"]
+        complete_path = library.root / "video-runs" / run / "complete.json"
+        complete = json.loads(complete_path.read_text())
+        complete.pop("artifact_baseline", None)
+        complete_path.write_text(json.dumps(complete))
+        view = session.view(run)
+        assert view["execution_verified"]
+        assert not view["download_available"]
+        assert view["producer_source_commit"]
+        assert session.download(run).is_file()
+        assert session.view(run)["download_available"]
+    finally:
+        session.close()
+
+
+def test_video_record_read_retries_verified_sharing_fault(tmp_path, monkeypatch):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+    from src.shared.python.motion_matching.jobs import io_atomic
+
+    path = tmp_path / "request.json"
+    path.write_text('{"status": "running"}', encoding="utf-8")
+    original = Path.read_text
+    attempts = []
+    error = PermissionError("verified sharing fault")
+    error.winerror = 32
+
+    def read(self, *args, **kwargs):
+        attempts.append(self)
+        if len(attempts) == 1:
+            raise error
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read)
+    monkeypatch.setattr(io_atomic.time, "sleep", lambda _: None)
+    assert jobs._read(path) == {"status": "running"}
+    assert len(attempts) == 2
+
+
+@pytest.mark.parametrize(
+    "payload,exception", [("{", json.JSONDecodeError), ("[]", ValueError)]
+)
+def test_video_record_malformed_json_is_not_retried(
+    tmp_path, monkeypatch, payload, exception
+):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+    from src.shared.python.motion_matching.jobs import io_atomic
+
+    path = tmp_path / "request.json"
+    path.write_text(payload, encoding="utf-8")
+    delays = []
+    monkeypatch.setattr(io_atomic.time, "sleep", delays.append)
+    with pytest.raises(exception):
+        jobs._read(path)
+    assert not delays
 
 
 def test_default_submission_has_no_force_layer_in_its_request(fit_case, monkeypatch):

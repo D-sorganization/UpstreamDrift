@@ -28,10 +28,10 @@ the 0.1x impact-window clip) of one clip kind and engine:
 
 Rendered on brick with the MyoSuite venv (`NATIVE_VIEWER_MYOSUITE_PYTHON`) from main after #12292, using the same bundles. Each strip shows the impact frame of `grf/` face-on, `club_forces/` hands close-up and `clean/` down-the-line.
 
-| Club | Grab |
-|---|---|
+| Club               | Grab                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------- |
 | Driver (capture-A) | [gcv19_showcase_driver_myosuite_impact.png](gcv19_showcase_driver_myosuite_impact.png) |
-| 7-iron (capture-B) | [gcv19_showcase_iron_myosuite_impact.png](gcv19_showcase_iron_myosuite_impact.png) |
+| 7-iron (capture-B) | [gcv19_showcase_iron_myosuite_impact.png](gcv19_showcase_iron_myosuite_impact.png)     |
 
 - **Clip set:** 15 MP4s per club (5 kind-view pairs × 1x, 0.5x and 0.1x), all 60 fps at 1920×1080 by cv2.
 - **Impact card:** Impact Location reads unavailable on both clubs, because the ball contact is off the face (toe −70 mm on the driver, −87 mm on the 7-iron). That is #12292's off-face reason, not a strike location.

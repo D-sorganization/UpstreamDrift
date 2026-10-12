@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11792 — F08: Match Mocap With Muscle Excitations and Verify Pure OpenSim Replay
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11792 (parent #11784; children #12342, #12343, #12353)
+- **PR:** #12344 (draft); related #12355
+- **Branch:** `fix/native-path-connection-finalization-12233-20261012`
+- **Started:** 2026-10-09 (parent issue opened)
+- **Paths:** `changes/12233-bound-moco-optimizer-states-to-source-mo.md`; `docs/agent_context/README.md`; `docs/agent_context/index.html`; `docs/development/feedback_controls/F07_PATH_WORK_TURNOVER.md`; `manuals/upstreamdrift/chapters/24-native-path-work.qmd`; `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py`; `tests/unit/engines/opensim/test_native_path_optimizer_domains.py`
+- **Summary:** This software/readiness work moves native connection finalization before optimizer-domain and passive audits. It does not claim a solve, optimum, learned replay, or physical qualification; all 17 registered model/variant rows remain unqualified.
+- **Next step:** Complete the combined no-probe preparation and physiological-policy/solver full-clock replay work under the existing acceptance gates.
+- **Last verified:** 2026-10-12 (merge commit `f637c179e1bac10b410882b6499050b27f7b1ddf`; pinned QA 3.12 pre_pr all gates passed; 23 focused lifecycle tests passed, 2 warnings; no native calls).
+
 ### DL-#11719 · GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export
 
 - **State:** in_review
@@ -45,34 +58,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Evidence:** tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py.
 - **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_SOURCE_20261011.md)
 
-### DL-#10965 · Reconciled Scopes From Duplicate Source Rows
-
-- **State:** shipped
-- **Owner:** claude (PR not recorded in source branch `bot/issue-10965-coverage-gate-authority`) | claude (PR merged in consolidated #10988; follow-up fix for #10989 on `fix/10989-coverage-gates-defusedxml`; branch `agy/ud-10965-coverage-gates`)
-- **Issue:** #10965
-- **PR:** #10988, #10994, #11113
-- **Branch:** `bot/issue-10965-coverage-gate-authority`; `agy/ud-10965-coverage-gates`
-- **Paths:** `scripts/check_coverage_gates.py`, `scripts/check_mypy_exclusion_budget.py`, `scripts/config/mypy_exclusion_budget.json`, `.github/workflows/ci-standard.yml`, `tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`; `scripts/check_coverage_gates.py`, `tests/unit/scripts/test_check_coverage_gates.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
-- **Started:** 2026-09-26
-- **Shipped:** 2026-09-29
-- **Summary:** Coverage gates use one JSON authority, strict XML/JSON parsing and CI enforcement; merged #10994 covers the parser-security follow-up. This is software enforcement only, not model qualification.
-- **Next step:** No further #10965 coverage-gate delivery remains. This is a software enforcement record, not evidence that engine coverage constitutes model or physical qualification.
-- **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_SOURCE_20261011.md)
-
-### DL-#11034 · Reconciled Scopes From Duplicate Source Rows
-
-- **State:** shipped
-- **Owner:** local (PR #11069; branch `fix/force-plate-test-module-identity-11034`) | claude (PR #11042; branch `claude/ud-11034-force-plate-flake`)
-- **Issue:** #11034
-- **PR:** #11069, #11042
-- **Branch:** `fix/force-plate-test-module-identity-11034`; `claude/ud-11034-force-plate-flake`
-- **Paths:** `src/launchers/sidekick_extension_overlay.py`, `tests/unit/launcher/test_sidekick_extension_overlay.py`, `tests/unit/sidekick/lab/bio/test_force_plate_stitching.py`; `tests/unit/sidekick/lab/bio/test_force_plate_stitching.py`
-- **Started:** 2026-09-27
-- **Shipped:** 2026-09-28
-- **Summary:** Merged #11069 fixes canonical test imports and uninstall parent-package cleanup; #11042 preserves diagnostic context for the prior contamination symptom. These are distinct software scopes; no native qualification is claimed.
-- **Next step:** The canonical-import and uninstall-detachment software correction is shipped. This record makes no native or physical qualification claim.
-- **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_SOURCE_20261011.md)
-
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
 - **Started:** not recorded in source
@@ -85,34 +70,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
 - **Next step:** FTO core complete and shipped. Follow-up #11313 is tracked in DL-#11313.
-
-### DL-#11596 · Commit Recovered Crocoddyl G1 Warm-Start IK and 0.60 s FDDP Stage Inputs Beside the Rk45, Rtol6 and B100 Receipts, Plus the W030r Chain-Root Candidate, With Sha256 Provenance
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11596
-- **Branch:** chore/crocoddyl-warm-start-evidence-11596
-- **PR:** #11598 (merged 2026-10-07; SHA d4a763d822464b53515bcbc6c798af37af164330)
-- **Paths:** see #11598
-- **Started:** 2026-10-07
-- **Shipped:** 2026-10-07
-- **Last verified:** 2026-10-11 (e68baeabde8ff639f846a167ca7703ace43bd0a9; six saved input hashes/source paths and tracked W030r candidate/receipt identity inspected, no test or solver rerun)
-- **Summary:** The six recovered warm-start/stage inputs are tracked beside their receipts with SHA-256 provenance. The tracked W030r chain-root candidate SHA-256 90b80cf50f8b86bf72bc8a5a85610227820a355bb32d7b7df26ab19af5568599 matches both its receipt and recovered_inputs.json source-run identity. All recorded G1 results remain rejected; input recovery does not change that disposition.
-- **Next step:** No further #11596 input-recovery delivery remains. Any new Crocoddyl G1 run is a separate, explicitly reviewed experiment; existing rejected receipts remain unchanged.
-
-### DL-#11553 · Fix ZTCF/Drift Sign in Engine Contract Docs and Unify ZVCF on Simulation_Backends.Ztcf_Zvcf (Counterfactual Delegates)
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #11553
-- **Branch:** fix/11553-zvcf-sign-and-definition
-- **PR:** #11638 (merged 2026-10-07; SHA 7300b4c4a91c9de5883dbd1e89950eaa1fb4116d), #11687 (merged 2026-10-07; SHA 71cc60b28b30cfda52391ff5610feb493dffa707)
-- **Paths:** see #11638
-- **Started:** 2026-10-07
-- **Shipped:** 2026-10-07
-- **Last verified:** 2026-10-11 (e68baeabde8ff639f846a167ca7703ace43bd0a9; source inspection only, no tests rerun)
-- **Summary:** The ZTCF/drift sign and canonical ZVCF contract were corrected, with protocol aliases and compatibility coverage delivered by the two merged PRs. Software/API delivery only; dynamics and physical qualification remain separate and unqualified.
-- **Next step:** No further #11553 software/API delivery remains. Any dynamics or physical qualification requires its own evidence and is not established by these PRs.
 
 ### DL-#11614 · Same-Input Parity LaTeX Research Reference (P-1 Pointwise Result)
 
@@ -321,54 +278,67 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 ### DL-#11235 · Necromatcher Native Fit
 
+- **Local Research Golf Checkpoint — #11493:** API, native and React now provide explicit Connect → Prepare Research → Arm → Submit → Recall through the actual local session. The authenticated bridge retains exact saved impact vectors and a declared proper Aim rotation; MODEL_CONTACT and contact/numerical/scientific qualification remain unverified. React passed 106 cases; one actual temporary-Library MuJoCo/clean-worker/Rust API and native case passed in 23.07 s with seven exact retained samples; configured mypy passed on seven owners. The final root cohort passed 209 cases with 12 warnings and no skips in 58.64 s; the actual native case is one additional pass. All 13 modified Python owners pass pinned Ruff check/format. The capability atlas was refreshed without claiming overall gap closure. Core V1 is superseded only by the root delivery_status unknown-ID KeyError→None contract fix. The three-page local report and procedure document the new local flight, saved assumptions and explicit lifecycle. No fit improvement, avatar/course capability, GL accuracy, ControlTower delivery or new remote CI claim is established. Tiger remains [0,191), Hogan [0,750); the full goal remains ACTIVE. [Procedure](necromatcher-local-research-golf.md); [Three-Page Report Source](necromatcher-local-research-golf-methods.tex).
+
+- **Authored Replay Impact Checkpoint:** SELF progresses #11464 with authenticated explicit head/face/sample extraction and full-vector declared-flight handoff. Earlier root 83 integrated app/impact cases pass. Portable full-state receipt export/recall now binds exact canonical trajectory bytes without changing the viewer wire; six integration cases pass, including tamper rejection. The supplemental five-page LaTeX methods report is compiled and visually reviewed on the local Desktop. [Procedure](necromatcher-replay-impact.md). Normal app impact execution remains open; authored seconds are not calibrated historical time and no historical replay or qualification is claimed.
+
+- **App Boundary Checkpoint:** SELF progresses #11450/#11414 with explicit strict lossless seeds and exact ordered saved-frame review in native/React hosts. Root 45 Python/45 UI cases pass; edited domains survive mode changes, excluded/sparse indices are covered, original source-only browsing remains available. [Procedure](necromatcher-app-restriction-and-frame-review.md). Historical results and Methods V8 remain unchanged; no physical qualification or CI-green claim.
+
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11235; parent #11232
-- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Issue:** #11235; parent #11232; explicit coordinate seeds #11281; probe/generalization trials #11284; qualification child #11357
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
+- **Arm Morphology Documentation Checkpoint:** Four unoptimized arm ±5% admissions and twelve selected overlays are independently provenance-verified; exact twelve-page AN1 report retained. Source 14,800 preserved, library 383→391; grip gaps worsen to 18.6–22.1 mm and anatomy remains unadopted. [Procedure](necromatcher-arm-morphology-admission.md). Documentation SELF; no behavior, evidence-role or release-qualification change.
+- **Scoped Camera Checkpoint:** At published producer 55d17, native session 74740 and independent session 92074 closed with exit 0; full 14,805-source-file and 391-library-file maps preserved. Tiger [0,191) body RMS 24.0827→24.7803 px worsens; Hogan 10.1364→10.0910 px has mixed shaft outcomes. Keep saved cameras; 17 root checker tests and all six compiled report pages reviewed. [Procedure](necromatcher-conditional-camera-and-scope.md). #11414 durable scope integration is implemented; root 294 Python/39 UI cases, Ruff, pinned mypy, TypeScript and ESLint pass. HTTP receipt registration runs off the event loop; 13 focused root follow-up cases pass. Restricted trial at 669508 saved an authored seed; strict fitting exceeded unchanged 300-second wall cap, exit 1, no final fit. Original assets/index records preserved; ten allowed files added. Solver evaluations/elapsed unknown. Independent partial-stage verification is accepted (V4 partial checker, actual root release V2). Setup profile V1 failed on an ambiguous ndarray adapter/receipt JSON and is preserved; V2 measured five public stages successfully, with independent serialized acceptance. At published `0143b39f571cbe67c57091fb2ae19e7d7eadae3b`, both independent audits preserved complete 14,826-source-file/401-library-file maps. The same 191-frame confidence-weighted dense body RMS is 35.102046 px for the seed versus 24.082673 px for its parent; retain the parent. Actual selected seed stills 0/150/190 show opacity 0.35 proxy shapes, skeleton and an explicit unoptimized authored research seed caption. Independent serialized source/image verification is accepted; unweighted display-marker RMS is approximately 6.45/44.14/18.27 px, separate from weighted body metrics. Native projection and complete overlay-union pixel parity were not independently recomputed. No timeout cause, qualified match, new full video or ControlTower delivery is established. Tiger matching remains [0,191), exact physical release is unmeasured, and Hogan is unchanged. Methods V7 is the latest compiled supplement: root reviewed all eighteen pages in contact sheets and new pages 17 and 18 full-size; V2/V3/V4/V5/V6 remain preserved. The root V7 acceptance SHA256 is 51a8da1aaa9b590100354d8db1956431450b955d87ba57894b97da0df673c810. The two new pages describe the reusable restriction workflow and synthetic native end-to-end evidence at 5197. Its three pinned external Desktop PNGs remain earlier V21 authored-seed figures and local repeatability dependencies, not a portable standalone bundle or newly rendered restricted fit. No scientific qualification or new ControlTower transfer. Performance child #11445 now implements public authenticated_read: one canonical full PNG/BGR/clock validation per capture per operation, fresh complete file hashes and metadata checks on reuse/close, cross-library/thread/task and nested-context rejection, immutable DTOs and failure reset. Final root validation passed 93 cases across two lanes (86 plus seven public-owner/fingerprint cases; one Windows symlink-privilege skip and inherited import warnings). Canonical public SHA256 validation is reused, and execution fingerprints cover shadow_tracker; this API checkpoint is separate from the accepted artifacts at 0143. This integration checkpoint implements short authentication boundaries for queue admission, worker setup and fresh output checks, candidate/delayed publication and storage. Contexts close before scheduling, computation, delivery or persistence; delayed publication closes before add_fit, which uses its own fresh validation context. Root passed 188 distinct cases (185 SDK-free plus three native temporary-fixture cases; one Windows symlink-privilege skip, three native cases deselected in the SDK-free lane and nine inherited warnings). Published integration f2dfe completed read-only Profile V3: five stages took 0.672506/1.464802/9.053819/1.511551/0.460402 s; only seed binding decoded 210 PNGs, once in one canonical full authentication. Source 14,835/Library 401, project/runtime/config were preserved; assessment is byte-identical to V2. Root acceptance SHA256 b8469dc86d8aa72e1be2499786a107c847dd2e11d32f20567aa1effb1947a8e4 records this invocation; differing instrumentation/context/hardware prevents an isolated speedup or timeout-cause claim. No strict retry or new ControlTower delivery is authorized; accepted 0143 artifacts are unchanged. Pure restriction #11450 has a frozen V2 core (SHA256 b3504e6c64c7f97116a108b97a06d6ecba8732f3d38dd004751789e0bc93ce58) with 23 plus 53 agent cases. Root accepted 91 distinct cases (23 core plus 68 disjoint compatibility/bounds/initialization cases; synthetic MuJoCo-first fixtures only, nine inherited warnings and 38 unmarked cases reported only). Root acceptance SHA256 c0c2c44509650d37dc9516aa4185a54b828a49767bcca4ab8d8b2af64786b2ff records Ruff/format, pinned mypy and governance checks; manual release remains inventory-blocked. Pure q/v/a roundoff and Bernstein encoding evidence 17ddcd74c27276a376174c202500baa10e389d09b97ca27c3c42e9d1e4b778b5 is not native feasibility, pixel agreement, seed adoption or queue integration. Subsequently, native session 50689 closed exit0 at published 81aa448794a0ce763cdc2dd6e503d3f9b42200e9; root serialized closure accepted ce833a420c5e208b82bc430fe4be4c4c16830aee54d9c8c357bdb1af9e775e9c. Full source 14,837/Library 401/project/runtime/config/helpers matched the fresh baseline. Restricted-parent body RMS exactly equals saved parent (dense 24.082673308003265, remaining 24.337344114034266, training 21.776977995696026 px); 381-point q/v/a roundoff and typed receipt equality hold. The full 176 x 12 dimensionless scaled constraint matrix has maximum 17.023155533359613 at ground:heel_l, source 18.501816666666667; continuous contact is uncertified and nodes differ from V21, so no V21 656 comparison applies. Retained frame 0 raw shaft RMS 66.69082241158017 px/angle 28.301292322830996deg remains mismatched. No optimizer/convergence/physical qualification, telemetry null; no adopted seed, new fit, overlay rendering/pixel-parity evaluation or ControlTower delivery. Subsequent backend software checkpoint: root accepted paired restrict_initialization/restricted_spline operations with canonical SDK-free restriction receipts, preserved prior/bounds, parent agreement within 1e-12, scope/hash admission and worker/storage/recall/delayed-publication checks. Legacy semantics and public counts (eight option fields, seven start_native_refit arguments, eight builder arguments) are unchanged. Root passed 87 distinct SDK-free cases with nine inherited warnings; pinned mypy on all five owners and Ruff/format passed. Root acceptance SHA256 dc43749d0e69c6c43051712c5d37b819fbbe950edd3cf5dfb12f426a61b80bed authenticates the software freezes. Backend software was published at 5197f8639818321b7cf8f86d4748a25ce79aa278 with all normal hooks passing. Synthetic native end-to-end session 4534 then closed exit 0: the public queue, clean worker, storage and recall preserved the nonuniform restricted curve on [1,6), with four training/five dense frames, 43 locked coordinates and five rejected queue/storage counterexamples. Root closure SHA256 a26073a9c7bef6c8d5f2dd12b249c8e5f848be49c9fb0ba63d0a5c98f011d9bc authenticates the independently closed SDK-free audit (session 97412): fresh 14,844-source-file/401-historical-file/runtime maps are unchanged. Independent pure q/v/a errors are 3.47e-18/2.78e-17/1.78e-15; saved native pixel metrics agree with the actual run, but were not independently reprojected by the serialized audit. Optimizer counts remain null; no optimization, historical seed registration, new overlay or ControlTower delivery occurred. This synthetic software acceptance does not alter the earlier Methods V6 historical native-evaluation checkpoint or establish physical qualification. Subsequent caption software adds UNOPTIMIZED RESTRICTED RESEARCH SEED through the shared still/video composer and authenticated manifest, with eight strict DTO fields and mutually exclusive authored/restricted flags. Root passed 80 distinct cases in MuJoCo-first temporary fixtures: canonical exports and tampered lineage, manifest claims and exact legacy/authored pixels; configured pinned mypy, Ruff and format pass. Caption root acceptance SHA256 12a5e9e99d0b5d3827fcddc229324bf9e5525e448ae430acb4a3e0881a1f73d0 records this later software checkpoint, separate from the Methods V7 appendix at 5197. No new historical seed or overlay is claimed. Next: publish through normal hooks, then separately reviewed historical admission and the unchanged strict restart. The full goal remains active. Subsequent V22 checkpoint: Tiger remains within reviewed source frames 0-190. The accepted lossless seed has a local 191-frame shape/skeleton video; the ordinary strict fit modestly reduces same-domain weighted dense RMS from 24.08 to 23.57 px but remains nonconverged and REJECTED. Independent acceptance SHA256 8bb98838915c914c4dab8b9c9b9fff871ec7b02294a8cfd155d57657852aa72d records preserved source and original non-index Library bytes. Methods V8 is the earlier 21-page seed/stills report, not this later fit/video checkpoint. Three optimized research stills are accepted locally (proof 0d244648c2f76bb2c4be9f232d81215a58c5a1779963f50bcb575f76ff402d13); ControlTower delivery remains pending. Hogan is unchanged; physical/anatomical/contact qualification is false and the goal remains active. Detailed evidence is retained in the camera-and-scope procedure.
 - **Branch:** `feat/necromatcher-native-fit-11235`
-- **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
+- **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`, `src/shared/python/motion_matching/historical_fit/shaft_*`, `src/shared/python/workspace/necromatcher_shaft_evidence.py`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 108 focused cases passed; subsequent native test refactor passed 34 cases; independent v7 audit checked 419 Tiger and 1499 Hogan poses. These receipts precede the b50e8fd91e branch merge.
-- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Both v7 candidates remain rejected: joint-limit violations and grip/contact errors require hard feasibility constraints. [Turnover](necromatcher-turnover.md).
-- **Next step:** Implement canonical whole-Hermite coordinate bounds with red-first overshoot tests.
+- **Last verified:** 2026-10-03 — Actual producer `3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5` completed all four matched shaft control/variant jobs. Fresh assessment `b1f3898d3d9e2cac5c460ceb33fd2e6c5b85371158b4eb2a823e4f027ede002e` verifies identical starts/body/geometry recipes and all five fixed finite targets; every fit remains budget-exhausted/nonconverged/rejected. Raw training improves, Tiger holdout worsens and Hogan holdout is essentially unchanged. Actual V2 admission and display-only exports preserve source/clock/roles without changing objectives; see the shaft trial procedure. Earlier verification retained: 2026-10-02 — producer6654881b0788c77620a0afb8a9a6763f3ee1ccb9 completed two V15 exact-six-knot normalized-coverage continuations under #11284. Independent native audits verify identical start/evidence/prior,32 finite authored ranges with12 unbounded coordinates,210 source frames,209 midpoints,88 scalar extrema and10 phase probes. Control78nodes/dense25.048392px/grip1.905599mm/angle0.703158degrees/ground3.437775mm fails ground; variant178nodes/dense25.160335px/grip1.955344mm/angle0.715385degrees/ground1.852699mm passes all five fixed finite research targets. Geometry weights4000→1752.808989 preserve potential family rowmass, not physical-time quadrature or continuous nonlinear qualification. Both exhaust30evaluations, remain nonconverged/rejected and have unknown physical time. Exact assessment and repeatability inputs are preserved in turnover; preceding V12–V14 evidence remains unchanged. Actual V15 overlay and selected-still review are published, with rejected qualification retained; final expanded source regression passed 476 cases.
+- **Slice A verification:** Source-bound club evidence Slice A (#11318) is committed at `605c695259b13cb98a6d6e379e7f7fee51f27443`: immutable reviewed shaft-axis segment/source-frame DTOs, distinct original decoded-pixel and PNG-byte hashes, exact source clock/capture binding, explicit abstention and authored-uncalibrated weighting, plus an exact-definition-bound infinite authored axis resolved from declared coaxial shaft/grip solid centers. Public receipt counts/digests and strict real-coordinate guards reject malformed records. Initial tests were red; the final focused suite passed 57 cases, with Ruff/format, pinned mypy and budget checks. Actual source-bound admission subsequently preserved two Tiger fragments, one faint Hogan fragment and a blurred-frame abstention; receipt `bb36ef2233e39c829b341046d2555fcbc245769dccbaa9489933f09ddb5fadd7`. Root independently inspected all four plots; separate review `67f8ace21806ea5c62e0f1da5635c3e3e19baf614e9989c9fa935ee48201d7ac`. The first TEMP driver failed before output creation because Ruff removed imports used only through locals; preserved v1 and traceback remain distinct from v2, whose explicit registry repair passed 10 protocol tests before successful execution. No optimization, library mutation or physical endpoint/shaft-length qualification occurred.
+- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds use a canonical Bernstein-admissible domain with explicit logged authored initialization and immutable native definition/range identities; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
+- **Slice B verification:** Committed8989 generic additional-image residuals preserve ImageFitInputs and independent body/geometry timelines. Separate sparse infinite-axis residuals and raw perpendicular RMS/unoriented angles passed112 combined and33 independent cases. No historical shaft fit occurred at that checkpoint.
+- **Slice C verification:** Committed8989 canonical capture/camera/PNG/full-clock/native-axis rebind returns one reusable native binding. Tests passed96 combined and28 independent cases; compilation-count compatibility is retained.
+- **Slice D verification:** Current reviewed queue/worker/persistence source passed102 combined and19 independent cases; strict receipt parsing rejects bool/float counts before native/source I/O. Native evidence controls passed32 offscreen tests independently; web30 plus type checking/ESLint passed. Stable original-video/job/API integration passed41; renderer20/80 combined and20 independent passed. Ruff/format and pinned mypy passed. [Shaft Trial Procedures](necromatcher-shaft-trials.md) records exact freezes and the independently observed unchanged five-second test deadline overrun, followed by successful focused rerun; no speculative cause is asserted.
+- **Next step:** Integrate the source-bound continuation in a separate follow-up PR; retain all historical receipts and failed shaft generalization. Head observations/errors and physical endpoints remain unmeasured; camera/anatomy/physical timing, continuous dynamics and impact acceptance remain open. Use the corrected preparation-only R,t geometry protocol before forearm/camera/morphology trials; no new native diagnostic has run. See necromatcher-camera-morphology-shutter-review.md.
+
+### DL-#11317 · Sanitized Historical Research Provider
+
+- **State:** in_progress
+- **Owner:** codex
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); Affine #4834 merged externally at 2026-10-03T02:38:02Z; actual consumer receipt remains 8fdebad
+- **Issue:** #11317; consumer AffineDrift #4828; parent #11232 / #11235
+- **Branch:** feat/necromatcher-native-fit-11235
+- **Paths:** src/shared/python/workspace/historical_research.py, docs/api/contracts/historical-player-research-v1.schema.json, tests/unit/workspace/test_historical_research_provider.py, docs/development/necromatcher-research-package.md
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-02 — Latest Tiger V15/Hogan V12 sanitized cohort exported from committed/pushed/remote-verified provider `605c695259b13cb98a6d6e379e7f7fee51f27443`; manifest `d68830b14e2704466d4dd1795342dffd96f6f4d9b238b1fccd7f27117a9c10ed` (6,852 bytes), export receipt `65c4e775a501c0719e06a40aefd6b8be73a59a031298b96cf1e8a453a605debd`. Committed Affine consumer `8fdebad14db0f62b719942fa5d64f14878b54fd5` passed no-write inspect, exclusive draft installation, exact/idempotent recall, deterministic QMD and standalone Quarto --no-execute; admission receipt `184907af70181af6bd7e94cd5526139fdec828e57fe540c69f87c5c7a80b7d2b`, wrapper `d94e28062f090f00b45e09bb550d99903926129c9b29d70b7d702ec46057aba6`. All source/input/helper/config/registry brackets remained unchanged. Root separately browser-reviewed three natural 1234-by-712 views; browser receipt `046cb332516253fe0592be36a20ceb148cc7496ec1e299a7dbd1041d9e0f10d6` records bounded review with full-page/manual acceptance false. V15 adapter plus selection regressions:64 passed, scoped Ruff/format/pinned mypy passed; unchanged final consumer suite:6,685 passed/26 skipped/187 existing-marker deselected. The earlier V14/V12 bundle and its exact receipts remain preserved in procedure/turnover. Both cohorts remain rejected with unknown timing and no original-media import, optimizer run, public deployment or scientific promotion.
+- **Summary:** Reuse canonical immutable library recall to cross-check external independent assessments, exact numerical producer and source/model/capture/fit hashes; rehash original downloaded footage without copying media. Export deterministic generic-player JSON under a separate rejected local research contract, preserving unknown physical timing and unauthorized distribution. No estimator, scheduler or qualified publication pathway is duplicated.
+- **Next step:** Preserve the new committed local research handoff and 18 checked repeatability-input copies without altering historical cohorts. Advance source-bound club evidence under #11318 and qualify camera/anatomy/physical timing and continuous behavior before scientific/public release; finite target passes and local browser review grant no qualification or publication authority.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 
 - **State:** in_review
 - **Owner:** codex
-- **Issue:** #11246; parent #11232
-- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Issue:** #11246; parent #11232; native stored-run recall #11282; translucent model-surface child #11356
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — all 210 Tiger and 750 Hogan v7 output frames decoded with matching hashes; prior live web v6 jobs and downloaded packages verified.
+- **Last verified:** 2026-10-03 — Producer `3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5` exported all four original-footage shaft displays; independent receipt `f60d277ce81e7d1d3dc2ddace626a1bacd9bd3a83708375ffefe1e7dcdd39dd0` verifies 1,920 source-sized frames, original PNG/PTS bindings, projections/metrics, immutable source/library brackets and twelve selected overlays/six originals. V1/V2 union is display-only; all-frame visual and manual acceptance remain false. Exact manifest PTS are distinct from Tiger encoder rounding (maximum 6.9736403 microseconds relative drift); Hogan 30/1 is exact. Earlier verification retained: 2026-10-02 — V15 selected Tiger variant export run `97b1b96fea0c4a2da403004a4985f390` at producer `6654881b0788c77620a0afb8a9a6763f3ee1ccb9` verifies all 210 original 1280x720 frames, original PNG/PTS bindings, ZIP CRC/member hashes and immutable source/runtime/audit brackets. Actual stills 0/105/209 were separately viewed; club-seed disagreement, follow-through upper-body residuals and cropped feet remain. Combined still-review SHA-256 `ca46a15129d238c06391f6ee1b05c0cfa6bc14cd6be95075d738841798d4b369`; the execution journal retains visual_review_completed=false. All-frame visual and manual acceptance remain false. Earlier V13/V12/native stored-run review receipts remain preserved; canonical sharing-race repair and final expanded source regression passed 476 cases.
 - **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
-- **Next step:** Revalidate export-job recall and download guards against the merged branch.
+- **Next step:** Retain guarded recall and distinct machine/selected-image/scientific outcomes. Infinite authored axes and interior fragments do not establish measured head/physical shaft endpoints or validated historical club motion. Complete independent surface-renderer review and clean published producer before actual translucent exports; disabled rendering preserves legacy behavior and displayed surfaces remain model proxies.
 
 ### DL-#11247 · Necromatcher Reproducible Methods Report
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11247; parent #11232
-- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Issue:** #11247; parent #11232; source audit #11357
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `docs/development/necromatcher-methods.tex`, `docs/development/historical_capture/*summary.json`, `docs/development/necromatcher-turnover.md`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 19-page PDF compiled with existing MiKTeX installer disabled; all pages visually reviewed and 60 Desktop artifact hashes verified.
+- **Last verified:** 2026-10-03 at `b8b280ce2f5ed706d1778fd809250cf18eac1fb7` — Published 74-page actual matched-shaft report: PDF `36319afeb6ec6132f7684387d04c1b8cde8d2854a38cf718354325334e4fdffd`, source `41c61a755f72a3b8928c5938f545e0a8a32aa19e4f84437ffc5ac07c92d7b6e9`, independent review `8b4fb44f2b0cd552c7a443f5e90ada9d95f624ff3711d4514f3f70e6708db6ee`, root review `6fe30a6978fcc61fbb3192df6641b3da93515155e21bec6cc3852ef832854c5c`. Three installer-disabled passes completed without actual warnings/overfull/unresolved references; all page layouts reviewed. Desktop manifest 1,504 artifacts `49868b903a729a147d188b03a0fc5ecf3f68e4973345f08b0191d79de2b85228`; exact prior 66 publication and1,260 index/README preserved under Report/handoff-shaft-66-page-publication. Earlier verification retained: 2026-10-02 — Expanded 66-page latest-handoff/sparse-shaft report compiled in three installer-disabled MiKTeX passes and was independently reviewed on all pages, with full-size contents/new chapter/figures/source-map checks. No overfull boxes or unresolved references; 17 contained table-wrapping warnings were visually reviewed. Published PDF SHA-256 `f31f1fbd6c0917254b358bae3852e42de8e5d898b1f60d47b3b08c63427f3228`; exact source `1702e35d4a04b95d0c5de13b04db34325cfef7b8e2ad47f50ea47da45354991c`; independent review `0c7a85f91018a01d117e0d7b0e41dbec61087f6c52019b780ade7bbca4e27481`; separate root review `9de379e2b3a32089bff17fd1086eec9430f0f953240717bfa6093bf02e57446d`. Refreshed Desktop index verifies 1,216 retained artifacts, SHA-256 `bd89c17e27de7b7849986f6e00d36debcd0e3c988ab8530b687a0f92ff1a6e9d`. Exact prior 60-page publication, 49-page edition and historical snapshots remain preserved. No scientific acceptance or physical motion claim; built-in compiler infrastructure criterion remains open.
 - **Summary:** Polished methods report records equations, provenance, assumptions, actual interim failures and reproducibility procedures. Built-in compiler infrastructure remains unavailable, so that issue criterion remains open. [Turnover](necromatcher-turnover.md).
-- **Next step:** Reconcile the built-in compilation criterion with the verified fallback receipt.
-
-### DL-#11234 — Necromatcher Historical Player Workspace
-
-- **Started:** not recorded in source
-- **State:** shipped
-- **Owner:** codex
-- **Issue:** #11234; parent #11232
-- **PR:** [#11239](https://github.com/D-sorganization/UpstreamDrift/pull/11239)
-- **Branch:** `feat/necromatcher-workspace-11234`
-- **Paths:** `src/tools/necromatcher`, `ui/src/pages/Necromatcher.tsx`, `src/shared/python/workspace/necromatcher_review.py`, launcher registries
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Shared persistent library, historical tiles, source-frame review, native/web version imports and portable exports. Reconciled launcher manifest and capability migration inventories. Further form tests, final parity acceptance and qualified fitting remain active. [Turnover](necromatcher-turnover.md).
+- **Next step:** Preserve publication and evidence snapshots; document subsequent work only after independent execution. Built-in compiler infrastructure and scientific/manual release criteria remain open. Nine-page source-audit supplement compiled and all pages reviewed; 77 source-audit files are verified on ControlTower separately from the unchanged 74-page/1,504-artifact publication.
 
 ### DL-#11230 — Historical Player Capture
 
@@ -422,19 +392,6 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Drake receipts now fail closed on missing runtime/evidence; fabricated marker metrics and placeholder hashes were removed, and Drake entered the nightly lane. Native qualification remains blocked without pydrake.
 - **Next step:** Merge drivers follow; native qualification remains blocked on engine availability (recorded in receipts, not silently).
 
-### DL-#11083 — Motion Matching Board Review
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** owner-requested documentation review; tracked by PR #11083
-- **PR:** #11083
-- **Branch:** `docs/motion-matching-board-review`
-- **Paths:** `docs/development/2026-09-28-motion-matching-board-review.md`
-- **Started:** 2026-09-28
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Evidence-backed engine/model review, recent GS3DX improvements, 18 issue proposals, anatomical Home-budget options and historical-video readiness; no implementation/qualification claim.
-- **Next step:** Board disposition and overlap reconciliation before creating implementation children.
-
 ### DL-#11080 · Product Review for the Expert Panel
 
 - **State:** in_review
@@ -447,214 +404,6 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Last verified:** 2026-09-28 at 599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309 — 108 focused tests and safe counterexample probes; Ruff lint/format and documentation hooks passed.
 - **Summary:** Twelve prioritized proposals across UI/UX, error handling, performance, scientific validity and shared Tools wiring, with bounded evidence, acceptance criteria and current backlog reconciliation. Product code and qualification status are unchanged.
 - **Next step:** Review R01–R12 using the report's RunnerDashboard panel brief.
-
-### DL-#11058 — MJX Knot Optimiser Head-to-Head Benchmark and Promotion Decision
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #11058
-- **PR:** #11072
-- **Branch:** `claude/ud-11058-benchmark`
-- **Paths:** `src/shared/python/motion_matching/solver_benchmark.py`, `scripts/benchmark_mjx_knot_solvers.py`, `src/shared/python/motion_matching/knot_gradient_optimiser.py`, `src/engines/physics_engines/mujoco/python/motion_matching/mjx_knot_optimiser.py`, `src/shared/python/motion_matching/pipeline/`, `docs/development/full_body_models/evidence/mjx_benchmark/`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Head-to-head of shooting fit, MJX Adam and MJX L-BFGS-B, each scored through the shared simulator, with promotion gated on accuracy parity, convergence and ground contact. Decision: keep `none` as the default. No MJX run converged in 10 iterations, and Adam loses iron downswing contact. L-BFGS is the most accurate opt-in (47.2 / 52.9 mm).
-- **Next step:** none; merged as PR #11072 (follow-up DL-#11071).
-
-### DL-#11059 — Shooting Fit No Longer Crashes on an Unimported `fs`
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #11059
-- **PR:** #11060
-- **Branch:** `claude/ud-11059-shooting-fs`
-- **Paths:** `src/shared/python/motion_matching/pipeline/dynamics.py`, `tests/unit/motion_matching/pipeline/test_dynamics.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** `shooting_fit` used `fs` at run time without importing it, so every `--shooting-fit` run crashed; it now imports it like its sibling functions.
-- **Next step:** None — merged as PR #11060.
-
-### DL-#11051 — Opt-In MJX Knot Trajectory Optimiser Stage in the Matching Pipeline
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11051
-- **PR:** #11057
-- **Branch:** `claude/ud-11051-mjx-pipeline`
-- **Paths:** `src/shared/python/motion_matching/pipeline/trajectory_optimiser.py`, `src/shared/python/motion_matching/pipeline/cli.py`, `src/shared/python/motion_matching/pipeline/constants.py`, `src/engines/physics_engines/mujoco/python/motion_matching/mjx_knot_optimiser.py`, `tests/unit/motion_matching/test_trajectory_optimiser_selection.py`, `tests/unit/motion_matching/test_mjx_optimisation.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** The matching pipeline can select the MJX knot optimiser as an opt-in trajectory stage; the default `none` leaves the pipeline output unchanged, and a missing JAX/MJX install is a named error.
-- **Next step:** None — merged as PR #11057.
-
-### DL-#11055 · Every `mj_fullM` Call Routed Through One MuJoCo 3.13-Safe Helper
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11055
-- **PR:** #11056
-- **Branch:** `claude/ud-11055-fullm-helper`
-- **Paths:** `src/shared/python/engine_core/mujoco_compat.py`, `tests/unit/engine_core/test_mujoco_compat.py`, every `src` module that called `mj_fullM` with `data.qM`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** MuJoCo 3.13 (inside the declared range) removed `MjData.qM`; one helper selects the right `mj_fullM` signature and replaces every single-path and hand-written dual-path call.
-- **Next step:** None — merged as PR #11056.
-
-### DL-#11049 · MJX Knot Optimiser Core Moved From the Evidence CLI Into `src`
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11049 (epic #11006 package P3)
-- **PR:** #11054
-- **Branch:** `claude/ud-11049-mjx-optimiser`
-- **Paths:** `src/engines/physics_engines/mujoco/python/motion_matching/mjx_knot_optimiser.py`, `docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py`, `tests/unit/engines/mujoco/test_mjx_knot_optimiser.py`, `tests/unit/engines/mujoco/mjx_toy_package.py`, `tests/unit/engines/mujoco/test_mjx_evidence_cli.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Loader, settings, knot-optimisation and diagnose logic move into a tested `src` module with validated inputs and no file or JAX-config side effects; the evidence script becomes a thin CLI over it.
-- **Next step:** None — merged as PR #11054.
-
-### DL-#11046 · MJX Evidence Prototype Rewired Onto the Tested `src` Plant, Knots and Adam Driver
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11046 (epic #11006 package 2c)
-- **PR:** #11048
-- **Branch:** `claude/ud-11046-mjx-rewire`
-- **Paths:** `docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py`, `tests/unit/engines/mujoco/test_mjx_evidence_cli.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** The evidence prototype drops its private copies of the knot basis, Adam loop, contact law, weld and plant and calls the merged `src` modules; the root vertical coordinate is read by name.
-- **Next step:** None — merged as PR #11048.
-
-### DL-#11052 · PR-Scoped Tests That All Skip Report Not Executed Instead of Failing Coverage
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #11052
-- **PR:** #11053
-- **Branch:** `claude/ud-11052-ci-exit5`
-- **Paths:** `.github/workflows/ci-standard.yml`, `tests/ci/test_ci_infrastructure.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** A PR-scoped pytest run that collects nothing (exit 5) with no changed `src` or dependency file now reports "Core test suite NOT EXECUTED" and exits 0, instead of falling back to a whole-`src` coverage lane whose 75 % floor the dependency-light lane cannot reach.
-- **Next step:** None — merged as PR #11053.
-
-### DL-#11044 · Canonical Calibrated Runs Regenerated on Current Code
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #11044
-- **PR:** #11050
-- **Branch:** `claude/ud-11044-canonical`
-- **Paths:** `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/`, `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/`, `docs/development/full_body_models/evidence/ground_support/bisect_11044_receipt.json`, `docs/development/full_body_models/evidence/ground_support/CANONICAL_RUN.md`, `docs/development/matched_swing_program/README.md`, `scripts/generate_matched_swing_status.py`, `reports/matched_swing_ledger.json`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** The canonical calibrated runs are regenerated on current code (driver 7.9 / 34.1 / 84.5 mm, 7-iron 6.6 / 31.6 / 88.6 mm); the pre-HO-8 receipts are kept as history because widened leg bounds explain their lower IK and both record range-of-motion flags, so G1 is not met.
-- **Next step:** None — merged as PR #11050.
-
-### DL-#11043 · Replays Start on the Dual-Grip Weld
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #11043
-- **PR:** #11047
-- **Branch:** `claude/ud-11043-dls`
-- **Paths:** `src/shared/python/motion_matching/weld_manifold.py`, `src/shared/python/motion_matching/full_body_forward_dynamics.py`, `src/shared/python/motion_matching/pipeline/dynamics.py`, `src/shared/python/motion_matching/execution/downswing.py`, `tests/unit/motion_matching/test_weld_manifold.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Tracked replays start from the reference velocity projected onto the weld (mass-weighted, the weld's inelastic impulse), because the acceleration-level KKT conserves any initial weld violation and the fitted closure's 187 mm/s start opened the grip and drove the controller through a truncated-SVD singularity.
-- **Next step:** None — merged as PR #11047.
-
-### DL-#11039 · MJX Tracking Plant and Differentiable Rollout
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11039 (epic #11006 package 2b)
-- **PR:** #11040
-- **Branch:** `claude/ud-11039-mjx-plant`
-- **Paths:** `src/engines/physics_engines/mujoco/python/motion_matching/mjx_tracking_plant.py`, `tests/unit/engines/mujoco/test_mjx_tracking_plant.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** MJX tracking plant with computed-torque control, JAX contact and grip-weld wrenches, and a differentiable rollout. Measured on the toy model: torque residual 7.1e-15, marker RMS 0.28 mm without contact, rollout gradient 2.2e-9 relative to central differences. Packages with a grip closure must supply weld gains; the caller's model is never mutated.
-- **Next step:** None — merged as PR #11040.
-
-### DL-#11037 · Differentiable JAX Contact Law and Grip Weld With Measured Parity
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11037 (epic #11006 package 2a)
-- **PR:** #11038
-- **Branch:** `claude/ud-11037-jax-contact`
-- **Paths:** `src/shared/python/motion_matching/jax_contact.py`, `tests/unit/motion_matching/test_jax_contact.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** JAX port of the shared Hunt-Crossley plus regularised-Coulomb contact law and the spring-damper grip weld. Parity over 2000 seeded states is 0.0 N normal and 1.0e-11 N friction; normal-force gradients match central differences to 1e-6 relative and stay finite at zero tangential velocity; weld forces are equal and opposite and the net moment equals (p_b − p_a) × F_b exactly.
-- **Next step:** None — merged as PR #11038.
-
-### DL-#11032 · JAX-Free Knot Basis, Horizon Mask and Adam Driver for the MJX Solver
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11032 (epic #11006 package 1)
-- **PR:** #11035
-- **Branch:** `claude/ud-11032-knot-adam`
-- **Paths:** `src/shared/python/motion_matching/knot_gradient_optimiser.py`, `tests/unit/motion_matching/test_knot_gradient_optimiser.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Knot grid with an integer knot count, vectorised hat basis that is exact at knots and refuses untouched knots, horizon mask, and a bias-corrected Adam loop generic over the array namespace that returns the best iterate by objective and stops on a non-finite cost or gradient. The first iterates match a hand-written Adam recurrence to 1e-12.
-- **Next step:** None — merged as PR #11035.
-
-### DL-#11029 · White-Jerk RTS Kinematic Smoother With Posterior Uncertainty
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11029 (epic #11007 package 5)
-- **PR:** #11031
-- **Branch:** `claude/ud-11029-rts-smoother`
-- **Paths:** `src/shared/python/estimation/kinematic_smoother.py`, `src/shared/python/motion_matching/pipeline/reference.py`, `src/shared/python/motion_matching/pipeline/__init__.py`, `tests/unit/estimation/test_kinematic_smoother.py`, `tests/unit/motion_matching/test_smooth_reference_bayesian_11029.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** State [q, q̇, q̈] under a white-jerk prior, discretised exactly; the RTS posterior matches an independently built dense-batch Gaussian posterior to 1e-8, 95% bands cover the truth at the nominal rate with the true noise, sigma widens inside NaN gaps, and the ML fit recovers r within 15% and q_c within a factor of 2 on seeded synthetic data. `smooth_reference` stays bit-for-bit unchanged.
-- **Next step:** None — merged as PR #11031.
-
-### DL-#11024 · Fit the Physics-Structured Surrogate Residual by Sparse Regression
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11024 (epic #11007 package 2, Board RM#1795)
-- **PR:** #11025
-- **Branch:** `claude/ud-11024-sparse-residual`
-- **Paths:** `src/shared/python/neural_motion/surrogates/sparse_residual.py`, `src/shared/python/neural_motion/surrogates/physics_structured.py`, `src/shared/python/neural_motion/surrogates/__init__.py`, `tests/unit/neural_motion/test_sparse_residual.py`, `tests/unit/neural_motion/test_forward_surrogates_nm07.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** STLSQ (Brunton, Proctor & Kutz 2016) over a polynomial plus optional sin/cos library recovers the damped-pendulum and Lorenz supports exactly on synthetic data; the physics-structured surrogate uses a fitted residual or refuses, replacing the invented constant.
-- **Next step:** None — merged as PR #11025.
-
-### DL-#11021 · Parameter Covariance on the Shared Least-Squares Motion-Matching Fits
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11021 (MS-101 #10375, Board RM#1793)
-- **PR:** #11023
-- **Branch:** `claude/ud-11021-fit-covariance`
-- **Paths:** `src/shared/python/estimation/fit_uncertainty.py`, `src/shared/python/motion_matching/prefix_fit.py`, `src/shared/python/motion_matching/multi_shooting_fit.py`, `src/shared/python/motion_matching/residual_regularization.py`, `tests/unit/estimation/test_fit_uncertainty.py`, `tests/unit/motion_matching/test_fit_uncertainty_wiring_11021.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Least-squares uncertainty reports marginal free-parameter covariance; bound parameters are NaN and rank-deficient/nonfinite Jacobians yield no estimate. Equality-constrained shooting leaves uncertainty unset.
-- **Next step:** None — merged as PR #11023.
-
-### DL-#11014 · Consolidate the Swing Phase Detectors Into One Canonical Event Detector
-
-- **State:** shipped
-- **Owner:** claude (agy executor, Gemini 3.8 Flash)
-- **Issue:** #11014
-- **PR:** #11020
-- **Branch:** `claude/ud-11014-swing-events`
-- **Paths:** `src/shared/python/analysis/swing_events.py`, `src/motion_capture/reconstruct/analytics.py`, `src/shared/python/analysis/phase_detection.py`, `src/shared/python/data_io/swing_capture_import.py`, `src/shared/python/motion_matching/loaders/_align.py`, `tests/unit/analysis/test_swing_events.py`, `tests/unit/analysis/test_swing_event_parity_11014.py`
-- **Started:** 2026-09-27
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** One frame-rate-aware swing-event detector now serves analytics, phase detection, import and alignment; ordering invariants and cross-site parity are tested.
-- **Next step:** None — merged as PR #11020; package 2 continues as #11024.
 
 ### DL-#11003 · Restate the #9243 BunkerShot Uncertainty Claims Under the Corrected F0 Model
 
@@ -773,20 +522,6 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Consumer-side PreImpactBundle v1 composing Tools conventions: provenance, bounded timebase, world/head/grip poses, head COM inertia and contact, ball, reduced shaft modal state and prestress field, per-hand wrench/impedance, per-field origin; absent fields raise; power-invariant transforms; energy-reporting modal projection. Engine adapters and installed-wheel fixtures remain.
 - **Next step:** Review the draft PR, then implement the first engine adapter against the bundle under #9703.
 
-### DL-#10960 · Fabricated-Evidence Audit: Fail-Closed Remediation of Literal Receipts and Self-Scored Fits
-
-- **State:** shipped
-- **Owner:** claude (agy executors on DeskComputer and OG Laptop)
-- **Issue:** #10960
-- **PR:** #11017
-- **Branch:** `claude/ud-consolidated2-20260926`
-- **Paths:** `src/shared/python/motion_matching/provider.py`, `src/engines/physics_engines/*/python/motion_matching/provider.py`, `src/shared/python/neural_motion/surrogates/`, `src/shared/python/neural_motion/matrix/`, `src/shared/python/neural_motion/turnover/`, `src/shared/python/neural_motion/benchmark/runner.py`, `src/shared/python/neural_motion/inference/orchestration.py`, `src/shared/python/motion_matching/contact_identification.py`, `src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py`, `docs/plans/neural_motion_matching/evidence/`, `docs/development/full_body_models/evidence/contact_id/receipt.json`, `src/shared/python/motion_matching/parity_report.py`, `src/shared/python/motion_matching/parity_schema.py`, `src/shared/python/motion_matching/cross_engine_replay.py`, `src/shared/python/motion_matching/full_body_forward_dynamics.py`, `src/shared/python/motion_matching/candidate_session.py`, `docs/development/full_body_models/evidence/fb5_matching/`, `docs/development/full_body_models/evidence/fb6_parity/`, `evidence/matched/driver_g1/parity_report.json`, `docs/development/full_body_models/evidence/_gates.py`, `docs/development/full_body_models/evidence/fb3_drake/`, `docs/development/full_body_models/evidence/fb4_calibration/`, `evidence/matched/driver_g1_pinocchio/`, `src/tools/matched_swing_browser/model.py`, `src/engines/physics_engines/opensim/python/tour_matching/document_ik.py`, `docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json`, `src/shared/python/motion_matching/matching_strategy.py`, `src/shared/python/motion_matching/ledger.py`, `reports/matched_swing_ledger.json`, `tests/fixtures/motion_matching_strategy.py`, `src/shared/python/motion_matching/club_only/`, `src/tools/motion_matching/gui.py`, `src/shared/python/motion_matching/acceptance.py`, `src/shared/python/motion_matching/kinematic_smoothing.py`, `src/shared/python/motion_matching/loaders/body_json.py`, `src/engines/physics_engines/drake/python/motion_matching/simulate.py`, `src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py`, `src/shared/python/tour_baselines/calibration.py`, `src/shared/python/pose_interchange/pose_io.py`, `docs/plans/club_only_matching/evidence/club_body_candidates.json`
-- **Started:** 2026-09-25
-- **Shipped:** 2026-09-27
-- **Last verified:** 2026-09-26 — consolidated branch on `71610a4ff`: motion_matching, neural_motion, opensim, tools/motion_matching, config and every changed test file: 3034 passed, 21 failed, all baseline or host-only (16 known motion_matching failures, OpenSim binding absent, Rajagopal asset absent, local 10k corpus present); ledger regenerated and fresh.
-- **Summary:** Fail-closed software fixes span motion matching, neural-motion receipts, parity and rollout evidence, native-lane reporting, and UI seed guards. Missing data remains unmeasured or unverified; no synthetic evidence or model qualification is emitted.
-- **Next step:** The fail-closed receipt correction is shipped. The checked receipts retain empty qualified/promoted sets and unmeasured status; no native or physical qualification is claimed.
-
 ### DL-#9415 · Repository Root Allowlist Check in Docs Governance
 
 - **State:** in_review
@@ -799,19 +534,6 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
 - **Summary:** Committed root entries (`git ls-tree --name-only HEAD`) must match `scripts/config/root_allowlist.json`; unlisted and stale entries both fail, and a failed git call or malformed config fails closed. Closes the last software checkbox of #9415; the history rewrite, Jules workflows and SPEC cap remain owner decisions.
 - **Next step:** CI green, review, merge.
-
-### DL-#10783 · Enforce the Deferred Validation Catalog
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** #10783; full rollout Repository_Management#1687
-- **PR:** #10784
-- **Branch:** `chore/10783-deferred-catalog-guard`
-- **Paths:** `shared_scripts/`, `tests/unit/repo_hygiene/test_deferred_catalog_hook.py`, `.pre-commit-config.yaml`, `docs/development/`, `AGENT_HANDOFF.md`, `README.md`, `SPEC.md`
-- **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 (`df571686df`; five RED then GREEN controls; twenty combined tests; root Ruff/8162-file format, strict new-test typing, size/manual gates and actual commit/pre-push hooks pass; initialized exact existing Tools gitlink after retained setup failures)
-- **Summary:** Install the exact central validator and always-run hook while preserving six published v1 plans, executable software and unavailable empirical acceptance.
-- **Next step:** User-requested committed handoff: architecture correction passes hosted job 107433594917; add the appropriate unit-suite marker to the three new catalog test functions, validate and complete protected #10784/default-branch verification. Three canonical-function exceptions expire 2026-10-23.
 
 ### DL-#8907 · One User Config Root and One QSettings Namespace for the Launcher
 
@@ -1461,606 +1183,18 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
-### DL-#12316 — Fix the PreconditionError Exception-Identity Split at the Shared Contracts Seam
-
-- **State:** shipped
-- **Owner:** fleet-orchestrator (agent: claude)
-- **Issue:** #12316 (retrospective governance created 2026-10-11; the original source recorded no governing issue)
-- **Branch:** `bot/contracts-exception-identity`; PR #11175
-- **Paths:** `src/shared/python/_contracts_exceptions.py`, `tests/unit/motion_matching/test_stability_matrix.py`
-- **Started:** 2026-09-30
-- **Shipped:** 2026-09-30
-- **Last verified:** 2026-10-11 (`0446a2b5`; collated from verified merged PR metadata)
-- **Summary:** `_contracts_exceptions.py` redefined the DbC exceptions in parallel with the public `contracts` module, so `@precondition` violations raised via `contracts` could not be caught as the shard-imported `PreconditionError` — `TestStabilityMatrix::test_get_canonical_test_invalid` stayed red on main. The shard now re-exports the same class objects; both import paths remain usable and referentially identical, asserted in the test.
-- **Next step:** PR #11175 merged 2026-09-30 (0446a2b5e46a1192ff58c84f614975bd0be2b2a4). The original source recorded no governing issue; retrospective governance was added as #12316 on 2026-10-11. This records the exception-identity delivery only.
-- **PR:** #11175
-
-### DL-#9191 · Govern Screenshot Schema, Capture Metadata, and Qualified Assets
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #9191
-- **Branch:** `feat/comp-b3-screenshot-governance-9191`
-- **Paths:** `docs/api/contracts/upstreamdrift-companion-screenshots-v1.schema.json`, `docs/api/contracts/upstreamdrift-companion-v1.schema.json`, `scripts/companion_screenshots.py`, `scripts/companion_catalog.py`, `scripts/config/companion_screenshots.v1.json`, `docs/screenshots/`, `tests/companion/test_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `tests/companion/test_companion_publication.py`, `tests/fixtures/companion/current-v1.0.0.json`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
-- **Started:** 2026-09-29
-- **Last verified:** 2026-10-11 (`27af7ffe`; collated from verified GitHub merge metadata (PR #11140, 2026-09-30))
-- **Shipped:** 2026-09-30
-- **Summary:** COMP-B3 records screenshot provenance/hashes, generates six representative assets, and registers the remaining captures as pending in the companion catalog and publication inventory.
-- **Next step:** Shipped via PR #11140 on 2026-09-30 (merge SHA 27af7ffe41f1fa8e26c367f27f9cdd0fe79da866). Preserved limitation: Only 6 of 74 screenshots exist; documentation completion cannot imply full visual inventory.
-- **PR:** #11140
-
-### DL-#11008 · Make Ball-Flight Parity Fixture Export Opt-In
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #11008
-- **PR:** #11012 (ready; auto-merge armed)
-- **Branch:** `fix/ball-flight-parity-fixture-opt-in`
-- **Paths:** `tests/parity/test_ball_flight_parity.py`
-- **Started:** 2026-09-26
-- **Last verified:** 2026-10-11 (`0aa8bb66`; collated from verified GitHub merge metadata (PR #11012, 2026-09-27))
-- **Shipped:** 2026-09-27
-- **Summary:** The export test writes to `tmp_path` and asserts the vector schema. It rewrites the committed golden only when `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A new test checks read-only that the committed fixture has the schema and the path pinned in `src/config/capability_migration.json`.
-- **Next step:** Shipped via PR #11012 on 2026-09-27 (merge SHA 0aa8bb660d138c9255a4f224902dd6133f21a3c0).
-
-### DL-#11071 — Run the MJX L-BFGS Arm Toward Convergence
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #11071
-- **PR:** #11075
-- **Branch:** `claude/ud-11071-lbfgs-converge`
-- **Paths:** `scripts/benchmark_mjx_knot_solvers.py`, `docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/`
-- **Started:** 2026-09-28
-- **Last verified:** 2026-10-11 (`0206717f`; collated from verified GitHub merge metadata (PR #11075, 2026-09-28))
-- **Shipped:** 2026-09-28
-- **Summary:** Re-runs only `mjx-lbfgs` at 60 iterations against the #11058 incumbents. Replay RMS falls to 40.8 / 42.6 mm (driver / iron) and the iron downswing weight fraction rises to 0.29, but neither capture converges, so `none` stays the default.
-- **Next step:** Shipped via PR #11075 on 2026-09-28 (merge SHA 0206717f70a654744165990fe4b229fcdd4f3dd7). Preserved limitation: Both captures did not converge; the no-MJX default decision is not an accepted physical result.
-
-### DL-#11102 — Publish a Best-Candidate Viewer With Honest Residuals
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #11102
-- **Branch:** `feat/mmr-16-best-candidate-viewer-11102`
-- **Paths:** `src/tools/tour_matching_viewer/core.py`, `src/tools/tour_matching_viewer/gui.py`, `src/tools/matched_swing_browser/model.py`, `src/tools/matched_swing_browser/gui.py`, `tests/unit/tools/test_tour_matching_viewer_residuals.py`, `tests/unit/tools/test_matched_swing_browser_best_candidate.py`, `tests/unit/tools/test_tour_matching_viewer_combo.py`
-- **Started:** 2026-09-29
-- **Last verified:** 2026-10-11 (`9c23f1a2`; collated from verified GitHub merge metadata (PR #11200, 2026-10-01))
-- **Shipped:** 2026-10-01
-- **Summary:** Best-candidate viewer preserves observations and rejected verdicts while adding comparable RMS ranking, residual navigation, metadata-bearing exports and missing-engine recovery. Viewer output does not qualify candidates.
-- **Remaining scope on #11102:** web/API surface parity, accessibility/native visual review and the remaining acceptance checkboxes; desktop PyQt fixes above do not close them.
-- **Next step:** Shipped via PR #11200 on 2026-10-01 (merge SHA 9c23f1a2efcbc722de1bd86299b8351c5e96c41e).
-- **PR:** #11200
-
-### DL-#11097 — Repair Reduced-Model and Club-Only Product Claims (MMR-11)
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #11097
-- **Branch:** `feat/mmr-11-reduced-model-claims-11097`
-- **Paths:** `src/shared/python/tour_baselines/coverage.py`, `src/shared/python/tour_baselines/baseline_package.py`, `src/shared/python/tour_baselines/qualification.py`, `src/shared/python/motion_matching/provider.py`, `src/engines/physics_engines/pendulum/python/motion_matching/provider.py`, `src/shared/python/motion_matching/club_only/ui_integration.py`, `src/shared/python/motion_matching/club_only/matrix_qualification.py`, `tests/unit/motion_matching/test_fit_options_dbc.py`
-- **Started:** 2026-09-29
-- **Last verified:** 2026-10-11 (`2cb3d58c`; collated from verified GitHub merge metadata (PR #11202, 2026-10-01))
-- **Shipped:** 2026-10-01
-- **Summary:** Added code-level, fail-closed claims gates: four driven-triple pendulum receipts (`driver_amateur`, `driver_elite`, `iron_amateur`, `iron_elite`) disqualified at projection time (evidence files on disk unchanged); promoted-package hash and out-of-plane-residual integrity checks; club-only fresh continuous replay + labeled inferred posture; matrix all-complete claims fail closed on unresolved cells; pendulum planar-floor early rejection now driven by the CURRENT target's plane distances with a DbC-validated `max_marker_rmse_m`.
-- **PR:** #11202
-- **Next step:** Shipped via PR #11202 on 2026-10-01 (merge SHA 2cb3d58cfe3b181c12c26015d236dcdb234cf574).
-- **Open (per MMR-11 acceptance, not satisfied here):** raw-to-package reproduction/regeneration of the reported baselines, Board-selected required club-only cells, and native qualification runs. PR references (not "Closes") #11097 for these.
-
-### DL-#11098 — Historical-Video Evidence Review Workflow
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #11098
-- **Branch:** `feat/mmr-12-historical-video-review-11098`
-- **Paths:** `src/shared/python/shadow_tracker/service.py`, `src/tools/shadow_tracker/gui.py`, `tests/unit/shadow_tracker/test_service.py`, `tests/tools/shadow_tracker/test_shadow_tracker_gui.py`
-- **Started:** 2026-09-29
-- **Last verified:** 2026-10-11 (`add9a1bd`; collated from verified GitHub merge metadata (PR #11197, 2026-10-01))
-- **Shipped:** 2026-10-01
-- **Summary:** Shadow Tracker preserves shot isolation/lineage, PTS timing, bounded cancellable decode and corrupt-media recovery; imports validate before mutation and unknown physical time remains null.
-- **Next step:** Shipped via PR #11197 on 2026-10-01 (merge SHA add9a1bd59ba21d99e6c65d04058b6db8a870d91).
-- **PR:** #11197
-
-### DL-#11107 — Implement Simscape Continuous-Replay Qualification Harness
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #11107
-- **Branch:** `feat/mmr-07-simscape-continuous-replay-11107`
-- **Paths:** `src/shared/python/motion_matching/simscape_replay_harness.py`, `tests/unit/motion_matching/test_simscape_continuous_replay_harness.py`, `scripts/matlab/run_simscape_candidate.ps1`, `docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/simscape_replay_qualification.json`, `SPEC.md`
-- **Started:** 2026-09-29
-- **Last verified:** 2026-10-11 (`ee806b50`; collated from verified GitHub merge metadata (PR #11198, 2026-10-01))
-- **Shipped:** 2026-10-01
-- **Summary:** Added fail-closed continuous replay checks for source, time, samples, runtime and frozen G1 metrics. Native run 102 remains REJECTED at 40.3 mm terminal RMS against a 35 mm ceiling; no new run or qualification is claimed.
-- **Next step:** Shipped via PR #11198 on 2026-10-01 (merge SHA ee806b50cb7db3e7001ce25b94c536895712625a). Preserved limitation: Run 102 was rejected; keep rejection visible and do not claim physical acceptance.
-- **PR:** #11198
-
-### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #11124
-- **Branch:** `fix/phantom-guard-scripts-paths-11124`
-- **Paths:** `scripts/ci/check_phantom_guard_paths.py`, `tests/scripts/test_check_phantom_guard_paths.py`
-- **Started:** 2026-09-29
-- **Last verified:** 2026-10-11 (`657d9528`; collated from verified GitHub merge metadata (PR #11131, 2026-09-29))
-- **Shipped:** 2026-09-29
-- **Summary:** Fixes false positive in anti-phantom-merge Rule 3 by expanding `ISSUE_PATH_PATTERN` to recognize `scripts/` and `.github/workflows/` (and `.github/`) paths, adding `(?<![\w/.-])` boundary protection to reject non-path prefix substrings (e.g. `engines/api`), stripping trailing punctuation from extracted paths, and dropping parenthetical prose fragments lacking valid file extensions.
-- **Next step:** Shipped via PR #11131 on 2026-09-29 (merge SHA 657d95287e7848dfc568ca4e70236bd5e982393a).
-- **PR:** #11131
-
-### DL-#11184 — Restore the High-Severity UI Npm Audit Gate
+### DL-#10783 · Enforce the Deferred Validation Catalog
 
 - **State:** shipped
 - **Owner:** codex
-- **Issue:** #11184
-- **Branch:** `fix/main-npm-audit-11184`
-- **Paths:** `ui/package-lock.json`, `ui/src/test/dependencySecurityContract.test.ts`, `SPEC.md`
-- **Started:** 2026-09-30
-- **Last verified:** 2026-10-11 (`1a7f7f5e`; collated from verified GitHub merge metadata (PR #11187, 2026-09-30))
-- **Shipped:** 2026-09-30
-- **Summary:** Raised only the compatible transitive resolutions for `brace-expansion` (5.0.9 → 5.0.12) and `undici` (8.10.0 → 8.11.2); added a lockfile security contract. Manifest dependencies, overrides, audit threshold, and the two moderate findings are unchanged.
-- **Next step:** Shipped via PR #11187 on 2026-09-30 (merge SHA 1a7f7f5e8fdbd3f82b69b0f8bb0fc43df7557791).
-- **PR:** #11187
-
-### DL-#11233 — Necromatcher Persistent Library
-
-- **Started:** not recorded in source
-- **State:** shipped
-- **Owner:** codex
-- **PR:** [#11237](https://github.com/D-sorganization/UpstreamDrift/pull/11237)
-- **Issue:** #11233; parent #11232; player epics #11226 and #11229
-- **Branch:** `feat/necromatcher-library-11233`
-- **Paths:** `src/shared/python/workspace/necromatcher.py`, `src/shared/python/workspace/necromatcher_capture.py`, `src/api/routes/necromatcher.py`
-- **Last verified:** 2026-10-11 (`93b5aa1a`; collated from verified GitHub merge metadata (PR #11237, 2026-10-02))
-- **Shipped:** 2026-10-02
-- **Summary:** Reuse project/session spine, artifact hashes and canonical torque evaluation for immutable historical-player library; captures remain image observations and model bytes remain unqualified candidates. [Turnover](necromatcher-turnover.md).
-- **Next step:** Shipped via PR #11237 on 2026-10-02 (merge SHA 93b5aa1a5a2bd0d6ce4beceaf57904fc903780fc). Preserved limitation: Model status remains unqualified; preserve that state and all downstream blockers.
-
-### DL-#11190 · Disable FastRestart for Solve_Starting_Pose and Resolve Model Path in Run_Leaderboard
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11190
-- **Branch:** fix/11190-motion-matching-fast-restart
-- **PR:** #11518
-- **Paths:** see #11518
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-11 (`d816c998`; collated from verified GitHub merge metadata (PR #11518, 2026-10-05))
-- **Shipped:** 2026-10-05
-- **Summary:** Disable FastRestart for solve_starting_pose and resolve model path in run_leaderboard
-- **Next step:** Shipped via PR #11518 on 2026-10-05 (merge SHA d816c9985835ba78f275ee4f6ae5efc7c6ae152c).
-
-### DL-#11513 · Point Contributors at Change Fragments in Post_Spec_Reminder
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11513
-- **Branch:** fix/11513-post-spec-reminder-fragments
-- **PR:** #11519
-- **Paths:** see #11519
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-11 (`739df607`; collated from verified GitHub merge metadata (PR #11519, 2026-10-05))
-- **Shipped:** 2026-10-05
-- **Summary:** Point contributors at change fragments in post_spec_reminder
-- **Next step:** Shipped via PR #11519 on 2026-10-05 (merge SHA 739df607f6e658ff966f33010f67d5fb6cc1e3c3).
-
-### DL-#11589 · Retire Stale Shared-Code Header Test
-
-- **State:** shipped
-- **Owner:** claude
-- **Issue:** #11589
-- **Branch:** chore/retire-unflagged-header-test-11589
-- **PR:** #11590
-- **Paths:** see #11590
-- **Started:** 2026-10-06
-- **Last verified:** 2026-10-11 (`a4031aa0`; collated from verified GitHub merge metadata (PR #11590, 2026-10-06))
-- **Shipped:** 2026-10-06
-- **Summary:** chore(tests): retire stale test_no_unflagged_shared_code header test and its unit-gate quarantine entry
-- **Next step:** Shipped via PR #11590 on 2026-10-06 (merge SHA a4031aa02ccb410936de6976090dc63abe2d7887).
-
-### DL-#11691 · Protect `.yml` and Related Filenames in the Title-Case Checker
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11691
-- **Branch:** merged via #11692
-- **PR:** #11692
-- **Paths:** see #11692
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`de0e48a1`; collated from changes/11691-protect-yml-and-related-filenames-in-the.md)
-- **Summary:** Protect `.yml` and Related Filenames in the Title-Case Checker
-- **Next step:** Shipped in PR #11692.
-
-### DL-#11641 · Register latex-references.yml in the Workflow Inventory so the Inventory Gate Passes on Main
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11641
-- **Branch:** merged via #11666
-- **PR:** #11666
-- **Paths:** see #11666
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`ee47b1ee`; collated from changes/11641-register-latex-references-yml-in-the-wor.md)
-- **Summary:** Register latex-references.yml in the workflow inventory so the inventory gate passes on main
-- **Next step:** Shipped in PR #11666.
-
-### DL-#11574 · Ci: Compile Docs/Research LaTeX References With Pinned Tectonic and Check Changed Title Case
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11574
-- **Branch:** merged via #11641
-- **PR:** #11641
-- **Paths:** see #11641
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`18a4a5bd`; collated from changes/11574-ci-compile-docs-research-latex-reference.md)
-- **Summary:** ci: compile docs/research LaTeX references with pinned Tectonic and check changed title case
-- **Next step:** Shipped in PR #11641.
-
-### DL-#11554 · Fixed-Size Window Residual: Typed DimeResidualEvaluationError Replaces the Np.Full(100, 1E8) Fake Residual; Bound Residuals Fixed-Length; DbC Postcondition on Residual Length. Single Shooting / Real Defects Deferred to MOSAIC-13 (#11545).
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11554
-- **Branch:** fix/11554-fixed-size-residual
-- **PR:** #11637
-- **Paths:** src/shared/python/estimation/dime_dynamics_window.py
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`feb58aa1`; collated from changes/11554-fixed-size-window-residual-typed-dimeres.md)
-- **Summary:** Fixed-size window residual: typed DimeResidualEvaluationError replaces the np.full(100, 1e8) fake residual; bound residuals fixed-length; DbC postcondition on residual length. Single shooting / real defects deferred to MOSAIC-13 (#11545).
-- **Next step:** Shipped in PR #11637.
-
-### DL-#11635 · Bump Tornado to 6.5.10 and Remove the Three Stale Tornado Pip-Audit Waivers
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11635
-- **Branch:** merged via #11636
-- **PR:** #11636
-- **Paths:** see #11636
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`019a42d3`; collated from changes/11635-bump-tornado-to-6-5-10-and-remove-the-th.md)
-- **Summary:** Bump tornado to 6.5.10 and remove the three stale tornado pip-audit waivers
-- **Next step:** Shipped in PR #11636.
-
-### DL-#11617 · OpenSim Musculoskeletal Swing: GRF Estimate, StaticOptimization Pipeline, Receipt
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11617
-- **Branch:** merged via #11621
-- **PR:** #11621, #11627
-- **Paths:** see #11621
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`976b9ce4`; collated from changes/11617-phase-2-spec-driven-musculoskeletal-mode.md)
-- **Summary:** OpenSim musculoskeletal swing: GRF estimate, StaticOptimization pipeline, receipt
-- **Next step:** Shipped in PR #11621.
-
-### DL-#11612 · P-7: Spec Full-Body Model Loaded Through the MyoSuite Runtime Reproduces MuJoCo Bit-Exactly Under the Same Inputs (L0/L1/L2 Parity Receipt)
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11612
-- **Branch:** merged via #11628
-- **PR:** #11628
-- **Paths:** see #11628
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`cf9fb216`; collated from changes/11612-p-7-spec-full-body-model-loaded-through.md)
-- **Summary:** P-7: spec full-body model loaded through the MyoSuite runtime reproduces MuJoCo bit-exactly under the same inputs (L0/L1/L2 parity receipt)
-- **Next step:** Shipped in PR #11628.
-
-### DL-#11611 · OpenSim Same-Input Parity Adapter (Exact Weld KKT, Shared Contact Law); Fix OSIM Exporter XYZ Euler Convention and 41-Coordinate Validation
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11611
-- **Branch:** merged via #11628
-- **PR:** #11628
-- **Paths:** see #11628
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`cf9fb216`; collated from changes/11611-opensim-same-input-parity-adapter-exact.md)
-- **Summary:** OpenSim same-input parity adapter (exact weld KKT, shared contact law); fix OSIM exporter XYZ Euler convention and 41-coordinate validation
-- **Next step:** Shipped in PR #11628.
-
-### DL-#11607 · Same-Input Parity P-2: Same-Input-Bundle/V1, Shared ZOH RK4 Integrator (8 Substeps for Stiff Contact Modes), Per-Step Closure Projection, MuJoCo Reference Generation, Replay Scoring; Pipeline Persists Q_Track
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11607
-- **Branch:** merged via #11628
-- **PR:** #11628
-- **Paths:** see #11628
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`cf9fb216`; collated from changes/11607-same-input-parity-p-2-same-input-bundle.md)
-- **Summary:** Same-input parity P-2: same-input-bundle/v1, shared ZOH RK4 integrator (8 substeps for stiff contact modes), per-step closure projection, MuJoCo reference generation, replay scoring; pipeline persists q_track
-- **Next step:** Shipped in PR #11628.
-
-### DL-#11606 · Same-Input Parity P-1: VectorPlant + Convention-Free Closure Projection; MuJoCo Exact-KKT Option; Pointwise MuJoCo/Drake/Pinocchio Acceleration Parity Gate and Receipt (Worst 1.1E-9 Relative Over 31 Frames)
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11606
-- **Branch:** merged via #11615
-- **PR:** #11615
-- **Paths:** see #11615
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`f2def974`; collated from changes/11606-same-input-parity-p-1-vectorplant-conven.md)
-- **Summary:** Same-input parity P-1: VectorPlant + convention-free closure projection; MuJoCo exact-KKT option; pointwise MuJoCo/Drake/Pinocchio acceleration parity gate and receipt (worst 1.1e-9 relative over 31 frames)
-- **Next step:** Shipped in PR #11615.
-
-### DL-#11623 · Per-Workspace CARGO_HOME for Rust-Quickstart and Realtime-Soak; Contract Test Pins RUSTUP_HOME and CARGO_HOME for Every Rust Job (RM#2021)
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11623
-- **Branch:** merged via #11624
-- **PR:** #11624
-- **Paths:** see #11624
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`17b3b95c`; collated from changes/11623-per-workspace-cargo-home-for-rust-quicks.md)
-- **Summary:** Per-workspace CARGO_HOME for rust-quickstart and realtime-soak; contract test pins RUSTUP_HOME and CARGO_HOME for every Rust job (RM#2021)
-- **Next step:** Shipped in PR #11624.
-
-### DL-#1893 · Archive HANDOFF.md and DEVELOPMENT_LOG.md Verbatim (RM#1893)
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #1893
-- **Branch:** merged via #11620
-- **PR:** #11620
-- **Paths:** see #11620
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`7a4e3436`; collated from changes/1893-archive-handoff-devlog.md)
-- **Summary:** Archive HANDOFF.md And DEVELOPMENT_LOG.md Verbatim (RM#1893)
-- **Next step:** Shipped in PR #11620.
-
-### DL-#11584 · Settings_Dialog: Ignore Late Dependency-Check Results After Close; Worker Emits Failed for Any Exception
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11584
-- **Branch:** merged via #11618
-- **PR:** #11618
-- **Paths:** see #11618
-- **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`1696354a`; collated from changes/11584-settings-dialog-ignore-late-dependency-c.md)
-- **Summary:** settings_dialog: ignore late dependency-check results after close; worker emits failed for any exception
-- **Next step:** Shipped in PR #11618.
-
-### DL-#11601 · Ci: Deleted-Test Guard Honours a Reviewed Allowlist (Scripts/Config/Reviewed_Test_Deletions.Json: Path + Issue + Reason, Fails Closed When Malformed) so an Approved Test Retirement Can Pass the Merge Queue; Unapproved Deletions Still Fail.
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11601
-- **Branch:** merged via #11602
-- **PR:** #11602
-- **Paths:** see #11602
-- **Started:** 2026-10-06
-- **Last verified:** 2026-10-06 (`cf9f9ad8`; collated from changes/11601-ci-deleted-test-guard-honours-a-reviewed.md)
-- **Summary:** ci: deleted-test guard honours a reviewed allowlist (scripts/config/reviewed_test_deletions.json: path + issue + reason, fails closed when malformed) so an approved test retirement can pass the merge queue; unapproved deletions still fail.
-- **Next step:** Shipped in PR #11602.
-
-### DL-#1976 · Make the Change-Fragment Round-Trip Test Hermetic so Collating a Real DL-#1976 Entry Cannot Break It
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #1976
-- **Branch:** merged via #11592
-- **PR:** #11592
-- **Paths:** see #11592
-- **Started:** 2026-10-06
-- **Last verified:** 2026-10-06 (`d2086034`; collated from changes/1976-make-the-change-fragment-round-trip-test.md)
-- **Summary:** Make the change-fragment round-trip test hermetic so collating a real DL-#1976 entry cannot break it
-- **Next step:** Shipped in PR #11592.
-
-### DL-#11595 · Ci: Give Every Dtolnay/Rust-Toolchain Job a Per-Job RUSTUP_HOME (${{ Github.Workspace }}/.rustup-home) so Rustup Never Upgrades the Runner Image's Partially Installed ~/.rustup Toolchain in Place; Contract Test in Tests/Ci/test_unit_gate_rust_kernel.py.
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11595
-- **Branch:** merged via #11597
-- **PR:** #11597
-- **Paths:** see #11597
-- **Started:** 2026-10-06
-- **Last verified:** 2026-10-06 (`39fbd017`; collated from changes/11595-ci-give-every-dtolnay-rust-toolchain-job.md)
-- **Summary:** ci: give every dtolnay/rust-toolchain job a per-job RUSTUP_HOME (${{ github.workspace }}/.rustup-home) so rustup never upgrades the runner image's partially installed ~/.rustup toolchain in place; contract test in tests/ci/test_unit_gate_rust_kernel.py.
-- **Next step:** Shipped in PR #11597.
-
-### DL-#2018 · Vendor Automerge_Guard and Requeue_Stalled_Merges (Stalled-Merge Requeue Tooling) From Repository_Management With Canonical Tests (Refs Repository_Management#2018)
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #2018
-- **Branch:** merged via #11577
-- **PR:** #11577, #11586
-- **Paths:** see #11577
-- **Started:** 2026-10-06
-- **Last verified:** 2026-10-06 (`1943a1b7`; collated from changes/2018-resync-requeue.md)
-- **Summary:** Vendor automerge_guard and requeue_stalled_merges (stalled-merge requeue tooling) from Repository_Management with canonical tests (Refs Repository_Management#2018)
-- **Next step:** Shipped in PR #11577.
-
-### DL-#11593 · Clear the Security Findings Main Carries: Werkzeug 3.1.8 to 3.1.9 (CVE-2026-102598) and Fsspec 2026.1.0 to 2026.6.0 (CVE-2026-104851) in Both Python Lockfiles, and Source-Map-Js 1.2.1 to 1.2.2 (CVE-2026-93749 / GHSA-68Fv-2Mgg-Jv7q) in Ui/Package-Lock.Json; Lockfile-Only Upgrades, No New Waiver.
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11593
-- **Branch:** merged via #11594
-- **PR:** #11594
-- **Paths:** see #11594
-- **Started:** 2026-10-06
-- **Last verified:** 2026-10-06 (`2d183206`; collated from changes/11593-bump-werkzeug-3-1-8-to-3-1-9-in-both-loc.md)
-- **Summary:** Clear the security findings main carries: werkzeug 3.1.8 to 3.1.9 (CVE-2026-102598) and fsspec 2026.1.0 to 2026.6.0 (CVE-2026-104851) in both Python lockfiles, and source-map-js 1.2.1 to 1.2.2 (CVE-2026-93749 / GHSA-68fv-2mgg-jv7q) in ui/package-lock.json; lockfile-only upgrades, no new waiver.
-- **Next step:** Shipped in PR #11594.
-
-### DL-#11577 · Fix(Tests): Wait for Settings-Dialog Dependency-Check Workers Before Teardown
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11577
-- **Branch:** merged via #11581
-- **PR:** #11581
-- **Paths:** see #11581
-- **Started:** 2026-10-06
-- **Last verified:** 2026-10-06 (`843e3e82`; collated from changes/11577-fix-tests-wait-for-settings-dialog-depen.md)
-- **Summary:** fix(tests): wait for settings-dialog dependency-check workers before teardown
-- **Next step:** Shipped in PR #11581.
-
-### DL-#11571 · Reconcile Engine Capability Matrix With Get_Capabilities and Add Consistency Test
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11571
-- **Branch:** merged via #11576
-- **PR:** #11576, #11580
-- **Paths:** see #11576
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`a40295cc`; collated from changes/11571-launcher-capability-tests.md)
-- **Summary:** Reconcile engine capability matrix with get_capabilities and add consistency test
-- **Next step:** Shipped in PR #11576.
-
-### DL-#11573 · Report NaN for Unmeasured Replay Metrics and Fail Closed in Acceptance Evaluation
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11573
-- **Branch:** merged via #11575
-- **PR:** #11575
-- **Paths:** see #11575
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`34cf0eb8`; collated from changes/11573-unmeasured-replay-metrics-nan.md)
-- **Summary:** Report NaN for unmeasured replay metrics and fail closed in acceptance evaluation
-- **Next step:** Shipped in PR #11575.
-
-### DL-#11567 · Drake Full-Body Fit Scores Forward Kinematics of the Drake Rollout Instead of the Warm-Start Candidate's Markers
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11567
-- **Branch:** merged via #11568
-- **PR:** #11568
-- **Paths:** see #11568
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`80dde80a`; collated from changes/11567-drake-full-body-fit-scores-forward-kinem.md)
-- **Summary:** Drake full-body fit scores forward kinematics of the Drake rollout instead of the warm-start candidate's markers
-- **Next step:** Shipped in PR #11568.
-
-### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11556
-- **Branch:** merged via #11556
-- **PR:** #11556
-- **Paths:** see #11556
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`b081650e`; collated from changes/11556-ci-security-re-vendor-fork-pr-runner-gua.md)
-- **Summary:** ci(security): re-vendor fork_pr_runner_guard.py and new fork_pr_guard_analysis.py from Repository_Management (RM#1996): same-repo if: exemption and sink-based head-checkout analysis.
-- **Next step:** Shipped in PR #11556.
-
-### DL-#11552 · Fix(Estimation): DIME Initialisers, Ablations and Manifest Report Not-Measured Instead of Constants or Ground-Truth-Derived Figures
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11552
-- **Branch:** merged via #11559
-- **PR:** #11559
-- **Paths:** see #11559
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`3637c80e`; collated from changes/11552-fix-estimation-dime-initialisers-ablatio.md)
-- **Summary:** fix(estimation): DIME initialisers, ablations and manifest report not-measured instead of constants or ground-truth-derived figures
-- **Next step:** Shipped in PR #11559.
-
-### DL-#11551 · DIME Replay and Engine Qualification Fail Closed on Missing Reference/Metrics; Replay Provenance Read From the Environment
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11551
-- **Branch:** merged via #11558
-- **PR:** #11558
-- **Paths:** see #11558
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`8dfd58bc`; collated from changes/11551-dime-replay-and-engine-qualification-fai.md)
-- **Summary:** DIME replay and engine qualification fail closed on missing reference/metrics; replay provenance read from the environment
-- **Next step:** Shipped in PR #11558.
-
-### DL-#11549 · Drift Prediction Propagates Covariance Through F = Df/Dx per Step, Steps the Full Horizon as H Steps of Dt, and Never Actuates the Floating-Base Root by Default
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11549
-- **Branch:** fix/11549-drift-covariance-propagation
-- **PR:** #11562
-- **Paths:** src/shared/python/estimation/drift_prediction.py
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`dc22a363`; collated from changes/11549-drift-prediction-propagates-covariance-t.md)
-- **Summary:** drift prediction propagates covariance through F = df/dx per step, steps the full horizon as H steps of dt, and never actuates the floating-base root by default
-- **Next step:** Shipped in PR #11562.
-
-### DL-#11548 · Multi-Trial MAP: Residual and Jacobian Prior Rows Share One Layout (Locked Priors Excluded From Both); Posterior Covariance Is the Schur Marginal Over the Shared Parameters, Reported as Unavailable (`covariance_status="rank_deficient"`, NaN) When the Fisher Matrix Is Singular; Calculation Documented in Docs/Conventions/canonical-v2.md §6.1
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11548
-- **Branch:** merged via #11557
-- **PR:** #11557
-- **Paths:** see #11557
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`efa445dd`; collated from changes/11548-multi-trial-map-residual-and-jacobian-pr.md)
-- **Summary:** Multi-trial MAP: residual and Jacobian prior rows share one layout (locked priors excluded from both); posterior covariance is the Schur marginal over the shared parameters, reported as unavailable (`covariance_status="rank_deficient"`, NaN) when the Fisher matrix is singular; calculation documented in docs/conventions/canonical-v2.md §6.1
-- **Next step:** Shipped in PR #11557.
-
-### DL-#11547 · DIME Solver Cache Key Now Covers Targets, Weights and Solver Options; Cost Breakdown Reports Measured Values or Not-Measured (None) Instead of Wall-Time Fractions
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11547
-- **Branch:** merged via #11561
-- **PR:** #11561
-- **Paths:** see #11561
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`d7b122a1`; collated from changes/11547-dime-solver-cache-key-now-covers-targets.md)
-- **Summary:** DIME solver cache key now covers targets, weights and solver options; cost breakdown reports measured values or not-measured (None) instead of wall-time fractions
-- **Next step:** Shipped in PR #11561.
-
-### DL-#11550 · DIME Manifold Retract and Local-Coordinate Jacobians Are Now the Exact Derivatives of the Right Quaternion Chart at Any Pose and Velocity (J_R^-1, dExp/Dv), Verified Against Central Finite Differences
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11550
-- **Branch:** merged via #11560
-- **PR:** #11560
-- **Paths:** see #11560
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`a9f33f14`; collated from changes/11550-dime-manifold-retract-and-local-coordina.md)
-- **Summary:** DIME manifold retract and local-coordinate Jacobians are now the exact derivatives of the right quaternion chart at any pose and velocity (J_r^-1, dExp/dv), verified against central finite differences
-- **Next step:** Shipped in PR #11560.
-
-### DL-#11525 · CLAUDE.md Is Prettier-Clean: Restored the Mangled Where-to-Edit Code Spans and Spaced the @AGENTS.md Import
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #11525
-- **Branch:** merged via #11526
-- **PR:** #11526
-- **Paths:** see #11526
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`45110b2b`; collated from changes/11525-claude-md-is-prettier-clean-restored-the.md)
-- **Summary:** CLAUDE.md is prettier-clean: restored the mangled Where-to-edit code spans and spaced the @AGENTS.md import
-- **Next step:** Shipped in PR #11526.
-
-### DL-#1989 · Keep Fork PRs Off the Self-Hosted Fleet: Fork Guard on PR-Triggered Jobs, Hosted Route for the Quality-Gate Lane, and a Static Checker (RM#1989)
-
-- **State:** shipped
-- **Owner:** unassigned
-- **Issue:** #1989
-- **Branch:** merged via #11523
-- **PR:** #11523
-- **Paths:** see #11523
-- **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`c20fb0b7`; collated from changes/1989-fork-pr-self-hosted-guard.md)
-- **Summary:** Keep fork PRs off the self-hosted fleet: fork guard on PR-triggered jobs, hosted route for the quality-gate lane, and a static checker (RM#1989)
-- **Next step:** Shipped in PR #11523.
+- **Issue:** #10783; full rollout Repository_Management#1687
+- **PR:** #10784
+- **Branch:** `chore/10783-deferred-catalog-guard`
+- **Paths:** `shared_scripts/`, `tests/unit/repo_hygiene/test_deferred_catalog_hook.py`, `.pre-commit-config.yaml`, `docs/development/`, `AGENT_HANDOFF.md`, `README.md`, `SPEC.md`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-10-12 (`8e9b4b97`; collated from scoped #10783 verification on UpstreamDrift main)
+- **Summary:** Install the exact central validator and always-run hook while preserving six published v1 plans, executable software and unavailable empirical acceptance.
+- **Next step:** The UpstreamDrift software guard is complete; the three canonical-function exceptions expire 2026-10-23. Broader fleet rollout remains separately tracked in Repository_Management #1687.
 
 ## Archive
 
@@ -2088,6 +1222,92 @@ No material development-log change — Bolt `np.linalg.norm` → `sqrt(einsum)`/
 No material development-log change — PyJWT floor/lock bump to 2.14.0 for OSV GHSA-w6j9-cwv2-h6wq (#11153) is a dependency-only change with no feature entry.
 No material development-log change — urllib3 (2.8.0, CVE-2026-97687) and PyJWT (2.15.0, CVE-2026-101918) floor/lock bumps (#11191) are dependency-only changes with no feature entry.
 No material development-log change — Bolt np.linalg.norm → sqrt(einsum) in rigidity.py (#11189) is a behaviour-preserving micro-optimisation with no feature entry.
+
+## DL-#11357 — Pure Raw Shaft Fragment Derivative Diagnostics
+
+- **Change:** Canonical immutable options/check/result contracts and public
+  raw fragment analytic/central FD diagnostics; canonical camera/marker reuse.
+- **Validation:** Repository fail-first scaffold regression followed by focused
+  native-free synthetic tests, curated exports and fingerprint inclusion.
+- **Limits:** No historical native/Library/render/fit operation, no objective
+  or evidence-role change, and no clinical/scientific qualification.
+- **Next Step:** Review typed core, then separately design authenticated
+  workspace consumers using existing job/store/renderer boundaries.
+
+## Authored Replay Impact Application Checkpoint — #11464
+
+The normal React journey now previews impact from a verified authored replay,
+with exact geometry/sample/flight declarations, bounded native execution,
+cancellation, persisted run-ID recall and authenticated four-file download.
+Saved results display their own assumptions and metrics. Canonical receipt and
+trajectory owners remain unchanged; source/runtime/parent and artifact checks
+fail closed. Research acceptance remains rejected, with authored seconds and
+false physical/scientific qualification.
+
+Root final validation: 125 focused Python cases pass with one Windows symlink
+capability skip; one additional opt-in native case passes with actual MuJoCo,
+clean process transport, impact solver and Rust flight (no substitutions).
+The React cohort passes 104 cases; configured six-owner mypy, scoped lint and
+format checks pass. Earlier failures and immutable agent freezes are retained
+in the application review. Four-page LaTeX Application Supplement 1 is compiled
+without final layout warnings and all pages visually reviewed; editable source,
+PDF and the explicitly synthetic native bundle are saved on the local Desktop.
+Earlier Methods V8 and the five-page extraction report remain unchanged.
+
+See [Application Procedure](necromatcher-replay-impact.md) and its linked review/report. Tiger stays
+within original frames 0–190 ([0,191)); Hogan stays [0,750). No historical
+Library mutation, qualified match or new ControlTower delivery is established.
+Remaining goal work includes improved historical matching, authored dynamics,
+simulation golf integration and desktop parity. The full goal remains active.
+
+## Native Desktop Replay Impact Checkpoint — #11487
+
+The native Necromatcher tile now imports registered authored replays, runs the
+shared bounded replay-impact session off the GUI thread, cancels owned jobs,
+recalls retained run IDs after restart and exports an authenticated four-file
+ZIP exclusively. Saved assumptions remain separate from editable declarations.
+The public Shot Tracer handoff retains exact detached positions and provenance.
+
+Root validation passes 146 focused Qt/viewer/parity cases without skips and
+configured mypy on three production owners. One additional opt-in actual
+MuJoCo/HDF5/clean-worker/impact/Rust native Qt case passes with Python exit 0.
+The three final synthetic screenshots are readable and visually reviewed;
+retained positions are verified, while OpenGL pixel accuracy is unverified.
+Test-only font bootstrap uses existing Windows Segoe UI when the offscreen
+font database is empty. The 120-second whole-test cap does not change the
+60-second native budget; earlier timeout evidence is preserved.
+
+The three-page Native Desktop Supplement 1 and editable LaTeX, screenshots and
+intact synthetic bundle are saved on the local Desktop. See [Procedure](necromatcher-replay-impact.md)
+and [Frozen Review](historical_capture/native-desktop-replay-impact-review.json). Tiger remains [0,191), Hogan [0,750).
+Historical fits, scientific qualification, simulation golf and final overall
+desktop parity acceptance remain open. No new ControlTower delivery or remote
+CI-green claim is made. The full goal remains active.
+
+## Local Research Admission Race Follow-Up — #11493
+
+A concurrent request regression reproduced reused shot-ID admission after another
+request prepared and cancelled during authentication. The API now applies the
+same identity guard before and immediately after authentication. All 10 API
+cases pass; a fresh additional actual MuJoCo/clean-worker/Rust API and Qt
+acceptance passes in 24.56 s, with seven exact retained samples and no
+re-simulation on recall. Configured mypy passes for the changed API owner.
+The earlier 209-case cohort and 106 React cases remain separate checkpoint
+evidence. The follow-up preserves unverified qualification and all historical
+limits; the full goal remains active.
+
+See [Follow-Up Review](historical_capture/local-research-golf-admission-race-review.json). Source inventory covers 6,697 src/test
+files, with equal before/after maps; this is not a whole-repository baseline.
+
+## User-Requested Handoff and Stop Checkpoint
+
+The user requested a committed checkpoint and instructed this agent to stop
+pursuing the goal after turnover. See [Next-Agent Turnover](necromatcher-next-agent-turnover.md) for the
+exact implementation state at f0e14944, scoped work packets, public owners,
+validation commands, historical evidence boundaries and remaining acceptance.
+No proposed optimized video export or new fit was started. This documentation
+checkpoint follows the published local research integration; the full goal is
+unfinished and is to be paused after normal commit/push and handoff publication.
 
 ## Capture Registry Parent Integration - #11162 / #11172
 

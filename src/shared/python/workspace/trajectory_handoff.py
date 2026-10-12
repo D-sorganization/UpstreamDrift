@@ -196,7 +196,14 @@ class ShotTrajectoryHandoffCoordinator:
         )
 
     def _adapt_swing_to_pipeline(self, swing: SwingState) -> SwingState:
-        """Align swing kinematics to canonical forward flight frame [x=fwd, y=left, z=up]."""
+        """Preserve declared flight vectors; align legacy undeclared provider state."""
+        if "frame_id" in swing.metadata:
+            frame_id = swing.metadata["frame_id"]
+            if frame_id != FLIGHT_FRAME_ID:
+                raise FrameUnitMismatchError(
+                    f"Unsupported swing frame '{frame_id}'. Expected {FLIGHT_FRAME_ID}."
+                )
+            return swing
         if (
             swing.clubhead_velocity[0] > 0
             and abs(swing.clubhead_velocity[1]) < 1e-6
