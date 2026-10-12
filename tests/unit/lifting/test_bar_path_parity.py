@@ -23,6 +23,8 @@ import json
 import numpy as np
 import pytest
 
+from tests.support.real_engines import real_module
+
 from src.shared.python.lifting.bar_path_parity import (
     BAR_PATH_PARITY_RECORD,
     REQUIRED_ENGINES,
@@ -175,9 +177,17 @@ def test_replay_rejects_a_bundle_without_a_recorded_bar_path(bundle) -> None:
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("engine", ["mujoco", "drake", "pinocchio", "opensim"])
+@pytest.mark.parametrize(
+    "engine",
+    [
+        pytest.param("mujoco", marks=pytest.mark.requires_mujoco),
+        pytest.param("drake", marks=pytest.mark.requires_drake),
+        pytest.param("pinocchio", marks=pytest.mark.requires_pinocchio),
+        pytest.param("opensim", marks=pytest.mark.requires_opensim),
+    ],
+)
 def test_engine_replays_the_recorded_bar_path(bundle, engine) -> None:
-    pytest.importorskip(_ENGINE_MODULE[engine])
+    real_module(_ENGINE_MODULE[engine])
     replay = replay_bar_path(engine, bundle, steps=CI_STEPS)
     assert isinstance(replay, BarPathReplay)
     assert replay.failure is None
