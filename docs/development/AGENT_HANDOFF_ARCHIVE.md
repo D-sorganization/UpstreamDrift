@@ -1,7 +1,10 @@
-# Agent handoff archive — 2026-10-12
+# Agent Handoff Archive
 
-> Historical turnover entries moved verbatim from `AGENT_HANDOFF.md` by PR #12393 / issue #9415.
-> The live handoff is current-state only (150 lines).
+This file holds the per-slice history moved verbatim out of `AGENT_HANDOFF.md` by #12416 so the live handoff can stay current-state only and under 150 lines (AGENTS.md policy). Nothing was rewritten or deleted: each section below is exactly as it stood in the live file on 2026-10-12. The Markerless Mocap Program section and the "Required Before Continuing" list stay in the live file.
+
+For current state, read `AGENT_HANDOFF.md`. For the authoritative record of each slice, read `docs/development/DEVELOPMENT_LOG.md` and the cited issues.
+
+---
 
 # Character Builder Docs and Tutorial, CMB-12 #11663
 
@@ -781,12 +784,6 @@ Branch `agy/issue-10944`; PR for #10944 (prereq for #10943).
 Advances `vendor/ud-tools` gitlink to `95ed6b47857e9a47211ab1973d02b28beae718bc` (Tools#5348 K0 knowledge-pack engine, Tools#5350 K3a Sidekick Wizards). Synchronizes child copy of `src/shared/python/ai/` (`knowledge/`, `wizards.py`, base adapter, panel tools, assistant panel, RAG deprecation). Pins in `Cargo.toml`, `requirements-tools.txt`, `src/config/impact_acceptance.json`, and `reconciliation.py` aligned. Divergence inventory regenerated.
 Focused verification: `pytest tests/companion/test_companion_catalog.py tests/unit/repo_hygiene/test_tools_child_copy_contract.py tests/unit/ai/test_knowledge_and_wizards.py tests/config/impact_acceptance/test_impact_acceptance_matrix.py tests/unit/tour_baselines/test_reconciliation.py -q -n 0 --no-cov`.
 
-## Markerless Mocap Program (#9063)
-
-- Tools #4706 owns capture and contract schemas; UpstreamDrift #9069 (folded into #9422) owns app orchestration and makes no physical-lab qualification claim.
-- ADR-0041 Amendment 1 (#9630, #9619): consumer-side self-calibration fitters live in `src/motion_capture/reconstruct/`; Tools keeps vendor-neutral reference geometry.
-- Real-data acceptance is deferred to `docs/development/planning/DV-9619.md`; the rig soak to `DV-9613.md`.
-
 ## TB-12: Publish Baseline Guide, Agent Runbooks and End-to-End Acceptance (#10597) [MERGED] / Epic #10584 [CLOSED]
 
 Branch `feat/tb12-baseline-guide-acceptance-10597`; PR [#10814](https://github.com/D-sorganization/UpstreamDrift/pull/10814) merged to `main` (`fbebf5c47`) on 2026-09-24. Parent Epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) (CLOSED); governing issue [#10597](https://github.com/D-sorganization/UpstreamDrift/issues/10597).
@@ -895,13 +892,6 @@ PRs [#10837](https://github.com/D-sorganization/UpstreamDrift/pull/10837), [#108
 - Dynamics inertia digest & cache refresh: `compute_pendulum_inertia_hash` digests actual cached physical properties consumed during rollout integration; `create_calibrated_double_pendulum_dynamics` passes calibrated lengths to constructor before parameter caching; `refresh_cache()` synchronizes runtime parameter mutations (#10849).
 - Surrogate validation quaternion norm optimization: vectorized norm calculation via `np.einsum` (#10844).
 - Focused verification: `pytest tests/unit/tour_baselines/ tests/unit/motion_matching/test_tour_baselines_presenter.py -q -n 0 --no-cov`.
-
-## Required Before Continuing
-
-- Read `AGENTS.md`, `CLAUDE.md`, and `docs/development/DEVELOPMENT_LOG.md`.
-- Epic #10584 and all child packages TB-00 through TB-12 are closed. Full-body models remain under governing programs (#10363, #10378, #10430, #10440).
-- Manual governance: UP-D0 (#9066) and UP-D1 (#9067) remain release blockers. Edit only the `manuals/upstreamdrift` QMD source and run `python3 -m scripts.check_design_manual_governance` for governed changes.
-- Update this handoff, the development-log entry, and exactly one `SPEC.md` change-log row for every substantive PR.
 
 ## Raw Shaft Fragment Diagnostic Core Handoff (#11357)
 
