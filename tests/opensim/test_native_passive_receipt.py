@@ -10,6 +10,8 @@ from typing import Any
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.engines.physics_engines.opensim.python.tour_matching.native_constraint_state import (
     ActuatorObservation,
     ConstraintObservation,
