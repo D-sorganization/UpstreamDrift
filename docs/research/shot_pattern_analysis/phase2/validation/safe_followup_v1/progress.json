@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete canonical RM-6 gate PASS: all eight gates; 7483 affected tests passed,377 skipped,43 deselected,1 xpassed,21 passing subtests. Test source81ec4e1c84; subsequent64f31f9f74 changes seven reviewed handoff fragments only, included in final policy checks. No frozen study rerun.",
+  "current_validation": "Preceding complete canonical gate passed7483tests but Semgrep was unavailable. New CI security finding repaired with36focusedtests and scoped Semgrep205rules0findings. Complete canonical rerun on fixture-boundary repair pending.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -655,5 +655,56 @@
       "review": "Astra approved three metadata fields, exact published pins, served receipt, historical evidence preservation and unchanged claim boundaries",
       "runtime_install": "PASS exact Git direct_url commit and source-byte equality; original count-based diagnostic replaced by exact declared shipped-file-set equality"
     }
+  },
+  "historical_fixture_security": {
+    "trigger": "CI security-scans found ten exec-detected findings on6ce959f227; preceding canonical gate advisory-skipped Semgrep",
+    "repair": "Test-only fixed-path and independent fixed-current/compressed/raw SHA bounds; reject changed source or redirected fixture before AST extraction. Ten exact-rule local false-positive classifications for required historical parity execution; no scanner config/threshold changes. No Python sandbox or scientific qualification claimed.",
+    "focused_tests": 36,
+    "new_boundary_cases": 12,
+    "existing_parity_cases": 24,
+    "semgrep": "1.180.0; CI p/python,p/security-audit,p/owasp-top-ten configs;205 rules across six repaired files:0 findings",
+    "full_gate": "Pending complete rerun with isolated Semgrep available",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-security-red.txt.gz",
+        "sha256": "773b6fe21aff129c2df9ae7e4434c97cfd2153e8109d455e660df705409b04c2",
+        "uncompressed_sha256": "eeb5334fc22522c79cf01c0d6f407312a5bb6504d8999c1cfab885a7ca1dc77d"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-semgrep-red.json.gz",
+        "sha256": "8421c6c077e6f80dce220dac261273e49fbcc91edf6a8ac696d8c71774eee051",
+        "uncompressed_sha256": "df914f39fab67ce344ce406c2cbb56b66c4f56a8d0a6a27b7484187ec80749c2"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-semgrep-red.log.gz",
+        "sha256": "e79cba9c628aebd894bd3a7a3063166edb879e5feacb88575b0762deb9ed506a",
+        "uncompressed_sha256": "f12a65cecd84cd66173ba6c92bfdcc0faa2ed49f64f62f5e86c90334bbecef92"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-semgrep-green.json.gz",
+        "sha256": "9e5212eac655e2acd1bf00ae89d809154c6e053ee1544372a24242d54ff3e9aa",
+        "uncompressed_sha256": "7257b40b816c9f309c727010ae8b491f04ae9b08ee358da400d7cd6500699b42"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-semgrep-green.log.gz",
+        "sha256": "fb9135609f3b4d95cccf686af88ce8347cbb054638a9ed91e7714cc6e4d90643",
+        "uncompressed_sha256": "18133ed7518bfdf602a24753b92e72477b8b7aa7c9f1844b00c879a4a85e2a27"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-security-red.txt.gz",
+        "sha256": "04cd8378093d636feb6507821c22631abeb27cdcf84c682beb33d33d0d5a4040",
+        "uncompressed_sha256": "3b589a6db08752f071a1e46d9926c8aa136e1584737118777a189783dd7529f8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-security-green.txt.gz",
+        "sha256": "b51d0f1188dcc4bf2cfa2143915713db298ff3562151c0ecaec61667c89c5065",
+        "uncompressed_sha256": "5764813b4c8d429b333c0d7d3aeddf755ea3613c1b2a33161be815525ecb27be"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-security-mypy.txt.gz",
+        "sha256": "b63e7a6232ab20178cda6ffd08adacc728d5c6c9429bada47e52d0a44bcc03fd",
+        "uncompressed_sha256": "ab35ee42183d4d6d3ba483825ab037d18a5a15622d03be01d82220b1564851ff"
+      }
+    ]
   }
 }

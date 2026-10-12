@@ -5,12 +5,13 @@ from __future__ import annotations
 import ast
 import collections
 from decimal import Decimal
-import gzip
 from pathlib import Path
 import re
 from typing import Any
 
 import pytest
+
+from tests.research.historical_fixture_security import read_fixture, verify_source
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "docs/research/shot_pattern_analysis/phase2/validation"
@@ -19,7 +20,10 @@ pytestmark = pytest.mark.unit
 
 
 def _load(source: str, values: dict[str, Any]) -> dict[str, Any]:
-    nodes = [n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)]
+    verify_source("article", source)
+    nodes: list[ast.stmt] = [
+        n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)
+    ]
     namespace = {
         "collections": collections,
         "Decimal": Decimal,
@@ -27,6 +31,8 @@ def _load(source: str, values: dict[str, Any]) -> dict[str, Any]:
         "Any": Any,
         **values,
     }
+    # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+    # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
     exec(
         compile(ast.Module(body=nodes, type_ignores=[]), str(SOURCE), "exec"), namespace
     )
@@ -130,11 +136,8 @@ def _result(fn: Any, source: str) -> Any:
 )
 def test_verifier_preserves_numeric_identity_and_error_contract(mutation: str) -> None:
     values, article = _fixture()
-    archived = next(
-        (BASE / "refinement_v3/historical_source_snapshots").glob("*-verify.py.gz")
-    )
-    before = _load(gzip.decompress(archived.read_bytes()).decode(), values)
-    after = _load(SOURCE.read_text(), values)
+    before = _load(read_fixture("article", archived=True), values)
+    after = _load(read_fixture("article"), values)
     if mutation == "count":
         article = article.replace("Straight & 10", "Straight & 9", 1)
     if mutation == "duplicate":
@@ -164,7 +167,7 @@ def test_verifier_preserves_numeric_identity_and_error_contract(mutation: str) -
 def test_verifier_has_separate_row_and_coverage_contracts() -> None:
     functions = {
         n.name
-        for n in ast.parse(SOURCE.read_text()).body
+        for n in ast.parse(read_fixture("article")).body
         if isinstance(n, ast.FunctionDef)
     }
     assert {"_numeric_row", "_verify_coverage"} <= functions

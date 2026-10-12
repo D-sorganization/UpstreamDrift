@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import ast
 import dataclasses
-import gzip
 import hashlib
 import json
 from pathlib import Path
@@ -18,6 +17,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 import numpy as np
 import pytest
 
+from tests.research.historical_fixture_security import read_fixture, verify_source
+
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "docs/research/shot_pattern_analysis/phase2/validation"
 SOURCE = BASE / "selected_renderer_representative_v1/qualify.py"
@@ -25,7 +26,10 @@ pytestmark = pytest.mark.unit
 
 
 def _namespace(source: str) -> dict[str, Any]:
-    nodes = [n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)]
+    verify_source("renderer", source)
+    nodes: list[ast.stmt] = [
+        n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)
+    ]
     namespace: dict[str, Any] = {
         "Path": Path,
         "hashlib": hashlib,
@@ -34,6 +38,8 @@ def _namespace(source: str) -> dict[str, Any]:
         "dataclasses": dataclasses,
         "matplotlib": matplotlib,
     }
+    # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+    # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
     exec(
         compile(ast.Module(body=nodes, type_ignores=[]), str(SOURCE), "exec"), namespace
     )
@@ -41,15 +47,12 @@ def _namespace(source: str) -> dict[str, Any]:
 
 
 def _archive() -> str:
-    archive = next(
-        (BASE / "refinement_v3/historical_source_snapshots").glob("*-qualify.py.gz")
-    )
-    return gzip.decompress(archive.read_bytes()).decode()
+    return read_fixture("renderer", archived=True)
 
 
 def test_figure_capture_matches_archived_axis_and_text_evidence() -> None:
     old = _archive()
-    after = _namespace(SOURCE.read_text())
+    after = _namespace(read_fixture("renderer"))
     fig = Figure(figsize=(4, 3))
     FigureCanvasAgg(fig)
     ax = fig.subplots()
@@ -65,6 +68,8 @@ def test_figure_capture_matches_archived_axis_and_text_evidence() -> None:
     )
     block = next(n for n in save.body if isinstance(n, ast.If))
     # The first statement updates the enclosing de-duplication set, then capture begins.
+    # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+    # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
     exec(
         compile(
             ast.Module(body=block.body[1:], type_ignores=[]), "archived-capture", "exec"
@@ -121,10 +126,12 @@ def test_source_snapshots_preserve_bound_hashes_and_failure(
         and isinstance(n.target, ast.Name)
         and n.target.id == "proof"
     )
-    current = _namespace(SOURCE.read_text())
+    current = _namespace(read_fixture("renderer"))
     inputs: dict[str, str] = {}
     if bad_hash:
         with pytest.raises(AssertionError):
+            # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+            # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
             exec(
                 compile(
                     ast.Module(body=[loop], type_ignores=[]),
@@ -136,6 +143,8 @@ def test_source_snapshots_preserve_bound_hashes_and_failure(
         with pytest.raises(AssertionError):
             current["_source_snapshots"](row, {"p": root}, inputs)
     else:
+        # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+        # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
         exec(
             compile(
                 ast.Module(body=[loop], type_ignores=[]), "archived-snapshot", "exec"

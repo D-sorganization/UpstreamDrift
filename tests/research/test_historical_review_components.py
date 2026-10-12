@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import ast
 from collections.abc import Callable, Mapping
-import gzip
 import hashlib
 import html
 import json
@@ -17,6 +16,8 @@ from typing import Any, NamedTuple
 
 from PIL import Image, ImageDraw, ImageFont
 import pytest
+
+from tests.research.historical_fixture_security import read_fixture, verify_source
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "docs/research/shot_pattern_analysis/phase2/validation"
@@ -83,7 +84,8 @@ def test_missing_figure_provider_fails_before_output(
 
 
 def _load(source: str) -> dict[str, Any]:
-    nodes = [
+    verify_source("review", source)
+    nodes: list[ast.stmt] = [
         n
         for n in ast.parse(source).body
         if isinstance(n, (ast.FunctionDef, ast.ClassDef))
@@ -102,6 +104,8 @@ def _load(source: str) -> dict[str, Any]:
         "ImageDraw": ImageDraw,
         "ImageFont": ImageFont,
     }
+    # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+    # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
     exec(
         compile(ast.Module(body=nodes, type_ignores=[]), str(SOURCE), "exec"), namespace
     )
@@ -146,12 +150,7 @@ def test_component_capture_preserves_artifact_hashes_contact_pixels_and_errors(
         "_slug": _slug,
         "reviewed": [],
     }
-    archived = next(
-        (BASE / "refinement_v3/historical_source_snapshots").glob(
-            "*-review_batch.py.gz"
-        )
-    )
-    old = gzip.decompress(archived.read_bytes()).decode()
+    old = read_fixture("review", archived=True)
     namespace = _load(old)
     namespace.update(values)
     main = next(
@@ -170,16 +169,20 @@ def test_component_capture_preserves_artifact_hashes_contact_pixels_and_errors(
         "archived-review",
         "exec",
     )
-    current = _load(SOURCE.read_text())
+    current = _load(read_fixture("review"))
     identity = current["_figure_identity_provider"]()
     if changed:
         with pytest.raises(ValueError, match="completed artifact changed"):
+            # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+            # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
             exec(code, namespace)
         with pytest.raises(ValueError, match="completed artifact changed"):
             current["_review_components"](
                 args, values["records"], suffixes, values["boundary"], identity
             )
     else:
+        # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+        # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
         exec(code, namespace)
         expected = namespace["reviewed"]
         before = {
@@ -234,12 +237,7 @@ def test_selection_order_and_export_kinds_match_archive(
         json.dumps({"comparisons": pairs})
     )
     args = SimpleNamespace(report=tmp_path, group=group, kind=kind)
-    archived = next(
-        (BASE / "refinement_v3/historical_source_snapshots").glob(
-            "*-review_batch.py.gz"
-        )
-    )
-    old = gzip.decompress(archived.read_bytes()).decode()
+    old = read_fixture("review", archived=True)
     namespace = _load(old)
     namespace.update(args=args, pair_comparison_identity=pair_comparison_identity)
     main = next(
@@ -252,13 +250,15 @@ def test_selection_order_and_export_kinds_match_archive(
         for n in main.body
         if isinstance(n, ast.If) and ast.unparse(n.test) == "args.group == 'pairs'"
     )
+    # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+    # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
     exec(
         compile(
             ast.Module(body=[selection], type_ignores=[]), "archived-selection", "exec"
         ),
         namespace,
     )
-    current = _load(SOURCE.read_text())
+    current = _load(read_fixture("review"))
     assert current["_selected_records"](
         args, current["_figure_identity_provider"]()
     ) == (

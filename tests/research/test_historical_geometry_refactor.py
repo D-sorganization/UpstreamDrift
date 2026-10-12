@@ -1,6 +1,5 @@
 """Synthetic geometry-audit parity against integrity-checked archived source."""
 
-import gzip
 import hashlib
 import io
 import json
@@ -12,6 +11,8 @@ from types import ModuleType, SimpleNamespace
 
 import pytest
 
+from tests.research.historical_fixture_security import read_fixture
+
 from docs.research.shot_pattern_analysis.phase2.validation import (
     independent_geometry_derivatives as current,
 )
@@ -21,21 +22,13 @@ pytestmark = pytest.mark.unit
 
 def _archived_module(source):
     path = Path(source.__file__)
-    archive_root = path.parent / "refinement_v3/historical_source_snapshots"
-    inventory = json.loads((archive_root / "manifest.json").read_text())
-    entry = next(
-        row
-        for row in inventory["sources"]
-        if row["source_path"].endswith("/" + path.name)
-    )
-    compressed = (archive_root / entry["archive"]).read_bytes()
-    assert hashlib.sha256(compressed).hexdigest() == entry["storage_sha256"]
-    raw = gzip.decompress(compressed)
-    assert hashlib.sha256(raw).hexdigest() == entry["original_sha256"]
+    raw = read_fixture("geometry", archived=True)
     module = ModuleType("archived_" + path.stem)
     # Both receipts intentionally report the current active filename/hash;
     # the archived implementation itself is verified independently above.
     module.__file__ = str(path)
+    # Trusted fixture AST: fixed path/digests verified before extraction; no external code.
+    # nosemgrep: python.lang.security.audit.exec-detected.exec-detected
     exec(compile(raw, str(path) + "::<archived>", "exec"), module.__dict__)
     return module
 
