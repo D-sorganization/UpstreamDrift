@@ -46,6 +46,43 @@ def _path(
     )
 
 
+def test_baseline_candidate_is_retained_when_budget_is_one() -> None:
+    dt = 0.01
+    path = replace(
+        _path("baseline", {"hip": 0.05}, prior=0.0, rate=100.0),
+        activation=0.1,
+        activation_dynamics=ActivationDynamics(
+            tau_act=0.015, tau_deact=0.06, min_activation=0.01
+        ),
+    )
+    activation = path.activation_dynamics.update(0.0, path.activation, dt)
+    fiber = EquilibriumSolver(path.muscle).solve_fiber_length(
+        path.muscle_tendon_length_m, activation
+    )
+    tendon_length = path.muscle_tendon_length_m - fiber
+    tendon_force = path.muscle.params.F_max * path.muscle.tendon_force(
+        tendon_length / path.muscle.params.l_slack
+    )
+    target = path.moment_arms_m_or_rad["hip"] * tendon_force
+
+    result = allocate_muscle_excitations(
+        (path,),
+        ("hip",),
+        (target,),
+        coordinate_effort_units=("N*m",),
+        dt_s=dt,
+        effort_tolerances=(1e-6,),
+        force_equilibrium_tolerance_n=1e-4,
+        max_nfev=1,
+    )
+
+    assert result.status == "budget_exhausted"
+    assert not result.feasible
+    assert result.excitations["baseline"] == pytest.approx(0.0)
+    assert result.generalized_effort["hip"] == pytest.approx(target, abs=1e-6)
+    assert result.nfev == 1
+
+
 def test_floor_plateau_seed_finds_feasible_above_floor_candidate() -> None:
     dt = 0.01
     paths = (
