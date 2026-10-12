@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **397** | **276** | **123** | **1626** | **808** | **673** |
+| **Total** | **397** | **276** | **123** | **1627** | **808** | **673** |
 
 ## Diverged Files by Package
 
@@ -426,7 +426,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/data_io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/data_processing/core.py` | -119 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-08-23 |
 | `sidekick/data_processing/io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `sidekick/lab/bio/c3d_reader.py` | +0 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `sidekick/lab/bio/c3d_reader.py` | +79 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `sidekick/latex_renderer.py` | -79 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 | `sidekick/notes_store.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/notes_tab.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |

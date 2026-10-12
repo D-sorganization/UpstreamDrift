@@ -23,8 +23,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, cast
 
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
+
 try:
-    import ezc3d
+    ezc3d = import_ezc3d()
 except ImportError:
     ezc3d = None  # type: ignore[assignment, unused-ignore]
 
