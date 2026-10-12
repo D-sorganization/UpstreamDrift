@@ -167,9 +167,24 @@ def test_leaderboard_resolves_commit_when_unknown(
 def _skip_if_no_pinocchio() -> None:
     """Skip the calling test if the Pinocchio bindings are not importable."""
     try:
-        import pinocchio  # noqa: F401
-    except ImportError as exc:  # pragma: no cover - environment-dependent
-        pytest.skip(f"pinocchio not installed: {exc}")
+        import pinocchio
+    except (ImportError, OSError) as exc:  # pragma: no cover - environment-dependent
+        pytest.skip(f"pinocchio not loadable: {exc}")
+    if type(pinocchio).__module__ == "unittest.mock" or not hasattr(
+        pinocchio, "buildModelFromUrdf"
+    ):
+        pytest.skip("pinocchio is a collection mock or lacks native bindings")
+
+
+@pytest.mark.unit
+def test_pinocchio_probe_rejects_collection_mock(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from unittest.mock import MagicMock
+
+    monkeypatch.setitem(sys.modules, "pinocchio", MagicMock())
+    with pytest.raises(pytest.skip.Exception):
+        _skip_if_no_pinocchio()
 
 
 @pytest.mark.requires_pinocchio
@@ -178,7 +193,7 @@ def test_plot_trajectory_overlay_smoke(
     fake_target: _FakeTarget, fake_result: FitResult, tmp_path: Path
 ) -> None:
     _skip_if_no_pinocchio()
-    from src.shared.python.motion_matching.viz import plot_trajectory_overlay
+    from motion_matching.viz import plot_trajectory_overlay
 
     out = tmp_path / "traj.png"
     fig = plot_trajectory_overlay(fake_target, fake_result, out_path=out)
@@ -194,7 +209,7 @@ def test_plot_error_timecourse_smoke(
     fake_target: _FakeTarget, fake_result: FitResult, tmp_path: Path
 ) -> None:
     _skip_if_no_pinocchio()
-    from src.shared.python.motion_matching.viz import plot_error_timecourse
+    from motion_matching.viz import plot_error_timecourse
 
     out = tmp_path / "err.png"
     fig = plot_error_timecourse(fake_target, fake_result, out_path=out)
@@ -210,7 +225,7 @@ def test_plot_fit_quality_card_smoke(
     fake_target: _FakeTarget, fake_result: FitResult, tmp_path: Path
 ) -> None:
     _skip_if_no_pinocchio()
-    from src.shared.python.motion_matching.viz import plot_fit_quality_card
+    from motion_matching.viz import plot_fit_quality_card
 
     out = tmp_path / "card.png"
     fig = plot_fit_quality_card(fake_target, fake_result, out_path=out)
@@ -226,7 +241,7 @@ def test_visualize_fit_emits_three_views(
     fake_target: _FakeTarget, fake_result: FitResult, tmp_path: Path
 ) -> None:
     _skip_if_no_pinocchio()
-    from src.shared.python.motion_matching.viz import visualize_fit
+    from motion_matching.viz import visualize_fit
 
     artefacts = visualize_fit(fake_target, fake_result, out_dir=tmp_path)
     assert {"trajectory_overlay", "error_timecourse", "fit_quality_card"} <= set(

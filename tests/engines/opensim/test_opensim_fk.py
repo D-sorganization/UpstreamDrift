@@ -136,6 +136,7 @@ class TestExtractWithMockModel:
         }
         model = self._make_mock_model(translations)
         state = MagicMock()
+        state.getNumSubsystems.return_value = 1
 
         pos, quat = extract_grip_pose(state, model)
 
@@ -161,6 +162,7 @@ class TestExtractWithMockModel:
         }
         model = self._make_mock_model(translations)
         state = MagicMock()
+        state.getNumSubsystems.return_value = 1
 
         pos, quat = extract_clubhead_pose(state, model)
         np.testing.assert_allclose(pos, [0.30, 0.10, -0.04], atol=1e-12)
@@ -180,6 +182,7 @@ class TestExtractWithMockModel:
         }
         model = self._make_mock_model(translations)
         state = MagicMock()
+        state.getNumSubsystems.return_value = 1
 
         full = extract_full_pose(state, model)
         # Each landmark must produce two keys: <name>_pos, <name>_quat.

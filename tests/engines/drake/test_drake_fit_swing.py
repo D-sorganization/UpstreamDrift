@@ -360,7 +360,9 @@ class TestFitSwingDrakeLive:
     """
 
     def test_recovers_synthetic_swing(self) -> None:
-        pytest.importorskip("pydrake")
+        pydrake = pytest.importorskip("pydrake")
+        if type(pydrake).__module__ == "unittest.mock":
+            pytest.skip("pydrake is a collection mock, not a Drake runtime")
 
         from src.engines.physics_engines.drake.python.motion_matching.simulate import (
             SimOptions,

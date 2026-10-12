@@ -40,9 +40,11 @@ fixture lands) and is not present on a fresh ``main`` checkout.
 from __future__ import annotations
 
 import csv
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -233,6 +235,19 @@ def simscape_poses() -> list[SimscapePose]:
     return _load_simscape_poses(SIMSCAPE_CSV)
 
 
+def _require_real_pydrake() -> None:
+    pydrake = pytest.importorskip("pydrake", reason="pydrake is required for #4123")
+    if type(pydrake).__module__ == "unittest.mock":
+        pytest.skip("pydrake is a collection mock, not a Drake runtime")
+
+
+@pytest.mark.unit
+def test_drake_probe_rejects_collection_mock(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setitem(sys.modules, "pydrake", MagicMock())
+    with pytest.raises(pytest.skip.Exception):
+        _require_real_pydrake()
+
+
 @pytest.fixture(scope="module")
 def drake_simulate_module():
     """Import the Drake forward-sim wrapper or skip.
@@ -240,7 +255,7 @@ def drake_simulate_module():
     Skips when either ``pydrake`` itself is missing OR when the
     ``simulate`` module has not been merged to ``main`` yet (PR #4169).
     """
-    pytest.importorskip("pydrake", reason="pydrake is required for #4123")
+    _require_real_pydrake()
     return pytest.importorskip(
         "src.engines.physics_engines.drake.python.motion_matching.simulate",
         reason=(
