@@ -130,10 +130,12 @@ class TestSetGet:
         import src.shared.python.contracts as contracts_mod
 
         set_contract_level(ContractLevel.OFF)
-        assert contracts_mod.DBC_LEVEL == ContractLevel.OFF
+        assert contracts_mod.DBC_LEVEL is contracts_mod.ContractLevel.OFF
+        assert contracts_mod.DBC_LEVEL.value == ContractLevel.OFF.value
         assert contracts_mod.CONTRACTS_ENABLED is False
         set_contract_level(ContractLevel.ENFORCE)
-        assert contracts_mod.DBC_LEVEL == ContractLevel.ENFORCE
+        assert contracts_mod.DBC_LEVEL is contracts_mod.ContractLevel.ENFORCE
+        assert contracts_mod.DBC_LEVEL.value == ContractLevel.ENFORCE.value
         assert contracts_mod.CONTRACTS_ENABLED is True
 
 
