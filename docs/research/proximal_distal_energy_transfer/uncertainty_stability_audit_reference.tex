@@ -1,0 +1,72 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{margin=1in}
+\title{Uncertainty and Control Stability Audit Reference}
+\author{UpstreamDrift Research}
+\date{October 2026}
+\begin{document}
+\maketitle
+
+\section{Scope and Assumptions}
+This standalone research reference specifies the deterministic, small-sample
+perturbation audit for the moving-base, two-hand, flexible-club model tier. It
+does not establish population uncertainty, physiological validity, or a human
+forward-dynamics match. The study uses 24 global parameter samples, six held-out
+samples, a 0.24\,s horizon, and a 0.004\,s step. Physical parameter units and
+bounds, output units, actuator definitions, and the model's coordinate frames
+are defined in \texttt{data/uncertainty\_control\_study.json} and its producer
+\texttt{scripts/research/proximal\_distal\_energy/run\_uncertainty\_control\_study.py}.
+The audit does not transform frames or units; its standardized sensitivity
+matrix and rank fractions are dimensionless.
+
+\section{Inputs and Provenance}
+The primary JSON and NPZ array artifact are immutable inputs to this audit.
+Before computation, their canonical SHA-256 digests and byte lengths must equal
+their entries in \texttt{release\_manifest.json}. The manifest's canonical text
+hashing normalizes CRLF to LF, while NPZ bytes are hashed without conversion.
+This binding rejects any change to the underlying sensitivity matrix even when
+the effective ranks happen to be unchanged. The primary JSON contains the six
+singular values saved by the original study producer. The committed stability
+JSON is historical output and is never regenerated solely to accommodate a
+different linear-algebra runtime.
+
+\section{Numerical Method}
+For each output metric, the audit computes partial rank correlations (PRCCs)
+against the global physical design. It repeats the calculation after deleting
+each of the 24 samples, then records the absolute-PRCC leader frequency and
+sign reversals. For each held-out candidate program, it minimizes the vector
+of five objectives: negative tenth-percentile delivery speed, mean face-path
+error, ninetieth-percentile hand force, mean squared-torque effort, and
+delivery-speed sample standard deviation. Pareto membership is recomputed after
+deleting each of the six held-out samples.
+
+Let $S$ be the standardized sensitivity matrix, and let
+$\sigma_1\geq\cdots\geq\sigma_6$ be its singular values. The threshold rank is
+\begin{equation}
+ r_{\tau}=\sum_{i=1}^{6}\mathbf{1}\{\sigma_i>\tau\sigma_1\},
+ \qquad \tau\in\{0.01,0.05,0.10,0.20\}.
+\end{equation}
+The audit reports the exact published singular values from the hash-bound
+primary study JSON. It independently computes singular values from the NPZ
+matrix and requires the four derived ranks to agree. This rank comparison
+checks the scientific conclusion without demanding bit-for-bit agreement in
+last-place singular-value digits across BLAS implementations.
+
+\section{Acceptance and Limits}
+Acceptance requires valid input hashes and lengths, agreement of all four
+threshold ranks, and exact equality between the rebuilt audit and the committed
+\texttt{data/uncertainty\_control\_stability\_audit.json}. On the registered
+study, the ranks at 1\%, 5\%, 10\%, and 20\% are 6, 6, 6, and 5.
+The six singular values identify only six observable directions among twelve
+coupled parameters. The leave-one-out and jackknife results diagnose local
+sample sensitivity; they are not confidence intervals or external validation.
+
+\section{Reproduction}
+From the repository root, with the pinned development environment active,
+run \texttt{python -m pytest -q -o addopts='' tests/research/test\_uncertainty\_stability\_audit.py
+tests/research/test\_results\_chapter\_audit.py}. The script
+\texttt{python -m scripts.research.proximal\_distal\_energy.audit\_uncertainty\_stability}
+is the writer entry point; use it only for a deliberately versioned new study,
+not to overwrite the historical audit during verification.
+\end{document}

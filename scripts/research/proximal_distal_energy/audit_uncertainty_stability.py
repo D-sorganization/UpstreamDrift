@@ -7,11 +7,31 @@ from pathlib import Path
 
 import numpy as np
 
+from .release_bundle import artifact_sha256, artifact_size
 from .uncertainty_control import nondominated_indices, partial_rank_correlations
 
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 OUTPUT = DATA / "uncertainty_control_stability_audit.json"
+ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
+
+
+def _verify_study_inputs() -> None:
+    """Bind the audit to the exact primary study and array release artifacts."""
+    manifest = json.loads(
+        (ARTICLE / "release_manifest.json").read_text(encoding="utf-8")
+    )
+    artifacts = manifest["artifacts"]
+    for name in ("uncertainty_control_study.json", "uncertainty_control_study.npz"):
+        path = DATA / name
+        relative = f"docs/research/proximal_distal_energy_transfer/data/{name}"
+        expected = artifacts.get(relative)
+        if (
+            not isinstance(expected, dict)
+            or artifact_sha256(path) != expected.get("sha256")
+            or artifact_size(path) != expected.get("bytes")
+        ):
+            raise ValueError(f"study input identity hash mismatch: {relative}")
 
 
 def _objectives(outputs: np.ndarray) -> np.ndarray:
@@ -29,6 +49,7 @@ def _objectives(outputs: np.ndarray) -> np.ndarray:
 
 def build_audit() -> dict[str, object]:
     """Compute leave-one-out rankings, Pareto membership, and rank thresholds."""
+    _verify_study_inputs()
     record = json.loads(
         (DATA / "uncertainty_control_study.json").read_text(encoding="utf-8")
     )
@@ -94,12 +115,26 @@ def build_audit() -> dict[str, object]:
         for index, name in enumerate(names)
     }
 
-    singular = np.linalg.svd(sensitivity, compute_uv=False)
+    singular = np.asarray(
+        record["identifiability"]["coupled_parameter_screen"][
+            "standardized_sensitivity_singular_values"
+        ],
+        dtype=float,
+    )
+    computed_singular = np.linalg.svd(sensitivity, compute_uv=False)
     threshold_fractions = (0.01, 0.05, 0.10, 0.20)
     threshold_ranks = {
         str(fraction): int(np.sum(singular > fraction * singular[0]))
         for fraction in threshold_fractions
     }
+    computed_ranks = {
+        str(fraction): int(np.sum(computed_singular > fraction * computed_singular[0]))
+        for fraction in threshold_fractions
+    }
+    if len(singular) != len(computed_singular) or threshold_ranks != computed_ranks:
+        raise ValueError(
+            "study singular values disagree with independently computed ranks"
+        )
     return {
         "schema_version": "proximal-distal-uncertainty-stability-audit-v1",
         "prcc_leave_one_out": {
