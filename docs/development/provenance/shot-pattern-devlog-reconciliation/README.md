@@ -21,3 +21,7 @@ The canonical pre-PR title checker then required `Same-Repo if:` to become `Same
 ## Workflow-Key Literal Follow-Up
 
 The protected CI repository checker treats `if` as a minor word, while the canonical RM checker had required `If`. The current archive now marks the workflow key as inline code (`if:`), preserving its literal spelling under both checkers. `workflow-literal-normalization.json` records the single heading edit and current archive hash; `archive-before-workflow-literal.md.gz` preserves the preceding archive exactly. The earlier title-normalization receipt remains historical. No record fields, statuses, acceptance claims or limits change.
+
+## Main Capacity-Repair Merge
+
+Main commit `8a22fd99a8` independently archived the same terminal records and corrected completed #10783 metadata. Its archive and this branch’s archive are byte-identical, including the workflow-key literal. The official `apply_devlog_entry` reapplies the already-reviewed #9507 fragment to the incoming log, preserving main’s #10783 update and every other entry title and field. `main-capacity-merge.json` and both gzip source logs record the merge. The official validator passes with its existing22-entry portfolio WIP warning retained. No further archive move or scientific acceptance change occurs.

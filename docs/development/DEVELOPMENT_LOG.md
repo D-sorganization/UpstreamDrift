@@ -522,19 +522,6 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Committed root entries (`git ls-tree --name-only HEAD`) must match `scripts/config/root_allowlist.json`; unlisted and stale entries both fail, and a failed git call or malformed config fails closed. Closes the last software checkbox of #9415; the history rewrite, Jules workflows and SPEC cap remain owner decisions.
 - **Next step:** CI green, review, merge.
 
-### DL-#10783 · Enforce the Deferred Validation Catalog
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** #10783; full rollout Repository_Management#1687
-- **PR:** #10784
-- **Branch:** `chore/10783-deferred-catalog-guard`
-- **Paths:** `shared_scripts/`, `tests/unit/repo_hygiene/test_deferred_catalog_hook.py`, `.pre-commit-config.yaml`, `docs/development/`, `AGENT_HANDOFF.md`, `README.md`, `SPEC.md`
-- **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 (`df571686df`; five RED then GREEN controls; twenty combined tests; root Ruff/8162-file format, strict new-test typing, size/manual gates and actual commit/pre-push hooks pass; initialized exact existing Tools gitlink after retained setup failures)
-- **Summary:** Install the exact central validator and always-run hook while preserving six published v1 plans, executable software and unavailable empirical acceptance.
-- **Next step:** User-requested committed handoff: architecture correction passes hosted job 107433594917; add the appropriate unit-suite marker to the three new catalog test functions, validate and complete protected #10784/default-branch verification. Three canonical-function exceptions expire 2026-10-23.
-
 ### DL-#8907 · One User Config Root and One QSettings Namespace for the Launcher
 
 - **State:** in_review
@@ -1195,6 +1182,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Summary:** `smoke-test-wheel` used non-cone sparse checkout, which leaves `core.sparseCheckout=true` in `.git/config` and poisons later jobs on reused self-hosted runners. Switched to cone mode on `tests/fixtures` and added a guard test over all workflows.
 - **Next step:** Implementation completed in merged #11522 (43d63ce98bcb6d4318bf5ab7ba8a6adf87071caf), issue #9507 closed completed. Metadata-only reconciliation: 24 checkout/workflow contract tests pass on 0c612812cb; no new fleet-runtime, scientific or physical qualification is claimed. Continue routine runner monitoring.
 - **PR:** #11522, #12278
+
+### DL-#10783 · Enforce the Deferred Validation Catalog
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #10783; full rollout Repository_Management#1687
+- **PR:** #10784
+- **Branch:** `chore/10783-deferred-catalog-guard`
+- **Paths:** `shared_scripts/`, `tests/unit/repo_hygiene/test_deferred_catalog_hook.py`, `.pre-commit-config.yaml`, `docs/development/`, `AGENT_HANDOFF.md`, `README.md`, `SPEC.md`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-10-12 (`8e9b4b97`; collated from scoped #10783 verification on UpstreamDrift main)
+- **Summary:** Install the exact central validator and always-run hook while preserving six published v1 plans, executable software and unavailable empirical acceptance.
+- **Next step:** The UpstreamDrift software guard is complete; the three canonical-function exceptions expire 2026-10-23. Broader fleet rollout remains separately tracked in Repository_Management #1687.
 
 ## Archive
 

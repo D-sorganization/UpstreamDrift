@@ -1077,5 +1077,13 @@
     "validation": "17 focused verifier/integrity cases pass, including wrong commit/path/cwd/command and corrupt stored/raw data. Separately, production full-history retrieval reproduces84 exact comparisons and3 source projections. Astra independently verified all6 original Git blob identities and deterministic archives.",
     "scope": "Unit-test portability only; no live Git retrieval claim from injected unit transport and no scientific qualification renewed.",
     "status": "Focused checks pass; updated complete canonical gate and protected CI pending."
+  },
+  "latest_main_capacity_reconciliation": {
+    "main": "8a22fd99a86f76e0fd1e42989a4e0ae1843a76df",
+    "tool": "shared_scripts.changes_fragment.apply_devlog_entry",
+    "scope": "Only retain already-completed9507 correction alongside incoming already-completed10783 correction; all76 parsed entry titles/fields conserved except these independently evidenced state updates.",
+    "archive": "Both branch and main archives are byte-identical:SHA25673675e99cd33bd54b3ec8804c29bc5b8adabbc4636ab57ca4c3f6493fa84f85d. No duplicate move.",
+    "validation": "Official development-log validator passes; existing22-entry portfolio WIP warning retained. Both original active logs are lossless gzip; detailed merge proof committed.",
+    "gate": "Updated complete canonical and protected CI pending."
   }
 }
