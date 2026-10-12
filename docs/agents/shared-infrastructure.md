@@ -75,6 +75,13 @@ binding parsers or execution. Keep physics and wire records in Tools; build
 UpstreamDrift API, PyQt, and React presenters on this gateway without copying
 the solver or relabeling provenance.
 
+### Data Processing Provider Boundary
+
+`src/shared/python/sidekick_data_processing_bridge.py` binds legacy Sidekick
+core and exception imports to the pinned Tools provider. Use the public
+`sidekick.data_processing` exports; the [boundary reference](../development/data_processing_provider_boundary.md)
+records class identity, calculation behavior, and reproduction checks.
+
 ### Motion Matching (The Big One)
 
 `src/shared/python/motion_matching/`

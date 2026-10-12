@@ -388,19 +388,19 @@ class TestFilterData:
     def test_filter_gt_returns_filtered_rows(self, loaded_engine) -> None:
         """filter_data('a', '>', 2.0) returns rows where a > 2."""
         result = loaded_engine.filter_data("a", ">", 2.0)
-        assert result.solver_status == "success"
+        assert result.success is True
         assert len(result.data) == 3  # rows with a=3,4,5
 
     def test_filter_eq_returns_matching_rows(self, loaded_engine) -> None:
         """filter_data('a', '==', 1.0) returns row where a == 1."""
         result = loaded_engine.filter_data("a", "==", 1.0)
-        assert result.solver_status == "success"
+        assert result.success is True
         assert len(result.data) == 1
 
     def test_filter_lt_returns_filtered_rows(self, loaded_engine) -> None:
         """filter_data('a', '<', 3.0) returns rows where a < 3."""
         result = loaded_engine.filter_data("a", "<", 3.0)
-        assert result.solver_status == "success"
+        assert result.success is True
         assert len(result.data) == 2
 
     def test_filter_no_data_raises(self, engine) -> None:
