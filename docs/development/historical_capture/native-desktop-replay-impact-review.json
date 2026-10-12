@@ -1,0 +1,411 @@
+{
+  "schema": "necromatcher-native-desktop-replay-impact-review/1",
+  "issue": 11487,
+  "epic": 11232,
+  "pull_request": 11359,
+  "base_checkpoint": "b1129b3489f9f504d927bd0c4e10394f2d0069ee",
+  "source_pins": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\tools\\necromatcher\\gui.py",
+      "bytes": 19748,
+      "sha256": "2c6fd964a4b0f74d6601bfc6546bcb2b1f78416ef08e5702ae245dd38854d6b8"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\tools\\necromatcher\\replay_impact_dialog.py",
+      "bytes": 22965,
+      "sha256": "89e8604505c658c7da6b43b0333ff52fdbf467842e752ef95caa75442d234773"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\launchers\\_shot_tracer_gui.py",
+      "bytes": 24344,
+      "sha256": "04a6c02810a74f02ca08fc7b7be74b3b82af3a1b41ffcdc5106512cad6204b37"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\launchers\\test_shot_tracer_public_handoff.py",
+      "bytes": 2526,
+      "sha256": "152a941a051ac909e79fa9517956e11e49b71b142789ae98e93753f8f1af0530"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\tools\\test_necromatcher_replay_impact_dialog.py",
+      "bytes": 11836,
+      "sha256": "82927d0e2ee2941d196837807f6baaefa460c8215f6c942708b2775eaaaa495d"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\tools\\test_necromatcher_replay_impact_handoff.py",
+      "bytes": 2454,
+      "sha256": "72ff5d29e160a8246dae0184dca77633754ebc44ae17a856b89c910b7654b95c"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\tools\\test_necromatcher_replay_impact_native_handoff.py",
+      "bytes": 12158,
+      "sha256": "98cad60edaf773f1c0acf4234bead67a1326f96d88bcecf45ddbb8a88290d0b1"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\config\\feature_parity.json",
+      "bytes": 27046,
+      "sha256": "22d1a03088dcecdc61079e72928346fcf1ba5f2b9a3fa37ab9b4e40e376b8325"
+    }
+  ],
+  "agent_freezes": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\native-replay-impact-ui-freeze-v1.json",
+      "bytes": 3288,
+      "sha256": "4b528506481d04a0362e632df18f44a061e06dab913a14bb3d062ed19786766e"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\shot-tracer-public-handoff-freeze-v1\\freeze.json",
+      "bytes": 2454,
+      "sha256": "6e3d8274aefe92fd011d96e8da70c66f0c62cc94d62a3c10f9dbb51213c28106"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-freeze-v3\\freeze.json",
+      "bytes": 4553,
+      "sha256": "45a7e6ceb5cf2ca82b210f2e6cc175d93b1baa24250db9dfd1f24ff1d77efe2c"
+    }
+  ],
+  "root_validation": {
+    "focused_cases": 146,
+    "skips": 0,
+    "cohort_session": 71367,
+    "cohort_exit_code": 0,
+    "logs": [
+      {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-impact-root-cohort-v1.log",
+        "bytes": 7078,
+        "sha256": "58ce4e6080e4fbe1b6f3e78f666a0b8306287ff2e9316d73ca70ea59c3004cba"
+      },
+      {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-impact-root-mypy-v1.log",
+        "bytes": 44,
+        "sha256": "281a094c39385b4d7b53e5db635f52158036861433c2a4975b9039e77a627a24"
+      }
+    ],
+    "configured_mypy_owners": 3,
+    "mypy_passed": true,
+    "pinned_ruff": "0.15.17 check and format passed on final seven files",
+    "manual_release": "blocked-inventory-required"
+  },
+  "actual_native_validation": {
+    "schema": "synthetic-native-qt-acceptance-review/3",
+    "actual_session": 71327,
+    "python_exit_code": 0,
+    "test_cases_passed": 1,
+    "call_elapsed_s": 20.68,
+    "setup_elapsed_s": 4.2,
+    "native_worker_budget_s": 60,
+    "pytest_timeout_s": 120,
+    "per_phase_wait_deadline_s": 90,
+    "actual_mujoco_hdf5_clean_worker_impact_rust": true,
+    "physics_transport_parser_substitution": false,
+    "file_chooser_substitution_only": true,
+    "observer_wrappers_delegate_real_calls": true,
+    "font_setup": "Existing Windows Segoe UI loaded only for empty offscreen font database; no installation or production change",
+    "visual_review": {
+      "all_three_images_inspected": true,
+      "text_readable": true,
+      "public_imported_list_row_visible": true,
+      "opengl_pixel_accuracy_claim": false
+    },
+    "scientific_qualified": false,
+    "historical_model_match": false,
+    "parent_reauthentication_claim_from_portable_receipt": false,
+    "source_budget": {
+      "lines": 307,
+      "max_function_lines": 43,
+      "max_args": 4
+    },
+    "timeline": [
+      {
+        "phase": "fixture_ready",
+        "elapsed_s": 2.5999615900218487e-6
+      },
+      {
+        "phase": "recorded_replay_and_expected_state",
+        "elapsed_s": 0.5136834000004455
+      },
+      {
+        "phase": "first_dialog_source_loaded",
+        "elapsed_s": 0.6259697999921627
+      },
+      {
+        "phase": "declaration_loaded",
+        "elapsed_s": 0.7049770999583416
+      },
+      {
+        "phase": "native_job_terminal",
+        "elapsed_s": 18.170223199995235
+      },
+      {
+        "phase": "bundle_saved",
+        "elapsed_s": 18.556009299994912
+      },
+      {
+        "phase": "first_session_closed",
+        "elapsed_s": 18.66038719995413
+      },
+      {
+        "phase": "bundle_verified",
+        "elapsed_s": 18.709133800002746
+      },
+      {
+        "phase": "second_dialog_source_loaded",
+        "elapsed_s": 18.79328220000025
+      },
+      {
+        "phase": "saved_run_recalled",
+        "elapsed_s": 18.93236129998695
+      },
+      {
+        "phase": "public_viewer_verified",
+        "elapsed_s": 20.631193599954713
+      },
+      {
+        "phase": "second_session_closed",
+        "elapsed_s": 20.634177099971566
+      }
+    ],
+    "prior_v2_preserved": "C:/Users/diete/Repositories/Temp/replay-impact-native-qt-freeze-v2/freeze.json"
+  },
+  "font_diagnosis": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\offscreen-font-diagnosis-v1.json",
+    "bytes": 508,
+    "sha256": "9d5c258293b24c04d7403dcdb0bd03c2f07a9dd3cc908e2a377375a3ee7a5f99"
+  },
+  "earlier_failure_boundary": "V1 timed out at the prior whole-test 60-second cap; shell exit 0 was masked and is not acceptance. Cause unqualified. V2 Python 0 establishes retained data, but unreadable screenshots were not visual acceptance. Both attempts preserved; V3 uses existing OS font only when offscreen font database is empty and a test-only 120-second cap. Native budget stays 60 seconds.",
+  "report": {
+    "source": {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\necromatcher-native-desktop-impact-methods.tex",
+      "bytes": 8999,
+      "sha256": "2c258f4649707af5d362099c7f409813ce3230d0da81dd2fcf42f045615eeaaf"
+    },
+    "pdf": {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\necromatcher-native-desktop-impact-methods.pdf",
+      "bytes": 164917,
+      "sha256": "91bf409ff307d235f13ef1971dad1acf63614154d2e3f5c3a15288bb68bb1bd9"
+    },
+    "compiler_log": {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\necromatcher-native-desktop-impact-methods.log",
+      "bytes": 21936,
+      "sha256": "4f5d795a03adb1b85e06a87fed4a6b73bc9b427d60af1e1373f93aef54671d76"
+    },
+    "pages": [
+      {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\page-1.png",
+        "bytes": 138537,
+        "sha256": "30f96b0261bd2e35d09a39d96485c854232642959d968c83833041a84c68ed55"
+      },
+      {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\page-2.png",
+        "bytes": 166385,
+        "sha256": "928bdf7db5dbcad898e1a551c55a8bc221f859c1116b50666ad18c8052ac8cbb"
+      },
+      {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\page-3.png",
+        "bytes": 186669,
+        "sha256": "483b3e35a3445d0d1f5610dfd94fe607a68dac08d7ad2d454df666ce779a74db"
+      }
+    ],
+    "page_count": 3,
+    "all_pages_visually_reviewed": true,
+    "layout_warnings": false,
+    "built_in_compiler": "unavailable platform directories; existing installer-disabled MiKTeX fallback"
+  },
+  "desktop_copies": [
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\necromatcher-native-desktop-impact-methods.tex",
+        "bytes": 8999,
+        "sha256": "2c258f4649707af5d362099c7f409813ce3230d0da81dd2fcf42f045615eeaaf"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\necromatcher-native-desktop-impact-methods.tex",
+        "bytes": 8999,
+        "sha256": "2c258f4649707af5d362099c7f409813ce3230d0da81dd2fcf42f045615eeaaf"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\necromatcher-native-desktop-impact-methods.pdf",
+        "bytes": 164917,
+        "sha256": "91bf409ff307d235f13ef1971dad1acf63614154d2e3f5c3a15288bb68bb1bd9"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\necromatcher-native-desktop-impact-methods.pdf",
+        "bytes": 164917,
+        "sha256": "91bf409ff307d235f13ef1971dad1acf63614154d2e3f5c3a15288bb68bb1bd9"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\necromatcher-native-desktop-impact-methods.log",
+        "bytes": 21936,
+        "sha256": "4f5d795a03adb1b85e06a87fed4a6b73bc9b427d60af1e1373f93aef54671d76"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\necromatcher-native-desktop-impact-methods.log",
+        "bytes": 21936,
+        "sha256": "4f5d795a03adb1b85e06a87fed4a6b73bc9b427d60af1e1373f93aef54671d76"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\page-1.png",
+        "bytes": 138537,
+        "sha256": "30f96b0261bd2e35d09a39d96485c854232642959d968c83833041a84c68ed55"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Report Pages\\page-1.png",
+        "bytes": 138537,
+        "sha256": "30f96b0261bd2e35d09a39d96485c854232642959d968c83833041a84c68ed55"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\page-2.png",
+        "bytes": 166385,
+        "sha256": "928bdf7db5dbcad898e1a551c55a8bc221f859c1116b50666ad18c8052ac8cbb"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Report Pages\\page-2.png",
+        "bytes": 166385,
+        "sha256": "928bdf7db5dbcad898e1a551c55a8bc221f859c1116b50666ad18c8052ac8cbb"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-native-desktop-impact-methods-v1\\page-3.png",
+        "bytes": 186669,
+        "sha256": "483b3e35a3445d0d1f5610dfd94fe607a68dac08d7ad2d454df666ce779a74db"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Report Pages\\page-3.png",
+        "bytes": 186669,
+        "sha256": "483b3e35a3445d0d1f5610dfd94fe607a68dac08d7ad2d454df666ce779a74db"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-acceptance-v3\\completed-dialog.png",
+        "bytes": 55512,
+        "sha256": "480fefd495106226c12480d6ab37ebbc833b902ba7abb471f4b234708b25af4d"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Synthetic Native Handoff\\completed-dialog.png",
+        "bytes": 55512,
+        "sha256": "480fefd495106226c12480d6ab37ebbc833b902ba7abb471f4b234708b25af4d"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-acceptance-v3\\font-environment.json",
+        "bytes": 378,
+        "sha256": "b6dd6ca955477f149a7e93b9384620551854d9f37231b17499b4739e8d251e47"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Synthetic Native Handoff\\font-environment.json",
+        "bytes": 378,
+        "sha256": "b6dd6ca955477f149a7e93b9384620551854d9f37231b17499b4739e8d251e47"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-acceptance-v3\\impact-receipt.json",
+        "bytes": 3210,
+        "sha256": "1cbca3b67548457a956e911954fb079a19e6145fdbf3d0bfec8fb9c795189b37"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Synthetic Native Handoff\\impact-receipt.json",
+        "bytes": 3210,
+        "sha256": "1cbca3b67548457a956e911954fb079a19e6145fdbf3d0bfec8fb9c795189b37"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-acceptance-v3\\recalled-dialog.png",
+        "bytes": 71828,
+        "sha256": "e5d9587a55886091b5b2a011622079b85dae30b2e0edb379200f950e40ec456d"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Synthetic Native Handoff\\recalled-dialog.png",
+        "bytes": 71828,
+        "sha256": "e5d9587a55886091b5b2a011622079b85dae30b2e0edb379200f950e40ec456d"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-acceptance-v3\\request.json",
+        "bytes": 100772,
+        "sha256": "74ae7fb5f5303e97e5b00f51816096c08b16e5b4037925fb4c259e23ab3db8f3"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Synthetic Native Handoff\\request.json",
+        "bytes": 100772,
+        "sha256": "74ae7fb5f5303e97e5b00f51816096c08b16e5b4037925fb4c259e23ab3db8f3"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-acceptance-v3\\result.json",
+        "bytes": 107579,
+        "sha256": "c337bcbbac5a661a107cb4d07271f04c4dcaaf2d54fc2e5b2898de51a57a0136"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Synthetic Native Handoff\\result.json",
+        "bytes": 107579,
+        "sha256": "c337bcbbac5a661a107cb4d07271f04c4dcaaf2d54fc2e5b2898de51a57a0136"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-acceptance-v3\\shot-tracer.png",
+        "bytes": 64724,
+        "sha256": "f344b50e1b8e756f0a00d8cfeb5b1bfcbcc7d602e61c1e563fb0fef0ffeab5d3"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Synthetic Native Handoff\\shot-tracer.png",
+        "bytes": 64724,
+        "sha256": "f344b50e1b8e756f0a00d8cfeb5b1bfcbcc7d602e61c1e563fb0fef0ffeab5d3"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-acceptance-v3\\timeline.json",
+        "bytes": 822,
+        "sha256": "9c5b03bddd8c9369b0a207ca499b4e6d2fc49539fdec4579d7beb391695ca6f7"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Synthetic Native Handoff\\timeline.json",
+        "bytes": 822,
+        "sha256": "9c5b03bddd8c9369b0a207ca499b4e6d2fc49539fdec4579d7beb391695ca6f7"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\replay-impact-native-qt-acceptance-v3\\trajectory.json",
+        "bytes": 1493,
+        "sha256": "dfc28416d085e947aff6c341dda2ad832b50ac359fbfde6fa2f241f329dccef1"
+      },
+      "destination": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Native Desktop Impact Supplement 1\\Synthetic Native Handoff\\trajectory.json",
+        "bytes": 1493,
+        "sha256": "dfc28416d085e947aff6c341dda2ad832b50ac359fbfde6fa2f241f329dccef1"
+      }
+    }
+  ],
+  "public_receipt_load_on_copied_bundle": true,
+  "review_boundaries": {
+    "readable_all_three_screenshots_reviewed": true,
+    "historical_library_mutated": false,
+    "historical_fit_improved": false,
+    "scientific_qualified": false,
+    "physical_time_qualified": false,
+    "opengl_pixel_accuracy": false,
+    "controltower_delivered": false,
+    "remote_ci_verified": false,
+    "goal_complete": false,
+    "tiger_source_frame_window": [0, 191],
+    "hogan_source_frame_window": [0, 750],
+    "overall_feature_parity": "gap #11234; native action implemented under #11487",
+    "catalog": "UI integrations unregistered; direct source review. Inherited launcher-atlas review stale; no broad graph verification claim"
+  }
+}

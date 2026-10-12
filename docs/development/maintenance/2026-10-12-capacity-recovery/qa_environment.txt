@@ -1,0 +1,5 @@
+C:\Users\diete\Repositories\_venvs\mpp-domain-12233\Scripts\python.exe
+3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+9.1.0
+PYTHONPATH=C:\Users\diete\Repositories\UpstreamDrift-worktrees\codex-devlog-capacity-12391-20261012;C:\Users\diete\Repositories\Repository_Management
+PYTHONDONTWRITEBYTECODE=1

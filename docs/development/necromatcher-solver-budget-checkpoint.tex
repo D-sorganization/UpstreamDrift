@@ -1,0 +1,155 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=0.85in,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\usepackage{amsmath,booktabs,array,xcolor,xurl,hyperref,fancyhdr}
+\definecolor{ink}{HTML}{17334A}\definecolor{accent}{HTML}{187E91}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,pdftitle={Necromatcher: Solver Budget Checkpoint},pdfauthor={UpstreamDrift Development}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\textcolor{ink}{\textbf{NECROMATCHER} / SOLVER BUDGET}}
+\fancyhead[R]{\small Technical Checkpoint}\fancyfoot[L]{\small Research Evidence / Qualification Remains Open}\fancyfoot[R]{\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}\setlength{\emergencystretch}{2em}
+\renewcommand{\arraystretch}{1.15}
+\newcommand{\code}[1]{\nolinkurl{#1}}\newcommand{\hash}[1]{{\footnotesize\nolinkurl{#1}}}
+\begin{document}
+{\small\textcolor{accent}{UPSTREAMDRIFT / REPEATABLE RESEARCH METHODS}}\par
+{\LARGE\bfseries\textcolor{ink}{Solver Budget Checkpoint}}\par
+{\large Tiger Woods V18 / Partial Ben Hogan V15 Attempt}\par
+\smallskip
+\section{What Was Actually Executed}
+The requested residual-evaluation ceiling increased from 30 to 120; the wall guard
+remained 300 seconds. Two Tiger jobs produced saved candidates, both nonconverged
+and rejected. Hogan's locked control failed at the unchanged wall guard, produced
+no fit result, and stopped the sequence before its expanded variant was submitted.
+This is a partial budget experiment, not a completed balanced four-arm study.
+
+\begin{tabular}{@{}p{.26\linewidth}p{.68\linewidth}@{}}\toprule
+Record & Actual Scope\\\midrule
+Numerical Producer & \hash{00b7d9846bd2fb2572b7c84f03cfc6c9699323cb}\\
+Integrated Software & \hash{e0042ba61870f88543cb1305e3f6d21903c97fb8}; later integration, not the producer of these fits.\\
+Successful Jobs & Tiger locked 31-coordinate control and expanded 33-coordinate variant.\\
+Failed Job & Hogan locked control: ``Native refit exceeded its wall execution budget.''\\
+Unsubmitted Job & Hogan expanded variant: no result, no run, no numerical comparison.\\
+Observed Cost & Actual \code{nfev} and authoritative elapsed seconds are null: canonical terminal records do not persist them.\\\bottomrule
+\end{tabular}
+
+\section{Repeatable Controlled Procedure}
+Each arm reopened its original 30-budget request and its original saved start,
+not the optimized 30-budget final result. The locked Tiger start was
+\code{tiger-shaft-paired-variant-fit-v16}; its expanded start was
+\code{tiger-forearm-expansion-seed-v17}. The original source hash, full spline
+start, native model, camera, body observations, V1 shaft objective, reviewed V2
+evaluation evidence, geometry nodes, scales, priors and smoothness settings were retained.
+The current-parent first-pose prior remains soft; the fitted first pose may move.
+
+Durable request comparison permits only a new output ID, a new execution timestamp
+and \code{options.config.max_iterations}: $30\rightarrow120$.
+The requested ceiling is not a measured evaluation count. The sequential driver
+recorded owned run IDs and terminal status, audited the two successful fits, then
+failed closed on Hogan without restarting, overwriting or submitting a fourth arm.
+Neither a larger ceiling nor a successful computation establishes solver convergence.
+\newpage
+\section{Tiger Results and Sparse Shaft Evidence}
+All table values below are read from pinned canonical compact/full-audit records.
+Body RMS and raw shaft-line RMS are separate quantities, both in pixels; the latter
+is an unweighted diagnostic of an authored infinite axis, not a club-head or physical
+shaft-endpoint reconstruction. ``Seen'' means previously inspected evaluation labels.
+
+\begin{center}\small
+\begin{tabular}{@{}llrrrrr@{}}\toprule
+Arm & Budget & Body Train & Body Dense & Body Seen & Shaft Train & Shaft Seen\\\midrule
+Control & 30 & 22.300 & 24.749 & 25.019 & 126.145 & 151.999 \\
+Control & 120 & 22.118 & 24.494 & 24.756 & 116.733 & 146.260 \\
+Variant & 30 & 21.826 & 24.198 & 24.459 & 111.454 & 149.966 \\
+Variant & 120 & 21.316 & 23.586 & 23.837 & 99.258 & 145.944 \\
+\bottomrule\end{tabular}
+\end{center}
+\textbf{Coverage:} Tiger has 210 source poses and 209 adjacent midpoints; body
+training uses 22 times. Shaft training has two observed fragments at indices 0 and
+209; seen evaluation has one observed fragment at 150, with the blurred frame-60
+abstention preserved. A small diagnostic set is not broad swing-phase validation.
+
+The higher requested budget reduces both body and shaft diagnostic RMS for Tiger
+relative to each corresponding 30-budget arm. The expanded arm improves body RMS
+and shaft training more than the locked control, while their seen shaft errors remain
+approximately 146 pixels. The result does not establish validated historical club
+motion, anatomical accuracy or performance on untouched evidence.
+
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}\toprule
+120-Budget Arm & Grip Gap (mm) & Grip Angle (deg) & Ground Depth (mm)\\\midrule
+Control & 1.775 & 1.147 & 1.167 \\
+Variant & 2.140 & 0.822 & 1.198 \\
+\bottomrule\end{tabular}
+\end{center}
+The canonical scalar Hermite domain and extrema check pass for 32 authored bounded
+coordinates; 12 coordinates remain explicitly unbounded. Native grip and ground
+values are finite assessed extrema, not continuous nonlinear certificates. Both
+Tiger solvers report that the maximum number of function evaluations was exceeded;
+convergence and scientific acceptance are false.
+
+\section{Hogan Failure Is Missing Data}
+\begin{tabular}{@{}p{.34\linewidth}p{.59\linewidth}@{}}\toprule
+120-Budget Arm & Outcome\\\midrule
+Locked Control & \textbf{No Result}. Failed wall guard; no body/shaft/native fit metrics.\\
+Expanded Variant & \textbf{No Result}. Not submitted after control failure.\\\bottomrule
+\end{tabular}
+
+Do not substitute zeros, repeat earlier 30-budget values as new results, infer a
+120-evaluation count or estimate elapsed time from polling files. Earlier Hogan
+V14 results and imagery remain historical evidence; they do not complete this study.
+\newpage
+\section{Provenance, Preservation and Delivery}
+The independent review rehashed 14,742 numerical-source files, preserved all 336
+preexisting library files and original index records, and accounted for 347 current
+files. The eleven-file increase is exactly two Tiger fit assets and nine files in
+three owned run folders. Source, runtime and input identities remained unchanged.
+This is authorized append-only growth, not whole-library byte equality.
+
+\begin{tabular}{@{}p{.28\linewidth}p{.65\linewidth}@{}}\toprule
+Receipt & SHA-256\\\midrule
+Independent Review & \hash{736d35bc96f3eb8ead901ced70ad28716f00af2daa871a1c0ce0005fa322560b}\\
+Finally Preservation & \hash{36bba78162d4884d510dcdb53bc0bf3440b9faf2a7f44e42a3773f144171ea11}\\\bottomrule
+\end{tabular}\par\smallskip
+The independent receipt and copied compact results accompany this report under
+\code{evidence/}; \code{input-pins.json} records original paths, copied bytes and hashes.
+Original fit hashes are distinct from code revision, request recipe and decoded
+source-image identities. The integrated e004 software does not retroactively change
+the numerical producer or qualify preserved motions.
+
+Earlier paired 3D surface inspection is delivered to ControlTower in the exclusive
+\texttt{Necromatcher Forearm 3D Shape Review 2026-10-03 V1} folder (129 verified files).
+The separate \texttt{Necromatcher Forearm Matching Report 2026-10-03 V1} delivery contains
+27 verified files and its twelve-page report. These depict the earlier 30-budget fits,
+not the newly saved Tiger V18 candidates. Hogan's earlier 750-frame full-video
+heuristics still fail the unchanged 600-second gate; no full shaded-video result
+is added by this checkpoint.
+
+The twenty-image interior source gallery and proofs are delivered separately as
+38 verified files. A dense 52-image gallery is local and source-only; root reviewed all images and
+verified their PNG hashes. Annotation and transfer remain separate. Neither gallery assigns phases,
+training/held-out roles, confidence labels or physical-clock calibration. Dense
+Hogan review corrects the earlier coarse post-strike impression at index 400:
+300--425 show the club approaching from image left; 430--450 show a low pass and
+rise to image right. These are broad visual descriptions, not exact contact events.
+The source review receipt is
+\hash{f2661458cb1ccbf70b1475c65100f6eb0ab31bb01cfe0b9c5f8bff1fb0aa1581}.
+
+\section{Next Stage and Qualification Limits}
+The fixed row-time protocol software has 53 checked cases. Actual row-time and focal
+trials have not been executed at this checkpoint. Software verification does not
+establish exposure duration, rolling shutter, focal length, anatomical morphology,
+hand contact state or clinical range of motion. Published model limits are authored
+generic ranges, not patient or historical-player measurements.
+
+Preregister source-supported interior shaft coverage, visible straight fragments and
+abstentions before adding evidence. Preserve previously seen roles; do not select
+labels from fit residuals or silently convert them into unseen validation. A future
+balanced budget comparison must retain the same starts and scientific controls,
+persist actual evaluation/elapsed counters through a reviewed canonical boundary,
+and explicitly report any wall-limit failure.
+
+The research candidates remain rejected and nonconverged. Infinite shaft-axis
+diagnostics, finite geometry checks and generic surface proxies do not measure club
+heads, physical endpoints, validated anatomy or dynamics. No issue closure, public
+deployment or historical-motion completion is asserted. The earlier 9-, 12- and
+74-page report editions remain preserved.
+\end{document}

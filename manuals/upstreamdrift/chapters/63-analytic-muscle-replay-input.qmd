@@ -1,0 +1,97 @@
+# Analytic Muscle Replay Input Contract (Provisional)
+
+## Scope and Status
+
+Issue #12392 adds a strict, immutable decoder for a small synthetic analytic
+muscle-replay input record. The decoder is an input contract only. It does not
+advance activation, evaluate muscle force, integrate a plant, replay an
+excitation trace, or establish an implementation/runtime identity. No native
+OpenSim or other engine call is part of this feature. The calculation registry
+remains empty; manual publication and release remain blocked.
+
+The supported profile is one rotational coordinate, constant moment arms,
+no contact, no constraints, and a scalar positive inertia. Coordinate identity
+and units are explicit: radians, radians per second, newton-metres, kilograms
+metres squared, and metres per radian. This profile is a bounded synthetic
+fixture shape; it is not a full-body or cross-engine model.
+
+## Input Record
+
+`decode_analytic_replay_spec` in
+`src/shared/python/motion_matching/analytic_muscle_replay_spec.py` accepts UTF-8
+JSON for schema `synthetic-analytic-muscle-replay-input-v2` and profile
+`rotational-1d-constant-moment-arm-no-contact-v1`. It returns frozen nested
+dataclasses with tuple-valued collections. The exact-key contract includes the
+coordinate and unit labels; clock and command-hold rule; initial position,
+velocity, activation and prior raw excitation; activation time constants,
+floor and update-rule label; plant inertia, external torque, contact,
+constraints and integration-rule label; ordered muscle IDs and geometry/Hill
+parameters; raw excitation commands and per-muscle raw rate limits; and
+optional syntactic producer provenance.
+
+The decoder accepts at most 65,536 input bytes, eight muscles and 128 command
+steps. IDs must be nonempty, control-free, valid UTF-8 text of at most 128 UTF-8
+bytes. Optional source revisions are syntax-checked as 40 lowercase
+hexadecimal characters; they are not resolved, trusted, or treated as source
+pins. Duplicate JSON keys, unknown or missing fields, booleans in numeric
+fields, non-finite numbers, invalid units/enums, malformed shapes, duplicate
+muscle IDs, and out-of-domain values fail closed.
+
+## Clock, Geometry, and Raw Commands
+
+Command timestamps follow the declared left-endpoint zero-order-hold grid
+$t_k=t_0+k\Delta t$. The decoder requires finite, strictly increasing,
+representable command times; each serialized timestamp must match its expected
+grid point within an absolute tolerance of
+$\min(10^{-12},\Delta t\,10^{-6})$ seconds. Relative tolerance is zero. The
+finite terminal time $t_0+N\Delta t$ must advance beyond both the last expected
+grid point and the last serialized command time.
+
+The constant-moment-arm geometry check computes the initial musculotendon
+length as
+
+$$
+L_{MT}(q_0)=L_{MT,ref}-r(q_0-q_{ref}),
+$$
+
+where $r$ is the declared moment arm in metres per radian. This derived value
+must be finite and positive. This is a narrow contract consistency check, not a
+muscle-path evaluator.
+
+Excitation samples and the previous applied raw excitation remain raw values
+in $[0,1]$. For each muscle, the first command is checked against the prior
+raw value and later commands against the preceding raw value, using the exact
+inclusive clipped rate interval
+
+$$
+u_k\in\left[\max(0,u_{k-1}-\dot u_{max}\Delta t),\;
+                 \min(1,u_{k-1}+\dot u_{max}\Delta t)\right].
+$$
+
+The activation floor is retained separately from these raw commands. The
+decoder does not compute an effective clipped command or an activation update.
+
+## Validation and Limits
+
+The focused tests cover exact key and shape validation, bounded UTF-8 IDs,
+clock-grid and terminal checks, exact slew boundaries, state/rate bounds,
+raw-zero retention with a separate activation floor, finite positive derived
+geometry, frozen output, and a fresh-process import boundary. The decoder
+module itself uses only the Python standard library; the subprocess test
+imports and decodes a valid fixture while checking for forbidden NumPy, Qt,
+biomechanics, controller and native-module components.
+
+The validation run for this change passed 32 focused tests with one existing
+DeprecationWarning, Ruff check and format, and canonical diff-scoped mypy for
+the decoder file. The canonical mypy invocation was
+`python -B Repository_Management/shared_scripts/run_mypy_diff.py src/shared/python/motion_matching/analytic_muscle_replay_spec.py`
+with the checkout root on `PYTHONPATH` and `MYPYPATH`. The standard-conftest
+focused pytest invocation was
+`python -B -m pytest -o 'addopts=' -q tests/unit/motion_matching/test_analytic_muscle_replay_spec.py`.
+
+A decoder pass establishes only that the JSON record satisfies this input
+schema. It does not establish model identity, an execution worker, force
+balance, activation behavior, optimization, trajectory quality, physical
+validity, native replay, or parity with any registered engine. A later worker
+must have its own source/runtime receipt and independently validated execution
+contract before it can consume these inputs as evidence.

@@ -1,0 +1,110 @@
+{
+  "schema": "necromatcher/independent-overlay-verification/1",
+  "source_commit": "b32878a828d3b96bfc796bee368ef60cb692d117",
+  "export_producer": "b32878a828d3b96bfc796bee368ef60cb692d117",
+  "numerical_producer": "b32878a828d3b96bfc796bee368ef60cb692d117",
+  "review_receipt_sha256": "b7f8be1bdba2f7299db63dbea97b1c90dc1701466d4d2e13409919d037d3f427",
+  "source_runtime_export_bracket_verified": true,
+  "qualification": "monocular_research_hypothesis",
+  "scientific_acceptance": "rejected",
+  "continuous_certified": false,
+  "decoded_total_frames": 960,
+  "runs": [
+    {
+      "player": "tiger",
+      "run_id": "d40e5852e53b4bd9a6811a5f1b6c9a24",
+      "decoded_frames": 210,
+      "image_size": [1280, 720],
+      "zip_sha256": "afe49038f301fefad072c89fcfff842197eb606bf28ff8a290af14c25d25a0a9",
+      "zip_crc_and_member_bytes_verified": true,
+      "manifest_video_and_png_hashes_verified": true,
+      "capture_model_fit_bindings_verified": true,
+      "all_manifest_source_frame_records_match_saved_fit": true,
+      "all_original_capture_frame_identities_verified": true,
+      "selected_original_capture_png_hashes_verified": true,
+      "parent_hash_bracket_verified": true,
+      "numerical_stamp": {
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "source_commit": "b32878a828d3b96bfc796bee368ef60cb692d117",
+        "source_sha256": "sha256:9452685bbe53287f37dc13ccb20413b7f7a5e7fbfeb7fa0bbc0caea73bd3b603"
+      },
+      "selected_rms_pixels": [
+        6.240430413903914, 66.63174260315111, 16.318071032366266
+      ],
+      "png_sha256": {
+        "frame-000000.png": "eea7b99856a511fa9f2dbdfbeaceb73835c1e9aaf23c549ebe99bbafffa43306",
+        "frame-000105.png": "e18175f9b239b0daefaf29991fe781e9f5dbaf96fd22cb041d7a575ed75116b0",
+        "frame-000209.png": "38ae53ef06dbb83acf841ae9ddff5bebecbd61a681fdec24635d0e4697cf7690"
+      }
+    },
+    {
+      "player": "hogan",
+      "run_id": "8558165cdc424feb87a934f132372a53",
+      "decoded_frames": 750,
+      "image_size": [320, 240],
+      "zip_sha256": "7aa9bc4e9194c8489c538591d01f13a8e586fb7e489125edf3af77dcb0a9eb32",
+      "zip_crc_and_member_bytes_verified": true,
+      "manifest_video_and_png_hashes_verified": true,
+      "capture_model_fit_bindings_verified": true,
+      "all_manifest_source_frame_records_match_saved_fit": true,
+      "all_original_capture_frame_identities_verified": true,
+      "selected_original_capture_png_hashes_verified": true,
+      "parent_hash_bracket_verified": true,
+      "numerical_stamp": {
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "source_commit": "b32878a828d3b96bfc796bee368ef60cb692d117",
+        "source_sha256": "sha256:9452685bbe53287f37dc13ccb20413b7f7a5e7fbfeb7fa0bbc0caea73bd3b603"
+      },
+      "selected_rms_pixels": [
+        6.834237353804852, 5.114766680823752, 9.154082375279632
+      ],
+      "png_sha256": {
+        "frame-000000.png": "a34e53de1156be6a9c12897f7bbae1be50317362edb3357762bec6545ca60f1d",
+        "frame-000375.png": "56948335c95404f76301447d781f6503f5a940d62ea4de9a8e6df7abcb7dfd04",
+        "frame-000749.png": "d8dbd5fe188327c6e88ef8b487153d897124d972aa3e4dbe58a2046efef1384c"
+      }
+    }
+  ],
+  "visual_review": {
+    "reviewed_at_utc": "2026-10-02T21:17:42.906481+00:00",
+    "method": "Direct view_image inspection of each actual exported first/middle/last PNG; original source-sized pixels, without modifying media.",
+    "viewed_stills": [
+      {
+        "player": "tiger",
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Tiger Controlled V12 Overlay\\frame-000000.png",
+        "sha256": "eea7b99856a511fa9f2dbdfbeaceb73835c1e9aaf23c549ebe99bbafffa43306"
+      },
+      {
+        "player": "tiger",
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Tiger Controlled V12 Overlay\\frame-000105.png",
+        "sha256": "e18175f9b239b0daefaf29991fe781e9f5dbaf96fd22cb041d7a575ed75116b0"
+      },
+      {
+        "player": "tiger",
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Tiger Controlled V12 Overlay\\frame-000209.png",
+        "sha256": "38ae53ef06dbb83acf841ae9ddff5bebecbd61a681fdec24635d0e4697cf7690"
+      },
+      {
+        "player": "hogan",
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Hogan Controlled V12 Overlay\\frame-000000.png",
+        "sha256": "a34e53de1156be6a9c12897f7bbae1be50317362edb3357762bec6545ca60f1d"
+      },
+      {
+        "player": "hogan",
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Hogan Controlled V12 Overlay\\frame-000375.png",
+        "sha256": "56948335c95404f76301447d781f6503f5a940d62ea4de9a8e6df7abcb7dfd04"
+      },
+      {
+        "player": "hogan",
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Hogan Controlled V12 Overlay\\frame-000749.png",
+        "sha256": "d8dbd5fe188327c6e88ef8b487153d897124d972aa3e4dbe58a2046efef1384c"
+      }
+    ],
+    "findings": {
+      "tiger": "Frame105 retains pronounced upper-body/arm projection displacement and long yellow residuals; the blue attachment seed extends toward upper-left rather than identifying the visible shaft. Frame209 has cropped feet and a long blue rightward/downward seed unlike the visible lower-left shaft. Frame0 body projection is closer, but its attachment seed also diverges from the visible club.",
+      "hogan": "The body projection is comparatively closer at all three stills; low320x240 source resolution and blur limit anatomical interpretation. The blue seed extends left at frame375 while the visible lower shaft points down; apparent body overlap does not identify the club or establish ground contact.",
+      "labels": "All six retain MONOCULAR RESEARCH, camera/anatomy unqualified, physical time unknown, source frame/PTS, matched RMS, and existing green observations/blue rig-seeds/yellow residual legend."
+    },
+    "qualification": "Rejected monocular research remains unchanged. These stills provide image review, not recovered historical anatomy/shaft, verified planted contact, dynamics, or scientific acceptance."
+  }
+}

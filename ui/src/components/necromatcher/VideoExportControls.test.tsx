@@ -6,6 +6,58 @@ const api = vi.hoisted(() => ({submitVideoExport: vi.fn(), fetchVideoExport: vi.
 vi.mock('@/api/necromatcher', () => api);
 const run = (values = {}) => ({run_id:'export-1',source_fit_id:'fit-1',status:'running',acceptance:'partial',qualification:'monocular_research_hypothesis',blockers:[],message:'Encoding',fraction:null,control_available:true,execution_started:true,execution_verified:false,download_available:false,...values});
 beforeEach(() => {api.submitVideoExport.mockReset(); api.fetchVideoExport.mockReset(); api.cancelVideoExport.mockReset();});
+it('displays the stored reviewed source window when recalling an export', async () => {
+  api.fetchVideoExport.mockResolvedValue(run({source_fit_scope: {
+    first_frame: 0, end_exclusive_frame: 191,
+    review: {reason: 'Reviewed conservative boundary', uncertainty_policy: 'Release unmeasured'},
+  }}));
+  render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
+  expect(await screen.findByText(/Reviewed Original Frames: 0 to 191/)).toHaveTextContent('Release unmeasured');
+});
+it('opts into a translucent model proxy and resets options for another fit', async () => {
+  api.submitVideoExport.mockResolvedValue(run({status: 'failed', acceptance: 'rejected'}));
+  const view = render(<VideoExportControls fit="fit-1" />);
+  const user = userEvent.setup();
+  expect(screen.getByLabelText('Model Proxy Opacity')).toBeDisabled();
+  await user.click(screen.getByRole('checkbox', {name: 'Show Translucent Model Proxy'}));
+  await user.clear(screen.getByLabelText('Model Proxy Opacity'));
+  await user.type(screen.getByLabelText('Model Proxy Opacity'), '0.6');
+  await user.click(screen.getByRole('button', {name: 'Export Research Overlay'}));
+  expect(api.submitVideoExport).toHaveBeenCalledWith('fit-1', {shape_overlay: {opacity: 0.6}});
+  expect(screen.getByText(/Model Proxy Retains the Skeleton/)).toBeInTheDocument();
+  view.rerender(<VideoExportControls fit="fit-2" />);
+  expect(screen.getByRole('checkbox', {name: 'Show Translucent Model Proxy'})).not.toBeChecked();
+  await user.click(screen.getByRole('button', {name: 'Export Research Overlay'}));
+  expect(api.submitVideoExport).toHaveBeenLastCalledWith('fit-2');
+});
+it('blocks malformed opacity before submitting and displays recalled proxy options', async () => {
+  api.fetchVideoExport.mockResolvedValue(run({status: 'succeeded', acceptance: 'rejected', shape_overlay: {opacity: 0.4}}));
+  render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
+  expect(await screen.findByText(/Stored Model Proxy Opacity/)).toHaveTextContent('0.4');
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('checkbox', {name: 'Show Translucent Model Proxy'}));
+  await user.clear(screen.getByLabelText('Model Proxy Opacity'));
+  expect(screen.getByRole('button', {name: 'Export Research Overlay'})).toBeDisabled();
+  await user.type(screen.getByLabelText('Model Proxy Opacity'), '1.2');
+  expect(screen.getByRole('button', {name: 'Export Research Overlay'})).toBeDisabled();
+  expect(api.submitVideoExport).not.toHaveBeenCalled();
+});
+it('opts into reviewed shaft lines and clears the record for a different source', async () => {
+  api.submitVideoExport.mockResolvedValue(run({status: 'failed', acceptance: 'rejected'}));
+  const view = render(<VideoExportControls fit="fit-1" />);
+  const record = {schema: 'necromatcher/shaft-axis-evidence/1', capture_id: 'capture', frames: [{frame_index: 0}]};
+  const file = new File([JSON.stringify(record)], 'review.json', {type: 'application/json'});
+  file.text = vi.fn().mockResolvedValue(JSON.stringify(record));
+  const user = userEvent.setup();
+  await user.upload(screen.getByLabelText('Reviewed Shaft Evidence'), file);
+  await screen.findByText(/1 Reviewed Frame/);
+  await user.click(screen.getByRole('button', {name: 'Export Research Overlay'}));
+  expect(api.submitVideoExport).toHaveBeenCalledWith('fit-1', {shaft_evidence: record});
+  view.rerender(<VideoExportControls fit="fit-2" />);
+  expect(screen.queryByText(/1 Reviewed Frame/)).not.toBeInTheDocument();
+  await user.click(screen.getByRole('button', {name: 'Export Research Overlay'}));
+  expect(api.submitVideoExport).toHaveBeenLastCalledWith('fit-2');
+});
 it('submits once and downloads verified computation with rejected scientific acceptance', async () => {
   api.submitVideoExport.mockResolvedValue(run());
   api.fetchVideoExport.mockResolvedValue(run({status:'succeeded',acceptance:'rejected',execution_verified:true,download_available:true,blockers:['physical_clock_unknown']}));
@@ -47,6 +99,20 @@ it('shows backend failure and permits retry', async () => {
 it('does not advertise orphan cancellation or unverified download', async () => {
   api.fetchVideoExport.mockResolvedValue(run({control_available:false,download_available:true})); render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
   await screen.findByRole('status'); expect(screen.queryByRole('button',{name:'Cancel Overlay Export'})).not.toBeInTheDocument(); expect(screen.queryByRole('link')).not.toBeInTheDocument();
+});
+it('offers guarded verification for historically completed stored packages', async () => {
+  api.fetchVideoExport.mockResolvedValue(run({status:'succeeded',acceptance:'rejected',execution_verified:true,download_available:false,control_available:false,producer_source_commit:'older-commit'}));
+  render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
+  expect(await screen.findByRole('link',{name:'Verify Stored Overlay Package'})).toHaveAttribute('href','/export/export-1/download');
+  expect(screen.queryByRole('link',{name:'Download Overlay Package'})).not.toBeInTheDocument();
+  expect(screen.getByText(/Download Readiness Unverified/)).toHaveTextContent('Guarded verification can reject changed files');
+  expect(screen.getByText(/Producer Commit/)).toHaveTextContent('older-commit');
+});
+it.each(['failed','cancelled','running'])('never offers stored verification for %s runs', async (status) => {
+  api.fetchVideoExport.mockResolvedValue(run({status,execution_verified:true,download_available:false,control_available:false}));
+  render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
+  await screen.findByRole('status');
+  expect(screen.queryByRole('link')).not.toBeInTheDocument();
 });
 it('submits the opt-in force layer only after it is enabled', async () => {
   api.submitVideoExport.mockResolvedValue(run()); api.fetchVideoExport.mockResolvedValue(run());

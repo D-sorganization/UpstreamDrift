@@ -20,6 +20,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
 from src.shared.python.core.contracts import precondition
 from src.shared.python.data_io.provenance import (
     ProvenanceInfo,
@@ -495,7 +496,7 @@ def _export_to_c3d_ezc3d(  # noqa: C901
     """Export using ezc3d library."""
     if output_path is None:
         raise ValueError("output_path must be provided")
-    import ezc3d
+    ezc3d = import_ezc3d()
 
     c = ezc3d.c3d()
     c["parameters"]["POINT"]["RATE"]["value"] = [data.frame_rate]

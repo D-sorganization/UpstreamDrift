@@ -11,6 +11,52 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+def test_nonzero_shapes_use_one_native_binding_and_skeleton_is_drawn_afterward(
+    video_case, tmp_path, monkeypatch
+):
+    import cv2
+    from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+    from src.shared.python.workspace import necromatcher_video as module
+
+    library, capture, _ = video_case
+    before = Path(capture.path).read_bytes()
+    original_load = module.load_native_fit_binding
+    calls = []
+    surfaces_seen = []
+    captions = []
+    original_caption = module._caption
+
+    def load(*args):
+        calls.append(args)
+        return original_load(*args)
+
+    def skeleton(binding, pose, image):
+        surfaces_seen.append(np.any(image == 165))
+        image[-1, -1] = (11, 22, 33)
+
+    def caption(image, lines):
+        captions.extend(lines)
+        original_caption(image, lines)
+
+    monkeypatch.setattr(module, "load_native_fit_binding", load)
+    monkeypatch.setattr(module, "_draw_rigid_skeleton", skeleton)
+    monkeypatch.setattr(module, "_caption", caption)
+    output = tmp_path / "shapes"
+    result = module.export_fit_video(
+        library,
+        "video-fit",
+        output,
+        selected_frames=(0, 1),
+        shape_overlay=ShapeOverlayOptions(1.0),
+    )
+    assert len(calls) == 1 and all(surfaces_seen) and len(surfaces_seen) == 2
+    assert any("Model visual proxies" in line for line in captions)
+    for record in result["pngs"]:
+        image = cv2.imread(str(output / record["path"]))
+        np.testing.assert_array_equal(image[-1, -1], [11, 22, 33])
+    assert Path(capture.path).read_bytes() == before
+
+
 @pytest.fixture
 def video_case(native_fit_case, tmp_path):
     cv2 = pytest.importorskip("cv2")
@@ -23,12 +69,24 @@ def video_case(native_fit_case, tmp_path):
             ok, png = cv2.imencode(".png", image)
             assert ok
             frame = {
+                "schema_version": "shadow-tracker/frame/1.1.0",
+                "asset_id": "source-" + "a" * 64,
+                "shot_id": "video-shot",
+                "swing_id": "practice",
+                "camera_id": "source-camera",
                 "frame_id": f"video-{i}",
                 "frame_sha256": hashlib.sha256(image.tobytes()).hexdigest(),
                 "pts_ticks": i,
                 "timebase_numerator": 1,
                 "timebase_denominator": 30,
                 "physical_time_s": None,
+                "physical_time_reason": "Synthetic source physical clock unknown",
+                "timing_mode": "container_pts",
+                "is_timing_exact": True,
+                "clock_evidence": "Synthetic exact fixture PTS",
+                "decoder_name": "synthetic",
+                "decoder_version": "1",
+                "pixel_format": "bgr24",
             }
             rows.append(
                 {
@@ -60,7 +118,7 @@ def video_case(native_fit_case, tmp_path):
         "practice",
         archive_path,
         "image_capture",
-        {"schema": "necromatcher/image-capture/1"},
+        {"schema": "necromatcher/image-capture/1", "source_sha256": "a" * 64},
     )
     payload.update(
         capture_id=capture.dataset_id,
@@ -200,3 +258,45 @@ def test_unreadable_selected_png_cannot_publish(video_case, tmp_path, monkeypatc
             video_case[0], "video-fit", tmp_path / "broken", selected_frames=(0,)
         )
     assert not (tmp_path / "broken").exists()
+
+
+def test_shape_disabled_preserves_legacy_video_and_png_bytes(video_case, tmp_path):
+    from src.shared.python.workspace.necromatcher_video import export_fit_video
+
+    library, _, _ = video_case
+    left = tmp_path / "plain"
+    right = tmp_path / "none"
+    a = export_fit_video(library, "video-fit", left, selected_frames=(0, 1))
+    b = export_fit_video(
+        library, "video-fit", right, selected_frames=(0, 1), shape_overlay=None
+    )
+    assert a == b
+    for name in ("overlay.mp4", "frame-000000.png", "frame-000001.png"):
+        assert (left / name).read_bytes() == (right / name).read_bytes()
+
+
+def test_enabled_zero_shape_retains_legacy_pixels_and_records_proxies(
+    video_case, tmp_path
+):
+    from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+    from src.shared.python.workspace.necromatcher_video import export_fit_video
+
+    library, capture, _ = video_case
+    before = Path(capture.path).read_bytes()
+    left = tmp_path / "legacy"
+    right = tmp_path / "zero"
+    a = export_fit_video(library, "video-fit", left, selected_frames=(0, 1))
+    b = export_fit_video(
+        library,
+        "video-fit",
+        right,
+        selected_frames=(0, 1),
+        shape_overlay=ShapeOverlayOptions(0),
+    )
+    assert b["shape_overlay"]["options"] == {"opacity": 0.0}
+    assert b["shape_overlay"]["geometry_basis"] == "model_conditioned_visual_proxy"
+    assert b["shape_overlay"]["native_xml_sha256"] == a["model_hash"]
+    assert b["shape_overlay"]["physical_geometry_qualified"] is False
+    for name in ("frame-000000.png", "frame-000001.png"):
+        assert (left / name).read_bytes() == (right / name).read_bytes()
+    assert Path(capture.path).read_bytes() == before
