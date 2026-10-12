@@ -117,6 +117,25 @@ for _pkg in ("chat", "sidekick", "ai", "shared.python", "src.shared.python"):
             if _v_path not in _pkg_mod.__path__:
                 _pkg_mod.__path__.append(_v_path)
 
+_gui_local = str(
+    (
+        _Path(__file__).resolve().parents[1]
+        / "src"
+        / "shared"
+        / "python"
+        / "ai"
+        / "gui"
+    ).resolve()
+)
+for _gui_name in ("shared.python.ai.gui", "src.shared.python.ai.gui"):
+    with contextlib.suppress(ImportError):
+        _gui_mod = _sys.modules.get(_gui_name)
+        if _gui_mod is None:
+            _gui_mod = _early_importlib.import_module(_gui_name)
+        if _gui_mod is not None and hasattr(_gui_mod, "__path__"):
+            if _gui_local not in _gui_mod.__path__:
+                _gui_mod.__path__.insert(0, _gui_local)
+
 _local_tools_path = str((_Path(__file__).resolve().parents[1] / "tools").resolve())
 with contextlib.suppress(ImportError):
     import tools

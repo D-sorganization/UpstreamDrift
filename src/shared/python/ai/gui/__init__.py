@@ -28,6 +28,10 @@ from typing import Any
 
 
 def __getattr__(name: str) -> Any:
+    if name == "assistant":
+        import importlib
+
+        return importlib.import_module(f"{__name__}.assistant")
     if name == "AIAssistantPanel":
         from shared.python.ai.gui.assistant_panel import AIAssistantPanel
 
