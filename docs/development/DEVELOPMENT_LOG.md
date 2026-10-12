@@ -444,6 +444,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Branch:** `docs/motion-matching-board-review`
 - **Paths:** `docs/development/2026-09-28-motion-matching-board-review.md`
 - **Started:** 2026-09-28
+- **Shipped:** 2026-09-29
 - **Last verified:** 2026-10-12 at 64962e8d6b6263d5fb32bb1444712b28a9df4433 (remote merge verification only; no tests or native runs)
 - **Summary:** Evidence-backed engine/model review, recent GS3DX improvements, 18 issue proposals, anatomical Home-budget options and historical-video readiness; no implementation or qualification claim.
 - **Next step:** The documentation review is shipped. Resulting implementation proposals remain separate, independently tracked issues.
