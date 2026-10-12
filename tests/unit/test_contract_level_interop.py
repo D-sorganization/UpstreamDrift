@@ -10,6 +10,8 @@ from typing import Any, cast
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class UnsupportedLevel(enum.Enum):
     STRICT = "strict"

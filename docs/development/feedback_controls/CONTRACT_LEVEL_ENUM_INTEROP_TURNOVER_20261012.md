@@ -15,11 +15,26 @@ canonical setter remain a separate Tools-owned issue, #5577.
 
 TDD covers the UD-installed public wrapper, core/shared/alias interop, each
 supported level, invalid input with state preservation, enforcement, warning
-logging, and off-mode silence. The focused contract and fragment tests passed
-56 tests. Scoped Ruff check/format and mypy passed on the four changed Python
-files. Normal hooks passed for implementation commit
+logging, and off-mode silence. The first focused validation passed 56 tests;
+a later targeted run passed 17 tests after adding the required unit marker and
+updating the alias assertion to compare the canonical module enum identity and
+shared value. Scoped Ruff check/format and mypy passed on the four changed
+production/test Python files. Normal hooks passed for implementation commit
 `e60afb2b4d61b2776106f28f1184ff524aa2d99b`; the corrective commit restores
 `src/shared/python/contracts.py` to its exact parent blob.
+
+The full canonical pre-PR gate at `49b82bd37bf1fa08f71382f20822e0ac4cac34b7`
+returned exit 1. A read-only run of the same three affected nodes on main
+`30e55be1af3bcba1ebc4edd0c4285cefdf781925` reproduced two failures: the
+optimized-mode default assertion and the top-level package collision ratchet.
+The alias propagation node passed on main and failed only on the feature because
+the assertion compared enum instances from distinct module classes; the
+corrected assertion now checks canonical identity and shared value. The two
+remaining baseline failures are not fixed or waived by this change. The
+optimized assertion conflicts with `contracts.py`'s existing `OFF` default
+under `python -O`; the collision ratchet reports vendor roots already listed
+in `pyproject.toml`. The full gate must be rerun after the test-only correction;
+no passing full-gate claim is made. No native run or qualification claim is made.
 
 A merge-group failure later reported
 `TestContractLevelGetSet.test_get_contract_level_returns_level` at head
