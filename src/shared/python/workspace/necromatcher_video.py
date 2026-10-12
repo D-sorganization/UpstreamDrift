@@ -7,6 +7,7 @@ attachment offsets and observations are omitted rather than reconstructed here.
 
 from __future__ import annotations
 
+from dataclasses import asdict, dataclass
 from fractions import Fraction
 import hashlib
 import json
@@ -18,11 +19,36 @@ from typing import Any, Sequence, cast
 import numpy as np
 
 from src.shared.python.motion_matching import default_body_segments
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from src.shared.python.motion_matching.historical_fit import (
+    AuthoredShaftAxis,
+    ShaftAxisAssessment,
+    ShaftAxisEvidence,
+    ShaftAxisResidualTerm,
+    resolve_authored_shaft_axis,
+)
 from src.shared.python.shadow_tracker.source_records import VariableFrameRateError
-from .necromatcher import NecromatcherLibrary
-from .necromatcher_native import NativeFitBinding, load_native_fit_binding
-from .necromatcher_review import CaptureReview
-from .necromatcher_video_forces import (
+from src.shared.python.workspace.necromatcher import NecromatcherLibrary
+from src.shared.python.workspace.necromatcher_caption import (
+    CaptionFrame,
+    CaptionOverlayOptions,
+    authored_seed_status,
+    caption_layout,
+    caption_provenance,
+    draw_caption,
+    restricted_seed_status,
+)
+from src.shared.python.workspace.necromatcher_native import (
+    NativeFitBinding,
+    load_native_fit_binding,
+)
+from src.shared.python.workspace.necromatcher_review import CaptureReview
+from src.shared.python.workspace.necromatcher_shaft_evidence import (
+    BoundShaftEvidence,
+    bind_fit_shaft_evidence,
+)
+from src.shared.python.workspace.necromatcher_shape_overlay import NativeShapeOverlay
+from src.shared.python.workspace.necromatcher_video_forces import (
     ForceLayer,
     ForceLayerRenderer,
     ForceSamplerFactory,
@@ -31,6 +57,168 @@ from .necromatcher_video_forces import (
 _OBSERVED = (90, 230, 90)
 _NATIVE = (255, 170, 30)
 _RESIDUAL = (40, 210, 255)
+_SHAFT_OBSERVED = (230, 60, 230)
+_SHAFT_NATIVE = (230, 230, 40)
+
+
+@dataclass(frozen=True)
+class ShaftVideoOverlay:
+    """Prepared sparse overlay; export always freshly binds caller evidence."""
+
+    bound: BoundShaftEvidence
+    axis: AuthoredShaftAxis
+    assessment: ShaftAxisAssessment
+
+    def to_record(self) -> dict[str, Any]:
+        evidence = self.bound.evidence
+        record = {
+            "schema": "necromatcher/shaft-video-overlay/1",
+            "evidence": evidence.to_record(),
+            "evidence_sha256": evidence.sha256,
+            "source_clock_sha256": self.bound.source_clock_sha256,
+            "axis": self.axis.to_record(),
+            "assessment": asdict(self.assessment),
+            "uncertainty_calibrated": False,
+            "physical_geometry_qualified": False,
+            "legend": "Magenta: observed interior fragment; cyan: infinite authored axis",
+        }
+        return cast(dict[str, Any], json.loads(json.dumps(record, allow_nan=False)))
+
+
+@dataclass(frozen=True)
+class VideoOverlayLayers:
+    """Optional display layers share one existing binding and saved camera."""
+
+    shaft: ShaftVideoOverlay | None = None
+    shapes: NativeShapeOverlay | None = None
+    captions: CaptionOverlayOptions | None = None
+
+
+def validate_video_shaft_domain(
+    fit: dict[str, Any], evidence: ShaftAxisEvidence
+) -> None:
+    """Reject reviewed evidence outside the exported pose domain before native work."""
+    if any(item.frame_index not in fit["frame_indices"] for item in evidence.frames):
+        raise ValueError("Shaft review frames must belong to the bound exported fit")
+
+
+def prepare_shaft_overlay(
+    library: NecromatcherLibrary,
+    binding: NativeFitBinding,
+    evidence: ShaftAxisEvidence,
+) -> ShaftVideoOverlay:
+    """Rebind PNG/PTS/camera and resolve geometry using one existing native plant."""
+    validate_video_shaft_domain(binding.fit, evidence)
+    bound = bind_fit_shaft_evidence(library, binding.fit, evidence)
+    indices = binding.fit["frame_indices"]
+    axis = resolve_authored_shaft_axis(
+        binding.definition_bytes, binding.plant.plant_sha
+    )
+    poses = np.asarray(
+        [binding.fit["q"][indices.index(item.frame_index)] for item in evidence.frames]
+    )
+    camera, _ = binding.review_inputs()
+    # assess is raw/unweighted; this visibility option is not applied to diagnostics.
+    term = ShaftAxisResidualTerm(evidence, axis, bound.source_clock_sha256, 0.5)
+    return ShaftVideoOverlay(bound, axis, term.assess(binding.plant, camera, poses))
+
+
+def clip_infinite_axis(
+    points: np.ndarray, size: tuple[int, int]
+) -> tuple[np.ndarray, np.ndarray] | None:
+    """Clip an infinite projected axis, never its authored reference segment."""
+    points = np.asarray(points, dtype=float)
+    if points.shape != (2, 2) or not np.isfinite(points).all():
+        raise ValueError("Shaft projection requires two finite image points")
+    if len(size) != 2 or any(type(value) is not int or value <= 0 for value in size):
+        raise ValueError("Shaft raster dimensions must be positive integers")
+    direction = points[1] - points[0]
+    length = float(np.linalg.norm(direction))
+    if not np.isfinite(length) or length <= 1e-10:
+        raise ValueError("Projected shaft axis is degenerate")
+    normal = np.array([-direction[1], direction[0]]) / length
+    offset = float(normal @ points[0])
+    if not np.isfinite(offset):
+        raise ValueError("Shaft line coefficients must remain finite")
+    width, height = size
+    candidates: list[np.ndarray] = []
+    if abs(normal[1]) > 1e-12:
+        candidates.extend(
+            np.array([x, (offset - normal[0] * x) / normal[1]]) for x in (0, width - 1)
+        )
+    if abs(normal[0]) > 1e-12:
+        candidates.extend(
+            np.array([(offset - normal[1] * y) / normal[0], y]) for y in (0, height - 1)
+        )
+    valid: list[np.ndarray] = []
+    for point in candidates:
+        if (
+            np.isfinite(point).all()
+            and -1e-9 <= point[0] <= width - 1 + 1e-9
+            and -1e-9 <= point[1] <= height - 1 + 1e-9
+            and not any(np.linalg.norm(point - previous) <= 1e-9 for previous in valid)
+        ):
+            valid.append(np.clip(point, [0, 0], [width - 1, height - 1]))
+    return (valid[0], valid[1]) if len(valid) >= 2 else None
+
+
+def _draw_shaft(
+    binding: NativeFitBinding,
+    overlay: ShaftVideoOverlay,
+    index: int,
+    pose: np.ndarray,
+    image: np.ndarray,
+) -> tuple[dict[str, Any], list[str]]:
+    camera, _ = binding.review_inputs()
+    axis = overlay.axis
+    projected = camera.project(
+        binding.plant.marker_positions(
+            pose,
+            {
+                "shaft_a": (axis.body, axis.point_a_m),
+                "shaft_b": (axis.body, axis.point_b_m),
+            },
+        )
+    )
+    clipped = clip_infinite_axis(projected, (image.shape[1], image.shape[0]))
+    if clipped is not None:
+        _line(image, clipped[0], clipped[1], _SHAFT_NATIVE)
+    bound = overlay.bound
+    evidence = bound.evidence
+    frames = evidence.frames
+    positions = [item.frame_index for item in frames]
+    record: dict[str, Any] = {
+        "status": "unreviewed",
+        "raw_rms_pixels": None,
+        "angular_error_deg": None,
+        "native_axis_visible": clipped is not None,
+        "projected_axis_reference_pixels": projected.tolist(),
+        "clipped_infinite_axis_pixels": [point.tolist() for point in clipped]
+        if clipped is not None
+        else None,
+    }
+    if index in positions:
+        position = positions.index(index)
+        segment = frames[position].segment
+        record["status"] = segment.status
+        errors = overlay.assessment.perpendicular_errors_pixels[position]
+        record["angular_error_deg"] = overlay.assessment.angular_errors_deg[position]
+        if errors is not None:
+            record["perpendicular_errors_pixels"] = list(errors)
+            record["raw_rms_pixels"] = float(np.sqrt(np.mean(np.square(errors))))
+        if segment.points_px is not None:
+            a, b = np.asarray(segment.points_px)
+            _line(image, a, b, _SHAFT_OBSERVED, 2)
+            _draw_points(image, {"a": a, "b": b}, _SHAFT_OBSERVED)
+    metric = (
+        f"Shaft raw RMS {record['raw_rms_pixels']:.2f} px | Axis angle {record['angular_error_deg']:.2f} deg"
+        if record["raw_rms_pixels"] is not None
+        else f"Shaft observation {record['status']} | Raw line RMS unavailable"
+    )
+    return record, [
+        metric,
+        "Magenta: fragment | Cyan: infinite authored axis (uncalibrated)",
+    ]
 
 
 def source_frame_rate(
@@ -219,6 +407,9 @@ def _render(
     review: CaptureReview,
     index: int,
     anatomy: dict[str, Any],
+    shaft: ShaftVideoOverlay | None = None,
+    shapes: NativeShapeOverlay | None = None,
+    captions: CaptionOverlayOptions | None = None,
     force: ForceLayerRenderer | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     import cv2
@@ -245,6 +436,8 @@ def _render(
         if anatomy
         else {}
     )
+    if shapes is not None:
+        image = shapes.composite(binding, pose, image)
     origins = _draw_rigid_skeleton(binding, pose, image)
     layer_record = force.draw(image, position, pose, origins) if force else {}
     for segment in default_body_segments(tuple(anatomical)):
@@ -257,13 +450,83 @@ def _render(
     _draw_points(image, anatomical | native, _NATIVE)
     _draw_points(image, observed, _OBSERVED)
     rms = float(np.sqrt(np.mean(np.square(errors)))) if errors else None
+    shaft_record, shaft_lines = _shaft_frame(
+        binding, shaft, index, pose, image, original_png
+    )
+    if shapes is not None and shapes.options.opacity > 0:
+        shaft_lines.append(
+            f"Model visual proxies | Opacity {shapes.options.opacity:.2f} | Anatomy unqualified"
+        )
     identity = row["frame"]
     pts = Fraction(
         identity["pts_ticks"] * identity["timebase_numerator"],
         identity["timebase_denominator"],
     )
+    compact = None
+    if captions is None:
+        _render_caption(image, index, pts, rms, len(errors), shaft_lines, force)
+    else:
+        compact = caption_layout(
+            (image.shape[1], image.shape[0]),
+            CaptionFrame(
+                index,
+                pts,
+                rms,
+                len(errors),
+                shaft is not None,
+                shapes.options.opacity if shapes else None,
+                authored_seed_status(binding.fit),
+                restricted_seed_status(binding.fit),
+            ),
+            captions,
+        )
+        draw_caption(image, compact)
+    record: dict[str, Any] = {
+        "frame_index": index,
+        "frame": identity,
+        "original_png_sha256": hashlib.sha256(original_png).hexdigest(),
+        "matched_marker_count": len(errors),
+        "matched_rms_pixels": rms,
+        **layer_record,
+    }
+    if shaft is not None:
+        record["shaft_overlay"] = shaft_record
+    if compact is not None:
+        record["caption_overlay"] = compact.to_record()
+    return image, record
+
+
+def _shaft_frame(
+    binding: NativeFitBinding,
+    shaft: ShaftVideoOverlay | None,
+    index: int,
+    pose: np.ndarray,
+    image: np.ndarray,
+    original_png: bytes,
+) -> tuple[dict[str, Any], list[str]]:
+    if shaft is None:
+        return {}, []
+    bound = shaft.bound
+    evidence = bound.evidence
+    for item in evidence.frames:
+        if item.frame_index == index and (
+            item.png_sha256 != "sha256:" + hashlib.sha256(original_png).hexdigest()
+        ):
+            raise ValueError("Shaft original PNG changed during overlay render")
+    return _draw_shaft(binding, shaft, index, pose, image)
+
+
+def _render_caption(
+    image: np.ndarray,
+    index: int,
+    pts: Fraction,
+    rms: float | None,
+    count: int,
+    shaft_lines: list[str],
+    force: ForceLayerRenderer | None = None,
+) -> None:
     metric = (
-        f"Matched RMS {rms:.2f} px ({len(errors)} markers)"
+        f"Matched RMS {rms:.2f} px ({count} markers)"
         if rms is not None
         else "Matched RMS unavailable (no common observed markers)"
     )
@@ -277,17 +540,10 @@ def _render(
             "Camera/anatomy unqualified | Physical time unknown",
             metric,
             "Green: observations | Blue: native rig/seeds | Yellow: residuals",
+            *shaft_lines,
             *unavailable,
         ],
     )
-    return image, {
-        "frame_index": index,
-        "frame": identity,
-        "original_png_sha256": hashlib.sha256(original_png).hexdigest(),
-        "matched_marker_count": len(errors),
-        "matched_rms_pixels": rms,
-        **layer_record,
-    }
 
 
 def _verify_video(path: Path, count: int, size: tuple[int, int]) -> None:
@@ -322,6 +578,9 @@ def export_fit_video(
     destination: Path,
     *,
     selected_frames: Sequence[int] = (),
+    shaft_evidence: ShaftAxisEvidence | None = None,
+    shape_overlay: ShapeOverlayOptions | None = None,
+    caption_overlay: CaptionOverlayOptions | None = None,
     force_layer: ForceLayer | None = None,
     force_sampler_factory: ForceSamplerFactory | None = None,
 ) -> dict[str, Any]:
@@ -332,6 +591,7 @@ def export_fit_video(
     output hashes, frame identities and unqualified scientific status are recorded.
     An enabled ``force_layer`` additionally requires ``force_sampler_factory``.
     """
+    _validate_overlay_options(shape_overlay, caption_overlay)
     if (
         force_layer is not None
         and force_layer.enabled
@@ -346,7 +606,9 @@ def export_fit_video(
     rate = source_frame_rate(indices, frames)
     if any(type(index) is not int or index not in indices for index in selected_frames):
         raise ValueError("Selected PNG frames must belong to the bound fit")
-    anatomy, missing = _anatomical_attachments(binding)
+    anatomy, missing, overlays = _prepare_export_layers(
+        library, binding, shaft_evidence, shape_overlay, caption_overlay
+    )
     destination.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(
         prefix="necromatcher-video-", dir=destination.parent
@@ -361,6 +623,7 @@ def export_fit_video(
             set(selected_frames),
             anatomy,
             missing,
+            overlays,
             ForceLayerRenderer(
                 binding, force_layer, force_sampler_factory, _rigid_segments(binding)
             )
@@ -369,11 +632,103 @@ def export_fit_video(
             and force_sampler_factory is not None
             else None,
         )
-        # Existing library authority rechecks parent and fit hashes before publication.
-        if library.load_asset(fit_id).metadata["hash"] != binding.fit_hash:
-            raise ValueError("Fit bytes changed during overlay export")
-        library.load_fit(fit_id)
+        _verify_export_binding(library, binding, overlays.shaft)
         _publish(staging, destination)
+    return manifest
+
+
+def export_fit_stills(
+    library: NecromatcherLibrary,
+    fit_id: str,
+    destination: Path,
+    *,
+    selected_frames: Sequence[int],
+    shaft_evidence: ShaftAxisEvidence | None = None,
+    shape_overlay: ShapeOverlayOptions | None = None,
+    caption_overlay: CaptionOverlayOptions | None = None,
+) -> dict[str, Any]:
+    """Publish selected source-sized PNGs using canonical video composition.
+
+    Selection is nonempty, unique and source-bound. Only selected poses are
+    rendered; no codec, frame-rate inference or physical-clock assumption occurs.
+    Exact source identities/PTS and lossless output hashes accompany the manifest.
+    """
+    _validate_overlay_options(shape_overlay, caption_overlay)
+    selected = tuple(selected_frames)
+    if (
+        not selected
+        or any(type(index) is not int for index in selected)
+        or len(set(selected)) != len(selected)
+    ):
+        raise ValueError(
+            "Selected still frames must be nonempty unique integer indices"
+        )
+    destination = Path(destination)
+    if destination.exists():
+        raise FileExistsError(destination)
+    binding = load_native_fit_binding(library, fit_id)
+    if any(index not in binding.fit["frame_indices"] for index in selected):
+        raise ValueError("Selected still frames must belong to the bound fit")
+    anatomy, missing, overlays = _prepare_export_layers(
+        library, binding, shaft_evidence, shape_overlay, caption_overlay
+    )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(
+        prefix="necromatcher-stills-", dir=destination.parent
+    ) as temporary:
+        staging = Path(temporary) / "export"
+        staging.mkdir()
+        manifest = _write_stills(
+            binding, library, staging, selected, anatomy, missing, overlays
+        )
+        _verify_export_binding(library, binding, overlays.shaft)
+        _publish(staging, destination)
+    return manifest
+
+
+def _write_stills(
+    binding: NativeFitBinding,
+    library: NecromatcherLibrary,
+    staging: Path,
+    selected: tuple[int, ...],
+    anatomy: dict[str, Any],
+    missing: list[str],
+    overlays: VideoOverlayLayers,
+) -> dict[str, Any]:
+    records, pngs, times = [], [], []
+    with CaptureReview(library, binding.fit["capture_id"]) as review:
+        first = review.frame(selected[0])
+        size = [first["image_width"], first["image_height"]]
+        for index in selected:
+            image, record = _render_layers(binding, review, index, anatomy, overlays)
+            if list(image.shape[:2][::-1]) != size:
+                raise ValueError("Selected still changed original source dimensions")
+            frame = record["frame"]
+            pts = Fraction(
+                frame["pts_ticks"] * frame["timebase_numerator"],
+                frame["timebase_denominator"],
+            )
+            records.append(record)
+            times.append(
+                {
+                    "frame_index": index,
+                    "numerator": pts.numerator,
+                    "denominator": pts.denominator,
+                }
+            )
+            pngs.append(_save_png(staging / f"frame-{index:06d}.png", image))
+    manifest = _export_manifest(
+        binding,
+        library,
+        records,
+        pngs,
+        anatomy,
+        missing,
+        overlays,
+        {"schema": "necromatcher/source-overlay-stills/1", "image_size": size},
+    )
+    manifest["frame_pts"] = times
+    _save_manifest(staging, manifest)
     return manifest
 
 
@@ -406,6 +761,20 @@ def _publish(staging: Path, destination: Path) -> None:
         raise
 
 
+def _render_layers(
+    binding: NativeFitBinding,
+    review: CaptureReview,
+    index: int,
+    anatomy: dict[str, Any],
+    overlays: VideoOverlayLayers | None,
+    force: ForceLayerRenderer | None = None,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    shaft = overlays.shaft if overlays else None
+    shapes = overlays.shapes if overlays else None
+    captions = overlays.captions if overlays else None
+    return _render(binding, review, index, anatomy, shaft, shapes, captions, force)
+
+
 def _write_export(
     binding: NativeFitBinding,
     library: NecromatcherLibrary,
@@ -414,6 +783,7 @@ def _write_export(
     selected: set[int],
     anatomy: dict[str, Any],
     missing: list[str],
+    overlays: VideoOverlayLayers | None = None,
     force: ForceLayerRenderer | None = None,
 ) -> dict[str, Any]:
     import cv2
@@ -432,7 +802,9 @@ def _write_export(
             if not writer.isOpened():
                 raise ValueError("MP4 encoder could not open")
             for index in binding.fit["frame_indices"]:
-                image, record = _render(binding, review, index, anatomy, force)
+                image, record = _render_layers(
+                    binding, review, index, anatomy, overlays, force
+                )
                 writer.write(image)
                 records.append(record)
                 if index in selected:
@@ -441,8 +813,62 @@ def _write_export(
         finally:
             writer.release()
     _verify_video(staging / "overlay.mp4", len(records), size)
-    manifest = {
+    media = {
         "schema": "necromatcher/source-overlay-video/1",
+        "source_frame_rate": {
+            "numerator": rate.numerator,
+            "denominator": rate.denominator,
+        },
+        "image_size": list(size),
+        "video": {
+            "path": "overlay.mp4",
+            "codec": "mp4v",
+            "sha256": _sha(staging / "overlay.mp4"),
+            "bytes": (staging / "overlay.mp4").stat().st_size,
+        },
+    }
+    manifest = _export_manifest(
+        binding, library, records, pngs, anatomy, missing, overlays, media, force
+    )
+    _save_manifest(staging, manifest)
+    return manifest
+
+
+def video_scope_provenance(fit: dict[str, Any]) -> dict[str, Any]:
+    """Detach scope from a canonically authenticated fit without inventing lineage."""
+    from .necromatcher_source_scope import SourceFitScope
+
+    provenance = fit.get("provenance", {})
+    keys = ("source_fit_scope", "source_fit_scope_binding")
+    if not any(key in provenance for key in keys):
+        return {}
+    if not all(key in provenance for key in keys):
+        raise ValueError("Video source scope requires its selected-domain binding")
+    SourceFitScope.from_record(provenance[keys[0]])
+    if not isinstance(provenance[keys[1]], dict):
+        raise ValueError("Video source scope binding must be a record")
+    return json.loads(
+        json.dumps({key: provenance[key] for key in keys}, allow_nan=False)
+    )
+
+
+def _export_manifest(
+    binding: NativeFitBinding,
+    library: NecromatcherLibrary,
+    records: list[dict[str, Any]],
+    pngs: list[dict[str, str]],
+    anatomy: dict[str, Any],
+    missing: list[str],
+    overlays: VideoOverlayLayers | None,
+    media: dict[str, Any],
+    force: ForceLayerRenderer | None = None,
+) -> dict[str, Any]:
+    import cv2
+
+    shaft = overlays.shaft if overlays else None
+    shapes = overlays.shapes if overlays else None
+    manifest = {
+        "schema": media["schema"],
         "fit_id": binding.fit_id,
         "fit_hash": binding.fit_hash,
         "model_id": binding.model_id,
@@ -458,11 +884,12 @@ def _write_export(
         "export_implementation_sha256": _sha(Path(__file__)),
         "opencv_version": cv2.__version__,
         "physical_time_qualified": False,
-        "source_frame_rate": {
-            "numerator": rate.numerator,
-            "denominator": rate.denominator,
-        },
-        "image_size": list(size),
+        **(
+            {"source_frame_rate": media["source_frame_rate"]}
+            if "source_frame_rate" in media
+            else {}
+        ),
+        "image_size": media["image_size"],
         "frames": records,
         "anatomical_marker_names": list(anatomy),
         "missing_anatomical_offsets": missing,
@@ -474,16 +901,81 @@ def _write_export(
         ],
         "club_representation": "declared attachment points only; no mesh or inferred shaft",
         "pngs": pngs,
-        "video": {
-            "path": "overlay.mp4",
-            "codec": "mp4v",
-            "sha256": _sha(staging / "overlay.mp4"),
-            "bytes": (staging / "overlay.mp4").stat().st_size,
-        },
+        **({"video": media["video"]} if "video" in media else {}),
     }
+    manifest.update(video_scope_provenance(binding.fit))
+    if shapes is not None:
+        manifest["shape_overlay"] = shapes.provenance
+        manifest["club_representation"] = (
+            "declared attachment points and model-conditioned visual proxies; not measured shaft anatomy"
+        )
+    if shaft is not None:
+        manifest["shaft_overlay"] = shaft.to_record()
+        manifest["club_representation"] = (
+            "declared attachments and projected infinite authored axis; not physical endpoints or shaft length"
+        )
+    if overlays and overlays.captions:
+        manifest["caption_overlay"] = caption_provenance(overlays.captions)
+        if authored_seed_status(binding.fit):
+            manifest["authored_initialization_seed"] = True
+        if restricted_seed_status(binding.fit):
+            manifest["restricted_initialization_seed"] = True
     if force is not None:
         manifest["force_layer"] = force.manifest()
+    return manifest
+
+
+def _save_manifest(staging: Path, manifest: dict[str, Any]) -> None:
     (staging / "manifest.json").write_text(
         json.dumps(manifest, indent=2, allow_nan=False) + "\n", encoding="utf-8"
     )
-    return manifest
+
+
+def _verify_export_binding(
+    library: NecromatcherLibrary,
+    binding: NativeFitBinding,
+    shaft: ShaftVideoOverlay | None,
+) -> None:
+    """Recheck immutable fit/parents and optional source evidence before publication."""
+    if library.load_asset(binding.fit_id).metadata["hash"] != binding.fit_hash:
+        raise ValueError("Fit bytes changed during overlay export")
+    library.load_fit(binding.fit_id)
+    if shaft is not None:
+        if (
+            bind_fit_shaft_evidence(library, binding.fit, shaft.bound.evidence)
+            != shaft.bound
+        ):
+            raise ValueError("Shaft source clock changed during overlay export")
+
+
+def _validate_overlay_options(
+    shape_overlay: ShapeOverlayOptions | None,
+    caption_overlay: CaptionOverlayOptions | None,
+) -> None:
+    if shape_overlay is not None and not isinstance(shape_overlay, ShapeOverlayOptions):
+        raise TypeError("Shape export requires typed options")
+    if caption_overlay is not None and not isinstance(
+        caption_overlay, CaptionOverlayOptions
+    ):
+        raise TypeError("Caption export requires typed options")
+
+
+def _prepare_export_layers(
+    library: NecromatcherLibrary,
+    binding: NativeFitBinding,
+    shaft_evidence: ShaftAxisEvidence | None,
+    shape_overlay: ShapeOverlayOptions | None,
+    caption_overlay: CaptionOverlayOptions | None,
+) -> tuple[dict[str, Any], list[str], VideoOverlayLayers]:
+    anatomy, missing = _anatomical_attachments(binding)
+    shaft = (
+        prepare_shaft_overlay(library, binding, shaft_evidence)
+        if shaft_evidence is not None
+        else None
+    )
+    shapes = (
+        NativeShapeOverlay.prepare(binding, shape_overlay)
+        if shape_overlay is not None
+        else None
+    )
+    return anatomy, missing, VideoOverlayLayers(shaft, shapes, caption_overlay)

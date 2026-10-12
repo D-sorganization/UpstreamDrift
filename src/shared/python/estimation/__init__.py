@@ -2,8 +2,15 @@
 
 from __future__ import annotations
 
-
 from src.shared.python.core.deprecation import deprecated_alias_getattr
+from src.shared.python.estimation.hermite_bounds import HermiteBoundsDomain
+from src.shared.python.estimation.hermite_initialization import (
+    AuthoredHermiteInitialization,
+    AuthoredKnotChange,
+    CoordinateDisplacement,
+    initialize_authored_hermite,
+)
+from src.shared.python.estimation.solver_telemetry import SolverBackend, SolverTelemetry
 from src.shared.python.estimation.identifiability import (
     IdentifiabilityGateOptions,
     IdentifiabilityGateReport,
@@ -327,6 +334,8 @@ __all__ = [
     "AdaptiveMatchingInitializer",
     "AnalyticPendulumProvider",
     "ArrivalFactor",
+    "AuthoredHermiteInitialization",
+    "AuthoredKnotChange",
     "BilateralAllocationStatus",
     "CalibrationParameter",
     "CalibrationParameterKind",
@@ -349,6 +358,7 @@ __all__ = [
     "ContinuousReplayResult",
     "ControlBand",
     "ControlChannelSpec",
+    "CoordinateDisplacement",
     "CoupledRangeOfMotionPrior",
     "CoupledRomEvaluationResult",
     "CovarianceValidationError",
@@ -410,11 +420,12 @@ __all__ = [
     "ForceClassification",
     "ForceProvenance",
     "ForwardModel",
-    "GroundReactionForceReport",
     "GlobalCalibrationProblem",
     "GlobalCalibrationResult",
+    "GroundReactionForceReport",
     "GroundTruthRigResult",
     "HeldOutEvaluationReport",
+    "HermiteBoundsDomain",
     "HierarchicalDimensionPrior",
     "IdentifiabilityGateOptions",
     "IdentifiabilityGateReport",
@@ -493,6 +504,8 @@ __all__ = [
     "SharedParameterSpec",
     "SkeletonRigForwardModel",
     "SmoothedTrajectoryResult",
+    "SolverBackend",
+    "SolverTelemetry",
     "SplineTrajectoryEvaluation",
     "SplitPolicy",
     "StaleModelIdentityError",
@@ -540,6 +553,7 @@ __all__ = [
     "finite_difference_jacobian",
     "gate_shared_parameters",
     "identifiability_finite_difference_jacobian",
+    "initialize_authored_hermite",
     "integrate_step",
     "invert_camera_extrinsics",
     "linearize_drift",

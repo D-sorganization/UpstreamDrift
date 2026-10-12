@@ -1,0 +1,98 @@
+{
+  "schema": "necromatcher/methods-report-review/1",
+  "edition": "Authored Replay Impact Methods Edition 1",
+  "source_checkpoint": "b059f04e91e5fefd056d8c8514fc2b502815cd89",
+  "issues": [11232, 11464],
+  "source": {
+    "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\necromatcher-replay-impact-methods.tex",
+    "bytes": 12408,
+    "sha256": "032c54a30c90150b9b62c1928a8fd6652c0c270f0182c9265e221f9527ec9ca4"
+  },
+  "pdf": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-methods-edition1\\necromatcher-replay-impact-methods.pdf",
+    "bytes": 232166,
+    "sha256": "381d8875452be3ae042348a1ab513425cfa643a1a2751366ffc5bb5c7b7f4730"
+  },
+  "compile_log": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-methods-edition1\\necromatcher-replay-impact-methods.log",
+    "bytes": 23342,
+    "sha256": "1d6d98013f6d34f408bc970af8afd69410b7f8d160ae78a6b3f522eb4d042bf4"
+  },
+  "builtin_compiler": {
+    "status": "compile-failed",
+    "diagnostic": "Unable to find standard directories for platform"
+  },
+  "fallback": {
+    "compiler": "MiKTeX pdfTeX 1.40.28",
+    "package_installer_disabled": true,
+    "exit_code": 0
+  },
+  "pages": [
+    {
+      "page": 1,
+      "visually_reviewed": true,
+      "text_characters": 1960,
+      "image": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-methods-edition1\\page-1.png",
+        "bytes": 68292,
+        "sha256": "6fea03f6b4e1e6feef900684cb137841d7e3c677c4654405b71d8bbbfdb2d91b"
+      }
+    },
+    {
+      "page": 2,
+      "visually_reviewed": true,
+      "text_characters": 2089,
+      "image": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-methods-edition1\\page-2.png",
+        "bytes": 66625,
+        "sha256": "a8680df5d58786b5406649c26ea29c265d1bca7d31a776fa4599c771de99474a"
+      }
+    },
+    {
+      "page": 3,
+      "visually_reviewed": true,
+      "text_characters": 1855,
+      "image": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-methods-edition1\\page-3.png",
+        "bytes": 67797,
+        "sha256": "2ab142a26c1dda982e70928dfb1a5b399ce406f65402f5367cee6231218b7539"
+      }
+    },
+    {
+      "page": 4,
+      "visually_reviewed": true,
+      "text_characters": 2358,
+      "image": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-methods-edition1\\page-4.png",
+        "bytes": 82469,
+        "sha256": "588ae34114de81e34cdd8283cd4ad72365d1c1bd88547dcacdec2d7eeda9b169"
+      }
+    },
+    {
+      "page": 5,
+      "visually_reviewed": true,
+      "text_characters": 2707,
+      "image": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-methods-edition1\\page-5.png",
+        "bytes": 90522,
+        "sha256": "3e825f6b1f1a4bcfa936739ed670b41ce771eaa0145fa9d8b9e61e6192a57f90"
+      }
+    }
+  ],
+  "desktop_source": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Authored Replay Impact Methods Edition 1\\necromatcher-replay-impact-methods.tex",
+    "bytes": 12408,
+    "sha256": "032c54a30c90150b9b62c1928a8fd6652c0c270f0182c9265e221f9527ec9ca4"
+  },
+  "desktop_pdf": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Authored Replay Impact Methods Edition 1\\necromatcher-replay-impact-methods.pdf",
+    "bytes": 232166,
+    "sha256": "381d8875452be3ae042348a1ab513425cfa643a1a2751366ffc5bb5c7b7f4730"
+  },
+  "page_layout_warnings": [],
+  "scientific_qualified": false,
+  "physical_source_time_qualified": false,
+  "controltower_delivered": false,
+  "earlier_methods_report_modified": false,
+  "later_receipt_and_ui_behavior_included": false
+}
