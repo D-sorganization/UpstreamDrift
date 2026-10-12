@@ -1,0 +1,42 @@
+{
+  "report_id": "swing-report-fixture-full",
+  "rows": [
+    {
+      "plot_id": "clubhead_speed_ts",
+      "title": "Clubhead Speed",
+      "kind": "time_series",
+      "enabled": true,
+      "status_label": "Advertised With Uncertainty",
+      "detail": "Uncertainty: engine_spread (provisional_cross_engine_spread), units m/s",
+      "unavailable_reason": null
+    },
+    {
+      "plot_id": "clubhead_path",
+      "title": "Clubhead Path",
+      "kind": "scatter",
+      "enabled": true,
+      "status_label": "Advertised With Uncertainty",
+      "detail": "Uncertainty: engine_spread (provisional_cross_engine_spread), units m",
+      "unavailable_reason": null
+    },
+    {
+      "plot_id": "face_angle_ts",
+      "title": "Face Angle Ts",
+      "kind": "time_series",
+      "enabled": false,
+      "status_label": "Not Validated",
+      "detail": "Not validated (#10382).",
+      "unavailable_reason": "Not validated (#10382)."
+    },
+    {
+      "plot_id": "joint_load_ts",
+      "title": "Joint Load Ts",
+      "kind": "time_series",
+      "enabled": false,
+      "status_label": "Not Validated",
+      "detail": "Not validated (#10382).",
+      "unavailable_reason": "Not validated (#10382)."
+    }
+  ],
+  "default_custom_ids": ["clubhead_speed_ts"]
+}
