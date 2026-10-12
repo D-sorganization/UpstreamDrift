@@ -86,3 +86,12 @@ execution or solve was run for this receipt change. The fragment validator
 accepted the new #12342 fragment. Design-manual governance verified the 62 QMD
 sources and retained `release=blocked-inventory-required`; calculation/manual
 release remains blocked.
+
+### Receipt Validation Maintenance (2026-10-12)
+
+The passive receipt validator now delegates native-state and muscle-coverage
+checks to `_validate_passive_muscle_inventory`, keeping the public validation
+sequence and fail-closed errors unchanged while satisfying the 100-line
+function budget. The targeted receipt module passed 27 tests; architecture and
+file-size budget checks passed. Agent-context render/check passed, and its
+12-query evaluation passed after registering the receipt source and test.

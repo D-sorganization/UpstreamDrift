@@ -121,6 +121,51 @@ def write_native_passive_observation_receipt(
     )
 
 
+def _validate_passive_muscle_inventory(
+    payload: dict[str, Any],
+    observation: dict[str, Any],
+    loaded_model_sha256: str,
+    policy_sha256: str | None,
+    observer_sha256: str,
+    reference: NativePassiveObservationReceiptReference,
+) -> None:
+    native_state = observation.get("native_state")
+    muscles = observation.get("muscles")
+    if not isinstance(native_state, dict) or not isinstance(muscles, list):
+        raise ValueError("receipt native state or muscle inventory is missing")
+    if _audit_digest(native_state) != reference.prepared_state_sha256:
+        raise ValueError("receipt prepared-state digest mismatch")
+    if native_state.get("loaded_model_sha256") != loaded_model_sha256:
+        raise ValueError("receipt native loaded-model identity mismatch")
+    if observation.get("policy_sha256") != policy_sha256:
+        raise ValueError("receipt passive-policy identity mismatch")
+    if len(muscles) != payload.get("muscle_count") or any(
+        not isinstance(item, dict)
+        or not isinstance(item.get("path"), str)
+        or not item["path"]
+        for item in muscles
+    ):
+        raise ValueError("receipt muscle inventory is malformed")
+    muscle_paths = [item["path"] for item in muscles]
+    actuators = native_state.get("actuators")
+    if not isinstance(actuators, list) or any(
+        not isinstance(item, dict)
+        or not isinstance(item.get("path"), str)
+        or not item["path"]
+        or not isinstance(item.get("is_muscle"), bool)
+        for item in actuators
+    ):
+        raise ValueError("receipt native actuator inventory is malformed")
+    native_muscle_paths = [item["path"] for item in actuators if item["is_muscle"]]
+    if (
+        len(set(muscle_paths)) != len(muscle_paths)
+        or len(set(native_muscle_paths)) != len(native_muscle_paths)
+        or set(muscle_paths) != set(native_muscle_paths)
+        or payload.get("muscle_count") != len(muscles)
+    ):
+        raise ValueError("receipt passive muscle coverage mismatch")
+
+
 def validate_native_passive_observation_receipt(
     directory: Path,
     reference: NativePassiveObservationReceiptReference,
@@ -188,41 +233,14 @@ def validate_native_passive_observation_receipt(
         raise ValueError("receipt audit digest mismatch")
     if observation.get("observer_sha256") != reference.observer_sha256:
         raise ValueError("receipt observer identity mismatch")
-    native_state = observation.get("native_state")
-    muscles = observation.get("muscles")
-    if not isinstance(native_state, dict) or not isinstance(muscles, list):
-        raise ValueError("receipt native state or muscle inventory is missing")
-    if _audit_digest(native_state) != reference.prepared_state_sha256:
-        raise ValueError("receipt prepared-state digest mismatch")
-    if native_state.get("loaded_model_sha256") != loaded_model_sha256:
-        raise ValueError("receipt native loaded-model identity mismatch")
-    if observation.get("policy_sha256") != policy_sha256:
-        raise ValueError("receipt passive-policy identity mismatch")
-    if len(muscles) != payload.get("muscle_count") or any(
-        not isinstance(item, dict)
-        or not isinstance(item.get("path"), str)
-        or not item["path"]
-        for item in muscles
-    ):
-        raise ValueError("receipt muscle inventory is malformed")
-    muscle_paths = [item["path"] for item in muscles]
-    actuators = native_state.get("actuators")
-    if not isinstance(actuators, list) or any(
-        not isinstance(item, dict)
-        or not isinstance(item.get("path"), str)
-        or not item["path"]
-        or not isinstance(item.get("is_muscle"), bool)
-        for item in actuators
-    ):
-        raise ValueError("receipt native actuator inventory is malformed")
-    native_muscle_paths = [item["path"] for item in actuators if item["is_muscle"]]
-    if (
-        len(set(muscle_paths)) != len(muscle_paths)
-        or len(set(native_muscle_paths)) != len(native_muscle_paths)
-        or set(muscle_paths) != set(native_muscle_paths)
-        or payload.get("muscle_count") != len(muscles)
-    ):
-        raise ValueError("receipt passive muscle coverage mismatch")
+    _validate_passive_muscle_inventory(
+        payload,
+        observation,
+        loaded_model_sha256,
+        policy_sha256,
+        observer_sha256,
+        reference,
+    )
     return payload
 
 
