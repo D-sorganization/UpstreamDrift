@@ -423,7 +423,7 @@ def redistribute_forces(
             options={"ftol": max(tolerance, 1e-12), "maxiter": max_iterations},
         )
         z = solve.x
-        converged = bool(solve.success or (solve.status in (0, 8, 9)))
+        converged = bool(solve.success)
         message = str(solve.message)
     else:
         z = np.empty(0)
@@ -634,7 +634,7 @@ def redistribute_trajectory(
             options={"ftol": max(tolerance, 1e-12), "maxiter": max_iterations},
         )
         z_sol = solve.x
-        converged = bool(solve.success or (solve.status in (0, 8, 9)))
+        converged = bool(solve.success)
         message = str(solve.message)
     else:
         z_sol = np.empty(0)
