@@ -65,7 +65,9 @@ VOCABULARY: dict[str, set[str]] = {
 
 @pytest.fixture(scope="module")
 def matrix() -> dict[str, Any]:
-    return json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    loaded = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    validate_claim_scope(loaded)
+    return loaded
 
 
 @pytest.fixture(scope="module")
@@ -185,6 +187,47 @@ def test_release_claim_stays_bounded_while_work_is_outstanding(
     for entry in matrix["closure"]:
         if entry["status"] != "met":
             assert entry["blockers"], f"closure {entry['id']} unmet without blockers"
+
+
+REQUIRED_SCOPE_KEYS = (
+    "validated_scope",
+    "not_validated",
+    "deferred_empirical_validation",
+)
+
+
+def validate_claim_scope(matrix: dict[str, Any]) -> None:
+    """Precondition for the gate: ``claim_scope`` carries every required field."""
+    scope = matrix.get("claim_scope")
+    if not isinstance(scope, dict):
+        raise ValueError("claim_scope object is required (issue #11847)")
+    missing = [k for k in REQUIRED_SCOPE_KEYS if not scope.get(k)]
+    if missing:
+        raise ValueError(f"claim_scope missing fields: {missing}")
+
+
+def test_claim_scope_limits_acceptance_to_central_contact(
+    matrix: dict[str, Any],
+) -> None:
+    """#11847: consistency is qualified to the tested central-contact model."""
+    scope = matrix["claim_scope"]
+    for key in REQUIRED_SCOPE_KEYS:
+        assert scope[key], f"claim_scope.{key} must be non-empty"
+    assert "central-contact" in scope["validated_scope"].lower()
+    excluded = " ".join(scope["not_validated"]).lower()
+    for topic in ("off-center", "shaft", "player population"):
+        assert topic in excluded, f"claim_scope.not_validated omits {topic}"
+    packet = PACKET_PATH.read_text(encoding="utf-8")
+    assert "## Scope Limitations" in packet
+    assert "central-contact" in packet.lower()
+
+
+def test_claim_scope_missing_fields_are_rejected() -> None:
+    """Design by Contract: the loader refuses an unscoped acceptance record."""
+    with pytest.raises(ValueError, match="claim_scope"):
+        validate_claim_scope({"claim_scope": {"validated_scope": "x"}})
+    with pytest.raises(ValueError, match="claim_scope"):
+        validate_claim_scope({})
 
 
 def test_review_packet_names_every_model(models: dict[str, dict[str, Any]]) -> None:

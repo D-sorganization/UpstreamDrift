@@ -15,6 +15,17 @@
   "release_claim": "code_verified_only",
   "predictive_accuracy_claim": false,
   "claim_boundary": "Every entry below is software correctness evidence: synthetic golden cases and agreement with another implementation verify code, not physics. No predictive-accuracy or polished-delivery claim is made on the basis of the audit's 16 library tests or the probes here; that claim requires the physical reference datasets and predeclared error criteria of item 3.",
+  "claim_scope": {
+    "issue": 11847,
+    "validated_scope": "Numerical self-consistency of the tested translating central-contact impact model (momentum conservation, passivity, sign and axis conventions). Consistency is qualified to central contact only.",
+    "not_validated": [
+      "off-center club rotation (clubhead angular dynamics under offset strikes)",
+      "real shaft dynamics (the club is modelled as a free clubhead)",
+      "player population behaviour (no population-level distribution is validated)"
+    ],
+    "deferred_empirical_validation": "Physical launch-monitor or high-speed-camera reference datasets with predeclared error criteria (acceptance item 3) are deferred; until then no result is an empirical or predictive claim.",
+    "illustrative_inputs_note": "Preset club inputs shown in reports are illustrative, not measured player data or complete manufacturer specifications (issue #11846)."
+  },
   "model_capabilities": {
     "library": "src/shared/python/physics/impact_model",
     "vocabulary": {
