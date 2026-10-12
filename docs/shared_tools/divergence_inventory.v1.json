@@ -11,10 +11,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 397,
-    "diverged": 276,
+    "identical": 399,
+    "diverged": 274,
     "ud-only": 1628,
-    "tools-only": 808,
+    "tools-only": 777,
     "spelling-only": 123
   },
   "packages": {
@@ -372,7 +372,7 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 118,
+      "tools-only": 105,
       "spelling-only": 0
     },
     "golf_simulator": {
@@ -425,10 +425,10 @@
       "spelling-only": 0
     },
     "humanoid_character_builder": {
-      "identical": 13,
-      "diverged": 27,
+      "identical": 14,
+      "diverged": 26,
       "ud-only": 36,
-      "tools-only": 3,
+      "tools-only": 0,
       "spelling-only": 9
     },
     "impact_parameters": {
@@ -754,10 +754,10 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 211,
-      "diverged": 67,
+      "identical": 212,
+      "diverged": 66,
       "ud-only": 36,
-      "tools-only": 89,
+      "tools-only": 76,
       "spelling-only": 23
     },
     "signal_toolkit": {
@@ -799,7 +799,7 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 429,
+      "tools-only": 427,
       "spelling-only": 0
     },
     "tests": {
@@ -8710,7 +8710,7 @@
       "package": "golf_club",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 10238,
+      "tools_bytes": 10237,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -8722,7 +8722,7 @@
       "package": "golf_club",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 10508,
+      "tools_bytes": 9515,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -8825,48 +8825,12 @@
       "spelling_only": false
     },
     {
-      "path": "golf_club/_head_cad.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 3906,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "golf_club/_measured_grip_contracts.py",
       "classification": "tools-only",
       "package": "golf_club",
       "subpackage": "",
       "ud_bytes": null,
       "tools_bytes": 8404,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "golf_club/_pre_impact_contracts.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 11231,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "golf_club/_pre_impact_serde.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 8922,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -9521,18 +9485,6 @@
       "spelling_only": false
     },
     {
-      "path": "golf_club/field_origin.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 3619,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "golf_club/fitting_document.py",
       "classification": "tools-only",
       "package": "golf_club",
@@ -9605,66 +9557,6 @@
       "spelling_only": false
     },
     {
-      "path": "golf_club/iron_cad.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 6956,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "golf_club/iron_export.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 4239,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "golf_club/iron_geometry.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 3116,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "golf_club/iron_parameters.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 9750,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "golf_club/iron_serialization.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 3157,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "golf_club/measured_grip_impedance.py",
       "classification": "tools-only",
       "package": "golf_club",
@@ -9683,42 +9575,6 @@
       "subpackage": "",
       "ud_bytes": null,
       "tools_bytes": 8594,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "golf_club/modal_state.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 9928,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "golf_club/pre_impact_bundle.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 12668,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "golf_club/pre_impact_frames.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 7735,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -10001,24 +9857,12 @@
       "spelling_only": false
     },
     {
-      "path": "golf_club/validation.py",
-      "classification": "tools-only",
-      "package": "golf_club",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 528,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "golf_club/wedge_cad.py",
       "classification": "tools-only",
       "package": "golf_club",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 5863,
+      "tools_bytes": 6961,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -10030,7 +9874,7 @@
       "package": "golf_club",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 6456,
+      "tools_bytes": 7022,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -11566,8 +11410,8 @@
       "package": "humanoid_character_builder",
       "subpackage": "mesh",
       "ud_bytes": 20498,
-      "tools_bytes": 20606,
-      "byte_delta": -108,
+      "tools_bytes": 20438,
+      "byte_delta": 60,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11592,18 +11436,6 @@
       "ud_bytes": 15784,
       "tools_bytes": 15676,
       "byte_delta": 108,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "humanoid_character_builder/mesh/triangle_lamina.py",
-      "classification": "tools-only",
-      "package": "humanoid_character_builder",
-      "subpackage": "mesh",
-      "ud_bytes": null,
-      "tools_bytes": 7288,
-      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11814,13 +11646,13 @@
     },
     {
       "path": "humanoid_character_builder/tests/test_inertia_calculator.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "humanoid_character_builder",
       "subpackage": "tests",
       "ud_bytes": 9755,
-      "tools_bytes": 9759,
-      "byte_delta": -4,
-      "byte_identical": false,
+      "tools_bytes": 9755,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -11861,18 +11693,6 @@
       "spelling_only": false
     },
     {
-      "path": "humanoid_character_builder/tests/test_triangle_lamina.py",
-      "classification": "tools-only",
-      "package": "humanoid_character_builder",
-      "subpackage": "tests",
-      "ud_bytes": null,
-      "tools_bytes": 9227,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "humanoid_character_builder/tests/test_urdf_contracts_integration.py",
       "classification": "diverged",
       "package": "humanoid_character_builder",
@@ -11893,18 +11713,6 @@
       "tools_bytes": 10054,
       "byte_delta": 0,
       "byte_identical": true,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "humanoid_character_builder/tests/test_urdf_inertia_export.py",
-      "classification": "tools-only",
-      "package": "humanoid_character_builder",
-      "subpackage": "tests",
-      "ud_bytes": null,
-      "tools_bytes": 3178,
-      "byte_delta": null,
-      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -25566,13 +25374,13 @@
     },
     {
       "path": "sidekick/calculators/electrical/electrical_model.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "calculators",
       "ud_bytes": 18532,
-      "tools_bytes": 19044,
-      "byte_delta": -512,
-      "byte_identical": false,
+      "tools_bytes": 18532,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -25906,7 +25714,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 7545,
+      "tools_bytes": 3266,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -25918,7 +25726,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 10596,
+      "tools_bytes": 5925,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -26045,18 +25853,6 @@
       "spelling_only": false
     },
     {
-      "path": "sidekick/lab/mocap/cleanup.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 1787,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "sidekick/lab/mocap/cli.py",
       "classification": "tools-only",
       "package": "sidekick",
@@ -26093,78 +25889,6 @@
       "spelling_only": false
     },
     {
-      "path": "sidekick/lab/mocap/evidence_serialization.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 5389,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/experiment_contracts.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 9144,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/experiment_evidence.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 19254,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/experiment_execution.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 11608,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/experiment_replay.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 9524,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/experiment_resources.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 5391,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "sidekick/lab/mocap/extrinsics.py",
       "classification": "tools-only",
       "package": "sidekick",
@@ -26189,42 +25913,6 @@
       "spelling_only": false
     },
     {
-      "path": "sidekick/lab/mocap/native_state_artifact.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 5949,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/native_state_replay.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 9648,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/native_state_replay_serialization.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 4031,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "sidekick/lab/mocap/observations.py",
       "classification": "tools-only",
       "package": "sidekick",
@@ -26243,30 +25931,6 @@
       "subpackage": "lab",
       "ud_bytes": null,
       "tools_bytes": 12511,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/preview_artifacts.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 14891,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/preview_serialization.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 2391,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -26339,18 +26003,6 @@
       "subpackage": "lab",
       "ud_bytes": null,
       "tools_bytes": 9682,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/replay_serialization.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 7025,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31066,7 +30718,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 9054,
+      "tools_bytes": 8950,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31078,7 +30730,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 1491,
+      "tools_bytes": 1182,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31282,7 +30934,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 7565,
+      "tools_bytes": 7344,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31294,7 +30946,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 8530,
+      "tools_bytes": 8201,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31402,7 +31054,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 16610,
+      "tools_bytes": 12260,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31606,7 +31258,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 7523,
+      "tools_bytes": 7469,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31619,18 +31271,6 @@
       "subpackage": "flight",
       "ud_bytes": null,
       "tools_bytes": 3320,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "swing_sim/flight/tests/test_flight_termination.py",
-      "classification": "tools-only",
-      "package": "swing_sim",
-      "subpackage": "flight",
-      "ud_bytes": null,
-      "tools_bytes": 14245,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31846,7 +31486,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 15570,
+      "tools_bytes": 10649,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31858,7 +31498,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 9864,
+      "tools_bytes": 9579,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -34319,18 +33959,6 @@
       "subpackage": "",
       "ud_bytes": null,
       "tools_bytes": 5199,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "swing_sim/runtime_manifest.py",
-      "classification": "tools-only",
-      "package": "swing_sim",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 11297,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -40021,19 +39649,6 @@
       }
     },
     {
-      "path": "humanoid_character_builder/tests/test_inertia_calculator.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-10-11",
-        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
-      }
-    },
-    {
       "path": "humanoid_character_builder/tests/test_urdf_contracts_integration.py",
       "ud": {
         "author": "Dieter Olson",
@@ -40876,19 +40491,6 @@
         "author": "d-sorgclaudeagent[bot]",
         "date": "2026-06-15",
         "commit": "08ec0412c4569cd2b39572d638fdf4ba1fd9f76e"
-      }
-    },
-    {
-      "path": "sidekick/calculators/electrical/electrical_model.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-29",
-        "commit": "95800a5647603bf1211a98b0899674540cc16151"
       }
     },
     {
