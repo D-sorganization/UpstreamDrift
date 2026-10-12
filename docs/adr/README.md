@@ -72,3 +72,5 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 - **2026-10-07:** ADR-0052 gains an addendum on arrow scale modes, clamping and group toggles (GCV-4, #11710).
 - **2026-10-07:** ADR-0052 gains the Grip Label Table: labels, application points and force/torque halves for `GRIP` wrenches from `grip_wrench.to_overlay_wrenches` (GCV-7, #11713).
 - **2026-10-09:** ADR-0052 records the GCV-9 Simscape per-hand grip channels and the GCV-10 `grip_frame` metadata and `label_variant_hex` shading (GCV-18, #11724).
+
+- **2026-10-12:** [ADR-0014](0014-shared-biomech-models.md) validation references now follow the mirrored test layout for biomechanical model schemas, source-provider resolution and workspace setup. The architecture decision and acceptance status are unchanged.
