@@ -2,6 +2,12 @@
 
 from __future__ import annotations
 
+from src.shared.python.motion_matching.marker_kinematics import (
+    MarkerLinearization,
+    MarkerLinearizer,
+    MarkerLinearizationPlant,
+)
+
 from src.shared.python.motion_matching.pipeline import (
     address,
     cli,
@@ -89,6 +95,9 @@ from src.shared.python.motion_matching.pipeline.reference import (
 )
 
 __all__ = [
+    "MarkerLinearization",
+    "MarkerLinearizer",
+    "MarkerLinearizationPlant",
     "AddressStageInputs",
     "AddressStageResult",
     "BALANCE",

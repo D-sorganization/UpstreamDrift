@@ -6,6 +6,7 @@ import importlib
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from ._validation import check_sha256
     from .camera_bridge import (
         from_pipeline_camera,
         to_pipeline_camera,
@@ -185,6 +186,7 @@ if TYPE_CHECKING:
     )
 
 _LAZY_EXPORTS: dict[str, str] = {
+    "check_sha256": "._validation",
     "SourceAsset": ".source_records",
     "FrameIdentity": ".source_records",
     "RightsStatus": ".source_records",
@@ -332,6 +334,7 @@ _LAZY_EXPORTS: dict[str, str] = {
 }
 
 __all__ = [
+    "check_sha256",
     "AblationResult",
     "AblationType",
     "AffineTimingMapping",

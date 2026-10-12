@@ -10,15 +10,15 @@ Inputs are the dynamically consistent same-input bundles (driver, iron): 44
 coordinates at 1 ms, reference `q`, `v` and efforts. Ground reactions are exact
 (the deterministic contact law evaluated on the OpenSim skeleton), not estimated.
 
-| Check | Driver | Iron |
-| --- | --- | --- |
-| ID vs bundle efforts, leg/pelvis/trunk, median / p95 abs (N m) | 0.01 / 1.1 | 0.01 / 0.9 |
-| ID RMS before / after club-head speed peak (N m) | 0.8 / 5.5 | 0.3 / 4.1 |
-| ID peak error (N m), at stiff foot-contact transients | 80.7 | 71.2 |
-| Body origins vs MuJoCo parity model (mm), excl. fixed convention offsets | 0.0 | 0.0 |
-| Peak total vertical force (body weights) | 3.01 | 3.00 |
-| Leg reserve RMS / peak (N m) | 34.3 / 452 | 35.6 / 417 |
-| Leg reserve RMS before / after speed peak (N m) | 22.9 / 53.2 | 14.3 / 63.2 |
+| Check                                                                    | Driver      | Iron        |
+| ------------------------------------------------------------------------ | ----------- | ----------- |
+| ID vs bundle efforts, leg/pelvis/trunk, median / p95 abs (N m)           | 0.01 / 1.1  | 0.01 / 0.9  |
+| ID RMS before / after club-head speed peak (N m)                         | 0.8 / 5.5   | 0.3 / 4.1   |
+| ID peak error (N m), at stiff foot-contact transients                    | 80.7        | 71.2        |
+| Body origins vs MuJoCo parity model (mm), excl. fixed convention offsets | 0.0         | 0.0         |
+| Peak total vertical force (body weights)                                 | 3.01        | 3.00        |
+| Leg reserve RMS / peak (N m)                                             | 34.3 / 452  | 35.6 / 417  |
+| Leg reserve RMS before / after speed peak (N m)                          | 22.9 / 53.2 | 14.3 / 63.2 |
 
 Phase 1 (IK inputs, estimated GRF): leg reserve peak 2134 N m, pelvis residual up
 to 22 316 (RMS up to 1457). Phase 2 has no pelvis residual.

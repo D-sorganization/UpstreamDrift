@@ -2,10 +2,135 @@
 
 from pathlib import Path
 import threading
-
+from dataclasses import dataclass
+from types import SimpleNamespace
+from typing import Any
 import pytest
 
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_native_shape_control_captures_optional_typed_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, enabled: bool
+) -> None:
+    monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    app = QApplication.instance() or QApplication([])
+    calls: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
+
+    def submit(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        calls.append((args, kwargs))
+        return {}
+
+    dialog = VideoExportDialog(
+        "fit", SimpleNamespace(submit=submit), library_root=tmp_path
+    )
+    targets: list[Any] = []
+    dialog._work = lambda operation, target: targets.append(target)
+    try:
+        assert not dialog.shape_opacity.isEnabled()
+        dialog.shape_enabled.setChecked(enabled)
+        dialog.shape_opacity.setValue(0.6)
+        assert dialog.shape_opacity.isEnabled() == enabled
+        dialog._start()
+        dialog.shape_opacity.setValue(0.9)
+        targets[0]()
+        assert calls[0][0] == ("fit",)
+        if enabled:
+            assert calls[0][1]["shape_overlay"].to_record() == {"opacity": 0.6}
+        else:
+            assert calls[0][1] == {}
+        app.processEvents()
+    finally:
+        dialog.cleanup()
+
+
 pytestmark = pytest.mark.unit
+
+
+@dataclass
+class _Control:
+    enabled: bool = False
+    text: str = ""
+
+    def setEnabled(self, value: bool) -> None:
+        self.enabled = value
+
+    def setText(self, value: str) -> None:
+        self.text = value
+
+
+def _stored_overlay_probe(status: str = "succeeded") -> SimpleNamespace:
+    """Exercise control policy without constructing the Qt application."""
+    return SimpleNamespace(
+        run={
+            "status": status,
+            "acceptance": "rejected",
+            "qualification": "monocular_research_hypothesis",
+            "message": "Historical completion",
+            "blockers": [],
+            "control_available": False,
+            "download_available": False,
+            "execution_verified": True,
+            "run_id": "owned",
+            "producer_source_commit": "older-commit",
+        },
+        _closed=False,
+        _worker=None,
+        status=_Control(),
+        start=_Control(),
+        cancel=_Control(),
+        save=_Control(),
+        _timer=SimpleNamespace(stop=lambda: None),
+    )
+
+
+def test_historical_native_overlay_offers_explicit_guarded_verification() -> None:
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    probe = _stored_overlay_probe()
+    VideoExportDialog._render(probe)
+    assert probe.save.enabled
+    assert probe.save.text == "Verify Stored Overlay Package"
+    assert "Readiness unverified" in probe.status.text
+    assert "can reject changed files" in probe.status.text
+    assert "older-commit" in probe.status.text
+
+
+@pytest.mark.parametrize("status", ["failed", "cancelled", "running"])
+def test_native_stored_verification_requires_successful_history(status: str) -> None:
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    probe = _stored_overlay_probe(status)
+    VideoExportDialog._render(probe)
+    assert not probe.save.enabled
+
+
+def test_native_unverified_package_uses_authoritative_guard_before_copy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.tools.necromatcher.video_dialog import VideoExportDialog, QFileDialog
+
+    probe = _stored_overlay_probe()
+    operations: list[tuple[str, Any]] = []
+    destination = tmp_path / "save.zip"
+    probe.library_root = tmp_path / "library"
+    probe._work = lambda operation, target: operations.append((operation, target))
+
+    def reject_download(run: str) -> Path:
+        assert run == "owned"
+        raise ValueError("Stored artifact hash changed")
+
+    probe.session = SimpleNamespace(download=reject_download)
+    monkeypatch.setattr(
+        QFileDialog, "getSaveFileName", lambda *args: (str(destination), "")
+    )
+    VideoExportDialog._save(probe)
+    assert len(operations) == 1
+    with pytest.raises(ValueError, match="hash changed"):
+        operations[0][1]()
+    assert not destination.exists()
 
 
 def test_export_submission_is_responsive_and_download_requires_success(
@@ -80,6 +205,8 @@ def test_export_submission_is_responsive_and_download_requires_success(
         dialog._worker.wait(2)
         dialog._poll()
         assert destination.read_bytes() == package.read_bytes()
+        assert "monocular_research_hypothesis" in dialog.status.text()
+        assert "Checked Research Overlay Saved" in dialog.status.text()
         assert "research" in dialog.boundary.text().lower()
     finally:
         release.set()
@@ -192,6 +319,106 @@ def test_response_from_another_fit_or_run_is_rejected(tmp_path, monkeypatch):
                 {"source_fit_id": "fit", "run_id": "different"}, "owned"
             )
         app.processEvents()
+    finally:
+        dialog.cleanup()
+
+
+@pytest.mark.parametrize("status", ["pending", "running", "failed", "succeeded"])
+def test_stored_export_selector_recalls_without_submission(
+    tmp_path, monkeypatch, status
+):
+    monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    app = QApplication.instance() or QApplication([])
+    record = dict(_stored_overlay_probe(status).run, source_fit_id="fit")
+    record.update(control_available=status in {"pending", "running"})
+    calls = []
+
+    class Session:
+        def stored_runs(self, fit_id):
+            assert fit_id == "fit"
+            return [record.copy()]
+
+        def view(self, run_id):
+            calls.append(("view", run_id))
+            return record.copy()
+
+        def submit(self, fit_id):
+            pytest.fail("Recall must not submit a new job")
+
+        def cancel(self, run_id):
+            record.update(status="cancelled", control_available=False)
+            return record.copy()
+
+    dialog = VideoExportDialog("fit", Session(), library_root=tmp_path)
+    try:
+        assert dialog.stored_runs.count() == 2
+        assert dialog.run is None and not dialog.save.isEnabled()
+        dialog.stored_runs.setCurrentIndex(1)
+        app.processEvents()
+        if dialog._worker:
+            dialog._worker.wait(2)
+        dialog._poll()
+        assert dialog.run["run_id"] == "owned"
+        assert calls and all(action == "view" for action, _ in calls)
+        assert dialog.save.isEnabled() == (status == "succeeded")
+        assert dialog.cancel.isEnabled() == (status in {"pending", "running"})
+        assert "older-commit" in dialog.status.text()
+        dialog.stored_runs.setCurrentIndex(0)
+        assert dialog.run is None
+        assert not dialog.save.isEnabled() and not dialog.cancel.isEnabled()
+    finally:
+        dialog.cleanup()
+
+
+def test_stored_export_selector_rejects_foreign_fit(tmp_path, monkeypatch):
+    monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    app = QApplication.instance() or QApplication([])
+    foreign = dict(_stored_overlay_probe().run, source_fit_id="other-fit")
+    session = SimpleNamespace(stored_runs=lambda fit: [foreign])
+    dialog = VideoExportDialog("fit", session, library_root=tmp_path)
+    try:
+        app.processEvents()
+        assert dialog.stored_runs.count() == 1
+        assert "selected fit" in dialog.status.text()
+        assert dialog.run is None and not dialog.save.isEnabled()
+    finally:
+        dialog.cleanup()
+
+
+def test_recalled_export_rejects_changed_capture_through_session_guard(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    app = QApplication.instance() or QApplication([])
+    record = dict(_stored_overlay_probe().run, source_fit_id="fit")
+    calls = []
+
+    def guarded_view(fit_id, run_id):
+        calls.append((fit_id, run_id))
+        raise ValueError("Bound capture hash changed")
+
+    session = SimpleNamespace(
+        stored_runs=lambda fit: [record],
+        view_for_fit=guarded_view,
+        view=lambda run: pytest.fail("Must use canonical fit/parent guard"),
+    )
+    dialog = VideoExportDialog("fit", session, library_root=tmp_path)
+    try:
+        dialog.stored_runs.setCurrentIndex(1)
+        app.processEvents()
+        assert calls == [("fit", "owned")]
+        assert dialog.run is None
+        assert "capture hash changed" in dialog.status.text()
+        assert not dialog.save.isEnabled() and not dialog.cancel.isEnabled()
     finally:
         dialog.cleanup()
 

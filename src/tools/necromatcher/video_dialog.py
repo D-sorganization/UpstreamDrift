@@ -11,7 +11,9 @@ from typing import Any
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QDialog,
+    QDoubleSpinBox,
     QFileDialog,
     QLabel,
     QPushButton,
@@ -20,6 +22,12 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.ui.adapters import BackgroundWorker, get_worker_adapter
 from src.shared.python.workspace import compute_file_sha256
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from src.tools.necromatcher.refit_dialog import (
+    ReviewedShaftDialog,
+    read_reviewed_shaft_evidence,
+    source_scope_summary,
+)
 
 
 def copy_export(source: Path, destination: Path, library_root: Path) -> Path:
@@ -44,7 +52,7 @@ def copy_export(source: Path, destination: Path, library_root: Path) -> Path:
     return destination
 
 
-class VideoExportDialog(QDialog):
+class VideoExportDialog(ReviewedShaftDialog):
     """Observe an owned job without running native physics in the Qt process."""
 
     def __init__(
@@ -70,6 +78,12 @@ class VideoExportDialog(QDialog):
         )
         self.boundary.setWordWrap(True)
         layout.addWidget(self.boundary)
+        self.stored_runs = QComboBox()
+        self.stored_runs.setAccessibleName("Stored Overlay Exports")
+        self.stored_runs.addItem("Select a Stored Overlay Export", None)
+        layout.addWidget(self.stored_runs)
+        self._build_shaft_inputs(layout)
+        self._build_shape_inputs(layout)
         self.force_layer = QCheckBox(
             "Draw force and torque glyphs (research fit; not measured forces)"
         )
@@ -94,6 +108,80 @@ class VideoExportDialog(QDialog):
         self._timer = QTimer(self)
         self._timer.setInterval(100)
         self._timer.timeout.connect(self._poll)
+        self.stored_runs.currentIndexChanged.connect(self._recall)
+        self._load_stored_runs()
+
+    def _build_shape_inputs(self, layout: QVBoxLayout) -> None:
+        self.shape_enabled = QCheckBox("Show Translucent Model Proxy")
+        self.shape_opacity = QDoubleSpinBox()
+        self.shape_opacity.setAccessibleName("Model Proxy Opacity")
+        self.shape_opacity.setRange(0.0, 1.0)
+        self.shape_opacity.setSingleStep(0.05)
+        self.shape_opacity.setValue(0.35)
+        self.shape_opacity.setEnabled(False)
+        self.shape_enabled.toggled.connect(self.shape_opacity.setEnabled)
+        layout.addWidget(self.shape_enabled)
+        layout.addWidget(self.shape_opacity)
+        note = QLabel(
+            "Model Proxy Retains the Skeleton; Authored Geometry Is Uncalibrated. "
+            "Historical Anatomy and Original Scene Occlusion Remain Unknown."
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+    def _shape_controls(self, blocked: bool) -> None:
+        self.shape_enabled.setEnabled(not blocked)
+        self.shape_opacity.setEnabled(not blocked and self.shape_enabled.isChecked())
+
+    def _load_stored_runs(self) -> None:
+        """List canonical fit-scoped persisted receipts without submitting work."""
+        list_runs = getattr(self.session, "stored_runs", None)
+        if not callable(list_runs):
+            return
+        try:
+            records = list_runs(self.source_fit_id)
+            for record in records:
+                self._check_owner(record)
+            for record in records:
+                self.stored_runs.addItem(
+                    f"{record['run_id']} · {record['status']} · {record['acceptance']}",
+                    record["run_id"],
+                )
+        except (ValueError, KeyError, OSError, RuntimeError) as exc:
+            self.status.setText(str(exc))
+
+    def _recall(self, index: int) -> None:
+        """Observe a stored run through the authoritative session status boundary."""
+        if self._closed or self._worker:
+            return
+        self._timer.stop()
+        self.run = None
+        self._cancel_requested = False
+        self.save.setEnabled(False)
+        self.cancel.setEnabled(False)
+        self.start.setEnabled(True)
+        run_id = self.stored_runs.itemData(index)
+        if run_id is None:
+            self.status.setText(
+                "Select a Stored Export or Render a New Research Overlay."
+            )
+            return
+        try:
+            view = self._view_run(run_id)
+            self._check_owner(view, run_id)
+            self.run = view
+            self._render()
+            if view["status"] in {"pending", "running"}:
+                self._timer.start()
+        except (ValueError, KeyError, OSError, RuntimeError) as exc:
+            self.status.setText(str(exc))
+
+    def _view_run(self, run_id: str) -> dict[str, Any]:
+        """Use the fit/parent guard when supported by the canonical session."""
+        guarded_view = getattr(self.session, "view_for_fit", None)
+        if callable(guarded_view):
+            return dict(guarded_view(self.source_fit_id, run_id))
+        return dict(self.session.view(run_id))
 
     def force_layer_settings(self) -> dict[str, Any] | None:
         """Opt-in layer settings, or None so the default export is unchanged."""
@@ -117,25 +205,44 @@ class VideoExportDialog(QDialog):
         self._worker = get_worker_adapter(guarded, force_threading=True)
         self.start.setEnabled(False)
         self.save.setEnabled(False)
+        self.stored_runs.setEnabled(False)
+        self._shaft_controls(True)
+        self._shape_controls(True)
         self._worker.start()
         self._timer.start()
 
     def _start(self) -> None:
         if self._worker or self._closed:
             return
+        if self._shaft_path is not None and self._shaft_owner != self.source_fit_id:
+            self.status.setText("Remove evidence selected for another source fit")
+            return
+        source, path = self.source_fit_id, self._shaft_path
+        shape = (
+            ShapeOverlayOptions(self.shape_opacity.value())
+            if self.shape_enabled.isChecked()
+            else None
+        )
+        layer = self.force_layer_settings()
+
+        def submit() -> dict[str, Any]:
+            evidence = read_reviewed_shaft_evidence(path)
+            options: dict[str, Any] = (
+                {"shape_overlay": shape} if shape is not None else {}
+            )
+            if layer:
+                options["force_layer"] = layer
+            return (
+                self.session.submit(source, **options)
+                if evidence is None
+                else self.session.submit(source, evidence, **options)
+            )
+
         self.run = None
         self._cancel_requested = False
         self.cancel.setEnabled(True)
         self.status.setText("Submitting Research Overlay…")
-        layer = self.force_layer_settings()
-        self._work(
-            "submit",
-            lambda: (
-                self.session.submit(self.source_fit_id, force_layer=layer)
-                if layer
-                else self.session.submit(self.source_fit_id)
-            ),
-        )
+        self._work("submit", submit)
 
     def _poll(self) -> None:
         if self._closed:
@@ -144,6 +251,7 @@ class VideoExportDialog(QDialog):
             if self._worker.is_running():
                 return
             worker, self._worker = self._worker, None
+            self.stored_runs.setEnabled(True)
             if worker.error:
                 if self._operation == "save":
                     self._render()
@@ -151,10 +259,15 @@ class VideoExportDialog(QDialog):
                 self._timer.stop()
                 self.cancel.setEnabled(False)
                 self.start.setEnabled(True)
+                self._shaft_controls(False)
+                self._shape_controls(False)
                 return
             if self._operation == "save":
                 self._render()
-                self.status.setText(f"Checked Research Overlay Saved: {worker.result}")
+                self.status.setText(
+                    self.status.text()
+                    + f"\nChecked Research Overlay Saved: {worker.result}"
+                )
                 self._timer.stop()
                 return
             try:
@@ -162,6 +275,8 @@ class VideoExportDialog(QDialog):
             except ValueError as exc:
                 self.status.setText(str(exc))
                 self.start.setEnabled(True)
+                self._shaft_controls(False)
+                self._shape_controls(False)
                 self.cancel.setEnabled(False)
                 self._timer.stop()
                 return
@@ -171,7 +286,7 @@ class VideoExportDialog(QDialog):
                 updated = (
                     self.session.cancel(self.run["run_id"])
                     if self._cancel_requested and self.run["control_available"]
-                    else self.session.view(self.run["run_id"])
+                    else self._view_run(self.run["run_id"])
                 )
                 self._check_owner(updated, self.run["run_id"])
                 self.run = updated
@@ -191,18 +306,44 @@ class VideoExportDialog(QDialog):
     def _render(self) -> None:
         if not self.run or self._closed:
             return
+        historical = (
+            self.run["status"] == "succeeded"
+            and self.run.get("execution_verified") is True
+        )
+        stored = historical and not self.run["download_available"]
+        note = (
+            "\nReadiness unverified; guarded verification can reject changed files."
+            if stored
+            else ""
+        )
+        producer = self.run.get("producer_source_commit")
+        if producer:
+            note += (
+                f"\nProducer commit: {producer}; current source equality unverified."
+            )
+        if self.run.get("shape_overlay") is not None:
+            shape = ShapeOverlayOptions.from_record(self.run["shape_overlay"])
+            note += f"\nStored Model Proxy Opacity: {shape.opacity}; Skeleton Retained; Uncalibrated."
+        if self.run.get("source_fit_scope") is not None:
+            note += "\n" + source_scope_summary(
+                self.run["source_fit_scope"], self.run.get("source_fit_scope_binding")
+            )
         self.status.setText(
             f"{self.run['status']} · {self.run['acceptance']} · {self.run['qualification']}\n{self.run['message']}\n"
             + "\n".join(self.run["blockers"])
+            + note
         )
         active = self.run["status"] in {"pending", "running"}
         self.start.setEnabled(not active)
+        if hasattr(self, "shaft_import"):
+            self._shaft_controls(active)
+        if hasattr(self, "shape_enabled"):
+            self._shape_controls(active)
         self.cancel.setEnabled(active and bool(self.run["control_available"]))
-        self.save.setEnabled(
-            self.run["status"] == "succeeded"
-            and self.run["download_available"]
-            and self.run.get("execution_verified") is True
+        self.save.setText(
+            "Verify Stored Overlay Package" if stored else "Save Checked ZIP"
         )
+        self.save.setEnabled(historical)
         if not active:
             self._timer.stop()
 
@@ -216,7 +357,6 @@ class VideoExportDialog(QDialog):
             or self._worker
             or not self.run
             or self.run["status"] != "succeeded"
-            or not self.run["download_available"]
             or self.run.get("execution_verified") is not True
         ):
             return

@@ -583,5 +583,34 @@
         }
       ]
     }
+  },
+  "main_reconciliation_8e9b4b974b": {
+    "main": "8e9b4b974b98d0f1006514a121b3b0807ed42d9c",
+    "reason": "Real merge-tree conflicts, not freshness-only update",
+    "source": "Merged Necromatcher #11359 preserved; no source conflicts. Incoming launcher arrays only reformatted; shot-pattern native-only tile retained.",
+    "resolution": "Current-state handoff with Necromatcher turnover pointer; specific launcher-atlas review after 88 actual focused passes. Signal project-task-native-replay review retained unchanged. Official context, capability atlas and divergence regeneration.",
+    "checks": "88 passed; agent_context check PASS; manual governance structurally PASS with release blocked/inventory required",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-8e9-merge-preview.txt.gz",
+        "sha256": "40fe1d576215082065aa5e0b81049c01142dcdb765df472cb8b95cf7404359ac",
+        "uncompressed_sha256": "b44b4de1a6e5f6ccbba84d6c9d09788c6c03571d203630037bf9dc107dc64bf7"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-8e9-focused.txt.gz",
+        "sha256": "adb3654a70765850a1acb129d98093859002dbee91098e7766fbfa87b696d69d",
+        "uncompressed_sha256": "7f1daf055839fbf6385faff01e15c9aa31b7ec284afba76097f7c4af082cc783"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-8e9-context-check.txt.gz",
+        "sha256": "cc0a7147cfa2fe8bb1ea7d77d7996bc107d0d9d2ebfbc71796c709540d0d2976",
+        "uncompressed_sha256": "9bf5d597ef1cce6c355e1727229cc29f9433e59b89ec5ce3fdd64387b7217581"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-8e9-manual-governance.txt.gz",
+        "sha256": "b676571e3fec9bed6e04a4c7a56fd2e48beba45e7d5e2ff114ca2c37cb800fde",
+        "uncompressed_sha256": "631fbce346bd2d8e16b8fd430a959280d9c3c21c54f696f45eca1074dc2338fe"
+      }
+    ]
   }
 }

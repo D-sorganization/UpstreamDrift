@@ -61,3 +61,5 @@ The linked records preserve peer-reported status and provenance; this index does
 - [Incoming Main Peer Records, Part 2](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_INCOMING_RECORDS-02.md)
 - [Incoming Main Peer Records, Part 3](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_INCOMING_RECORDS-03.md)
 - [Incoming Main Peer Records, Part 4](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_INCOMING_RECORDS-04.md)
+
+- **Necromatcher Continuation**: Merged #11359 restricts historical fits to reviewed swing intervals and retains its research/native integration. See [Next-Agent Turnover](docs/development/necromatcher-next-agent-turnover.md) for the current checkpoints and open scientific gates. This reconciliation adds no new fit or physical qualification.
