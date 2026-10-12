@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T05:39:50.824026+00:00",
+  "recorded_at_utc": "2026-10-12T05:51:40.814243+00:00",
   "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
@@ -41,11 +41,12 @@
     "pr": 5005,
     "source_review_commit": "6f0d81eb",
     "audit_commit": "f5ee7c1d",
-    "full_gates": "All completed checks pass; E2E accessibility step still running; protected auto-merge armed",
-    "public_routes": "Deployment and live article/PDF verification pending",
+    "full_gates": "PR CI38203470000 PASS; protected merge queue CI38209044541 in progress",
+    "public_routes": "Deployment and live verification pending; local all nine assets frozen; verifier local HTTP fixture passed53 checks",
     "pushed_commit": "5b658b733c4591f318687540e0ca4e571ee25d8a",
     "canonical_pre_pr": "PASS after actual main conflict reconciliation",
-    "ci_run": "https://github.com/D-sorganization/AffineDrift/actions/runs/38203470000"
+    "ci_run": "https://github.com/D-sorganization/AffineDrift/actions/runs/38203470000",
+    "merge_queue_sha": "eabbb3233a3644f11324d5dc39252db8589d71cc"
   },
   "protected_merge": "pending",
   "overall_complete": false,
@@ -199,9 +200,9 @@
     }
   },
   "remote_pr_head_observed": {
-    "commit": "99f8d6f8816",
-    "observation": "Advanced PR branch fetched and reconciled locally at 15059675d5; actual dirty main conflict resolved locally at 57df058371; no push from successor branch.",
-    "required_before_push": "Complete final-source canonical pre-PR and review protected PR state before authorized push."
+    "commit": "7375b888e21db3d2fb5d0a10547166dd8230ab1a",
+    "observation": "Remote incorporated additional main merges. Successor preserves both histories through ordinary local merge; sole generated divergence-inventory conflict regenerated officially. No successor push.",
+    "required_before_push": "Finish provider integration and complete canonical gate; recheck protected queue/head state."
   },
   "latest_local_reconciliation": {
     "remote_pr": "99f8d6f8816",
@@ -398,6 +399,48 @@
         "sha256": "4337d733a8d4c92559eda908b8795345f5d98ec33cdc7e0cd36f0723daefa27b",
         "raw_sha256": "e317872697c2cbfdefa321527a6efe73290dff3a390b0fa8723b87092eccba6a"
       }
+    }
+  },
+  "latest_remote_reconciliation": {
+    "remote": "7375b888e21db3d2fb5d0a10547166dd8230ab1a",
+    "local_parent": "9b40f1f0e7",
+    "incoming_changes": "Native wrist compatibility, finalized path audit connections, central-impact claim bounds, and replay contract documentation from already merged main PRs. Existing current-state SPEC rows retained.",
+    "focused": "63 passed, 15 skipped; native OpenSim requirements remain explicit",
+    "receipt": {
+      "receipt": "remote-7375-focused-green.txt.gz",
+      "sha256": "5259c7290ab6bf97e9376d3e86b696fd1fbf271c5b68e1a29ce5a11ac2b79a5b",
+      "raw_sha256": "c58829a9255c783758d45c905592868925436ea096ec209c319e369d4a2e7225"
+    },
+    "first_target_resolution_attempt": {
+      "receipt": "remote-7375-first-target-path-error.txt.gz",
+      "sha256": "dc8b4641ec84638ec016e4b01815e6beb1e138560d439f046f93affebddd6546",
+      "raw_sha256": "b2186ee8ce8285b33a239d330ce5502e2959a288ec83a57eed818832e1cb66e5"
+    },
+    "inventory": "Official generator applied to combined source; no new rule allowance or scientific approval."
+  },
+  "previously_failing_node_recheck": {
+    "result": "33 passed together; three Signal optimized-mode nodes not part of this diagnostic because upstream provider fix has not merged. Not full acceptance.",
+    "receipt": {
+      "receipt": "previous-failures-33-green-diagnostic.txt.gz",
+      "sha256": "45996c0bd4cb8703c7053d47b14faffe44d03ff0e6e7e3dee38c3e42bfb180de",
+      "raw_sha256": "f269e08f5746691ffa47183a8c0115107741663606c605dc6edf23fec921f6f0"
+    }
+  },
+  "tools_signal_dependency": {
+    "issue": 5569,
+    "local_commit": "0c43d91539",
+    "review": "Astra approved source/test fix",
+    "local_gates": "339 affected tests pass; Ruff, mypy, consistency collection, fragment, import and workflow gates pass; nine manual gates pass with unapproved publication preserved. Canonical RM-6 EXIT1 only inherited 76 development-log findings identical on Tools main.",
+    "status": "No push; user scope clarification pending for separate governed migration. No tolerance waiver or direct shared-log edit.",
+    "receipt": {
+      "receipt": "tools-signal-source-gates-green-log-policy-failed.txt.gz",
+      "sha256": "ccb63bc6b778d8aa3184930b9a767e4778356829fa1e93c99504517d7f7864a0",
+      "raw_sha256": "6e003c0f27e0336bc25835de8d63e1b83cfaa9dac2549bd856f320a07a2da5f1"
+    },
+    "baseline_findings": {
+      "receipt": "tools-log-baseline-76-findings.txt.gz",
+      "sha256": "278df3621cd2da8af9efc7f00b6b86ad4a7acc549e84052ca877ff5bee698f2e",
+      "raw_sha256": "3f07ea9ec2202a482e5e77c3e83d84db713e183d29a041063f6572a8ae4999b8"
     }
   }
 }

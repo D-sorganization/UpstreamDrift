@@ -119,7 +119,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
-| `sidekick` | 211 | 67 | 23 | 36 | 89 | 278 |
+| `sidekick` | 210 | 68 | 23 | 36 | 89 | 278 |
+| `sidekick_data_processing_bridge.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -142,7 +143,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **397** | **276** | **123** | **1630** | **808** | **673** |
+| **Total** | **396** | **277** | **123** | **1631** | **808** | **673** |
 
 ## Diverged Files by Package
 
@@ -414,7 +415,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `reporting/__init__.py` | +387 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `reporting/generator.py` | -58 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 
-### Package `sidekick` (67 Diverged Files)
+### Package `sidekick` (68 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -424,7 +425,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/calculators/thermo/steam_engine.py` | -983 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/calculators/thermo/thermo_properties.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/data_io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
-| `sidekick/data_processing/core.py` | -119 |  | Dieter Olson 2026-08-18 | d-sorgcodexagent[bot] 2026-10-11 |
+| `sidekick/data_processing/core.py` | -24973 |  | fleet-orchestrator 2026-10-11 | d-sorgcodexagent[bot] 2026-10-11 |
+| `sidekick/data_processing/exceptions.py` | -1347 |  | fleet-orchestrator 2026-10-11 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/data_processing/io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/lab/bio/c3d_reader.py` | +0 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/latex_renderer.py` | -79 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
