@@ -6,7 +6,7 @@ physiological admission and makes no global error-bound claim.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import math
@@ -35,6 +35,19 @@ def _interval(value: tuple[float, float], field: str) -> tuple[float, float]:
     ):
         raise ValueError(f"{field} must be a finite increasing interval")
     return float(lower), float(upper)
+
+
+def _optimizer_interval(
+    chart: tuple[float, float], function: tuple[float, float]
+) -> tuple[float, float]:
+    """Intersect global chart and function domains, excluding CPP activity."""
+    lower = max(chart[0], function[0])
+    upper = min(chart[1], function[1])
+    if lower >= upper:
+        raise ValueError(
+            "declared chart and moving path function optimizer domains do not overlap"
+        )
+    return _interval((lower, upper), "moving path optimizer domain")
 
 
 @dataclass(frozen=True)
@@ -130,6 +143,11 @@ class NativePathWorkIdentity:
                 "declared chart, active path and function domains do not overlap"
             )
         return lower, upper
+
+    @property
+    def optimizer_bounds(self) -> tuple[float, float]:
+        """Intersect chart and function domains, excluding CPP regime activity."""
+        return _optimizer_interval(self.chart_bounds, self.function_bounds)
 
 
 def inspect_native_path_work_identity(
@@ -227,7 +245,7 @@ def _loaded_path_components(
 
 
 def _native_path_domains(
-    declaration: DeclaredColdStart,
+    declaration: DeclaredColdStart | None,
     *,
     coordinate_path: str,
     moving_point: Any,
@@ -237,17 +255,22 @@ def _native_path_domains(
     osim: Any,
 ) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float]]:
     """Read coordinate, adjacent conditional point and spline domains."""
-    native_bounds = (
-        float(coordinate.getRangeMin()),
-        float(coordinate.getRangeMax()),
+    native_bounds = _interval(
+        (float(coordinate.getRangeMin()), float(coordinate.getRangeMax())),
+        "native coordinate range",
     )
-    declared_bounds = declaration.chart_bounds.get(coordinate_path)
-    if declared_bounds is None:
+    declared_bounds = (
+        None if declaration is None else declaration.chart_bounds.get(coordinate_path)
+    )
+    if declaration is not None and declared_bounds is None:
         raise ValueError("moving path coordinate is absent from the declared chart")
-    chart_bounds = (
-        max(native_bounds[0], declared_bounds[0]),
-        min(native_bounds[1], declared_bounds[1]),
-    )
+    chart_bounds = native_bounds
+    if declared_bounds is not None:
+        declared_bounds = _interval(declared_bounds, "declared coordinate chart")
+        chart_bounds = (
+            max(native_bounds[0], declared_bounds[0]),
+            min(native_bounds[1], declared_bounds[1]),
+        )
     if chart_bounds[0] >= chart_bounds[1]:
         raise ValueError("declared chart does not overlap the native coordinate range")
 
@@ -266,6 +289,7 @@ def _native_path_domains(
                     float(conditional.get_range(0)),
                     float(conditional.get_range(1)),
                 )
+                _interval(active_bounds, "conditional path activity range")
 
     function_domains: list[tuple[float, float]] = []
     for coordinate_for_axis, function in (
@@ -282,7 +306,14 @@ def _native_path_domains(
         if spline is not None:
             count = int(spline.getNumberOfPoints())
             knots = tuple(float(spline.getX(index)) for index in range(count))
-            if count < 2 or not all(math.isfinite(value) for value in knots):
+            if (
+                count < 2
+                or not all(math.isfinite(value) for value in knots)
+                or any(
+                    lower >= upper
+                    for lower, upper in zip(knots, knots[1:], strict=False)
+                )
+            ):
                 raise ValueError("moving path spline has an invalid knot domain")
             function_domains.append((min(knots), max(knots)))
         elif (
@@ -303,6 +334,74 @@ def _native_path_domains(
     if function_bounds[0] >= function_bounds[1]:
         raise ValueError("moving path functions have no shared coordinate domain")
     return chart_bounds, active_bounds, function_bounds
+
+
+def native_path_optimizer_domains(
+    model: Any, declaration: DeclaredColdStart | None, osim: Any
+) -> Mapping[str, tuple[float, float]]:
+    """Intersect source MPP axis domains for optimizer bounds, excluding CPP regimes."""
+    components = tuple(model.getComponentsList())
+    moving_paths = {
+        component.getAbsolutePathString()
+        for component in components
+        if component.getConcreteClassName() == "MovingPathPoint"
+    }
+    if not moving_paths:
+        return {}
+    if (
+        declaration is not None
+        and hashlib.sha256(declaration.model_path.read_bytes()).hexdigest()
+        != declaration.source_sha256
+    ):
+        raise ValueError("moving path domain source differs from its declaration")
+
+    discovered: dict[str, int] = {}
+    domains_by_coordinate: dict[str, list[tuple[float, float]]] = {}
+    for component in components:
+        geometry = osim.GeometryPath.safeDownCast(component)
+        if geometry is None:
+            continue
+        point_set = geometry.getPathPointSet()
+        for point_index in range(point_set.getSize()):
+            moving_point = osim.MovingPathPoint.safeDownCast(point_set.get(point_index))
+            if moving_point is None:
+                continue
+            point_path = moving_point.getAbsolutePathString()
+            discovered[point_path] = discovered.get(point_path, 0) + 1
+            for coordinate in (
+                moving_point.getXCoordinate(),
+                moving_point.getYCoordinate(),
+                moving_point.getZCoordinate(),
+            ):
+                if coordinate is None:
+                    raise ValueError("moving path axis has no source coordinate")
+                coordinate_path = coordinate.getAbsolutePathString()
+                chart, _active, function = _native_path_domains(
+                    declaration,
+                    coordinate_path=coordinate_path,
+                    moving_point=moving_point,
+                    coordinate=coordinate,
+                    point_set=point_set,
+                    point_index=point_index,
+                    osim=osim,
+                )
+                domain = _optimizer_interval(chart, function)
+                domains_by_coordinate.setdefault(coordinate_path, []).append(domain)
+    if set(discovered) != moving_paths or any(
+        count != 1 for count in discovered.values()
+    ):
+        raise ValueError("moving path point ownership is incomplete or ambiguous")
+
+    optimizer_domains: dict[str, tuple[float, float]] = {}
+    for coordinate_path, domains in domains_by_coordinate.items():
+        lower = max(domain[0] for domain in domains)
+        upper = min(domain[1] for domain in domains)
+        if lower >= upper:
+            raise ValueError(
+                "moving path functions have no shared optimizer coordinate domain"
+            )
+        optimizer_domains[coordinate_path] = (lower, upper)
+    return optimizer_domains
 
 
 @dataclass(frozen=True)

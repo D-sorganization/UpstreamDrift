@@ -87,10 +87,20 @@ following modifications:
    `msk_club_grip_calibration.json`, written by
    `python3 -m src.engines.physics_engines.opensim.python.msk_club_calibration
 <models>`: inverse kinematics puts each hand's palm grip point on its
-   shaft grip point (gap under 0.4 mm), lays the shaft diagonally across the
-   palm, keeps the wrists in their physiological deviation range, follows
+   shaft grip point (gap under 1 mm), turns each hand to a specified grip
+   rotation (`grip_hand_rotation`, #12306: the shaft diagonally across the
+   palm toward the thumb, the trail palm facing the target with its fingers
+   wrapping under the shaft, the lead palm facing away from it, so the
+   palms are opposed; within 2 degrees at the solution), keeps the wrists in
+   their physiological deviation range, follows
    the generated model's hip, shoulder and elbow centres at the captured
    address and plants the feet (the generated feet are unobserved). The
+   lead forearm then sits at the Rajagopal pronation limit (90 deg,
+   neutral): a lead palm facing away from the target needs neutral or more,
+   and the address landmark RMS rises from 14 to 25 mm (driver) and 15 to
+   23 mm (7-iron) for `golf_humanoid`. The report lists the coordinates left
+   at a range bound; `ADDRESS_BOUND_REASONS` records why the scaled model's
+   wrists sit at their deviation limit. The
    default coordinates are that address pose, so the face is square there
    (0.18 deg by OpenSim FK). The file holds one entry per model and club;
    `--club iron7` writes the 7-iron entry (#12042), which `msk_club_tracking`
