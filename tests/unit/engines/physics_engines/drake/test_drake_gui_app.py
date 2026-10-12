@@ -26,8 +26,12 @@ class TestDrakeSimApp:
     @patch.object(DrakeSimApp, "_setup_ui")
     @patch.object(DrakeSimApp, "_sync_kinematic_sliders")
     @patch("src.engines.physics_engines.drake.python.src.drake_gui_app.QtCore.QTimer")
+    @patch(
+        "src.shared.python.body_part_viz.force_color_controls.install_force_color_menu"
+    )
     def test_init(
         self,
+        mock_install_force_color_menu: MagicMock,
         mock_timer_cls: MagicMock,
         mock_sync: MagicMock,
         mock_setup_ui: MagicMock,
@@ -39,13 +43,17 @@ class TestDrakeSimApp:
         mock_timer = MagicMock()
         mock_timer_cls.return_value = mock_timer
 
-        DrakeSimApp()
+        app = DrakeSimApp()
 
         mock_base_init.assert_called_once()
         mock_scan.assert_called_once()
         mock_init_sim.assert_called_once()
         mock_setup_ui.assert_called_once()
         mock_sync.assert_called_once()
+        mock_install_force_color_menu.assert_called_once()
+        menu_window, menu_targets = mock_install_force_color_menu.call_args.args
+        assert menu_window is app
+        assert callable(menu_targets)
 
         mock_timer_cls.assert_called_once()
         mock_timer.timeout.connect.assert_called_once()

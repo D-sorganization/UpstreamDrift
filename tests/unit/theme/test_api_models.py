@@ -85,7 +85,7 @@ def make_theme_client(
 ) -> tuple[TestClient, FakeThemeManager]:
     manager = manager or FakeThemeManager()
     app = FastAPI()
-    app.include_router(create_theme_router(manager, prefix="/themes"))
+    app.include_router(create_theme_router(manager), prefix="/themes")
     return TestClient(app), manager
 
 
@@ -168,7 +168,7 @@ class TestSaveCustomThemeRequest:
 class TestThemeOperationResponse:
     def test_success_true(self) -> None:
         resp = ThemeOperationResponse(success=True, message="done")
-        assert resp.solver_status == "success"
+        assert resp.success is True
 
     def test_theme_name_optional(self) -> None:
         resp = ThemeOperationResponse(success=True, message="ok")

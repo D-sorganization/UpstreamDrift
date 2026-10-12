@@ -49,16 +49,13 @@ with (
         OpenSimPhysicsEngine,
     )
 
-    # Force the module-level opensim reference to use our mock
-    osim_module.opensim = mock_opensim
-
 
 @pytest.fixture
-def engine() -> OpenSimPhysicsEngine:
+def engine(monkeypatch: pytest.MonkeyPatch) -> OpenSimPhysicsEngine:
     # Reset mock_opensim for each test
     mock_opensim.reset_mock()
     # Ensure the engine module's opensim ref points to our mock
-    osim_module.opensim = mock_opensim
+    monkeypatch.setattr(osim_module, "opensim", mock_opensim)
     return OpenSimPhysicsEngine()
 
 
@@ -109,8 +106,8 @@ def test_opensim_physics_engine_load_from_string(mock_named_temp, engine) -> Non
     # context manager return
     mock_named_temp.return_value.__enter__.return_value = mock_tmp
 
-    # Mock load_from_path to avoid real loading logic
-    with patch.object(engine, "load_from_path") as mock_load:
+    # String loading delegates to the engine-specific path hook.
+    with patch.object(engine, "_load_from_path_impl") as mock_load:
         engine.load_from_string("<osim/>")
         mock_load.assert_called_once_with("/tmp/fake.osim")
 

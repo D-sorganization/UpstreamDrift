@@ -535,7 +535,7 @@ class TestCalculatedAndTransform:
     def test_add_calculated_column_creates_new_column(self, loaded_engine) -> None:
         """add_calculated_column creates a new column from an expression."""
         result = loaded_engine.add_calculated_column("c", "a * 2")
-        assert result.solver_status == "success"
+        assert result.success is True
         assert "c" in loaded_engine.get_column_names()
 
     def test_transform_column_log(self, loaded_engine) -> None:
