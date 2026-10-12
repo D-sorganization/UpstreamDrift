@@ -70,9 +70,7 @@ import math
 import os
 import sys
 from pathlib import Path
-from xml.etree import ElementTree as ET
-
-import defusedxml.ElementTree as DefusedET
+import defusedxml.ElementTree as ET
 
 # Repository root, derived from this script's location.
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -149,7 +147,7 @@ def _parse(path: Path) -> ET.ElementTree:
             f"Base OSIM not found: {path}. "
             "Run `git submodule update --init shared/models/opensim/opensim-models`."
         )
-    return DefusedET.parse(path)
+    return ET.parse(path)
 
 
 def _find_one(parent: ET.Element, tag: str) -> ET.Element:
@@ -164,12 +162,13 @@ def _find_one(parent: ET.Element, tag: str) -> ET.Element:
 
 def _make_coordinate_actuator(coord_name: str) -> ET.Element:
     """Build a <CoordinateActuator> for a single coordinate."""
-    act = ET.Element("CoordinateActuator", attrib={"name": f"tau_{coord_name}"})
-    ET.SubElement(act, "appliesForce").text = "true"
-    ET.SubElement(act, "min_control").text = "-Inf"
-    ET.SubElement(act, "max_control").text = "Inf"
-    ET.SubElement(act, "coordinate").text = coord_name
-    ET.SubElement(act, "optimal_force").text = "1"
+    act = ET.fromstring(
+        "<CoordinateActuator><appliesForce>true</appliesForce>"
+        "<min_control>-Inf</min_control><max_control>Inf</max_control>"
+        "<coordinate /><optimal_force>1</optimal_force></CoordinateActuator>"
+    )
+    act.set("name", f"tau_{coord_name}")
+    _find_one(act, "coordinate").text = coord_name
     return act
 
 

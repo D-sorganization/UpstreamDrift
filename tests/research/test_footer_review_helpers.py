@@ -16,8 +16,6 @@ from src.tools.shot_pattern_analysis.matched_pair_social import (
 from src.tools.shot_pattern_analysis.matched_pair_social import PairSocialContext
 
 
-
-
 @pytest.mark.integration
 @pytest.mark.slow
 @pytest.mark.timeout(240)

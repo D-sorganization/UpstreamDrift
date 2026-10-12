@@ -1357,7 +1357,7 @@ def main() -> None:
         f"Creating {len(remaining)} issues (skipping {len(ISSUES) - len(remaining)} already created) against milestone '{MILESTONE}'...\n"
     )
     created: list[dict[str, object]] = []
-    for title, labels, body in remaining:  # noqa
+    for title, labels, body in remaining:
         try:
             num = gh_issue_create(title, body, labels)
             created.append({"number": num, "title": title, "labels": labels})

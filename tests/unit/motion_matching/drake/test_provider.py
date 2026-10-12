@@ -46,6 +46,8 @@ from src.shared.python.motion_matching.provider_registry import (
     get_provider,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Test helpers (mirror the patterns in tests/engines/drake/test_drake_fit_swing.py).
 # ---------------------------------------------------------------------------

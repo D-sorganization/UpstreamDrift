@@ -71,7 +71,9 @@ class TestTheViewportDegradesOutLoud:
             lambda: select_viewport_provider(import_checker=lambda _module: False),
         )
 
-    def test_no_three_dimensional_provider_is_available(self, no_provider: None) -> None:
+    def test_no_three_dimensional_provider_is_available(
+        self, no_provider: None
+    ) -> None:
         fallback = viewport_fallback()
         assert isinstance(fallback, ViewportFallback)
         assert fallback.provider is None

@@ -97,6 +97,7 @@ def _add_sensitivities(
     report: dict, endpoints: dict, *, club_id: str, target: float, seed: int
 ) -> None:
     """Add supported course-geometry sensitivity results to a scored report."""
+
     def sensitivity(**changes: float) -> dict:
         try:
             return score_course_endpoints(
@@ -172,9 +173,7 @@ def score_corrected_bundle(output_dir: Path) -> Path:
         report = score_course_endpoints(
             endpoints, club_id=club_id, target_x_m=target, seed=seed
         )
-        _add_sensitivities(
-            report, endpoints, club_id=club_id, target=target, seed=seed
-        )
+        _add_sensitivities(report, endpoints, club_id=club_id, target=target, seed=seed)
     except ValueError as exc:
         report = {"status": "unavailable", "reason": str(exc), "club_id": club_id}
     baseline = build_broadie_approx_baseline()

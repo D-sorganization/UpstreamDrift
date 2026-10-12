@@ -28,7 +28,7 @@ from __future__ import annotations
 import importlib.util
 import math
 from pathlib import Path
-from xml.etree import ElementTree as ET
+import defusedxml.ElementTree as ET
 
 import pytest
 
