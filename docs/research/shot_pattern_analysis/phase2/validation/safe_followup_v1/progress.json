@@ -402,21 +402,24 @@
     }
   },
   "latest_remote_reconciliation": {
-    "remote": "7375b888e21db3d2fb5d0a10547166dd8230ab1a",
-    "local_parent": "9b40f1f0e7",
-    "incoming_changes": "Native wrist compatibility, finalized path audit connections, central-impact claim bounds, and replay contract documentation from already merged main PRs. Existing current-state SPEC rows retained.",
-    "focused": "63 passed, 15 skipped; native OpenSim requirements remain explicit",
-    "receipt": {
-      "receipt": "remote-7375-focused-green.txt.gz",
-      "sha256": "5259c7290ab6bf97e9376d3e86b696fd1fbf271c5b68e1a29ce5a11ac2b79a5b",
-      "raw_sha256": "c58829a9255c783758d45c905592868925436ea096ec209c319e369d4a2e7225"
-    },
-    "first_target_resolution_attempt": {
-      "receipt": "remote-7375-first-target-path-error.txt.gz",
-      "sha256": "dc8b4641ec84638ec016e4b01815e6beb1e138560d439f046f93affebddd6546",
-      "raw_sha256": "b2186ee8ce8285b33a239d330ce5502e2959a288ec83a57eed818832e1cb66e5"
-    },
-    "inventory": "Official generator applied to combined source; no new rule allowance or scientific approval."
+    "remote": "42ea5c93c3a5d9f0e792db09fe995bd74a4d0870",
+    "main": "d922b0bee9",
+    "local_parent": "f403ea4eaf",
+    "incoming_changes": "Already-merged barbell bushing/evidence PR12345 and swing-report plot registry/selection PR12366; source preserved. Only generated divergence inventories conflicted and were officially regenerated.",
+    "focused": "46 passed,2 engine-dependent skips,2 documented barbell standing-hold xfails; no physical acceptance asserted.",
+    "manual_governance": "PASS structurally:63QMD,0registeredcalculations,releaseblocked-inventory-required",
+    "receipts": {
+      "remote-42ea-focused": {
+        "receipt": "remote-42ea-focused.txt.gz",
+        "sha256": "2fc1e7ac5530f9a7fbb7c56c27d3f5cdb5c4ee61386c25bb63d9f954d78ecc10",
+        "raw_sha256": "8d6633fc8ebf9955b09796c074b9bb2011c7202427a4b6c1e043ee854d4e0265"
+      },
+      "remote-42ea-manual-governance": {
+        "receipt": "remote-42ea-manual-governance.txt.gz",
+        "sha256": "b676571e3fec9bed6e04a4c7a56fd2e48beba45e7d5e2ff114ca2c37cb800fde",
+        "raw_sha256": "631fbce346bd2d8e16b8fd430a959280d9c3c21c54f696f45eca1074dc2338fe"
+      }
+    }
   },
   "previously_failing_node_recheck": {
     "result": "33 passed together; three Signal optimized-mode nodes not part of this diagnostic because upstream provider fix has not merged. Not full acceptance.",
@@ -517,5 +520,22 @@
         "raw_sha256": "9bf5d597ef1cce6c355e1727229cc29f9433e59b89ec5ce3fdd64387b7217581"
       }
     }
+  },
+  "previous_remote_reconciliation": {
+    "remote": "7375b888e21db3d2fb5d0a10547166dd8230ab1a",
+    "local_parent": "9b40f1f0e7",
+    "incoming_changes": "Native wrist compatibility, finalized path audit connections, central-impact claim bounds, and replay contract documentation from already merged main PRs. Existing current-state SPEC rows retained.",
+    "focused": "63 passed, 15 skipped; native OpenSim requirements remain explicit",
+    "receipt": {
+      "receipt": "remote-7375-focused-green.txt.gz",
+      "sha256": "5259c7290ab6bf97e9376d3e86b696fd1fbf271c5b68e1a29ce5a11ac2b79a5b",
+      "raw_sha256": "c58829a9255c783758d45c905592868925436ea096ec209c319e369d4a2e7225"
+    },
+    "first_target_resolution_attempt": {
+      "receipt": "remote-7375-first-target-path-error.txt.gz",
+      "sha256": "dc8b4641ec84638ec016e4b01815e6beb1e138560d439f046f93affebddd6546",
+      "raw_sha256": "b2186ee8ce8285b33a239d330ce5502e2959a288ec83a57eed818832e1cb66e5"
+    },
+    "inventory": "Official generator applied to combined source; no new rule allowance or scientific approval."
   }
 }
