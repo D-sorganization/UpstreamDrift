@@ -1,5 +1,17 @@
 # Documentation Authority and Release Boundary
 
+## Native Hypothesis Admission Inventory Boundary
+
+Issue #11376 adds typed native camera/model hypothesis rebinding through existing
+capture, native export, canonical Hermite initialization and immutable fit
+providers. Source PNG/decoded-frame identities, exact PTS and native units are
+validated separately. An unoptimized candidate seed preserves the saved final
+coefficients while explicitly changing the authored native model/camera identity.
+Fixture validation does not establish historical calibration, anthropometry,
+physical time, continuous dynamics or release acceptance. Calculation inventory
+and all publication gates remain blocked; this description is an implementation
+boundary, not an approved calculation entry.
+
 ## Purpose
 
 The manual will explain scientific calculations from theory and assumptions

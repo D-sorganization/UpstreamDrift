@@ -22,18 +22,18 @@ Coordinates and units: SI, OpenSim calcaneus frame (x forward, y up, z lateral),
 
 The torsion patch radius was tuned on the driver only and validated on the 7-iron. Replays of the saved baseline reference (same IK, `--static-seeds`, iron with `--zmp-filter`), simulation from address. Marker RMS is against the capture; finish is $t \ge 1.0$ s.
 
-| Club | Patch | Marker RMS all / finish | Pre-impact (0-1 s) | Foot slide | Pelvis yaw error max / final | ZMP inside 1.0-1.5 s / finish |
-| ---- | ----- | ----------------------- | ------------------ | ---------- | ---------------------------- | ----------------------------- |
-| Driver | none | 83.3 / 121.0 mm | 25.6 mm | 502 mm | 34.5 / 34.5 deg | 1.00 / 0.88 |
-| Driver | 0.03 m | 71.0 / 102.2 mm | 25.6 mm | 300 mm | 11.6 / 11.6 deg | 1.00 / 0.95 |
-| Driver | 0.04 m | 68.7 / 98.5 mm | 25.6 mm | 250 mm | 8.7 / 6.1 deg | 1.00 / 0.93 |
-| Driver | **0.05 m** | **67.3 / 96.3 mm** | 25.6 mm | 210 mm | 9.0 / 1.9 deg | 0.99 / 0.93 |
-| Driver | 0.06 m | 66.6 / 95.3 mm | 25.6 mm | 177 mm | 9.3 / -1.6 deg | 0.99 / 0.95 |
-| Driver | 0.08 m | 66.9 / 95.8 mm | 25.6 mm | 125 mm | 11.4 / -7.1 deg | 0.99 / 0.92 |
-| Driver | 0.12 m | 70.1 / 100.9 mm | 25.6 mm | 62 mm | 17.5 / -13.6 deg | 0.98 / 0.93 |
-| 7-iron | none | 57.9 / 81.7 mm | 23.7 mm | 340 mm | 19.4 / 19.4 deg | 1.00 / 0.99 |
-| 7-iron | **0.05 m** (validation) | **54.3 / 76.2 mm** | 23.7 mm | 93 mm | 14.5 / -9.9 deg | 1.00 / 0.99 |
-| 7-iron | 0.03 m (not selected) | 52.8 / 73.8 mm | 23.7 mm | 181 mm | 13.4 / 0.3 deg | 1.00 / 0.99 |
+| Club   | Patch                   | Marker RMS all / finish | Pre-impact (0-1 s) | Foot slide | Pelvis yaw error max / final | ZMP inside 1.0-1.5 s / finish |
+| ------ | ----------------------- | ----------------------- | ------------------ | ---------- | ---------------------------- | ----------------------------- |
+| Driver | none                    | 83.3 / 121.0 mm         | 25.6 mm            | 502 mm     | 34.5 / 34.5 deg              | 1.00 / 0.88                   |
+| Driver | 0.03 m                  | 71.0 / 102.2 mm         | 25.6 mm            | 300 mm     | 11.6 / 11.6 deg              | 1.00 / 0.95                   |
+| Driver | 0.04 m                  | 68.7 / 98.5 mm          | 25.6 mm            | 250 mm     | 8.7 / 6.1 deg                | 1.00 / 0.93                   |
+| Driver | **0.05 m**              | **67.3 / 96.3 mm**      | 25.6 mm            | 210 mm     | 9.0 / 1.9 deg                | 0.99 / 0.93                   |
+| Driver | 0.06 m                  | 66.6 / 95.3 mm          | 25.6 mm            | 177 mm     | 9.3 / -1.6 deg               | 0.99 / 0.95                   |
+| Driver | 0.08 m                  | 66.9 / 95.8 mm          | 25.6 mm            | 125 mm     | 11.4 / -7.1 deg              | 0.99 / 0.92                   |
+| Driver | 0.12 m                  | 70.1 / 100.9 mm         | 25.6 mm            | 62 mm      | 17.5 / -13.6 deg             | 0.98 / 0.93                   |
+| 7-iron | none                    | 57.9 / 81.7 mm          | 23.7 mm            | 340 mm     | 19.4 / 19.4 deg              | 1.00 / 0.99                   |
+| 7-iron | **0.05 m** (validation) | **54.3 / 76.2 mm**      | 23.7 mm            | 93 mm      | 14.5 / -9.9 deg              | 1.00 / 0.99                   |
+| 7-iron | 0.03 m (not selected)   | 52.8 / 73.8 mm          | 23.7 mm            | 181 mm     | 13.4 / 0.3 deg               | 1.00 / 0.99                   |
 
 The chosen value 0.05 m is the middle of the driver's flat optimum (0.04 to 0.08 m) and was fixed before the iron was evaluated. The full pipeline with `--torsional-patch-m 0.05` reproduces these two rows (driver 67.25 / 96.33 mm, iron 54.34 / 76.15 mm; pre-impact root error 19.9 and 21.7 mm, baseline 20.0 and 21.8 mm).
 
@@ -41,14 +41,14 @@ The chosen value 0.05 m is the middle of the driver's flat optimum (0.04 to 0.08
 
 Re-running the full pipeline (IK, calibration, scaling, replay) with lateral spheres:
 
-| Run | Marker RMS all | Pre-impact root error | Slide | Yaw error max |
-| --- | -------------- | --------------------- | ----- | ------------- |
-| Driver, 0.03 m, spheres not pinned | 90.7 mm | 15.1 mm | 630 mm | 41.3 deg |
-| Driver, 0.02 m, pinned | 106.6 mm | 14.2 mm | 359 mm | 25.6 deg |
-| Driver, 0.03 m, pinned | 84.0 mm | 20.1 mm | 497 mm | 22.8 deg |
-| 7-iron, 0.03 m, spheres not pinned | 187.1 mm | 123.5 mm | 527 mm | 58.0 deg |
-| 7-iron, 0.02 m, pinned | 94.5 mm | 24.1 mm | 271 mm | 11.2 deg |
-| 7-iron, 0.03 m, pinned | 133.1 mm | 123.8 mm | 280 mm | 28.2 deg |
+| Run                                | Marker RMS all | Pre-impact root error | Slide  | Yaw error max |
+| ---------------------------------- | -------------- | --------------------- | ------ | ------------- |
+| Driver, 0.03 m, spheres not pinned | 90.7 mm        | 15.1 mm               | 630 mm | 41.3 deg      |
+| Driver, 0.02 m, pinned             | 106.6 mm       | 14.2 mm               | 359 mm | 25.6 deg      |
+| Driver, 0.03 m, pinned             | 84.0 mm        | 20.1 mm               | 497 mm | 22.8 deg      |
+| 7-iron, 0.03 m, spheres not pinned | 187.1 mm       | 123.5 mm              | 527 mm | 58.0 deg      |
+| 7-iron, 0.02 m, pinned             | 94.5 mm        | 24.1 mm               | 271 mm | 11.2 deg      |
+| 7-iron, 0.03 m, pinned             | 133.1 mm       | 123.8 mm              | 280 mm | 28.2 deg      |
 
 No width is better than the baseline on both clubs; the iron at 0.03 m loses the pre-impact root fit (124 mm). Width therefore stays an opt-in experiment. An earlier replay-only trial (spheres added without re-IK) broke the 0 to 1 s root fit by 34 mm, which is why the IK pins the lateral spheres.
 

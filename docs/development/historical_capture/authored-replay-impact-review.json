@@ -1,0 +1,117 @@
+{
+  "schema": "necromatcher/authored-replay-impact-root-review/1",
+  "source_attribution": "SELF; integrated over app commit 9d329e49b0f1f5dc2b4a7636aeb5515f92fff6d1",
+  "issue": 11464,
+  "parent_epic": 11232,
+  "pr": 11359,
+  "extraction_freeze": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\impact-extraction-freeze-v1\\freeze.json",
+    "bytes": 9102,
+    "sha256": "088a4697979e905666c217af8d56b0eb8bf9b0821bfc658d411f4ba81be1230e"
+  },
+  "sources": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\workspace\\necromatcher_impact.py",
+      "bytes": 11048,
+      "sha256": "f7653b52867ef06fbe76b26bcfa0422f88d228cd266a6472ca243a115711bdf6"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\workspace\\necromatcher_impact_contracts.py",
+      "bytes": 5423,
+      "sha256": "cc966c022e6f1a34f87ebfaf7e8e8dba464345dab44b55323e7c8c2e77a70bec"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\impact_fixture.py",
+      "bytes": 4815,
+      "sha256": "641a521e2cecf6879b1e1c226562b8e156b7c2ab69d3cdd04d639549d8942e7e"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_impact.py",
+      "bytes": 6070,
+      "sha256": "570fb3358962c73a7b249b4d38a637b98b27207525f27cc90c0e42ca8cd1434f"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_impact_contracts.py",
+      "bytes": 2551,
+      "sha256": "2bfa4ef67aa424fcd37d82c9bc6fcb3a530a5c4c615b021e48a9030e6cdad833"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\workspace\\__init__.py",
+      "bytes": 11774,
+      "sha256": "e7ad1b96dd6fcc3ec8efb6c0ea416cd8c0dc683d7c011c8521e09b6e919ac8a4"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\workspace\\trajectory_handoff.py",
+      "bytes": 16709,
+      "sha256": "eb27db4376d04a2d14e94f2d38ba3e0c05b1c3eb196fea826c6bb4a1b5caa669"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\integration\\test_shot_trajectory_handoff.py",
+      "bytes": 19239,
+      "sha256": "c1fb3cf00aee57d331a092f0330ce6e6b701f2f5f2c4f62727bd02e60dd563cb"
+    }
+  ],
+  "tests": {
+    "isolated_extraction_impact_viewers": {
+      "passed": 38,
+      "log": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-root-green-v3.log",
+        "bytes": 5637,
+        "sha256": "0ee7a129a6ad2b93d4b3de091df382e622a75df864a749850acc09ada8953e74"
+      }
+    },
+    "integrated_app_and_impact": {
+      "passed": 83,
+      "log": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-app-impact-integrated-root-v1.log",
+        "bytes": 6506,
+        "sha256": "de7cf65d1f49acb49b19eea6412fb9b3159528e0986f57473ab1ac7ce803fc36"
+      }
+    }
+  },
+  "mypy": {
+    "configured_version": "1.13.0",
+    "source_files": 3,
+    "exit_code": 0,
+    "log": {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-impact-integrated-root-mypy-v1.log",
+      "bytes": 44,
+      "sha256": "281a094c39385b4d7b53e5db635f52158036861433c2a4975b9039e77a627a24"
+    }
+  },
+  "ruff_format_and_diff": "passed",
+  "formula": {
+    "head_velocity": "native_J(q)_times_recorded_v",
+    "angular_velocity": "0.5_sum_e_cross_de_dt",
+    "basis_probe_length_m": 1.0
+  },
+  "clock": "authored_simulation_seconds",
+  "capture_pts_used_for_velocity": false,
+  "full_vectors_reach_actual_impact_solver": true,
+  "pipeline_result_retains_extraction_metadata": true,
+  "trajectory_wire_persists_full_extraction_receipt": false,
+  "normal_app_replay_impact_action": false,
+  "historical_native_replay_executed": false,
+  "historical_library_mutation": false,
+  "scientific_qualified": false,
+  "issue_complete": false,
+  "limits": "Independent synthetic native kinematics; actual impact solver and existing viewers. Flight fixture substitutes optional Rust integration when unavailable. No historical physical-speed or impact qualification.",
+  "preserved_root_failures": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-integration-red-v1.log",
+      "bytes": 4635,
+      "sha256": "d99a8972a10657ec5e62ba7c933db2c668aa0e694ec99e07a7614f1feb0639de"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-facade-red-v1.log",
+      "bytes": 4167,
+      "sha256": "c78353bad33f5ee13df61bdf320cab17d127707edfe2bde0027781496e204fa9"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-impact-root-green-v1.log",
+      "bytes": 8243,
+      "sha256": "f775532b5aa313e27a67279c1fdc2ccde9572a54ce8d4124821105f347985214"
+    }
+  ],
+  "root_expectation_correction": "Replaced mathematically exact zero by independently evaluated analytic sin/cos screw velocity; retained comparison tolerances and added array-equal input/consumer check. No source numerical change."
+}

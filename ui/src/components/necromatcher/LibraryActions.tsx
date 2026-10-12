@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { createPlayer, createSwing, importAsset } from '@/api/necromatcher';
 import type { ModelRequest } from '@/api/generated/types';
+import { ReplayControls } from './ReplayControls';
 
 const field = 'block w-full mt-1 rounded border border-gray-600 bg-gray-900 p-2 text-gray-100';
 const action = 'rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50';
@@ -28,22 +29,24 @@ function ActionForm({ title, fields, onSave }: {
 }
 
 export function LibraryActions({ player, swing, onChanged }: {player: string; swing: string; onChanged: () => void}) {
-  const [kind, setKind] = useState<'captures' | 'models' | 'profiles'>('captures');
+  const [kind, setKind] = useState<'captures' | 'models' | 'profiles' | 'fits' | 'replays'>('captures');
+  const [revision, setRevision] = useState(0);
   const [engine, setEngine] = useState<ModelRequest['engine']>('mujoco');
   const [dofs, setDofs] = useState('');
-  async function save(actionPromise: Promise<unknown>) { await actionPromise; onChanged(); }
+  async function save(actionPromise: Promise<unknown>) { await actionPromise; setRevision((value) => value + 1); onChanged(); }
   return <div className="space-y-4">
     <h2 className="text-lg font-semibold text-white">Library Actions</h2>
     <ActionForm title="Save Player" fields={[{name:'id',label:'Player ID'},{name:'name',label:'Player Name'}]} onSave={(values) => save(createPlayer(values.id, values.name))} />
     {player && <ActionForm key={player} title="Save Swing" fields={[{name:'id',label:'Swing ID'},{name:'name',label:'Swing Name'}]} onSave={(values) => save(createSwing(values.id, player, values.name))} />}
     {swing && <div className="space-y-3">
       <label className="block text-sm text-gray-300">Import Type<select className={field} value={kind} onChange={(event) => setKind(event.target.value as typeof kind)}>
-        <option value="captures">Capture Folder</option><option value="models">Native Model</option><option value="profiles">Torque Profile</option><option value="fits">Kinematic Research Fit</option>
+        <option value="captures">Capture Folder</option><option value="models">Native Model</option><option value="profiles">Torque Profile</option><option value="fits">Kinematic Research Fit</option><option value="replays">Authored Replay HDF5</option>
       </select></label>
       {kind === 'models' && <><label className="block text-sm text-gray-300">Model Engine<select className={field} value={engine} onChange={(event) => setEngine(event.target.value as ModelRequest['engine'])}>{['mujoco','drake','pinocchio','opensim','simscape'].map((name) => <option key={name}>{name}</option>)}</select></label>
         <label className="block text-sm text-gray-300">Ordered Joint Names<input className={field} value={dofs} onChange={(event) => setDofs(event.target.value)} placeholder="hip, knee, shoulder" /></label></>}
-      <p className="text-xs text-gray-400">Use a local capture folder, model file, profile JSON or research fit JSON. Saved fits retain their source and model bindings; native replay still requires verification.</p>
+      <p className="text-xs text-gray-400">Use a server-local capture folder, model file, profile JSON, research fit JSON or authored replay HDF5. Replay import verifies its saved parents and authored clock.</p>
       <ActionForm key={`${swing}/${kind}`} title="Import Version" fields={[{name:'id',label:'Version ID'},{name:'source_path',label:'Source Path'}]} onSave={(values) => save(importAsset(swing, kind, {id:values.id,source_path:values.source_path,...(kind === 'models' ? {engine,dofs:dofs.split(',').map((x) => x.trim()).filter(Boolean)} : {})}))} />
+      <ReplayControls swing={swing} revision={revision} />
     </div>}
   </div>;
 }
