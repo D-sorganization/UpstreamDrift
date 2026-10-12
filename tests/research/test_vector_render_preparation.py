@@ -4,6 +4,13 @@ from pathlib import Path
 
 import pytest
 
+try:
+    import pypdf  # noqa: F401
+except (ImportError, OSError) as exc:
+    pytest.skip(
+        f"Vector review dependencies unavailable: {exc}", allow_module_level=True
+    )
+
 from scripts.research.shot_pattern_analysis import vector_rasterization as module
 
 pytestmark = pytest.mark.unit
