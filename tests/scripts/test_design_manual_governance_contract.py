@@ -123,6 +123,14 @@ def test_agent_context_exposes_update_and_artifact_rules() -> None:
         encoding="utf-8"
     )
     handoff = (REPO_ROOT / "AGENT_HANDOFF.md").read_text(encoding="utf-8")
+    # Handoff history moved out of AGENT_HANDOFF.md by UpstreamDrift#9415.
+    handoff += (
+        REPO_ROOT
+        / "docs"
+        / "development"
+        / "archive"
+        / "AGENT_HANDOFF_ARCHIVE_2026-10-12.md"
+    ).read_text(encoding="utf-8")
 
     for text in (agents, claude):
         normalized = " ".join(text.lower().split())

@@ -110,7 +110,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `qt_utils` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `realtime` | 0 | 2 | 0 | 4 | 0 | 2 |
-| `reporting` | 0 | 2 | 0 | 25 | 0 | 2 |
+| `reporting` | 0 | 2 | 0 | 26 | 0 | 2 |
 | `rotation_transforms` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `safe_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `safe_pandas_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
@@ -133,7 +133,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `training` | 0 | 0 | 0 | 28 | 0 | 0 |
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ud_import_alias_policy.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `ui` | 0 | 0 | 0 | 29 | 9 | 0 |
+| `ui` | 0 | 0 | 0 | 30 | 9 | 0 |
 | `upstream_drift` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `upstream_drift_tools` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ux` | 0 | 0 | 0 | 7 | 0 | 0 |
@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **397** | **276** | **123** | **1687** | **808** | **673** |
+| **Total** | **397** | **276** | **123** | **1689** | **808** | **673** |
 
 ## Diverged Files by Package
 

@@ -13,7 +13,7 @@
   "totals": {
     "identical": 397,
     "diverged": 276,
-    "ud-only": 1687,
+    "ud-only": 1689,
     "tools-only": 808,
     "spelling-only": 123
   },
@@ -693,7 +693,7 @@
     "reporting": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 25,
+      "ud-only": 26,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -854,7 +854,7 @@
     "ui": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 29,
+      "ud-only": 30,
       "tools-only": 9,
       "spelling-only": 0
     },
@@ -15573,7 +15573,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 22717,
+      "ud_bytes": 26069,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24814,6 +24814,18 @@
       "package": "reporting",
       "subpackage": "swing_report",
       "ud_bytes": 13514,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/view_model.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 4275,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37769,6 +37781,18 @@
       "spelling_only": false
     },
     {
+      "path": "ui/swing_report_dialog.py",
+      "classification": "ud-only",
+      "package": "ui",
+      "subpackage": "",
+      "ud_bytes": 5303,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "ui/tile_help.py",
       "classification": "ud-only",
       "package": "ui",
@@ -40356,7 +40380,7 @@
       "ud": {
         "author": "Dieter Olson",
         "date": "2026-10-12",
-        "commit": "c4f81000e39c804eb32bd25261c6696c85f7fdfb"
+        "commit": "ca3e6b8e4feee9e3d578532b9c7a5b442a734562"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
