@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T04:41:51.268105+00:00",
-  "checkpoint": "0504feab4c11063a66e0853d6ef338d73d40dfd4",
+  "recorded_at_utc": "2026-10-12T04:49:17.348954+00:00",
+  "checkpoint": "662c1f06a2",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "0504feab4c11063a66e0853d6ef338d73d40dfd4",
+  "source_commit": "662c1f06a2",
   "integration": "Remote PR 99f8d6f8816 and actual conflicting origin/main ba57e27033 reconciled locally; later fixes through 0504feab4c. No push; frozen rows and approved DRY baseline unchanged.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Development-log policy blocker #11935 is closed by merged #12337/d8a6e303 and local validator passed after reconciliation. Clean CI 126/126 lock pins and MyoSuite gitlink initialized; current Rust source matches wheel build source. Post-main focused suite 95 passed, 1 optional-reportlab skip; layout migration scoped suite 387 passed, 31 skipped, 11 inherited engine failures deselected. Stability audit/results/release-bundle focused suite 11 passed. Latest full canonical pre-PR remains incomplete (interrupted at 24% on prior source with 1494 passed, 150 skipped, 6 failed); remaining protocol amendment is in progress. No full merge acceptance claimed.",
+  "current_validation": "Final stability contract and integrity focused suite 12 passed; claim integrity validate passed. Canonical pre-PR attempt on 662c1f06a2 failed mypy at scripts/inspect_opensim_vs_simscape.py:123 and was interrupted before full test/consistency summaries. No full gate acceptance. Root-layout owner fixing the narrow mypy issue; rerun exact canonical on new source.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -265,7 +265,50 @@
     },
     "red_and_compile_limitations": "stability-red-and-tool-limitations.json",
     "latex_compilation": "UNAVAILABLE: uncached Tectonic bundle fetch failed; no compilation success claim",
-    "manifest_refresh": "Only audit source SHA/bytes and its CHECKSUMS line changed; prior bytes preserved outside artifact glob"
+    "manifest_refresh": "Only audit source SHA/bytes and its CHECKSUMS line changed; prior bytes preserved outside artifact glob",
+    "immutable_input_followup": "662c1f06a2; published JSON and NPZ SHA/byte identities independently pinned; changed NPZ plus refreshed manifest is rejected, and SVD rank disagreement rejected",
+    "final_focused": {
+      "result": "12 passed, 1 Hypothesis warning",
+      "receipt": {
+        "source": "/tmp/shot-safe-final-integrity-focused.txt",
+        "source_sha256": "f15d14be0d5ae5726d3e3163ebaa63010884596dd7a7f2b94bc0dec68db962b9",
+        "receipt_sha256": "6e97e9368f34de789f05e1a58e19c6218da08b501afaa58a9dbd5206fe27e952"
+      }
+    }
   },
-  "next_required": "Finish and review nonlinear registration amendment, refresh release integrity records for that source and README, run complete canonical pre_pr on final source in clean CI environment, then protected PR integration. Do not rerun frozen simulation study or claim this checkpoint as full acceptance."
+  "next_required": "Finish narrow OpenSim inspect-script mypy repair, rerun exact complete canonical pre_pr on final source, then protected PR integration. Do not rerun frozen simulations or claim this checkpoint as full acceptance.",
+  "final_integrity_refresh": {
+    "release_manifest_before": {
+      "path": "/tmp/shot-final-integrity-before-release_manifest.json",
+      "sha256": "f376258d2228d285f547ec9e735efe5934c72acdb2679469a93c7e56eecabdab"
+    },
+    "checksums_before": {
+      "path": "/tmp/shot-final-integrity-before-CHECKSUMS.sha256",
+      "sha256": "42fef62fe3f19f55f5963dcf0b7d17b2f3f6abb64974f6c5c6a4feb715e89932"
+    },
+    "claim_manifest_before": {
+      "path": "/tmp/shot-final-integrity-before-data-claim_evidence_manifest.json",
+      "sha256": "4b1cf756b0aa53a54e249787f4bbd4974b04b4906fc6a554f6ef0083465b5c15"
+    },
+    "action": "Official release_bundle builder/checksum_lines then claim_evidence_integrity builder; no qualification or historical report rewrite",
+    "claim_validation": {
+      "result": "PASS 328 claims, 430 local artifacts, 78 external URLs",
+      "receipt": {
+        "source": "/tmp/shot-safe-final-claim-integrity-validate.txt",
+        "source_sha256": "efbb6b36561f40c240329de46b754afe97556941cdde0d4b6e1f6462e337e776",
+        "receipt_sha256": "75667734d992bf3c2eb1e8c8026a6475ee7d43b26e975b92d23638e8bcc518f5"
+      }
+    }
+  },
+  "latest_full_canonical_attempt": {
+    "source_commit": "662c1f06a2",
+    "result": "INCOMPLETE exit 130 after immediate mypy failure; deliberately interrupted affected pytest and consistency before full summaries, no acceptance",
+    "mypy": "1 error in 154 files: scripts/inspect_opensim_vs_simscape.py:123 object not callable [operator]; existing ignore[misc] insufficient",
+    "receipt": {
+      "source": "/tmp/shot-safe-final-canonical-prepr.txt",
+      "source_sha256": "a74fbe98d0187484e565327b7bb2c82dafb8af63cbd539234ea9e6fba5fe0d50",
+      "receipt_sha256": "0af9159795248ca8c21d31361148936e1fe8dcc119ccb59000f13a2dff5fc4e8"
+    },
+    "next": "Owner of root-test layout migration fixes narrowly, then exact canonical pre_pr reruns on new source"
+  }
 }
