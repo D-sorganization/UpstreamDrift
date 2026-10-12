@@ -32,8 +32,9 @@ the assertion compared enum instances from distinct module classes; the
 corrected assertion now checks canonical identity and shared value. The two
 remaining baseline failures are not fixed or waived by this change. The
 optimized assertion conflicts with `contracts.py`'s existing `OFF` default
-under `python -O`; the collision ratchet reports vendor roots already listed
-in `pyproject.toml`. The full gate must be rerun after the test-only correction;
+under `python -O` and is tracked separately in #12404. The collision ratchet
+reports vendor roots already listed in `pyproject.toml` and is tracked in
+#12405; neither failure is fixed by broadening the collision allowlist. The full gate must be rerun after the test-only correction;
 no passing full-gate claim is made. No native run or qualification claim is made.
 
 A merge-group failure later reported

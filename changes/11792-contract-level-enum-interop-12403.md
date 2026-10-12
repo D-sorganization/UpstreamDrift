@@ -2,7 +2,7 @@
 issue: 11792
 summary: "Normalize contract-level enum values at the UD alias boundary"
 dl_state: "in_progress"
-next_step: "Rerun the full gate after the test contract correction; two pre-existing baseline failures remain separately unresolved. Review the UD boundary fix and separate Tools-owned #5577 fix; CI trigger remains unproven."
+next_step: "Rerun the full gate after the test contract correction; track the pre-existing optimized-default and vendor-collision failures separately in #12404 and #12405. Review the UD boundary fix and Tools-owned #5577 fix; CI trigger remains unproven."
 owner: "codex"
 branch: "fix/contract-enum-interop-12403-20261012"
 paths: "src/shared/python/_contracts_level.py,src/shared/python/core/contracts/level.py,src/shared/python/ud_import_alias_policy.py,tests/unit/test_contract_level_interop.py,tests/shared/wave10_contracts/test_level.py,docs/development/CONTRACT_LEVEL_ENUM_INTEROP_20261012.md,docs/development/feedback_controls/CONTRACT_LEVEL_ENUM_INTEROP_TURNOVER_20261012.md"
