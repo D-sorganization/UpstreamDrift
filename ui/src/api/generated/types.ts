@@ -2540,7 +2540,7 @@ export interface ModelPayloadV2 {
   features: string[];
   model: "linear" | "ridge" | "lasso" | "elastic_net" | "mlp";
   random_seed: number;
-  group_column?: "session_id" | "monitor_vendor" | "club" | null;
+  group_column?: "monitor_vendor" | "session_id" | "club" | null;
 }
 
 export interface ModelProvenanceV2 {

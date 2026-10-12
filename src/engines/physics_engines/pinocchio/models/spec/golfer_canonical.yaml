@@ -11,7 +11,7 @@ coordinate_system:
 root:
   name: pelvis
   frame: pelvis_frame
-  position: [0.0, 0.0, 0.9]
+  position: [0.0, 0.0, 0.98]
   orientation: [0.0, 0.0, 0.0]
   mass: 11.7
   inertia:

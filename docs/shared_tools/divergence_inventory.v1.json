@@ -13,7 +13,7 @@
   "totals": {
     "identical": 397,
     "diverged": 276,
-    "ud-only": 1660,
+    "ud-only": 1666,
     "tools-only": 808,
     "spelling-only": 123
   },
@@ -266,7 +266,7 @@
     "data_io": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 30,
+      "ud-only": 31,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -483,7 +483,7 @@
     "lifting": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 29,
+      "ud-only": 31,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -504,7 +504,7 @@
     "model_appearance": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 15,
+      "ud-only": 16,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 304,
+      "ud-only": 305,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -588,7 +588,7 @@
     "physics": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 74,
+      "ud-only": 75,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -7337,6 +7337,18 @@
       "spelling_only": false
     },
     {
+      "path": "data_io/native_dll_guard.py",
+      "classification": "ud-only",
+      "package": "data_io",
+      "subpackage": "",
+      "ud_bytes": 3963,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "data_io/output_manager.py",
       "classification": "ud-only",
       "package": "data_io",
@@ -7389,7 +7401,7 @@
       "classification": "ud-only",
       "package": "data_io",
       "subpackage": "",
-      "ud_bytes": 24950,
+      "ud_bytes": 25036,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8565,7 +8577,7 @@
       "classification": "ud-only",
       "package": "force_overlay",
       "subpackage": "",
-      "ud_bytes": 12518,
+      "ud_bytes": 13230,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12677,6 +12689,18 @@
       "spelling_only": false
     },
     {
+      "path": "lifting/bar_path_parity.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "",
+      "ud_bytes": 5374,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "lifting/baseline_view.py",
       "classification": "ud-only",
       "package": "lifting",
@@ -12694,6 +12718,18 @@
       "package": "lifting",
       "subpackage": "",
       "ud_bytes": 16784,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/kinetics_parity.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "",
+      "ud_bytes": 6326,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13113,7 +13149,7 @@
       "classification": "ud-only",
       "package": "model_appearance",
       "subpackage": "",
-      "ud_bytes": 6348,
+      "ud_bytes": 6549,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13174,6 +13210,18 @@
       "package": "model_appearance",
       "subpackage": "",
       "ud_bytes": 18012,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/grip_hands.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 5965,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15621,7 +15669,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 19951,
+      "ud_bytes": 20269,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16769,6 +16817,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/output_policy.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 5816,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/output_time_grid.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -17517,7 +17577,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "same_input",
-      "ud_bytes": 6326,
+      "ud_bytes": 7460,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17961,7 +18021,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 25305,
+      "ud_bytes": 25393,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -21881,6 +21941,18 @@
       "spelling_only": false
     },
     {
+      "path": "physics/impact_model/README.md",
+      "classification": "ud-only",
+      "package": "physics",
+      "subpackage": "impact_model",
+      "ud_bytes": 724,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "physics/impact_model/__init__.py",
       "classification": "ud-only",
       "package": "physics",
@@ -21933,7 +22005,7 @@
       "classification": "ud-only",
       "package": "physics",
       "subpackage": "impact_model",
-      "ud_bytes": 5834,
+      "ud_bytes": 6354,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

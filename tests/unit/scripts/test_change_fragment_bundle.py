@@ -155,6 +155,19 @@ def test_validate_rejects_a_malformed_fragment(scratch_repo: Path) -> None:
 def test_collate_updates_a_legacy_hyphen_entry_in_place(scratch_repo: Path) -> None:
     """``DL-#11329 - ...`` (hyphen heading) is updated, never duplicated."""
     devlog_path = scratch_repo / "docs/development/DEVELOPMENT_LOG.md"
+    devlog_lines = devlog_path.read_text(encoding="utf-8").splitlines(keepends=True)
+    matching_lines = [
+        index
+        for index, line in enumerate(devlog_lines)
+        if line.startswith("### DL-#11329 ")
+    ]
+    assert len(matching_lines) == 1
+    current_heading = devlog_lines[matching_lines[0]]
+    line_ending = "\r\n" if current_heading.endswith("\r\n") else "\n"
+    devlog_lines[matching_lines[0]] = (
+        "### DL-#11329 - Scapula and Quiet Torso Matching" + line_ending
+    )
+    devlog_path.write_text("".join(devlog_lines), encoding="utf-8")
     assert "### DL-#11329 - " in devlog_path.read_text(encoding="utf-8")
     fragment = scratch_repo / "changes" / "11329-touch.md"
     fragment.parent.mkdir()

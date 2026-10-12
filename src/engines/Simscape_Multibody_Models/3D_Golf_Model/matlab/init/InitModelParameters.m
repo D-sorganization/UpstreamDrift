@@ -14,7 +14,7 @@ function params = InitModelParameters()
 
     % Pelvis (Root)
     params.Pelvis.Mass = 11.700000;
-    params.Pelvis.Position = [0, 0, 0.9];
+    params.Pelvis.Position = [0, 0, 0.98];
     params.Pelvis.Inertia = [0.1337, 0.1337, 0.1337];
 
     % Segments

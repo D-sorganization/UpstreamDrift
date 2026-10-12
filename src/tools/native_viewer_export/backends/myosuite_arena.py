@@ -1,4 +1,4 @@
-"""MyoSuite native export: ``MujocoEnv`` / ``MJRenderer`` arena over EGL.
+"""MyoSuite native export: ``MJRenderer`` arena over EGL.
 
 MyoSuite often lives in its own virtual environment (its pinned MuJoCo and
 Gymnasium differ from this repository's). The backend therefore runs a worker
@@ -19,6 +19,7 @@ from src.tools.native_viewer_export.backends._subprocess import (
     render_in_worker,
     worker_env,
 )
+from src.tools.native_viewer_export.backends.myosuite_compat import PROBE_CODE
 from src.tools.native_viewer_export.core import (
     ExportSettings,
     Image8,
@@ -51,7 +52,7 @@ class MyoSuiteArenaBackend:
                 "myosuite installed"
             )
         probe = subprocess.run(  # noqa: S603 - fixed argv
-            [python, "-c", "import myosuite, mujoco"],
+            [python, "-c", PROBE_CODE],
             capture_output=True,
             text=True,
             check=False,
@@ -59,7 +60,9 @@ class MyoSuiteArenaBackend:
             env=worker_env(),
         )
         if probe.returncode != 0:
-            return f"{python} cannot import myosuite and mujoco: {probe.stderr[-200:]}"
+            return (
+                f"{python} cannot import the MyoSuite renderer: {probe.stderr[-200:]}"
+            )
         return None
 
     def render(

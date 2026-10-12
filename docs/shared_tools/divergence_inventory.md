@@ -49,7 +49,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `core` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `dashboard` | 0 | 0 | 0 | 15 | 0 | 0 |
-| `data_io` | 0 | 0 | 0 | 30 | 0 | 0 |
+| `data_io` | 0 | 0 | 0 | 31 | 0 | 0 |
 | `data_processing` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `data_processor` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `data_processor_io` | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -80,12 +80,12 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launch_monitor` | 0 | 0 | 0 | 0 | 30 | 0 |
 | `launcher_embed` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `lifting` | 0 | 0 | 0 | 29 | 0 | 0 |
+| `lifting` | 0 | 0 | 0 | 31 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_appearance` | 0 | 0 | 0 | 15 | 0 | 0 |
+| `model_appearance` | 0 | 0 | 0 | 16 | 0 | 0 |
 | `model_generation` | 25 | 54 | 16 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 304 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 305 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `native_lanes` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -95,7 +95,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `pendulum_simulator` | 0 | 0 | 0 | 79 | 0 | 0 |
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
-| `physics` | 0 | 0 | 0 | 74 | 0 | 0 |
+| `physics` | 0 | 0 | 0 | 75 | 0 | 0 |
 | `physics_informed` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `plot_engine` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `plot_labels.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **397** | **276** | **123** | **1660** | **808** | **673** |
+| **Total** | **397** | **276** | **123** | **1666** | **808** | **673** |
 
 ## Diverged Files by Package
 

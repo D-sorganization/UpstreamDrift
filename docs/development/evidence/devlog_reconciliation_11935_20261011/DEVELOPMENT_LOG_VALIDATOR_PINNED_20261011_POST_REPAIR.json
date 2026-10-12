@@ -1,0 +1,36 @@
+{
+  "validator_source": "ud-tools gitlink 6b6e4be55e7086a33db43b36d2632765be619bde",
+  "validator_modules_sha256": {
+    "shared_scripts/development_log.py": "23f561d3d4dcc12e646675db771324c37692a746d24c3391b46983b8e0b99710",
+    "shared_scripts/development_log_validator.py": "aee931c8ae1f584c3c36df49c013a4381acbcbd372621feb84fed2c5a07b5f5b",
+    "shared_scripts/development_log_schema.py": "4ad2c79060a9e15b092d9e361aea1f6f54f53cb222210438bb2568405328d64f"
+  },
+  "upstreamdrift_base_head": "944d798ed3748fc09e115825cf9db30b65d1f232",
+  "main_reconciled_commit": "e68baeabde8ff639f846a167ca7703ace43bd0a9",
+  "main_delta": "Exact active DL-#11719 entry copied from e68baeab; no existing IDs changed by that main commit.",
+  "log_sha256": "b48485a4a029237722dc5cda68c4f1ba2212bd03ac2f208a2a49cf07404f3d34",
+  "log_bytes": 198711,
+  "entry_count": 140,
+  "active_count": 75,
+  "state_counts": {
+    "in_review": 55,
+    "in_progress": 19,
+    "shipped": 65,
+    "proposed": 1
+  },
+  "finding_counts": {
+    "portfolio_wip_breach": 1
+  },
+  "error_count": 0,
+  "warning_count": 1,
+  "findings": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": null,
+      "kind": "portfolio_wip_breach",
+      "message": "19 concurrent WIP entries (in_progress) exceeds the 'golf' portfolio cap of 8.",
+      "remediation": "Park or ship entries to bring WIP to <= 8 before starting new work.",
+      "severity": "warning"
+    }
+  ]
+}

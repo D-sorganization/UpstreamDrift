@@ -14,6 +14,12 @@ identical forward-dynamics trajectories satisfying the cross-engine tolerance ga
 All native physics engines are dynamically guarded via is_mujoco_available(),
 is_pinocchio_available(), and is_drake_available() so tests gracefully skip or
 verify contract compliance when compiled shared objects are not installed on host.
+
+Baseline provenance (#12013): the committed ``simscape_canonical_baseline.npz``
+was produced by MuJoCo, not Simscape (see its ``.provenance.json`` receipt).
+Comparisons that claim Simscape agreement therefore fail closed and skip as
+"Simscape baseline unavailable" until a real MATLAB R2025b baseline, with a
+committed generator and receipt, replaces it. No tolerance has been changed.
 """
 
 from __future__ import annotations
@@ -37,6 +43,12 @@ from src.engines.physics_engines.drake.python.simulate_with_coefficients import 
     DEFAULT_GOLFER_URDF as DRAKE_GOLFER_URDF,
 )
 from src.shared.python.core.contracts.decorators import postcondition, precondition
+from tests.cross_engine.baseline_provenance import (
+    COMMITTED_PROVENANCE_PATH,
+    BaselineProvenanceError,
+    load_provenance,
+    require_producing_engine,
+)
 from src.shared.python.engine_core.engine_availability import (
     is_drake_available,
     is_mujoco_available,
@@ -55,17 +67,6 @@ BENCHMARK_HORIZON_S: float = 0.02
 BENCHMARK_TIMESTEP_S: float = 0.001
 BENCHMARK_SAMPLE_RATE_HZ: float = 1000.0
 EXPECTED_SAMPLE_COUNT: int = 21
-
-# The committed "Simscape" baseline reproduces the pre-#11811 self-colliding
-# MuJoCo golfer to 0.026 mm, so it is not Simscape ground truth (#12013).
-BASELINE_IS_MUJOCO_ARTEFACT = pytest.mark.xfail(
-    is_mujoco_available(),
-    reason=(
-        "#12013: baseline is a MuJoCo rollout of the self-colliding golfer; "
-        "with #11811 fixed MuJoCo grip RMSE is 20.0 mm and clubhead 53.2 mm"
-    ),
-    strict=True,
-)
 
 CANONICAL_BASELINE_PATH: Path = (
     Path(__file__).resolve().parents[1]
@@ -134,8 +135,12 @@ def get_certified_benchmark_theta() -> NDArray[np.float64]:
     return theta
 
 
-def load_simscape_golden_baseline() -> SimscapeGoldenBaseline:
-    """Load canonical Simscape ground-truth forward-dynamics baseline."""
+def load_baseline_arrays() -> SimscapeGoldenBaseline:
+    """Load the committed baseline arrays WITHOUT asserting who produced them.
+
+    Only for structural checks and tolerance-gate mechanics. Anything that
+    claims agreement with Simscape must use ``load_simscape_golden_baseline``.
+    """
     if not CANONICAL_BASELINE_PATH.is_file():
         msg = (
             f"Simscape canonical baseline fixture missing at {CANONICAL_BASELINE_PATH}"
@@ -158,6 +163,27 @@ def load_simscape_golden_baseline() -> SimscapeGoldenBaseline:
         club_quat=club_quat,
         theta_star=theta_star,
     )
+
+
+def load_simscape_golden_baseline() -> SimscapeGoldenBaseline:
+    """Load the baseline as Simscape ground truth, fail-closed (#12013).
+
+    Raises:
+        BaselineProvenanceError: the producer-recorded engine is not Simscape
+            (today the committed arrays are a MuJoCo artefact), or provenance
+            is missing.
+    """
+    provenance = load_provenance(COMMITTED_PROVENANCE_PATH)
+    require_producing_engine(provenance, claimed_engine="simscape")
+    return load_baseline_arrays()
+
+
+def simscape_baseline_or_skip() -> SimscapeGoldenBaseline:
+    """Return the Simscape baseline, or skip as withheld/not-validated."""
+    try:
+        return load_simscape_golden_baseline()
+    except BaselineProvenanceError as exc:
+        pytest.skip(f"Simscape baseline unavailable (not validated): {exc}")
 
 
 # --------------------------------------------------------------------------- #
@@ -386,7 +412,7 @@ def run_drake_parity_rollout(
 
 def test_simscape_golden_baseline_integrity() -> None:
     """Simscape golden baseline must be complete, monotonic, and physically valid."""
-    baseline = load_simscape_golden_baseline()
+    baseline = load_baseline_arrays()
 
     assert baseline.time.ndim == 1
     assert baseline.time.shape[0] == EXPECTED_SAMPLE_COUNT
@@ -415,13 +441,12 @@ def test_simscape_golden_baseline_integrity() -> None:
     np.testing.assert_allclose(grip_quat_norms, 1.0, atol=1e-6)
 
 
-@BASELINE_IS_MUJOCO_ARTEFACT
 def test_mujoco_parity_vs_simscape() -> None:
     """MuJoCo forward dynamics matches Simscape baseline within parity tolerances."""
     if not is_mujoco_available():
         pytest.skip("MuJoCo runtime is not installed on host")
 
-    baseline = load_simscape_golden_baseline()
+    baseline = simscape_baseline_or_skip()
     theta_star = get_certified_benchmark_theta()
 
     sim_grip, sim_clubhead = run_mujoco_parity_rollout(theta_star)
@@ -448,7 +473,7 @@ def test_pinocchio_parity_vs_simscape() -> None:
     if not is_pinocchio_available():
         pytest.skip("Pinocchio C++ runtime is not installed on host")
 
-    baseline = load_simscape_golden_baseline()
+    baseline = simscape_baseline_or_skip()
     theta_star = get_certified_benchmark_theta()
 
     sim_grip, sim_clubhead = run_pinocchio_parity_rollout(theta_star)
@@ -475,7 +500,7 @@ def test_drake_parity_vs_simscape() -> None:
     if not is_drake_available():
         pytest.skip("Drake C++ runtime (pydrake) is not installed on host")
 
-    baseline = load_simscape_golden_baseline()
+    baseline = simscape_baseline_or_skip()
     theta_star = get_certified_benchmark_theta()
 
     sim_grip, sim_clubhead = run_drake_parity_rollout(theta_star)
@@ -497,10 +522,9 @@ def test_drake_parity_vs_simscape() -> None:
     assert res.passed
 
 
-@BASELINE_IS_MUJOCO_ARTEFACT
 def test_four_engine_cross_engine_matrix() -> None:
     """Four-engine parity summary matrix across all available engines and Simscape."""
-    baseline = load_simscape_golden_baseline()
+    baseline = simscape_baseline_or_skip()
     theta_star = get_certified_benchmark_theta()
 
     # Track evaluated results
@@ -578,7 +602,7 @@ def test_four_engine_cross_engine_matrix() -> None:
 
 def test_parity_tolerance_gate_boundary_conditions() -> None:
     """Tolerance gate strictly passes compliant errors and rejects breaches."""
-    baseline = load_simscape_golden_baseline()
+    baseline = load_baseline_arrays()
 
     # Base trajectories
     base_grip = baseline.grip.copy()
