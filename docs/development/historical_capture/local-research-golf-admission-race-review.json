@@ -1,0 +1,403 @@
+{
+  "schema": "necromatcher/local-research-golf-admission-race-review/1",
+  "issue": 11493,
+  "base_checkpoint": "7727f3815ea78d6473283b092d201ca92334c560",
+  "base_review": {
+    "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\historical_capture\\local-research-golf-review.json",
+    "bytes": 66486,
+    "sha256": "d7907b67093379fe0337b356dd130cf9d092a20cf3f1a67443bd6d48c995efae"
+  },
+  "production_change": "Same unused-ID guard before and after awaited authentication; no event-loop yield before preparation/context publication",
+  "meaningful_red": "Delayed admission accepted reused ID with HTTP 200 after concurrent prepare/cancel; regression expects 409 and IDLE",
+  "api_validation": {
+    "process_session": 17683,
+    "exit_code": 0,
+    "cases_passed": 10,
+    "elapsed_s": 13.86
+  },
+  "mypy": {
+    "configured_follow_imports": "silent",
+    "changed_owner_passed": true,
+    "prior_unconfigured_attempt": "179 transitive errors in unrelated owners; preserved, not acceptance"
+  },
+  "native_validation": {
+    "process_session": 81062,
+    "python_exit_code": 0,
+    "cases_passed": 1,
+    "elapsed_s": 24.56,
+    "call_s": 19.06,
+    "worker_budget_s": 60,
+    "phase_deadline_s": 90,
+    "whole_test_cap_s": 120,
+    "pytest_exit": 0,
+    "source_files_checked": 6697,
+    "source_before_equals_after": true,
+    "inventory_scope": "src files plus owned native acceptance test, not entire repository"
+  },
+  "screenshots": {
+    "root_reviewed_readable": true,
+    "gl_pixel_accuracy": false
+  },
+  "budgets": [
+    {
+      "path": "src/api/routes/golf_research.py",
+      "lines": 156,
+      "max_function_lines": 54,
+      "max_arguments": 2
+    },
+    {
+      "path": "tests/unit/api/test_golf_research_routes.py",
+      "lines": 274,
+      "max_function_lines": 38,
+      "max_arguments": 3
+    },
+    {
+      "path": "tests/unit/workspace/test_necromatcher_golf_native_handoff.py",
+      "lines": 292,
+      "max_function_lines": 77,
+      "max_arguments": 3
+    }
+  ],
+  "copies": [
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\api\\routes\\golf_research.py",
+        "bytes": 5795,
+        "sha256": "638eebd84fecbcaad2850bc8b31e29ecdb382054ae175e786c5b4436a1914926"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\sources\\golf_research.py",
+        "bytes": 5795,
+        "sha256": "638eebd84fecbcaad2850bc8b31e29ecdb382054ae175e786c5b4436a1914926"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\api\\test_golf_research_routes.py",
+        "bytes": 8883,
+        "sha256": "9c5475fdd01b221528ae96a21b8bfc1008edb622cb87ef5963bd981066973745"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\sources\\test_golf_research_routes.py",
+        "bytes": 8883,
+        "sha256": "9c5475fdd01b221528ae96a21b8bfc1008edb622cb87ef5963bd981066973745"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_golf_native_handoff.py",
+        "bytes": 10476,
+        "sha256": "26478d75fb6b21a25b5f59b7e5d20f4626355c842e507daf29b3c81c405d684b"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\sources\\test_necromatcher_golf_native_handoff.py",
+        "bytes": 10476,
+        "sha256": "26478d75fb6b21a25b5f59b7e5d20f4626355c842e507daf29b3c81c405d684b"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\api.json",
+        "bytes": 9551,
+        "sha256": "c532c4af92c5d25fb24fe8d72ea48da99e1002195dde2449db7c4c8fd1c6a1c2"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\api.json",
+        "bytes": 9551,
+        "sha256": "c532c4af92c5d25fb24fe8d72ea48da99e1002195dde2449db7c4c8fd1c6a1c2"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\font-environment.json",
+        "bytes": 378,
+        "sha256": "b6dd6ca955477f149a7e93b9384620551854d9f37231b17499b4739e8d251e47"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\font-environment.json",
+        "bytes": 378,
+        "sha256": "b6dd6ca955477f149a7e93b9384620551854d9f37231b17499b4739e8d251e47"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\impact\\impact-receipt.json",
+        "bytes": 3210,
+        "sha256": "07db55da61bede579ac9763a73faa34a0bfa02f00cfe92007c29dc3b704a9b76"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\impact\\impact-receipt.json",
+        "bytes": 3210,
+        "sha256": "07db55da61bede579ac9763a73faa34a0bfa02f00cfe92007c29dc3b704a9b76"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\impact\\request.json",
+        "bytes": 100906,
+        "sha256": "d05dc96cdd6dc40e52c4582104e636838a3b0a80f7884397f9e421efea141255"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\impact\\request.json",
+        "bytes": 100906,
+        "sha256": "d05dc96cdd6dc40e52c4582104e636838a3b0a80f7884397f9e421efea141255"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\impact\\result.json",
+        "bytes": 107713,
+        "sha256": "330324c373707e1a0c4e3f301929c620e3c13ce89ae6b2d4434c88e9cc83f04f"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\impact\\result.json",
+        "bytes": 107713,
+        "sha256": "330324c373707e1a0c4e3f301929c620e3c13ce89ae6b2d4434c88e9cc83f04f"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\impact\\trajectory.json",
+        "bytes": 1493,
+        "sha256": "dfc28416d085e947aff6c341dda2ad832b50ac359fbfde6fa2f241f329dccef1"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\impact\\trajectory.json",
+        "bytes": 1493,
+        "sha256": "dfc28416d085e947aff6c341dda2ad832b50ac359fbfde6fa2f241f329dccef1"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\qt.json",
+        "bytes": 4778,
+        "sha256": "61311979e9f5803ec5d46625c15e18e64d77ec1a89c21d545b3f14ecc48d37f0"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\qt.json",
+        "bytes": 4778,
+        "sha256": "61311979e9f5803ec5d46625c15e18e64d77ec1a89c21d545b3f14ecc48d37f0"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\research-recalled.png",
+        "bytes": 65209,
+        "sha256": "7546b80d0b91fc7d587c8f6c2d48da6cdae49ca98f3c5c76197e86e7f699aad2"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\research-recalled.png",
+        "bytes": 65209,
+        "sha256": "7546b80d0b91fc7d587c8f6c2d48da6cdae49ca98f3c5c76197e86e7f699aad2"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\research-submitted.png",
+        "bytes": 68103,
+        "sha256": "4210d74f4b5029ae94d1679aec6e2baae29dfdbdc16b7bb4368e07d48c810655"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\research-submitted.png",
+        "bytes": 68103,
+        "sha256": "4210d74f4b5029ae94d1679aec6e2baae29dfdbdc16b7bb4368e07d48c810655"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\terminal.json",
+        "bytes": 2007,
+        "sha256": "aeed61fd2aebafb16a17dacd435932c123461088057dbca398cfd4801a94bd68"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\terminal.json",
+        "bytes": 2007,
+        "sha256": "aeed61fd2aebafb16a17dacd435932c123461088057dbca398cfd4801a94bd68"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2\\timeline.json",
+        "bytes": 427,
+        "sha256": "00845b154afb04fe664db7b3195bf3363a6001aa316de468ce97a8ea9c75a196"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\native\\timeline.json",
+        "bytes": 427,
+        "sha256": "00845b154afb04fe664db7b3195bf3363a6001aa316de468ce97a8ea9c75a196"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-admission-race-red-v1.log",
+        "bytes": 4204,
+        "sha256": "f2ca0660adca639783dee55415283efc96695ca3f390d5d44dac4de6001ee240"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-research-golf-admission-race-red-v1.log",
+        "bytes": 4204,
+        "sha256": "f2ca0660adca639783dee55415283efc96695ca3f390d5d44dac4de6001ee240"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-admission-race-green-v1.log",
+        "bytes": 2775,
+        "sha256": "bc4aec3bc71cd88689459bb7a613ff4dca270333ee62686f0b7d28bbea745dc1"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-research-golf-admission-race-green-v1.log",
+        "bytes": 2775,
+        "sha256": "bc4aec3bc71cd88689459bb7a613ff4dca270333ee62686f0b7d28bbea745dc1"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-admission-race-green-v1.xml",
+        "bytes": 1632,
+        "sha256": "60b390444714cf9b55da656edfd699c25033faf4b1f64110154791f6df8d021f"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-research-golf-admission-race-green-v1.xml",
+        "bytes": 1632,
+        "sha256": "60b390444714cf9b55da656edfd699c25033faf4b1f64110154791f6df8d021f"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-admission-race-mypy-v1.log",
+        "bytes": 37852,
+        "sha256": "b37482759d23a7fc9df4f0eacf254fe80392a525e3faaaacdfc5b58f9def9e17"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-research-golf-admission-race-mypy-v1.log",
+        "bytes": 37852,
+        "sha256": "b37482759d23a7fc9df4f0eacf254fe80392a525e3faaaacdfc5b58f9def9e17"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-admission-race-mypy-v2.log",
+        "bytes": 43,
+        "sha256": "8e63ae22e8213e327a5e9cbd584067681681bd8ef7f25c869877887ccdcfc4ff"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-research-golf-admission-race-mypy-v2.log",
+        "bytes": 43,
+        "sha256": "8e63ae22e8213e327a5e9cbd584067681681bd8ef7f25c869877887ccdcfc4ff"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2.log",
+        "bytes": 3252,
+        "sha256": "cfa57b0563404488b45d56d1bf9887862349616f216bc5e3c4424df2422bdf8c"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-local-research-golf-native-v2.log",
+        "bytes": 3252,
+        "sha256": "cfa57b0563404488b45d56d1bf9887862349616f216bc5e3c4424df2422bdf8c"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2.xml",
+        "bytes": 402,
+        "sha256": "330c3363bc5b4814cedebc4c9b4384ca8e1279f4726d11e68a7c9862ba3c3ce0"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-local-research-golf-native-v2.xml",
+        "bytes": 402,
+        "sha256": "330c3363bc5b4814cedebc4c9b4384ca8e1279f4726d11e68a7c9862ba3c3ce0"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2-result.json",
+        "bytes": 190,
+        "sha256": "ea920644fb8e2e373b296cddcf507bca58432aba70d5f23d68f0f302b5802b2d"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-local-research-golf-native-v2-result.json",
+        "bytes": 190,
+        "sha256": "ea920644fb8e2e373b296cddcf507bca58432aba70d5f23d68f0f302b5802b2d"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2-exit.txt",
+        "bytes": 1,
+        "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-local-research-golf-native-v2-exit.txt",
+        "bytes": 1,
+        "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2-source-before.json",
+        "bytes": 1019401,
+        "sha256": "7343bbaaed1962137b85b041c4fa84a9a7eafb81443001f7409bab0c8aa10022"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-local-research-golf-native-v2-source-before.json",
+        "bytes": 1019401,
+        "sha256": "7343bbaaed1962137b85b041c4fa84a9a7eafb81443001f7409bab0c8aa10022"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v2-source-after.json",
+        "bytes": 1019401,
+        "sha256": "7343bbaaed1962137b85b041c4fa84a9a7eafb81443001f7409bab0c8aa10022"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\necromatcher-local-research-golf-native-v2-source-after.json",
+        "bytes": 1019401,
+        "sha256": "7343bbaaed1962137b85b041c4fa84a9a7eafb81443001f7409bab0c8aa10022"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\test_research_golf_admission_race_v1.py",
+        "bytes": 1478,
+        "sha256": "ef6abeb8afbed9dd80862dd2d47a70092563a0a6572a57156f839e4304245865"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\test_research_golf_admission_race_v1.py",
+        "bytes": 1478,
+        "sha256": "ef6abeb8afbed9dd80862dd2d47a70092563a0a6572a57156f839e4304245865"
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\run-local-research-golf-native-v2.py",
+        "bytes": 1635,
+        "sha256": "4f7e5a623acf978d467eadb0402d7305501101cf220a02507b0d67acc7fa88da"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\Admission Race Follow-Up\\proofs\\run-local-research-golf-native-v2.py",
+        "bytes": 1635,
+        "sha256": "4f7e5a623acf978d467eadb0402d7305501101cf220a02507b0d67acc7fa88da"
+      }
+    }
+  ],
+  "qualification": {
+    "scientific": false,
+    "historical_improvement": false,
+    "physical_source_time": false,
+    "avatar_course": false,
+    "controltower_delivery": false
+  },
+  "scope": {
+    "tiger_half_open": [0, 191],
+    "hogan_half_open": [0, 750]
+  },
+  "pending": {
+    "publication": true,
+    "remote_ci": true,
+    "full_goal": true
+  }
+}

@@ -92,7 +92,7 @@
   "weights": {
     "marker": 1000.0,
     "terminal_marker": 10000.0,
-    "effort": 1e-05,
+    "effort": 1e-5,
     "velocity": 0.001,
     "range_barrier": 1000.0
   },
@@ -112,7 +112,7 @@
     "converged": true,
     "iterations": 108,
     "cost": 31.779621541726325,
-    "stopping_criterion": 1.308044401535653e-07,
+    "stopping_criterion": 1.308044401535653e-7,
     "wall_clock_s": 3983.168357632996,
     "stages": [
       {
@@ -151,17 +151,12 @@
         "iterations": 108,
         "converged": true,
         "cost": 31.779621541726325,
-        "stopping_criterion": 1.308044401535653e-07,
+        "stopping_criterion": 1.308044401535653e-7,
         "wall_clock_s": 3019.2717858390242,
         "marker_rms_m": 0.01972575884293077
       }
     ],
-    "continuation_s": [
-      0.05,
-      0.1,
-      0.2,
-      0.3
-    ],
+    "continuation_s": [0.05, 0.1, 0.2, 0.3],
     "tracking_gains": {
       "kp": 400.0,
       "kd": 40.0
@@ -257,7 +252,7 @@
     "max_normal_force_n": 1082.3393246080389,
     "max_normal_force_body_weights": 1.4149730221107668,
     "max_penetration_m": 0.01719458026964854,
-    "closure_translation_error_max_m": 1.158135170603304e-05,
+    "closure_translation_error_max_m": 1.158135170603304e-5,
     "weight_fraction": {
       "min": 0.20959310286520405,
       "max": 2.043349578041101,

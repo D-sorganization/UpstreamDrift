@@ -1,0 +1,646 @@
+{
+  "schema": "necromatcher/normalized-coverage-v15-summary/1",
+  "producer": "6654881b0788c77620a0afb8a9a6763f3ee1ccb9",
+  "input_receipt_sha256": "sha256:ed1208faa1d568596b720787a61ee978d2fa17e9fb19c1873a55b98c8482ebe6",
+  "frozen_driver_sha256": "sha256:b23736899016c635fad566d9379894f61bbd7c6d0161d8f84b845885c86e1871",
+  "audit_script_sha256": "sha256:918f1996cb38fcf896297588d2c38df7d5be9a87767bff5a98eccaf19651ebab",
+  "both_runs_verified": true,
+  "optimization_performed": false,
+  "scientific_acceptance": false,
+  "continuous_certified": false,
+  "physical_time_qualified": false,
+  "source_runtime_parent_artifact_evidence_brackets_verified": true,
+  "matched_protocol": {
+    "time_counts": [78, 178],
+    "rows": [936, 2136],
+    "weight_factor": 0.43820224719101125,
+    "potential_mass_equal": true,
+    "same_start_and_prior": true,
+    "added_image_points": 0,
+    "continuous_certified": false
+  },
+  "matched_comparison": {
+    "continuous_certified": false,
+    "coverage_counts": [78, 178],
+    "declared_factor": "expanded coverage with equal potential geometric family rowmass",
+    "penalty_mass_factor": 1.0,
+    "same_start_prior_camera_evidence": true,
+    "scientific_acceptance": false,
+    "variant_minus_control": {
+      "dense_original_rms_pixels": 0.11194348157095746,
+      "maximum_sampled_grip_gap_m": 4.974467308465724e-5,
+      "maximum_sampled_grip_rotation_rad": 0.0002134054887187216,
+      "maximum_sampled_ground_penetration_m": -0.0015850758866428824
+    }
+  },
+  "issue": 11284,
+  "external_assessment_sha256": "sha256:f7f1be7ce6b6742895c279ff348773b6f758a2b25eca2594ed84358cf6c11818",
+  "ground_diagnosis_sha256": "sha256:af703bf7c11d777134336bd6a569ffbac820006c68a815ad7d9a5e4710bcfe58",
+  "repeatability_copy_receipt": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Normalized-Coverage V15 Numerical Evidence\\Repeatability Inputs\\repeatability-copy-receipt.json",
+    "sha256": "sha256:5f4588ebabaf35f71e6b5e58cd34b2e00c8489fb97661533cefe2221de37f255",
+    "artifact_count": 17,
+    "protocol_tests": 48
+  },
+  "fixed_V10_dense_RMS": 35.75207656383587,
+  "parent_V14_dense_RMS": 25.522535818337587,
+  "normalization_limit": "Equal potential quadratic family rowmass; not physical-time quadrature, actual active penalty equality, or a continuous nonlinear proof.",
+  "original_image_evidence": {
+    "array_shapes": [
+      [22, 13, 2],
+      [22, 13]
+    ],
+    "hash_layout": "pixel/confidence/source-time little-endian float64 in declared shape/order",
+    "marker_order": [
+      "left_ankle",
+      "left_elbow",
+      "left_hip",
+      "left_knee",
+      "left_shoulder",
+      "left_wrist",
+      "nose",
+      "right_ankle",
+      "right_elbow",
+      "right_hip",
+      "right_knee",
+      "right_shoulder",
+      "right_wrist"
+    ],
+    "observed_point_count": 286,
+    "sha256": "sha256:59f361e40194babe3b4e53412343b606eff7483210e11ec7daebff54967aca2f",
+    "training_frame_indices": [
+      0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160,
+      170, 180, 190, 200, 209
+    ]
+  },
+  "artifact_hashes": {
+    "driver": "sha256:b23736899016c635fad566d9379894f61bbd7c6d0161d8f84b845885c86e1871",
+    "phase_review": "sha256:88973ff55f29df194d8e1e6b133558dab74a743891ef922e3c5fadbfea4889cd",
+    "preflight_helper": "sha256:61be2c02998602e69674236e350ee4f242a9e43a51892483c66fda263b9607ed",
+    "v10_helper": "sha256:be20e1f2dd91726580944dbb871964af7805ad2d4906147336b320946b769608",
+    "v11_driver": "sha256:6f0276adb596dfd56867adcbe79ced29ebfc3e82d6e7573068bd9105cbd4e619",
+    "v12_driver": "sha256:d4256367708704ac1296874071122abeb3070f9009a965654e08e066a2cfc858",
+    "v13_driver": "sha256:bed8a23d6ec6607806d6dd68f3df7cf3da5158250f07922d9127a5edf7fedb0c",
+    "v13_independent_assessment": "sha256:0bc1525fd4e8b3b289a1608ce567960ca68d32f27c884965a308c252d2c6779e"
+  },
+  "runs": [
+    {
+      "fit_id": "tiger-normalized-coverage-control-fit-v15",
+      "role": "control",
+      "run_id": "e153fc16295c45209c6f72bd5ac0173c",
+      "fit_sha256": "sha256:828aa7bb8781d72f4486a510febb678d86c35845ab522ef7c1ad1010ebb32230",
+      "options": {
+        "budget_wall_s": 300.0,
+        "config": {
+          "closure_weight": 100.0,
+          "constraint_options": {
+            "base": {
+              "ground": {
+                "height_m": 0,
+                "normal": [0.0, 0.0, 1.0]
+              },
+              "ground_scale_m": 0.01,
+              "ground_weight": 4000,
+              "pinned_spheres": ["heel_r", "heel_l"],
+              "position_scale_m": 0.01,
+              "position_weight": 4000,
+              "rotation_scale_rad": 0.1,
+              "rotation_weight": 4000
+            },
+            "schedule": {
+              "capture_id": "tiger-usga-range-capture-v1",
+              "capture_sha256": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+              "phases": [
+                {
+                  "end_pts": [53053, 3000],
+                  "pinned_spheres": ["heel_r", "heel_l"],
+                  "review_frame_sha256": [
+                    "sha256:a817db59bf332a48e94e2288d4ee2f2c92d52e747d49146f42a89e513516c436",
+                    "sha256:4ea8e5c8d72c643acc957f3897579af97a175c7b2d873fd5c4b30480b01dd96d",
+                    "sha256:54de9f3f95c1d052559fbbb5bd136f5f6c093a7acb61c5e3d9f6fa23ff10070e"
+                  ],
+                  "start_pts": [3003, 200]
+                },
+                {
+                  "end_pts": [37037, 2000],
+                  "pinned_spheres": ["heel_l"],
+                  "review_frame_sha256": [
+                    "sha256:1558171b05cb12ff03507754c79873691546ffbc6060d8dd212f42845ba6088d",
+                    "sha256:c43a1d437a1009d4d7b0ab5067d650eeb4d019e88bce80c8803c3fded75da36c"
+                  ],
+                  "start_pts": [53053, 3000]
+                },
+                {
+                  "end_pts": [659659, 30000],
+                  "pinned_spheres": [],
+                  "review_frame_sha256": [
+                    "sha256:9701752e2157dd6e142247aed454c7c107fa73d0b445ced1b6c747211fe0b539",
+                    "sha256:6996956a034f6f7b13c2a5ec6a0bfd96fbfbd0679c865a1699274276294fd308",
+                    "sha256:3596faba5894db1985226cf55b83934a2a66d18086610afce32c4b66461378ba"
+                  ],
+                  "start_pts": [37037, 2000]
+                }
+              ],
+              "status": "authored_contact_hypothesis"
+            }
+          },
+          "coordinate_bounds": [
+            ["SpineInputX", -0.6108652381980153, 0.6108652381980153],
+            ["SpineInputY", -0.7853981633974483, 0.7853981633974483],
+            ["TorsoInput", -1.7453292519943295, 1.7453292519943295],
+            ["LEInput", -2.6179938779914944, 0.08726646259971647],
+            ["LFInput", -1.5707963267948966, 1.5707963267948966],
+            ["LScapInputX", -0.17453292519943295, 0.5235987755982988],
+            ["LScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["LWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["LWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["REInput", -2.6179938779914944, 0.08726646259971647],
+            ["RFInput", -1.5707963267948966, 1.5707963267948966],
+            ["RScapInputX", -0.5235987755982988, 0.17453292519943295],
+            ["RScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["RWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["RWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["NeckInputX", -0.7853981633974483, 0.7853981633974483],
+            ["NeckInputY", -1.0471975511965976, 1.0471975511965976],
+            ["NeckInputZ", -1.3962634015954636, 1.3962634015954636],
+            ["hip_flexion_r", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_r", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_r", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_r", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_r", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_r", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_r", -0.5235987755982988, 0.5235987755982988],
+            ["hip_flexion_l", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_l", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_l", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_l", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_l", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_l", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_l", -0.5235987755982988, 0.5235987755982988]
+          ],
+          "initialization_policy": "strict",
+          "interior_fractions": [
+            0.045454545454545456, 0.13636363636363635, 0.22727272727272727,
+            0.3181818181818182, 0.4090909090909091, 0.5, 0.5909090909090909,
+            0.6818181818181818, 0.7727272727272727, 0.8636363636363636,
+            0.9545454545454546
+          ],
+          "max_iterations": 30,
+          "prior_weight": 0.001,
+          "smoothness_weight": 0.001
+        },
+        "coordinate_scales": [
+          0.1, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0
+        ],
+        "frame_indices": [
+          0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
+          160, 170, 180, 190, 200, 209
+        ],
+        "initialization_source": "preserved_spline",
+        "knot_count": 6,
+        "operation": "fit",
+        "unknown_visibility_weight": 0.5
+      },
+      "metrics": {
+        "fit_id": "tiger-normalized-coverage-control-fit-v15",
+        "fit_hash": "sha256:828aa7bb8781d72f4486a510febb678d86c35845ab522ef7c1ad1010ebb32230",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 22.545890554992887,
+        "dense_original_rms_pixels": 25.048391708066035,
+        "maximum_sampled_grip_gap_m": 0.0019055993408266328,
+        "maximum_sampled_grip_rotation_rad": 0.012272415335515681,
+        "maximum_sampled_ground_penetration_m": 0.003437774590502249,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false,
+        "coordinate_extrema": {
+          "bounded_coordinates": [
+            "SpineInputX",
+            "SpineInputY",
+            "TorsoInput",
+            "LEInput",
+            "LFInput",
+            "LScapInputX",
+            "LScapInputY",
+            "LWInputX",
+            "LWInputY",
+            "REInput",
+            "RFInput",
+            "RScapInputX",
+            "RScapInputY",
+            "RWInputX",
+            "RWInputY",
+            "NeckInputX",
+            "NeckInputY",
+            "NeckInputZ",
+            "hip_flexion_r",
+            "hip_adduction_r",
+            "hip_rotation_r",
+            "knee_angle_r",
+            "ankle_angle_r",
+            "subtalar_angle_r",
+            "mtp_angle_r",
+            "hip_flexion_l",
+            "hip_adduction_l",
+            "hip_rotation_l",
+            "knee_angle_l",
+            "ankle_angle_l",
+            "subtalar_angle_l",
+            "mtp_angle_l"
+          ],
+          "unbounded_coordinates": [
+            "TranslationInputX",
+            "TranslationInputY",
+            "TranslationInputZ",
+            "HipInputX",
+            "HipInputY",
+            "HipInputZ",
+            "LSInputX",
+            "LSInputY",
+            "LSInputZ",
+            "RSInputX",
+            "RSInputY",
+            "RSInputZ"
+          ],
+          "violating_coordinates": []
+        },
+        "q_bound_certificate": {
+          "conservative_bernstein_q_domain_verified": true,
+          "continuous_nonlinear_certified": false,
+          "method": "canonical_HermiteBoundsDomain.encode",
+          "reason": "Canonical Bernstein domain and scalar extrema agree"
+        }
+      },
+      "training_rms_pixels": 22.545890554992887,
+      "held_out_rms_pixels": 25.32405480073066,
+      "nodes": {
+        "time_count": 78,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 936,
+        "nonzero_ground_residual_row_count": 72,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 2417.0258524584688,
+          "grip_rotation": 1149.1195526364406,
+          "ground": 956.4711870992761
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 4000,
+          "position_scale_m": 0.01,
+          "rotation_weight": 4000,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 4000,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 9360000000.0,
+          "grip_rotation_rad_inverse_squared": 93599999.99999999,
+          "ground_m_inverse_squared": 18720000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.0019055993408266328,
+          "source_time": 17.86785
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.01204109794680749,
+          "source_time": 17.994643333333336
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 0.0009896389179742254,
+          "source_time": 18.351666666666667
+        }
+      },
+      "targets": {
+        "checks": {
+          "dense_rms_nonregression": true,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": true,
+          "sampled_grip_angle": true,
+          "sampled_nonpenetration": false
+        },
+        "research_targets_met": false,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "optimizer_ran": true,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "runtime_s": 53.55562519998057,
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\normalized-coverage-v15-independent-assessment-tiger-normalized-coverage-control-fit-v15-audit.json",
+        "sha256": "sha256:b21e8698c1bd52112109955905835716dbfed2153c8b1554c712d1e985653584"
+      },
+      "initial_spline_coefficient_sha256": "sha256:7fe01891f243ac56d3faf3d052b65409218349c471ff47dbeb8f5300553def04",
+      "scientific_acceptance": "rejected"
+    },
+    {
+      "fit_id": "tiger-normalized-coverage-variant-fit-v15",
+      "role": "variant",
+      "run_id": "11849c2ccc2846dca604dd59a9177394",
+      "fit_sha256": "sha256:d16babdc84452cc61f5ca725825c34dc68a289c09f7cd5aca093c417dc2af7a0",
+      "options": {
+        "budget_wall_s": 300.0,
+        "config": {
+          "closure_weight": 100.0,
+          "constraint_options": {
+            "base": {
+              "ground": {
+                "height_m": 0,
+                "normal": [0.0, 0.0, 1.0]
+              },
+              "ground_scale_m": 0.01,
+              "ground_weight": 1752.808988764045,
+              "pinned_spheres": ["heel_r", "heel_l"],
+              "position_scale_m": 0.01,
+              "position_weight": 1752.808988764045,
+              "rotation_scale_rad": 0.1,
+              "rotation_weight": 1752.808988764045
+            },
+            "schedule": {
+              "capture_id": "tiger-usga-range-capture-v1",
+              "capture_sha256": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+              "phases": [
+                {
+                  "end_pts": [53053, 3000],
+                  "pinned_spheres": ["heel_r", "heel_l"],
+                  "review_frame_sha256": [
+                    "sha256:a817db59bf332a48e94e2288d4ee2f2c92d52e747d49146f42a89e513516c436",
+                    "sha256:4ea8e5c8d72c643acc957f3897579af97a175c7b2d873fd5c4b30480b01dd96d",
+                    "sha256:54de9f3f95c1d052559fbbb5bd136f5f6c093a7acb61c5e3d9f6fa23ff10070e"
+                  ],
+                  "start_pts": [3003, 200]
+                },
+                {
+                  "end_pts": [37037, 2000],
+                  "pinned_spheres": ["heel_l"],
+                  "review_frame_sha256": [
+                    "sha256:1558171b05cb12ff03507754c79873691546ffbc6060d8dd212f42845ba6088d",
+                    "sha256:c43a1d437a1009d4d7b0ab5067d650eeb4d019e88bce80c8803c3fded75da36c"
+                  ],
+                  "start_pts": [53053, 3000]
+                },
+                {
+                  "end_pts": [659659, 30000],
+                  "pinned_spheres": [],
+                  "review_frame_sha256": [
+                    "sha256:9701752e2157dd6e142247aed454c7c107fa73d0b445ced1b6c747211fe0b539",
+                    "sha256:6996956a034f6f7b13c2a5ec6a0bfd96fbfbd0679c865a1699274276294fd308",
+                    "sha256:3596faba5894db1985226cf55b83934a2a66d18086610afce32c4b66461378ba"
+                  ],
+                  "start_pts": [37037, 2000]
+                }
+              ],
+              "status": "authored_contact_hypothesis"
+            }
+          },
+          "coordinate_bounds": [
+            ["SpineInputX", -0.6108652381980153, 0.6108652381980153],
+            ["SpineInputY", -0.7853981633974483, 0.7853981633974483],
+            ["TorsoInput", -1.7453292519943295, 1.7453292519943295],
+            ["LEInput", -2.6179938779914944, 0.08726646259971647],
+            ["LFInput", -1.5707963267948966, 1.5707963267948966],
+            ["LScapInputX", -0.17453292519943295, 0.5235987755982988],
+            ["LScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["LWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["LWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["REInput", -2.6179938779914944, 0.08726646259971647],
+            ["RFInput", -1.5707963267948966, 1.5707963267948966],
+            ["RScapInputX", -0.5235987755982988, 0.17453292519943295],
+            ["RScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["RWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["RWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["NeckInputX", -0.7853981633974483, 0.7853981633974483],
+            ["NeckInputY", -1.0471975511965976, 1.0471975511965976],
+            ["NeckInputZ", -1.3962634015954636, 1.3962634015954636],
+            ["hip_flexion_r", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_r", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_r", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_r", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_r", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_r", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_r", -0.5235987755982988, 0.5235987755982988],
+            ["hip_flexion_l", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_l", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_l", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_l", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_l", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_l", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_l", -0.5235987755982988, 0.5235987755982988]
+          ],
+          "initialization_policy": "strict",
+          "interior_fractions": [
+            0.03125, 0.0625, 0.09375, 0.125, 0.15625, 0.1875, 0.21875, 0.25,
+            0.28125, 0.3125, 0.34375, 0.375, 0.40625, 0.4375, 0.46875, 0.5,
+            0.53125, 0.5625, 0.59375, 0.625, 0.65625, 0.6875, 0.71875, 0.75,
+            0.78125, 0.8125, 0.84375, 0.875, 0.90625, 0.9375, 0.96875
+          ],
+          "max_iterations": 30,
+          "prior_weight": 0.001,
+          "smoothness_weight": 0.001
+        },
+        "coordinate_scales": [
+          0.1, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0
+        ],
+        "frame_indices": [
+          0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
+          160, 170, 180, 190, 200, 209
+        ],
+        "initialization_source": "preserved_spline",
+        "knot_count": 6,
+        "operation": "fit",
+        "unknown_visibility_weight": 0.5
+      },
+      "metrics": {
+        "fit_id": "tiger-normalized-coverage-variant-fit-v15",
+        "fit_hash": "sha256:d16babdc84452cc61f5ca725825c34dc68a289c09f7cd5aca093c417dc2af7a0",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 22.598245561689165,
+        "dense_original_rms_pixels": 25.160335189636992,
+        "maximum_sampled_grip_gap_m": 0.00195534401391129,
+        "maximum_sampled_grip_rotation_rad": 0.012485820824234403,
+        "maximum_sampled_ground_penetration_m": 0.0018526987038593665,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false,
+        "coordinate_extrema": {
+          "bounded_coordinates": [
+            "SpineInputX",
+            "SpineInputY",
+            "TorsoInput",
+            "LEInput",
+            "LFInput",
+            "LScapInputX",
+            "LScapInputY",
+            "LWInputX",
+            "LWInputY",
+            "REInput",
+            "RFInput",
+            "RScapInputX",
+            "RScapInputY",
+            "RWInputX",
+            "RWInputY",
+            "NeckInputX",
+            "NeckInputY",
+            "NeckInputZ",
+            "hip_flexion_r",
+            "hip_adduction_r",
+            "hip_rotation_r",
+            "knee_angle_r",
+            "ankle_angle_r",
+            "subtalar_angle_r",
+            "mtp_angle_r",
+            "hip_flexion_l",
+            "hip_adduction_l",
+            "hip_rotation_l",
+            "knee_angle_l",
+            "ankle_angle_l",
+            "subtalar_angle_l",
+            "mtp_angle_l"
+          ],
+          "unbounded_coordinates": [
+            "TranslationInputX",
+            "TranslationInputY",
+            "TranslationInputZ",
+            "HipInputX",
+            "HipInputY",
+            "HipInputZ",
+            "LSInputX",
+            "LSInputY",
+            "LSInputZ",
+            "RSInputX",
+            "RSInputY",
+            "RSInputZ"
+          ],
+          "violating_coordinates": []
+        },
+        "q_bound_certificate": {
+          "conservative_bernstein_q_domain_verified": true,
+          "continuous_nonlinear_certified": false,
+          "method": "canonical_HermiteBoundsDomain.encode",
+          "reason": "Canonical Bernstein domain and scalar extrema agree"
+        }
+      },
+      "training_rms_pixels": 22.598245561689165,
+      "held_out_rms_pixels": 25.442248537384614,
+      "nodes": {
+        "time_count": 178,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 2136,
+        "nonzero_ground_residual_row_count": 160,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 2436.9302040089146,
+          "grip_rotation": 1147.429756007411,
+          "ground": 994.4596232227864
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 1752.808988764045,
+          "position_scale_m": 0.01,
+          "rotation_weight": 1752.808988764045,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 1752.808988764045,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 9360000000.0,
+          "grip_rotation_rad_inverse_squared": 93599999.99999999,
+          "ground_m_inverse_squared": 18720000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.001945930540042197,
+          "source_time": 19.112009583333332
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.012485820824234403,
+          "source_time": 21.988633333333333
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 0.0018498117121615032,
+          "source_time": 17.935208958333334
+        }
+      },
+      "targets": {
+        "checks": {
+          "dense_rms_nonregression": true,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": true,
+          "sampled_grip_angle": true,
+          "sampled_nonpenetration": true
+        },
+        "research_targets_met": true,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "optimizer_ran": true,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "runtime_s": 49.31700569999521,
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\normalized-coverage-v15-independent-assessment-tiger-normalized-coverage-variant-fit-v15-audit.json",
+        "sha256": "sha256:07f642d7665df42e9da1638b0d5c10de9336b036e7b5c10d033d1b04afc02609"
+      },
+      "initial_spline_coefficient_sha256": "sha256:7fe01891f243ac56d3faf3d052b65409218349c471ff47dbeb8f5300553def04",
+      "scientific_acceptance": "rejected"
+    }
+  ]
+}

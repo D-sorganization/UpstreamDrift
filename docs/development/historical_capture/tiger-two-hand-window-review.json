@@ -1,0 +1,110 @@
+{
+  "schema": "necromatcher/reviewed-two-hand-fit-window/1",
+  "reviewer": "Codex root",
+  "capture_id": "tiger-usga-range-capture-v1",
+  "capture_archive": {
+    "path": "C:\\Users\\diete\\AppData\\Local\\upstream-drift\\upstream-drift\\launcher\\necromatcher\\assets\\tiger-usga-range-capture-v1.zip",
+    "bytes": 167593456,
+    "sha256": "d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357"
+  },
+  "source": {
+    "schema_version": "shadow-tracker/source/1.0.0",
+    "asset_id": "source-99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+    "source_uri": "urn:asset:source-99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+    "content_sha256": "99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+    "width_px": 1280,
+    "height_px": 720,
+    "rights_status": "unknown",
+    "rights_note": ""
+  },
+  "source_clock_sha256": "sha256:e0d9d6c8fe5fcf973f551a8e21d2f3b52cb6aaa855f6bb4b658a16ac43e60f1a",
+  "start_frame_inclusive": 0,
+  "end_frame_inclusive": 190,
+  "end_frame_exclusive": 191,
+  "start_source_frame": {
+    "schema_version": "shadow-tracker/frame/1.1.0",
+    "asset_id": "source-99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+    "shot_id": "tiger-woods-window",
+    "swing_id": "tiger-woods-unreviewed",
+    "camera_id": "source-camera",
+    "frame_id": "frame-450450",
+    "pts_ticks": 450450,
+    "timebase_numerator": 1,
+    "timebase_denominator": 30000,
+    "physical_time_s": null,
+    "physical_time_reason": "Historical playback scale is unverified",
+    "frame_sha256": "a817db59bf332a48e94e2288d4ee2f2c92d52e747d49146f42a89e513516c436",
+    "timing_mode": "container_pts",
+    "is_timing_exact": true,
+    "clock_evidence": "Decoded original container PTS; physical clock unknown",
+    "decoder_name": "pyav",
+    "decoder_version": "19.0.0",
+    "pixel_format": "bgr24"
+  },
+  "last_retained_source_frame": {
+    "schema_version": "shadow-tracker/frame/1.1.0",
+    "asset_id": "source-99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+    "shot_id": "tiger-woods-window",
+    "swing_id": "tiger-woods-unreviewed",
+    "camera_id": "source-camera",
+    "frame_id": "frame-640640",
+    "pts_ticks": 640640,
+    "timebase_numerator": 1,
+    "timebase_denominator": 30000,
+    "physical_time_s": null,
+    "physical_time_reason": "Historical playback scale is unverified",
+    "frame_sha256": "21106dc0841f815b912cbf833a7cf3836948814a0123ff8362981032d5b559de",
+    "timing_mode": "container_pts",
+    "is_timing_exact": true,
+    "clock_evidence": "Decoded original container PTS; physical clock unknown",
+    "decoder_name": "pyav",
+    "decoder_version": "19.0.0",
+    "pixel_format": "bgr24"
+  },
+  "first_excluded_source_frame": {
+    "schema_version": "shadow-tracker/frame/1.1.0",
+    "asset_id": "source-99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+    "shot_id": "tiger-woods-window",
+    "swing_id": "tiger-woods-unreviewed",
+    "camera_id": "source-camera",
+    "frame_id": "frame-641641",
+    "pts_ticks": 641641,
+    "timebase_numerator": 1,
+    "timebase_denominator": 30000,
+    "physical_time_s": null,
+    "physical_time_reason": "Historical playback scale is unverified",
+    "frame_sha256": "af80d97dbed875c2781c7fb327057e41772bd7fa4615e48d9ff810e280c3d410",
+    "timing_mode": "container_pts",
+    "is_timing_exact": true,
+    "clock_evidence": "Decoded original container PTS; physical clock unknown",
+    "decoder_name": "pyav",
+    "decoder_version": "19.0.0",
+    "pixel_format": "bgr24"
+  },
+  "source_gallery_manifests": [
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Tiger Both-Hands Source Review 2026-10-03 V1\\source-manifest.json",
+      "bytes": 18429,
+      "sha256": "2520470a7aa5cfcd70df0d44757ee84e778cd190c72991c6d8866e9f51dd6648"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Tiger Both-Hands Source Review 2026-10-03 V2\\source-manifest.json",
+      "bytes": 27848,
+      "sha256": "86a73c578b781012a85e8e25161212a4c854fb4531a457f6a1a34ac3673331af"
+    }
+  ],
+  "visually_reviewed_indices": [
+    0, 100, 125, 140, 150, 160, 170, 180, 185, 188, 190, 191, 192, 193, 194,
+    195, 196, 198, 200, 209
+  ],
+  "reason": "User excludes right-hand-release follow-through. Hands remain together at the grip through the selected conservative endpoint; separation becomes evident in later frames. Exclude the uncertain transition and all subsequent frames.",
+  "interpretation": "Conservative authored source-PTS fitting boundary, not a measured contact force or exact release instant",
+  "all_retained_frames_visually_reviewed": false,
+  "physical_release_time_s": null,
+  "physical_time_qualified": false,
+  "scientific_qualified": false,
+  "roles_adopted": false,
+  "new_fit_created": false,
+  "future_primary_scope": "Body/shaft objective, geometry/grip assessment, camera correspondences and matched overlays use the same retained window",
+  "historical_whole_capture_outputs_unchanged": true
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "necromatcher/guarded-overlay-recall-review/1",
+  "verified_at_utc": "2026-10-02T16:29:04.322339+00:00",
+  "verification_implementation_commit": "73ace83145",
+  "run_id": "f6daf6efec0d4dd8aa36a8a2424036cd",
+  "source_fit_id": "hogan-authored-ground-fit-v6",
+  "producer_source_commit": "3c73001a7c174118fa3224e95f8022336dcc9d57",
+  "qualification": "monocular_research_hypothesis",
+  "acceptance": "rejected",
+  "initial_ui_action": "Verify Stored Overlay Package",
+  "final_ui_action_after_download_and_reload": "Download Overlay Package",
+  "download_sha256": "49aa8296d86e9414a3683e40237dd89e045de32560d99d2d0866ffe061456418",
+  "download_matches_previously_verified_package": true,
+  "producer_equal_to_current_source_claimed": false,
+  "proof_sha256": "964a953933d6272d9151289be96437bbdf52894396ea9d68d8e24bab41692f26",
+  "limitations": [
+    "Live web recall verified; native migration verified by focused control tests.",
+    "Historical artifact verification does not accept the underlying motion."
+  ]
+}

@@ -1,0 +1,689 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.82in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,xcolor,hyperref,fancyhdr,graphicx}
+\definecolor{ink}{HTML}{16324F}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=ink}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Conditional Camera and Two-Hand Methods}\fancyhead[R]{\small Methods V8}\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}\setlength{\parindent}{0pt}\setlength{\parskip}{7pt}
+\newcommand{\digest}[1]{\texttt{\small\detokenize{#1}}}
+\begin{document}
+\begin{center}
+{\LARGE\color{ink}\bfseries Conditional Camera Initialization\\and Two-Hand Scope Methods}\par
+\vspace{8pt}{\large A Source-Bound Tiger Woods and Ben Hogan Supplement}\par
+\vspace{8pt}3 October 2026\quad\textbullet\quad Methods V8: Historical Restriction and Visual Review
+\end{center}
+\section*{Status and Purpose}
+This supplement describes one closed, read-only conditional-camera diagnostic and the exclusion of Tiger's uncertain late hand-release phase. It accompanies exact serialized data; it is not a calibration report or an accepted historical reconstruction. Root observed producer session 74740 and independent checker session 92074 close with exit code zero. Root accepted the independent serialized-output and complete-byte preservation review. This acceptance does not independently recompute native projections or reconstruct the capture clock.
+
+In the camera experiment, no conditional camera was adopted or registered, no motion optimizer ran, and no library asset changed; no roles were adopted, and scientific qualification remains false. The public initializer internally refines camera pose; ``no optimizer'' here means no trajectory-fitting optimization, not an assertion that RefineLM performs no numerical refinement.
+
+The diagnostic holds each saved native model, trajectory and assumed intrinsics fixed. It changes only a conditional static camera's extrinsics, then freshly evaluates unchanged and conditional camera states over identical source-bound scopes. It asks whether this existing initialization procedure improves image agreement for the fixed inferred motion. It does not establish the historical camera or resolve model geometry, grip topology or physical timing.
+\section*{Preregistered Comparison Scope}
+\begin{center}\begin{tabular}{lrrr}\toprule
+Player & Retained Frames & Training Frames & Positive Correspondences\\\midrule
+Tiger Woods & 191 & 20 & 260\\
+Ben Hogan & 750 & 23 & 286\\\bottomrule
+\end{tabular}\end{center}
+There are two camera states per player, hence $2(191+750)=1,882$ native pose assessments. Positive correspondence counts refer to source-marker pairs entering camera initialization, not pose counts or two scalar coordinate rows. Neither missing observations nor new body landmarks were fabricated.
+
+The portable \texttt{results-data.json} contains exact scalar values, role arrays, scope lineage and external artifact pins. Tables here print twelve decimal places; machine data remains authoritative. This source was prepared before compilation; a separate root review receipt records compilation and page-layout inspection for the final edition.
+\newpage
+\section*{Source Scope and Reviewed Boundary}
+Tiger retains frame indices $0,\ldots,190$, expressed as the half-open interval $[0,191)$. The root's authenticated original-frame review chose a conservative cutoff before the uncertain release transition. This follows the user's instruction to match the interval with both hands on the club. It does not measure an exact physical release instant or certify every retained frame's contact state. Original frame identities and encoded presentation timestamps bind the choice to this capture.
+
+Tiger's retained training rows are $0,10,\ldots,190$. Hogan retains the unchanged interval $[0,750)$ and its original 23 training frames. The full historical assets remain intact. This read-only diagnostic restricts actual primary body and shaft evaluation; it does not retroactively change old full-capture fits or alter their original whole-capture provenance. Durable scope integration was implemented after this diagnostic, as described later in this edition.
+
+The original Tiger record with shaft evidence at frame 209 is excluded before term construction and evaluation. It is not evaluated with zero weight, converted into an abstention or counted as a passed constraint. The original point coordinates and role labels of retained evidence are unchanged.
+\section*{Clock and Image Identity}
+The boundary-review digest is:
+\begin{center}\digest{0d63f2635b3d5ec462c3a50ac4ee9475c0e7bbf5587ff4391de313ba2c2147a5}\end{center}
+Its source clock is exact encoded container PTS, with timebase $1/30000$. Tiger's retained first and last PTS are $450450/30000$ and $640640/30000$ seconds; the first excluded frame has PTS $641641/30000$. These are rational source-clock identities, not calibrated elapsed physical swing time. Historical playback scale, sensor readout and exposure remain unknown.
+
+Decoded image-byte identity and PNG-file identity are separate domains. Canonical capture/frame admission checks the original source PNG and complete clock rather than trusting a caller-created typed receipt as authentication. Parent and subset evidence retain both their canonical record digests and external raw JSON hashes.
+\section*{Scoped Versus Historical Denominators}
+Tiger's new 191-frame body RMS cannot be treated as the same statistic as an earlier 210-frame whole-capture RMS. Removing late frames changes the observation set and its weight sum. Historical values remain useful as lineage, not as a matched comparator. The only primary comparisons in this experiment are freshly recomputed unchanged versus conditional cameras using the same retained rows, weights and canonical metrics owner. Hogan's unchanged interval still requires the same-owner fresh comparison to avoid silently mixing different metric definitions.
+\newpage
+\section*{Public Conditional Camera Method}
+The existing public \texttt{initialize\_camera\_hypothesis} performs SQPNP followed by RefineLM. It receives fixed assumed camera intrinsics and world correspondences produced through the canonical native marker provider from saved poses. At least six nondegenerate positive-confidence correspondences are required. Missing and zero-weight records are excluded rather than filled; nonfinite values, inadequate geometry and invalid depth fail admission.
+
+For native world point $X$, the camera convention is
+\[
+ X_c=RX+t,\qquad C=-R^{\mathsf T}t,\qquad
+ \pi(X_c)=\left(f_xX_{c,x}/X_{c,z}+c_x,\;
+ f_yX_{c,y}/X_{c,z}+c_y\right).
+\]
+The reported camera center $C$ is conditional on the current native model-world coordinate system and scale. Its units and orientation must not be interpreted as measured historical camera placement. Intrinsics $K$ are held exactly fixed and are assumed, not inferred sensor calibration.
+
+Correspondences are selected source-major then marker-major. Tiger supplies 260 eligible pairs distributed 91/78/91 across early/middle/late training strata; Hogan supplies 286 distributed 104/91/91. The source thirds are predefined by original retained index domain. A single static camera is fitted per player; no per-third camera, grid search or best-stratum selection occurs.
+\section*{Unweighted Initialization and Weighted Diagnostics}
+The public camera initializer uses eligible correspondences without confidence weighting in its numerical objective. Canonical confidence $w_i>0$ selects inclusion, but does not become an SQPNP or RefineLM solver weight. The separately reported canonical body diagnostic uses a confidence-weighted point RMS:
+\[
+ \mathrm{RMS}_{\mathrm{body}}=
+ \sqrt{\frac{\sum_{i\in\mathcal I}w_i
+ \lVert\pi(RX_i+t)-u_i\rVert_2^2}{\sum_{i\in\mathcal I}w_i}}.
+\]
+The denominator is the sum of point weights, not twice that sum. Consequently this unweighted pose initialization is not guaranteed to reduce the weighted reported metric. The evaluation preserves the same positive rows and weight denominators between camera states. Body, shaft training, shaft seen evaluation and newly reviewed diagnostic-seen metrics remain distinct scientific quantities.
+
+Confidence and localization uncertainty are authored and uncalibrated. A small numerical difference is not an uncertainty interval or statistical significance claim. No uncertainty propagation, clinical ROM inference or physical-time calibration is provided by this experiment.
+\newpage
+\section*{Fresh Body Results}
+\begin{center}\small\begin{tabular}{llrr}\toprule
+Player & Scope & Unchanged RMS (px) & Conditional RMS (px)\\\midrule
+Tiger & Dense & 24.082673308003 & 24.780344535782 \\
+Tiger & Remaining Frames & 24.337344114034 & 25.026883245631 \\
+Hogan & Dense & 10.136350597234 & 10.090998303145 \\
+Hogan & Remaining Frames & 10.220486086558 & 10.174191400528 \\
+\bottomrule\end{tabular}\end{center}
+Tiger's scoped dense body RMS increases by approximately $0.698$ pixels. Hogan's dense body RMS decreases by approximately $0.045$ pixels. Neither change warrants adopting the conditional camera. Remaining-frame metrics exclude the body's original training frames; they do not constitute blinded or previously unseen validation.
+\section*{Predefined Temporal Strata}
+\begin{center}\small\begin{tabular}{llrrr}\toprule
+Player & Stratum & Frames & Unchanged RMS (px) & Conditional RMS (px)\\\midrule
+Tiger & Training & 20 & 21.776977995696 & 22.555950153154 \\
+Tiger & Early & 64 & 10.171545654888 & 10.964173082533 \\
+Tiger & Middle & 64 & 33.583957254638 & 34.060632789004 \\
+Tiger & Late & 63 & 23.596205022253 & 24.871763077240 \\
+Hogan & Training & 23 & 6.856656444159 & 6.853373110974 \\
+Hogan & Early & 250 & 9.334854849587 & 9.316152864703 \\
+Hogan & Middle & 250 & 10.968678503150 & 10.872076102688 \\
+Hogan & Late & 250 & 10.050913590970 & 10.038290983056 \\
+\bottomrule\end{tabular}\end{center}
+Tiger thirds contain 64/64/63 retained source frames; Hogan thirds contain 250 each. The training row shown in this table is separate from the thirds. No additional image points are introduced by temporal stratification. Every stratum retains its own confidence sum and positive-point count in the machine data.
+
+Tiger worsens in each displayed dense temporal third. Hogan's changes are small and vary by third. A static-camera solution conditioned on an imperfect inferred model and motion can absorb some image error without identifying its cause. These results do not separate camera movement, model attachment error, sparse landmark localization, blur, film or broadcast processing, nor original rolling shutter. Interpretation requires that distinction rather than selecting the lowest displayed scalar.
+\newpage
+\section*{Three Separate Shaft Buckets}
+The native authored shaft line is compared with visible interior image fragments. These fragment points are not identified grip-butt, shaft-tip or clubhead endpoints, nor measured physical shaft length. Raw perpendicular pixel RMS and angular discrepancies are diagnostics, separate from weighted body metrics and any shaft objective penalty.
+\begin{center}\small\begin{tabular}{llrrr}\toprule
+Player & Bucket & Observed & Unchanged RMS (px) & Conditional RMS (px)\\\midrule
+Tiger & V1 Training & 1 & 66.690822411580 & 66.122042369971 \\
+Tiger & V2 Seen & 1 & 145.903630709799 & 131.225378293373 \\
+Tiger & New Diagnostic Seen & 2 & 131.724609752306 & 142.236114285228 \\
+Hogan & V1 Training & 1 & 16.997736205167 & 16.415242382054 \\
+Hogan & V2 Seen & 2 & 23.037824755424 & 23.645817035911 \\
+Hogan & New Diagnostic Seen & 11 & 36.890373721668 & 36.384232280393 \\
+\bottomrule\end{tabular}\end{center}
+Tiger V1 training retains frame 0 and excludes frame 209. V2 seen evaluation retains frame 60's explicit abstention and frame 150's observation. The new diagnostic-seen Tiger cohort retains 21 reviewed records, with two observed fragments and 19 abstentions. Hogan retains V1 frame 0 abstention and frame 375 observation, V2 frame 200 and 550 observations, and 31 new diagnostic records with 11 observations and 20 abstentions.
+
+An abstention contributes no observed-segment RMS denominator and has null per-frame errors. It is not a perfect match. Hogan frame 375 occurs in multiple buckets with separately preserved authored records; the buckets are not pooled or double-counted into a combined score. Reviewers had already seen source frames and global model results, so these labels cannot be called untouched unseen evidence.
+
+Hogan's seen-evaluation shaft RMS increases from approximately $23.038$ to $23.646$ pixels despite the small dense body improvement. Tiger's seen shaft error decreases, while its new diagnostic-seen error increases and dense body agreement worsens. Mixed bucket outcomes argue against declaring a camera solution from a single preferred metric.
+\section*{Limits and No-Adoption Decision}
+Both conditional cameras remain diagnostic outputs only. Models, morphology, attachment axes, continuous right-hand closure and historical timing are not qualified by this comparison. The club is driven through an authored left-wrist universal attachment with continuous right-hand closure in the historical model; the user's late-release instruction makes scope control essential. No new contact topology, coupled clinical ROM or rolling-shutter compensation was introduced. Independent serialized preservation is accepted; historical reconstruction acceptance remains unproven.
+\newpage
+\section*{Repeatability and Release Lineage}
+The closed producer is:
+\begin{center}\digest{55d17cfedf2e72e1a3c5a99c0f24ec1fa6f993cf}\end{center}
+The reviewed released configuration and freeze have SHA256 digests:
+\begin{center}
+\digest{ad1c1486880c426377c0cc203d27503fdc8f9359f4ee57fd6a2d4c8bc4827ff2}\\
+\digest{26becba9a03534d443bc194c22289e73d4e8bb720b3feb23117e5e5bf6b68bb8}
+\end{center}
+Root release and actual finally-preservation digests are:
+\begin{center}
+\digest{02671ad6ad3e6c5eb0cd87c096f2e48452a8623cc2b5fb55cdacb87ee61fd8f7}\\
+\digest{98d6cba317c227573d0439e40d995986680ab579a0ffa049e354ae19750f02ec}
+\end{center}
+Complete source, library, project, runtime and helper/config facets are captured before and after. Complete expected source/library/project maps are compared before SDK import; the worker imports MuJoCo before workspace-dependent native interfaces. Checked helper buffers authenticate transitive imports and reject foreign module caches. SDK import failure is cached without retry. Preservation retains primary failures and collects remaining facets; success requires zero library delta. The frozen SDK-free preparation has 42 green tests, Ruff and mypy checks, plus retained earlier failure logs.
+
+The independently preserved scope contains 14,805 canonical tracked files and 391 library files; four Gitlink directories are not counted as tracked file bytes. These counts do not replace full-map identity. Root reran 17 SDK-free checker tests and accepted the completed check. Its root acceptance SHA256 is \digest{852d579c442bda76793ad959beda6e172e49df6b254e46f8e986b1acc8890d5f}. Exact machine manifests carry paths, byte sizes and hashes; command details are copied verbatim in \texttt{REPLAY.md}. Use the known Python 3.13 executable with \texttt{-X utf8}, repository/src/shared-python import paths and one-thread BLAS environment. Do not rerun the exclusive completed output directory or treat archived authorization as permission for a new invocation.
+\section*{Implemented Durable Scope}
+The durable \texttt{SourceFitScope} now binds capture/hash/complete-clock identity, reviewed first and excluded frame identities, half-open bounds and authored uncertainty. Native and web consumers import the exact immutable raw review through a common owner. Queue admission, worker compilation, publication, recall and overlays freshly rebind it. Descendants inherit or narrow the window; excluded body, shaft and contact rows reject rather than silently vanish. Root implementation validation passed 294 Python and 39 interface cases; a separate 13-case upload check verifies registration stays off the event loop. These checks do not qualify historical reconstruction.
+
+\newpage
+\section*{Restricted Trial: Initialization and Failure}
+The trial producer is:\begin{center}\digest{6695085027bdf4f354d867136930931591002d80}\end{center}Tiger uses 20 training indices $0,10,\ldots,190$, six Hermite knots and the unchanged saved camera/model. The final unpinned contact phase ends at frame 190; existing review anchors at 105 and 120 remain in domain. Shaft training retains frame 0 and explicitly excludes frame 209. No exact physical hand-contact measurement was introduced.
+
+\subsection*{Strict Admission Before Authored Initialization}
+Sampling the original longer spline onto the shorter knot domain failed the public Bernstein control-bound check: physical velocity violated its bounds. This preserved failure motivated a separate author-initialization operation. It was not accepted as an exact strict restart, and no optimizer or Library writes occurred during that feasibility probe.
+
+The public authored policy sets 198 knot velocities to zero while preserving every knot position. Native preflight authenticated the exact selected source domain and unchanged complete source/Library maps. Its training body RMS is $31.8610147$ px and maximum scaled geometric constraint residual is $656.3979098$. Thus admissible initialization does not establish geometric feasibility. The resulting coefficient SHA256 is:
+\begin{center}\digest{039799006ed95b3530999434a86ae221f5cb460bd94c462979390f1dc8da5174}\end{center}
+
+\subsection*{Actual Two-Stage Outcome}
+The author stage saved \texttt{tiger-both-hands-authored-seed-v21}; its worker elapsed time was $59.480674$ s, with no optimizer invocation. The strict fitting stage then restarted from that exact new seed with preserved-spline initialization. The evaluation cap remained 120 and the worker wall cap remained 300 s. This stage exceeded the wall cap. Root observed process session 32543 close with exit 1; no final fit, final candidate or completion receipt was published.
+
+Solver evaluation counts and solver elapsed time are null because the killed child did not deliver its terminal receipt. Neither zero iterations nor 300 seconds of solver work may be inferred. The saved seed is an unoptimized research artifact, not a successful fitted match. Its immutable asset SHA256 is:
+\begin{center}\digest{a8c62a72cd313e552fe3ee78e7869b1b3d694c07f559470738d819693f9d6e52}\end{center}
+
+\newpage
+\section*{Partial Publication and Repeatability}
+Before execution, full maps captured 14,825 canonical tracked source files and 391 Library files. The failed-run preservation receipt retained all original non-index Library bytes and original index records. Exactly ten allowlisted files were added: two assets, four successful-author-run files and four failed-strict-run files. Index metadata changed only through the permitted publication path; no active run remains. Full-map comparison governs acceptance, not file-count equality.
+
+\begin{center}\small
+Released Configuration\\
+\digest{e916e9cf423b06fd60fd94b3cfa7b604ee75a2819f986aaa88e66eebb49d1948}\\[5pt]
+Released Freeze\\
+\digest{32b2d35598850909e42c0c90c2dffca1ecb4ecf143ff75d3cd85c3bcec28f7d0}\\[5pt]
+Closed-Process Proof\\
+\digest{f6c0f971ad60444d9d6d656f6b6ce3b19d48146aa0cd819412780f027dbaaa41}\\[5pt]
+Finally Preservation\\
+\digest{ed77ca0b8e0c80a16fe258c4337cd5243ebed297832693a0f2267b7d2390d90b}\\[5pt]
+Durable Journal\\
+\digest{58e7f4328acb851f83a9d610523b72b79dea1ac44dda73689f869611226f13ff}\\[5pt]
+\end{center}
+
+The root partial acceptance checks observed exit status, frozen pre-execution maps, original asset bytes, exact added-file identities and absence of a final artifact. Independent SDK-free canonical-stage and seed-provenance checking has passed, verifying serialized records and preservation without native recomputation. The separately frozen successful-writer checker and final-fit rendering proposal remain ineligible; a failed run must not be converted into a successful receipt by weakening their criteria.
+
+\subsection*{Historical Profile V2 Measurement Plan}
+At the partial-trial checkpoint, the following measurement was prospective.
+Profiles V2 and V3 subsequently completed; their distinct actual evidence is
+reported in the following sections.
+
+Capture fresh complete baselines, then profile public native binding, source authentication, exact strict seed initialization and canonical metrics without optimization or writes. Compare parent and seed on the identical 191-frame dense and 20-frame training domains, with separate shaft buckets. Measured stage costs must guide any efficiency change before a retry or budget change. Preservation and identity checks remain required.
+
+Interim overlays must explicitly state that the artifact is an unoptimized authored research seed. Retain original imagery, model shapes, skeletons, variable opacity and source-clock identity. Fresh pilot review precedes selected stills or full-video export; neither a rendered shape nor low image error establishes anatomical, camera, shutter, ROM or dynamics validity. No new ControlTower transfer is claimed. The Tiger/Hogan Necromatcher goal remains active.
+\newpage
+\section*{Profile V2: Measured Setup and Matched-Domain Results}
+The read-only profile completed five public stages at the following producer:
+\begin{center}\digest{0143b39f571cbe67c57091fb2ae19e7d7eadae3b}\end{center} Root observed session 70262 close with exit 0. Complete before/after source, Library, project, runtime and input facets agree. There were no optimizer calls or Library writes. The failed V1 adapter and four raw profiles remain preserved; V2 uses exact public-camera JSON serialization and checkpoints each stage atomically.
+
+\begin{center}\small\begin{tabular}{lr}\toprule
+Measured Stage & Elapsed Time (s)\\\midrule
+Parent Binding & 0.964918\\
+Parent Body and Shaft Metrics & 2.148624\\
+Seed Binding and Shaft Admission & 19.146040\\
+Seed Body and Shaft Metrics & 2.134822\\
+Strict Seed Public Initializer & 0.571843\\
+\bottomrule\end{tabular}\end{center}
+Timings include cProfile overhead and describe this invocation; they are not isolated performance benchmarks or a decomposition of the failed worker's 300-second budget. Seed binding spends approximately 16.30 s in two scope-payload validations, including approximately 15.57 s in two capture-identity checks. This identifies repeated authentication as an efficiency target, not the established cause of the optimizer timeout. Fresh original PNG/BGR/clock and receipt/capture-hash checks must remain fail-closed in any reuse design; a global cache is not justified.
+
+\begin{center}\small\begin{tabular}{lrr}\toprule
+Canonical Body Metric & Parent (px) & Authored Seed (px)\\\midrule
+Dense: 191 Frames & 24.082673 & 35.102046\\
+Training: 20 Frames & 21.776978 & 31.861015\\
+Remaining Frames & 24.337344 & 35.460732\\
+\bottomrule\end{tabular}\end{center}
+The comparison uses identical source indices, observations, confidence weights, saved camera and model. The seed worsens dense body agreement by approximately 11.02 px. Remaining-frame diagnostics are not blinded unseen validation. Strict public initialization preserves the exact saved seed spline, performs no reauthoring or optimization, and retains a maximum scaled geometric residual of 656.398. This normalized residual cannot be converted into a physical distance without its individual row semantics. No new qualified match exists.
+
+\newpage
+\section*{Source-Bound Seed Preview: Address and Late Swing}
+The figure labels report display marker RMS: for the $N$ drawable matched marker identities in that single frame, the public video renderer computes $\sqrt{N^{-1}\sum_{i=1}^{N}\lVert\mathbf{p}^{\mathrm{model}}_i-\mathbf{p}^{\mathrm{observed}}_i\rVert_2^2}$ without confidence weighting. This is separate from the confidence-weighted 191-frame body diagnostic and from the optimizer objective, which also includes configured priors and geometric or shaft terms. A display value is not a trajectory objective or a qualification score.
+
+Three original-sized 1280-by-720 PNGs were exported through the public stills owner at the same producer. Root observed session 22892 close with exit 0 and visually reviewed all three. Complete source/Library/runtime/input facets remain unchanged. The shape layer uses opacity 0.35, retains the skeleton, and explicitly labels this unoptimized authored research seed. Model surfaces and the cyan infinite shaft axis are authored proxies, not measured physical anatomy or shaft endpoints. Frame150 exposes conspicuous wrist/arm and neck mismatch. These figures support inspection rather than reconstruction acceptance.
+
+\begin{center}\includegraphics[width=0.65\linewidth]{\detokenize{C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000000.png}}\\[3pt]
+{\small Frame 0: Unoptimized Seed; Display Marker RMS 6.45 px}\end{center}
+\begin{center}\includegraphics[width=0.65\linewidth]{\detokenize{C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000150.png}}\\[3pt]
+{\small Frame 150: Unoptimized Seed; Display Marker RMS 44.14 px}\end{center}
+\newpage
+\section*{Conservative Final Retained Frame}
+Frame190 is the last frame of the authored two-hand window. The exact physical hand-release instant remains unmeasured; the uncertain transition from frame191 and later one-handed follow-through are excluded from this fitted domain. The retained contact schedule and source-bound provenance do not certify hand contact in every image.
+
+\begin{center}\includegraphics[width=0.88\linewidth]{\detokenize{C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000190.png}}\\[3pt]
+{\small Frame 190: Unoptimized Seed; Display Marker RMS 18.27 px}\end{center}
+\subsection*{Verification Limits and Next Work}
+Independent SDK-free serialized profile and source-image/geometry-provenance reviews have completed with exit 0 (sessions 74182 and 43117). The checks preserve all 14,826 source and 401 Library files and verify three original and three overlay PNGs, original encoded PNG/decoded BGR identities, rational PTS records, caption semantics and saved geometry provenance. Root visually reviewed all three previews. These reviews do not rerender native projections or independently reconstruct the original container clock. The respective profile and stills receipt SHA256 values are:
+\begin{center}\digest{104a935990ec4a25a005153f0d1524037a08b0d638e0ac43e9855bb7a0aa0bdd}\par\smallskip\digest{dd779807794509a8d2c10912e4cc1d3b74a611015b0708efae51f50920d98217}\end{center} Complete pixel parity outside the union of all model/skeleton/residual supports cannot be asserted from these artifacts because native surface/depth/support masks were not saved. No such claim is made.
+
+\newpage
+\section*{Bounded Authentication Before Side Effects}
+Published integration producer
+\digest{f2dfe7d450e3aa8b0c446245f2f6047858ce61bb}
+adds short, operation-owned capture authentication contexts to the existing
+canonical refit pathway. The first read of a capture in each context performs
+the full original PNG, decoded BGR and source-clock validation. Subsequent reads
+reuse the detached immutable identity only after fresh complete archive hashes,
+registered metadata and path checks. Successful close repeats fresh complete archive-hash and registered-metadata/path
+checks; it does not repeat PNG decoding for an unchanged capture within the
+context. Full PNG/BGR/clock validation belongs to the first identity fill. This
+is not a stat-only cache or a transferable admission token.
+
+Queue admission closes before scheduling or request publication. Worker setup
+closes before initialization or fitting; a separate fresh output context closes
+before result delivery. Candidate and delayed-publication checks use fresh
+contexts. The delayed callback closes its context before calling storage;
+storage then opens its own validation context inside the existing write lock,
+closing before copying the fit or updating the project. These boundaries keep
+the context outside the optimizer and prevent a failed closing check from
+publishing a candidate or asset. Existing model, fit, receipt and native
+validation remains authoritative; no numerical objective, prior, bounds,
+constraint schedule or accepted-state rule changes.
+
+The owner rejects nested contexts and reuse across libraries, threads or
+asynchronous tasks. A read failure poisons that context even if caught by its
+caller; cleanup clears retained identities and preserves the primary exception
+when close also fails. Capture identities contain detached frozen scalar
+records and copied immutable containers. Public SHA256 validation is reused;
+execution fingerprints include its source owner.
+
+Root validation passed 188 distinct cases: 185 SDK-free cases and three native
+cases using temporary fixtures. The SDK-free lane excluded those three native
+cases; one Windows symlink-privilege case skipped and nine inherited import
+warnings remain. Tests cover close-time same-stat mutation, no side effect on
+failed admission, fresh stage boundaries, legacy behavior and source integrity.
+The root acceptance receipt digest is:
+\begin{center}
+\digest{13710191499ca3c558f5a554fba92e5f69aa908a8216312d711d9dc1f1b55e1d}
+\end{center}
+These are functional software checks, not historical performance measurements.
+
+\subsection*{Measured Profile V3 and Invocation Limits}
+Root observed the read-only Profile V3 session 27587 close with exit zero at
+published integration producer f2dfe. Complete maps of 14,835 source and 401
+Library files, project, runtime and configuration were preserved. The saved
+assessment is byte-identical to Profile V2; no optimization, candidate
+registration or Library write occurred.
+\begin{center}\small\begin{tabular}{lrr}\toprule
+Public Stage & Seconds & PNG Decodes\\\midrule
+Parent Binding & 0.672506 & 0\\
+Parent Body/Shaft Metrics & 1.464802 & 0\\
+Seed Binding and Shaft Admission & 9.053819 & 210\\
+Seed Body/Shaft Metrics & 1.511551 & 0\\
+Strict Seed Initializer & 0.460402 & 0\\\bottomrule
+\end{tabular}\end{center}
+\newpage
+All 210 PNG decode calls belong to one canonical full capture authentication
+in the seed-binding stage. Closing that context repeats full archive-hash and
+registered-metadata/path checks without another unchanged-capture decode.
+Pstats counts and the five top-twenty function records were independently
+checked against the preserved stage receipts.
+
+The earlier Profile V2 seed-binding invocation took 19.146040 seconds. Profile
+V3 includes context-close, counting and timing instrumentation; invocation and
+hardware conditions differ. These observations do not establish isolated
+production or optimizer speedup, explain the failed worker's 300-second budget,
+or authorize a strict-fit retry. No missing solver telemetry is reconstructed.
+The exact root acceptance and unchanged assessment digests are:
+\begin{center}
+\digest{b8469dc86d8aa72e1be2499786a107c847dd2e11d32f20567aa1effb1947a8e4}\par\smallskip
+\digest{e1d87d9814c4420f9cb8fd3f5253792a6c35a14e97a3b2b4f66fa2df73345f5b}
+\end{center}
+The closing preservation receipt digest is
+\begin{center}\digest{f245953430934187ba054b5feb5f54c89c1c33b78c37b801a37baf9b5872db58}\end{center}
+These receipts are in the preserved Profile V3 Desktop folder and its root
+release directory under Repositories/Temp; serialized checks do not constitute
+new native projection or scientific qualification.
+
+\section*{Footage Provenance and Dimension Evidence}
+Tiger's actual bound source is the USGA broadcast with video identifier
+\texttt{bado2QdgD3c}, whose title identifies the 2000 U.S. Open final round.
+USGA event records support the 2000 Pebble Beach championship context.
+\footnote{USGA broadcast: \url{https://www.youtube.com/watch?v=bado2QdgD3c}.
+Official event records: \url{https://www.usga.org/content/usga/home-page/media/online-media-center/usga-records/u-s--open-results--1895-to-present.html}.}
+That supports broadcast/event provenance, not the precise range-camera
+acquisition date or physical playback scale. The requested compilation
+\texttt{t\_J6Vik3Tss} is a different source; its uploader's year claim does not
+inherit the official broadcast lineage.
+\footnote{Requested compilation: \url{https://www.youtube.com/watch?v=t_J6Vik3Tss}.}
+The catalog records year 2000 while the immutable capture receipt retains a
+null recording year. Neither record is silently rewritten or promoted.
+
+In a dated 5 January 2000 press conference, Tiger reported a then-current body
+mass of 180 lb.
+\footnote{Contemporaneous transcript, Mercedes Championships, Kapalua:
+\url{https://www.asapsports.com/show_interview.php?id=15961}.}
+This is first-person era-specific evidence, not a calibrated weigh-in matching
+the captured range sequence. It may motivate a declared weak morphology prior;
+no mass, stature or segment proportion is adopted here, and no uncertainty
+precision is invented. Other listed stature values differ. Generic model
+inputs remain authored assumptions rather than measured player anatomy.
+
+Hogan's exact owner-provided MP4 has no established original publisher, capture
+date or tape identity; its receipt year and physical clock remain unknown.
+Similar filenames or web compilations do not authenticate these bytes. Listed
+retrospective body dimensions do not establish anatomy for this unknown-era
+capture. Neither source establishes clinical joint limits, individual coupled
+ROM, segment inertias, lens calibration, sensor readout or exposure processing.
+
+\newpage
+\subsection*{Retained Scope and Scientific Limits}
+Tiger matching remains the conservative source-bound interval $[0,191)$;
+physical hand-release timing and every-frame contact certainty are unmeasured.
+Hogan's scope remains unchanged. The accepted historical seed previews at
+frames 0, 150 and 190 retain their original producer and verification receipts:
+opacity 0.35 proxy shapes, skeleton and the explicit unoptimized authored-seed
+caption. Their unweighted display-marker RMS values of approximately
+6.45/44.14/18.27 px are distinct from confidence-weighted dense body RMS of
+35.102046 px for the seed versus 24.082673 px for its parent on the same
+191-frame domain. The parent is not replaced.
+
+The earlier three selected stills were visually reviewed, not all retained
+frames. Serialized source/image checks do not independently rerender native
+projection or prove pixel parity outside every overlay support. Rolling
+shutter, physical timing, anatomy, coupled clinical ROM and dynamics remain
+unqualified; no qualification flag is promoted. No new full video or
+ControlTower delivery is implied. Preserve the exact V4 source, PDF and page
+review as the preceding accepted edition.
+
+\section*{Source-Clock Restriction: Pure Algebraic Evidence}
+A separate public-owner check restricts the saved parent motion spline to the
+last retained frame190 source PTS $8008/375$. It retains the first five knots
+and evaluates the canonical position and velocity for the final knot. Over
+191 source times plus 190 midpoints, maximum absolute $q$, $v$ and $a$
+differences are $8.88\times10^{-16}$, $1.39\times10^{-15}$ and
+$6.49\times10^{-15}$ in their respective coordinate/derivative units.
+Canonical Bernstein bound encoding succeeds; manual versus public coefficients
+differ by up to $4.44\times10^{-16}$, so the public coefficients and their
+identity must be authoritative.
+\begin{center}\digest{17ddcd74c27276a376174c202500baa10e389d09b97ca27c3c42e9d1e4b778b5}\end{center}
+This source-clock algebra is not native contact feasibility, freshly evaluated
+pixel agreement, physical-time calibration, an admitted seed or an optimized
+result. Issue \#11450's pure-code slice is underway and is not integrated into
+the historical fitting pathway at this checkpoint. Any future restriction
+requires truthful parent/model/order/clock/coefficient lineage and separately
+released native feasibility before storage or optimization.
+
+\newpage
+\section*{Lossless Restriction: Closed Native Evaluation}
+This later checkpoint evaluates the losslessly restricted saved parent, rather
+than the authored zero-slope V21 seed. Root observed native session 50689 close
+with exit zero at published producer
+\begin{center}\digest{81aa448794a0ce763cdc2dd6e503d3f9b42200e9}\end{center}
+Root accepted the serialized closure and exact full-byte preservation checks.
+The complete 14,837-source-file and 401-Library-file maps, project, runtime,
+configuration and helpers agree before and after with the fresh published
+baseline. No Library asset was written or registered and no motion optimizer
+ran. The strict public initializer reports preserved-spline evaluation,
+convergence false and null telemetry; missing solver counts or durations are
+not inferred from the completed process.
+
+The typed restriction receipt equals the independent pure check. Across the
+191 source times and 190 midpoints, maximum absolute $q$, $v$ and $a$
+differences remain $8.88\times10^{-16}$, $1.39\times10^{-15}$ and
+$6.49\times10^{-15}$, respectively. Public Bernstein encoding retains the
+396-variable coefficient identity. This is source-clock motion preservation,
+not a physical-time or contact certificate. The earlier pure-only section
+records its historical checkpoint; this subsequent native evaluation does not
+retroactively change that receipt or the V21 trial.
+
+\begin{center}\begin{tabular}{lrr}\toprule
+Confidence-Weighted Body Metric & Saved Parent (px) & Restricted Parent (px)\\\midrule
+Dense: 191 Frames & 24.082673308003 & 24.082673308003\\
+Remaining Frames & 24.337344114034 & 24.337344114034\\
+Training Frames & 21.776977995696 & 21.776977995696\\\bottomrule
+\end{tabular}\end{center}
+All three serialized body metrics are exactly equal, not merely equal at the
+printed precision. Remaining-frame evaluation is not blind unseen validation.
+The fixed native model, assumed camera and source observations remain
+unchanged. Equality preserves the existing image agreement; it does not
+improve it or establish measured historical anatomy.
+
+The restriction coefficient SHA256 is
+\begin{center}\digest{6a66a358db1797906a5b6a6e1ea9a6476608a3ccfebd623be8b1cac3d994a2d5}\end{center}
+The accepted raw native result and final preservation digests are
+\begin{center}
+\digest{79ea0e959d96683b42b549b628ada0b60253b875ac66d49b1f97471270947629}\par\smallskip
+\digest{4c48ade0860ffe305cf0890be50b4dedb77d9507b94c25e3daf362ee70e2ab53}
+\end{center}
+They reside in the preserved Desktop folder
+\texttt{Tiger Lossless Restriction Native Feasibility V2}. The root closure
+receipt, under the preparation V2 root-release directory, has digest
+\begin{center}\digest{ce833a420c5e208b82bc430fe4be4c4c16830aee54d9c8c357bdb1af9e775e9c}\end{center}
+
+\newpage
+\section*{Native Constraints and Qualification Limits}
+The native initializer records all 176 time nodes and all twelve scaled
+constraint rows. Its largest absolute scaled residual is
+$17.023155533359613$, at \texttt{ground:heel\_l} and encoded source time
+$18.501816666666667$. This is a dimensionless scaled row value, not a grip
+distance in metres, clinical ROM error or physical ground penetration without
+its row-specific scaling. The full matrix and row labels remain in the raw
+result. The contact binding explicitly reports no continuous certificate;
+normal-height constraints are hypotheses and tangential no-slip is not
+enforced.
+
+These native geometry nodes differ from the earlier V21 evaluation schedule.
+Do not compare the maximum here against its 656.398 scaled maximum as if the
+node sets and certificates were identical. Lossless $q/v/a$ preservation does
+not make an infeasible constraint schedule feasible, and this computation does
+not certify continuous contact or exact physical hand attachment.
+
+\begin{center}\begin{tabular}{lr}\toprule
+Retained Raw Shaft Training Diagnostic & Value\\\midrule
+Observed Source Frame & 0\\
+Perpendicular RMS (px) & 66.690822411580\\
+Axis Angular Error (deg) & 28.301292322831\\\bottomrule
+\end{tabular}\end{center}
+The retained training fragment remains mismatched. Its unweighted raw shaft
+units and authored uncertainty are separate from confidence-weighted body RMS,
+scaled geometry rows and the historical display-marker values in the three
+seed figures. Excluded frame209 does not re-enter training or evaluation.
+No new overlay was rendered and overlay pixel parity was not evaluated in this
+checkpoint; the three figures remain the earlier unoptimized V21 seed previews.
+
+Native evaluation completed computationally, while convergence, scientific
+qualification and physical-time qualification remain false. The restricted
+parent is not an adopted seed, registered model or improved fit. Neither a new
+strict retry nor a ControlTower transfer is implied. The separate next backend
+mode implementation is still underway; this receipt is not evidence of its
+integration or acceptance. Tiger retains $[0,191)$ and Hogan is unchanged.
+Preserve Methods V5 and its fourteen-page review as the preceding accepted
+edition. The Tiger/Hogan Necromatcher goal remains active.
+
+\newpage
+\section*{Reusable Lossless Restriction Workflow}
+This subsequent software checkpoint integrates an explicit, reusable backend
+path for restricting a preserved Hermite curve to an authenticated source
+window. The preceding sections retain their status at the time they were
+written; their earlier historical V21 figures and results are unchanged.
+The completed test below concerns a synthetic fixture, not a new historical
+Tiger seed or an optimized match.
+
+The public pure operation \texttt{restrict\_image\_spline\_interval(start, lower,
+upper)} retains interior knots and their position/velocity coefficients. Cut
+endpoints are evaluated and packed through the canonical public trajectory
+provider. Its immutable \texttt{SplineIntervalRestriction} receipt records
+both exact six-field spline identities: model hash, coordinate order, free
+order, knot times, coefficients and coefficient digest. This algebraic receipt
+alone is not capture authentication or a physical-time certificate. $q$ and $v$
+are continuous; acceleration at an existing-knot upper cut follows the retained
+left segment, not a claim of $C^2$ continuity.
+
+\begin{center}\begin{tabular}{p{0.21\linewidth}p{0.71\linewidth}}\toprule
+Public Boundary & Required Admission and Postcondition\\\midrule
+Source and Scope & Canonical parent bytes, registered review receipt, complete capture clock
+and exact source identities; selected first/last span the reviewed half-open window.\\
+Queue & Explicit \texttt{restrict\_initialization}/\texttt{restricted\_spline};
+strict policy, exact retained knot count, receipt and selected-first parent prior
+enter the immutable request and its hash.\\
+Clean Worker & SDK-first model/order/free/units binding, canonical rederivation before
+compilation, exact restricted start passed to the public initializer; no optimizer
+or authored projection.\\
+Publication and Recall & Fresh bounded authentication before writes, exact request/candidate
+comparison, canonical stored parent hash and receipt rederivation; scope, source
+poses and recipe persist without widening.\\\bottomrule
+\end{tabular}\end{center}
+
+Public Bernstein-domain encoding checks both free coefficients and constant
+locked reference values against declared bounds. The ordinary
+\texttt{preserved\_spline} short-interval rejection remains unchanged. This is a
+separate explicit mode, not a silent resampling fallback. Its prior policy is
+\texttt{selected\_\allowbreak first\_\allowbreak parent\_\allowbreak pose}; later starting windows use the saved parent
+pose at their first selected frame, rather than assuming frame zero.
+
+Read contexts close before scheduling, native initialization or storage writes;
+fresh groups cover worker preparation, output authentication and publication.
+The stored result retains the blocker
+\texttt{spline\_\allowbreak interval\_\allowbreak restriction\_\allowbreak only}. No optimizer counts, convergence,
+range projection or scientific qualification are invented. Caption-consumer
+software is a separate pending checkpoint here; this section does not claim a
+new historical restriction caption, seed registration or rendered overlay.
+
+\newpage
+\begingroup\small
+\section*{Synthetic Native End-to-End Evidence}
+Root observed actual fixture process 4534 close with exit code zero, followed by
+SDK-free independent process 97412 closing with exit code zero. The released
+producer is
+\begin{center}\digest{5197f8639818321b7cf8f86d4748a25ce79aa278}\end{center}
+The public queue, clean worker, storage and reopened recall were exercised in
+an exclusive temporary fixture Library. The real historical Library was never
+passed to fixture matching. Complete 14,844-source-file and 401-historical-file
+maps, project and stable runtime identities remained unchanged.
+
+Seven authored synthetic source frames have rational PTS $i/10$, $i=0,\ldots,6$.
+The registered scope is $[1,6)$; training uses $(1,2,3,5)$ and dense output uses
+$1,\ldots,5$. The parent knots are $(0,.17,.31,.52,.6)$; the child retains the
+nonuniform knots $(.1,.17,.31,.5)$. One of 44 native coordinates is free;
+all 43 locked coordinates retain their references. Nonzero retained and endpoint
+velocities are preserved. These are authored synthetic presentation records,
+not measured physical seconds, anatomy or a historical contact assessment.
+
+\begin{center}\begin{tabular}{lr}\toprule
+Independent Serialized or Pure Check & Value\\\midrule
+Training Body RMS (px) & 4.79766778352853\\
+Dense Body RMS (px) & 4.795600130676517\\
+Maximum Pure $q$ Difference & $3.47\times10^{-18}$\\
+Maximum Pure $v$ Difference & $2.78\times10^{-17}$\\
+Maximum Pure $a$ Difference & $1.78\times10^{-15}$\\
+Computational Status / Acceptance & Succeeded / Rejected\\
+Optimizer / Convergence & False / False\\
+Solver \texttt{nfev}/\texttt{njev} & Null / Null\\\bottomrule
+\end{tabular}\end{center}
+
+The actual native fixture freshly checked confidence-weighted Euclidean body
+RMS through public projection providers; its denominator is the sum of point
+weights, not twice that sum. The independent review verifies saved/result
+metric parity and pure Hermite $q/v/a$ at five source times and four midpoints;
+it does not independently rerun native projection. These cuts lie inside parent
+segments. The selected-first prior at frame 1 is persisted correctly, but its
+free-coordinate soft cost is not independently observable from an unoptimized
+exact-start output. Recorded worker duration is scoped telemetry, not complete
+process wall time or evidence of optimizer iterations.
+
+Two queue counterexamples (wrong knot count and selected domain) created no
+files. Three distinct stored specimens (changed prior, receipt or model hash)
+were rejected. No accepted fixture asset was overwritten. The exact owned run is
+\begin{center}\digest{f32866fdca3949fd9cfb766eb682027b}\end{center}
+Root closure and independent serialized review digests, respectively, are
+\begin{center}
+\digest{a26073a9c7bef6c8d5f2dd12b249c8e5f848be49c9fb0ba63d0a5c98f011d9bc}\par\smallskip
+\digest{6ebc2b607b35b4d0611594bd1df7443358117510711fde1601f084f78f5c8f4d}
+\end{center}
+The exact results, finally maps, source/config/helper pins and independent
+checker are preserved under the released synthetic-proof and independent-review
+folders. This backend acceptance does not certify physical timing, continuous
+constraints, clinical ROM, dynamics or improved historical image agreement.
+Tiger matching still excludes frames 191 onward; no new historical fit, camera,
+role adoption or ControlTower delivery is claimed.
+\endgroup
+
+\newpage
+\section*{Historical Public Restriction and Registration}
+This subsequent historical checkpoint follows the preceding synthetic workflow
+evidence. At published producer
+\begin{center}\digest{263b478989d96e395a061cf34c23b1a791b81087}\end{center}
+the public restriction operation registered
+\texttt{tiger-both-hands-lossless-restricted-seed-v22} from the saved V20 parent.
+The reviewed half-open source window remains $[0,191)$: frames 191 onward are
+excluded, exact physical hand release is unmeasured, and Hogan is unchanged.
+Writer process 20172 and independent audit process 91154 both closed with exit
+code zero. Registration is computational success, while the stored result
+remains an unoptimized, nonconverged, rejected research seed.
+
+\begin{center}\begin{tabular}{lr}\toprule
+Saved Domain and Independent Pure Check & Value\\\midrule
+Dense Source Poses / Training Frames & 191 / 20\\
+Nonuniform Knots & 6\\
+Free / Full / Locked Coordinates & 33 / 44 / 11\\
+Source and Midpoint Comparison Times & 381\\
+Maximum Pure $q$ Difference & $8.88\times10^{-16}$\\
+Maximum Pure $v$ Difference & $1.39\times10^{-15}$\\
+Maximum Pure $a$ Difference & $6.49\times10^{-15}$\\
+Training Body RMS (px) & 21.776977995696026\\
+Dense Body RMS (px) & 24.082673308003265\\
+Optimizer / Convergence & False / False\\
+Solver \texttt{nfev}/\texttt{njev} & Null / Null\\\bottomrule
+\end{tabular}\end{center}
+
+The two confidence-weighted body metrics exactly equal the parent on this same
+restricted domain. They are not an improvement attributable to restriction.
+The independent review compares serialized native results and pure Hermite
+motion; it does not independently repeat native body projections. Neither
+curve preservation nor unchanged body RMS establishes hand attachment,
+anatomical validity, rolling-shutter calibration, physical time or clinical ROM.
+
+\begin{center}\begin{tabular}{p{0.29\linewidth}p{0.63\linewidth}}\toprule
+Evidence Boundary & Recorded Scope\\\midrule
+Sampled Native Constraints & Finite 176-by-12 scaled matrix; maximum dimensionless
+residual 17.023155533359613. Continuous certification remains false.\\
+Source Preservation & Fresh complete 14,846-file source map matches the writer's
+after-state; runtime and project facets are independently checked.\\
+Library Ownership & 406-file after-state; 401 original files preserved except
+the allowed project-index addition, exactly five owned new files, active fit
+identity unchanged.\\
+Scientific Status & Unoptimized restriction only; rejected research, no parent
+replacement, improved fit, optimizer retry or ControlTower delivery.\\\bottomrule
+\end{tabular}\end{center}
+
+\newpage
+\begingroup\small
+\section*{Historical Restriction Evidence Ledger}
+Root acceptance is the 1,584-byte record \texttt{root-acceptance.json}
+in the following folder under \texttt{Temp/}:
+\begin{center}
+\texttt{tiger-lossless-restricted-seed-independent-actual-v1/}
+\end{center}
+Its digest is
+\begin{center}
+\digest{21bf25fc7184105af787d3b1c60cd5d085f13518309104e6e9fd1cc80aa5a87b}
+\end{center}
+The 62,956-byte serialized assessment and 4,818,584-byte independent finally
+record have these respective digests:
+\begin{center}
+\digest{06d0c840015977543093bf98b530bfc1a390eab01faa0d7d73c21fae6fe78cb3}\par\smallskip
+\digest{29b022763dcccdabc6fdfed296f2d0b1233d072e16fca8fcfa366a4b5889292f}
+\end{center}
+The owned run identity is
+\begin{center}\digest{0d81c91f50ab49ecb6ce5fd279ccb441}\end{center}
+These byte identities bind the particular result and preservation records;
+they are distinct from decoded-frame identity, native model definition, source
+clock and spline coefficient hashes. The public payload owner authenticates
+the parent, receipt, selected-first prior and reviewed scope before publication
+and again on recall. The caption composer consumes that freshly authenticated
+record; it does not independently rederive the restriction receipt.
+
+Selected original source frames 0, 150 and 190 were exported and root-reviewed
+at full 1280-by-720 resolution after stills process 78009 closed with exit code
+zero. The model-proxy opacity is 0.35; the retained skeleton and explicit
+\texttt{UNOPTIMIZED RESTRICTED RESEARCH SEED} caption remain visible. Original,
+overlay and stored-fit source identities and rational presentation timestamps
+agree. The complete source, Library, project and runtime facets match the
+preceding seed-audit after-state without mutation. This is a three-frame visual
+review, not whole-video review, independent pixel reconstruction or physical
+agreement certification.
+
+The root's stills acceptance record is 3,600 bytes, with digest
+\begin{center}
+\digest{e5329f6056f9306f392e46bd67cc145b559c0c96d8626443fb176b2ac65bc94b}
+\end{center}
+It pins the three originals, three overlays, both manifests and finally record.
+The selected-stills manifest digest is
+\begin{center}
+\digest{5c5600ec5d8bd7febe1f039568d7d73cc3aeae70f4225ca159cdf5e320d76dc0}
+\end{center}
+Frame 150 retains substantial visible arm, head and leg mismatch; frame 0
+retains a shaft-axis mismatch. The per-frame values below are unweighted
+13-marker display RMS, distinct from confidence-weighted training and dense
+body RMS. Neither rendering nor curve restriction improved the saved fit.
+The preceding three V21 authored-seed figures remain historical evidence.
+No new full-video result or ControlTower delivery is included. The goal remains
+active, Hogan is unchanged, and anatomical/contact, clinical ROM and physical
+clock qualification remain false.
+\endgroup
+
+
+\newpage
+\section*{Reviewed V22 Source and Overlay Comparisons}
+All panels preserve the original aspect ratio. The left images contain original
+source pixels; the right images retain the skeleton and 0.35 model-proxy opacity
+with an explicit unoptimized label. Substantial visible mismatch remains,
+especially at frame 150. Rational PTS identifies encoded source time, not
+calibrated physical motion time. These selected views do not certify anatomy,
+hand contact or a complete-video match.
+\begin{figure}[htbp]
+\centering
+\small Original Source\hfill Restricted Research Seed, Proxy Opacity 0.35\par\smallskip
+\includegraphics[width=0.485\linewidth]{\detokenize{C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Lossless Restricted Seed Stills V1/originals/frame-000000.png}}\hfill
+\includegraphics[width=0.485\linewidth]{\detokenize{C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Lossless Restricted Seed Stills V1/selected-stills/frame-000000.png}}\par
+{\small Source Frame 0; PTS $3003/200$ s; Unweighted 13-Marker RMS 6.45384770639445 px}\par\medskip
+\includegraphics[width=0.485\linewidth]{\detokenize{C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Lossless Restricted Seed Stills V1/originals/frame-000150.png}}\hfill
+\includegraphics[width=0.485\linewidth]{\detokenize{C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Lossless Restricted Seed Stills V1/selected-stills/frame-000150.png}}\par
+{\small Source Frame 150; PTS $1001/50$ s; Unweighted 13-Marker RMS 46.86777460035451 px}\par\medskip
+\includegraphics[width=0.485\linewidth]{\detokenize{C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Lossless Restricted Seed Stills V1/originals/frame-000190.png}}\hfill
+\includegraphics[width=0.485\linewidth]{\detokenize{C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Lossless Restricted Seed Stills V1/selected-stills/frame-000190.png}}\par
+{\small Source Frame 190; PTS $8008/375$ s; Unweighted 13-Marker RMS 18.274561270909892 px}\par\medskip
+\caption{Reviewed V22 Original and Overlay Comparisons}
+\end{figure}
+
+\end{document}

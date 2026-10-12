@@ -1,0 +1,257 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=.85in,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,graphicx,xcolor,xurl,hyperref,fancyhdr}
+\definecolor{ink}{HTML}{17334A}\definecolor{accent}{HTML}{187E91}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,pdftitle={Necromatcher: Full Shape Export Checkpoint},pdfauthor={UpstreamDrift Development}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\textcolor{ink}{\textbf{NECROMATCHER} / FULL SHAPE EXPORTS}}
+\fancyhead[R]{\small Technical Checkpoint}\fancyfoot[L]{\small Research Projections / Qualification Remains Open}\fancyfoot[R]{\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}\setlength{\emergencystretch}{2em}\renewcommand{\arraystretch}{1.16}
+\newcommand{\code}[1]{\nolinkurl{#1}}\newcommand{\hash}[1]{{\footnotesize\nolinkurl{#1}}}
+\newcommand{\chapterpage}[1]{\clearpage\section{#1}}
+\newcommand{\panel}[4]{\begin{minipage}[t]{.47\linewidth}\centering\includegraphics[width=\linewidth]{#1}\par{\small\textbf{#2}\\PTS #3 s; RMS #4 px}\end{minipage}}
+\newcommand{\hpanel}[4]{\begin{minipage}[t]{.40\linewidth}\centering\includegraphics[width=\linewidth]{#1}\par{\small\textbf{#2}\\PTS #3 s; RMS #4 px}\end{minipage}}
+\begin{document}\hypersetup{pageanchor=false}
+\begin{titlepage}\thispagestyle{empty}\vspace*{.45in}
+{\large\textcolor{accent}{UPSTREAMDRIFT / REPEATABLE RESEARCH METHODS}}\par\vspace{.25in}
+{\Huge\bfseries\textcolor{ink}{Necromatcher}}\par\vspace{.18in}
+{\LARGE Full Shape Export Checkpoint}\par\vspace{.3in}
+{\large Tiger Woods V17 and Ben Hogan V14 / Balanced Four-Arm Supplement}\par\vspace{.35in}
+\begin{tabular}{@{}p{1.2in}p{4.7in}@{}}\toprule
+Actual Outputs & Four source-sized MP4 videos, twelve selected PNGs and canonical manifests. All 1,920 decoded frames verified twice.\\
+Layers & Original source underlay, native skeleton and attachments, observed landmarks/residuals, sparse shaft display and model visual proxies at opacity 0.35.\\
+Execution & \hash{e0042ba61870f88543cb1305e3f6d21903c97fb8}.\\
+Saved Motion & \hash{00b7d9846bd2fb2572b7c84f03cfc6c9699323cb}.\\
+Preservation & Exact 351-file library and 14,767-file source snapshots; no fitting, registration or library run writes.\\
+Qualification & All four saved motions remain rejected and nonconverged. Camera, anatomy, physical time and continuous validity remain unqualified.\\\bottomrule
+\end{tabular}
+\vfill\textcolor{ink}{\textbf{Interpretation Boundary}}\par
+This is an export and inspection checkpoint, not a new motion reconstruction or optimizer trial.
+Shape surfaces are generic authored visual proxies, not individualized anatomical meshes.
+The original 12-page forearm results supplement and prior evidence remain unchanged.
+The later documentation-only checkpoint is separate from the producers above.
+The engineering manual \code{manuals/upstreamdrift} has its own release gate.
+\end{titlepage}\hypersetup{pageanchor=true}
+\section{Actual Execution and Timing Scope}
+The balanced forearm comparison with requested budget 30 supplies four immutable final fits.
+The control retained 31 free coordinates; the variant added the two forearm coordinates,
+for 33 free coordinates. Export does not change either trajectory, its model, camera,
+constraint recipe, training evidence or prior. The separately attempted comparison with requested budget 120
+from the same original initializations and focal sensitivity seeds are not used here.
+
+One clean child invokes the existing public \code{export_fit_video} per clip.
+Four children run sequentially, with a fixed 600-second deadline covering binding,
+rendering, canonical full codec/hash checks and exclusive publication. Each child passed.
+Additional independent full decoding occurs outside that child deadline.
+No actual optimizer evaluation count or hardware isolation is claimed.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Saved Fit & Frames & ROI Estimate (s) & Export Call (s) & Child Wall (s)\\\midrule
+Tiger Control V17 & 210 & 120.217 & 308.494 & 320.982\\
+Tiger Variant V17 & 210 & 164.600 & 197.449 & 213.319\\
+Hogan Control V14 & 750 & 255.014 & 296.859 & 304.613\\
+Hogan Variant V14 & 750 & 248.651 & 275.741 & 284.361\\
+\bottomrule\end{tabular}\end{center}
+The ROI estimate is the largest measured selected-pose surface time multiplied by
+source frame count. Twelve original/layer/depth/mask/geometry-ID comparisons matched
+the earlier pilot exactly. All four estimates passed the unchanged 600-second screen;
+that screen established eligibility only. It was not a full-clip bound or certificate.
+Full export includes its own source checks, skeleton, shaft display, encoding and
+publication, and nonsampled poses may have different raster cost. The table measures
+whole execution; it does not attribute the difference to an unmeasured component.
+
+Compilation/rendering filesystem bounds from a prior peer activity preceded the first
+ROI pose measurement; exact process-exit UTC was not recorded. Later peer activity was
+image viewing and lightweight checks. These facts do not establish hardware isolation.
+The four actual full clips independently satisfied their deadlines in this execution context.
+
+\chapterpage{Canonical Projection and Depth Compositing}
+The exporter reuses the saved native binding and canonical forward kinematics.
+Its supplied \texttt{CameraProjection} is unchanged. No alternative FK, camera,
+estimator or renderer is introduced.
+For an authored local vertex $v$ on native body $b$, column-vector notation gives
+\[
+X_w=R_b(q)v+t_b(q),\qquad X_c=R_cX_w+t_c,
+\qquad \widetilde p=KX_c,\quad p=\left(\frac{\widetilde p_x}{\widetilde p_z},
+\frac{\widetilde p_y}{\widetilde p_z}\right).
+\]
+The saved camera uses world-to-camera rotation and translation. Its numerical validity
+is checked; historical calibration and metric scale are not established by this check.
+Model depth is expressed in authored model metres, not measured scene distance.
+
+Shared capsules and saved ellipsoid/box hints produce fixed local triangle surfaces.
+The manifest pins the exact native definition, exported XML, derived visual description,
+visual hints and tessellation (16 longitude / 8 latitude samples). Shared body shapes
+are placed through public native body poses. Radius defaults and hints are model
+assumptions; they are not fitted skin surfaces, measured girth or subject-specific anatomy.
+
+Triangles are clipped at the fixed positive camera near plane $10^{-6}$ model metres.
+The shared rasterizer evaluates integer pixel centers inside each triangle's bounded ROI.
+For screen-space barycentric weights $\lambda_i$ and camera depths $z_i$, perspective-correct depth is
+\[
+z(p)=\left(\sum_{i=1}^{3}\frac{\lambda_i(p)}{z_i}\right)^{-1}.
+\]
+The nearest model triangle supplies the pixel; uncovered pixels retain infinite depth.
+The sealed surface layer contains BGR pixels, a Boolean coverage mask, positive finite
+covered depth and semantic Unicode geometry identities. It is model-only occlusion:
+no original-scene depth, human segmentation or environmental occluder is inferred.
+
+For mask $M$ and proxy color layer $S$, compositing over source $I$ is
+\[
+I'(p)=\begin{cases}\operatorname{round}\bigl((1-\alpha)I(p)+\alpha S(p)\bigr),&p\in M,\\
+I(p),&p\notin M,\end{cases}\qquad\alpha=0.35.
+\]
+Canonical rounding uses NumPy \code{rint}, including ties-to-even.
+Canonical skeleton, landmark/residual and shaft annotations are then drawn on this
+source-sized derivative. The original encoded source bytes are unchanged.
+Opacity zero is a distinct source-identity preflight; no full zero-opacity export is claimed here.
+
+\chapterpage{Source Clock, Evidence and Hash Authority}
+All original source frame identities and presentation timestamps are retained in each
+manifest. Uniform contiguous source intervals define encoded MP4 cadence; no frame
+is dropped, padded, letterboxed or extrapolated. Container playback starts its own
+encoded sequence; exact original PTS offsets remain in the manifest.
+
+\begin{center}\begin{tabular}{@{}lrrr@{}}\toprule
+Player & Source Size & Rational Cadence & Source PTS Interval (s)\\\midrule
+Tiger & $1280\times720$ & $30000/1001$ & $15.015$--$21.988633\ldots$\\
+Hogan & $320\times240$ & $30/1$ & $110$--$134.966666\ldots$\\\bottomrule
+\end{tabular}\end{center}
+The decoded Tiger cadence is 29.97 fps, checked against $30000/1001$ within
+$10^{-3}$ fps; Hogan decodes at 30 fps. These are re-encoded presentation cadences,
+not a verified physical motion clock or sensor readout/exposure timing.
+Source-domain derivatives therefore remain source-clock quantities.
+
+Fresh admission authenticates original encoded PNG bytes, decoded frame identities,
+source PTS, camera and native model before sparse shaft display. V1 training labels and
+already-inspected V2 evaluation labels are combined for display only. No new label,
+weight, objective term, geometry probe or fitting operation is introduced by export.
+The magenta observed interior fragment differs from the cyan projected infinite authored
+axis: neither fragment endpoints nor axis display establish physical shaft endpoints or length.
+
+The actual before/finally record and separate fresh-process audit each rehash every
+351 library file, 14,767 source file, runtime/config/helper pin and immutable input,
+including both original MP4 byte hashes. All facets match exactly, with no capture errors.
+The independent process repeats canonical source PNG/frame checks, manifest/shape
+provenance checks and complete MP4 decoding; it does not recompute native fitting.
+All four selected PNG inventories and their source-sized dimensions/hashes match.
+
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.25in}p{4.55in}@{}}\toprule
+Authority & Exact SHA-256\\\midrule
+Execution Finally & \hash{78422d112a891010967fea691d36900619a23e805a06b2d1ac13640c7ab76db5}\\
+Independent Review & \hash{ba1f3b78b45ca3c1ab64f86dea5233a38c04ad5e98e257a70d0698196fa475a0}\\
+Independent Finally & \hash{0a965ec366ece0a2c80b3da88c7cc06b49d69cab8c7cf9879b0380a1bb79b271}\\
+Root Still Review & \hash{8266c22fcd97eae31f7134edda4422ea4ebaa9580ddf541d4d0f45ce999802d8}\\\bottomrule
+\end{tabular}
+\chapterpage{Tiger Paired Source Inspection}
+Late club direction/hand mismatch and upper-body residuals remain visible. Both stored motions remain rejected; blended solids are unqualified model proxies.
+\begin{figure}[!ht]\centering
+\panel{assets/tiger-forearm-paired-control-v17-frame-000000.png}{Control / Frame 0}{15.015}{6.393}\hfill
+\panel{assets/tiger-forearm-paired-variant-v17-frame-000000.png}{Variant / Frame 0}{15.015}{6.415}\par\vspace{.1in}
+\panel{assets/tiger-forearm-paired-control-v17-frame-000150.png}{Control / Frame 150}{20.020}{45.711}\hfill
+\panel{assets/tiger-forearm-paired-variant-v17-frame-000150.png}{Variant / Frame 150}{20.020}{45.729}\par\vspace{.1in}
+\panel{assets/tiger-forearm-paired-control-v17-frame-000209.png}{Control / Frame 209}{21.989}{14.618}\hfill
+\panel{assets/tiger-forearm-paired-variant-v17-frame-000209.png}{Variant / Frame 209}{21.989}{15.498}\par\vspace{.1in}
+\caption{Tiger Control and Variant Source Overlays}
+\end{figure}
+\chapterpage{Hogan Paired Source Inspection}
+Low-resolution blur and silhouette gaps remain. Captions occupy roughly the bottom 70 pixels of each source-sized image. Both stored motions remain rejected.
+\begin{figure}[!ht]\centering
+\hpanel{assets/hogan-forearm-paired-control-v14-frame-000200.png}{Control / Frame 200}{116.667}{10.599}\hfill
+\hpanel{assets/hogan-forearm-paired-variant-v14-frame-000200.png}{Variant / Frame 200}{116.667}{10.650}\par\vspace{.1in}
+\hpanel{assets/hogan-forearm-paired-control-v14-frame-000375.png}{Control / Frame 375}{122.500}{5.220}\hfill
+\hpanel{assets/hogan-forearm-paired-variant-v14-frame-000375.png}{Variant / Frame 375}{122.500}{5.223}\par\vspace{.1in}
+\hpanel{assets/hogan-forearm-paired-control-v14-frame-000550.png}{Control / Frame 550}{128.333}{12.570}\hfill
+\hpanel{assets/hogan-forearm-paired-variant-v14-frame-000550.png}{Variant / Frame 550}{128.333}{12.694}\par\vspace{.1in}
+\caption{Hogan Control and Variant Source Overlays}
+\end{figure}
+\chapterpage{Limits, Delivery and Repeatability}
+Green denotes observations, blue the native rig/attachment seeds, and yellow the
+residuals. Magenta is the observed interior shaft fragment; cyan is the projected
+infinite authored axis. Blended solids are model visual proxies. Figure RMS is the
+unweighted Euclidean matched-landmark diagnostic, distinct from confidence-weighted
+body RMS and raw shaft line RMS. Figure PNG bytes are unchanged; paired print-scale
+legends are supplemented by this readable external text.
+
+Root directly viewed all twelve selected source-sized PNGs; no all-frame visual review is
+claimed. Programmatic verification covers all 1,920 frames. Source captions remain intact,
+but Hogan's approximately 70-pixel caption region uses substantial space in a $320\times240$
+image. Tiger's internal legends shrink in paired print panels. Readable external captions
+and unchanged original PNGs preserve the distinction between inspection and qualification.
+
+Body proxies can make authored pose and volume assumptions easier to inspect, while
+shaft disagreement, body/silhouette gaps, cropped feet, blur and residuals remain visible.
+This evidence does not establish historical anatomy, calibrated camera, physical timing,
+contact forces, whole-trajectory nonlinear validity or qualified simulation/control outputs.
+A successful export is not scientific acceptance, and passing finite geometric targets does
+not change the rejected stored status. The four curves are neither refitted nor promoted.
+
+The private user-requested ControlTower Desktop package is
+``Necromatcher Balanced Full Shape Review 2026-10-03 V1''.
+Its 43 reviewed payloads contain four videos, twelve selected stills and verification proofs,
+47,496,146 uncompressed bytes. Every remote byte count/SHA matches the reviewed
+manifest; all local sources were rehashed unchanged after transfer. Archive, transport
+script, authorized manifest and remote receipt are additional infrastructure files,
+excluded from the 43-payload count. There is no public hosting or registry update.
+
+The first verification command exceeded the remote shell command-length limit before
+execution. An enclosing stdin invocation returned without executing; read-only probes
+proved archive-only state and no receipt. The exact pinned verifier was then uploaded,
+its remote raw hash checked, and invoked once through short \code{-File} transport.
+Link/ancestor, path, no-overwrite, ZIP count/CRC identity and per-member hash guards
+remained unchanged. Previous failure/no-op logs are preserved; no extraction retry occurred.
+
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.25in}p{4.55in}@{}}\toprule
+Delivery Authority & Exact SHA-256\\\midrule
+Remote Receipt & \hash{a5d76d6effb46807d1f3d349a14d12c16836e3d6136f0d301e1d9ee9b2f3f0aa}\\
+Local Delivery & \hash{90c77ab53ecbcdbeaf90cc18b53e8ed4efa47d94a17006a35fdb35ea2871954d}\\
+Archive & \hash{bb806b0311db6695cdbd26fb73ce8bce0f04a25b82c2e28ce786bab943e9cd8f}\\\bottomrule
+\end{tabular}
+
+\chapterpage{Repeatable Commands and Source Map}
+The immutable V2 protocol directory is \code{Repositories/Temp/balanced-full-shape-export-v2}.
+Use the original checkout root, its \code{src} and \code{src/shared/python} on
+\code{PYTHONPATH}. Set UTF-8, disabled bytecode writes and BLAS/OpenMP thread counts to one.
+Import the native SDK before workspace/UI dependencies in each clean child.
+A replay requires fresh reviewed source/runtime/library pins and new exclusive output
+and preservation paths; never repeat the historical invocation into existing destinations.
+
+Replace every quoted template value below with its separately reviewed value.
+Run this PowerShell template from the immutable protocol directory; the argument
+array keeps the invocation intact across lines.
+\begin{quote}\small
+\begin{verbatim}
+$shapeReviewArgs = @(
+  '-B', '-u', 'driver.py',
+  '--producer', '<reviewed-clean-published-commit>',
+  '--config', '<separately-authorized-config>',
+  '--config-sha256', '<exact-config-sha256>',
+  '--freeze', '<immutable-protocol-freeze>',
+  '--freeze-sha256', '<exact-freeze-sha256>',
+  '--preservation-output', '<new-finally-receipt>',
+  '--execute-exports'
+)
+python @shapeReviewArgs
+\end{verbatim}
+\end{quote}
+The disabled preparation mode omits \code{--execute-exports}; it authenticates pins without
+native execution. Actual authorization requires writer closure, exact four-case ROI binding,
+strict opacity/deadline and a fresh whole-library baseline. A failed child stops remaining
+cases. Its intent is recorded first, stdout/stderr and surviving partial outputs are retained,
+and no blind resubmission occurs. Canonical TemporaryDirectory handling may remove
+some transient scratch on an ordinary exception; preservation claims surviving files only.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{2.45in}p{3.35in}@{}}\toprule
+Reusable Seam / Evidence & Role\\\midrule\endhead
+\code{workspace/necromatcher_video.py} & Source-sized export and codec checks.\\
+\code{workspace/necromatcher_shape_overlay.py} & Native proxy layer and provenance.\\
+\code{body_part_viz/renderers/projective_renderer.py} & Clipping, ROI depth and compositing.\\
+\code{workspace/necromatcher_review.py} & Original PNG, frame and PTS review.\\
+\code{frozen-preparation-receipt-v2.json} & 23 guard tests, Ruff/mypy and authenticated byte reads.\\
+\code{completion.json} and Per-Arm Manifests & Four measured durations and source/codec identities.\\
+Actual / Independent Finally Receipts & 351 library files and 14,767 source files preserved.\\
+\code{asset-copy-pins.json} and \code{report-data.json} & Twelve unchanged images and exact PTS/metrics.\\
+\code{report-review-receipt.json} & Build and page-review authority.\\\bottomrule
+\end{longtable}}
+\end{document}

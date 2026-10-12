@@ -1,0 +1,150 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,amsmath,amssymb,booktabs,array,xcolor,fancyhdr,xurl}
+\usepackage[hidelinks]{hyperref}
+\definecolor{ink}{HTML}{18354B}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}
+\setlength{\emergencystretch}{2em}\renewcommand{\arraystretch}{1.15}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small UpstreamDrift / Necromatcher}
+\fancyhead[R]{\small Fragment Derivatives / Supplement V1}
+\fancyfoot[L]{\small Local Numerical Evidence / Physical Qualification Open}
+\fancyfoot[R]{\thepage}
+\newcommand{\code}[1]{{\small\nolinkurl{#1}}}
+\newcommand{\hash}[1]{{\footnotesize\nolinkurl{#1}}}
+\begin{document}
+{\LARGE\bfseries\color{ink} Source-Bound Shaft Fragment Derivatives}\par
+{\large Completed Role-Specific Finite-Difference Supplement V1}\par
+3 October 2026\par\rule{\linewidth}{0.7pt}
+\textbf{Status: completed numerical diagnostic; historical motion remains unqualified.}
+This separate supplement closes the observed-fragment derivative gap left explicitly
+open in the preserved six-page shaft and grip methods report. It describes accepted
+serialized results, without repeating native evaluation, fitting or rendering.
+This supplement was compiled with the installed LaTeX compiler and all three
+pages were visually reviewed. The built-in compiler was unavailable; its
+platform-directory diagnostic is preserved in the accompanying records.
+
+\section*{1. Immutable Cohort and Role Accounting}
+The four saved motions are Tiger forearm control/variant V17 and Hogan forearm
+control/variant V14. Each contributes three original source poses: Tiger
+0, 150 and 209; Hogan 200, 375 and 550. Camera, native model, shaft attachment,
+saved curve, source pixels and rational presentation clock remain fixed.
+The original twelve-pose assessments, curves and identities compare exactly after
+removing only the added \code{fragment_distance_checks} field.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}\toprule
+Saved Pair & Poses & Observed Role Fragments & Derivative Records\\\midrule
+Tiger Control / Variant & 6 & 6 & 108\\
+Hogan Control / Variant & 6 & 8 & 144\\\midrule
+Total & 12 & 14 & 252\\\bottomrule
+\end{tabular}\end{center}
+Hogan frame 375 contributes separate training and
+\code{new52_diagnostic_seen_unadopted} records for each arm. Their overlap is
+retained explicitly; it is not pooled or described as unseen validation.
+The other declared evaluation fragments are also previously seen evidence.
+Each observed role has six declared radian-coordinate columns and three central
+steps. All 252 actual derivative records are available; none is unavailable.
+There are zero explicit abstentions among these selected role records. This does
+not remove abstentions elsewhere in the authenticated evidence archives or promote
+diagnostic roles to training observations.
+
+\section*{2. Raw Fragment Observable}
+Let $x_a(q),x_b(q)\in\mathbb R^3$ be the declared native axis endpoints,
+and let $p_a=\pi(x_a)$ and $p_b=\pi(x_b)$ be saved-camera image projections.
+For $\delta=p_b-p_a$, $L=\|\delta\|$, define
+\[
+ t=\delta/L,\qquad n=(-t_y,t_x)^\mathsf T,\qquad
+ d_i(q)=n(q)^\mathsf T\bigl(u_i-p_a(q)\bigr),\quad i=1,2.
+\]
+The observed interior fragment points $u_i$ are fixed source-pixel evidence.
+These signed distances are to the projected infinite axis, not to finite physical
+shaft endpoints. No shaft length, hand contact or observed endpoint is inferred.
+The raw observable has two pixel-valued entries. Authored confidence, visibility
+and residual sigma do not weight this derivative comparison.
+
+\newpage
+\section*{3. Analytic Chain and Independent Central Steps}
+The native endpoint Jacobian and saved camera projection Jacobian give
+$\partial p/\partial q=(\partial\pi/\partial x)(\partial x/\partial q)$.
+Differentiating the normalized image line gives
+\[
+ \frac{\partial d_i}{\partial q_j}
+ =\left(\frac{\partial n}{\partial q_j}\right)^\mathsf T(u_i-p_a)
+ -n^\mathsf T\frac{\partial p_a}{\partial q_j}.
+\]
+The diagnostic compares this analytic two-entry column with a separately
+evaluated central difference of the same raw observable:
+\[
+ D_{j,h}=\frac{d(q+h e_j)-d(q-h e_j)}{2h},\qquad
+ E_{j,h}=\max_{i=1,2}|D_{j,h,i}-J_{ij}|.
+\]
+Selected coordinate units are authenticated as radians. Therefore both columns
+and their errors are measured in pixels per radian. Central perturbations must
+remain within authored bounds; an unsupported perturbation is unavailable rather
+than clamped, extrapolated or replaced with zero. Degenerate projected axes and
+explicit abstentions retain their distinct null/reason contracts.
+
+\begin{center}
+\begin{tabular}{@{}rr@{}}\toprule
+Central Step (rad) & Maximum Absolute Error (pixels/rad)\\\midrule
+$10^{-5}$ & $2.153369393909088\times10^{-8}$\\
+$10^{-6}$ & $1.133986984314106\times10^{-7}$\\
+$10^{-7}$ & $1.6666702578049808\times10^{-6}$\\\bottomrule
+\end{tabular}\end{center}
+Each maximum spans all fourteen observed role fragments and six selected columns.
+The increase at the smallest step is consistent with finite numerical arithmetic;
+this table does not establish a global error bound. Agreement supports the local
+implementation of this observable at these twelve saved poses. It does not prove
+historical identifiability, clinical coordinate axes, correct grip phase, calibrated
+camera, correct anatomy or accepted physical motion. Source presentation time
+remains distinct from physical time.
+
+\section*{4. Closed Preservation and Independent Review}
+The native operation closed with exit code zero. Its finally receipt records
+completion, preservation and identical before/after facets. The independent
+standard-library checker also closed with exit code zero, with no primary or
+preservation error. It checked finite typed vectors, record shapes, exact roles
+and steps, null semantics and error arithmetic without importing the SDK or
+recomputing native derivatives.
+The source producer was
+\hash{6fe04eac5b05e3914e85aaefac853415a7b9d958}.
+All 14,793 tracked source files and 363 library files, plus project and runtime
+facets, remained exact. No new fit, optimizer, renderer, observation adoption or
+qualification promotion occurred.
+
+\newpage
+\section*{5. Bounded Authority and Repeatability}
+Root acceptance checked 158 invocation input pins and independently compared all
+four original cases using type-preserving finite canonical JSON. Authority is
+bounded to the current config, freeze, launch, closed-process proof, executed
+helpers, flat authenticated input pins and full live preservation maps.
+Historical receipts are authenticated as immutable serialized evidence; arbitrary
+references nested inside them are not promises that old helper files remain
+current or executable. In particular, the historical camera writer's saved
+\code{orientation.py} reference is not a fragment-audit executable dependency.
+
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.25\linewidth}p{0.69\linewidth}@{}}\toprule
+Evidence & SHA-256\\\midrule
+Native Closed Process & \hash{4e01270f190413d95410cd25def24a278d52037f55108313153d6311a2fccf19}\\
+Native Finally & \hash{87288dab593e22ecd00600534c589097e67445a52e7a5410ec439dface14c0bb}\\
+Independent Review & \hash{5981b2ea0c783b06a0ef1af9d2419fda8da264e208e4710ff75221621232efcf}\\
+Checker Closed Process & \hash{5e14fee443c5ee569fdce9dcf07460c8620bb970c3b3ba98444abccbaccd0976}\\\bottomrule
+\end{tabular}\end{center}
+The accompanying \code{report-data.json} preserves exact evidence pins and the
+accepted per-case summary. \code{REPEATABILITY.md} identifies frozen source,
+config, release and closure records. Earlier base report files are unchanged.
+An actual repeat would require a new exclusive output, reviewed current inputs
+and a separate release; this report preparation does not authorize one.
+
+\section*{6. Interpretation Boundary}
+The former fragment-distance finite-difference gap is closed for this exact
+cohort, role set and local perturbation grid. Existing body and shaft mismatches
+remain; this diagnostic does not improve a saved fit or evaluate new evidence.
+All historical/scientific qualification flags remain false. No clinical ROM,
+rolling-readout, exposure, contact-force or dynamics conclusion follows from
+the derivative agreement. The preserved six-page base report remains a truthful
+record of its earlier, narrower checkpoint.
+\end{document}
