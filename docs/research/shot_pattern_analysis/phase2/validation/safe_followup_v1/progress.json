@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T05:51:40.814243+00:00",
+  "recorded_at_utc": "2026-10-12T06:04:40.585578+00:00",
   "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
@@ -442,5 +442,18 @@
       "sha256": "278df3621cd2da8af9efc7f00b6b86ad4a7acc549e84052ca877ff5bee698f2e",
       "raw_sha256": "3f07ea9ec2202a482e5e77c3e83d84db713e183d29a041063f6572a8ae4999b8"
     }
+  },
+  "signal_provider_bridge_experiment": {
+    "source_commit": "cf60b1738d",
+    "result": "REJECTED and fully reverted; direct canonical core loader passed two fresh-process orders but failed bare-first identity because package initialization constructs distinct classes before the shim. No unsafe bridge committed, no vendor or pin change.",
+    "receipt": "signal-core-bridge-rejected.txt.gz",
+    "receipt_sha256": "09ca63e31bad1f02a4d81962641bee5a6d00ce764ba94f7d8427eefa08a7db26",
+    "raw_sha256": "eede45fa1704ed834ea62f44dea95218200d9a450adf5eac9e0f1d46952f08f4",
+    "next": "Use a properly reviewed provider consumption boundary preserving local fitting behavior and all import identities after the governed Tools dependency can merge."
+  },
+  "new_remote_context_checks": {
+    "agent_context": "PASS with documented pinned-provider PYTHONPATH; initial bare environment had no agent_context module and is not acceptance",
+    "development_log": "PASS; 21-entry pre-existing portfolio WIP warning",
+    "manual_governance": "PASS structurally:63 QMD,0 registered calculations, release blocked-inventory-required; no release approval"
   }
 }
