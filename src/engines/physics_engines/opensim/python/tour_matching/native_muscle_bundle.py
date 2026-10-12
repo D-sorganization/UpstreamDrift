@@ -221,10 +221,12 @@ def _coordinate_units(
     model: Any,
     *,
     native_mechanics_profile: Any | None = None,
+    coupled_rotation_paths: frozenset[str] = frozenset(),
 ) -> dict[str, str]:
     import opensim as osim
 
     units = {}
+    observed_coupled: set[str] = set()
     coordinates = model.getCoordinateSet()
     for i in range(coordinates.getSize()):
         coordinate = coordinates.get(i)
@@ -233,6 +235,12 @@ def _coordinate_units(
             unit = "rad"
         elif motion == osim.Coordinate.Translational:
             unit = "m"
+        elif (
+            motion == osim.Coordinate.Coupled
+            and coordinate.getAbsolutePathString() in coupled_rotation_paths
+        ):
+            unit = "rad"
+            observed_coupled.add(coordinate.getAbsolutePathString())
         else:
             custom_unit = _custom_joint_coordinate_unit(
                 model, coordinate, native_mechanics_profile, osim
@@ -243,6 +251,8 @@ def _coordinate_units(
         prefix = coordinate.getAbsolutePathString()
         units[prefix + "/value"] = unit
         units[prefix + "/speed"] = unit + "/s"
+    if observed_coupled != coupled_rotation_paths:
+        raise ValueError("declared coupled rotation chart differs from native source")
     return units
 
 
@@ -281,8 +291,13 @@ def _state_specs(
     options: Mapping[str, tuple[float, ...]],
     contracts: Any,
     native_mechanics_profile: Any | None = None,
+    coupled_rotation_paths: frozenset[str] = frozenset(),
 ) -> tuple[Any, ...]:
-    units = _coordinate_units(model, native_mechanics_profile=native_mechanics_profile)
+    units = _coordinate_units(
+        model,
+        native_mechanics_profile=native_mechanics_profile,
+        coupled_rotation_paths=coupled_rotation_paths,
+    )
     roles = {
         "value": contracts.StateComponentRole.POSITION,
         "speed": contracts.StateComponentRole.VELOCITY,
@@ -326,6 +341,7 @@ def _identity(
     contracts: Any,
     native_mechanics_profile: Any | None = None,
     visual_resources: tuple[native_visual_resources.SourceVisualResource, ...] = (),
+    coupled_rotation_paths: frozenset[str] = frozenset(),
 ) -> Any:
     import opensim as osim
 
@@ -363,7 +379,14 @@ def _identity(
         contracts.InitialStateSchema(
             "opensim-native-continuous-and-registered-options",
             _VERSION,
-            _state_specs(model, names, options, contracts, native_mechanics_profile),
+            _state_specs(
+                model,
+                names,
+                options,
+                contracts,
+                native_mechanics_profile,
+                coupled_rotation_paths,
+            ),
         ),
         muscles,
         hashlib.sha256(model.dump().encode()).hexdigest(),
