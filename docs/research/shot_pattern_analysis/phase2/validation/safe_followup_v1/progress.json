@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T08:48:32.897149+00:00",
+  "recorded_at_utc": "2026-10-12T09:02:01.152148+00:00",
   "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
@@ -46,7 +46,17 @@
     "pushed_commit": "5b658b733c4591f318687540e0ca4e571ee25d8a",
     "canonical_pre_pr": "PASS after actual main conflict reconciliation",
     "ci_run": "https://github.com/D-sorganization/AffineDrift/actions/runs/38203470000",
-    "merge_queue_sha": "eabbb3233a3644f11324d5dc39252db8589d71cc"
+    "merge_queue_sha": "eabbb3233a3644f11324d5dc39252db8589d71cc",
+    "live_verification": {
+      "revision": "ace2a1ac49ec179f982f4457b0e3a2ccb3c16a84",
+      "checks_passed": 53,
+      "assets": 9,
+      "pdf": "39 pages, exact accepted SHA256",
+      "browser_automated_cells_passed": 4,
+      "axe_serious_critical": 0,
+      "manual_visual": "Desktop coherent; mobile headline narrow/word-splitting FAIL, Sol repair in progress",
+      "overall": "Publication visual acceptance pending mobile repair"
+    }
   },
   "protected_merge": "pending",
   "overall_complete": false,
@@ -620,7 +630,7 @@
     "merged_at": "2026-10-12T08:38:08Z",
     "sha": "8a11691b4e9aee7d04dfc39628a8269ca561b07d",
     "queue_ci": 38222319843,
-    "status": "Protected merge PASS; three pins agree; Rust check and served bundle PASS; Python exact Git installation in progress",
+    "status": "Protected merge PASS; three published pins agree; installed exact Git package verified, all 19 shipped Signal files match, all 126 development pins unchanged; Rust, served-bundle, capability and 80 focused installed-provider checks PASS",
     "served_assets": 76,
     "javascript_assets": 5,
     "served_bytes": 2801426,
@@ -635,7 +645,7 @@
         "passed": 29
       },
       "review": "Astra approved three metadata fields, exact published pins, served receipt, historical evidence preservation and unchanged claim boundaries",
-      "runtime_install": "Still fetching exact Git requirement; installed identity not yet accepted"
+      "runtime_install": "PASS exact Git direct_url commit and source-byte equality; original count-based diagnostic replaced by exact declared shipped-file-set equality"
     }
   }
 }
