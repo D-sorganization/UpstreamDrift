@@ -669,6 +669,8 @@ MuJoCo `overlay_source` supplies its contact and kinematics. Epic #11673.
 
 `src/shared/python/lifting/pack_audit/` loads the OpenSim, MuJoCo, Drake and Pinocchio lift model packs behind one `EngineAdapter` (canonical frame, FK, CoM, closure), and reduces the receipt to tables and gap rules (`analysis.py`, `gaps.py`, `report.py`). Reuse it for same-input lift parity (LIFT-2 onward) instead of writing another per-engine loader. Entry point: `scripts/lifting/run_pack_parity_baseline.py`; record: `docs/development/lifting/PACK_PARITY_BASELINE.md`.
 
+`src/shared/python/lifting/barbell_bushing.py` (`BarbellBushingPlant`, `Barbell`) wraps any same-input `VectorPlant` with a rigid barbell held at both hands by the OSV-7 grip bushing (shared law, stiffness and modal damping design), coupled two-way through each engine's own kinematics; `BushingSample.grip_analysis()` gives the GCV-7 per-hand reduction. `barbell_runs.py` holds a pose, builds a loaded bundle and measures cross-engine parity. Record: `docs/development/lifting/BARBELL_BUSHING.md` (LIFT-4, #11744).
+
 ## Native OpenSim Marker Geometry
 
 `tour_matching/native_marker_geometry.py` supplies explicit native body-attached

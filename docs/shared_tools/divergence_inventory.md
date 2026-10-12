@@ -64,7 +64,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `force_overlay` | 0 | 0 | 0 | 17 | 0 | 0 |
-| `golf_club` | 0 | 0 | 0 | 0 | 105 | 0 |
+| `golf_club` | 0 | 0 | 0 | 0 | 118 | 0 |
 | `golf_simulator` | 0 | 0 | 0 | 19 | 0 | 0 |
 | `golf_view_presets` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
@@ -72,7 +72,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
-| `humanoid_character_builder` | 14 | 26 | 9 | 36 | 0 | 40 |
+| `humanoid_character_builder` | 13 | 27 | 9 | 36 | 3 | 40 |
 | `impact_parameters` | 0 | 0 | 0 | 15 | 0 | 0 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
@@ -80,7 +80,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launch_monitor` | 0 | 0 | 0 | 0 | 30 | 0 |
 | `launcher_embed` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `lifting` | 0 | 0 | 0 | 31 | 0 | 0 |
+| `lifting` | 0 | 0 | 0 | 33 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 16 | 0 | 0 |
@@ -110,7 +110,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `qt_utils` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `realtime` | 0 | 2 | 0 | 4 | 0 | 2 |
-| `reporting` | 0 | 2 | 0 | 11 | 0 | 2 |
+| `reporting` | 0 | 2 | 0 | 13 | 0 | 2 |
 | `rotation_transforms` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `safe_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `safe_pandas_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
@@ -119,13 +119,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
-| `sidekick` | 212 | 66 | 23 | 36 | 76 | 278 |
+| `sidekick` | 211 | 67 | 23 | 36 | 89 | 278 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `spatial_algebra` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `swing_comparison` | 0 | 0 | 0 | 7 | 0 | 0 |
-| `swing_sim` | 0 | 0 | 0 | 0 | 427 | 0 |
+| `swing_sim` | 0 | 0 | 0 | 0 | 429 | 0 |
 | `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `theme` | 0 | 0 | 0 | 4 | 23 | 0 |
 | `tools` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **399** | **274** | **123** | **1628** | **777** | **673** |
+| **Total** | **397** | **276** | **123** | **1632** | **808** | **673** |
 
 ## Diverged Files by Package
 
@@ -295,7 +295,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher/registry.py` | -75 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 | `gui_launcher/tools_sidebar_integration.py` | +10123 |  | Dieter Olson 2026-05-29 | Dieter Olson 2026-08-20 |
 
-### Package `humanoid_character_builder` (26 Diverged Files)
+### Package `humanoid_character_builder` (27 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -318,11 +318,12 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/interfaces/api.py` | +36 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-08-20 |
-| `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
+| `humanoid_character_builder/mesh/inertia_calculator.py` | -108 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `humanoid_character_builder/mesh/primitive_inertia.py` | +108 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/presets/__init__.py` | +226 |  | Dieter Olson 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/presets/loader.py` | +2871 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/tests/test_api.py` | -423 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-26 |
+| `humanoid_character_builder/tests/test_inertia_calculator.py` | -4 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/validation/physics_validator.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 
@@ -413,11 +414,12 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `reporting/__init__.py` | +387 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-05-15 |
 | `reporting/generator.py` | -58 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 
-### Package `sidekick` (66 Diverged Files)
+### Package `sidekick` (67 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `sidekick/agent/action_service.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-06-15 |
+| `sidekick/calculators/electrical/electrical_model.py` | -512 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-29 |
 | `sidekick/calculators/electrical/glass_interface.py` | -9103 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-07 |
 | `sidekick/calculators/thermo/steam_engine.py` | -983 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `sidekick/calculators/thermo/thermo_properties.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
