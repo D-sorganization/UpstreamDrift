@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T04:56:22.827634+00:00",
-  "checkpoint": "d8cf83a81bf41bb92534f3ff32c1b54112f7c260",
+  "recorded_at_utc": "2026-10-12T05:35:54.456382+00:00",
+  "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "d8cf83a81bf41bb92534f3ff32c1b54112f7c260",
+  "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "integration": "Remote PR 99f8d6f8816 and actual conflicting origin/main ba57e27033 reconciled locally; later fixes through 0504feab4c. No push; frozen rows and approved DRY baseline unchanged.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Canonical pre-PR on d8cf83a81b passed mypy (154 sources), then diff-scoped pytest cascaded 11 failures and 128 errors by 25% from mixed-collection engine fakes and migrated tests. Interrupted exit130; no complete pytest/consistency summary or full acceptance. Owner preparing tests-only repair.",
+  "current_validation": "Latest complete canonical gate at 0543d781e5 failed: 7180 passed, 36 failed, 365 skipped, 42 deselected, 1 xpassed; mypy and consistency passed. Repairs and corrected child-process PYTHONPATH are being verified; full final-source acceptance remains pending.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -41,11 +41,11 @@
     "pr": 5005,
     "source_review_commit": "6f0d81eb",
     "audit_commit": "f5ee7c1d",
-    "full_gates": "CI running; local Python suite timed out in unchanged dynamics with60s watchdog; local fullrender running",
-    "public_routes": "All four expected routes returned404; deployment acceptance pending",
-    "pushed_commit": "94831b9ef2837939960e9dfa6f58ca999c78db7b",
-    "canonical_pre_pr": "PASS",
-    "ci_run": "https://github.com/D-sorganization/AffineDrift/actions/runs/38185152476"
+    "full_gates": "All completed checks pass; E2E accessibility step still running; protected auto-merge armed",
+    "public_routes": "Deployment and live article/PDF verification pending",
+    "pushed_commit": "5b658b733c4591f318687540e0ca4e571ee25d8a",
+    "canonical_pre_pr": "PASS after actual main conflict reconciliation",
+    "ci_run": "https://github.com/D-sorganization/AffineDrift/actions/runs/38203470000"
   },
   "protected_merge": "pending",
   "overall_complete": false,
@@ -127,7 +127,7 @@
   },
   "canonical_pre_pr_diagnostics": {
     "command": "/tmp/shot-upstream-ci-venv/bin/python -u /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main",
-    "environment": "Clean CI 126/126 dev-lock runtime; PYTHONPATH Repository_Management plus own worktree; MYPYPATH own worktree; headless platform variables; GitHub credentials unset",
+    "environment": "Clean CI 126/126 dev-lock runtime; next invocation PYTHONPATH and MYPYPATH own worktree only; absolute central wrapper; headless variables; actionlint 1.7.7 and shellcheck 0.10.0.",
     "pre_guard_collection_failure": {
       "result": "INCOMPLETE; SIGINT exit 130 after pypdf collection failure, before consistency phase finished",
       "source_commit": "2fd7099fd1",
@@ -276,7 +276,7 @@
       }
     }
   },
-  "next_required": "Review/land mixed-collection tests-only repair, then rerun exact complete canonical pre_pr on final source before protected PR integration. Do not rerun frozen simulations.",
+  "next_required": "Finish provider compatibility retirement and merged Tools Signal dependency; refresh only reviewed current integration inventories; run full canonical pre-PR on final source; complete protected integrations and verify live article/PDF. Never rerun frozen simulations.",
   "final_integrity_refresh": {
     "release_manifest_before": {
       "path": "/tmp/shot-final-integrity-before-release_manifest.json",
@@ -301,15 +301,52 @@
     }
   },
   "latest_full_canonical_attempt": {
-    "source_commit": "d8cf83a81bf41bb92534f3ff32c1b54112f7c260",
-    "result": "INCOMPLETE exit 130; mypy PASS 154 sources, pytest deliberately interrupted at 25% after cascading mixed-collection engine errors; consistency phase not completed",
-    "pytest": "11 failed, 1646 passed, 50 skipped, 42 deselected, 128 errors, 192 warnings in 207.82s",
-    "error_clusters": "125 OpenSim fake module missing Model, 3 Drake fake pydrake missing multibody; 4 Pinocchio viz obsolete import; 3 OpenSim FK mock failures; Drake drift, OpenSim geometry, two build_humanoid subprocess import failures",
+    "source_commit": "0543d781e5",
+    "result": "FAIL exit 1; complete run, no acceptance",
+    "pytest": "36 failed, 7180 passed, 365 skipped, 42 deselected, 1 xpassed, 21 subtests passed",
+    "mypy": "PASS 154 sources",
+    "consistency": "PASS",
     "receipt": {
-      "receipt": "canonical-after-mypy-fix-cascade-incomplete.txt.gz",
-      "receipt_sha256": "8e784321bbe0ececfd4ee014c9a68b4c171f206801741876fd6f1486dd355c76",
-      "source_sha256": "2fbc9d57fb12077637f5e71b9499a6ee737b486347f136a3701a7e39ff6710fe"
+      "receipt": "canonical-full-post-engine-fix-failed.txt.gz",
+      "receipt_sha256": "ba16036eaaafeb677e4ae0d978e2305b064b23c17ab9ddbaa019129c28478bf6",
+      "source_sha256": "dc1ffde336cc80058ec378e2c4b394c09a0e8bff2900b4fa7d49c804363c33f4"
     },
-    "next": "Migration owner applies tests-only runtime-probe/facade/mock repairs; rerun unchanged full canonical after focused verification"
+    "environment_correction": "For the next canonical invocation PYTHONPATH contains only the own UpstreamDrift root. The absolute central wrapper loads its own infrastructure without leaking Repository_Management into child-process source resolution."
+  },
+  "nonlinear_registration_amendment": {
+    "commit": "b1cf07cbce",
+    "status": "Implemented and Astra reviewed; immutable historical registration retained; separate dated amendment captures three authority digest changes, unchanged protocol and zero outcomes/rankings; historical qualification explicitly rejected against current sources."
+  },
+  "adapter_golden_repair": {
+    "commit": "e76404f611",
+    "status": "Astra approved; historical fixture unchanged; exact full historical-source receipts qualify Python 3.11/3.12 with NumPy 2.2.6 and explicit SciPy versions. 11 tests pass in each of three qualified environments; unknown combinations fail closed."
+  },
+  "gravity_literal_repair": {
+    "commit": "05745b52cc",
+    "status": "Astra approved; full decimal literals detected without prefix false positives; TDD red captured and checker suites pass.",
+    "red": {
+      "receipt": "gravity-literal-red.txt.gz",
+      "receipt_sha256": "6e35ec5274312519a822c9f3452a82823aad353da9d04ded5a7bedc1676fbed3",
+      "source_sha256": "91bb88096a2adaea78885fc12735799a68015c2ac6e288d5f110cfb33eba2d8d"
+    },
+    "green": {
+      "receipt": "gravity-literal-green.txt.gz",
+      "receipt_sha256": "717bc5d979bc2ee790a1b15f0dc1ea5898f177f61a445fe2ec6b685b46112b2d",
+      "source_sha256": "2966879a57d1fe445a9dc3ad0b8a13b40725ae57adca1cbc3a4ca95ba75ecf28"
+    }
+  },
+  "document_title_case": {
+    "baseline": "2511 tracked documents, 2497 pre-existing violations; full audit fails truthfully",
+    "changed": "289 changed documents, zero violations; scoped audit passes",
+    "baseline_receipt": {
+      "receipt": "document-title-case-baseline-failed.txt.gz",
+      "receipt_sha256": "e32db0974400e107a9d411db2e1d84b720bef72376c3a6f2019d9ccf8c0d01f2",
+      "source_sha256": "72817bfc096f89ed96ac0077c974a4b5b15addb68287b979c31eb22849d31437"
+    },
+    "changed_receipt": {
+      "receipt": "document-title-case-changed-pass.txt.gz",
+      "receipt_sha256": "fbdf80306895b54d9f7a961472199056681020ea087bb67822ede9c79e2fae15",
+      "source_sha256": "b23a75bb07a83220f85f78fd0bef51601bbd496c48cf7b4576148112eb617cb2"
+    }
   }
 }
