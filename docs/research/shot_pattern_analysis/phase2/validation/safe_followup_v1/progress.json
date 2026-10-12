@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T00:18:12.413700+00:00",
+  "recorded_at_utc": "2026-10-12T00:45:49.191750+00:00",
   "checkpoint": "adc1fb0627",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "17ad20777773f3ae69a42bcfd28a5179a5af1135",
+  "source_commit": "5fab697b635d0fded7805880796a2cc6284dc4e4",
   "integration": "Incoming 9c9000 reconciled at cb4948eb1b; writer API repair committed at 17ad207777. Frozen rows and approved DRY baseline unchanged. No force push.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Clean CI runtime matches all 126 evaluated requirements-dev.lock pins; Rust wheel built and import/smoke probe passed. Contact node, full DRY, architecture, and file-size checks passed locally. Complete canonical post-fix pre-PR still pending; no repository acceptance claim.",
+  "current_validation": "Clean CI runtime matches 126/126 dev-lock pins. Guarded optional vector import, generated parity matrix, and archived handoff sidecars have focused green checks. Earlier canonical pre-PR runs are preserved as incomplete diagnostics (pypdf collection failure; then 577 passed/2 failed before repairs). Complete canonical gate on repaired source remains pending; no repository acceptance claim.",
   "development_log_blocker": {
     "issue": 11935,
     "owned_by_other_session": true,
@@ -122,6 +122,66 @@
       "probe": "upstream-ci-rust-probe.txt.gz"
     },
     "generated_ignored_cargo_lock_sha256": "a986247a943e2f3a4b3881f5e259d7abf9c3b783679ec33e97d5db569fd2a8df",
-    "complete_pre_pr": "pending"
+    "complete_pre_pr": "pending on repaired source 5fab697b63; earlier interrupted diagnostics are not acceptance"
+  },
+  "canonical_pre_pr_diagnostics": {
+    "command": "/tmp/shot-upstream-ci-venv/bin/python -u /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main",
+    "environment": "Clean CI 126/126 dev-lock runtime; PYTHONPATH Repository_Management plus own worktree; MYPYPATH own worktree; headless platform variables; GitHub credentials unset",
+    "pre_guard_collection_failure": {
+      "result": "INCOMPLETE; SIGINT exit 130 after pypdf collection failure, before consistency phase finished",
+      "source_commit": "2fd7099fd1",
+      "receipt": "clean-ci-prepr-collection-failure-incomplete.txt.gz",
+      "receipt_sha256": "4a8a716bd6c8381039d20aac11c205a0b506ac05f87dd63f25fba6074374070c"
+    },
+    "post_guard_two_failures": {
+      "result": "INCOMPLETE; SIGINT exit 130 after 577 passed, 2 failed, 12 skipped, 38 deselected; consistency phase not completed",
+      "source_commit": "cc75f1ee0b",
+      "failures": [
+        "root clutter: eight tracked AGENT_HANDOFF sidecars",
+        "feature parity matrix stale versus official generator"
+      ],
+      "receipt": "clean-ci-prepr-post-guard-interrupted-two-failures.txt.gz",
+      "receipt_sha256": "87bfe44ff057da57b1768b19bd5d24aed84284875ea76ce2107ae617efdc96a2"
+    },
+    "vector_guard_focused": {
+      "source_commit": "cc75f1ee0b",
+      "clean_ci_collection": {
+        "result": "PASS; 5 numeric collected, target module skipped for missing optional pypdf",
+        "receipt": "vector-collection-clean-ci-green.txt.gz",
+        "receipt_sha256": "697ba1c21c5eec0a50cbec698e0b819df7fa6ea111736f072ebf5d674119624c"
+      },
+      "report_extra": {
+        "result": "PASS; two render-preparation tests",
+        "python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+        "packages": {
+          "pypdf": "6.20.0",
+          "reportlab": "4.5.1",
+          "matplotlib": "3.11.2"
+        },
+        "contract": "pyproject.toml [project.optional-dependencies].shot-pattern-report",
+        "receipt": "vector-render-preparation-report-extra-green.txt.gz",
+        "receipt_sha256": "40d0e730215df83cccbd8710acc6a5fdb5902793a6d4b9bac1a62c8131fefabd"
+      },
+      "ruff": {
+        "result": "PASS check and format",
+        "receipt": "vector-render-preparation-ruff-green.txt.gz",
+        "receipt_sha256": "9ee2323b64e5a8f96fac022e416007e216e88198e8515ee8446bc7ab4daa04f1"
+      }
+    },
+    "feature_parity_repair": {
+      "commit": "88b7584775",
+      "action": "Official generator refreshed stale padded Markdown formatting; no registry changes",
+      "generator_check": "PASS",
+      "focused_tests": "3 PASS"
+    },
+    "next": "Run unchanged canonical pre-PR on repaired source in 126/126 clean CI runtime",
+    "root_clutter_repair": {
+      "commit": "5fab697b635d0fded7805880796a2cc6284dc4e4",
+      "action": "Relocated eight byte-identical handoff sidecars from repository root to archive, updated manifest and link contracts",
+      "focused_tests": "5 PASS",
+      "document_title_case": "1 document checked, 0 violations",
+      "handoff_links": "PASS",
+      "ruff": "PASS"
+    }
   }
 }
