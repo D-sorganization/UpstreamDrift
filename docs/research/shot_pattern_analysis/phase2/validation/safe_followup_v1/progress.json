@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T09:24:30.139246+00:00",
+  "recorded_at_utc": "2026-10-12T09:43:08.573342+00:00",
   "checkpoint": "4317a39b461db30d59c7062d4b9cd0334ec37956",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "4317a39b461db30d59c7062d4b9cd0334ec37956",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Canonical gate at4317a39b46:7483 passed,377 skipped,43 deselected,1 xpassed,21 passing subtests; all gates passed except one title-case finding in a newly archived historical heading. Formatting correction and complete rerun pending.",
+  "current_validation": "Complete canonical RM-6 gate PASS: all eight gates; 7483 affected tests passed,377 skipped,43 deselected,1 xpassed,21 passing subtests. Test source81ec4e1c84; subsequent64f31f9f74 changes seven reviewed handoff fragments only, included in final policy checks. No frozen study rerun.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -615,17 +615,18 @@
     ]
   },
   "latest_combined_gate": {
-    "source": "4317a39b461db30d59c7062d4b9cd0334ec37956",
+    "test_source": "81ec4e1c84",
+    "policy_checkpoint": "64f31f9f749735ddb00054b70a0715f4b31a485a",
+    "status": "PASS all eight canonical gates",
     "passes": 7483,
     "failures": 0,
     "skipped": 377,
     "deselected": 43,
     "xpassed": 1,
     "subtests": 21,
-    "policy_failure": "One archived heading: Same-Repo if: must use If:. Original raw evidence remains preserved; formatting correction pending.",
-    "receipt": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/published-provider-canonical-title-red.txt.gz",
-    "receipt_sha256": "1bde4f2d24f8d61bbb81e26f185a127a29635c311cd8a09e93b1a4ac4c83b10f",
-    "uncompressed_sha256": "312ae1aab92fdeb0700721561c459cfb685d4dbff04032aaf02627fa4a3311bc"
+    "receipt": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/published-provider-canonical-green.txt.gz",
+    "receipt_sha256": "6edfefedcaa139f22a4ebc1986e4ffed1f2f842d2ed2a87d0e4129c859cbbde8",
+    "uncompressed_sha256": "71333bb621d6527258a005ce3946a63c8109446fe0e4d9254b96224fb80113da"
   },
   "development_log_reconciliation": {
     "review": "Astra approved exact public-API candidate and byte preservation",
