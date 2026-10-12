@@ -364,3 +364,37 @@ def test_drake_grip_matches_simscape(
             f"Drake produced a non-finite grip_quat at t={pose.t:.3f}s "
             f"(pose={pose.name!r}); cannot evaluate orientation gate."
         )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "arguments, expected",
+    [
+        ([], (SIMSCAPE_CSV, 0.30, 1000.0)),
+        (
+            [
+                "--csv",
+                "synthetic.csv",
+                "--simulation-time",
+                "0.5",
+                "--sample-rate",
+                "200",
+            ],
+            (Path("synthetic.csv"), 0.5, 200.0),
+        ),
+    ],
+)
+def test_inspection_cli_uses_migrated_provider_and_preserves_options(
+    arguments, expected
+):
+    from scripts import inspect_drake_vs_simscape as inspector
+
+    from tests.engines.drake import test_drake_simscape_equivalence as provider
+
+    assert inspector._load_simscape_poses is provider._load_simscape_poses
+    assert (
+        inspector._quaternion_geodesic_angle_rad
+        is provider._quaternion_geodesic_angle_rad
+    )
+    args = inspector._parse_args(arguments)
+    assert (args.csv, args.simulation_time, args.sample_rate) == expected

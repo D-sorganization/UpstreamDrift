@@ -706,5 +706,65 @@
         "uncompressed_sha256": "ab35ee42183d4d6d3ba483825ab037d18a5a15622d03be01d82220b1564851ff"
       }
     ]
+  },
+  "postpush_governance_repairs": {
+    "source": "6ce959f22737387c904d30a14a198ad101ff634c",
+    "ci": "Python3.11/3.12, frontend, sharedprovider, Rust quality and wheel parity green; security and ADR-index/architecture gates failed. All findings repaired locally; no bypass.",
+    "adr": "Index records mirrored ADR0014 validation test references; docs governance passes.",
+    "architecture": "CLI parsing/header and exact SVD/rank helper extraction: main96lines/build_audit97lines; no budget change. Migrated Drake test import corrected;9focusedtests pass,3missing-Drake skips.",
+    "release": "Official builder changes only audit source hash/size and matching checksum;10release/audit checks pass, exact published audit JSON preserved. Astra approved narrow identity refresh; no claim/approval/publication report renewal.",
+    "interrupted_local_gate": "4d262bf4ea run stopped after5percent when additionalCIrepair required. Exit143; not acceptance. Final repaired-source complete gate pending.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-security-canonical-prepr.txt.gz",
+        "sha256": "eb79cb38a21e7a9f4a555aac776a787840d8a9c1d417652d6eb98ba178f5e4c3",
+        "uncompressed_sha256": "7b58d0bc82568d494372ad356259549ce126f64cbffc5052b687c9dc779dd6b7"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-docs-governance-red.txt.gz",
+        "sha256": "a48baa6a6687df40e797097ea20ec300e99ebaf70ede3fb3345cb9fd27f31567",
+        "uncompressed_sha256": "c5a7d9c07945551e1037a0111fa2ec7b86976eaac56e18d41a90b83bf8178e7d"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-repo-structure-red.txt.gz",
+        "sha256": "1dc640e573150a2ce681e47457b2354f6e3d60f762083872b6984ae465af09a2",
+        "uncompressed_sha256": "76f2b42efad5f284e7cde1d2ca4c5a5b7278480d65c7234eef6979563c072cf0"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-doc-governance-red.txt.gz",
+        "sha256": "127a8ea4c41dd45cb411af2bab95526cfab1f9e233dee721762682f6a5868a96",
+        "uncompressed_sha256": "6e95993a11f0d803f67817f6be56d615e30ba124f9649ea7a832a9f905563eb1"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-docs-quality-red.txt.gz",
+        "sha256": "12e8326c707e7f6ad088070d897443112fedebfa94ba070508c3858de4e958d5",
+        "uncompressed_sha256": "46e31c88e5d7145d3aa406c170975cd040dcfb0c2f620cba119b935064d6efc1"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-function-extraction-red.txt.gz",
+        "sha256": "dd2bae9b28ce1f76165507fd32d8096c7ad8545f550929a25ddfa957ce031935",
+        "uncompressed_sha256": "4f309bf8279a85b5b68fb3e23c8af3112ad262d4feab9c2b092c2b896286aa53"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-function-extraction-green.txt.gz",
+        "sha256": "ade4ecaf0f63c4fcb244df009d2d67cc49bb8cbf1226643e89bd38ad6d2f5607",
+        "uncompressed_sha256": "ecdb1a06aa39b482329675587dfa80d3339d1337560e19d202021408558a14c2"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-function-extraction-architecture-green.txt.gz",
+        "sha256": "14bbaf1ed8dee012e9fae94fcc322e04f23a2aab4856de845d3487ba315f4dc1",
+        "uncompressed_sha256": "3c081fa5abadb66a3f6b464ddae560051ed351f328cf602d107008e723857355"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-refactor-release-integrity-green.txt.gz",
+        "sha256": "87cd593bff12213011d15842744b0bf0daeaa5d48d1f914ccaa479ae8fccca19",
+        "uncompressed_sha256": "f3b3b070d48cc7172a36fc0701cdd254ec440cb96e430c70a9e55f4cb35a028c"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-refactor-release-integrity-corrected-green.txt.gz",
+        "sha256": "72b20d3c40a0ef2646541dfb0efc1c12214d783d760d6b6503b9f78f4772f544",
+        "uncompressed_sha256": "8cb5b3a2f555fa7443333651f0b047d5a02a3ab5a5fa3a7c15150f527a970c18"
+      }
+    ]
   }
 }
