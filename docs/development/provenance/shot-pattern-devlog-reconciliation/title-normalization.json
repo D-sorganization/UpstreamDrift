@@ -8,7 +8,7 @@
   "archive_bytes": 280375,
   "line": 791,
   "before_heading": "DL-#11556 \u00b7 Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.",
-  "after_heading": "DL-#11556 \u00b7 Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo If: Exemption and Sink-Based Head-Checkout Analysis.",
+  "after_heading": "DL-#11556 \u00b7 Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.",
   "formatter": "shared_scripts.document_title_case.apply_text_fixes",
   "formatter_sha256": "c6ec3c3243bb08dec0f0a31a5bf9306d3d948e40522f73bf97b8caa3f6f5131d",
   "canonical_finding_before": true,
