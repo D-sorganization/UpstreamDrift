@@ -38,6 +38,7 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
 from ._subject_anthropometrics import SubjectAnthropometrics
 from .engine_adapters import ADAPTER_REGISTRY
 from .estimators.from_de_leva import DeLevaEstimator
@@ -331,8 +332,8 @@ def _load_marker_trajectories(mocap_path: Path) -> dict[str, np.ndarray]:
     is NaN-tolerant.
     """
     try:
-        import ezc3d  # local import keeps the package importable without ezc3d
-    except ImportError as error:  # pragma: no cover - exercised via mocks
+        ezc3d = import_ezc3d()  # lazy: package stays importable without ezc3d
+    except ModuleNotFoundError as error:  # pragma: no cover - exercised via mocks
         raise ImportError(
             "ezc3d is required to load C3D marker trajectories. "
             "Install it with: pip install ezc3d"

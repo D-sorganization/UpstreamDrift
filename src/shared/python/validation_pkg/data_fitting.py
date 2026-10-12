@@ -17,6 +17,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ._data_fitting_models import (
@@ -393,8 +394,8 @@ class A3FittingPipeline:
         if c3d_path is None:
             raise ValueError("c3d_path must be provided")
         try:
-            import ezc3d
-        except ImportError as e:
+            ezc3d = import_ezc3d()
+        except ModuleNotFoundError as e:
             logger.error("ezc3d not available - cannot read C3D files")
             raise ImportError("Install ezc3d: pip install ezc3d") from e
 

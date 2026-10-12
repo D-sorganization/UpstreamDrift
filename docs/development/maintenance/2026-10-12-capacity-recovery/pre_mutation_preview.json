@@ -1,0 +1,24 @@
+{
+    "head":  "8e9b4b974b98d0f1006514a121b3b0807ed42d9c",
+    "original_bytes":  224549,
+    "original_sha256":  "72154f850177d6006163e93e1804b4ca3b1d24504f8455448cadee6acf7cd00b",
+    "original_git_blob":  "01e235eff4efe0ab5fc0493ede0399feea243c1e",
+    "entry_count":  144,
+    "non_target_entries_byte_exact":  true,
+    "10783_preview_state":  "shipped",
+    "11792_state":  "in_progress",
+    "archive_days":  0,
+    "day0_archive_count":  68,
+    "day0_archive_year_counts":  {
+                                     "2026":  68
+                                 },
+    "remaining_entries":  76,
+    "remaining_log_bytes":  162340,
+    "archive_written":  false,
+    "preview_sha256":  "ffd0dee46d9352b55977fc83fed5136ae64852a827c5fb807cee008b70e8b873",
+    "row_source":  "scoped #10783 verification on UpstreamDrift main",
+    "row_sha":  "8e9b4b974b98d0f1006514a121b3b0807ed42d9c",
+    "existing_pr":  10784,
+    "next_step":  "The UpstreamDrift software guard is complete; the three canonical-function exceptions expire 2026-10-23. Broader fleet rollout remains separately tracked in Repository_Management #1687.",
+    "preview_snapshot":  "DEVELOPMENT_LOG.collation-preview.md.snapshot"
+}

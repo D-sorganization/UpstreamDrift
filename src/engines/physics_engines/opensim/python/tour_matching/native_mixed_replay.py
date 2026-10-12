@@ -160,7 +160,10 @@ def _identity(
     declaration: DeclaredColdStart | None = None,
 ) -> Any:
     paths = tuple(channel.path for channel in admitted.channels)
-    base = native_muscle_bundle._identity(path, model, names, paths, options, contracts)
+    base = native_muscle_bundle._identity(
+        native_muscle_bundle.BundleSubject(path, model, names, paths, options),
+        contracts,
+    )
     # Registered override variables carry the owning scalar actuator's native
     # output units. Unknown registered discrete semantics are rejected.
     units = {
