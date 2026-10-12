@@ -228,12 +228,14 @@ def test_check_file_dbc_directory(tmp_path) -> None:
         check_file(tmp_path)  # directory, not a file
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize("literal", ["9.8", "9.81", "9.80665", "9.810000"])
 def test_gravity_literal_detection_retains_all_decimal_digits(literal: str) -> None:
     issues = check_magic_numbers([f"g = {literal}"], Path("physics.py"))
     assert any("GRAVITY_M_S2" in message for _, message, _ in issues)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize("literal", ["19.80665", "99.81"])
 def test_gravity_literal_detection_rejects_larger_number_suffixes(literal: str) -> None:
     issues = check_magic_numbers([f"g = {literal}"], Path("physics.py"))

@@ -11,6 +11,8 @@ import pytest
 
 from scripts import check_spec_paths as checker
 
+pytestmark = pytest.mark.unit
+
 
 def _git(root: Path, *args: str) -> str:
     return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()

@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately.",
+  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately. Protected repo-structure then found10 source-level functions missing suite classification; only rightful unit markers are added, with22 unit cases and static ratchet passing. Production/assertions/baseline unchanged; updated canonical/protected CI pending.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -1143,5 +1143,34 @@
     ],
     "gate": "Astra-preservation review and complete stable-source canonical pass; protected updated CI pending.",
     "independent_review": "Astra independently verifies eight exact incoming files, both log hashes, single registry resolution and generated catalog preservation; no scientific feature qualification or boundary-review renewal."
+  },
+  "protected_ci_suite_marker_followup": {
+    "failed_head": "6bdfa8cea2a4a8967f5dbfba40d23511f221f84a",
+    "run": 38259075783,
+    "job": 114845096127,
+    "scope": "Only rightful unit suite classification: module marker on new path-provenance tests and decorators on two new gravity-literal tests. Assertions, production source, suite baseline, numerical tolerances and selection policy unchanged.",
+    "validation": "Actual ratchet red10 source-level test functions -> green; explicit unit lane22 cases passes, Ruff/format passes. Full combined canonical/protected CI pending.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-repo-structure-failed.log.gz",
+        "sha256": "407088f8c970d3c5f81192afd1d547aa37d6bfb46be173bc70f7da22b260c193",
+        "uncompressed_sha256": "624ec8b5b0fcc68d0e0b578669067832bb9f486258d36af55ddddfb7145c17f6"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-marker-red.txt.gz",
+        "sha256": "3804bc3227cd2a33976966d612c4f8e5b2296a59a0e672ab67a692b4b208cfc0",
+        "uncompressed_sha256": "c7d48837a3ff7ad1ba7795fb35d725357a8878d653e8a009a8ff5b57c075e1d5"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-marker-green.txt.gz",
+        "sha256": "c4748dd688e3b57ce96642de24f1e1be045f14e675ea66ef72daef5bae40c121",
+        "uncompressed_sha256": "a0ec2cf9cefdab32b1006612107f39556c111ba9fe766711fb238c976280ed81"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-marker-unit-tests.txt.gz",
+        "sha256": "9216777e5ca4e2ca4d96a50a59a342b2fa3270bd05a5880965de950076df2203",
+        "uncompressed_sha256": "0853b90c4f95a9ab32e4860ebe6482ee8d8ff40b20d271dfab6c6e76b921a58b"
+      }
+    ]
   }
 }
