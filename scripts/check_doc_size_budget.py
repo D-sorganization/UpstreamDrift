@@ -28,6 +28,9 @@ EXCLUDED_PARTS = {
 # definition and exempt from the size budget (RM#1893).
 ARCHIVE_DIR = "docs/development/archive"
 DEVLOG_ARCHIVE_PREFIX = "docs/development/DEVELOPMENT_LOG_ARCHIVE_"
+# SPEC.md change-log history moved verbatim by UpstreamDrift#9415; SPEC.md
+# itself stays under its own capped, dated exception.
+SPEC_ARCHIVE = "docs/spec/CHANGELOG_ARCHIVE.md"
 
 
 @dataclass(frozen=True)
@@ -69,7 +72,9 @@ def _is_document(path: Path) -> bool:
 
 def _is_archive(rel_path: str) -> bool:
     """Return whether a path is a verbatim HANDOFF/DEVELOPMENT_LOG archive."""
-    return rel_path.startswith((f"{ARCHIVE_DIR}/", DEVLOG_ARCHIVE_PREFIX))
+    return rel_path == SPEC_ARCHIVE or rel_path.startswith(
+        (f"{ARCHIVE_DIR}/", DEVLOG_ARCHIVE_PREFIX)
+    )
 
 
 def _is_excluded(path: Path) -> bool:
