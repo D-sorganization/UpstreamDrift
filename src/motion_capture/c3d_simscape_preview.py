@@ -10,7 +10,7 @@ from src.shared.python.data_io.native_dll_guard import import_ezc3d
 try:
     ezc3d = import_ezc3d()
 except ImportError:
-    ezc3d = None
+    ezc3d = None  # type: ignore[assignment, unused-ignore]
 
 logger = logging.getLogger(__name__)
 
