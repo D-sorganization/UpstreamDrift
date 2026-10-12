@@ -246,18 +246,3 @@ replay share the same revalidation boundary. A missing legacy audit or changed
 sidecar fails closed. The physical test is necessary for optimization, never
 sufficient for muscle physiology, captured-motion fit or release. See
 canonical chapter53 and `F07_MOCO_INERTIA_PREFLIGHT_TURNOVER.md`.
-
-## F01 Replay Full-Horizon and Observation-Clock Contract (#11828)
-
-`FeedbackComparisonRegistry` admits the within-engine replay and same-input
-levels only when the evidence declares `full_horizon=True`; a truncated replay
-raises `replay must cover the full horizon`. Observation accuracy additionally
-requires its own `observation_time_grid_sha256`, the digest of the output or
-capture clock, which must be distinct from the T01 applied-input time-grid
-hash. Capture timing is never inferred from actuator sampling, so a receipt that
-reuses the input-grid digest for the observation clock is rejected. This is a
-contract repair that closes an admission gap (PR #12141, tests
-`test_truncated_replay_cannot_pass_full_horizon_levels` and
-`test_observation_score_requires_separate_output_clock_digest`); it is not a
-numerical qualification and asserts no native trajectory, contact or
-real-capture accuracy.

@@ -40,9 +40,12 @@ remains blocked pending full inventory and qualification.
 PR #12141 (commit ec109fa1aa) made `_admit_replay_evidence` raise
 `replay must cover the full horizon` when `full_horizon` is False at the
 within-engine-replay and same-input levels, and made observation accuracy
-require a distinct `observation_time_grid_sha256` for the output/capture clock,
-never inferred from actuator sampling or reused from the T01 input grid. Tests:
+require its own `observation_time_grid_sha256` field for the output/capture clock,
+separate from the T01 input-grid hash field and never inferred from actuator
+sampling (the registry requires the digest to be present; it does not compare
+its value with the input-grid hash). Tests:
 `test_truncated_replay_cannot_pass_full_horizon_levels` and
 `test_observation_score_requires_separate_output_clock_digest` in
 `tests/unit/engines/test_feedback_comparison.py`. This is a contract repair,
-not a numerical qualification; the manual (`DESIGN.md`) and SPEC now state it.
+not a numerical qualification; canonical manual chapter 13
+(`manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`) and SPEC state it.
