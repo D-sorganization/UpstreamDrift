@@ -107,6 +107,43 @@ class GripSource(Protocol):
 _GRIP_FAILURES = (ValueError, ArithmeticError, RuntimeError, np.linalg.LinAlgError)
 
 
+def sphere_bodies(spec: Mapping[str, Any]) -> dict[str, str]:
+    """Contact-sphere name to spec body name, from a full-body spec document."""
+    spheres = spec.get("contact", {}).get("spheres", ())
+    return {sphere["name"]: sphere["body"] for sphere in spheres}
+
+
+def contact_sample_wrenches(
+    samples: Mapping[str, Any],
+    sphere_body: Mapping[str, str],
+    *,
+    source: str,
+) -> list[OverlayWrench]:
+    """Loaded shared-law contact samples as ground ``CONTACT`` wrenches.
+
+    ``samples`` maps sphere name to a ``ContactSample``; ``sphere_body`` maps
+    sphere name to its spec body (default: the name's last ``_`` part).
+    Postcondition: unloaded spheres (``|F| <= 1e-9 N``) are omitted, so a foot
+    off the ground has no wrench rather than a zero one.
+    """
+    ground: list[OverlayWrench] = []
+    for name, sample in samples.items():
+        force = np.asarray(sample.normal_force_n) + np.asarray(sample.friction_force_n)
+        if float(np.linalg.norm(force)) <= 1e-9:
+            continue
+        ground.append(
+            OverlayWrench(
+                WrenchKind.CONTACT,
+                f"contact:{_label_part(name)}",
+                sphere_body.get(name, name.rsplit("_", 1)[-1]),
+                _tuple3(np.asarray(sample.contact_point_m, float)),
+                force_n=_tuple3(force),
+                source=source,
+            )
+        )
+    return ground
+
+
 class BundleOverlayProvider:
     """Time series of overlay frames for one bundle (or a replay of it).
 
@@ -153,9 +190,7 @@ class BundleOverlayProvider:
         self._gravity = np.asarray(
             spec.get("gravity_m_s2", (0.0, 0.0, -9.80665)), float
         )
-        self._sphere_body = {
-            s["name"]: s["body"] for s in spec.get("contact", {}).get("spheres", ())
-        }
+        self._sphere_body = sphere_bodies(spec)
 
     def with_grip(
         self, grip: GripSource, source: str | None = None
@@ -252,24 +287,9 @@ class BundleOverlayProvider:
         per-foot and net force, CoP, free moment and moment about the CoM.
         """
         samples = self._contact.evaluate_contact_samples(coords, rates)
-        ground: list[OverlayWrench] = []
-        for name, sample in samples.items():
-            force = np.asarray(sample.normal_force_n) + np.asarray(
-                sample.friction_force_n
-            )
-            if float(np.linalg.norm(force)) <= 1e-9:
-                continue
-            body = self._sphere_body.get(name, name.rsplit("_", 1)[-1])
-            ground.append(
-                OverlayWrench(
-                    WrenchKind.CONTACT,
-                    f"contact:{_label_part(name)}",
-                    body,
-                    _tuple3(np.asarray(sample.contact_point_m, float)),
-                    force_n=_tuple3(force),
-                    source=f"{self._engine}:shared_contact_law",
-                )
-            )
+        ground = contact_sample_wrenches(
+            samples, self._sphere_body, source=f"{self._engine}:shared_contact_law"
+        )
         return list(
             ground_reaction_overlay(
                 ground,
