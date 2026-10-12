@@ -20,6 +20,7 @@ from src.tools.launch_monitor_model import (
     baseline_table_sha256,
 )
 
+from .core import PATTERNS
 from .uncertainty import paired_mean_difference
 
 SOURCE_URL = "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
@@ -138,6 +139,11 @@ def _normal_cdf(z: float) -> float:
     return 0.5 * (1 + math.erf(z / math.sqrt(2)))
 
 
+# Table 9 putting states span 0–75 ft; the three-putt logistic is only
+# monotone (and fitted) inside that range.
+MAX_PUTT_DISTANCE_YARDS = 75 / 3
+
+
 def putt_probabilities(distance_yards: float) -> tuple[float, float]:
     """Return paper Eq. 5 p1 and an anchor-reconciled approximation to p3.
 
@@ -148,6 +154,11 @@ def putt_probabilities(distance_yards: float) -> tuple[float, float]:
     """
     if not math.isfinite(distance_yards) or distance_yards < 0:
         raise ValueError("putt distance must be finite and nonnegative")
+    if distance_yards > MAX_PUTT_DISTANCE_YARDS:
+        raise ValueError(
+            f"putt distance {distance_yards:.2f} yd exceeds the fitted "
+            f"{MAX_PUTT_DISTANCE_YARDS:.0f} yd putting range"
+        )
     sigma_angle = math.radians(1.46)
     sigma_distance = 0.057
     target_past_yards = 0.5
@@ -370,10 +381,15 @@ def load_pattern_endpoints(
 ) -> dict[str, list[tuple[int, float, float]]]:
     """Load shot endpoints grouped by pattern from a shots.csv file."""
     endpoints: dict[str, list[tuple[int, float, float]]] = {
-        name: [] for name in ("Straight", "Draw", "Fade")
+        pattern.name: [] for pattern in PATTERNS
     }
     with Path(shots_csv_path).open(newline="") as handle:
         for row in csv.DictReader(handle):
+            if row["pattern"] not in endpoints:
+                raise ValueError(
+                    f"unknown shot pattern {row['pattern']!r}; "
+                    f"expected one of {sorted(endpoints)}"
+                )
             endpoints[row["pattern"]].append(
                 (
                     int(row["shot_index"]),

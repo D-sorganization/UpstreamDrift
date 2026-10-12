@@ -133,7 +133,9 @@ def _report_source_hashes() -> dict[str, str]:
         repository / "src/tools/shot_pattern_analysis/matched_supplement_figures.py",
     )
     return {
-        str(path.relative_to(repository)): hashlib.sha256(path.read_bytes()).hexdigest()
+        path.relative_to(repository).as_posix(): hashlib.sha256(
+            path.read_bytes()
+        ).hexdigest()
         for path in sources
     }
 

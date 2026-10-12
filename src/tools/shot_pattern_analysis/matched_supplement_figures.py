@@ -269,7 +269,7 @@ def _cell_figure_ledger(
                         if "overhead" in figure_group
                         else None
                     ),
-                    "relative_path": str(path.relative_to(output_dir)),
+                    "relative_path": path.relative_to(output_dir).as_posix(),
                     "sha256": _sha256(path),
                 }
             )
@@ -969,7 +969,7 @@ def _pair_density_ledger(
                 "total_n_per_population": first["config"]["n_shots"],
                 "conditioning": "same shot indices supported in all six populations",
                 "target_x_m": context.target_x,
-                "relative_path": str(path.relative_to(request.output_dir)),
+                "relative_path": path.relative_to(request.output_dir).as_posix(),
                 "sha256": _sha256(path),
             }
         )
@@ -1095,7 +1095,7 @@ def _pair_overhead_ledger(
                 "saved_trajectory_samples_by_pattern": {
                     key: len(samples) for key, samples in trajectory_sets.items()
                 },
-                "relative_path": str(path.relative_to(request.output_dir)),
+                "relative_path": path.relative_to(request.output_dir).as_posix(),
                 "sha256": _sha256(path),
             }
         )

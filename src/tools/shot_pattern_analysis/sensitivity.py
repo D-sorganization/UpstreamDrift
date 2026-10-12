@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from importlib.metadata import version
 import math
@@ -19,6 +18,7 @@ from .core import AnalysisConfig, PhysicsProtocol
 from .delivery_geometry import delivery_from_face_angle, delivery_from_shaft_rotation
 from .physics import ShotPhysics
 from .presets import CLUB_PRESETS
+from .provenance import relative_file_hashes, sha256_file
 
 
 def fixed_club_pitch(*, base_loft_deg: float, lie_deg: float, pitch_deg: float) -> dict:
@@ -212,14 +212,14 @@ def scientific_source_hashes() -> dict[str, str]:
     ]
     paths += [
         root / "src/shared/python/core/physics_constants.py",
-        root / "Cargo.lock",
         root / "Cargo.toml",
     ]
+    # Cargo.lock is gitignored; hash it only when a local build produced it.
+    cargo_lock = root / "Cargo.lock"
+    if cargo_lock.is_file():
+        paths.append(cargo_lock)
     paths += list((root / "rust_core/upstream-physics/src").glob("*.rs"))
-    return {
-        str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in sorted(paths)
-    }
+    return relative_file_hashes(sorted(paths), root)
 
 
 def runtime_provenance(source_hashes: dict[str, str], command: str) -> dict:
@@ -236,10 +236,7 @@ def runtime_provenance(source_hashes: dict[str, str], command: str) -> dict:
             name: version(name) for name in ("numpy", "scipy", "upstream-physics")
         },
         "source_sha256": source_hashes,
-        "native_binary_sha256": {
-            path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-            for path in binaries
-        },
+        "native_binary_sha256": {path.name: sha256_file(path) for path in binaries},
         "reproduction_command": command,
         "native_build_command": "maturin develop --release --manifest-path rust_core/upstream-physics/Cargo.toml",
         "qualification": "software-level deterministic study; no measured club/golfer validation",

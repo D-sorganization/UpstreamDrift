@@ -422,25 +422,24 @@ def run_matched_analysis(
             except ValueError:
                 inputs["status"] = "delivery_out_of_range"
                 rows.append(MatchedShotRecord(**inputs))
-                continue
-            try:
-                delivered = engine.simulate_delivery(
-                    nominal_face_deg=nominal.face_deg,
-                    path_deg=inputs["path_deg"],
-                    config=club,
-                    shaft_rotation_deg=rotation,
-                    contact_horizontal_m=horizontal,
-                    contact_vertical_m=vertical,
-                    sample_trajectory=index < 5,
-                )
-            except UnsupportedShot as exc:
-                inputs["status"] = exc.reason
-                rows.append(MatchedShotRecord(**inputs))
             else:
-                rows.append(_supported_record(inputs, delivered))
-                outcome = delivered.outcome
-                if index < 5:
-                    paths.append(outcome.trajectory_xy_m)
+                try:
+                    delivered = engine.simulate_delivery(
+                        nominal_face_deg=nominal.face_deg,
+                        path_deg=inputs["path_deg"],
+                        config=club,
+                        shaft_rotation_deg=rotation,
+                        contact_horizontal_m=horizontal,
+                        contact_vertical_m=vertical,
+                        sample_trajectory=index < 5,
+                    )
+                except UnsupportedShot as exc:
+                    inputs["status"] = exc.reason
+                    rows.append(MatchedShotRecord(**inputs))
+                else:
+                    rows.append(_supported_record(inputs, delivered))
+                    if index < 5:
+                        paths.append(delivered.outcome.trajectory_xy_m)
             if progress is not None and (
                 index % 100 == 0 or index == request.n_shots - 1
             ):

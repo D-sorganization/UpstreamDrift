@@ -6,7 +6,35 @@ import hashlib
 import importlib.machinery
 import importlib.util
 import json
+from collections.abc import Iterable
 from pathlib import Path
+
+
+def sha256_file(path: Path) -> str:
+    """Return the hex SHA-256 digest of one file, streamed in 1 MiB blocks."""
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def relative_file_hashes(paths: Iterable[Path], root: Path) -> dict[str, str]:
+    """Hash files keyed by their POSIX path relative to ``root``.
+
+    Keys are platform independent, so a receipt written on Windows matches one
+    written on Linux. Raises ValueError for a file outside ``root``.
+    """
+    root = Path(root)
+    hashes: dict[str, str] = {}
+    for path in paths:
+        path = Path(path)
+        try:
+            key = path.relative_to(root).as_posix()
+        except ValueError as exc:
+            raise ValueError(f"{path} lies outside provenance root {root}") from exc
+        hashes[key] = sha256_file(path)
+    return hashes
 
 
 def resolve_native_binary(origin: Path) -> Path:
@@ -78,14 +106,9 @@ def source_snapshot() -> dict:
         raise RuntimeError("native upstream_physics must be installed")
     native_binary = resolve_native_binary(Path(rust_spec.origin))
     return {
-        "source_sha256": {
-            path.relative_to(root).as_posix(): hashlib.sha256(
-                path.read_bytes()
-            ).hexdigest()
-            for path in files
-        },
+        "source_sha256": relative_file_hashes(files, root),
         "native_binary_path": str(native_binary),
-        "native_binary_sha256": hashlib.sha256(native_binary.read_bytes()).hexdigest(),
+        "native_binary_sha256": sha256_file(native_binary),
         "cargo_lock_present": has_cargo_lock,
     }
 
@@ -130,8 +153,7 @@ def manifest_files_match(manifest_path: Path) -> bool:
         return all(
             isinstance(name, str)
             and isinstance(expected, str)
-            and hashlib.sha256((manifest_path.parent / name).read_bytes()).hexdigest()
-            == expected
+            and sha256_file(manifest_path.parent / name) == expected
             for name, expected in hashes.items()
         )
     except (OSError, ValueError, TypeError, KeyError):
