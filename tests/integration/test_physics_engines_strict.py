@@ -206,12 +206,12 @@ class TestOpenSimStrict:
         engine = OpenSimPhysicsEngine()
         engine._model = MagicMock(
             spec=["getNumSpeeds", "getNumCoordinates", "initSystem", "realizeVelocity"]
-        )  # type: ignore
-        engine._state = MagicMock(spec=["getQ", "getU", "getTime"])  # type: ignore
+        )
+        engine._state = MagicMock(spec=["getQ", "getU", "getTime"])
 
         # Provide correct speeds/coords
-        engine._model.getNumSpeeds.return_value = 2  # type: ignore
-        engine._model.getNumCoordinates.return_value = 2  # type: ignore
+        engine._model.getNumSpeeds.return_value = 2
+        engine._model.getNumCoordinates.return_value = 2
 
         # Mock vector interaction for udot input
         # No error raised

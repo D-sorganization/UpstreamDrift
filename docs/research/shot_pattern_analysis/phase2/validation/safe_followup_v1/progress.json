@@ -434,7 +434,7 @@
     "local_commit": "0c43d91539",
     "review": "Astra approved source/test fix",
     "local_gates": "339 affected tests pass; Ruff, mypy, consistency collection, fragment, import and workflow gates pass; nine manual gates pass with unapproved publication preserved. Canonical RM-6 EXIT1 only inherited 76 development-log findings identical on Tools main.",
-    "status": "User authorized governed cross-repository repair. RM PR2082 merged db97f51573889f2a82b33562785735b3f801c24f with protected CI; Tools approved mapping is being applied through the official tool, no direct manual shared-log edit.",
+    "status": "Tools PR #5573 open at e5e2c92acc7cd95b1188295ef758a3090f69c6b6; corrected full local gate and Astra review PASS; Detect Secrets and divergence ledger CI PASS; protected merge pending",
     "receipt": {
       "receipt": "tools-signal-source-gates-green-log-policy-failed.txt.gz",
       "sha256": "ccb63bc6b778d8aa3184930b9a767e4778356829fa1e93c99504517d7f7864a0",
@@ -537,5 +537,51 @@
       "raw_sha256": "b2186ee8ce8285b33a239d330ce5502e2959a288ec83a57eed818832e1cb66e5"
     },
     "inventory": "Official generator applied to combined source; no new rule allowance or scientific approval."
+  },
+  "candidate_full_prepr_20261012": {
+    "head": "95909ac61a",
+    "exit_code": 1,
+    "tests": {
+      "passed": 7456,
+      "failed": 2,
+      "skipped": 377,
+      "deselected": 42,
+      "xpassed": 1,
+      "subtests_passed": 21
+    },
+    "duration_seconds": 1141.15,
+    "remaining": [
+      "Owned ignored root Cargo.lock preserved outside repository; no allowlist change",
+      "Impact acceptance pin reconciliation requires final published Tools capability probes and served bundle",
+      "Six unit markers/five bare type-ignore policy findings corrected with focused checks pending"
+    ],
+    "receipt": {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/candidate_full_prepr_20261012.txt.gz",
+      "sha256": "b50bb0d385f149068dbf6ebb01d6da2f20f8dc560362d77ccad3176f4de41a63",
+      "uncompressed_sha256": "b4732dad8ebb09b73912f918f2a77ba3806483aebf2e1e16f3b821728d36b8f0"
+    },
+    "acceptance": "Candidate diagnostic only; final published provider pin and complete gate remain required",
+    "follow_up": {
+      "policy": "Official policy/fragment validator PASS; six unit markers and five bare ignores corrected without assertion changes",
+      "focused_tests": "124 passed",
+      "root_clutter": "Generated ignored Cargo.lock preserved at /tmp/shot-candidate-generated-Cargo.lock; original root-clutter test PASS",
+      "receipts": [
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-candidate-policy-fix-focused.txt.gz",
+          "sha256": "1683d6c7965f4a9b0c6a96d841945787a942b3506fa1cde80578a9ada109e450",
+          "uncompressed_sha256": "90eba088f4d978ec8158c38a78e228519be792bb04e65c71d46ec5b85a302d83"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-candidate-policy-fragments-green.txt.gz",
+          "sha256": "70dbb8096c563d6cd5fd682760d0d312720d552222ad5fd1d9059ecaf82ee287",
+          "uncompressed_sha256": "c26de83abdc9496cd1301470918ec39ecca1cf389ef0ae1c6504da1800d1c431"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-candidate-root-clutter-test-green.txt.gz",
+          "sha256": "43566ca0b542be0b8e0ca54d3756187c4b5761e6f131330610b74c6e54f9f708",
+          "uncompressed_sha256": "eff9d4c2fb312c7b793ec36d47cdff2fdb9eae66be7fdf03aa1f6939c5a2d4eb"
+        }
+      ]
+    }
   }
 }

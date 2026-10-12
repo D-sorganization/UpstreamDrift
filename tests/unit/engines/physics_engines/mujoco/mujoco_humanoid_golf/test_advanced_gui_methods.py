@@ -4,10 +4,13 @@ import json
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_gui_methods import (
     AdvancedGuiMethodsMixin,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class MockGuiClass(AdvancedGuiMethodsMixin):

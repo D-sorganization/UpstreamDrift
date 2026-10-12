@@ -9,6 +9,8 @@ from src.engines.physics_engines.drake.python.src.drake_gui_app import (
     HAS_QT,
 )
 
+pytestmark = pytest.mark.unit
+
 if not HAS_QT:
     pytest.skip(
         "Skipping PyQt tests since PyQt6 is not available", allow_module_level=True
@@ -156,4 +158,4 @@ class TestDrakeSimApp:
         """Test updating status bar with None msg."""
         app = DrakeSimApp()
         with pytest.raises(ValueError, match="message must be provided"):
-            app._update_status(None)  # type: ignore
+            app._update_status(None)  # type: ignore[arg-type]

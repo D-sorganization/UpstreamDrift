@@ -16,6 +16,8 @@ from src.shared.python.theme.api import (
     create_theme_router,
 )
 
+pytestmark = pytest.mark.unit
+
 _COLORS = {
     "bg": "#1e1e2e",
     "group_bg": "#2a2a3e",

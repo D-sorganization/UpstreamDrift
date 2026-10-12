@@ -12,6 +12,8 @@ from src.shared.python.signal_toolkit.limits import (
     apply_saturation,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_signal(amp: float = 2.0, n: int = 100) -> Signal:
     t = np.linspace(0.0, 1.0, n)
