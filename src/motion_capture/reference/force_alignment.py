@@ -123,7 +123,8 @@ def force_frame_for_video(
         raw_points = np.array([w.point_m for w in frame.wrenches], dtype=np.float64)
         world_points = registration.place_points(raw_points)
         for w, pt in zip(frame.wrenches, world_points, strict=True):
-            p_tuple = (float(pt[0]), float(pt[1]), float(pt[2]))
+            pt_arr = np.asarray(pt)
+            p_tuple = (float(pt_arr[0]), float(pt_arr[1]), float(pt_arr[2]))
             wrenches.append(_transform_wrench(w, p_tuple, a_matrix, det_a))
 
     axial: AxialLoadFrame | None = None
@@ -249,13 +250,14 @@ def _load_fallback_trace_forces(handle: h5py.File) -> ForceTorqueSeries | None:
     body = str(handle.attrs.get("meta_wrench_body", "root"))
     frames: list[ForceTorqueFrame] = []
     for t_val, row in zip(times, wrench_arr, strict=True):
+        row_arr = np.asarray(row)
         w = OverlayWrench(
             kind=WrenchKind.EXTERNAL,
             label="external:trace_wrench",
             body=body,
             point_m=point_m,
-            force_n=(float(row[0]), float(row[1]), float(row[2])),
-            torque_nm=(float(row[3]), float(row[4]), float(row[5])),
+            force_n=(float(row_arr[0]), float(row_arr[1]), float(row_arr[2])),
+            torque_nm=(float(row_arr[3]), float(row_arr[4]), float(row_arr[5])),
             source=backend,
         )
         frames.append(

@@ -18,18 +18,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11792 — Whole-Body Motion Matching Readiness
+### DL-#11792 — F08: Match Mocap With Muscle Excitations and Verify Pure OpenSim Replay
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11792 (parent #11784; implementation children #12342, #12343, and #12353)
-- **PR:** #12344 (merged); #12355 (open); #12367 (open)
-- **Branch:** fix/native-path-connection-finalization-12233-20261012 (#12344); feat/native-passive-observation-receipt-12342 (#12355); feat/native-no-probe-12353-20261012 (#12367)
+- **Issue:** #11792 (parent #11784; children #12342, #12343, #12353)
+- **PR:** #12344 (draft); related #12355
+- **Branch:** `fix/native-path-connection-finalization-12233-20261012`
 - **Started:** 2026-10-09 (parent issue opened)
-- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py; src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py; src/engines/physics_engines/opensim/python/tour_matching/native_passive_receipt.py; tests/opensim/test_native_passive_receipt.py; tests/unit/engines/opensim/test_native_path_optimizer_domains.py; tests/unit/engines/opensim/test_native_moco_probe_mode.py; manuals/upstreamdrift/chapters/24-native-path-work.qmd; manuals/upstreamdrift/chapters/33-native-passive-readiness.qmd; docs/development/feedback_controls/F07_PATH_WORK_TURNOVER.md; docs/development/feedback_controls/F07_PASSIVE_READINESS_TURNOVER.md
-- **Last verified:** 2026-10-12 at f7a0ad630f9f9142cadb4e816d03f91379a354fb; pinned QA pre-PR passed all gates (307 passed, 29 skipped, 16 warnings). Semgrep and Fleet Policy were skipped because their local tools/entrypoints were unavailable. The run made no native calls.
-- **Summary:** Software/readiness work finalizes native connections before optimizer-domain and passive audits, persists the passive-readiness observation without changing its scientific digest, and provides a preparation mode that avoids forward integration. It does not establish a solve, optimum, learned replay, or physical qualification. All 17 registered model/variant rows remain unqualified.
-- **Next step:** Complete and review the combined no-probe preparation, then address physiological policy and require solver readback plus a full-clock replay before any qualification claim.
+- **Paths:** `changes/12233-bound-moco-optimizer-states-to-source-mo.md`; `docs/agent_context/README.md`; `docs/agent_context/index.html`; `docs/development/feedback_controls/F07_PATH_WORK_TURNOVER.md`; `manuals/upstreamdrift/chapters/24-native-path-work.qmd`; `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py`; `tests/unit/engines/opensim/test_native_path_optimizer_domains.py`
+- **Summary:** This software/readiness work moves native connection finalization before optimizer-domain and passive audits. It does not claim a solve, optimum, learned replay, or physical qualification; all 17 registered model/variant rows remain unqualified.
+- **Next step:** Complete the combined no-probe preparation and physiological-policy/solver full-clock replay work under the existing acceptance gates.
+- **Last verified:** 2026-10-12 (merge commit `f637c179e1bac10b410882b6499050b27f7b1ddf`; pinned QA 3.12 pre_pr all gates passed; 23 focused lifecycle tests passed, 2 warnings; no native calls).
 
 ### DL-#11719 · GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export
 
@@ -334,42 +334,67 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 ### DL-#11235 · Necromatcher Native Fit
 
+- **Local Research Golf Checkpoint — #11493:** API, native and React now provide explicit Connect → Prepare Research → Arm → Submit → Recall through the actual local session. The authenticated bridge retains exact saved impact vectors and a declared proper Aim rotation; MODEL_CONTACT and contact/numerical/scientific qualification remain unverified. React passed 106 cases; one actual temporary-Library MuJoCo/clean-worker/Rust API and native case passed in 23.07 s with seven exact retained samples; configured mypy passed on seven owners. The final root cohort passed 209 cases with 12 warnings and no skips in 58.64 s; the actual native case is one additional pass. All 13 modified Python owners pass pinned Ruff check/format. The capability atlas was refreshed without claiming overall gap closure. Core V1 is superseded only by the root delivery_status unknown-ID KeyError→None contract fix. The three-page local report and procedure document the new local flight, saved assumptions and explicit lifecycle. No fit improvement, avatar/course capability, GL accuracy, ControlTower delivery or new remote CI claim is established. Tiger remains [0,191), Hogan [0,750); the full goal remains ACTIVE. [Procedure](necromatcher-local-research-golf.md); [Three-Page Report Source](necromatcher-local-research-golf-methods.tex).
+
+- **Authored Replay Impact Checkpoint:** SELF progresses #11464 with authenticated explicit head/face/sample extraction and full-vector declared-flight handoff. Earlier root 83 integrated app/impact cases pass. Portable full-state receipt export/recall now binds exact canonical trajectory bytes without changing the viewer wire; six integration cases pass, including tamper rejection. The supplemental five-page LaTeX methods report is compiled and visually reviewed on the local Desktop. [Procedure](necromatcher-replay-impact.md). Normal app impact execution remains open; authored seconds are not calibrated historical time and no historical replay or qualification is claimed.
+
+- **App Boundary Checkpoint:** SELF progresses #11450/#11414 with explicit strict lossless seeds and exact ordered saved-frame review in native/React hosts. Root 45 Python/45 UI cases pass; edited domains survive mode changes, excluded/sparse indices are covered, original source-only browsing remains available. [Procedure](necromatcher-app-restriction-and-frame-review.md). Historical results and Methods V8 remain unchanged; no physical qualification or CI-green claim.
+
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11235; parent #11232
-- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Issue:** #11235; parent #11232; explicit coordinate seeds #11281; probe/generalization trials #11284; qualification child #11357
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
+- **Arm Morphology Documentation Checkpoint:** Four unoptimized arm ±5% admissions and twelve selected overlays are independently provenance-verified; exact twelve-page AN1 report retained. Source 14,800 preserved, library 383→391; grip gaps worsen to 18.6–22.1 mm and anatomy remains unadopted. [Procedure](necromatcher-arm-morphology-admission.md). Documentation SELF; no behavior, evidence-role or release-qualification change.
+- **Scoped Camera Checkpoint:** At published producer 55d17, native session 74740 and independent session 92074 closed with exit 0; full 14,805-source-file and 391-library-file maps preserved. Tiger [0,191) body RMS 24.0827→24.7803 px worsens; Hogan 10.1364→10.0910 px has mixed shaft outcomes. Keep saved cameras; 17 root checker tests and all six compiled report pages reviewed. [Procedure](necromatcher-conditional-camera-and-scope.md). #11414 durable scope integration is implemented; root 294 Python/39 UI cases, Ruff, pinned mypy, TypeScript and ESLint pass. HTTP receipt registration runs off the event loop; 13 focused root follow-up cases pass. Restricted trial at 669508 saved an authored seed; strict fitting exceeded unchanged 300-second wall cap, exit 1, no final fit. Original assets/index records preserved; ten allowed files added. Solver evaluations/elapsed unknown. Independent partial-stage verification is accepted (V4 partial checker, actual root release V2). Setup profile V1 failed on an ambiguous ndarray adapter/receipt JSON and is preserved; V2 measured five public stages successfully, with independent serialized acceptance. At published `0143b39f571cbe67c57091fb2ae19e7d7eadae3b`, both independent audits preserved complete 14,826-source-file/401-library-file maps. The same 191-frame confidence-weighted dense body RMS is 35.102046 px for the seed versus 24.082673 px for its parent; retain the parent. Actual selected seed stills 0/150/190 show opacity 0.35 proxy shapes, skeleton and an explicit unoptimized authored research seed caption. Independent serialized source/image verification is accepted; unweighted display-marker RMS is approximately 6.45/44.14/18.27 px, separate from weighted body metrics. Native projection and complete overlay-union pixel parity were not independently recomputed. No timeout cause, qualified match, new full video or ControlTower delivery is established. Tiger matching remains [0,191), exact physical release is unmeasured, and Hogan is unchanged. Methods V7 is the latest compiled supplement: root reviewed all eighteen pages in contact sheets and new pages 17 and 18 full-size; V2/V3/V4/V5/V6 remain preserved. The root V7 acceptance SHA256 is 51a8da1aaa9b590100354d8db1956431450b955d87ba57894b97da0df673c810. The two new pages describe the reusable restriction workflow and synthetic native end-to-end evidence at 5197. Its three pinned external Desktop PNGs remain earlier V21 authored-seed figures and local repeatability dependencies, not a portable standalone bundle or newly rendered restricted fit. No scientific qualification or new ControlTower transfer. Performance child #11445 now implements public authenticated_read: one canonical full PNG/BGR/clock validation per capture per operation, fresh complete file hashes and metadata checks on reuse/close, cross-library/thread/task and nested-context rejection, immutable DTOs and failure reset. Final root validation passed 93 cases across two lanes (86 plus seven public-owner/fingerprint cases; one Windows symlink-privilege skip and inherited import warnings). Canonical public SHA256 validation is reused, and execution fingerprints cover shadow_tracker; this API checkpoint is separate from the accepted artifacts at 0143. This integration checkpoint implements short authentication boundaries for queue admission, worker setup and fresh output checks, candidate/delayed publication and storage. Contexts close before scheduling, computation, delivery or persistence; delayed publication closes before add_fit, which uses its own fresh validation context. Root passed 188 distinct cases (185 SDK-free plus three native temporary-fixture cases; one Windows symlink-privilege skip, three native cases deselected in the SDK-free lane and nine inherited warnings). Published integration f2dfe completed read-only Profile V3: five stages took 0.672506/1.464802/9.053819/1.511551/0.460402 s; only seed binding decoded 210 PNGs, once in one canonical full authentication. Source 14,835/Library 401, project/runtime/config were preserved; assessment is byte-identical to V2. Root acceptance SHA256 b8469dc86d8aa72e1be2499786a107c847dd2e11d32f20567aa1effb1947a8e4 records this invocation; differing instrumentation/context/hardware prevents an isolated speedup or timeout-cause claim. No strict retry or new ControlTower delivery is authorized; accepted 0143 artifacts are unchanged. Pure restriction #11450 has a frozen V2 core (SHA256 b3504e6c64c7f97116a108b97a06d6ecba8732f3d38dd004751789e0bc93ce58) with 23 plus 53 agent cases. Root accepted 91 distinct cases (23 core plus 68 disjoint compatibility/bounds/initialization cases; synthetic MuJoCo-first fixtures only, nine inherited warnings and 38 unmarked cases reported only). Root acceptance SHA256 c0c2c44509650d37dc9516aa4185a54b828a49767bcca4ab8d8b2af64786b2ff records Ruff/format, pinned mypy and governance checks; manual release remains inventory-blocked. Pure q/v/a roundoff and Bernstein encoding evidence 17ddcd74c27276a376174c202500baa10e389d09b97ca27c3c42e9d1e4b778b5 is not native feasibility, pixel agreement, seed adoption or queue integration. Subsequently, native session 50689 closed exit0 at published 81aa448794a0ce763cdc2dd6e503d3f9b42200e9; root serialized closure accepted ce833a420c5e208b82bc430fe4be4c4c16830aee54d9c8c357bdb1af9e775e9c. Full source 14,837/Library 401/project/runtime/config/helpers matched the fresh baseline. Restricted-parent body RMS exactly equals saved parent (dense 24.082673308003265, remaining 24.337344114034266, training 21.776977995696026 px); 381-point q/v/a roundoff and typed receipt equality hold. The full 176 x 12 dimensionless scaled constraint matrix has maximum 17.023155533359613 at ground:heel_l, source 18.501816666666667; continuous contact is uncertified and nodes differ from V21, so no V21 656 comparison applies. Retained frame 0 raw shaft RMS 66.69082241158017 px/angle 28.301292322830996deg remains mismatched. No optimizer/convergence/physical qualification, telemetry null; no adopted seed, new fit, overlay rendering/pixel-parity evaluation or ControlTower delivery. Subsequent backend software checkpoint: root accepted paired restrict_initialization/restricted_spline operations with canonical SDK-free restriction receipts, preserved prior/bounds, parent agreement within 1e-12, scope/hash admission and worker/storage/recall/delayed-publication checks. Legacy semantics and public counts (eight option fields, seven start_native_refit arguments, eight builder arguments) are unchanged. Root passed 87 distinct SDK-free cases with nine inherited warnings; pinned mypy on all five owners and Ruff/format passed. Root acceptance SHA256 dc43749d0e69c6c43051712c5d37b819fbbe950edd3cf5dfb12f426a61b80bed authenticates the software freezes. Backend software was published at 5197f8639818321b7cf8f86d4748a25ce79aa278 with all normal hooks passing. Synthetic native end-to-end session 4534 then closed exit 0: the public queue, clean worker, storage and recall preserved the nonuniform restricted curve on [1,6), with four training/five dense frames, 43 locked coordinates and five rejected queue/storage counterexamples. Root closure SHA256 a26073a9c7bef6c8d5f2dd12b249c8e5f848be49c9fb0ba63d0a5c98f011d9bc authenticates the independently closed SDK-free audit (session 97412): fresh 14,844-source-file/401-historical-file/runtime maps are unchanged. Independent pure q/v/a errors are 3.47e-18/2.78e-17/1.78e-15; saved native pixel metrics agree with the actual run, but were not independently reprojected by the serialized audit. Optimizer counts remain null; no optimization, historical seed registration, new overlay or ControlTower delivery occurred. This synthetic software acceptance does not alter the earlier Methods V6 historical native-evaluation checkpoint or establish physical qualification. Subsequent caption software adds UNOPTIMIZED RESTRICTED RESEARCH SEED through the shared still/video composer and authenticated manifest, with eight strict DTO fields and mutually exclusive authored/restricted flags. Root passed 80 distinct cases in MuJoCo-first temporary fixtures: canonical exports and tampered lineage, manifest claims and exact legacy/authored pixels; configured pinned mypy, Ruff and format pass. Caption root acceptance SHA256 12a5e9e99d0b5d3827fcddc229324bf9e5525e448ae430acb4a3e0881a1f73d0 records this later software checkpoint, separate from the Methods V7 appendix at 5197. No new historical seed or overlay is claimed. Next: publish through normal hooks, then separately reviewed historical admission and the unchanged strict restart. The full goal remains active. Subsequent V22 checkpoint: Tiger remains within reviewed source frames 0-190. The accepted lossless seed has a local 191-frame shape/skeleton video; the ordinary strict fit modestly reduces same-domain weighted dense RMS from 24.08 to 23.57 px but remains nonconverged and REJECTED. Independent acceptance SHA256 8bb98838915c914c4dab8b9c9b9fff871ec7b02294a8cfd155d57657852aa72d records preserved source and original non-index Library bytes. Methods V8 is the earlier 21-page seed/stills report, not this later fit/video checkpoint. Three optimized research stills are accepted locally (proof 0d244648c2f76bb2c4be9f232d81215a58c5a1779963f50bcb575f76ff402d13); ControlTower delivery remains pending. Hogan is unchanged; physical/anatomical/contact qualification is false and the goal remains active. Detailed evidence is retained in the camera-and-scope procedure.
 - **Branch:** `feat/necromatcher-native-fit-11235`
-- **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
+- **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`, `src/shared/python/motion_matching/historical_fit/shaft_*`, `src/shared/python/workspace/necromatcher_shaft_evidence.py`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 108 focused cases passed; subsequent native test refactor passed 34 cases; independent v7 audit checked 419 Tiger and 1499 Hogan poses. These receipts precede the b50e8fd91e branch merge.
-- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Both v7 candidates remain rejected: joint-limit violations and grip/contact errors require hard feasibility constraints. [Turnover](necromatcher-turnover.md).
-- **Next step:** Implement canonical whole-Hermite coordinate bounds with red-first overshoot tests.
+- **Last verified:** 2026-10-03 — Actual producer `3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5` completed all four matched shaft control/variant jobs. Fresh assessment `b1f3898d3d9e2cac5c460ceb33fd2e6c5b85371158b4eb2a823e4f027ede002e` verifies identical starts/body/geometry recipes and all five fixed finite targets; every fit remains budget-exhausted/nonconverged/rejected. Raw training improves, Tiger holdout worsens and Hogan holdout is essentially unchanged. Actual V2 admission and display-only exports preserve source/clock/roles without changing objectives; see the shaft trial procedure. Earlier verification retained: 2026-10-02 — producer6654881b0788c77620a0afb8a9a6763f3ee1ccb9 completed two V15 exact-six-knot normalized-coverage continuations under #11284. Independent native audits verify identical start/evidence/prior,32 finite authored ranges with12 unbounded coordinates,210 source frames,209 midpoints,88 scalar extrema and10 phase probes. Control78nodes/dense25.048392px/grip1.905599mm/angle0.703158degrees/ground3.437775mm fails ground; variant178nodes/dense25.160335px/grip1.955344mm/angle0.715385degrees/ground1.852699mm passes all five fixed finite research targets. Geometry weights4000→1752.808989 preserve potential family rowmass, not physical-time quadrature or continuous nonlinear qualification. Both exhaust30evaluations, remain nonconverged/rejected and have unknown physical time. Exact assessment and repeatability inputs are preserved in turnover; preceding V12–V14 evidence remains unchanged. Actual V15 overlay and selected-still review are published, with rejected qualification retained; final expanded source regression passed 476 cases.
+- **Slice A verification:** Source-bound club evidence Slice A (#11318) is committed at `605c695259b13cb98a6d6e379e7f7fee51f27443`: immutable reviewed shaft-axis segment/source-frame DTOs, distinct original decoded-pixel and PNG-byte hashes, exact source clock/capture binding, explicit abstention and authored-uncalibrated weighting, plus an exact-definition-bound infinite authored axis resolved from declared coaxial shaft/grip solid centers. Public receipt counts/digests and strict real-coordinate guards reject malformed records. Initial tests were red; the final focused suite passed 57 cases, with Ruff/format, pinned mypy and budget checks. Actual source-bound admission subsequently preserved two Tiger fragments, one faint Hogan fragment and a blurred-frame abstention; receipt `bb36ef2233e39c829b341046d2555fcbc245769dccbaa9489933f09ddb5fadd7`. Root independently inspected all four plots; separate review `67f8ace21806ea5c62e0f1da5635c3e3e19baf614e9989c9fa935ee48201d7ac`. The first TEMP driver failed before output creation because Ruff removed imports used only through locals; preserved v1 and traceback remain distinct from v2, whose explicit registry repair passed 10 protocol tests before successful execution. No optimization, library mutation or physical endpoint/shaft-length qualification occurred.
+- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds use a canonical Bernstein-admissible domain with explicit logged authored initialization and immutable native definition/range identities; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
+- **Slice B verification:** Committed8989 generic additional-image residuals preserve ImageFitInputs and independent body/geometry timelines. Separate sparse infinite-axis residuals and raw perpendicular RMS/unoriented angles passed112 combined and33 independent cases. No historical shaft fit occurred at that checkpoint.
+- **Slice C verification:** Committed8989 canonical capture/camera/PNG/full-clock/native-axis rebind returns one reusable native binding. Tests passed96 combined and28 independent cases; compilation-count compatibility is retained.
+- **Slice D verification:** Current reviewed queue/worker/persistence source passed102 combined and19 independent cases; strict receipt parsing rejects bool/float counts before native/source I/O. Native evidence controls passed32 offscreen tests independently; web30 plus type checking/ESLint passed. Stable original-video/job/API integration passed41; renderer20/80 combined and20 independent passed. Ruff/format and pinned mypy passed. [Shaft Trial Procedures](necromatcher-shaft-trials.md) records exact freezes and the independently observed unchanged five-second test deadline overrun, followed by successful focused rerun; no speculative cause is asserted.
+- **Next step:** Integrate the source-bound continuation in a separate follow-up PR; retain all historical receipts and failed shaft generalization. Head observations/errors and physical endpoints remain unmeasured; camera/anatomy/physical timing, continuous dynamics and impact acceptance remain open. Use the corrected preparation-only R,t geometry protocol before forearm/camera/morphology trials; no new native diagnostic has run. See necromatcher-camera-morphology-shutter-review.md.
+
+### DL-#11317 · Sanitized Historical Research Provider
+
+- **State:** in_progress
+- **Owner:** codex
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); Affine #4834 merged externally at 2026-10-03T02:38:02Z; actual consumer receipt remains 8fdebad
+- **Issue:** #11317; consumer AffineDrift #4828; parent #11232 / #11235
+- **Branch:** feat/necromatcher-native-fit-11235
+- **Paths:** src/shared/python/workspace/historical_research.py, docs/api/contracts/historical-player-research-v1.schema.json, tests/unit/workspace/test_historical_research_provider.py, docs/development/necromatcher-research-package.md
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-02 — Latest Tiger V15/Hogan V12 sanitized cohort exported from committed/pushed/remote-verified provider `605c695259b13cb98a6d6e379e7f7fee51f27443`; manifest `d68830b14e2704466d4dd1795342dffd96f6f4d9b238b1fccd7f27117a9c10ed` (6,852 bytes), export receipt `65c4e775a501c0719e06a40aefd6b8be73a59a031298b96cf1e8a453a605debd`. Committed Affine consumer `8fdebad14db0f62b719942fa5d64f14878b54fd5` passed no-write inspect, exclusive draft installation, exact/idempotent recall, deterministic QMD and standalone Quarto --no-execute; admission receipt `184907af70181af6bd7e94cd5526139fdec828e57fe540c69f87c5c7a80b7d2b`, wrapper `d94e28062f090f00b45e09bb550d99903926129c9b29d70b7d702ec46057aba6`. All source/input/helper/config/registry brackets remained unchanged. Root separately browser-reviewed three natural 1234-by-712 views; browser receipt `046cb332516253fe0592be36a20ceb148cc7496ec1e299a7dbd1041d9e0f10d6` records bounded review with full-page/manual acceptance false. V15 adapter plus selection regressions:64 passed, scoped Ruff/format/pinned mypy passed; unchanged final consumer suite:6,685 passed/26 skipped/187 existing-marker deselected. The earlier V14/V12 bundle and its exact receipts remain preserved in procedure/turnover. Both cohorts remain rejected with unknown timing and no original-media import, optimizer run, public deployment or scientific promotion.
+- **Summary:** Reuse canonical immutable library recall to cross-check external independent assessments, exact numerical producer and source/model/capture/fit hashes; rehash original downloaded footage without copying media. Export deterministic generic-player JSON under a separate rejected local research contract, preserving unknown physical timing and unauthorized distribution. No estimator, scheduler or qualified publication pathway is duplicated.
+- **Next step:** Preserve the new committed local research handoff and 18 checked repeatability-input copies without altering historical cohorts. Advance source-bound club evidence under #11318 and qualify camera/anatomy/physical timing and continuous behavior before scientific/public release; finite target passes and local browser review grant no qualification or publication authority.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 
 - **State:** in_review
 - **Owner:** codex
-- **Issue:** #11246; parent #11232
-- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Issue:** #11246; parent #11232; native stored-run recall #11282; translucent model-surface child #11356
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — all 210 Tiger and 750 Hogan v7 output frames decoded with matching hashes; prior live web v6 jobs and downloaded packages verified.
+- **Last verified:** 2026-10-03 — Producer `3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5` exported all four original-footage shaft displays; independent receipt `f60d277ce81e7d1d3dc2ddace626a1bacd9bd3a83708375ffefe1e7dcdd39dd0` verifies 1,920 source-sized frames, original PNG/PTS bindings, projections/metrics, immutable source/library brackets and twelve selected overlays/six originals. V1/V2 union is display-only; all-frame visual and manual acceptance remain false. Exact manifest PTS are distinct from Tiger encoder rounding (maximum 6.9736403 microseconds relative drift); Hogan 30/1 is exact. Earlier verification retained: 2026-10-02 — V15 selected Tiger variant export run `97b1b96fea0c4a2da403004a4985f390` at producer `6654881b0788c77620a0afb8a9a6763f3ee1ccb9` verifies all 210 original 1280x720 frames, original PNG/PTS bindings, ZIP CRC/member hashes and immutable source/runtime/audit brackets. Actual stills 0/105/209 were separately viewed; club-seed disagreement, follow-through upper-body residuals and cropped feet remain. Combined still-review SHA-256 `ca46a15129d238c06391f6ee1b05c0cfa6bc14cd6be95075d738841798d4b369`; the execution journal retains visual_review_completed=false. All-frame visual and manual acceptance remain false. Earlier V13/V12/native stored-run review receipts remain preserved; canonical sharing-race repair and final expanded source regression passed 476 cases.
 - **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
-- **Next step:** Revalidate export-job recall and download guards against the merged branch.
+- **Next step:** Retain guarded recall and distinct machine/selected-image/scientific outcomes. Infinite authored axes and interior fragments do not establish measured head/physical shaft endpoints or validated historical club motion. Complete independent surface-renderer review and clean published producer before actual translucent exports; disabled rendering preserves legacy behavior and displayed surfaces remain model proxies.
 
 ### DL-#11247 · Necromatcher Reproducible Methods Report
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11247; parent #11232
-- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Issue:** #11247; parent #11232; source audit #11357
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `docs/development/necromatcher-methods.tex`, `docs/development/historical_capture/*summary.json`, `docs/development/necromatcher-turnover.md`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 19-page PDF compiled with existing MiKTeX installer disabled; all pages visually reviewed and 60 Desktop artifact hashes verified.
+- **Last verified:** 2026-10-03 at `b8b280ce2f5ed706d1778fd809250cf18eac1fb7` — Published 74-page actual matched-shaft report: PDF `36319afeb6ec6132f7684387d04c1b8cde8d2854a38cf718354325334e4fdffd`, source `41c61a755f72a3b8928c5938f545e0a8a32aa19e4f84437ffc5ac07c92d7b6e9`, independent review `8b4fb44f2b0cd552c7a443f5e90ada9d95f624ff3711d4514f3f70e6708db6ee`, root review `6fe30a6978fcc61fbb3192df6641b3da93515155e21bec6cc3852ef832854c5c`. Three installer-disabled passes completed without actual warnings/overfull/unresolved references; all page layouts reviewed. Desktop manifest 1,504 artifacts `49868b903a729a147d188b03a0fc5ecf3f68e4973345f08b0191d79de2b85228`; exact prior 66 publication and1,260 index/README preserved under Report/handoff-shaft-66-page-publication. Earlier verification retained: 2026-10-02 — Expanded 66-page latest-handoff/sparse-shaft report compiled in three installer-disabled MiKTeX passes and was independently reviewed on all pages, with full-size contents/new chapter/figures/source-map checks. No overfull boxes or unresolved references; 17 contained table-wrapping warnings were visually reviewed. Published PDF SHA-256 `f31f1fbd6c0917254b358bae3852e42de8e5d898b1f60d47b3b08c63427f3228`; exact source `1702e35d4a04b95d0c5de13b04db34325cfef7b8e2ad47f50ea47da45354991c`; independent review `0c7a85f91018a01d117e0d7b0e41dbec61087f6c52019b780ade7bbca4e27481`; separate root review `9de379e2b3a32089bff17fd1086eec9430f0f953240717bfa6093bf02e57446d`. Refreshed Desktop index verifies 1,216 retained artifacts, SHA-256 `bd89c17e27de7b7849986f6e00d36debcd0e3c988ab8530b687a0f92ff1a6e9d`. Exact prior 60-page publication, 49-page edition and historical snapshots remain preserved. No scientific acceptance or physical motion claim; built-in compiler infrastructure criterion remains open.
 - **Summary:** Polished methods report records equations, provenance, assumptions, actual interim failures and reproducibility procedures. Built-in compiler infrastructure remains unavailable, so that issue criterion remains open. [Turnover](necromatcher-turnover.md).
-- **Next step:** Reconcile the built-in compilation criterion with the verified fallback receipt.
+- **Next step:** Preserve publication and evidence snapshots; document subsequent work only after independent execution. Built-in compiler infrastructure and scientific/manual release criteria remain open. Nine-page source-audit supplement compiled and all pages reviewed; 77 source-audit files are verified on ControlTower separately from the unchanged 74-page/1,504-artifact publication.
 
 ### DL-#11234 — Necromatcher Historical Player Workspace
 
@@ -441,12 +466,12 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** codex
 - **Issue:** owner-requested documentation review; tracked by PR #11083
 - **PR:** #11083
-- **Branch:** docs/motion-matching-board-review
-- **Paths:** docs/development/2026-09-28-motion-matching-board-review.md
+- **Branch:** `docs/motion-matching-board-review`
+- **Paths:** `docs/development/2026-09-28-motion-matching-board-review.md`
 - **Started:** 2026-09-28
 - **Shipped:** 2026-09-29
-- **Last verified:** 2026-10-12 at 64962e8d6b6263d5fb32bb1444712b28a9df4433 (remote merge verification only; no tests or native runs)
-- **Summary:** Evidence-backed engine/model review, recent GS3DX improvements, 18 issue proposals, anatomical Home-budget options and historical-video readiness; no implementation or qualification claim.
+- **Last verified:** 2026-10-12 (merged PR #11083 at 64962e8d6b6263d5fb32bb1444712b28a9df4433; remote merge metadata only, no tests or native runs)
+- **Summary:** Evidence-backed engine/model review, recent GS3DX improvements, 18 issue proposals, anatomical Home-budget options and historical-video readiness; no implementation/qualification claim.
 - **Next step:** The documentary review is shipped; its implementation proposals remain separately tracked and open. No qualification claim.
 
 ### DL-#11080 · Product Review for the Expert Panel
@@ -2102,6 +2127,92 @@ No material development-log change — Bolt `np.linalg.norm` → `sqrt(einsum)`/
 No material development-log change — PyJWT floor/lock bump to 2.14.0 for OSV GHSA-w6j9-cwv2-h6wq (#11153) is a dependency-only change with no feature entry.
 No material development-log change — urllib3 (2.8.0, CVE-2026-97687) and PyJWT (2.15.0, CVE-2026-101918) floor/lock bumps (#11191) are dependency-only changes with no feature entry.
 No material development-log change — Bolt np.linalg.norm → sqrt(einsum) in rigidity.py (#11189) is a behaviour-preserving micro-optimisation with no feature entry.
+
+## DL-#11357 — Pure Raw Shaft Fragment Derivative Diagnostics
+
+- **Change:** Canonical immutable options/check/result contracts and public
+  raw fragment analytic/central FD diagnostics; canonical camera/marker reuse.
+- **Validation:** Repository fail-first scaffold regression followed by focused
+  native-free synthetic tests, curated exports and fingerprint inclusion.
+- **Limits:** No historical native/Library/render/fit operation, no objective
+  or evidence-role change, and no clinical/scientific qualification.
+- **Next Step:** Review typed core, then separately design authenticated
+  workspace consumers using existing job/store/renderer boundaries.
+
+## Authored Replay Impact Application Checkpoint — #11464
+
+The normal React journey now previews impact from a verified authored replay,
+with exact geometry/sample/flight declarations, bounded native execution,
+cancellation, persisted run-ID recall and authenticated four-file download.
+Saved results display their own assumptions and metrics. Canonical receipt and
+trajectory owners remain unchanged; source/runtime/parent and artifact checks
+fail closed. Research acceptance remains rejected, with authored seconds and
+false physical/scientific qualification.
+
+Root final validation: 125 focused Python cases pass with one Windows symlink
+capability skip; one additional opt-in native case passes with actual MuJoCo,
+clean process transport, impact solver and Rust flight (no substitutions).
+The React cohort passes 104 cases; configured six-owner mypy, scoped lint and
+format checks pass. Earlier failures and immutable agent freezes are retained
+in the application review. Four-page LaTeX Application Supplement 1 is compiled
+without final layout warnings and all pages visually reviewed; editable source,
+PDF and the explicitly synthetic native bundle are saved on the local Desktop.
+Earlier Methods V8 and the five-page extraction report remain unchanged.
+
+See [Application Procedure](necromatcher-replay-impact.md) and its linked review/report. Tiger stays
+within original frames 0–190 ([0,191)); Hogan stays [0,750). No historical
+Library mutation, qualified match or new ControlTower delivery is established.
+Remaining goal work includes improved historical matching, authored dynamics,
+simulation golf integration and desktop parity. The full goal remains active.
+
+## Native Desktop Replay Impact Checkpoint — #11487
+
+The native Necromatcher tile now imports registered authored replays, runs the
+shared bounded replay-impact session off the GUI thread, cancels owned jobs,
+recalls retained run IDs after restart and exports an authenticated four-file
+ZIP exclusively. Saved assumptions remain separate from editable declarations.
+The public Shot Tracer handoff retains exact detached positions and provenance.
+
+Root validation passes 146 focused Qt/viewer/parity cases without skips and
+configured mypy on three production owners. One additional opt-in actual
+MuJoCo/HDF5/clean-worker/impact/Rust native Qt case passes with Python exit 0.
+The three final synthetic screenshots are readable and visually reviewed;
+retained positions are verified, while OpenGL pixel accuracy is unverified.
+Test-only font bootstrap uses existing Windows Segoe UI when the offscreen
+font database is empty. The 120-second whole-test cap does not change the
+60-second native budget; earlier timeout evidence is preserved.
+
+The three-page Native Desktop Supplement 1 and editable LaTeX, screenshots and
+intact synthetic bundle are saved on the local Desktop. See [Procedure](necromatcher-replay-impact.md)
+and [Frozen Review](historical_capture/native-desktop-replay-impact-review.json). Tiger remains [0,191), Hogan [0,750).
+Historical fits, scientific qualification, simulation golf and final overall
+desktop parity acceptance remain open. No new ControlTower delivery or remote
+CI-green claim is made. The full goal remains active.
+
+## Local Research Admission Race Follow-Up — #11493
+
+A concurrent request regression reproduced reused shot-ID admission after another
+request prepared and cancelled during authentication. The API now applies the
+same identity guard before and immediately after authentication. All 10 API
+cases pass; a fresh additional actual MuJoCo/clean-worker/Rust API and Qt
+acceptance passes in 24.56 s, with seven exact retained samples and no
+re-simulation on recall. Configured mypy passes for the changed API owner.
+The earlier 209-case cohort and 106 React cases remain separate checkpoint
+evidence. The follow-up preserves unverified qualification and all historical
+limits; the full goal remains active.
+
+See [Follow-Up Review](historical_capture/local-research-golf-admission-race-review.json). Source inventory covers 6,697 src/test
+files, with equal before/after maps; this is not a whole-repository baseline.
+
+## User-Requested Handoff and Stop Checkpoint
+
+The user requested a committed checkpoint and instructed this agent to stop
+pursuing the goal after turnover. See [Next-Agent Turnover](necromatcher-next-agent-turnover.md) for the
+exact implementation state at f0e14944, scoped work packets, public owners,
+validation commands, historical evidence boundaries and remaining acceptance.
+No proposed optimized video export or new fit was started. This documentation
+checkpoint follows the published local research integration; the full goal is
+unfinished and is to be paused after normal commit/push and handoff publication.
 
 ## Capture Registry Parent Integration - #11162 / #11172
 

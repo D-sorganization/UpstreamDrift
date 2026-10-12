@@ -1,0 +1,141 @@
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,booktabs,array,xcolor,fancyhdr}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\definecolor{ink}{HTML}{17344A}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textcolor{ink}{UpstreamDrift / Necromatcher}}
+\fancyhead[R]{\small Local Research Golf Methods}
+\fancyfoot[L]{\small Model-Contact Research; Qualification Unverified}
+\fancyfoot[R]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{7pt}
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\title{\textcolor{ink}{Necromatcher Local Research Golf\\Authenticated Impact Admission and Explicit Simulation}}
+\author{UpstreamDrift Technical Reference\\Epic \#11232; Integration Issue \#11493}
+\date{4 October 2026 / Local Research Golf Supplement 1}
+\begin{document}
+\maketitle
+\begin{center}\rule{0.9\linewidth}{0.6pt}\end{center}
+\section*{Purpose and Research Boundary}
+This procedure connects a saved, source-bound authored replay impact to the
+existing local golf simulator. It is reusable across player records, models and
+driving profiles; it does not create a player-specific physics implementation.
+Model contact remains assumed, authored seconds remain uncalibrated historical
+time, and contact, numerical and scientific qualification remain unverified.
+Local delivery acceptance is an execution state, not a historical validity badge.
+
+Tiger matching retains original frames 0--190, the conservative reviewed domain
+$[0,191)$. The uncertain hand-release transition and later one-hand follow-through
+remain excluded. Hogan retains $[0,750)$. Camera, anatomical dimensions, human
+range of motion, continuous grip/contact, shaft flex and imaging distortion
+remain separate historical qualification requirements.
+
+\section*{Immutable Evidence Admission}
+The public research bridge receives an explicit registered replay ID, completed
+impact run ID and shot/session metadata. The canonical impact session repeats
+parent, manifest, execution and exact artifact checks before a shot is prepared.
+The portable bundle retains \code{request.json}, \code{result.json},
+\code{impact-receipt.json} and \code{trajectory.json}. A successful rejected
+research run may be used; incomplete, cancelled, foreign or altered evidence
+cannot establish admission.
+
+The companion receipt binds complete extraction state to exact trajectory bytes.
+Result and request parents, geometry, selection and execution identities must
+agree, as must the receipt's extraction metadata. The bridge retains hashes and
+actual saved assumptions through a detached whitelist. Uncontrolled JSON fields
+cannot override run identities or promote qualification. Original input files
+and the retained original trajectory are not rewritten by the conversion.
+
+\newpage
+\section*{Launch Vectors and Declared Aim}
+Use the complete saved post-impact ball velocity and angular velocity. Neither
+clubhead scalar speed nor differences between plotted positions replace these
+vectors. The existing post-impact bridge constructs the canonical shot envelope;
+the existing spatial transformation owner applies the proper declared aim:
+\[
+\mathbf v_T=R_{TF}\mathbf v_F,\qquad
+\boldsymbol\omega_T=R_{TF}\boldsymbol\omega_F,\qquad
+R_{TF}^{\mathsf T}R_{TF}=I,\quad\det R_{TF}=+1.
+\]
+The source uses \code{flight_xfwd_yleft_zup}; the target is the declared target
+local frame. Proper rotations preserve vector norms and handle angular velocity
+without a reflection. Local two-dimensional contact offsets retain their own
+club coordinates. The saved source vectors and byte hashes remain available
+independently of this declared target transformation.
+
+Model-run, trace digest, impact identity and selected authored sample time derive
+from the authenticated result, rather than caller-supplied replacement lineage.
+The sample is a declared hypothesis; no historical collision is detected by
+preparation, arming or explicit submission.
+
+\section*{Canonical Local Session Policy}
+\begin{center}\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.28\linewidth}>{\raggedright\arraybackslash}p{0.63\linewidth}}\toprule
+Boundary & Required Behavior\\\midrule
+Ordinary Model Preparation & Retains the qualified-contact requirement.\\
+Research Preparation & Explicit opt-in; actual connected local adapter; all three qualification axes unverified; nonempty evidence and model lineage.\\
+Arm and Submit & Owned preparation and single-use token; recheck research destination before submission.\\
+Destination Change & Invalidates pending preparation; research cannot use fake, relay or external destinations.\\
+Trajectory Recall & Confirmed owned local receipt, exact shot identity and detached retained samples.\\\bottomrule
+\end{tabular}
+\end{center}
+The local adapter executes its existing flight simulator outside the event loop.
+It computes a new flight using its own settings and environment, rather than
+claiming byte identity with the retained original impact trajectory. Saved
+original assumptions remain visible, but are not silently adopted as new local
+environment settings. Native avatar, course feedback and aim-control support
+remain unsupported by this destination.
+
+\newpage
+\section*{Explicit Operator Sequence}
+Recall a registered authored replay and verified completed impact result, then
+choose \textbf{Open Local Research Simulation}. Review saved IDs, hashes,
+assumptions and authored sample time. Choose \textbf{Connect}, then
+\textbf{Prepare Research Shot}, \textbf{Arm} and explicitly \textbf{Submit}.
+Preparation does not arm or send automatically. Disarm or cancel through actual
+owned controls; source or destination replacement must retire stale preparation
+before new controls become usable.
+
+The local delivery receipt and retained sample positions/velocities are distinct
+from scientific acceptance. Web visualization reuses the existing flight scene;
+native review exposes retained values. Malformed research links do not select a
+manual demo. Failed or stale responses cannot restore old tokens or silently
+connect another destination.
+
+\section*{API and Persistence}
+The research preparation endpoint accepts explicit replay/run/shot/session IDs,
+timestamp, proper aim and context revision. Expensive evidence authentication
+runs outside the API event loop; session replacement during that operation
+refuses preparation. Existing lifecycle endpoints retain their canonical owners.
+After confirmed local delivery, trajectory retrieval returns new samples with
+the source research context. Reused shot IDs cannot replace prior context.
+
+Registered replays and original impact results persist in the canonical Library.
+Local golf sessions and their current trajectories are session data; restart
+recall of a local simulation is not claimed. After restarting, recall the saved
+source result and explicitly create another local research simulation.
+
+\section*{Verification Protocol and Remaining Work}
+Meaningful failing tests precede implementation. Verify full asymmetric launch
+and spin vectors, nonidentity proper aim, qualification-promotion refusal,
+foreign/stale/altered bundles, one-shot lifecycle, cancellation and responsive
+background work. Ordinary service/GUI doubles establish boundary behavior only.
+Native acceptance uses a fresh temporary canonical Library and actual MuJoCo
+replay, clean-worker impact, Rust flight and real local submission. Exact
+implementation bytes, terminal process logs, retained samples and inspected
+screenshots belong to the accompanying frozen review.
+
+This integration does not qualify a Tiger/Hogan match, establish physical source
+time, animate a native avatar or prove external/course delivery. Historical
+matching and final overall integration remain active. The separate engineering
+manual inventory and approval gates remain in force.
+
+\section*{References and Public Owners}
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/11493}{Issue \#11493}
+and \href{https://github.com/D-sorganization/UpstreamDrift/pull/11359}{PR \#11359}.
+Public owners: the research impact bridge, \code{GolfSessionService},
+\code{LocalReferenceAdapter}, post-impact launch conversion and the existing
+spatial transformation and visualization providers.
+\end{document}

@@ -1196,11 +1196,7 @@
       "path": "src/tools/impact_parameters_panel/__main__.py",
       "logo": "impact_parameters.svg",
       "status": "gui_ready",
-      "capabilities": [
-        "impact_parameters",
-        "launch_monitor",
-        "target_line"
-      ],
+      "capabilities": ["impact_parameters", "launch_monitor", "target_line"],
       "order": 52,
       "web": {
         "mode": "route",
@@ -1216,11 +1212,7 @@
       "path": "src/tools/grip_wrench_plots/__main__.py",
       "logo": "grip_wrench_plots.svg",
       "status": "gui_ready",
-      "capabilities": [
-        "grip_wrench",
-        "club_forces",
-        "force_plots"
-      ],
+      "capabilities": ["grip_wrench", "club_forces", "force_plots"],
       "order": 53,
       "web": {
         "mode": "route",
@@ -1236,11 +1228,7 @@
       "path": "src/tools/ground_reaction_plots/__main__.py",
       "logo": "ground_reaction_plots.svg",
       "status": "gui_ready",
-      "capabilities": [
-        "ground_reaction",
-        "foot_forces",
-        "force_plots"
-      ],
+      "capabilities": ["ground_reaction", "foot_forces", "force_plots"],
       "order": 54,
       "web": {
         "mode": "route",

@@ -12,21 +12,21 @@ Show how the hands load the club: the force of each hand at its grip point, the 
 
 ## Inputs
 
-| Input | Units | Description |
-| --- | --- | --- |
-| Grip wrench series | N, N*m | Per-sample hand wrenches exerted by the hand on the club, world axes, from the engine's constraint multiplier or `efc_force` |
-| Couple frame | world or club | Frame of the equivalent couple panel; the club frame needs the club orientation |
-| Impact time | s | Optional event marker |
+| Input              | Units         | Description                                                                                                                  |
+| ------------------ | ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Grip wrench series | N, N\*m       | Per-sample hand wrenches exerted by the hand on the club, world axes, from the engine's constraint multiplier or `efc_force` |
+| Couple frame       | world or club | Frame of the equivalent couple panel; the club frame needs the club orientation                                              |
+| Impact time        | s             | Optional event marker                                                                                                        |
 
 ## Outputs
 
-| Output | Units | Description |
-| --- | --- | --- |
-| Hand force magnitude | N | Left and right hand force on the club |
-| Net force at midpoint | N | Sum of both hand forces, drawn at the grip midpoint |
-| Equivalent couple | N*m | Moment of the hand forces about the midpoint plus both free torques |
-| Contact force moment vs free torque | N*m | The two parts of the couple |
-| Split method | label | How the left/right split was obtained: `constraint_multiplier`, `efc_force`, `allocation`, `bushing` or `unavailable` |
+| Output                              | Units | Description                                                                                                           |
+| ----------------------------------- | ----- | --------------------------------------------------------------------------------------------------------------------- |
+| Hand force magnitude                | N     | Left and right hand force on the club                                                                                 |
+| Net force at midpoint               | N     | Sum of both hand forces, drawn at the grip midpoint                                                                   |
+| Equivalent couple                   | N\*m  | Moment of the hand forces about the midpoint plus both free torques                                                   |
+| Contact force moment vs free torque | N\*m  | The two parts of the couple                                                                                           |
+| Split method                        | label | How the left/right split was obtained: `constraint_multiplier`, `efc_force`, `allocation`, `bushing` or `unavailable` |
 
 Glyph colours: net `#56B4E9`; the left hand is lighter and the right hand darker. The couple is a curved arrow about the midpoint whose axis is the couple direction; each hand's free torque is a separate arc at its grip point. Use the `grip_per_hand`, `grip_net`, `grip_couple` and `grip_mof` toggles to show or hide each class.
 

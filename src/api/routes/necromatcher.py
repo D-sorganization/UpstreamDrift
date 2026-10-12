@@ -9,12 +9,14 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Annotated, Any, Iterator, Literal, AsyncIterator
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.background import BackgroundTask
+from starlette.concurrency import run_in_threadpool
 
 from src.api.routes.matched_swings import require_local_client
+from src.api.middleware.upload_limits import read_upload_file_bytes
 from src.shared.python.core.contracts.exceptions import StateError
 from src.shared.python.force_overlay.contracts import WrenchKind
 from src.shared.python.workspace import (
@@ -25,11 +27,26 @@ from src.shared.python.workspace import (
     NativeVideoSession,
     NativeRefitOptions,
     refit_plan,
+    SourceFitScope,
+    import_fit_source_scope_review,
 )
-from src.shared.python.motion_matching.historical_fit import ImageFitConfig
+from src.shared.python.motion_matching.historical_fit import (
+    ImageFitConfig,
+    ShaftAxisEvidence,
+)
 from src.shared.python.motion_matching.pipeline.plant import EngineUnavailableError
 from src.shared.python.workspace.necromatcher import default_necromatcher_library
 from src.shared.python.workspace.necromatcher_review import CaptureReview
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from src.shared.python.workspace.necromatcher_caption import CaptionOverlayOptions
+from src.shared.python.workspace.necromatcher_impact_jobs import NativeImpactSession
+from src.shared.python.workspace.necromatcher_impact_contracts import (
+    ReplayImpactGeometry,
+    ReplayImpactSelection,
+)
+from src.shared.python.workspace.necromatcher_scope_import import (
+    MAX_SOURCE_SCOPE_REVIEW_BYTES,
+)
 
 
 @asynccontextmanager
@@ -40,6 +57,9 @@ async def refits_lifespan(_app: object) -> AsyncIterator[None]:
         if get_refits.cache_info().currsize:
             get_refits().close()
             get_refits.cache_clear()
+        if get_impact_runs.cache_info().currsize:
+            get_impact_runs().close()
+            get_impact_runs.cache_clear()
         if get_video_exports.cache_info().currsize:
             get_video_exports().close()
             get_video_exports.cache_clear()
@@ -79,6 +99,22 @@ def get_video_exports() -> NativeVideoSession:
 VideoExports = Annotated[NativeVideoSession, Depends(get_video_exports)]
 
 
+@lru_cache(maxsize=1)
+def get_impact_runs() -> NativeImpactSession:
+    """Reuse owned, bounded research impact jobs across local API requests."""
+    return NativeImpactSession(get_library())
+
+
+ImpactRuns = Annotated[NativeImpactSession, Depends(get_impact_runs)]
+
+
+class ImpactRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
+    geometry: dict[str, Any]
+    selection: dict[str, Any]
+    budget_wall_s: float = Field(gt=0, le=600)
+
+
 class RefitRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
     new_fit_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
@@ -91,20 +127,44 @@ class RefitRequest(BaseModel):
     closure_weight: float = Field(default=100.0, ge=0)
     unknown_visibility_weight: float = Field(default=0.5, ge=0, le=1)
     budget_wall_s: float = Field(default=600.0, gt=0, le=3600)
+    config: dict[str, Any] | None = None
+    shaft_evidence: dict[str, Any] | None = None
+    source_scope: dict[str, Any] | None = None
+    operation: Literal["fit", "author_initialization", "restrict_initialization"] = (
+        "fit"
+    )
+    initialization_source: Literal[
+        "sampled_parent", "preserved_spline", "restricted_spline"
+    ] = "sampled_parent"
 
     def options(self) -> NativeRefitOptions:
-        return NativeRefitOptions(
-            tuple(self.frame_indices),
-            self.knot_count,
-            tuple(self.coordinate_scales),
-            ImageFitConfig(
+        legacy = {
+            "max_iterations",
+            "prior_weight",
+            "smoothness_weight",
+            "closure_weight",
+        }
+        if self.config is not None and self.model_fields_set & legacy:
+            raise ValueError("Nested config cannot be mixed with legacy scalar options")
+        config = (
+            ImageFitConfig.from_record(self.config)
+            if self.config is not None
+            else ImageFitConfig(
                 self.max_iterations,
                 self.prior_weight,
                 self.smoothness_weight,
                 self.closure_weight,
-            ),
+            )
+        )
+        return NativeRefitOptions(
+            tuple(self.frame_indices),
+            self.knot_count,
+            tuple(self.coordinate_scales),
+            config,
             self.unknown_visibility_weight,
             self.budget_wall_s,
+            self.operation,
+            self.initialization_source,
         )
 
 
@@ -121,7 +181,10 @@ class ForceLayerRequest(BaseModel):
 
 
 class VideoExportRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    shaft_evidence: dict[str, Any] | None = None
+    shape_overlay: dict[str, Any] | None = None
+    caption_overlay: dict[str, Any] | None = None
     force_layer: ForceLayerRequest = Field(default_factory=ForceLayerRequest)
 
 
@@ -180,11 +243,48 @@ def get_refit_plan(fit_id: str, library: Library) -> dict[str, Any]:
         return refit_plan(library, fit_id)
 
 
+@router.post("/fits/{fit_id}/source-scope-reviews", status_code=201)
+async def import_source_scope_review(
+    fit_id: str, file: UploadFile, library: Library
+) -> dict[str, Any]:
+    """Preserve bounded exact review bytes through canonical portable registration."""
+    raw = await read_upload_file_bytes(file, max_bytes=MAX_SOURCE_SCOPE_REVIEW_BYTES)
+    with _errors():
+        scope: SourceFitScope = await run_in_threadpool(
+            import_fit_source_scope_review, library, fit_id, raw
+        )
+        return scope.to_record()
+
+
+@router.get("/source-scope-reviews/{review_id}")
+def source_scope_review(review_id: str, library: Library) -> dict[str, Any]:
+    """Recall a registered review only after fresh source and receipt validation."""
+    with _errors():
+        return library.load_source_scope_review(review_id).to_record()
+
+
 @router.post("/fits/{fit_id}/refits", status_code=202)
 def submit_refit(fit_id: str, request: RefitRequest, refits: Refits) -> dict[str, Any]:
     with _errors():
         try:
-            return refits.submit(fit_id, request.new_fit_id, request.options())
+            options = request.options()
+            scope = (
+                SourceFitScope.from_record(request.source_scope)
+                if request.source_scope is not None
+                else None
+            )
+            if request.shaft_evidence is None:
+                if scope is None:
+                    return refits.submit(fit_id, request.new_fit_id, options)
+                return refits.submit(
+                    fit_id, request.new_fit_id, options, source_scope=scope
+                )
+            evidence = ShaftAxisEvidence.from_record(request.shaft_evidence)
+            if scope is None:
+                return refits.submit(fit_id, request.new_fit_id, options, evidence)
+            return refits.submit(
+                fit_id, request.new_fit_id, options, evidence, source_scope=scope
+            )
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from exc
 
@@ -209,9 +309,27 @@ def submit_video_export(
     layer = request.force_layer if request else None
     with _errors():
         try:
-            if layer is None or not layer.enabled:
+            if request is None:
                 return exports.submit(fit_id)
-            return exports.submit(fit_id, force_layer=layer.model_dump(mode="json"))
+            evidence = (
+                ShaftAxisEvidence.from_record(request.shaft_evidence)
+                if request.shaft_evidence is not None
+                else None
+            )
+            options: dict[str, Any] = {}
+            if request.shape_overlay is not None:
+                options["shape_overlay"] = ShapeOverlayOptions.from_record(
+                    request.shape_overlay
+                )
+            if request.caption_overlay is not None:
+                options["caption_overlay"] = CaptionOverlayOptions.from_record(
+                    request.caption_overlay
+                )
+            if layer is not None and layer.enabled:
+                options["force_layer"] = layer.model_dump(mode="json")
+            if evidence is None:
+                return exports.submit(fit_id, **options)
+            return exports.submit(fit_id, evidence, **options)
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from exc
 
@@ -344,6 +462,50 @@ def replay_summary(replay_id: str, library: Library) -> dict[str, Any]:
             "backend": trace.backend,
             "metadata": dict(trace.meta),
         }
+
+
+@router.post("/replays/{replay_id}/impact-runs", status_code=202)
+def submit_impact_run(
+    replay_id: str, request: ImpactRunRequest, runs: ImpactRuns
+) -> dict[str, Any]:
+    """Submit explicit operator assumptions; no contact or clock calibration."""
+    with _errors():
+        geometry = ReplayImpactGeometry.from_record(request.geometry)
+        selection = ReplayImpactSelection.from_record(request.selection)
+        try:
+            return runs.submit(replay_id, geometry, selection, request.budget_wall_s)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+
+@router.get("/replays/{replay_id}/impact-runs/{run_id}")
+def view_impact_run(replay_id: str, run_id: str, runs: ImpactRuns) -> dict[str, Any]:
+    with _errors():
+        return runs.view(replay_id, run_id)
+
+
+@router.post("/replays/{replay_id}/impact-runs/{run_id}/cancel")
+def cancel_impact_run(replay_id: str, run_id: str, runs: ImpactRuns) -> dict[str, Any]:
+    with _errors():
+        try:
+            return runs.cancel(replay_id, run_id)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+
+@router.get("/replays/{replay_id}/impact-runs/{run_id}/download")
+def download_impact_run(replay_id: str, run_id: str, runs: ImpactRuns) -> FileResponse:
+    """Serve only a reauthenticated complete research trajectory/receipt bundle."""
+    with _errors():
+        try:
+            path = runs.download(replay_id, run_id)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        return FileResponse(
+            path,
+            media_type="application/zip",
+            filename=f"necromatcher-impact-{run_id}.zip",
+        )
 
 
 @router.get("/replays/{replay_id}/data")
