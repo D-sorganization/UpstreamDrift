@@ -134,6 +134,27 @@ Only the `vendor/ud-tools` submodule is required. The three model submodules
 `src/shared/tools/human-gazebo`) are optional and only needed for the
 experimental OpenSim/MyoSuite engines.
 
+### Smaller Clone (Blobless)
+
+The repository history contains many older versions of the bundled model and
+asset files, so a full clone transfers a large pack. A blobless partial clone
+transfers commits and trees up front and fetches file contents on demand:
+
+```bash
+git clone --filter=blob:none https://github.com/D-sorganization/UpstreamDrift.git
+cd UpstreamDrift
+git submodule update --init vendor/ud-tools
+```
+
+A blobless clone does not change the working tree. Checking out a branch still
+downloads the contents of the files at that commit, so the saving is in the
+history transfer, not in the size of the checked-out files. Older file contents
+are fetched when a command needs them, for example `git log -p`, `git blame`,
+or `git checkout <old-commit>`, and that step requires network access.
+
+This is a documented workaround only. The repository history is not rewritten,
+and the model files remain committed in place.
+
 `pyproject.toml` is the canonical dependency source. A Conda wrapper is
 generated from it:
 

@@ -54,7 +54,10 @@ from src.engines.physics_engines.opensim.python import (  # noqa: E402
 from src.engines.physics_engines.opensim.python import (  # noqa: E402
     msk_turn_targets as tt,
 )
-from src.shared.python.golf_view_presets import simbody_camera_transform  # noqa: E402
+from src.shared.python.golf_view_presets import (  # noqa: E402
+    get_view_preset,
+    simbody_camera_transform,
+)
 from src.shared.python.motion_matching.turn_receipt import (  # noqa: E402
     capture_turn_inputs,
 )
@@ -79,7 +82,7 @@ EVENTS_S = {"address": 0.0, "top": 1.104, "impact": 1.326}
 CLUBS = ("driver", "iron7")  # swing_q_<club>.npz fixtures
 CLIP_FPS = 30
 SPEED = 0.5
-VIEWS = ("face_on", "down_the_line")
+VIEWS = ("face_on", "down_the_line", "hands_closeup")
 DISTANCE_M = 4.2
 SIZE = (960, 720)
 MAX_DRAWS = 12
@@ -112,6 +115,22 @@ def event_frames(n_frames: int, capture_events: Any = None) -> dict[str, int]:
     }
     frames["finish"] = n_frames - 1
     return frames
+
+
+def view_target(
+    view: str, lookat_os: np.ndarray, hands_os: np.ndarray
+) -> tuple[np.ndarray, float]:
+    """Look-at point (Rajagopal world) and camera distance (m) of ``view``.
+
+    The hands close-up looks at the grip midpoint ``hands_os`` from the
+    preset's distance; the other views look at the static ``lookat_os`` from
+    :data:`DISTANCE_M`. Raises ``ValueError`` for a view not in :data:`VIEWS`.
+    """
+    if view not in VIEWS:
+        raise ValueError(f"view must be one of {VIEWS}, got {view!r}")
+    if view == "hands_closeup":
+        return np.asarray(hands_os, float), get_view_preset(view).default_distance_m
+    return np.asarray(lookat_os, float), DISTANCE_M
 
 
 def check_options(club: str, mode: str, has_capture: bool) -> None:
@@ -205,9 +224,23 @@ class _Viewer:
             self.coords.get(name).setValue(self.state, float(value), False)
         self.model.realizePosition(self.state)
 
-    def camera(self, view: str, lookat_os: np.ndarray, floor_z: float) -> None:
+    def hands(self) -> np.ndarray:
+        """Midpoint of the two hand origins (Rajagopal world) at the pose."""
+        bodies = self.model.getBodySet()
+        return 0.5 * sum(
+            cal.transform_in_ground(bodies.get(hand), self.state)[:3, 3]
+            for hand in mc.HAND_BODIES.values()
+        )
+
+    def camera(
+        self,
+        view: str,
+        lookat_os: np.ndarray,
+        floor_z: float,
+        distance_m: float = DISTANCE_M,
+    ) -> None:
         lookat = cal.NATIVE_TO_OPENSIM.T @ lookat_os + np.array([0.0, 0.0, floor_z])
-        rows, pos = simbody_camera_transform(view, lookat, DISTANCE_M)
+        rows, pos = simbody_camera_transform(view, lookat, distance_m)
         rot = cal.NATIVE_TO_OPENSIM @ np.array(rows)
         pos_os = cal.NATIVE_TO_OPENSIM @ (np.array(pos) - np.array([0, 0, floor_z]))
         mat = self.osim.Mat33()
@@ -311,7 +344,7 @@ def render(
             "landmark_rms_m": tracked[k].landmark_rms_m,
         }
         for view in VIEWS:
-            viewer.camera(view, lookat, floor)
+            viewer.camera(view, *_framed(view, lookat, viewer.hands(), floor))
             _write_png(out / f"msk_club_{event}_{view}.png", viewer.grab())
     clip_path = out / "msk_club_swing_half_speed_face_on.mp4"
     writer = imageio.get_writer(str(clip_path), fps=CLIP_FPS, codec="libx264")
@@ -329,6 +362,14 @@ def render(
         summary["msk_turn"] = _msk_turn(tracked, inputs.events, mode)
     (out / "msk_club_render_summary.json").write_text(json.dumps(summary, indent=1))
     return summary
+
+
+def _framed(
+    view: str, lookat_os: np.ndarray, hands_os: np.ndarray, floor_z: float
+) -> tuple[np.ndarray, float, float]:
+    """``(look-at, floor, distance)`` arguments of ``_Viewer.camera`` for ``view``."""
+    point, distance = view_target(view, lookat_os, hands_os)
+    return point, floor_z, distance
 
 
 def _msk_turn(

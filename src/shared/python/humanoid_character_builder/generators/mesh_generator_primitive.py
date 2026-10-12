@@ -153,10 +153,10 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
 
         import trimesh
 
-        from shared.python.humanoid_character_builder.core.anthropometry import (
+        from src.shared.python.humanoid_character_builder.core.anthropometry import (
             estimate_segment_dimensions,
         )
-        from shared.python.humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
             GeometryType,
         )
@@ -223,7 +223,7 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
         )
 
     def get_supported_segments(self) -> list[str]:
-        from shared.python.humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 

@@ -17,11 +17,88 @@ from .types import (
 )
 
 
+def _evidence_refusals(
+    baseline_latency: LatencySummary | None,
+    candidate_latency: LatencySummary | None,
+    baseline_metrics: AcceptedMatchMetrics | None,
+    candidate_metrics: AcceptedMatchMetrics | None,
+) -> list[str]:
+    """Return reasons the evidence cannot support promotion (fail closed, #12320).
+
+    Evidence must be present, non-zero and comparable. No sample-size
+    thresholds are applied here; those await the statistical review
+    (Repository_Management#1840).
+    """
+    named: dict[str, object] = {
+        "baseline latency": baseline_latency,
+        "candidate latency": candidate_latency,
+        "baseline metrics": baseline_metrics,
+        "candidate metrics": candidate_metrics,
+    }
+    reasons = [
+        f"Missing evidence: {name} not provided"
+        for name, value in named.items()
+        if value is None
+    ]
+    if reasons:
+        return reasons
+    assert baseline_latency is not None and candidate_latency is not None
+    assert baseline_metrics is not None and candidate_metrics is not None
+
+    for name, lat in (
+        ("baseline", baseline_latency),
+        ("candidate", candidate_latency),
+    ):
+        if lat.sample_count == 0:
+            reasons.append(f"Zero latency samples in {name} evidence")
+    for name, met in (
+        ("baseline", baseline_metrics),
+        ("candidate", candidate_metrics),
+    ):
+        if met.total_attempts == 0:
+            reasons.append(f"Zero attempts in {name} validation evidence")
+        elif met.accepted_count == 0:
+            reasons.append(f"Zero accepted examples in {name} validation evidence")
+    if reasons:
+        return reasons
+
+    if baseline_latency.sample_count != candidate_latency.sample_count:
+        reasons.append(
+            "Non-comparable evidence: latency sample counts differ "
+            f"(baseline {baseline_latency.sample_count}, "
+            f"candidate {candidate_latency.sample_count})"
+        )
+    if baseline_latency.is_gpu != candidate_latency.is_gpu:
+        reasons.append("Non-comparable evidence: GPU/CPU timing modes differ")
+    if baseline_metrics.total_attempts != candidate_metrics.total_attempts:
+        reasons.append(
+            "Non-comparable evidence: validation attempt counts differ "
+            f"(baseline {baseline_metrics.total_attempts}, "
+            f"candidate {candidate_metrics.total_attempts})"
+        )
+    return reasons
+
+
+def _refused(reasons: list[str]) -> PromotionGateResult:
+    return PromotionGateResult(
+        decision=PromotionDecision.RESEARCH_ONLY,
+        passed=False,
+        median_speedup=0.0,
+        p95_delta_s=0.0,
+        quality_rate_delta=0.0,
+        failure_reasons=tuple(reasons),
+        follow_up_recommendation=(
+            f"Promotion refused, evidence insufficient ({'; '.join(reasons)}). "
+            f"Candidate remains RESEARCH_ONLY until comparable, non-zero evidence exists."
+        ),
+    )
+
+
 def evaluate_promotion_gate(
-    baseline_latency: LatencySummary,
-    candidate_latency: LatencySummary,
-    baseline_metrics: AcceptedMatchMetrics,
-    candidate_metrics: AcceptedMatchMetrics,
+    baseline_latency: LatencySummary | None,
+    candidate_latency: LatencySummary | None,
+    baseline_metrics: AcceptedMatchMetrics | None,
+    candidate_metrics: AcceptedMatchMetrics | None,
     min_median_speedup: float = 2.0,
 ) -> PromotionGateResult:
     """Evaluate frozen promotion gate.
@@ -31,8 +108,19 @@ def evaluate_promotion_gate(
         2. Non-worse p95 latency: candidate p95 <= baseline p95 + 1e-4.
         3. Non-worse quality: candidate acceptance_rate >= baseline acceptance_rate - 1e-4.
 
+    Fails closed: missing, zero or non-comparable evidence is refused before any
+    arithmetic (#12320).
+
     If any condition fails, the candidate is designated RESEARCH_ONLY with an explicit follow-up recommendation.
     """
+    evidence_reasons = _evidence_refusals(
+        baseline_latency, candidate_latency, baseline_metrics, candidate_metrics
+    )
+    if evidence_reasons:
+        return _refused(evidence_reasons)
+    assert baseline_latency is not None and candidate_latency is not None
+    assert baseline_metrics is not None and candidate_metrics is not None
+
     if baseline_latency.median_s <= 0.0 or candidate_latency.median_s <= 0.0:
         raise ValueError("Median latencies must be strictly positive")
 
