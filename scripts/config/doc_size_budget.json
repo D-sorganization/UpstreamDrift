@@ -104,15 +104,15 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "docs/agents/handoffs/shot-pattern-integration-peer-records.md",
+      "path": "docs/agents/shared-infrastructure.md",
       "owner": "@maintainers",
-      "reason": "Shot pattern analysis multi-agent peer records and validation evidence.",
+      "reason": "Shared agent infrastructure documentation temporarily exceeds budget; staged for decomposition.",
       "expires_on": "2026-10-31"
     },
     {
-      "path": "docs/research/shot_pattern_analysis/phase2/REPORT.md",
+      "path": "docs/development/necromatcher-turnover.md",
       "owner": "@maintainers",
-      "reason": "Comprehensive phase 2 shot pattern analysis research report.",
+      "reason": "Necromatcher native fit turnover log for issue #11235; staged for archival or section decomposition.",
       "expires_on": "2026-10-31"
     }
   ]

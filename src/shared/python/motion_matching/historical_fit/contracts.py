@@ -1,14 +1,19 @@
 """Validated image evidence and explicitly unqualified native fit records."""
 
 from __future__ import annotations
+from .shaft_residuals import ImageResidualAssessment
+from .contact_schedule import ScheduledConstraintOptions, constraint_options_from_record
 
 from dataclasses import dataclass, field
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any
+import hashlib
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 from src.shared.python.estimation import (
+    SolverTelemetry,
+    AuthoredHermiteInitialization,
     CubicHermiteSplineTrajectory,
     project_pinhole,
     reprojection_residual_from_points,
@@ -60,8 +65,15 @@ class CameraProjection:
         ) or not np.isclose(np.linalg.det(self.rotation), 1.0):
             raise ValueError("Camera rotation must be proper orthonormal")
 
+    def camera_points(self, points: np.ndarray) -> np.ndarray:
+        """Return finite camera-space points without projecting or clipping."""
+        points = np.asarray(points, dtype=float)
+        if points.ndim != 2 or points.shape[1] != 3 or not np.isfinite(points).all():
+            raise ValueError("Camera points must be finite (N,3)")
+        return points @ self.rotation.T + self.translation
+
     def _depth(self, points: np.ndarray) -> None:
-        if not np.all((points @ self.rotation.T + self.translation)[:, 2] > 1e-8):
+        if not np.all(self.camera_points(points)[:, 2] > 1e-8):
             raise ValueError("Model markers must be in front of the supplied camera")
 
     def project(self, points: np.ndarray) -> np.ndarray:
@@ -72,6 +84,18 @@ class CameraProjection:
             rotation_world_to_camera=self.rotation,
             translation_world_to_camera=self.translation,
         )
+
+    def project_jacobian(self, points: np.ndarray) -> np.ndarray:
+        """Fixed pinhole derivative (points,2,3) with respect to world metres."""
+        self._depth(points)
+        current = self.camera_points(points)
+        depth = current[:, 2]
+        derivative = np.zeros((len(current), 2, 3))
+        derivative[:, :, :2] = self.intrinsics[:2, :2] / depth[:, None, None]
+        derivative[:, :, 2] = (
+            -(current[:, :2] @ self.intrinsics[:2, :2].T) / depth[:, None] ** 2
+        )
+        return derivative @ self.rotation
 
     def residual(
         self, points: np.ndarray, observed: np.ndarray, confidence: np.ndarray
@@ -166,16 +190,55 @@ class ImageFitInputs:
             object.__setattr__(self, "initial_samples", samples)
 
 
+def _validate_coordinate_bounds(bounds: tuple[tuple[str, float, float], ...]) -> None:
+    """Require unique named two-sided finite limits in native coordinate units."""
+    if not isinstance(bounds, tuple):
+        raise ValueError("Coordinate bounds must be immutable named tuples")
+    names: set[str] = set()
+    for bound in bounds:
+        if not isinstance(bound, tuple) or len(bound) != 3:
+            raise ValueError("Coordinate bounds require name, lower and upper")
+        name, lower, upper = bound
+        if not isinstance(name, str) or not name.strip() or name in names:
+            raise ValueError("Coordinate bounds require unique nonempty names")
+        if (
+            any(
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not np.isfinite(value)
+                for value in (lower, upper)
+            )
+            or lower > upper
+        ):
+            raise ValueError("Coordinate bounds require ordered finite endpoints")
+        names.add(name)
+
+
 @dataclass(frozen=True)
 class ImageFitConfig:
     max_iterations: int = 100
     prior_weight: float = 0.1
     smoothness_weight: float = 0.01
     closure_weight: float = 100.0
-    constraint_options: ConstraintOptions | None = None
+    constraint_options: ConstraintOptions | ScheduledConstraintOptions | None = None
     interior_fractions: tuple[float, ...] = ()
+    coordinate_bounds: tuple[tuple[str, float, float], ...] = ()
+
+    initialization_policy: Literal["strict", "authored_range_project_zero_slopes"] = (
+        "strict"
+    )
 
     def __post_init__(self) -> None:
+        if self.initialization_policy not in (
+            "strict",
+            "authored_range_project_zero_slopes",
+        ):
+            raise ValueError("Unknown initialization policy")
+        if self.initialization_policy != "strict" and not self.coordinate_bounds:
+            raise ValueError(
+                "Authored initialization requires explicit coordinate bounds"
+            )
+        _validate_coordinate_bounds(self.coordinate_bounds)
         if (
             isinstance(self.max_iterations, bool)
             or not isinstance(self.max_iterations, int)
@@ -207,7 +270,9 @@ class ImageFitConfig:
                 ConstraintOptions,
             )
 
-            if not isinstance(self.constraint_options, ConstraintOptions):
+            if not isinstance(
+                self.constraint_options, (ConstraintOptions, ScheduledConstraintOptions)
+            ):
                 raise ValueError(
                     "Fit constraint options must be a ConstraintOptions record"
                 )
@@ -218,6 +283,12 @@ class ImageFitConfig:
         if not isinstance(record, Mapping):
             raise ValueError("Fit configuration must be an object")
         values = dict(record)
+        bounds = values.get("coordinate_bounds", ())
+        if not isinstance(bounds, (tuple, list)) or any(
+            not isinstance(bound, (tuple, list)) for bound in bounds
+        ):
+            raise ValueError("Coordinate bounds must be an array of named limits")
+        values["coordinate_bounds"] = tuple(tuple(bound) for bound in bounds)
         fractions = values.get("interior_fractions", ())
         if not isinstance(fractions, (tuple, list)):
             raise ValueError("Interior fractions must be an array")
@@ -225,27 +296,126 @@ class ImageFitConfig:
         nested = values.get("constraint_options")
         try:
             if nested is not None:
-                from src.shared.python.motion_matching.constraint_kinematics import (
-                    ConstraintOptions,
-                )
-                from src.shared.python.motion_matching.contact_law import GroundPlane
-
-                if not isinstance(nested, Mapping) or not isinstance(
-                    nested.get("ground"), Mapping
-                ):
-                    raise ValueError(
-                        "Fit constraint configuration must contain a ground object"
-                    )
-                options = dict(nested)
-                options["ground"] = GroundPlane(**dict(options["ground"]))
-                pinned = options.get("pinned_spheres", ())
-                if not isinstance(pinned, (tuple, list)):
-                    raise ValueError("Pinned sphere names must be an array")
-                options["pinned_spheres"] = tuple(pinned)
-                values["constraint_options"] = ConstraintOptions(**options)
+                values["constraint_options"] = constraint_options_from_record(nested)
             return cls(**values)
         except (TypeError, KeyError) as exc:
             raise ValueError("Malformed fit configuration") from exc
+
+
+def _spline_vector(values: Any, name: str) -> tuple[float, ...]:
+    raw = np.asarray(values)
+    if raw.ndim != 1 or raw.dtype.kind not in "ifu" or not np.isfinite(raw).all():
+        raise ValueError(f"Spline {name} must be a finite numeric vector")
+    return tuple(float(value) for value in raw)
+
+
+def _spline_hash(coefficients: tuple[float, ...]) -> str:
+    return (
+        "sha256:"
+        + hashlib.sha256(np.asarray(coefficients, dtype="<f8").tobytes()).hexdigest()
+    )
+
+
+@dataclass(frozen=True)
+class ImageSplineStart:
+    """Exact immutable physical Hermite start, bound to model and coordinate identities."""
+
+    knot_times: tuple[float, ...]
+    spline_coefficients: tuple[float, ...]
+    coordinate_order: tuple[str, ...]
+    free_coordinates: tuple[str, ...]
+    model_sha: str
+    coefficient_sha256: str
+
+    def __post_init__(self) -> None:
+        knots = _spline_vector(self.knot_times, "knot times")
+        coefficients = _spline_vector(self.spline_coefficients, "coefficients")
+        order, free = tuple(self.coordinate_order), tuple(self.free_coordinates)
+        for names in (order, free):
+            if (
+                not names
+                or any(not isinstance(name, str) or not name.strip() for name in names)
+                or len(set(names)) != len(names)
+            ):
+                raise ValueError(
+                    "Spline coordinate identities must be nonempty and unique"
+                )
+        if not set(free).issubset(order):
+            raise ValueError(
+                "Spline free coordinates must belong to native coordinate order"
+            )
+        if len(knots) < 2 or any(
+            b <= a for a, b in zip(knots, knots[1:], strict=False)
+        ):
+            raise ValueError("Spline knot times must strictly increase")
+        if len(coefficients) != 2 * len(knots) * len(free):
+            raise ValueError(
+                "Spline coefficients must match knot and free coordinate counts"
+            )
+        if not isinstance(self.model_sha, str) or not self.model_sha.strip():
+            raise ValueError("Spline requires a model identity")
+        if self.coefficient_sha256 != _spline_hash(coefficients):
+            raise ValueError(
+                "Spline coefficient hash does not match canonical physical bytes"
+            )
+        for name, value in (
+            ("knot_times", knots),
+            ("spline_coefficients", coefficients),
+            ("coordinate_order", order),
+            ("free_coordinates", free),
+        ):
+            object.__setattr__(self, name, value)
+
+    @classmethod
+    def from_coefficients(
+        cls,
+        knot_times: Any,
+        coefficients: Any,
+        coordinate_order: tuple[str, ...],
+        free_coordinates: tuple[str, ...],
+        model_sha: str,
+    ) -> ImageSplineStart:
+        """Snapshot canonical coefficients and compute their explicit byte identity."""
+        values = _spline_vector(coefficients, "coefficients")
+        return cls(
+            knot_times,
+            values,
+            coordinate_order,
+            free_coordinates,
+            model_sha,
+            _spline_hash(values),
+        )
+
+    def to_record(self) -> dict[str, Any]:
+        """Return a detached six-field JSON representation."""
+        return {
+            "knot_times": list(self.knot_times),
+            "spline_coefficients": list(self.spline_coefficients),
+            "coordinate_order": list(self.coordinate_order),
+            "free_coordinates": list(self.free_coordinates),
+            "model_sha": self.model_sha,
+            "coefficient_sha256": self.coefficient_sha256,
+        }
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> ImageSplineStart:
+        """Decode a declared saved spline; never silently repair malformed identities."""
+        fields = {
+            "knot_times",
+            "spline_coefficients",
+            "coordinate_order",
+            "free_coordinates",
+            "model_sha",
+            "coefficient_sha256",
+        }
+        if not isinstance(record, Mapping) or set(record) != fields:
+            raise ValueError(
+                "Saved spline must contain exactly its six declared fields"
+            )
+        try:
+            return cls(**dict(record))
+        except (TypeError, KeyError) as exc:
+            raise ValueError("Malformed saved spline identity") from exc
 
 
 @dataclass(frozen=True)
@@ -268,10 +438,26 @@ class ImageFitResult:
     constraint_times: np.ndarray = field(default_factory=lambda: np.empty(0))
     constraint_residuals: np.ndarray = field(default_factory=lambda: np.empty((0, 0)))
     constraint_row_labels: tuple[str, ...] = ()
+    optimizer_ran: bool = True
+    initialization: AuthoredHermiteInitialization | None = None
+    initial_spline: ImageSplineStart | None = None
+    additional_image_assessments: tuple[ImageResidualAssessment, ...] = ()
+    telemetry: SolverTelemetry | None = None
     qualification: str = field(default="monocular_research_hypothesis", init=False)
     physical_time_qualified: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
+        if not isinstance(self.optimizer_ran, bool) or (
+            self.converged and not self.optimizer_ran
+        ):
+            raise ValueError("Convergence requires an executed optimizer")
+        if self.telemetry is not None:
+            if not isinstance(self.telemetry, SolverTelemetry):
+                raise ValueError("Telemetry must be a typed SolverTelemetry")
+            if not self.optimizer_ran and (
+                self.telemetry.nfev is not None or self.telemetry.njev is not None
+            ):
+                raise ValueError("Unoptimized output cannot claim solver counts")
         for name in (
             "source_times",
             "q",
@@ -281,6 +467,22 @@ class ImageFitResult:
             "constraint_residuals",
         ):
             object.__setattr__(self, name, _array(getattr(self, name), name))
+        if self.initialization is not None and not isinstance(
+            self.initialization, AuthoredHermiteInitialization
+        ):
+            raise ValueError("Initialization must be a typed authored receipt")
+        if self.initial_spline is not None and not isinstance(
+            self.initial_spline, ImageSplineStart
+        ):
+            raise ValueError(
+                "Initial spline must be a typed preserved coefficient identity"
+            )
+        assessments = tuple(self.additional_image_assessments)
+        if any(not isinstance(item, ImageResidualAssessment) for item in assessments):
+            raise ValueError(
+                "Additional image diagnostics require validated typed records"
+            )
+        object.__setattr__(self, "additional_image_assessments", assessments)
         errors = self.pixel_errors.copy()
         errors.setflags(write=False)
         object.__setattr__(self, "pixel_errors", errors)

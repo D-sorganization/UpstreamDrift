@@ -3,6 +3,42 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/shared/python/workspace/necromatcher_video.py",
+      "symbol": "export_fit_video",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11235,
+      "reason": "Issue #11235: export_fit_video passes overlay and force sampler options for historical fits.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/workspace/necromatcher_video.py",
+      "symbol": "_write_export",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11235,
+      "reason": "Issue #11235: _write_export coordinates export writing with force and caption layers.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/workspace/necromatcher_video.py",
+      "symbol": "_export_manifest",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11235,
+      "reason": "Issue #11235: _export_manifest builds full export manifest including overlay options.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/workspace/necromatcher_video_jobs.py",
+      "symbol": "NativeVideoSession.submit",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11235,
+      "reason": "Issue #11235: NativeVideoSession.submit validates and submits video jobs end-to-end.",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "src/tools/capture_rig/overlay_render.py",
       "symbol": "render_frame",
       "rule": "parameters",

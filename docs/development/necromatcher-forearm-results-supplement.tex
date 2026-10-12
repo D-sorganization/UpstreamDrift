@@ -1,0 +1,362 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=0.85in,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,graphicx,xcolor,xurl,hyperref,fancyhdr}
+\definecolor{ink}{HTML}{17334A}\definecolor{accent}{HTML}{187E91}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,pdftitle={Necromatcher: Matched Forearm Continuation Results},pdfauthor={UpstreamDrift Development}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\textcolor{ink}{\textbf{NECROMATCHER} / FOREARM MATCHING}}
+\fancyhead[R]{\small Results Supplement}\fancyfoot[L]{\small Research Evidence / Qualification Remains Open}\fancyfoot[R]{\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}\setlength{\emergencystretch}{2em}\renewcommand{\arraystretch}{1.15}
+\newcommand{\code}[1]{\nolinkurl{#1}}\newcommand{\hash}[1]{{\footnotesize\nolinkurl{#1}}}
+\newcommand{\chapterpage}[1]{\par\clearpage\section{#1}}
+\begin{document}\hypersetup{pageanchor=false}
+\begin{titlepage}\thispagestyle{empty}\vspace*{0.55in}
+{\large\textcolor{accent}{UPSTREAMDRIFT / REPEATABLE RESEARCH METHODS}}\par\vspace{.25in}
+{\Huge\bfseries\textcolor{ink}{Necromatcher}}\par\vspace{.18in}
+{\LARGE Matched Forearm Continuation Results}\par\vspace{.3in}
+{\large Tiger Woods V17 and Ben Hogan V14 / Supplemental Technical Record}\par\vspace{.35in}
+\par\smallskip
+\begin{tabular}{@{}p{1.35in}p{4.6in}@{}}\toprule
+Comparison & Four canonical jobs: locked 31-coordinate continuation versus 33-coordinate continuation with two forearm coordinates added.\\
+Common Start & Current Tiger V16 and Hogan V13 variant final motions. Expanded unoptimized seeds preserve all 44 native coordinates' positions, velocities and accelerations.\\
+Producer & \hash{00b7d9846bd2fb2572b7c84f03cfc6c9699323cb}.\\
+Evidence & Identical body observations and V1 shaft objective; previously inspected V2 labels used for evaluation only.\\
+Status & All finite five-target checks pass. All four optimizers are nonconverged and stored candidates remain rejected.\\
+Visual Chapter & Twelve sampled paired surface composites, independently machine-verified and separately visually reviewed; no full shaded videos.\\\bottomrule
+\end{tabular}\par\smallskip
+\vfill\textcolor{ink}{\textbf{Interpretation Boundary}}\par
+This supplement records a controlled freedom comparison within an authored generic model.
+It does not qualify historical anatomy, camera, exposure timing, rolling shutter, club geometry or dynamics.
+It accompanies the preserved methods, source/shutter and geometry/shape supplements.
+The canonical engineering manual remains \code{manuals/upstreamdrift}; its release gate is separate.
+\end{titlepage}\hypersetup{pageanchor=true}
+\section{Controlled Comparison and Admission}
+Both arms start from the same current final motion: Tiger
+\code{tiger-shaft-paired-variant-fit-v16} and Hogan \code{hogan-shaft-paired-variant-fit-v13}.
+The locked control retains 31 free coordinates. The variant adds only \code{LFInput} and
+\code{RFInput}, formerly locked at zero radians. Native model identity, full 44-coordinate
+order and units remain unchanged. Forearm limits remain the exact authored native
+$[-\pi/2,\pi/2]$ radians, not measured clinical ROM.
+
+An unoptimized expansion seed is registered separately because canonical preserved-spline
+restart inherits a saved fit's free order. Each seed has freshly measured body/shaft diagnostics
+and a \code{coordinate_expansion_only} blocker. Old physical coefficients are retained.
+The added tracks have constant zero position and zero velocity/acceleration.
+Their coefficient identity is new; this is not a bitwise restart of the 31-coordinate parent.
+
+Each optimizer then uses an exact six-field restart of its own registered start:
+model identity, native order, free order, knot times, coefficients and coefficient hash.
+Both arms use the same current-parent first-pose prior. The optimized first pose may move
+because this prior is soft; prior identity is checked through inputs and durable requests.
+\par\smallskip
+\begin{tabular}{@{}p{.62\linewidth}rr@{}}\toprule
+Controlled Quantity & Tiger & Hogan\\\midrule
+Source Frames / Adjacent Midpoints & 210 / 209 & 750 / 749\\
+Training Times / Positive Body Observations & 22 / 286 & 23 / 286\\
+Knots & 6 & 12\\
+Geometry Nodes / Row Families per Node & 178 / 12 & 364 / 12\\
+Free Coordinates, Locked / Expanded & 31 / 33 & 31 / 33\\
+Physical Hermite Coefficients, Locked / Expanded & 372 / 396 & 744 / 792\\
+Evaluation Budget / Wall Budget & 30 / 300 s & 30 / 300 s\\\bottomrule
+\end{tabular}\par\smallskip
+
+Camera, confidence, unknown-visibility policy, native scales, bounds, phase-contact recipe,
+geometry times, configured objective weights and reviewed V1 labels are unchanged.
+No landmark, shaft label, probe or alternative solver is introduced.
+\chapterpage{Motion Preservation and Closure Sensitivity}
+The expansion proof covers every source time and adjacent-source floating-point midpoint:
+419 Tiger and 1,499 Hogan times. For each of 44 native coordinates and each derivative separately,
+\[
+\max_{t\in\mathcal T}|z_j^{\mathrm{expanded}}(t)-z_j^{\mathrm{parent}}(t)|
+\leq10^{-12},\qquad z\in\{q,v,a\}.
+\]
+These are coordinate-wise native/source-clock comparisons, not mixed metre/radian norms.
+Canonical cubic Hermite evaluation is reused. The independent review recomputes the proof
+from saved snapshots and checks exact dense source poses/frame identities in both seeds.
+
+Initial body RMS is 22.474796153 px for Tiger and 7.385376101 px for Hogan.
+Fresh initial V1 shaft RMS is 136.754847150 px and 36.969613879 px, respectively.
+These equal current-parent training metrics within the declared tolerance.
+
+The authored club attaches through the left wrist chain. Earlier marker diagnostics showed
+zero direct club derivative for \code{RFInput}; this does not imply zero closure influence.
+Public body poses are $(R,t)$, with attachment placement $R\ell+t$.
+Fresh preflight differentiates the public signed three-metre closure vector and separate
+principal rotation norm at first/middle/last poses, using canonical central differences at
+$10^{-6}$ and $2\times10^{-6}$.
+\par\smallskip
+\begin{tabular}{@{}p{.23\linewidth}p{.35\linewidth}p{.34\linewidth}@{}}\toprule
+Coordinate / Player & Gap Derivative Norm (m/rad) & Rotation Derivative (rad/rad)\\\midrule
+LFInput / Tiger & 0.0593--0.0801 & $-0.5153$--$0.1903$\\
+RFInput / Tiger & 0.0244--0.0252 & $-0.9470$--$0.6978$\\
+LFInput / Hogan & 0.0788--0.0795 & $-0.9551$--$-0.3159$\\
+RFInput / Hogan & 0.0240--0.0243 & $0.6740$--$0.9627$\\\bottomrule
+\end{tabular}\par\smallskip
+
+Forearm derivative step differences are at most $2.23\times10^{-10}$ m/rad and
+$2.07\times10^{-7}$ rad/rad. The rotation-norm derivative is local and scalar,
+not a signed SO(3) vector derivative or global observability certificate.
+All 32 finite authored ranges and 12 explicitly unbounded coordinates remain reported.
+Numerical sensitivity in this model is not a historical anatomy qualification.
+\chapterpage{Objective Composition and Regularization}
+Body residual prefixes and geometric rows remain canonical. The optional shaft term has
+its own reviewed source times, potentially absent from body training.
+Fragment points are image-space samples, not physical tip, grip-butt or head endpoints.
+For projected image-axis unit normal $n_i$, offset $b_i$ and reviewed pixels $p_{ik}$,
+\[
+d_{ik}=n_i^\top p_{ik}+b_i,\qquad k\in\{1,2\}.
+\]
+Weighted residuals use authored confidence, pixel uncertainty and unknown-visibility policy.
+Raw pixel RMS and unoriented angles are separate diagnostics, not weighted objective values.
+Abstentions retain zero slots and add no observed raw segment or fabricated pixel.
+
+The full-native position prior already has 44 rows per training time in both arms.
+Existing LF/RF position-prior rows become variable; no position rows are added.
+Speed regularization uses free coordinates: 31 becomes 33, adding two rows per training time.
+Duration, coordinate scales and smoothing coefficient remain identical.
+Added initial velocities are zero, so added initial speed-prior cost is zero.
+\par\smallskip
+\begin{tabular}{@{}lrr@{}}\toprule
+Regularization Row Count & Tiger & Hogan\\\midrule
+Position Prior, Locked / Expanded & 968 / 968 & 1,012 / 1,012\\
+Speed Prior, Locked 31 & 682 & 713\\
+Speed Prior, Expanded 33 & 726 & 759\\
+Added Speed Rows & 44 & 46\\\bottomrule
+\end{tabular}\par\smallskip
+
+There is no mass renormalization. The experiment changes free-coordinate representation
+under the canonical policy; it does not claim identical total regularization row count or
+conditioning. Describing two new position-prior rows would be incorrect.
+
+Geometry retains 178 Tiger and 364 Hogan nodes with 12 families per node.
+Audits at source times, midpoints, extrema and phase probes are finite checks distinct from objective rows.
+No extra image point enters the body RMS denominator or shaft training role.
+Metre and radian constraints retain separate scales and physical units.
+\chapterpage{Body Image Results and Solver Termination}
+Body training, held-out and dense RMS retain the original confidence policy/observations.
+Tables round to six decimals; portable JSON/CSV retain unrounded machine values.
+\par\smallskip
+\begin{tabular}{@{}lrrr@{}}\toprule
+Arm & Training RMS (px) & Held-Out RMS (px) & Dense RMS (px)\\\midrule
+Tiger Locked 31 & 22.300413 & 25.019052 & 24.749160 \\
+Tiger Expanded 33 & 21.825821 & 24.459473 & 24.197894 \\
+Hogan Locked 31 & 7.152497 & 10.342984 & 10.262214 \\
+Hogan Expanded 33 & 7.218843 & 10.364096 & 10.284241 \\
+\bottomrule\end{tabular}\par\smallskip
+
+Expanded Tiger improves dense RMS by 0.551266108 px against matched control.
+Expanded Hogan worsens it by 0.022027160 px. Both are continuations from the same current parent.
+Comparing only to an older historical fit would confound freedom with extra optimizer continuation.
+
+All four recorded solver messages are exactly:
+\begin{quote}\ttfamily The maximum number of function evaluations is exceeded.\end{quote}
+Each stored \code{converged} value is false. An owned job's success verifies its immutable
+computation, not convergence. The harness preserves actual accepted/rejected numerical status,
+without forcing rejection because previous fits were rejected.
+All four actual terminal acceptance states here are \code{rejected}.
+
+The common limits are 30 function evaluations and 300 seconds. Recorded messages support
+evaluation-budget termination, not guessed wall-time termination.
+This is a budgeted continuation experiment, not a convergence study.
+No independent dynamics or force/torque qualification is claimed.
+\chapterpage{Sparse Shaft Results and Seen Evaluation}
+Tiger has two observed training and one V2 evaluation segment; Hogan has one training and
+two V2 evaluation segments. Abstentions are excluded from raw counts.
+V2 was previously inspected: these labels are seen evaluation, not untouched test data.
+A shaft evaluation frame can already belong to body-landmark training.
+\par\smallskip
+\begin{tabular}{@{}lrr@{}}\toprule
+Arm & Raw Training RMS (px) & Seen Evaluation RMS (px)\\\midrule
+Tiger Locked 31 & 126.145190 & 151.998988 \\
+Tiger Expanded 33 & 111.454011 & 149.966002 \\
+Hogan Locked 31 & 28.186982 & 30.975508 \\
+Hogan Expanded 33 & 28.173896 & 30.929644 \\
+\bottomrule\end{tabular}\par\smallskip
+\begin{figure}[h]\centering
+\includegraphics[width=\linewidth]{assets/paired-shaft-errors.pdf}
+\caption{Raw Shaft-Axis Perpendicular RMS for Current Parents and Matched Continuations. Distinct Panel Scales; Sparse Authored Segment Counts; No Error Bars or Calibration Claim.}
+\end{figure}
+
+Expanded Tiger lowers training RMS by 14.691179649 px and seen evaluation RMS by
+2.032986717 px. Hogan reductions are only 0.013085129 px and 0.045864244 px.
+Remaining displacement is large relative to reviewed fragments.
+Training improvement is not physical shaft, head, endpoint or contact acceptance.
+Confidence/pixel uncertainty are uncalibrated authored assumptions.
+These residuals cannot establish metric shaft displacement without qualified camera/depth/geometry/timing.
+\chapterpage{Angular Disagreement and Finite Constraints}
+These unoriented image-axis errors are per observed segment in stored order, distinct from
+native hand/club closure angles.
+\par\smallskip
+\begin{tabular}{@{}p{.31\linewidth}p{.31\linewidth}p{.29\linewidth}@{}}\toprule
+Arm & Training Angles (deg) & Seen Evaluation Angles (deg)\\\midrule
+Tiger Locked 31 & 35.5582, 70.4033 & 28.9916 \\
+Tiger Expanded 33 & 33.9531, 60.3764 & 28.6140 \\
+Hogan Locked 31 & 11.1972 & 85.4083, 28.8097 \\
+Hogan Expanded 33 & 10.9114 & 85.6594, 28.6294 \\
+\bottomrule\end{tabular}\par\smallskip
+
+Hogan's first evaluation segment remains almost perpendicular to the projected native axis
+at about $85.4$--$85.7^\circ$. Tiger's shaft angles also remain substantial.
+Native closure and image-axis agreement therefore remain separate acceptance questions.
+\par\smallskip
+\begin{tabular}{@{}lrrr@{}}\toprule
+Arm & Grip Gap (mm) & Closure Angle (deg) & Ground Depth (mm)\\\midrule
+Tiger Locked 31 & 1.902159 & 1.165997 & 1.252438 \\
+Tiger Expanded 33 & 2.270786 & 0.848280 & 1.642092 \\
+Hogan Locked 31 & 1.298358 & 0.232036 & 0.479780 \\
+Hogan Expanded 33 & 1.439082 & 0.263096 & 0.686942 \\
+\bottomrule\end{tabular}\par\smallskip
+
+Every arm passes five predeclared finite targets: dense body RMS no worse than Tiger
+35.752076564 px/Hogan 10.699636639 px; all 32 finite authored bounds assessed through the
+canonical conservative Hermite/Bernstein domain and scalar extrema; grip gap at most 10 mm;
+native closure angle at most $5^\circ$; penetration at most 2 mm.
+The 12 unbounded coordinates remain unqualified.
+
+Fresh source/midpoint/extrema/phase audits provide these maxima, not only objective nodes.
+Passing finite probes is not continuous nonlinear closure/nonpenetration certification.
+All scientific acceptance and continuous nonlinear certification flags remain false.
+\chapterpage{Producer, Runtime and Immutable Lineage}
+Numerical producer: \hash{00b7d9846bd2fb2572b7c84f03cfc6c9699323cb}.
+Recorded runtime: Python 3.13.5, NumPy 2.4.1, SciPy 1.16.0, MuJoCo 3.3.4,
+OpenCV 4.13.0.90 and Windows 11, with BLAS threads set to one.
+Version fingerprints are not complete binary/hardware certification.
+\par\smallskip
+\begin{longtable}{@{}p{.35\linewidth}p{.61\linewidth}@{}}\toprule
+Arm / Fit Identity & Owned Run Identity\\\midrule\endhead
+Tiger Locked 31 & \hash{3475126f0d8f4c6b99dd3ebb914990cd} \\ \multicolumn{2}{@{}p{.97\linewidth}@{}}{\code{tiger-forearm-paired-control-fit-v17} \newline File SHA256: \hash{8c9387bcf1f83c94f624a2ff810bbb0e4aee447709ca631a8a2177cc3f7b2630}} \\ \addlinespace
+Tiger Expanded 33 & \hash{73b2783d0e84433b983d47768a7a0148} \\ \multicolumn{2}{@{}p{.97\linewidth}@{}}{\code{tiger-forearm-paired-variant-fit-v17} \newline File SHA256: \hash{d35504e46095ef47de0c162c72c9680614f177be42e71aa4afaac9d73fc0c7f5}} \\ \addlinespace
+Hogan Locked 31 & \hash{0710e3edd6f94a63b2887482f1be850f} \\ \multicolumn{2}{@{}p{.97\linewidth}@{}}{\code{hogan-forearm-paired-control-fit-v14} \newline File SHA256: \hash{6cd423bb924011bf1030e5fe99b4bd05ade14e75bbf6f95063cf95690b0efc3b}} \\ \addlinespace
+Hogan Expanded 33 & \hash{bac62be2a27743a5a0a223690a7c998c} \\ \multicolumn{2}{@{}p{.97\linewidth}@{}}{\code{hogan-forearm-paired-variant-fit-v14} \newline File SHA256: \hash{9554eef439f9b6fd4d3bd53a632d11a63ac4c340f1db54c3fdb0beb4a813d676}} \\ \addlinespace
+\bottomrule\end{longtable}
+\par\smallskip
+\begin{longtable}{@{}p{.34\linewidth}p{.62\linewidth}@{}}\toprule
+Authoritative Input / Receipt & Exact File SHA256\\\midrule\endhead
+Completion Receipt & \hash{1b8876531cbc99aa20dcd0fd5db8c184faf4e3284c50baecf0e5673116f4e9e4} \\ \addlinespace
+Initial Preflight Receipt & \hash{35095eb119e882fb05cf6da6a3e3e36e1110e48c999b8f98c013c45eff8baa84} \\ \addlinespace
+Independent Review & \hash{e3637ea8cbe883e95c2d13964e5abc79f40b83f2fe534370d29a280bce521a40} \\ \addlinespace
+Authorized Config & \hash{1d9899677526a3648dc4c88c1360efe5b8ce2c8d57cfebd58334064817f5d526} \\ \addlinespace
+Tiger Expansion Seed & \hash{946d5f1eb150c7182f41abd19a9efdf7fb94d8656147c62c28ac8cc310c4f1af} \\ \addlinespace
+Hogan Expansion Seed & \hash{f9e0b644d071ec4eb22bed93644b66ecb7fe1b352d5167630b8cf0df59ca59ff} \\ \addlinespace
+Finally-Preservation Receipt & \hash{8f5e7a161731a5c3564642a4743c2e0ea291791eb79c805c31d830f787ce9ec6} \\ \addlinespace
+\bottomrule\end{longtable}
+The durable bundle preserves all six raw fit JSONs, including both unoptimized seeds.
+Encoded file SHA, fit record SHA, XML SHA, decoded frame hash, source-clock hash and
+source/runtime fingerprint represent distinct identity domains.
+\chapterpage{Preservation and Reproduction}
+The external finally wrapper captures source/runtime/input/helper/config/frozen-file/library
+and project-index identities even if admitted native preflight, owned fit or audit fails.
+Independent capture tasks preserve runtime/library evidence when a source check fails.
+The original error remains primary; foreign writes cannot be hidden by a failure receipt.
+
+All 14,742 tracked source files are preserved. Original nonindex bytes and indexed records
+are unchanged. Library files increase from 318 to 336: six declared fit assets and twelve
+files inside four owned run roots. Only six declared dataset IDs enter the index; active run
+remains null. There are no foreign additions.
+
+The first launch mistyped a CLI freeze hash. Its guard stopped it before SDK setup, library
+operations or optimizer submission. Its traceback is retained separately.
+The corrected attempt has an empty console log and verified preservation; no owned job was blindly rerun.
+
+\textbf{Portable Inputs.} Keep source, relative \code{assets/}, JSON and CSV together.
+\code{Matched Forearm Repeatability V17-V14} preserves 81 logical inputs/67 content-addressed
+copies: drivers, wrapper, tests, RED/GREEN logs, helpers, configs, preflight, authorization,
+owned requests, six raw fits and receipts. Previous media/capture/model/evidence files remain
+linked to hash-verified Desktop copies, avoiding unnecessary footage duplication.
+
+\textbf{Repeatable Procedure.} Verify absent immutable IDs/exclusive paths and all external pins;
+check a clean published producer; run SDK-first read-only preflight with execution disabled;
+verify preservation; obtain separate job authorization; version only the execution flag;
+submit sequentially using the canonical session; persist owned IDs immediately; inspect
+fresh audits/terminal receipts; verify file/index deltas. A new producer requires a separately
+pinned config and preflight, not silent reuse of old admission.
+
+\textbf{Paired Visual Scope.} The following pages show twelve source-sized alpha=0.35 surface composites.
+These are sampled display diagnostics, not full shaded videos or historical body-shape admission.
+Independent source/alpha/depth/mask/native-projection verification passed for all twelve frames; the nine-page numerical edition is preserved separately.
+
+\textbf{Qualification Limits.} The human is an authored generic 1.71 m/78 kg model with
+unqualified historical camera and ROM. Forearm freedom may absorb reference-body, camera or
+club-attachment errors; this experiment does not identify which dominates.
+It fits no rolling-shutter/exposure model and cannot establish correction of imaging distortion.
+Physical playback scale, gross shaft mismatch, physical head/endpoints and dynamics remain unresolved.
+\chapterpage{Paired Tiger Surface Pilots}
+Authored native surfaces are composited over original source-sized backgrounds at opacity 0.35.
+Left: locked 31-coordinate control. Right: expanded 33-coordinate variant.
+The projection and generic rig are unchanged; body-surface overlap does not qualify historical anatomy.
+\par\smallskip
+\begin{tabular}{@{}p{.48\linewidth}p{.48\linewidth}@{}}
+\textbf{Locked 31 Control} & \textbf{Expanded 33 Variant}\\
+\includegraphics[width=\linewidth]{assets/tiger-control-000000-surface.png} & \includegraphics[width=\linewidth]{assets/tiger-variant-000000-surface.png}\\
+\multicolumn{2}{@{}p{.97\linewidth}@{}}{\small\textbf{Source Frame 0: V1 Shaft Training}}\\[5pt]
+\includegraphics[width=\linewidth]{assets/tiger-control-000150-surface.png} & \includegraphics[width=\linewidth]{assets/tiger-variant-000150-surface.png}\\
+\multicolumn{2}{@{}p{.97\linewidth}@{}}{\small\textbf{Source Frame 150: Previously Seen Shaft Evaluation}}\\[5pt]
+\includegraphics[width=\linewidth]{assets/tiger-control-000209-surface.png} & \includegraphics[width=\linewidth]{assets/tiger-variant-000209-surface.png}\\
+\multicolumn{2}{@{}p{.97\linewidth}@{}}{\small\textbf{Source Frame 209: V1 Shaft Training}}\\[5pt]
+\end{tabular}\par\smallskip
+Frame 150 was also used by the body-landmark objective. Its shaft label was reserved for evaluation and has already been inspected; it is not an unseen image.
+\chapterpage{Paired Hogan Surface Pilots}
+Authored native surfaces are composited over original source-sized backgrounds at opacity 0.35.
+Left: locked 31-coordinate control. Right: expanded 33-coordinate variant.
+The projection and generic rig are unchanged; body-surface overlap does not qualify historical anatomy.
+\par\smallskip
+\begin{tabular}{@{}p{.48\linewidth}p{.48\linewidth}@{}}
+\textbf{Locked 31 Control} & \textbf{Expanded 33 Variant}\\
+\includegraphics[width=.82\linewidth]{assets/hogan-control-000200-surface.png} & \includegraphics[width=.82\linewidth]{assets/hogan-variant-000200-surface.png}\\
+\multicolumn{2}{@{}p{.97\linewidth}@{}}{\small\textbf{Source Frame 200: Previously Seen Shaft Evaluation}}\\[5pt]
+\includegraphics[width=.82\linewidth]{assets/hogan-control-000375-surface.png} & \includegraphics[width=.82\linewidth]{assets/hogan-variant-000375-surface.png}\\
+\multicolumn{2}{@{}p{.97\linewidth}@{}}{\small\textbf{Source Frame 375: V1 Shaft Training}}\\[5pt]
+\includegraphics[width=.82\linewidth]{assets/hogan-control-000550-surface.png} & \includegraphics[width=.82\linewidth]{assets/hogan-variant-000550-surface.png}\\
+\multicolumn{2}{@{}p{.97\linewidth}@{}}{\small\textbf{Source Frame 550: Previously Seen Shaft Evaluation}}\\[5pt]
+\end{tabular}\par\smallskip
+Low resolution, blur and encoded interlacing limit localization. Control/variant visual changes are very small; the visible club and authored proxy still disagree.
+\chapterpage{Performance Gates and Visual Interpretation}
+The twelve selected-frame pilots preserve original source pixels, saved camera and native
+geometry. The reported full-clip times are a heuristic from the slowest selected frame,
+not measured full-video runtimes. The unchanged canonical worker gate is 600 seconds.
+\par\smallskip
+\begin{tabular}{@{}lrrl@{}}\toprule
+Case & Source Frames & Estimated Seconds & Gate\\\midrule
+Tiger Locked 31 & 210 & 487.223541 & Pass\\
+Tiger Expanded 33 & 210 & 431.301465 & Pass\\
+Hogan Locked 31 & 750 & 790.175250 & Fail\\
+Hogan Expanded 33 & 750 & 875.144100 & Fail\\\bottomrule
+\end{tabular}
+\par\smallskip
+A passing Tiger estimate is not a full-clip timing certificate. Both Hogan cases exceed the
+unchanged gate. No full shaded videos were authorized or exported by this pilot operation.
+The reported paired surface images do not replace the earlier verified source-video exports.
+
+\textbf{Visual Findings.} Tiger's body proxy broadly overlaps the imaged trunk and legs,
+but the authored club remains grossly displaced at frames 0 and 209. Forearm freedom
+improves numerical shaft metrics without producing a convincing physical club reconstruction.
+Hogan's paired surfaces are nearly unchanged and retain broad club-direction disagreement.
+The transparent surface is an authored native geometric proxy, not a segmented historical silhouette
+or measured player-specific body mesh.
+
+\textbf{Conditional Grip-State Hypothesis.} In late Tiger frame 209 the visible shaft lies
+down-left behind the imaged body, while the authored rig projects the club rightward from its
+wrist attachment. A holding-hand or post-swing grip-state mismatch is a hypothesis requiring
+review of neighboring original frames, wrist observations/confidence and the continuous attachment
+assumptions. A single frame does not establish anatomical hand identity or release.
+This hypothesis does not explain Hogan frame 200 and is not evidence for rolling-shutter compensation.
+No historical labels, constraints, attachment or fit have been changed on this basis.
+
+\textbf{Source and Qualification.} The original numerical producer remains
+\hash{00b7d9846bd2fb2572b7c84f03cfc6c9699323cb}.
+The pilot and fresh independent verification preserve all 14,742 tracked source and 336 library files,
+with complete before/after source/runtime/helper/config/input fingerprints and zero library growth.
+The machine review checks all 72 PNGs and 12 depth NPZs, including exact source backgrounds, alpha
+composition, mask/depth and native FK/camera agreement. The report displays only twelve composites;
+its visual review is separate from machine identity checks.
+Physical time, historical camera/body geometry, clinical ROM, exposure and dynamics remain unqualified.
+All four numerical fits remain nonconverged and rejected, notwithstanding all five finite-target passes.
+\par\smallskip
+\begin{tabular}{@{}p{.31\linewidth}p{.65\linewidth}@{}}\toprule
+Paired Pilot Proof & Exact File SHA256\\\midrule
+Pilot Finally Preservation & \hash{d6b278e1a92dd4b3e3c8d92de3514a10da58f1198738aebfae4b6e96938429b5}\\
+Independent Native Review & \hash{1a242728cd872282c30fe91aaf1a61f8bc2ecb238ef0ba86303dedbe3a145a96}\\
+Independent Finally Preservation & \hash{bf2a36c8179b7aca4067a8cf2804f9278b75dd66962423a1ecd652a575811564}\\\bottomrule
+\end{tabular}
+
+\end{document}

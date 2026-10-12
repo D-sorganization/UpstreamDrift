@@ -56,7 +56,6 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository) &&
       (!contains(github.event.pull_request.labels.*.name, 'spec-exempt'))
     timeout-minutes: 5
-
     steps:
       - name: Enable long Git paths
         run: git config --global core.longpaths true

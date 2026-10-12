@@ -609,7 +609,7 @@
     },
     {
       "feature_id": "simulation.swing_objective_lab",
-      "title": "Swing Objective Lab — mechanism-vs-outcome downswing comparison",
+      "title": "Swing Objective Lab ΓÇö mechanism-vs-outcome downswing comparison",
       "status": "parity",
       "pyqt": "src/launchers/adapters/swing_objective_lab_embed.py",
       "api": "src/api/routes/swing_objectives.py",
@@ -732,7 +732,7 @@
       "tiles": [
         "launch_monitor_analytics"
       ],
-      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), Relationships — correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate), Monitor Comparison (POST /v2/comparison), Models (POST /v2/model) and Data Treatment (POST /v2/treatment). As on the desktop, the treated data becomes the analysis view that every other section reads, while treatment itself always runs on the raw rows. Still missing on the web: Sessions and Reports.",
+      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. The web page (#11987) now covers Flexible Analysis (POST /v2/analyze), Trends (POST /v2/trend), Dispersion (POST /v2/dispersion), Relationships ΓÇö correlations/partial correlations/dependency network, PCA, and VIF (POST /v2/relationships, POST /v2/multivariate), Monitor Comparison (POST /v2/comparison), Models (POST /v2/model) and Data Treatment (POST /v2/treatment). As on the desktop, the treated data becomes the analysis view that every other section reads, while treatment itself always runs on the raw rows. Still missing on the web: Sessions and Reports.",
       "id": "tools.launch_monitor_analytics"
     },
     {
@@ -890,22 +890,6 @@
       ],
       "notes": "Tracked in #11987 (epic #9546 is closed). Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts.",
       "id": "tools.rate_of_closure"
-    },
-    {
-      "feature_id": "tools.shot_pattern_analysis",
-      "title": "Shot Pattern Analysis Workbench",
-      "status": "exempt",
-      "pyqt": "src/tools/shot_pattern_analysis/gui.py",
-      "api": null,
-      "web": null,
-      "issue": null,
-      "reason": "The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed.",
-      "pending_decision": false,
-      "tiles": [
-        "shot_pattern_analysis"
-      ],
-      "notes": "The GUI runs the canonical CLI in a cancellable managed subprocess. The Python solver delegates impact and flight to shared UpstreamDrift physics.",
-      "id": "tools.shot_pattern_analysis"
     },
     {
       "feature_id": "tools.terrain_engine",
@@ -1067,7 +1051,7 @@
     {
       "id": "myosim_suite",
       "title": "MyoSuite",
-      "description": "MyoSuite engine dashboard: engine availability and environment status (driving a simulation requires the optional myosuite package — #9478)",
+      "description": "MyoSuite engine dashboard: engine availability and environment status (driving a simulation requires the optional myosuite package ΓÇö #9478)",
       "path": "src/engines/physics_engines/myosuite/python/gui.py",
       "launch_target": "src/engines/physics_engines/myosuite/python/gui.py",
       "category": "physics_engine",
@@ -1141,7 +1125,7 @@
     {
       "id": "mujoco_models_shared",
       "title": "MuJoCo Models",
-      "description": "MuJoCo simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if MuJoCo_Models is absent beside this repository — #10514)",
+      "description": "MuJoCo simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if MuJoCo_Models is absent beside this repository ΓÇö #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "MuJoCo_Models",
       "category": "tool",
@@ -1151,7 +1135,7 @@
     {
       "id": "drake_models_shared",
       "title": "Drake Models",
-      "description": "Drake simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Drake_Models is absent beside this repository — #10514)",
+      "description": "Drake simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Drake_Models is absent beside this repository ΓÇö #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "Drake_Models",
       "category": "tool",
@@ -1161,7 +1145,7 @@
     {
       "id": "pinocchio_models_shared",
       "title": "Pinocchio Models",
-      "description": "Pinocchio simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Pinocchio_Models is absent beside this repository — #10514)",
+      "description": "Pinocchio simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Pinocchio_Models is absent beside this repository ΓÇö #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "Pinocchio_Models",
       "category": "tool",
@@ -1171,7 +1155,7 @@
     {
       "id": "opensim_models_shared",
       "title": "OpenSim Models",
-      "description": "OpenSim simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if OpenSim_Models is absent beside this repository — #10514)",
+      "description": "OpenSim simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if OpenSim_Models is absent beside this repository ΓÇö #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "OpenSim_Models",
       "category": "tool",
@@ -1198,7 +1182,7 @@
     {
       "id": "pendulum_simulator",
       "title": "Pendulum Simulator",
-      "description": "Interactive proximal–distal companion for double, triple, and 8-DOF golfer dynamics",
+      "description": "Interactive proximalΓÇôdistal companion for double, triple, and 8-DOF golfer dynamics",
       "path": "src/config/models.yaml",
       "launch_target": "tools://src/double_pendulum_golf/__main__.py",
       "category": "simulation",
@@ -1283,8 +1267,8 @@
     },
     {
       "id": "swing_flight_pipeline",
-      "title": "Swing → Flight Pipeline",
-      "description": "End-to-end swing dynamics → impact → aerodynamic ball flight pipeline",
+      "title": "Swing ΓåÆ Flight Pipeline",
+      "description": "End-to-end swing dynamics ΓåÆ impact ΓåÆ aerodynamic ball flight pipeline",
       "path": "src/tools/swing_flight_pipeline/gui.py",
       "launch_target": "src/tools/swing_flight_pipeline/gui.py",
       "category": "simulation",
@@ -1628,20 +1612,6 @@
       ]
     },
     {
-      "id": "shot_pattern_analysis",
-      "title": "Shot Pattern Analysis",
-      "description": "Compare straight, draw, and fade patterns with matched delivery, shaft rotation, strike variation, and covariance. Install: pip install -e '.[gui-tools]'; requires the native upstream-physics wheel.",
-      "path": "src/tools/shot_pattern_analysis/__main__.py",
-      "launch_target": "src/tools/shot_pattern_analysis/__main__.py",
-      "category": "tool",
-      "status": "ready",
-      "capabilities": [
-        "shot_pattern_analysis",
-        "shot_dispersion",
-        "impact_physics"
-      ]
-    },
-    {
       "id": "rate_of_closure",
       "title": "Rate of Closure Impact Explorer",
       "description": "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center). Its launch-monitor tab is the in-context surface of the same analytics engine as Launch Monitor Analytics.",
@@ -1663,7 +1633,7 @@
     {
       "id": "sidekick",
       "title": "Sidekick",
-      "description": "AI assistant chat panel — embed as a dock or tab",
+      "description": "AI assistant chat panel ΓÇö embed as a dock or tab",
       "path": "src/tools/sidekick/_embed_adapter.py",
       "launch_target": "src/tools/sidekick/_embed_adapter.py",
       "category": "tool",
@@ -1727,7 +1697,7 @@
     {
       "id": "biomech_gait",
       "title": "Gait Model",
-      "description": "Saved shortcut/preset forwarding gait filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)",
+      "description": "Saved shortcut/preset forwarding gait filter to Exercise Dashboard (persists filter parameters through serialization and dispatch ΓÇö #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "registered launcher action",
       "category": "biomechanics",
@@ -1737,7 +1707,7 @@
     {
       "id": "biomech_sit_to_stand",
       "title": "Sit-to-Stand Model",
-      "description": "Saved shortcut/preset forwarding sit-to-stand filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)",
+      "description": "Saved shortcut/preset forwarding sit-to-stand filter to Exercise Dashboard (persists filter parameters through serialization and dispatch ΓÇö #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "registered launcher action",
       "category": "biomechanics",
@@ -1747,7 +1717,7 @@
     {
       "id": "movement_optimizer",
       "title": "Movement Optimizer",
-      "description": "Cross-engine barbell trajectory optimization (unified task mapped with tools_movement_optimizer under #9406 authority; retains legacy IDs and alternate provider diagnostics — #10514)",
+      "description": "Cross-engine barbell trajectory optimization (unified task mapped with tools_movement_optimizer under #9406 authority; retains legacy IDs and alternate provider diagnostics ΓÇö #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "src/movement_optimizer/__main__.py",
       "category": "biomechanics",
@@ -1804,7 +1774,7 @@
     {
       "id": "motion_capture",
       "title": "Motion Capture",
-      "description": "FreeMoCap sidecar: markerless motion capture recording and processing (command-line interface requiring --input; it is not yet a launchable GUI tile — #9478)",
+      "description": "FreeMoCap sidecar: markerless motion capture recording and processing (command-line interface requiring --input; it is not yet a launchable GUI tile ΓÇö #9478)",
       "path": "src/tools/freemocap_sidecar/run_freemocap.py",
       "launch_target": "src/tools/freemocap_sidecar/run_freemocap.py",
       "category": "motion_capture",
@@ -1867,7 +1837,7 @@
     {
       "id": "drake_dashboard",
       "title": "Drake Dashboard",
-      "description": "Interactive Drake simulation dashboard (advanced mode of Drake engine destination; specialized and dashboard controls both available — #10514)",
+      "description": "Interactive Drake simulation dashboard (advanced mode of Drake engine destination; specialized and dashboard controls both available ΓÇö #10514)",
       "path": "src/launchers/drake_dashboard.py",
       "launch_target": "src/launchers/drake_dashboard.py",
       "category": "physics_engine",
@@ -1883,7 +1853,7 @@
     {
       "id": "mujoco_dashboard",
       "title": "MuJoCo Dashboard",
-      "description": "Interactive MuJoCo simulation dashboard (advanced mode of MuJoCo engine destination; specialized and dashboard controls both available — #10514)",
+      "description": "Interactive MuJoCo simulation dashboard (advanced mode of MuJoCo engine destination; specialized and dashboard controls both available ΓÇö #10514)",
       "path": "src/launchers/mujoco_dashboard.py",
       "launch_target": "src/launchers/mujoco_dashboard.py",
       "category": "physics_engine",
@@ -1899,7 +1869,7 @@
     {
       "id": "pinocchio_dashboard",
       "title": "Pinocchio Dashboard",
-      "description": "Interactive Pinocchio simulation dashboard (advanced mode of Pinocchio engine destination; specialized and dashboard controls both available — #10514)",
+      "description": "Interactive Pinocchio simulation dashboard (advanced mode of Pinocchio engine destination; specialized and dashboard controls both available ΓÇö #10514)",
       "path": "src/launchers/pinocchio_dashboard.py",
       "launch_target": "src/launchers/pinocchio_dashboard.py",
       "category": "physics_engine",
@@ -1915,7 +1885,7 @@
     {
       "id": "pinn_pure_rigid",
       "title": "Pure Rigid Body",
-      "description": "Pinocchio inverse dynamics only — no ML",
+      "description": "Pinocchio inverse dynamics only ΓÇö no ML",
       "path": "src/config/models.yaml",
       "launch_target": "registered launcher action",
       "category": "biomechanics",
@@ -2056,7 +2026,7 @@
       "instructions": [
         "Choose a camera view and pause at the frame you want to discuss.",
         "Draw lines, arrows, circles, ellipses or rectangles. Select a shape to adjust it, or use Undo.",
-        "Save your references before returning. Use the editor’s export controls to share an annotated image or video."
+        "Save your references before returning. Use the editorΓÇÖs export controls to share an annotated image or video."
       ]
     },
     {
@@ -2111,7 +2081,7 @@
       "view": "workflow",
       "instructions": [
         "Search the catalog or add a custom club. Enter only the specifications you know; keep estimates and unknown values explicit.",
-        "Assign the selected club to this capture. Editing your bag later preserves the capture’s saved club details.",
+        "Assign the selected club to this capture. Editing your bag later preserves the captureΓÇÖs saved club details.",
         "Skip this step if the club details are unavailable. Current body models record equipment context without applying a club constraint."
       ]
     },
@@ -3174,9 +3144,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
-    "src/config/launcher_manifest.json": "45b6cea9134f9896b1a719c23c6fc77d59d4aed751bfe62908ad888acdc86037",
-    "src/config/feature_parity.json": "96d1f047e09b3357d8f6f80dc3a4176a7a46e3ae1de18d6c27469494e0973ebc",
+    "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
+    "src/config/launcher_manifest.json": "e328a1f5ef14988077d53b83ed0bd7a2e86d0580e1b5e86883457292de0dcf88",
+    "src/config/feature_parity.json": "90f50e54e16a901d070b56dd56218ea92a019ee80ccba8c401f7e790b9dc5b5b",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

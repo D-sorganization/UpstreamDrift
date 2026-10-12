@@ -282,7 +282,7 @@
     "reference_acceleration_rms": 56.48005567361892,
     "relative_rms_error_muscle_reserve": 4.360085008800014e-12,
     "relative_rms_limit": 0.01,
-    "torque_closure_limit_nm": 1e-06,
+    "torque_closure_limit_nm": 1e-6,
     "torque_closure_max_nm": 1.1368683772161603e-13
   },
   "invocation": "python3 scripts/run_myofullbody_swing.py --bundle /tmp/claude-1000/-home-dieterolson-Repositories-UpstreamDrift/16836c4a-59a5-46dd-92ff-37c7c6bab2f1/scratchpad/sip_runs/bundles/iron.npz --receipt /tmp/mfb/v2/iron.json --solution /tmp/mfb/v2/iron.npz --stride 5 --workers 2",
@@ -737,10 +737,7 @@
       }
     ],
     "window_frames": 34,
-    "window_steps": [
-      1095,
-      1260
-    ]
+    "window_steps": [1095, 1260]
   },
   "myofullbody": {
     "commit": "93b0ca8f4ec90c9899ee7f05fee561e9911da91b",
@@ -837,17 +834,17 @@
     "NeckInputX": {
       "effort_rms_nm": 4.8117527463515675,
       "peak_nm": 0.00018911842243696242,
-      "rms_nm": 5.346332536695862e-05
+      "rms_nm": 5.346332536695862e-5
     },
     "NeckInputY": {
       "effort_rms_nm": 4.082394309964603,
       "peak_nm": 0.0001229716621278243,
-      "rms_nm": 3.149971304204381e-05
+      "rms_nm": 3.149971304204381e-5
     },
     "NeckInputZ": {
       "effort_rms_nm": 0.6299333819131645,
       "peak_nm": 0.00010379129447812829,
-      "rms_nm": 2.799579493857467e-05
+      "rms_nm": 2.799579493857467e-5
     },
     "REInput": {
       "effort_rms_nm": 11.22910648345668,
@@ -1037,25 +1034,25 @@
       "backswing": {
         "effort_share": 0.28099974752811063,
         "frames": 219,
-        "ratio": 9.463252278998285e-06,
+        "ratio": 9.463252278998285e-6,
         "reserve_share": 0.2183716715942952
       },
       "downswing": {
         "effort_share": 0.0658518435575235,
         "frames": 31,
-        "ratio": 1.090902496061439e-05,
+        "ratio": 1.090902496061439e-5,
         "reserve_share": 0.06800633046403902
       },
       "follow_through": {
         "effort_share": 0.6299969514039044,
         "frames": 112,
-        "ratio": 1.1287088797638283e-05,
+        "ratio": 1.1287088797638283e-5,
         "reserve_share": 0.6964851548917136
       },
       "impact_window": {
         "effort_share": 0.023151457510461614,
         "frames": 5,
-        "ratio": 9.235735238742797e-06,
+        "ratio": 9.235735238742797e-6,
         "reserve_share": 0.017136843049951986
       }
     },
@@ -1118,9 +1115,9 @@
       "coordinates": 3,
       "effort_peak_nm": 17.020847137750913,
       "effort_rms_nm": 3.661316878742846,
-      "reserve_over_effort_rms": 1.0734831541947842e-05,
+      "reserve_over_effort_rms": 1.0734831541947842e-5,
       "reserve_peak_nm": 0.00018911842243696242,
-      "reserve_rms_nm": 3.9303619914994723e-05
+      "reserve_rms_nm": 3.9303619914994723e-5
     },
     "trunk": {
       "coordinates": 3,

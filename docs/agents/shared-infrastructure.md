@@ -1,5 +1,16 @@
 # Shared Infrastructure Directory
 
+### Native Camera and Model Hypothesis Admission
+
+Reuse `workspace.NativeHypothesisRequest`, `bind_native_hypothesis` and
+`author_native_hypothesis` for explicit, source-authenticated unoptimized seed
+rebinding. `NativeModelBinding` verifies registered XML, native coordinate order
+and compiled scalar units without a candidate fit. Capture identities preserve
+separate encoded PNG/decoded BGR domains and the existing complete-clock digest.
+The fixed two-operation clean worker reuses refit cancellation/cleanup; candidate
+initialization and stored lineage never qualify camera, anatomy or physical time.
+See [Native Hypothesis Procedure](../development/necromatcher-native-hypothesis-admission.md).
+
 Grouped by concern, with one-line descriptions and the public symbols
 worth knowing. Not exhaustive — when in doubt, grep — but these are
 the modules most often missed.
@@ -165,6 +176,14 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - `urdf_bridge.shape_to_urdf_visual` — re-use the same shape vocabulary
   as URDF visual elements; a custom mesh imported in the C3D Viewer is
   re-usable as a URDF visual link without re-modelling.
+- `renderers.projective_renderer`: `SurfaceMesh`, `SurfaceLayer`, `render_surface_layer` and `composite_surface` project shared shape triangles
+  through an explicitly supplied saved camera, with near-plane clipping,
+  perspective-correct nearest depth and checked opacity. Use this for
+  source-footage registration rather than a free-view camera screenshot.
+- `ShapeOverlayOptions` validates finite opacity in [0,1]; `shapes.BoxShape`
+  joins the existing capsule/ellipsoid primitives. `visual_skeleton` remains
+  the shared native-definition visual provider. Derived surfaces are model
+  proxies where authored visual solids are absent, not measured anatomy.
 - See `docs/user_guide/body_part_viz/` for end-user workflow guides
   and `docs/api/body_part_viz.md` for the full API surface.
 
@@ -625,6 +644,14 @@ The root Bushing Joint also exposes six actuator-sensing channels under HipLogs.
 
 ## Historical Research Fit Jobs
 
+The optional `motion_matching.pipeline.MarkerLinearizationPlant` capability
+creates a `MarkerLinearizer` returning immutable `MarkerLinearization` world
+points and native-coordinate derivatives. It does not extend the required
+`MatchingPlant` protocol. Historical fitting combines this owner-provided
+derivative with `CameraProjection.project_jacobian`; unsupported providers
+retain finite differences and malformed advertised providers fail closed.
+See [Analytic Marker Derivatives](../development/necromatcher-analytic-marker-derivatives.md).
+
 The workspace facade exports `NativeRefitOptions` and `start_native_refit` for
 immutable source-bound historical refits. Reuse `motion_matching.jobs` for owned
 job execution, cancellation, manifests and recovery. `MatchingWorkOutcome`
@@ -633,6 +660,10 @@ against cancellation. The native worker uses canonical image evidence and Hermit
 MAP fitting with immutable warm-start samples; source PTS and unqualified camera
 assumptions cannot certify physical derivatives or joint efforts. See the
 [Necromatcher Native Fitting Procedure](../development/necromatcher-native-fit.md).
+
+The canonical estimation facade exports `initialize_authored_hermite` and its immutable receipt DTOs. Historical fitting exports `initialize_image_trajectory` for explicit seed authoring without optimization; `fit_image_trajectory` shares preparation/result assembly while preserving original priors and pixels. Reuse `NativeFitBinding.authored_coordinate_bounds()` for captured definition/XML/unit-bound authored radian ranges; compiled joint limits remain disabled. See [Authored Initialization](../development/necromatcher-authored-initialization.md) and [Authored Ranges](../development/necromatcher-authored-ranges.md).
+
+`historical_fit.ImageSplineStart` and the optional exact start on `fit_image_trajectory` preserve physical Hermite coefficients, native model/order identities and the original knot clock. Reuse `workspace.necromatcher_spline.preserved_fit_spline` for SDK-free plan/worker recall, and `refit_plan.baseline_config` for complete canonical recipes across both hosts. See [Saved-Spline Restart](../development/necromatcher-saved-spline-restart.md).
 
 ### Repository Python Worker Environments
 
@@ -653,6 +684,16 @@ invent missing scales. project_store.validate_workspace_id exposes the existing
 identity contract for early admission before native work. UI request types are
 generated from the strict RefitRequest schema.
 
+### Historical Research Video Captions
+
+`workspace.CaptionOverlayOptions` is the SDK-free, versioned display recipe
+owned by `workspace/necromatcher_caption.py`. Pass its optional `caption_overlay`
+keyword to `workspace.export_fit_video` or `workspace.NativeVideoSession.submit`
+to reuse measured compact research captions in the existing exporter/worker.
+Omitted options preserve legacy captions; enabled manifests authenticate source
+dimensions, rational PTS, qualification and complete semantic/layout records.
+See [Compact Research Captions](../development/necromatcher-compact-captions.md).
+
 ### Historical Authored Generalized Efforts
 
 workspace.AuthoredEffortProfile and NecromatcherLibrary.load_effort_profile
@@ -671,6 +712,56 @@ named order. Projection and native refitting reuse this resource; efforts checks
 exact model/fit hashes, ordered units and authored timing before native command
 mapping. Scientific acceptance remains independent. See the
 [Native Resource Procedure](../development/necromatcher-native-resources.md).
+
+### Bounded Hermite Coordinate Domain
+
+`src.shared.python.estimation.HermiteBoundsDomain` represents a conservative C1 whole-segment bound through Bernstein controls. `MapEstimatorOptions.trajectory_domain` preserves physical callback/saved coefficient contracts while the existing single-trial MAP solver optimizes bounded internal positions/slopes. `ImageFitConfig.coordinate_bounds` binds immutable named native limits; unsupported names or infeasible seeds fail before solving. Reuse this domain instead of clipping stored trajectories or introducing another fitting scheduler. Active branch ties use an explicitly documented generalized derivative; bounds do not qualify nonlinear grip/contact or dynamics. See [Hermite Bounds Procedure](../development/necromatcher-hermite-bounds.md).
+
+### Authored Source Contact Phases
+
+Reuse `historical_fit.ContactPinSchedule` / `ScheduledConstraintOptions` for exact source-clock phase-dependent normal-height pins. Legacy native options, stable residual rows and unilateral nonpenetration remain canonical. `workspace.necromatcher_contacts.contact_schedule_binding` validates capture/hash, exact original boundary PTS and reviewed decoded-frame hashes before native optimization. Phase assumptions do not infer no-slip contact or physical forces. See [Contact Phase Procedure](../development/necromatcher-contact-phases.md).
+
+### Explicit Fitting Coordinates and Stored Overlay Recall
+
+Reuse public `historical_fit.expand_image_spline_coordinates` and `SplineCoordinateExpansion` to expand a checked Hermite decision selection without changing geometry or old coefficients. Added coordinates remain constant before optimization, with a detached reference-pose receipt and changed decision identity. Reuse `workspace.build_native_fit_payload` for canonical worker/derived-seed serialization; expansion-only records cannot inherit optimized/converged metadata. Strict initializer and native authored-range extraction remain authoritative. See [Coordinate Expansion Procedure](../development/necromatcher-coordinate-expansion.md).
+
+`NativeVideoSession.stored_runs(fit_id)` and `view_for_fit(fit_id, run_id)` reuse canonical status and current parent binding checks for durable native recall. The dialog selector submits no new job. Guarded downloads/transfer remain shared; successful research exports remain rejected. Unreadable unpublished run directories are logged and omitted, while selected binding corruption is rejected. No full video hashing is added to polling.
+
+### Raw Shaft Fragment Derivative Diagnostics
+
+Reuse the curated `motion_matching.historical_fit.FragmentDerivativeOptions`,
+`FragmentDerivativeCheck`, `FragmentDerivativeAssessment`,
+`assess_fragment_derivatives` and `optional_fragment_derivatives`. The pure core
+uses canonical `CameraProjection` and public `MarkerLinearizer` data; no native
+state, FK, solver or renderer is duplicated. Results are immutable raw px/rad
+checks with strict order/units and explicit unavailable/bound-limited nulls.
+Source/model/clock authentication remains in canonical workspace admission.
+See [Procedure](../development/necromatcher-shaft-fragment-diagnostics.md).
+
+### Authenticated Replay Impact and Local Research Golf
+
+Reuse public `workspace.NativeImpactSession` for bounded authored replay-impact
+jobs, verified saved-run recall and checked four-file exports. The public
+`workspace.load_replay_impact_receipt` authenticates companion state against
+exact retained trajectory bytes; portable receipt loading does not freshly
+authenticate Library parents. `workspace.load_research_impact_shot` performs
+Library admission and returns an immutable `ResearchImpactShot` with exact saved
+velocity/spin, parent/receipt hashes, assumptions and authored-clock limits.
+Declared proper aim rotations use the existing spatial transformation owner.
+
+`GolfSessionService.prepare_research_shot` explicitly admits unverified
+`MODEL_CONTACT` only to the actual connected `LocalReferenceAdapter`. Reuse its
+ordinary arm, cancel and submit lifecycle and `get_local_trajectory_record` for
+detached confirmed local samples. Ordinary qualified-contact admission and
+external delivery gates remain unchanged. This creates a new local-default
+flight, separate from the original retained impact flight and environment;
+local session results are not claimed as restart-persistent. Native avatar,
+course feedback, physical source time and historical qualification remain open.
+
+Both hosts reuse these owners; future players should supply persistent Library
+records and explicit declarations rather than another physics or lifecycle
+implementation. See [Replay Impact Procedure](../development/necromatcher-replay-impact.md)
+and [Local Research Golf Procedure](../development/necromatcher-local-research-golf.md).
 
 ### Golf View Presets and Bundle Overlay Provider
 

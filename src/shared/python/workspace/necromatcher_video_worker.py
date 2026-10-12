@@ -21,6 +21,12 @@ from .necromatcher_fit_jobs import fit_execution_stamp
 from .necromatcher_native import NativeFitBinding
 from .necromatcher_video import export_fit_video
 from .necromatcher_video_forces import ForceLayer
+from .necromatcher_video_jobs import (
+    validate_video_scope,
+    video_caption_options,
+    video_shaft_evidence,
+    video_shape_options,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -102,21 +108,27 @@ def execute(request_path: Path) -> dict[str, Any]:
             or fit[f"{kind}_hash"] != request[f"{kind}_hash"]
         ):
             raise ValueError("Video parent differs from launch")
+    validate_video_scope(fit, request)
     destination = request_path.parent / "overlay"
-    layer_arguments: dict[str, Any] = (
-        {
-            "force_layer": ForceLayer(**request["force_layer"]),
-            "force_sampler_factory": mujoco_force_sampler,
-        }
-        if request.get("force_layer")
-        else {}
+    evidence = video_shaft_evidence(library, fit, request)
+    additional: dict[str, Any] = (
+        {"shaft_evidence": evidence} if evidence is not None else {}
     )
+    shape = video_shape_options(request)
+    if shape is not None:
+        additional["shape_overlay"] = shape
+    caption = video_caption_options(request)
+    if caption is not None:
+        additional["caption_overlay"] = caption
+    if request.get("force_layer"):
+        additional["force_layer"] = ForceLayer(**request["force_layer"])
+        additional["force_sampler_factory"] = mujoco_force_sampler
     export_fit_video(
         library,
         request["source_fit_id"],
         destination,
         selected_frames=tuple(request["selected_frames"]),
-        **layer_arguments,
+        **additional,
     )
     current = fit_execution_stamp()
     if any(

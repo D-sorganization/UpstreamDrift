@@ -3,11 +3,23 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LibraryActions } from './LibraryActions';
 
-const api = vi.hoisted(() => ({createPlayer: vi.fn(), createSwing: vi.fn(), importAsset: vi.fn()}));
+const api = vi.hoisted(() => ({createPlayer: vi.fn(), createSwing: vi.fn(), importAsset: vi.fn(), fetchAssets: vi.fn(), fetchReplaySummary: vi.fn(), replayDataUrl: vi.fn()}));
 vi.mock('@/api/necromatcher', () => api);
-beforeEach(() => { Object.values(api).forEach((mock) => mock.mockReset()); });
+beforeEach(() => { Object.values(api).forEach((mock) => mock.mockReset()); api.fetchAssets.mockResolvedValue({assets:[]}); });
 
 describe('Historical Library Actions', () => {
+  it('imports an authored replay through the canonical replay endpoint and refreshes recall', async () => {
+    api.importAsset.mockResolvedValue({});
+    const user=userEvent.setup(); const changed=vi.fn();
+    render(<LibraryActions player="player" swing="swing" onChanged={changed} />);
+    await user.selectOptions(screen.getByLabelText('Import Type'),'replays');
+    await user.type(screen.getByLabelText('Version ID'),'replay');
+    await user.type(screen.getByLabelText('Source Path'),'C:/replay.h5');
+    await user.click(screen.getByRole('button',{name:'Import Version'}));
+    await waitFor(() => expect(changed).toHaveBeenCalledOnce());
+    expect(api.importAsset).toHaveBeenCalledExactlyOnceWith('swing','replays',{id:'replay',source_path:'C:/replay.h5'});
+    expect(api.fetchAssets).toHaveBeenCalledTimes(2);
+  });
   it('imports a research fit JSON under the selected swing', async () => {
     api.importAsset.mockResolvedValue({});
     const user = userEvent.setup();

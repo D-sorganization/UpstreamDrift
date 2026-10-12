@@ -1,0 +1,221 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=0.85in,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,xcolor,xurl,hyperref,fancyhdr}
+\definecolor{ink}{HTML}{17334A}\definecolor{accent}{HTML}{187E91}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,pdftitle={Necromatcher: AN-1 Arm Morphology Admission},pdfauthor={UpstreamDrift Development}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\textcolor{ink}{\textbf{NECROMATCHER} / AN-1 MORPHOLOGY}}
+\fancyhead[R]{\small Admission Results Supplement}\fancyfoot[L]{\small Authored Geometry / Qualification Remains Open}\fancyfoot[R]{\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}\setlength{\emergencystretch}{2em}\renewcommand{\arraystretch}{1.12}
+\newcommand{\code}[1]{\nolinkurl{#1}}\newcommand{\hash}[1]{{\footnotesize\nolinkurl{#1}}}
+\newcommand{\chapterpage}[1]{\clearpage\section{#1}}
+\begin{document}\hypersetup{pageanchor=false}
+\begin{titlepage}\thispagestyle{empty}\vspace*{0.5in}
+{\large\textcolor{accent}{UPSTREAMDRIFT / REPEATABLE RESEARCH METHODS}}\par\vspace{.25in}
+{\Huge\bfseries\textcolor{ink}{Necromatcher}}\par\vspace{.18in}
+{\LARGE AN-1 Arm Morphology Admission}\par\vspace{.28in}
+{\large Tiger V20 and Hogan V17 Final Motions / Fixed-Mass Offset Hypotheses}\par\vspace{.3in}
+\begin{tabular}{@{}p{1.3in}p{4.65in}@{}}\toprule
+Experiment & Four unoptimized seeds: arm offsets scaled by 0.95 or 1.05 for each current parent.\\
+Preserved & Saved camera, all 44 native coordinates, 33 free tracks, Hermite coefficients, source clock, original body observations and parent recipe.\\
+Changed & Selected arm-body offsets, corresponding sparse markers, inertias and native model identity; canonical visual proxies rederived.\\
+Execution & One owned root operation, session 34737, closed with exit code 0. Four models and four seeds persisted. No optimizer ran.\\
+Outcome & Small body-pixel changes coexist with substantially worse authored dual-grip positional closure and persistent shaft-direction mismatch.\\
+Review Status & Producer persistence independently checked and accepted; no independent native recomputation or scientific qualification.\\
+Producer & \hash{1f7fe89be67d98ca9db307905a08aa54c2d53fb2}.\\\bottomrule
+\end{tabular}
+\vfill\textcolor{ink}{\textbf{Interpretation Boundary}}\par
+These are authored sensitivity hypotheses within a generic native model. They are not measured historical anatomy, calibrated camera models, physically accepted matches or dynamic reconstructions. Unchanged joint motion does not preserve marker geometry or grip closure when segment offsets change. The canonical engineering manual remains \code{manuals/upstreamdrift}; this supplement does not release its separate blocked calculation inventory.
+\end{titlepage}\hypersetup{pageanchor=true}
+
+\section{Question, Cohort and Admission Boundary}
+AN-1 asks how a small, explicit arm-offset change affects the same current joint motion and camera. It does not ask an optimizer to repair that change. The parents are \code{tiger-forearm-analytic-variant-fit-v20} and \code{hogan-forearm-analytic-variant-fit-v17}. Each parent's saved final curve supplies both the 0.95 and 1.05 hypotheses. The source clips contain 210 Tiger frames and 750 Hogan frames; their adjacent midpoints number 209 and 749. Exact encoded presentation times remain source identities, not verified physical clocks.
+
+The four new seeds are separate immutable versions. Their current model identities differ from the parents, while the named coordinate values and curve coefficients remain fixed. This is explicit model-conditioned rebinding, not a same-model exact restart. Each seed is unoptimized and nonconverged. Successful canonical admission establishes consistent asset ownership, native reproduction and input lineage; it does not establish a valid historical reconstruction.
+
+\begin{tabular}{@{}lll@{}}\toprule
+Player & Relative Factor & Seed ID Suffix\\\midrule
+Tiger & 0.95 & \code{arms-minus-five-unoptimized-seed-v1}\\
+Tiger & 1.05 & \code{arms-plus-five-unoptimized-seed-v1}\\
+Hogan & 0.95 & \code{arms-minus-five-unoptimized-seed-v1}\\
+Hogan & 1.05 & \code{arms-plus-five-unoptimized-seed-v1}\\\bottomrule
+\end{tabular}
+
+The report uses the complete producer results after observed process closure. All numerical values are retained at machine precision in the accompanying JSON/CSV; printed tables round them for readability. Independent SDK-free persistence closure is incorporated in this edition; it verifies serialized records and byte identities rather than recomputing native physics. No candidate image or surface video was rendered for this admission.
+
+\chapterpage{Authored Geometry And Population Inputs}
+The common native model has 44 scalar coordinates: three translations in metres and 41 rotations in radians. The current motions have 33 free coordinates; the remaining values retain their saved references. Local primitive axes, native order, units, follower transforms and the existing scalar ranges are preserved. They remain authored mechanical conventions, not clinically calibrated anatomical axes or coupled ROM.
+
+Saved subject inputs include stature 1.71 m, mass 78 kg, arm factor 1.1 and trunk factor 1.15. These labels are generic builder inputs. The 1.71 m input is not a verified standing FK height; scaling and assembled leg/trunk geometry can change embodied dimensions. The 78 kg subject label is not a verified historical mass or a checked no-club body total. The document's solid-mass sum, 79.3584923989728 kg, has a separate subject/club allocation ambiguity and must not be substituted for a player measurement.
+
+The current native document uses rebuilt anthropometric geometry. A separate legacy anthropometric candidate helper still rejects the nominal model's \code{UpperTorsoBase} segment-axis limitation. AN-1 neither repairs that helper nor treats its limitation as proof that the current rebuilt trunk shares the same defect. No uniformly scaled stature interpretation is introduced.
+
+\begin{tabular}{@{}lrrr@{}}\toprule
+Document Quantity & Parent & Factor 0.95 & Factor 1.05\\\midrule
+Upper-Arm Span (m) & 0.304352 & 0.289135 & 0.319570\\
+Forearm Aggregate Span (m) & 0.290523 & 0.275997 & 0.305049\\
+Shoulder Width (m) & 0.389880 & 0.389880 & 0.389880\\
+Authored Arm Input & 1.100000 & 1.045000 & 1.155000\\\bottomrule
+\end{tabular}
+
+These spans are root-reviewed native-document geometry. They are not measured Tiger or Hogan proportions, standing dimensions, optical calibration or newly recovered joint centres. The same generic geometric hypotheses are instantiated under each player's distinct saved motion. Neither hypothesis is selected as historical anatomy from its pixel residual alone.
+
+\chapterpage{Fixed-Mass Body-Frame Offset Construction}
+Only six declared arm segments are selected: left/right upper arms, their proximal forearm spherical solids and left/right lower forearms. Names must resolve uniquely. Shoulder hubs, trunk, legs, hands and club are not selected. The public \code{scale_segments} owner operates on independently owned copied documents.
+
+For a selected parent body $b$ and factor $s_b$, the construction scales the distal joint translation, solid placement translation, centre of mass and native marker/contact offsets:
+\begin{align}
+ t'_{b\to j}&=s_b t_{b\to j}, & c'_b&=s_b c_b, & a'_b&=s_b a_b,\\
+ m'_b&=m_b, & I'_b&=s_b^2 I_b, & R'&=R.
+\end{align}
+The child-to-follower transform and primitive rotation identities stay exact. Separate sparse fit-marker offsets are also scaled, through declared body frames or identity frame aliases. Unknown aliases or nonidentity affected sparse frames reject rather than supply guessed transforms.
+
+Fixed mass with squared inertia scaling is a body-frame geometric approximation. It is not an anatomical mass redistribution, a fitted density field or a mechanically validated dynamic model. No torque, force, acceleration-to-load inference or replay was computed here. Unchanged coordinate motion cannot imply unchanged dynamics under changed inertia.
+
+The four detached candidate document triplets were generated and root-reviewed before native registration. This admission consumes their exact definition, sparse-attachment and experiment bytes. It does not regenerate documents inside the native operation. Candidate upper-body hashes are recomputed by the canonical owner; old metadata is retained as parent provenance, not copied as new native authority.
+
+Club-local shaft endpoints and grip rotations remain unchanged. The club is driven through the left-wrist universal attachment, with continuous authored right-hand closure. The wrist's named Y coordinate denotes a native Rz primitive; the forearm primitive is also Rz. These are local mechanical labels, not a clinical forearm/wrist mapping. Phase-dependent hand release remains a separate unqualified hypothesis.
+
+\chapterpage{Canonical Admission And Motion Preservation}
+The operation compares the complete clean tracked-source, library and project maps to accepted baselines before importing the native SDK. Reviewed inputs and transitive helper buffers are authenticated before execution. The loaded public execution stamp must then match the admitted source/runtime. A same-count changed file is rejected; file counts alone are not admission.
+
+Each model is exported through the public MJCF owner, exclusively registered and rebound through the canonical native model loader. The loader reproduces exact XML and all 44 compiled names/units. The typed \code{NativeHypothesisRequest} binds source fit, capture/source clock, model definition, camera, sparse attachments and native/free coordinate mapping. The canonical \code{author_native_hypothesis} invokes its clean worker with the existing 600-second wall limit. It does not run optimization.
+
+The original parent recipe, body-training indices, unknown-visibility weight, coordinate scales, bounds, scheduled contacts, geometry times and first-pose reference remain explicit. The saved camera is unchanged. The author's exact saved reference is not confused with a new optimized first pose: no optimized pose exists in these seeds.
+
+\begin{tabular}{@{}lrr@{}}\toprule
+Preservation Proof & Tiger & Hogan\\\midrule
+Original Source Frames & 210 & 750\\
+Source Frames And Adjacent Midpoints & 419 & 1499\\
+Maximum Free $q/v/a$ Difference & 0 / 0 / 0 & 0 / 0 / 0\\
+Maximum All-Coordinate Dense $q$ Difference & 0 & 0\\
+Geometry Assessment Nodes & 178 & 364\\
+Residual Families Per Node & 12 & 12\\\bottomrule
+\end{tabular}
+
+The native-coordinate Hermite coefficients, knot clock and native/free order are equal; the model identity is newly rebound. Canonical source/midpoint evaluation supplies the $q/v/a$ proof. Saved dense poses are exact in this run; the established admission allowance is absolute $10^{-12}$ in native units with zero relative tolerance. No clipping or resampling occurred. Preserving the curve means $q'(t)=q(t)$, not $\operatorname{FK}_{M'}(q(t))=\operatorname{FK}_{M}(q(t))$.
+
+\chapterpage{Fresh Body Pixels And Their Denominator}
+The public body-metric owner freshly projects the preserved poses through each candidate model and unchanged camera. Positive observation weights retain the canonical source visibility rule; unknown visibility retains the original 0.5 weight. Missing and zero-weight observations add no body rows. The weighted point RMS is
+\[
+ E_{\rm body}=\sqrt{\frac{\sum_{i,j}w_{ij}\|\pi_K(RX_{ij}+t)-u_{ij}\|^2}{\sum_{i,j}w_{ij}}}.
+\]
+The denominator counts weighted observed points, not twice their number of pixel coordinates. No shaft annotation is inserted into that denominator.
+
+\begin{tabular}{@{}llrrr@{}}\toprule
+Player & Factor & Dense (px) & Training (px) & Seen Body Remainder (px)\\\midrule
+Tiger & 0.95 & 23.592441 & 21.278351 & 23.847618\\
+Tiger & 1.05 & 23.886327 & 21.710403 & 24.127238\\
+Hogan & 0.95 & 10.055042 & 6.801092 & 10.138515\\
+Hogan & 1.05 & 10.262778 & 6.984344 & 10.347091\\\bottomrule
+\end{tabular}
+
+The stored parent dense values are 23.5826859200 px for Tiger and 10.1363505972 px for Hogan. Their comparison uses the same canonical dense metric definition. The fresh training values above are not compared to earlier solver \code{rms_pixels} fields: that would require a same-owner fresh parent training audit. ``Held out'' in the machine metric means source frames outside the body-training list, not unseen source imagery or blinded validation.
+
+Tiger's original body-training set contains 22 frames; Hogan's contains 23. Both admit 286 positive-weight body points under the original mask. Dense counts and exact frame identities are preserved in the JSON. Image resolutions differ, so Tiger and Hogan pixel magnitudes are not averaged or used as cross-player reconstruction rankings.
+
+The modest Hogan minus-factor body improvement is a conditional projection result. It does not establish a better anatomical model, and the mechanical closure deterioration on the next page prevents body RMS from serving as an acceptance criterion by itself.
+
+\chapterpage{Authored Grip Closure Deterioration}
+The public native plant's \code{closure_residuals} delegates to the native model's \code{kinematic_closure_residuals}. That owner returns the detached world-space difference between two authored dual-grip sites, in metres. The stored maximum is the norm over original source poses. It is not a measured historical hand separation or a skin-surface contact test.
+
+\begin{tabular}{@{}llrr@{}}\toprule
+Player & State & Maximum Site Gap (mm) & Maximum Scaled Component\\\midrule
+Tiger & Parent & 2.123740 & 17.0232\\
+Tiger & Factor 0.95 & 22.057213 & 86.487034\\
+Tiger & Factor 1.05 & 21.950475 & 83.695898\\
+Hogan & Parent & 0.733037 & 2.20154\\
+Hogan & Factor 0.95 & 18.585247 & 51.366490\\
+Hogan & Factor 1.05 & 18.641038 & 51.464136\\\bottomrule
+\end{tabular}
+
+The dimensionless statistic is the maximum absolute configured constraint component over 178 Tiger or 364 Hogan assessment times. It includes the scaled position/rotation/ground families, not a physical millimetre norm. It must remain distinct from the separate authored site-gap maximum over all 210/750 source poses. The exact machine values and tested-time definitions are retained in the data file.
+
+All 12 row families remain present: three grip-position, three grip-rotation and six ground-sphere rows. Counts, scheduled contacts and configured scales are unchanged. Their newly computed values change because geometry changes. Root separately reviewed and pinned the native closure owner and six fit records in the geometry review receipt. The report does not reinterpret a weighted residual as a clinical distance, relax any target or hide the increase behind body-pixel improvement.
+
+These four seeds do not satisfy the current authored two-hand geometry as usable physical matches. The unchanged source/midpoint curve is an identity proof, not a feasibility proof. The saved \code{continuous_certified} flag remains false; finite assessments do not certify the nonlinear constraints between samples. Any future attempt to repair closure needs a separately reviewed controlled fit, not post hoc acceptance of the unoptimized morphology seed.
+
+\chapterpage{Separate Raw Shaft Evidence Buckets}
+Each candidate's authored native shaft axis is rebound to its new exact model definition. Raw perpendicular and unoriented angular diagnostics are freshly evaluated through the canonical shaft overlay/assessment owner. No historical physical shaft endpoints, shaft length, clubhead identity or hand-contact measurements are introduced.
+
+\begin{tabular}{@{}llrrr@{}}\toprule
+Player / Factor & Bucket & Observed & Raw RMS (px) & Angle RMS ($^\circ$)\\\midrule
+Tiger / 0.95 & Old Training & 2 & 107.430591 & 43.510270\\
+Tiger / 1.05 & Old Training & 2 & 91.098573 & 43.670848\\
+Tiger / 0.95 & Seen Evaluation & 1 & 136.647262 & 26.016814\\
+Tiger / 1.05 & Seen Evaluation & 1 & 155.115341 & 26.726441\\
+Tiger / 0.95 & New Diagnostic & 2 & 125.000351 & 88.189609\\
+Tiger / 1.05 & New Diagnostic & 2 & 138.494957 & 88.349967\\\midrule
+Hogan / 0.95 & Old Training & 1 & 18.070536 & 0.360945\\
+Hogan / 1.05 & Old Training & 1 & 15.910731 & 0.242993\\
+Hogan / 0.95 & Seen Evaluation & 2 & 24.016589 & 59.158744\\
+Hogan / 1.05 & Seen Evaluation & 2 & 22.166336 & 59.008851\\
+Hogan / 0.95 & New Diagnostic & 11 & 37.491006 & 38.733080\\
+Hogan / 1.05 & New Diagnostic & 11 & 36.297941 & 38.715378\\\bottomrule
+\end{tabular}
+
+Angle RMS is a descriptive summary computed from the preserved non-null per-observation angle list, not a fitted weighted objective statistic. Authored sigma/confidence values are uncalibrated. Explicit abstentions retain null diagnostics; they are not zeros. Hogan's old training bucket contains one abstention; the new diagnostic buckets retain 19 Tiger and 20 Hogan abstentions. Hogan 375's old and new fragments remain separate role records.
+
+Hogan frame 200 retains about $81.70^\circ$ or $81.76^\circ$ angular disagreement. Tiger's two new diagnostic fragments retain approximately right-angle disagreement. The small body-pixel variations therefore do not resolve club direction. Source-only review found the short Hogan fragment weak but plausibly along the visible shaft; neither morphology nor free camera compensation is justified solely by this mismatch.
+
+\chapterpage{Fresh Proxy Geometry And Reusable Consumers}
+The canonical \code{derive_visual_skeleton} owner produces 28 capsules, 47 spheres and four solid-shape descriptions for every candidate. These are freshly derived model-conditioned descriptions. Fixed-radius/solid hints are retained; derived radii may respond to changed offsets and fixed masses. They are not a person-specific mesh, tissue-density measurement or accepted anatomy.
+
+\begin{tabular}{@{}lrrr@{}}\toprule
+Candidate Family & Capsules & Spheres & Solid Shapes\\\midrule
+Tiger 0.95 / 1.05 & 28 / 28 & 47 / 47 & 4 / 4\\
+Hogan 0.95 / 1.05 & 28 / 28 & 47 / 47 & 4 / 4\\\bottomrule
+\end{tabular}
+
+No candidate proxy was rendered in AN-1. Counts and exact body-local proxy parameters are numerical provenance, not proof of visual plausibility. A separately authorized still stage can reuse the public selected-frame exporter and shared composition, retaining source-sized PNGs, skeleton, authored shaft and translucent shapes without producing full videos or a second renderer.
+
+The admission and diagnostic code use generic player-independent contracts. Model/seed IDs and root-authenticated inputs are configuration, not branches inside a fitter. Further historical figures can supply their own source evidence, model hypotheses and stored motion under the same public owners. Reuse does not remove the need to resolve camera/geometry gauge, ambiguous club observations, phase contact or source timing for each source.
+
+\chapterpage{Execution, Preservation And Telemetry}
+One owned root process closed with exit code 0 at the recorded observation time. The complete finally receipt reports operation completion and preservation verification. The tracked source count stayed 14,800. The library grew from 383 to 391 files: exactly four model XMLs and four seed JSONs. Eight dataset records were added; original nonindex bytes and original project records remained unchanged. No run records were added, and the active run remained null.
+
+All source/runtime/input/helper facets match before and after. The root closed-process proof and finally receipt are machine evidence from the producer; the V2 SDK-free checker and root acceptance verify persistence only. Completion is not inferred from a result filename or directory count alone.
+
+\begin{tabular}{@{}p{2.55in}p{3.4in}@{}}\toprule
+Field & Actual Meaning\\\midrule
+Optimizer Ran / Converged & False / false for all four seeds.\\
+Canonical Seed Solver Telemetry & Null for all four unoptimized admissions.\\
+Worker Wall Limit & Existing public author path: 600 seconds per clean worker.\\
+Native Worker PID & Unavailable in the public author return; not invented.\\
+Worker Monotonic Elapsed & Unavailable in these records; no receipt-mtime estimate.\\
+Root Owned Session & 34737, separately observed closed with exit code 0.\\\bottomrule
+\end{tabular}
+
+The synchronous author returns only after worker validation and persistence. The result field \code{worker_closed_by_public_author} records that API guarantee, not an independently tracked native PID. Missing nfev/njev are not backfilled with zero, requested budgets or estimates. No optimizer was called, so there is no new convergence or iteration-count claim.
+
+Primary errors, after-facet errors and receipt-write failures are preserved by the accepted controller. Partial owned additions would have remained explicit; no retry or overwrite path exists. The successful actual writer run requires no fictional recovery history. Independent checker session 35753 closed with exit code 0; all 14,800 source files and 391 library files match the accepted maps, with exactly eight permitted model/seed additions and original records preserved. The first independent checker closed with exit code 1 before SDK access or output creation because equivalent Windows path separators did not compare equal. Its failure proof is preserved. A narrowly tested V2 checker subsequently closed with exit code 0 and received root persistence-only acceptance. This checker failure does not invalidate the completed writer, and neither checker status constitutes scientific qualification.
+
+\chapterpage{Conditional Camera Follow-Up And Open Qualifications}
+The public \code{initialize_camera_hypothesis} already provides SQPNP followed by RefineLM on at least six finite nondegenerate observed correspondences, with supplied K fixed. It validates positive depth. Reuse that owner through typed hypothesis admission instead of adding a PnP, renderer or camera/body optimizer.
+
+A future small camera-only procedure can keep current saved model/motion/K fixed, use only preregistered original positive-weight body-training correspondences and estimate a conditional static extrinsic hypothesis. The initializer is unweighted: inclusion-mask semantics and weighted diagnostic RMS must be stated separately. Missing and zero-weight points are excluded, never filled. Shaft roles remain separately evaluated; no new diagnostic fragments become training by implication.
+
+For the world-to-camera convention $X_c=RX_w+t$, report camera centre $C=-R^Tt$ explicitly. A conditional extrinsic estimate may change C; it differs from the earlier fixed-centre $\pm2^\circ$ orientation probes. Failure of those small probes does not rule out a conditional extrinsic solution. Conversely, a better projection does not identify historical optics, body dimensions, distance, shutter or physical time.
+
+A static-camera plausibility table should compare predetermined early/middle/late source thirds under one shared camera. Per-stratum counts and residual trends are descriptive, not calibration or grounds to select favourable frames. Pose/model errors can generate the same pattern. Any future camera or morphology fit needs separate source/runtime/library admission, preregistered arms and matched budgets; no such operation is authorized by this supplement.
+
+Clinical coupled ROM remains unresolved. Current scalar native ranges and existing ROM flags are authored mechanical limits. Source blur, interlacing, scan artifacts, shaft flexure and retiming remain distinct from rolling shutter. Continuous right-hand closure and holding-hand phase are pending separate review. All four AN-1 seeds remain research hypotheses, and their worsened authored grip geometry prevents adoption as physical matches.
+
+\chapterpage{Portable Data And Receipt Lineage}
+The portable data edition is \code{an1-results-data-v4.json}, with exact body/shaft CSVs. It retains role-level raw nulls, camera/model/clock hashes, source owners, proxy descriptions and raw input byte pins. Tables round values; the JSON remains authoritative for reproduced arithmetic.
+
+\begin{longtable}{@{}p{1.35in}p{4.65in}@{}}\toprule
+Artifact & Raw SHA256\\\midrule\endhead
+Producer & \hash{1f7fe89be67d98ca9db307905a08aa54c2d53fb2}\\
+Root Release & \hash{e22701caf74d5ac99377b71b6baf7bcc92a994a221d4a72ae126dbaaa198c5ce}\\
+Prepared Freeze & \hash{cf0b6d1ca10eb1d4cbc328281bc904ba10420a90049c7f4aa28ae46251ac559e}\\
+Driver & \hash{7eb6b96735d19c4800e2ebf11913c7146b6472a306584a24955aeb8e35646703}\\
+Actual Configuration & \hash{b9454dc58f46a12a08502aec01c86ed0790537ac74b554240913f1747bf215a8}\\
+Independent Check & \hash{43a7eecd4b28c017ed4196325c3682d0986fbaf802a254d270862235e7e27673}\\
+Root Persistence Acceptance & \hash{f8ccb0ffbe44c4988de3a4e2bd49fe9dbbdb66a3c95f54ce74ed150e3de89869}\\\bottomrule
+\end{longtable}
+
+Exact full hashes/byte lengths for all four result files, the eight canonical model/seed assets, both parents, source owners, completion, finally and closed-process proof are in the JSON. Raw file SHA256 is distinguished from prefixed canonical asset/definition identities. Original outputs are not overwritten by report extraction.
+
+Compilation, complete page rendering and root visual review are recorded in the accompanying final review manifest. The accepted V2 serialized persistence check is recorded separately from native recomputation, visual validation and scientific qualification; none of those additional claims is made. Source, dataset and previous report editions remain unchanged.
+\end{document}
