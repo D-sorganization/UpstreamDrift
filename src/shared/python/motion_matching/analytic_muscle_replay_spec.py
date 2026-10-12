@@ -441,6 +441,93 @@ def _parse_provenance(value: Any) -> ProducerProvenance | None:
     )
 
 
+def _parse_initial_state(
+    value: Any,
+    muscles: tuple[MuscleSpec, ...],
+    activation: ActivationParameters,
+) -> InitialState:
+    initial_row = _object(
+        value,
+        frozenset({"q_rad", "v_rad_s", "activations", "previous_raw_excitations"}),
+        "initial_state",
+    )
+    initial_activations = _vector(
+        initial_row["activations"], len(muscles), "initial_state.activations"
+    )
+    previous_raw = _vector(
+        initial_row["previous_raw_excitations"],
+        len(muscles),
+        "initial_state.previous_raw_excitations",
+    )
+    for index, value in enumerate(initial_activations):
+        if not activation.min_activation <= value <= 1.0:
+            _fail(f"initial_state.activations[{index}] is outside [min_activation, 1]")
+    for index, value in enumerate(previous_raw):
+        if not 0.0 <= value <= 1.0:
+            _fail(f"initial_state.previous_raw_excitations[{index}] is outside [0, 1]")
+    initial = InitialState(
+        q_rad=_number(initial_row["q_rad"], "initial_state.q_rad"),
+        v_rad_s=_number(initial_row["v_rad_s"], "initial_state.v_rad_s"),
+        activations=initial_activations,
+        previous_raw_excitations=previous_raw,
+    )
+    for muscle in muscles:
+        geometry = muscle.geometry
+        length = (
+            geometry.reference_musculotendon_length_m
+            - geometry.moment_arm_m_per_rad * (initial.q_rad - geometry.reference_q_rad)
+        )
+        if not math.isfinite(length) or length <= 0.0:
+            _fail(
+                f"initial musculotendon length for {muscle.muscle_id!r} must be finite and positive"
+            )
+    return initial
+
+
+def _parse_raw_excitation_schedule(
+    commands_value: Any,
+    rate_limits_value: Any,
+    step_count: int,
+    muscles: tuple[MuscleSpec, ...],
+    previous_raw: tuple[float, ...],
+    dt_s: float,
+) -> tuple[tuple[tuple[float, ...], ...], tuple[float, ...]]:
+    rate_limits = _vector(
+        rate_limits_value,
+        len(muscles),
+        "raw_excitation_rate_limits_per_s",
+    )
+    if any(rate < 0.0 for rate in rate_limits):
+        _fail("raw_excitation_rate_limits_per_s values must be nonnegative")
+    if type(commands_value) is not list or len(commands_value) != step_count:
+        _fail("raw_excitation_commands has an invalid step shape")
+    commands_list: list[tuple[float, ...]] = []
+    previous = previous_raw
+    for row_index, command_row in enumerate(commands_value):
+        command = _vector(
+            command_row,
+            len(muscles),
+            f"raw_excitation_commands[{row_index}]",
+        )
+        for muscle_index, value in enumerate(command):
+            if not 0.0 <= value <= 1.0:
+                _fail(f"raw_excitation_commands[{row_index}] must lie in [0, 1]")
+            delta = rate_limits[muscle_index] * dt_s
+            if not math.isfinite(delta):
+                _fail(f"slew bounds overflow for muscle index {muscle_index}")
+            lower = max(0.0, previous[muscle_index] - delta)
+            upper = min(1.0, previous[muscle_index] + delta)
+            if not math.isfinite(lower) or not math.isfinite(upper):
+                _fail(f"slew bounds are nonfinite for muscle index {muscle_index}")
+            if value < lower or value > upper:
+                _fail(
+                    f"raw_excitation_commands[{row_index}][{muscle_index}] violates slew bounds"
+                )
+        commands_list.append(command)
+        previous = command
+    return tuple(commands_list), rate_limits
+
+
 def decode_analytic_replay_spec(raw_json: bytes) -> AnalyticReplaySpec:
     """Decode bounded JSON into immutable inputs for the synthetic profile only.
 
@@ -483,76 +570,15 @@ def decode_analytic_replay_spec(raw_json: bytes) -> AnalyticReplaySpec:
         _fail("muscle IDs must be unique")
 
     activation = _parse_activation(row["activation_dynamics"])
-    initial_row = _object(
-        row["initial_state"],
-        frozenset({"q_rad", "v_rad_s", "activations", "previous_raw_excitations"}),
-        "initial_state",
-    )
-    initial_activations = _vector(
-        initial_row["activations"], len(muscles), "initial_state.activations"
-    )
-    previous_raw = _vector(
-        initial_row["previous_raw_excitations"],
-        len(muscles),
-        "initial_state.previous_raw_excitations",
-    )
-    for index, value in enumerate(initial_activations):
-        if not activation.min_activation <= value <= 1.0:
-            _fail(f"initial_state.activations[{index}] is outside [min_activation, 1]")
-    for index, value in enumerate(previous_raw):
-        if not 0.0 <= value <= 1.0:
-            _fail(f"initial_state.previous_raw_excitations[{index}] is outside [0, 1]")
-    initial = InitialState(
-        q_rad=_number(initial_row["q_rad"], "initial_state.q_rad"),
-        v_rad_s=_number(initial_row["v_rad_s"], "initial_state.v_rad_s"),
-        activations=initial_activations,
-        previous_raw_excitations=previous_raw,
-    )
-    for muscle in muscles:
-        geometry = muscle.geometry
-        length = (
-            geometry.reference_musculotendon_length_m
-            - geometry.moment_arm_m_per_rad * (initial.q_rad - geometry.reference_q_rad)
-        )
-        if not math.isfinite(length) or length <= 0.0:
-            _fail(
-                f"initial musculotendon length for {muscle.muscle_id!r} must be finite and positive"
-            )
-
-    rate_limits = _vector(
+    initial = _parse_initial_state(row["initial_state"], muscles, activation)
+    commands, rate_limits = _parse_raw_excitation_schedule(
+        row["raw_excitation_commands"],
         row["raw_excitation_rate_limits_per_s"],
-        len(muscles),
-        "raw_excitation_rate_limits_per_s",
+        clock.step_count,
+        muscles,
+        initial.previous_raw_excitations,
+        clock.dt_s,
     )
-    if any(rate < 0.0 for rate in rate_limits):
-        _fail("raw_excitation_rate_limits_per_s values must be nonnegative")
-    command_rows = row["raw_excitation_commands"]
-    if type(command_rows) is not list or len(command_rows) != clock.step_count:
-        _fail("raw_excitation_commands has an invalid step shape")
-    commands_list: list[tuple[float, ...]] = []
-    previous = previous_raw
-    for row_index, command_row in enumerate(command_rows):
-        command = _vector(
-            command_row,
-            len(muscles),
-            f"raw_excitation_commands[{row_index}]",
-        )
-        for muscle_index, value in enumerate(command):
-            if not 0.0 <= value <= 1.0:
-                _fail(f"raw_excitation_commands[{row_index}] must lie in [0, 1]")
-            delta = rate_limits[muscle_index] * clock.dt_s
-            if not math.isfinite(delta):
-                _fail(f"slew bounds overflow for muscle index {muscle_index}")
-            lower = max(0.0, previous[muscle_index] - delta)
-            upper = min(1.0, previous[muscle_index] + delta)
-            if not math.isfinite(lower) or not math.isfinite(upper):
-                _fail(f"slew bounds are nonfinite for muscle index {muscle_index}")
-            if value < lower or value > upper:
-                _fail(
-                    f"raw_excitation_commands[{row_index}][{muscle_index}] violates slew bounds"
-                )
-        commands_list.append(command)
-        previous = command
 
     return AnalyticReplaySpec(
         schema=SCHEMA,
@@ -563,7 +589,7 @@ def decode_analytic_replay_spec(raw_json: bytes) -> AnalyticReplaySpec:
         activation_dynamics=activation,
         plant=_parse_plant(row["plant"]),
         muscles=muscles,
-        raw_excitation_commands=tuple(commands_list),
+        raw_excitation_commands=commands,
         raw_excitation_rate_limits_per_s=rate_limits,
         producer_provenance=_parse_provenance(row["producer_provenance"]),
     )
