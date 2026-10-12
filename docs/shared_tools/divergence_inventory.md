@@ -30,7 +30,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomech` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `biomechanics` | 0 | 0 | 0 | 37 | 0 | 0 |
+| `biomechanics` | 0 | 0 | 0 | 38 | 0 | 0 |
 | `body_part_viz` | 0 | 0 | 0 | 38 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
 | `camera` | 0 | 0 | 0 | 0 | 4 | 0 |
@@ -119,7 +119,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
-| `sidekick` | 210 | 68 | 23 | 36 | 91 | 278 |
+| `sidekick` | 210 | 68 | 23 | 36 | 89 | 278 |
 | `sidekick_data_processing_bridge.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `signal_toolkit` | 0 | 0 | 0 | 1 | 27 | 0 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
@@ -143,7 +143,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **375** | **271** | **121** | **1683** | **837** | **646** |
+| **Total** | **375** | **271** | **121** | **1684** | **835** | **646** |
 
 ## Diverged Files by Package
 
@@ -285,7 +285,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `contracts.py` | -709 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
+| `contracts.py` | -309 |  | Dieter Olson 2026-10-12 | d-sorgcodexagent[bot] 2026-10-11 |
 
 ### Package `gui_launcher` (4 Diverged Files)
 
@@ -466,10 +466,10 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/tests/process_calculators/test_syngas_water_calculator.py` | +36 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/tests/test_analysis_utils.py` | -1159 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/tests/test_baghouse_calculator.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
-| `sidekick/tests/test_calculator_state_mixin.py` | +226 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-10-12 |
+| `sidekick/tests/test_calculator_state_mixin.py` | -2 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/tests/test_launcher_factory.py` | +522 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/ui/catppuccin_theme.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
-| `sidekick/ui/mixins/calculator_state_mixin.py` | -2276 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-10-12 |
+| `sidekick/ui/mixins/calculator_state_mixin.py` | -512 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/ui/tools_sidebar/calculator_plotting.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/ui/tools_sidebar/chat_tab.py` | -304 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/ui/tools_sidebar/jupyter_tab/notebook_session.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |

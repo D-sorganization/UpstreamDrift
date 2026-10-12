@@ -13,8 +13,8 @@
   "totals": {
     "identical": 375,
     "diverged": 271,
-    "ud-only": 1683,
-    "tools-only": 837,
+    "ud-only": 1684,
+    "tools-only": 835,
     "spelling-only": 121
   },
   "packages": {
@@ -133,7 +133,7 @@
     "biomechanics": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 37,
+      "ud-only": 38,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -757,7 +757,7 @@
       "identical": 210,
       "diverged": 68,
       "ud-only": 36,
-      "tools-only": 91,
+      "tools-only": 89,
       "spelling-only": 23
     },
     "sidekick_data_processing_bridge.py": {
@@ -4152,6 +4152,18 @@
       "spelling_only": false
     },
     {
+      "path": "biomechanics/swing_posture_metrics.py",
+      "classification": "ud-only",
+      "package": "biomechanics",
+      "subpackage": "",
+      "ud_bytes": 8322,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "biomechanics/ztcf.py",
       "classification": "ud-only",
       "package": "biomechanics",
@@ -6544,9 +6556,9 @@
       "classification": "diverged",
       "package": "contracts.py",
       "subpackage": "",
-      "ud_bytes": 24271,
+      "ud_bytes": 24671,
       "tools_bytes": 24980,
-      "byte_delta": -709,
+      "byte_delta": -309,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -28236,18 +28248,6 @@
       "spelling_only": false
     },
     {
-      "path": "sidekick/tests/_calculator_state_helpers.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "tests",
-      "ud_bytes": null,
-      "tools_bytes": 396,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "sidekick/tests/calculators/__init__.py",
       "classification": "identical",
       "package": "sidekick",
@@ -28889,20 +28889,8 @@
       "package": "sidekick",
       "subpackage": "tests",
       "ud_bytes": 14882,
-      "tools_bytes": 14656,
-      "byte_delta": 226,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/tests/test_calculator_state_mixin_lifetime.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "tests",
-      "ud_bytes": null,
-      "tools_bytes": 2631,
-      "byte_delta": null,
+      "tools_bytes": 14884,
+      "byte_delta": -2,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -29441,8 +29429,8 @@
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 31010,
-      "tools_bytes": 33286,
-      "byte_delta": -2276,
+      "tools_bytes": 31522,
+      "byte_delta": -512,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -30353,7 +30341,7 @@
       "package": "signal_toolkit",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 2705,
+      "tools_bytes": 2556,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30413,7 +30401,7 @@
       "package": "signal_toolkit",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 22094,
+      "tools_bytes": 21685,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30437,7 +30425,7 @@
       "package": "signal_toolkit",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 26132,
+      "tools_bytes": 26078,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -37348,7 +37336,7 @@
       "classification": "ud-only",
       "package": "ud_import_alias_policy.py",
       "subpackage": "",
-      "ud_bytes": 4571,
+      "ud_bytes": 4766,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -40338,8 +40326,8 @@
       "path": "contracts.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "date": "2026-10-12",
+        "commit": "b75785d1c463d13088f463106ad2d13e194c8139"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -42175,9 +42163,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-10-12",
-        "commit": "24bb0c38714e36fc7d2d27be8d6b73ffe4dce106"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
@@ -42214,9 +42202,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-10-12",
-        "commit": "24bb0c38714e36fc7d2d27be8d6b73ffe4dce106"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
       }
     },
     {
