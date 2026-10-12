@@ -61,6 +61,23 @@ noisy, or measured-mocap feedback is unsupported. Independent open-loop replay
 must load the resulting applied-torque history into a fresh plant with no
 feedback or state resets under the F01 comparison and Tools T01 policies.
 
+## Stateless Request Boundary (#12390)
+
+DistributedFeedbackPolicy exposes the existing nominal-plus-feedback calculation as
+a stateless request_for_step operation. The returned immutable request preserves
+the full generalized-effort vector, selected channel identifiers and generalized
+indices, the selected-coordinate mask, phase/task provenance, schedule index, time
+and step duration. The caller supplies the expected policy time; computing a request
+does not allocate effort, advance a policy clock, mutate prior applied input, or step
+a plant. DistributedFeedbackController retains its existing constructor and
+command_for_step behavior by adding the stateful clock and allocator boundary
+around that policy.
+
+This is a software composition seam only. It does not introduce muscle commands,
+infer coordinate identities or units, perform native simulation, or establish
+muscle recruitment, replay, engine parity or scientific qualification. The
+full-body and all-model qualification gates remain open.
+
 ## Evidence and Limits
 
 The analytic double-integrator test uses MOSAIC Riccati gains: the declared
