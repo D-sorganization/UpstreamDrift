@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T04:49:17.348954+00:00",
-  "checkpoint": "662c1f06a2",
+  "recorded_at_utc": "2026-10-12T04:56:22.827634+00:00",
+  "checkpoint": "d8cf83a81bf41bb92534f3ff32c1b54112f7c260",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "662c1f06a2",
+  "source_commit": "d8cf83a81bf41bb92534f3ff32c1b54112f7c260",
   "integration": "Remote PR 99f8d6f8816 and actual conflicting origin/main ba57e27033 reconciled locally; later fixes through 0504feab4c. No push; frozen rows and approved DRY baseline unchanged.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Final stability contract and integrity focused suite 12 passed; claim integrity validate passed. Canonical pre-PR attempt on 662c1f06a2 failed mypy at scripts/inspect_opensim_vs_simscape.py:123 and was interrupted before full test/consistency summaries. No full gate acceptance. Root-layout owner fixing the narrow mypy issue; rerun exact canonical on new source.",
+  "current_validation": "Canonical pre-PR on d8cf83a81b passed mypy (154 sources), then diff-scoped pytest cascaded 11 failures and 128 errors by 25% from mixed-collection engine fakes and migrated tests. Interrupted exit130; no complete pytest/consistency summary or full acceptance. Owner preparing tests-only repair.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -276,7 +276,7 @@
       }
     }
   },
-  "next_required": "Finish narrow OpenSim inspect-script mypy repair, rerun exact complete canonical pre_pr on final source, then protected PR integration. Do not rerun frozen simulations or claim this checkpoint as full acceptance.",
+  "next_required": "Review/land mixed-collection tests-only repair, then rerun exact complete canonical pre_pr on final source before protected PR integration. Do not rerun frozen simulations.",
   "final_integrity_refresh": {
     "release_manifest_before": {
       "path": "/tmp/shot-final-integrity-before-release_manifest.json",
@@ -301,14 +301,15 @@
     }
   },
   "latest_full_canonical_attempt": {
-    "source_commit": "662c1f06a2",
-    "result": "INCOMPLETE exit 130 after immediate mypy failure; deliberately interrupted affected pytest and consistency before full summaries, no acceptance",
-    "mypy": "1 error in 154 files: scripts/inspect_opensim_vs_simscape.py:123 object not callable [operator]; existing ignore[misc] insufficient",
+    "source_commit": "d8cf83a81bf41bb92534f3ff32c1b54112f7c260",
+    "result": "INCOMPLETE exit 130; mypy PASS 154 sources, pytest deliberately interrupted at 25% after cascading mixed-collection engine errors; consistency phase not completed",
+    "pytest": "11 failed, 1646 passed, 50 skipped, 42 deselected, 128 errors, 192 warnings in 207.82s",
+    "error_clusters": "125 OpenSim fake module missing Model, 3 Drake fake pydrake missing multibody; 4 Pinocchio viz obsolete import; 3 OpenSim FK mock failures; Drake drift, OpenSim geometry, two build_humanoid subprocess import failures",
     "receipt": {
-      "source": "/tmp/shot-safe-final-canonical-prepr.txt",
-      "source_sha256": "a74fbe98d0187484e565327b7bb2c82dafb8af63cbd539234ea9e6fba5fe0d50",
-      "receipt_sha256": "0af9159795248ca8c21d31361148936e1fe8dcc119ccb59000f13a2dff5fc4e8"
+      "receipt": "canonical-after-mypy-fix-cascade-incomplete.txt.gz",
+      "receipt_sha256": "8e784321bbe0ececfd4ee014c9a68b4c171f206801741876fd6f1486dd355c76",
+      "source_sha256": "2fbc9d57fb12077637f5e71b9499a6ee737b486347f136a3701a7e39ff6710fe"
     },
-    "next": "Owner of root-test layout migration fixes narrowly, then exact canonical pre_pr reruns on new source"
+    "next": "Migration owner applies tests-only runtime-probe/facade/mock repairs; rerun unchanged full canonical after focused verification"
   }
 }
