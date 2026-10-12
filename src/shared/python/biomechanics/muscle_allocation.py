@@ -16,7 +16,9 @@ from scipy.optimize import OptimizeResult, least_squares
 
 from src.shared.python.biomechanics.activation_dynamics import ActivationDynamics
 from src.shared.python.biomechanics.hill_muscle import HillMuscleModel
-from src.shared.python.biomechanics.muscle_equilibrium import EquilibriumSolver
+from src.shared.python.biomechanics.muscle_force_evaluation import (
+    evaluate_quasistatic_muscle_force,
+)
 
 EffortUnit = Literal["N", "N*m"]
 
@@ -92,68 +94,33 @@ def _bounds(path: MuscleRecruitmentPath, dt_s: float) -> tuple[float, float]:
 def _evaluate(
     path: MuscleRecruitmentPath, excitation: float, dt_s: float
 ) -> _Evaluation:
-    model = path.muscle
     effective_excitation = max(
         excitation, float(path.activation_dynamics.min_activation)
     )
     activation = float(
         path.activation_dynamics.update(excitation, path.activation, dt_s)
     )
-    fiber_length = float(
-        EquilibriumSolver(model).solve_fiber_length(
-            path.muscle_tendon_length_m, activation
-        )
+    force = evaluate_quasistatic_muscle_force(
+        path.muscle, path.muscle_tendon_length_m, activation
     )
-    if not math.isfinite(fiber_length) or fiber_length <= 0:
-        raise ValueError(f"{path.name}: invalid equilibrium fiber length")
-    cos_alpha = math.cos(model.params.pennation_angle)
-    tendon_length = path.muscle_tendon_length_m - fiber_length * cos_alpha
-    if tendon_length <= 0:
-        raise ValueError(f"{path.name}: tendon length is non-positive")
-    tendon_force = float(
-        model.params.F_max * model.tendon_force(tendon_length / model.params.l_slack)
-    )
-    l_norm = fiber_length / model.params.l_opt
-    active_unprojected = float(
-        model.params.F_max
-        * activation
-        * model.force_length_active(l_norm)
-        * model.force_velocity(0.0)
-    )
-    passive_unprojected = float(model.params.F_max * model.force_length_passive(l_norm))
-    damping = 0.0  # The one-step equilibrium is explicitly quasistatic (v_CE = 0).
-    active_projected = active_unprojected * cos_alpha
-    passive_projected = passive_unprojected * cos_alpha
-    damping_projected = damping * cos_alpha
-    fiber_force = active_projected + passive_projected + damping_projected
-    numbers = (
-        activation,
-        tendon_force,
-        active_unprojected,
-        passive_unprojected,
-        damping,
-        fiber_force,
-    )
-    if not all(math.isfinite(item) for item in numbers):
-        raise ValueError(f"{path.name}: non-finite force component")
     return _Evaluation(
         activation=activation,
         effective_excitation=effective_excitation,
         components={
-            "active_fiber_along_fiber_n": active_unprojected,
-            "passive_fiber_along_fiber_n": passive_unprojected,
-            "damping_fiber_along_fiber_n": damping,
-            "active_tendon_axis_n": active_projected,
-            "passive_tendon_axis_n": passive_projected,
-            "damping_tendon_axis_n": damping_projected,
-            "fiber_tendon_axis_n": fiber_force,
-            "tendon_n": tendon_force,
-            "fiber_length_m": fiber_length,
-            "force_equilibrium_residual_n": fiber_force - tendon_force,
+            "active_fiber_along_fiber_n": force.active_fiber_along_fiber_n,
+            "passive_fiber_along_fiber_n": force.passive_fiber_along_fiber_n,
+            "damping_fiber_along_fiber_n": force.damping_fiber_along_fiber_n,
+            "active_tendon_axis_n": force.active_tendon_axis_n,
+            "passive_tendon_axis_n": force.passive_tendon_axis_n,
+            "damping_tendon_axis_n": force.damping_tendon_axis_n,
+            "fiber_tendon_axis_n": force.fiber_tendon_axis_n,
+            "tendon_n": force.tendon_force_n,
+            "fiber_length_m": force.fiber_length_m,
+            "force_equilibrium_residual_n": force.force_equilibrium_residual_n,
             "activation_input_excitation": effective_excitation,
         },
-        tendon_force=tendon_force,
-        equilibrium_residual_n=fiber_force - tendon_force,
+        tendon_force=force.tendon_force_n,
+        equilibrium_residual_n=force.force_equilibrium_residual_n,
     )
 
 

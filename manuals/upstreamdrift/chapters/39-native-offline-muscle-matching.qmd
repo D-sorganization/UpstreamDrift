@@ -244,6 +244,34 @@ qualification status in the 17-row model inventory and makes no parity claim
 for another engine. The broader controller boundary is described in `docs/development/feedback_controls/DESIGN.md`. Full anatomy, source-derived moment arms, passive-load
 limits, physiology, contact, replay, and all-model qualification remain open.
 
+### Shared Quasistatic Hill Force Evaluation
+
+`biomechanics.muscle_force_evaluation.evaluate_quasistatic_muscle_force`
+evaluates one already-constructed analytic `HillMuscleModel` at a supplied
+muscle-tendon length and activation. It returns an immutable scalar snapshot
+of fiber/tendon lengths, active/passive/damping force components, their
+projections, tendon force, and the observed force-equilibrium residual.
+Activation advancement and raw/effective excitation policy remain outside this
+function. The calculation assumes zero fiber velocity; it does not accept a
+native engine object, advance a model state, or read a serialized replay.
+
+For active and passive fiber force components, the tendon-axis projections use
+the model's pennation angle:
+
+$$
+F_{t,j}=(F_{active,j}+F_{passive,j}+F_{damping,j})\cos\alpha_j,
+\qquad
+r_{eq,j}=F_{t,j}-F_{tendon,j}.
+$$
+
+The residual is reported, not accepted against an allocator tolerance here.
+Callers retain responsibility for feasibility and policy. The module itself
+does not depend on the allocator/controller; the package aggregate initializer
+currently imports the allocator, so this statement is a module dependency
+boundary rather than an aggregate-import isolation guarantee. A future
+serialized-replay reader may reuse this primitive after its own artifact
+validation; no reader is added in this change.
+
 ## Assistance-Explicit Mixed Moco Link
 
 F07 #12147 adds an optional ordered `mixed_actuation` declaration to the same

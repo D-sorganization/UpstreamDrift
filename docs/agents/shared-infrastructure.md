@@ -207,6 +207,19 @@ This analytic quasistatic prototype has only a two-muscle/three-coordinate
 fixture; it is not an efficient or qualified full-body controller. See
 chapter39 and `docs/development/feedback_controls/F08_MUSCLE_RECRUITMENT_TURNOVER.md`.
 
+### Shared Quasistatic Muscle Force Evaluation
+
+`src/shared/python/biomechanics/muscle_force_evaluation.py` exposes
+`evaluate_quasistatic_muscle_force` and the immutable
+`QuasistaticMuscleForceEvaluation` snapshot. It composes the existing analytic
+Hill-model and fiber-equilibrium calculation at zero fiber velocity; callers
+supply activation and muscle-tendon length. It has no dependency on the
+allocator/controller and accepts no native-engine state. The module reports
+force-equilibrium residuals but does not decide tolerance acceptance. The
+aggregate `biomechanics` initializer still imports the allocator. See chapter
+39 and the F08 recruitment turnover; serialized artifact validation is a
+separate future consumer.
+
 ### MyoFullBody Muscle-Driven Swing
 
 `src/shared/python/myofullbody/` — maps the 44-coordinate spec swing onto the
