@@ -302,3 +302,8 @@ test_event_filter.py
 /docs/research/shot_pattern_analysis/phase2/supplement_final_v1/
 /docs/research/shot_pattern_analysis/phase2/presentation_preview*/
 !docs/research/shot_pattern_analysis/phase2/data_archives/**/*.zip
+
+# Shot-pattern binaries are release assets; restore with
+# python3 -m scripts.research.shot_pattern_analysis.fetch_release_assets
+docs/research/shot_pattern_analysis/**/*.zip
+docs/research/shot_pattern_analysis/**/*.jpg
