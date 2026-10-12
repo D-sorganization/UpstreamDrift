@@ -26,9 +26,9 @@ from src.shared.python.model_generation.core.types import (  # noqa: E402
 from src.shared.python.contracts import require  # noqa: E402
 
 if TYPE_CHECKING:
-    from shared.python.model_generation.converters.urdf_parser import ParsedModel
-    from shared.python.model_generation.core.types import Material
-    from shared.python.model_generation.editor.editor_types import ComponentType
+    from src.shared.python.model_generation.converters.urdf_parser import ParsedModel
+    from src.shared.python.model_generation.core.types import Material
+    from src.shared.python.model_generation.editor.editor_types import ComponentType
 
 logger = logging.getLogger(__name__)
 
@@ -386,14 +386,14 @@ class ModificationMixin:
                 return False
             joint.axis = axis
         if "limits" in kwargs:
-            from shared.python.model_generation.core.types import JointLimits
+            from src.shared.python.model_generation.core.types import JointLimits
 
             if not isinstance(kwargs["limits"], JointLimits):
                 logger.error("'limits' must be a JointLimits instance")
                 return False
             joint.limits = kwargs["limits"]
         if "dynamics" in kwargs:
-            from shared.python.model_generation.core.types import JointDynamics
+            from src.shared.python.model_generation.core.types import JointDynamics
 
             if not isinstance(kwargs["dynamics"], JointDynamics):
                 logger.error("'dynamics' must be a JointDynamics instance")

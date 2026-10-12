@@ -236,6 +236,108 @@ def test_planted_feet_contracts() -> None:
         tt.PlantedFeet({"l": np.zeros(3)}, {}, {}, 1)
 
 
+# ------------------------------------------------------------- per-frame feet
+RISE_FRAME = 14  # first frame of the heel lift; the address window is 0..11
+HEEL_RISE_M = 0.05
+
+
+def _moving_foot_capture(
+    rise_label: str = "RAnkleOut", invalid: tuple[int, ...] = ()
+) -> _Capture:
+    """Foot capture whose wrists leave at frame 12 and whose heel lifts 5 cm."""
+    cap = _foot_capture({"L": 10.0, "R": 5.0})
+    pts = cap.points_m.copy()
+    valid = cap.valid.copy()
+    col = cap.labels.index
+    pts[12:, col("RWristTop")] += np.array([0.1, 0.0, 0.0])  # past takeaway
+    pts[RISE_FRAME:, col(rise_label), 1] += HEEL_RISE_M  # Y-up height
+    for frame in invalid:
+        valid[frame, col("RToeIn")] = False
+    return _Capture(cap.time_s, cap.labels, pts, valid)
+
+
+def test_foot_track_address_frames_equal_the_static_targets() -> None:
+    cap = _moving_foot_capture()
+    track = tt.foot_track_from_capture(cap, cap.time_s)
+    static = tt.planted_feet_from_capture(cap).targets(0.0)
+    for name, point in track.targets_at(0, 0.0).items():
+        np.testing.assert_allclose(point, static[name], atol=1e-9)
+    assert len(track) == len(cap.time_s)
+    assert track.fallback_frames == 0
+
+
+def test_foot_track_lifts_the_trail_heel_and_keeps_the_toes_down() -> None:
+    cap = _moving_foot_capture()
+    track = tt.foot_track_from_capture(cap, cap.time_s)
+    before = track.targets_at(RISE_FRAME - 1, 0.0)
+    after = track.targets_at(RISE_FRAME, 0.0)
+    for body in ("calcn_r", "talus_r"):
+        assert after[body][1] - before[body][1] == pytest.approx(HEEL_RISE_M)
+    assert after["toes_r"][1] == pytest.approx(cal.FOOT_TEMPLATE["toes"][1])
+    for body in ("calcn_l", "toes_l", "toes_r"):
+        assert after[body][1] == pytest.approx(before[body][1])
+
+
+def test_foot_track_never_goes_below_the_floor() -> None:
+    cap = _moving_foot_capture()
+    pts = cap.points_m.copy()
+    pts[RISE_FRAME:, cap.labels.index("RToeIn"), 1] -= 0.5  # toe far underground
+    pts[RISE_FRAME:, cap.labels.index("RToeOut"), 1] -= 0.5
+    sunk = _Capture(cap.time_s, cap.labels, pts, cap.valid)
+    track = tt.foot_track_from_capture(sunk, sunk.time_s)
+    for frame in range(len(track)):
+        for point in track.targets_at(frame, 0.0).values():
+            assert point[1] >= 0.0
+    assert track.targets_at(RISE_FRAME, 0.0)["toes_r"][1] == 0.0
+
+
+def test_foot_track_falls_back_to_the_last_valid_frame_and_counts_it() -> None:
+    cap = _moving_foot_capture(invalid=(RISE_FRAME + 1, RISE_FRAME + 2))
+    track = tt.foot_track_from_capture(cap, cap.time_s)
+    assert track.fallback_frames == 2
+    held = track.targets_at(RISE_FRAME, 0.0)
+    for frame in (RISE_FRAME + 1, RISE_FRAME + 2):
+        for name, point in track.targets_at(frame, 0.0).items():
+            np.testing.assert_allclose(point, held[name], atol=1e-12)
+
+
+def test_foot_track_leading_invalid_frames_use_the_address_value() -> None:
+    cap = _moving_foot_capture(invalid=(0,))
+    track = tt.foot_track_from_capture(cap, cap.time_s)
+    assert track.fallback_frames == 1
+    static = tt.planted_feet_from_capture(cap).targets(0.0)
+    for name, point in track.targets_at(0, 0.0).items():
+        np.testing.assert_allclose(point, static[name], atol=1e-9)
+
+
+def test_foot_track_samples_the_capture_at_the_tracked_times() -> None:
+    cap = _moving_foot_capture()
+    times = cap.time_s[[0, RISE_FRAME, len(cap.time_s) - 1]]
+    track = tt.foot_track_from_capture(cap, times)
+    assert len(track) == 3
+    assert (
+        track.targets_at(1, 0.0)["calcn_r"][1]
+        > track.targets_at(0, 0.0)["calcn_r"][1] + 0.9 * HEEL_RISE_M
+    )
+
+
+def test_foot_track_contracts() -> None:
+    cap = _moving_foot_capture()
+    for bad in ([], [[0.0]], [0.0, float("nan")], [0.2, 0.1]):
+        with pytest.raises(ValueError, match="times_s"):
+            tt.foot_track_from_capture(cap, bad)
+    cut = _Capture(cap.time_s, cap.labels[:-1], cap.points_m[:, :-1], cap.valid[:, :-1])
+    with pytest.raises(ValueError, match="foot markers"):
+        tt.foot_track_from_capture(cut, cap.time_s)
+    track = tt.foot_track_from_capture(cap, cap.time_s)
+    with pytest.raises(ValueError, match="frame"):
+        track.targets_at(len(track), 0.0)
+    with pytest.raises(ValueError, match="heel_dz"):
+        tt.PlantedFeet(
+            track.address.ankle, track.address.axis, track.address.lateral, 1
+        ).targets(0.0, heel_dz_m={"l": float("nan"), "r": 0.0})
+
+
 # ------------------------------------------------------------- tracking inputs
 @dataclass
 class _TurnInputs:
@@ -268,7 +370,8 @@ def test_tracking_inputs_by_mode(synthetic_capture: _Capture) -> None:
         synthetic_capture, times, "turn_feet", weight_rad=0.05
     )
     assert targets is not None and targets.weight_rad == 0.05
-    assert isinstance(feet, tt.PlantedFeet)
+    assert isinstance(feet, tt.FootTrack) and len(feet) == len(times)
+    assert isinstance(feet.address, tt.PlantedFeet)
 
 
 def test_tracking_inputs_contracts(synthetic_capture: _Capture) -> None:

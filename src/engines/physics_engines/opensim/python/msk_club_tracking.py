@@ -136,14 +136,16 @@ def track_swing(
     *,
     club: str = "driver",
     turn_targets: tt.TurnTargets | None = None,
-    feet: tt.PlantedFeet | None = None,
+    feet: tt.PlantedFeet | tt.FootTrack | None = None,
 ) -> list[TrackedFrame]:
     """Track generated swing coordinates ``rows`` (frames x coordinates).
 
     ``rows`` follow the generated model's coordinate order (the club-face
     fixtures' order). The model must have a committed grip calibration.
     ``turn_targets`` (one entry per row) add the pelvis and upper-trunk turn
-    residuals; ``feet`` replace the synthetic planted stance. Without either
+    residuals; ``feet`` replace the synthetic planted stance (a static
+    ``PlantedFeet``, or a per-row ``FootTrack`` that follows the capture's
+    heel and toe motion). Without either
     the tracking is unchanged. Each frame's ``turn_points`` are the native
     model points of ``msk_turn_targets.model_turn_points``.
     Raises ``ValueError`` for a non-2-D ``rows`` or turn targets of another
@@ -155,6 +157,8 @@ def track_swing(
     rows = np.asarray(rows, dtype=float)
     if rows.ndim != 2:
         raise ValueError(f"rows must be 2-D (frames x coordinates), got {rows.shape}")
+    if isinstance(feet, tt.FootTrack) and len(feet) != rows.shape[0]:
+        raise ValueError(f"feet has {len(feet)} entries for {rows.shape[0]} rows")
     if turn_targets is not None and len(turn_targets) != rows.shape[0]:
         raise ValueError(
             f"turn_targets has {len(turn_targets)} entries for {rows.shape[0]} rows"
@@ -175,12 +179,16 @@ def track_swing(
     if turn_targets is not None:
         tracker.set_turn_reference(calibration.address_q)
         tracker.turn_weight_rad = turn_targets.weight_rad
-    planted = {} if feet is None else feet.targets(generated.floor_native_z)
+    floor = generated.floor_native_z
+    static = feet.targets(floor) if isinstance(feet, tt.PlantedFeet) else {}
     q = np.clip([calibration.address_q.get(n, 0.0) for n in names], *bounds.T)
     frames: list[TrackedFrame] = []
     for i, row in enumerate(rows):
         targets = generated.targets(row)
         tracker.grips = cal.grip_frames(shared, targets.club_in_ground)
+        planted = (
+            feet.targets_at(i, floor) if isinstance(feet, tt.FootTrack) else static
+        )
         tracker.landmarks = {**targets.landmarks, **planted}
         tracker.turn = None if turn_targets is None else turn_targets.at(i)
         tracker.previous = q
