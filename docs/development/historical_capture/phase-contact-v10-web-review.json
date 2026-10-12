@@ -1,0 +1,19 @@
+{
+  "schema": "necromatcher/authored-contact-web-review/1",
+  "producer_source_commit": "9c21eda8baae1192b66640467b4d67219878b958",
+  "api_process_id": 39232,
+  "run_id": "baa679197668403d9c41a3cb4a2552aa",
+  "new_fit_id": "hogan-contact-phase-web-review-v10",
+  "status": "succeeded",
+  "scientific_acceptance": "rejected",
+  "evaluation_budget": 1,
+  "complete_phase_recipe_retained": true,
+  "exact_start_verified": true,
+  "initial_coefficient_sha256": "sha256:3ddf08efede1695e1561748a25af5e3db5755eac34c62ac195cac6b8429a0f78",
+  "initial_rms_pixels": 8.200449410624524,
+  "rms_pixels": 8.200449410615876,
+  "capture_binding_verified": true,
+  "screenshot": "hogan-contact-phase-web-result-v10.png",
+  "draft_reset_to_parent_budget_30_after_store": true,
+  "frontend_source_sha256": "24609d008dc9478ddb73ab3cecd5e1e5cf375fba954d4b1bc5522c76011a64d1"
+}

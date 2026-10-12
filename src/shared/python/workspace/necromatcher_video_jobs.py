@@ -6,9 +6,11 @@ from collections import OrderedDict
 from collections.abc import Callable
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
@@ -32,14 +34,34 @@ from src.shared.python.motion_matching.jobs import (
     ProcessGuard,
     RunManifest,
 )
-from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_json
+from src.shared.python.motion_matching.jobs.io_atomic import (
+    atomic_write_json,
+    read_text,
+)
 from src.shared.python.motion_matching.jobs.service import JobHandle
 from src.shared.python.security import secure_popen
 from src.shared.python.version_info import get_repo_root
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
-from .necromatcher_video_forces import ForceLayer
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from src.shared.python.motion_matching.historical_fit import ShaftAxisEvidence
+from src.shared.python.workspace.necromatcher_caption import (
+    CaptionOverlayOptions,
+    validate_caption_manifest,
+)
+from src.shared.python.workspace.necromatcher_shaft_evidence import (
+    BoundShaftEvidence,
+    bind_fit_shaft_evidence,
+)
+from src.shared.python.workspace.necromatcher_shape_overlay import (
+    shape_overlay_provenance,
+)
+from src.shared.python.workspace.necromatcher_video import (
+    validate_video_shaft_domain,
+    video_scope_provenance,
+)
+from src.shared.python.workspace.necromatcher_video_forces import ForceLayer
 
 _BUDGET_WALL_S = 600.0
 _BLOCKERS = (
@@ -48,10 +70,11 @@ _BLOCKERS = (
     "anatomy_camera_unqualified",
 )
 _KIND = "necromatcher/video-job/1"
+logger = logging.getLogger(__name__)
 
 
 def _read(path: Path) -> dict[str, Any]:
-    value = json.loads(path.read_text(encoding="utf-8"))
+    value = json.loads(read_text(path))
     if not isinstance(value, dict):
         raise ValueError("Video job record must be a JSON object")
     return value
@@ -117,6 +140,63 @@ def _execute_worker(
                 stream.close()
 
 
+def video_shaft_evidence(
+    library: NecromatcherLibrary, fit: dict[str, Any], request: dict[str, Any]
+) -> ShaftAxisEvidence | None:
+    """Reopen reviewed PNGs and source clock; a request receipt is not admission."""
+    if "shaft_overlay" not in request:
+        return None
+    recipe = request["shaft_overlay"]
+    if not isinstance(recipe, dict) or set(recipe) != {
+        "evidence",
+        "evidence_sha256",
+        "source_clock_sha256",
+    }:
+        raise ValueError("Malformed shaft overlay request")
+    evidence = ShaftAxisEvidence.from_record(recipe["evidence"])
+    if evidence.sha256 != recipe["evidence_sha256"]:
+        raise ValueError("Video shaft evidence hash differs from request")
+    bound = _bind_video_shaft(library, fit, evidence)
+    if bound.source_clock_sha256 != recipe["source_clock_sha256"]:
+        raise ValueError("Video shaft source clock differs from request")
+    return evidence
+
+
+def _bind_video_shaft(
+    library: NecromatcherLibrary, fit: dict[str, Any], evidence: ShaftAxisEvidence
+) -> BoundShaftEvidence:
+    validate_video_shaft_domain(fit, evidence)
+    return bind_fit_shaft_evidence(library, fit, evidence)
+
+
+def _selected_still_frames(indices: list[int]) -> list[int]:
+    """Retain the established first/middle/last export recipe."""
+    return sorted({indices[0], indices[len(indices) // 2], indices[-1]})
+
+
+def _scope_hash_options(
+    fit: dict[str, Any], request: dict[str, Any], options: Any
+) -> Any:
+    scope = video_scope_provenance(fit)
+    if not scope:
+        return options
+    request.update(scope)
+    return {
+        **(options if isinstance(options, dict) else {"selected_frames": options}),
+        **scope,
+    }
+
+
+def validate_video_scope(fit: dict[str, Any], request: dict[str, Any]) -> None:
+    """Require exact admitted scope; absence cannot acquire a later fit's scope."""
+    expected = video_scope_provenance(fit)
+    recorded = video_scope_provenance({"provenance": request})
+    if json.dumps(expected, sort_keys=True, allow_nan=False) != json.dumps(
+        recorded, sort_keys=True, allow_nan=False
+    ):
+        raise ValueError("Video source scope differs from admitted request")
+
+
 def _parents(library: NecromatcherLibrary, request: dict[str, Any]) -> dict[str, Any]:
     fit = library.load_fit(request["source_fit_id"])
     if (
@@ -135,7 +215,68 @@ def _parents(library: NecromatcherLibrary, request: dict[str, Any]) -> dict[str,
             != fit[f"{kind}_hash"]
         ):
             raise ValueError("Video parent bytes changed")
+    validate_video_scope(fit, request)
+    video_shaft_evidence(library, fit, request)
+    video_shape_options(request)
+    video_caption_options(request)
     return fit
+
+
+def video_shape_options(request: dict[str, Any]) -> ShapeOverlayOptions | None:
+    """Validate persisted options again at worker and publication boundaries."""
+    if "shape_overlay" not in request:
+        return None
+    return ShapeOverlayOptions.from_record(request["shape_overlay"])
+
+
+def video_caption_options(request: dict[str, Any]) -> CaptionOverlayOptions | None:
+    """Authenticate enabled caption recipes at every persisted boundary."""
+    if "caption_overlay" not in request:
+        return None
+    return CaptionOverlayOptions.from_record(request["caption_overlay"])
+
+
+def _check_caption_manifest(manifest: dict[str, Any], request: dict[str, Any]) -> None:
+    from .necromatcher_review import CaptureReview
+
+    options = video_caption_options(request)
+    if options is None:
+        if "caption_overlay" in manifest or any(
+            "caption_overlay" in frame for frame in manifest.get("frames", [])
+        ):
+            raise ValueError("Disabled caption overlay cannot include layout")
+        return
+    library = NecromatcherLibrary(request["library_root"])
+    fit = library.load_fit(request["source_fit_id"])
+    with CaptureReview(library, fit["capture_id"]) as review:
+        source = review.frame(fit["frame_indices"][0])
+        if manifest.get("image_size") != [
+            source["image_width"],
+            source["image_height"],
+        ]:
+            raise ValueError("Caption layout differs from bound source dimensions")
+    if [
+        (row["frame_index"], row["frame"]) for row in manifest.get("frames", [])
+    ] != list(zip(fit["frame_indices"], fit["frames"], strict=True)):
+        raise ValueError("Caption frames differ from bound source identities")
+    validate_caption_manifest(manifest, options, fit)
+
+
+def _check_shape_manifest(manifest: dict[str, Any], request: dict[str, Any]) -> None:
+    options = video_shape_options(request)
+    if options is None:
+        if "shape_overlay" in manifest:
+            raise ValueError("Disabled shape overlay cannot include geometry")
+        return
+    library = NecromatcherLibrary(request["library_root"])
+    fit = library.load_fit(request["source_fit_id"])
+    expected = shape_overlay_provenance(
+        fit["provenance"]["native_definition"], fit["model_hash"], options
+    )
+    if manifest.get("shape_overlay") != expected:
+        raise ValueError(
+            "Overlay shape options or model provenance differ from request"
+        )
 
 
 def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[Path]]:
@@ -146,6 +287,24 @@ def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[
     manifest = _read(manifest_path)
     if manifest.get("schema") != "necromatcher/source-overlay-video/1":
         raise ValueError("Unsupported overlay manifest")
+    validate_video_scope({"provenance": manifest}, request)
+    _check_shape_manifest(manifest, request)
+    _check_caption_manifest(manifest, request)
+    if "shaft_overlay" in request:
+        shaft = manifest.get("shaft_overlay")
+        if not isinstance(shaft, dict) or any(
+            shaft.get(key) != expected
+            for key, expected in request["shaft_overlay"].items()
+        ):
+            raise ValueError("Overlay shaft evidence differs from the request")
+        if (
+            shaft.get("schema") != "necromatcher/shaft-video-overlay/1"
+            or shaft.get("uncertainty_calibrated") is not False
+            or shaft.get("physical_geometry_qualified") is not False
+        ):
+            raise ValueError("Overlay shaft qualification is malformed")
+    elif "shaft_overlay" in manifest:
+        raise ValueError("Disabled shaft overlay cannot include evidence")
     for name, expected in (
         ("fit_id", request["source_fit_id"]),
         ("fit_hash", request["source_fit_hash"]),
@@ -195,6 +354,88 @@ def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[
     return manifest, paths
 
 
+def _file_identity(library_root: Path, path: Path) -> dict[str, Any]:
+    """Bound a regular file to its owned path without reading its contents."""
+    relative = path.absolute().relative_to(library_root.absolute())
+    if ".." in relative.parts:
+        raise ValueError("Artifact baseline path must stay inside the library")
+    for ancestor in (path, *path.parents):
+        if ancestor.is_symlink():
+            raise ValueError("Artifact baseline may not use symlink paths")
+        if ancestor == library_root:
+            break
+    value = path.stat()
+    if not stat.S_ISREG(value.st_mode):
+        raise ValueError("Artifact baseline requires regular files")
+    return {
+        "path": relative.as_posix(),
+        "identity": [
+            value.st_dev,
+            value.st_ino,
+            value.st_size,
+            value.st_mtime_ns,
+            value.st_ctime_ns,
+        ],
+    }
+
+
+def _asset_bindings(
+    library: NecromatcherLibrary, swing: str, identities: list[str]
+) -> list[dict[str, Any]]:
+    assets = {asset.dataset_id: asset for asset in library.assets(swing)}
+    return [
+        {
+            "id": identity,
+            "path": assets[identity].path,
+            "kind": assets[identity].kind,
+            "hash": assets[identity].metadata["hash"],
+        }
+        for identity in identities
+    ]
+
+
+def _artifact_baseline(
+    library: NecromatcherLibrary, root: Path, request: dict[str, Any], swing: str
+) -> dict[str, Any]:
+    """Capture bounded metadata around an authoritative owned hash check."""
+    identities = [request["source_fit_id"], request["model_id"], request["capture_id"]]
+    scope = video_scope_provenance({"provenance": request})
+    if scope:
+        identities.append(
+            scope["source_fit_scope"]["review"]["artifact"]["artifact_id"]
+        )
+    bindings = _asset_bindings(library, swing, identities)
+    names = sorted(path.name for path in (root / "overlay").iterdir())
+    if len(names) > 5:
+        raise ValueError("Overlay contains too many artifact files")
+    paths = [root / "request.json", *(root / "overlay" / name for name in names)]
+    for binding in bindings:
+        path = Path(binding["path"])
+        paths.append(path if path.is_absolute() else library.root / path)
+    return {
+        "swing_id": swing,
+        "bindings": bindings,
+        "output_names": names,
+        "files": [_file_identity(library.root, path) for path in paths],
+    }
+
+
+def _artifact_available(
+    library: NecromatcherLibrary, root: Path, request: dict[str, Any]
+) -> bool:
+    """Fail closed on legacy or changed artifacts using only bounded metadata."""
+    try:
+        baseline = _read(root / "complete.json").get("artifact_baseline")
+        limit = 10 if "source_fit_scope" in request else 9
+        if not isinstance(baseline, dict) or len(baseline.get("files", [])) > limit:
+            return False
+        return baseline == _artifact_baseline(
+            library, root, request, baseline["swing_id"]
+        )
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+
 class NativeVideoSession:
     """Own bounded job handles; durable manifests never invent worker termination."""
 
@@ -214,13 +455,32 @@ class NativeVideoSession:
         return root
 
     def submit(
-        self, fit_id: str, force_layer: dict[str, Any] | None = None
+        self,
+        fit_id: str,
+        shaft_evidence: ShaftAxisEvidence | None = None,
+        *,
+        shape_overlay: ShapeOverlayOptions | None = None,
+        caption_overlay: CaptionOverlayOptions | None = None,
+        force_layer: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Schedule a new overlay with owned paths and first/middle/last stills.
 
         ``force_layer`` is an opt-in settings record; it is validated here and
         omitted from the request (and its job digest) when absent.
         """
+        if caption_overlay is not None and not isinstance(
+            caption_overlay, CaptionOverlayOptions
+        ):
+            raise TypeError("Caption overlay must be CaptionOverlayOptions or None")
+        if shape_overlay is not None and not isinstance(
+            shape_overlay, ShapeOverlayOptions
+        ):
+            raise TypeError("Shape overlay must be ShapeOverlayOptions or None")
+        shape = (
+            ShapeOverlayOptions.from_record(shape_overlay.to_record())
+            if shape_overlay is not None
+            else None
+        )
         layer = ForceLayer(**force_layer).to_dict() if force_layer else None
         with self._lock:
             if self._closed:
@@ -247,14 +507,42 @@ class NativeVideoSession:
                 "model_hash": fit["model_hash"],
                 "capture_id": fit["capture_id"],
                 "capture_hash": fit["capture_hash"],
-                "selected_frames": sorted(
-                    {indices[0], indices[len(indices) // 2], indices[-1]}
-                ),
+                "selected_frames": _selected_still_frames(indices),
                 "execution_stamp": stamp,
                 "execution_started": False,
             }
+            hash_options: Any = request["selected_frames"]
+            if shaft_evidence is not None:
+                bound = _bind_video_shaft(self.library, fit, shaft_evidence)
+                request["shaft_overlay"] = {
+                    "evidence": shaft_evidence.to_record(),
+                    "evidence_sha256": shaft_evidence.sha256,
+                    "source_clock_sha256": bound.source_clock_sha256,
+                }
+                hash_options = {
+                    "selected_frames": request["selected_frames"],
+                    "shaft_overlay": request["shaft_overlay"],
+                }
+            if shape is not None:
+                shape_overlay_provenance(
+                    fit["provenance"]["native_definition"], fit["model_hash"], shape
+                )
+                request["shape_overlay"] = shape.to_record()
+                if not isinstance(hash_options, dict):
+                    hash_options = {"selected_frames": hash_options}
+                hash_options["shape_overlay"] = request["shape_overlay"]
+            if caption_overlay is not None:
+                request["caption_overlay"] = caption_overlay.to_record()
+                if not isinstance(hash_options, dict):
+                    hash_options = {"selected_frames": hash_options}
+                hash_options["caption_overlay"] = request["caption_overlay"]
             if layer is not None:
                 request["force_layer"] = layer
+                if not isinstance(hash_options, dict):
+                    hash_options = [request["selected_frames"], layer]
+                else:
+                    hash_options["force_layer"] = layer
+            hash_options = _scope_hash_options(fit, request, hash_options)
             spec = MatchingJobSpec(
                 root.name,
                 "mujoco",
@@ -264,11 +552,7 @@ class NativeVideoSession:
                     fit["capture_hash"],
                     fit["model_hash"],
                     stamp["runtime_sha256"],
-                    _digest(
-                        request["selected_frames"]
-                        if layer is None
-                        else [request["selected_frames"], layer]
-                    ),
+                    _digest(hash_options),
                     stamp["source_sha256"],
                 ),
                 budget_wall_s=_BUDGET_WALL_S,
@@ -318,6 +602,8 @@ class NativeVideoSession:
                 raise ValueError(
                     "Video implementation or runtime changed during execution"
                 )
+            swing = self.library.load_asset(request["source_fit_id"]).session_id
+            baseline = _artifact_baseline(self.library, root, request, swing)
             _parents(self.library, request)
             _outputs(root, request)
             if (
@@ -325,8 +611,12 @@ class NativeVideoSession:
                 != "sha256:" + response["manifest_sha256"]
             ):
                 raise ValueError("Worker overlay manifest hash mismatch")
+            if baseline != _artifact_baseline(self.library, root, request, swing):
+                raise ValueError("Overlay metadata changed during verification")
 
             def publish() -> None:
+                if "shaft_overlay" in request or "source_fit_scope" in request:
+                    _parents(self.library, request)
                 atomic_write_json(
                     root / "complete.json",
                     {
@@ -338,6 +628,7 @@ class NativeVideoSession:
                         ),
                         "source_sha256": spec.hashes.solver_hash,
                         "runtime_sha256": spec.hashes.runtime_hash,
+                        "artifact_baseline": baseline,
                     },
                 )
                 progress(
@@ -401,6 +692,10 @@ class NativeVideoSession:
             except TimeoutError:
                 pass
         manifest_path = root / "run_manifest.json"
+        if manifest_path.is_symlink() or (
+            manifest_path.exists() and not manifest_path.is_file()
+        ):
+            raise ValueError("Video manifest must be a regular file without symlink")
         manifest = (
             RunManifest.from_dict(_read(manifest_path))
             if manifest_path.exists()
@@ -408,6 +703,12 @@ class NativeVideoSession:
         )
         if manifest is not None and manifest.run_id != run_id:
             raise ValueError("Video manifest identity mismatch")
+        if (
+            manifest is not None
+            and manifest.status == JobStatus.SUCCEEDED
+            and manifest.acceptance != AcceptanceState.REJECTED
+        ):
+            raise ValueError("Research overlay cannot claim scientific acceptance")
         status = (
             result.status
             if result
@@ -423,10 +724,11 @@ class NativeVideoSession:
             else AcceptanceState.PARTIAL
         )
         verified = self._verified(root, request, manifest) if manifest else False
+        available = verified and _artifact_available(self.library, root, request)
         message = result.message if result else "Source-bound research overlay export"
         if handle is None and status in {JobStatus.PENDING, JobStatus.RUNNING}:
             message = "Execution state unverified; this host has no live control handle"
-        return {
+        view = {
             "run_id": run_id,
             "source_fit_id": request["source_fit_id"],
             "status": status.value,
@@ -446,12 +748,64 @@ class NativeVideoSession:
             "control_available": handle is not None,
             "execution_started": request.get("execution_started") is True,
             "execution_verified": verified,
-            "download_available": verified,
+            "download_available": available,
+            "artifact_state": "verified_stat_baseline"
+            if available
+            else "changed_or_unverified",
+            "producer_source_commit": request.get("execution_stamp", {}).get(
+                "source_commit"
+            ),
         }
+        if "shape_overlay" in request:
+            shape = video_shape_options(request)
+            assert shape is not None
+            view["shape_overlay"] = shape.to_record()
+        if "caption_overlay" in request:
+            caption = video_caption_options(request)
+            assert caption is not None
+            view["caption_overlay"] = caption.to_record()
+        view.update(video_scope_provenance({"provenance": request}))
+        return view
 
     def view(self, run_id: str) -> dict[str, Any]:
         with self._lock:
             return self._view(run_id)
+
+    def _view_for_fit(self, fit_id: str, run_id: str) -> dict[str, Any]:
+        _, request = self._record(run_id)
+        if request.get("source_fit_id") != fit_id:
+            raise ValueError("Stored overlay belongs to a different source fit")
+        _parents(self.library, request)
+        return self._view(run_id)
+
+    def view_for_fit(self, fit_id: str, run_id: str) -> dict[str, Any]:
+        """Recall one source-bound run without granting foreign fit controls."""
+        with self._lock:
+            return self._view_for_fit(fit_id, run_id)
+
+    def stored_runs(self, fit_id: str) -> list[dict[str, Any]]:
+        """List durable fit-scoped statuses without scheduling or hashing video."""
+        with self._lock:
+            self.library.load_fit(fit_id)
+            directory = self.library.root / "video-runs"
+            if directory.is_symlink():
+                raise ValueError("Video run directory may not be a symlink")
+            if not directory.exists():
+                return []
+            runs = []
+            for path in sorted(directory.iterdir()):
+                if not re.fullmatch(r"[a-f0-9]{32}", path.name):
+                    continue
+                try:
+                    _, request = self._record(path.name)
+                except (OSError, ValueError, KeyError) as exc:
+                    logger.warning(
+                        "Skipping unreadable stored overlay %s: %s", path.name, exc
+                    )
+                    continue
+                if request.get("source_fit_id") == fit_id:
+                    runs.append(self._view_for_fit(fit_id, path.name))
+            return runs
 
     def cancel(self, run_id: str) -> dict[str, Any]:
         with self._lock:
@@ -478,6 +832,8 @@ class NativeVideoSession:
             root, request = self._record(run_id)
             _parents(self.library, request)
             _, files = _outputs(root, request)
+            swing = self.library.load_asset(request["source_fit_id"]).session_id
+            baseline = _artifact_baseline(self.library, root, request, swing)
             expected = {path.name: compute_file_sha256(path) for path in files}
             with TemporaryDirectory(prefix="video-download-", dir=root) as temporary:
                 archive_path = Path(temporary) / "overlay.zip"
@@ -500,6 +856,13 @@ class NativeVideoSession:
                     path.name: compute_file_sha256(path) for path in current_files
                 } != expected or not self._view(run_id)["execution_verified"]:
                     raise ValueError("Overlay changed during download packaging")
+                if baseline != _artifact_baseline(self.library, root, request, swing):
+                    raise ValueError(
+                        "Overlay metadata changed during download packaging"
+                    )
                 destination = root / ("overlay-" + uuid4().hex + ".zip")
                 os.link(archive_path, destination)
+            complete = _read(root / "complete.json")
+            complete["artifact_baseline"] = baseline
+            atomic_write_json(root / "complete.json", complete)
             return destination

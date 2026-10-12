@@ -1,0 +1,166 @@
+{
+  "scientific_qualified": false,
+  "pages": [
+    {
+      "page": 1,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-01.png",
+      "bytes": 126584,
+      "sha256": "1da404f636aa75c05cf7030f4792858925766913b89b9a1082adbae031d21be7"
+    },
+    {
+      "page": 2,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-02.png",
+      "bytes": 142403,
+      "sha256": "9eac2142f922c80d4d97cc340dd1849c1202a761ff6d3c3f0ae588290c091b57"
+    },
+    {
+      "page": 3,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-03.png",
+      "bytes": 155034,
+      "sha256": "d1ccc879e73d14bfe5a841551317430ef823a9b1b5d16d4656b305b891e7829f"
+    },
+    {
+      "page": 4,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-04.png",
+      "bytes": 156712,
+      "sha256": "49360005512062f9807cf18c0be4b3de2c502071626512a8c6547bef86d4bb0d"
+    },
+    {
+      "page": 5,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-05.png",
+      "bytes": 163086,
+      "sha256": "aa852bd94c646341d8bd53dda0bba3d253362392bded9dd7a8208e786adc4c71"
+    },
+    {
+      "page": 6,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-06.png",
+      "bytes": 155549,
+      "sha256": "08c171abc9c6128a29b1defb92db4671b76b9ce2125756e54ee01e5571635036"
+    },
+    {
+      "page": 7,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-07.png",
+      "bytes": 164312,
+      "sha256": "fc2bf0a2c9eef8993067a7fbbcc6f8282c12c0131d6a170a4e67ff3cde8f5a7b"
+    },
+    {
+      "page": 8,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-08.png",
+      "bytes": 170575,
+      "sha256": "b426e6e9d66de4fec0173f6c7f3b9d72dba40e1d9ebf73c24d67d6b1f481f313"
+    },
+    {
+      "page": 9,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-09.png",
+      "bytes": 116180,
+      "sha256": "27bef244aeabb26e3c36062a510b91f1188b8d82e77aa245ed7e407badb617d5"
+    },
+    {
+      "page": 10,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-10.png",
+      "bytes": 198025,
+      "sha256": "64fb18539b1c66b346b053a389e6b3f51b99b4adae08bdaa603478827e8ba032"
+    },
+    {
+      "page": 11,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-11.png",
+      "bytes": 168242,
+      "sha256": "ed42dce9474d369e45023e47f37def6c042f7bc17a8094ff5d03d48428e60b6d"
+    },
+    {
+      "page": 12,
+      "root_visually_reviewed": true,
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\render-review-final-v2\\page-12.png",
+      "bytes": 138317,
+      "sha256": "86ea1ce27d8eefa57bf191695583d32ea178bf6fa3cee88959257ec1305dafc3"
+    }
+  ],
+  "schema": "necromatcher/root-an1-compiled-report-review/1",
+  "changed_final_pages_re_reviewed": [2],
+  "initial_pages_reviewed": 12,
+  "reviewer": "Codex root",
+  "final_compiler_exit_codes": [0, 0],
+  "page_count": 12,
+  "compiler": "Existing MiKTeX pdflatex with installer disabled",
+  "builtin_compile_infrastructure_failure": "Unable to find standard directories for platform",
+  "all_final_pages_visually_reviewed": true,
+  "controltower_transferred": false,
+  "files": [
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\an1-arm-morphology-admission-supplement.tex",
+      "bytes": 25534,
+      "sha256": "e263868f98b55a0458771a4f471ef5f58823537e247b606c883c2157215a795d"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\an1-arm-morphology-admission-supplement.pdf",
+      "bytes": 298748,
+      "sha256": "0f66f42ddd8ead53404dae533d62a93020400559cdbfad8cb2f8a8f2c25eb8a7"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\an1-results-data-v4.json",
+      "bytes": 119762,
+      "sha256": "afd817d9e8870205b3a7131b899678242ca6dad91f9ddacca0c3f8f41ea6b5bb"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\an1-body-results.csv",
+      "bytes": 410,
+      "sha256": "ddcd11c2a58bf286284f47770bb82ae9f761bff295d6f5f045de8fdeaa378d57"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\an1-shaft-results.csv",
+      "bytes": 954,
+      "sha256": "f053804ae5462e64e0209ce247bc16822c66a4dc0d7f3e459eceb98c462639ad"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\root-persistence-acceptance-v1.json",
+      "bytes": 1211,
+      "sha256": "f8ccb0ffbe44c4988de3a4e2bd49fe9dbbdb66a3c95f54ce74ed150e3de89869"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\root-text-revision-v1.json",
+      "bytes": 1528,
+      "sha256": "0841cbea7351c53015024a82ea885860add1a378032ab7d914702778a9f5846b"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\root-titlecase-revision-v1.json",
+      "bytes": 513,
+      "sha256": "b6774f69aade2a83ea3610b30fef7827224c30df68d4282fd2064a6edc5a28d8"
+    }
+  ],
+  "compiled_verified": true,
+  "overfull_boxes": 0,
+  "remaining_underfull_boxes": 2,
+  "underfull_scope": "Long lineage table labels; final layout reviewed with no clipping",
+  "prior_accepted_review": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Arm Morphology Admission Results Supplement V3\\accepted-pre-titlecase-v3\\root-final-report-review-v1.json",
+    "bytes": 6862,
+    "sha256": "9de7b457b97a5f29fc4592a15d4bf8209381a687cfac67b458b2faa59500bdcc"
+  },
+  "final_revision": "One conjunction capitalization; page 2 re-reviewed, other 11 pages pixel-identical",
+  "compile_pass_logs": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\an1-titlecase-pass1.log",
+      "bytes": 7686,
+      "sha256": "988482471802a3517588573b9bcbbbbc389736238900d736720b6aa0b0e1140f"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\an1-titlecase-pass2.log",
+      "bytes": 7460,
+      "sha256": "32181e8b1d0be6e96ee6a1385ad9077e1231bce2071d11570c88236437d2522d"
+    }
+  ],
+  "phase_scope_note": "Historical whole-capture experiment; subsequent user instruction excludes Tiger right-hand-release follow-through from future fitting.",
+  "other_eleven_page_png_bytes_unchanged": true,
+  "prior_titlecase_review_sha256": "b8745989f7e72353724b6848f43276f70f7bd624af39dbc5fa0a0bf5f43d0d14"
+}

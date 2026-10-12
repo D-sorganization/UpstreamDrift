@@ -138,8 +138,9 @@ class AssemblyCanvas(QGraphicsView):
             return
         mime = event.mimeData()
         if mime is not None and mime.hasFormat(PART_MIME):
-            self._drag_part = mime.data(PART_MIME).data().decode("utf-8")
-            self._colour_ports_for(self._drag_part)
+            part_name = mime.data(PART_MIME).data().decode("utf-8")
+            self._drag_part = part_name
+            self._colour_ports_for(part_name)
             event.acceptProposedAction()
         else:
             event.ignore()

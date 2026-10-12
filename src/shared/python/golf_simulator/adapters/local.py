@@ -7,6 +7,7 @@ Distinctly separates numerical trajectory simulation from submission receipt aud
 from __future__ import annotations
 
 import datetime
+import asyncio
 import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
@@ -146,7 +147,9 @@ class LocalReferenceAdapter:
         launch = shot_envelope_to_launch_conditions(shot)
 
         # Simulate trajectory using the underlying flight simulator
-        points = self._flight_simulator.simulate_trajectory(launch)
+        points = await asyncio.to_thread(
+            self._flight_simulator.simulate_trajectory, launch
+        )
 
         provenance = (
             f"local_reference:{type(self._flight_simulator).__name__}:"

@@ -1,0 +1,570 @@
+{
+  "schema": "necromatcher/lower-knot-v13-independent-assessment/1",
+  "producer": "dafab40c107dbcd22d1c3a91bfcc79b102076f65",
+  "input_receipt_sha256": "sha256:58fe974b4907b421d2d87c471e8aacd21061df8d5f7398b4e7c72809562ef48f",
+  "frozen_driver_sha256": "sha256:bed8a23d6ec6607806d6dd68f3df7cf3da5158250f07922d9127a5edf7fedb0c",
+  "audit_script_sha256": "sha256:cc03de2d23ce9430d04a5c7100ee71e36fa4c1e31d10c3a600185d5dcc8b89a5",
+  "all_four_verified": true,
+  "optimization_performed": false,
+  "scientific_acceptance": false,
+  "continuous_certified": false,
+  "physical_time_qualified": false,
+  "source_runtime_parent_artifact_evidence_brackets_verified": true,
+  "initial_RMS_tolerance_pixels": 1e-8,
+  "matched_protocol": {
+    "geometry_time_union_count": 78,
+    "global_interior_count": 55,
+    "same_geometry_times_pins_rows_weights_and_potential_mass": true,
+    "time_match_absolute_tolerance": 1e-12,
+    "added_image_observations": 0,
+    "initial_training_RMS": [25.73777367470785, 40.4433738383923],
+    "initial_dense_RMS": [29.92276537034258, 43.00478375420236],
+    "different_authored_starting_curves_explicit": true,
+    "exact_restart_of_V12": false
+  },
+  "matched_comparison": {
+    "continuous_certified": false,
+    "control_fit_id": "tiger-lower-knot-control-fit-v13",
+    "exact_restart_of_V12": false,
+    "factor": "authored12-vs6-knot representation plus declared resampled starting curves",
+    "geometry_probe_times_and_per_row_mass_matched": true,
+    "scientific_acceptance": false,
+    "variant_fit_id": "tiger-lower-knot-variant-fit-v13",
+    "variant_minus_control": {
+      "dense_original_rms_pixels": -11.383674729140125,
+      "maximum_sampled_grip_gap_m": 0.007775280805795955,
+      "maximum_sampled_grip_rotation_rad": 0.02785728565579237,
+      "maximum_sampled_ground_penetration_m": 0.0006451569261955725
+    }
+  },
+  "full_independent_assessment": {
+    "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment.json",
+    "sha256": "sha256:e4e82f4a09b3e2d75f7894562efbfd15cd7f4dc5a364540da0fdc76495b78de9"
+  },
+  "runs": [
+    {
+      "role": "control",
+      "stage": "author",
+      "fit_id": "tiger-lower-knot-control-seed-v13",
+      "fit_sha256": "sha256:fa253f9ab571de411e2af88da9b07b9afd9f809ed7de334adfa9cd30e95da29b",
+      "metrics": {
+        "fit_id": "tiger-lower-knot-control-seed-v13",
+        "fit_hash": "sha256:fa253f9ab571de411e2af88da9b07b9afd9f809ed7de334adfa9cd30e95da29b",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 25.73777367470785,
+        "dense_original_rms_pixels": 29.92276537034258,
+        "maximum_sampled_grip_gap_m": 0.17956899443662327,
+        "maximum_sampled_grip_rotation_rad": 0.3503312773120865,
+        "maximum_sampled_ground_penetration_m": 0.00687856016069981,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": false,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false
+      },
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-control-seed-v13-audit.json",
+        "sha256": "sha256:3844172c72f3d279e4e8f45e047a76818b400197fc8d042325b5f8e103c61d44"
+      },
+      "source_and_probe_identities": {
+        "counts": {
+          "source_frame": 210,
+          "adjacent_source_midpoint": 209,
+          "coordinate_global_extremum": 88,
+          "contact_phase_boundary": 4,
+          "contact_phase_neighbor": 6
+        },
+        "source_png_and_exact_pts_metadata_verified": true,
+        "midpoint_rational_identities_verified": true,
+        "physical_time_qualified": false
+      },
+      "nodes": {
+        "time_count": 78,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 936,
+        "nonzero_ground_residual_row_count": 68,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 1958882.9431555597,
+          "grip_rotation": 93317.12507360964,
+          "ground": 348005.8841304695
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 1000,
+          "position_scale_m": 0.01,
+          "rotation_weight": 1000,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 1000,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 2340000000.0,
+          "grip_rotation_rad_inverse_squared": 23399999.999999996,
+          "ground_m_inverse_squared": 4680000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.17931110171189027,
+          "source_time": 19.769750000000002
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.3264417252360776,
+          "source_time": 18.375023333333335
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 0.0068904292015187114,
+          "source_time": 17.994643333333332
+        }
+      },
+      "fresh_strict_restart": null,
+      "targets": {
+        "checks": {
+          "dense_rms_nonregression": true,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": false,
+          "sampled_grip_angle": false,
+          "sampled_nonpenetration": false
+        },
+        "research_targets_met": false,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "driver_job_elapsed_wall_s": 6.066362799989292,
+      "optimizer_ran": false,
+      "optimizer_converged": false,
+      "optimizer_message": "Authored feasible initialization; optimizer not run",
+      "initialization_receipts_preserved": true,
+      "full_bound_certificate_preserved_in_external_audit": true
+    },
+    {
+      "role": "control",
+      "stage": "fit",
+      "fit_id": "tiger-lower-knot-control-fit-v13",
+      "fit_sha256": "sha256:971bfd2a248d020542bb68134c79863aab04511a8a67574a528a225131854f3e",
+      "metrics": {
+        "fit_id": "tiger-lower-knot-control-fit-v13",
+        "fit_hash": "sha256:971bfd2a248d020542bb68134c79863aab04511a8a67574a528a225131854f3e",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 16.130001468509068,
+        "dense_original_rms_pixels": 40.16522324232515,
+        "maximum_sampled_grip_gap_m": 0.004380122510509973,
+        "maximum_sampled_grip_rotation_rad": 0.02595437185128541,
+        "maximum_sampled_ground_penetration_m": 0.0030913025827884605,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false
+      },
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-control-fit-v13-audit.json",
+        "sha256": "sha256:99eb2419763c37807eb854ec8d7492c5011030c97a19a70cee969c01054e130c"
+      },
+      "source_and_probe_identities": {
+        "counts": {
+          "source_frame": 210,
+          "adjacent_source_midpoint": 209,
+          "coordinate_global_extremum": 88,
+          "contact_phase_boundary": 4,
+          "contact_phase_neighbor": 6
+        },
+        "source_png_and_exact_pts_metadata_verified": true,
+        "midpoint_rational_identities_verified": true,
+        "physical_time_qualified": false
+      },
+      "nodes": {
+        "time_count": 78,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 936,
+        "nonzero_ground_residual_row_count": 71,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 1242.1343887041878,
+          "grip_rotation": 558.8626472579831,
+          "ground": 258.99246377196
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 1000,
+          "position_scale_m": 0.01,
+          "rotation_weight": 1000,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 1000,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 2340000000.0,
+          "grip_rotation_rad_inverse_squared": 23399999.999999996,
+          "ground_m_inverse_squared": 4680000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.004133012527528582,
+          "source_time": 19.51616333333333
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.025996648983591865,
+          "source_time": 18.121436666666668
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 0.0022510516449985515,
+          "source_time": 18.375023333333335
+        }
+      },
+      "fresh_strict_restart": {
+        "initial_spline_six_fields_exact": true,
+        "initial_coefficient_sha256": "sha256:d8e1baf8710eaf13e4e82fee53422a58de2bfa5648a63e86cbd5ba3c7851ff5d",
+        "fresh_initial_rms_pixels": 25.73777367470785,
+        "training_rms_pixels": 16.130001468509068,
+        "held_out_rms_pixels": 42.08316275672916,
+        "training_frame_count": 22,
+        "dense_frame_count": 210,
+        "training_observed_point_count": 286,
+        "dense_observed_point_count": 2730,
+        "unknown_visibility_weight": 0.5,
+        "initializer_optimizer_ran": false,
+        "prior_pose": [
+          0.447621780996792, -0.16085205751381282, 0.890336116072585,
+          -0.14233948981912836, -0.2757229504538238, 0.10940563773248405,
+          0.30571233711547685, 0.7612406486770893, 0.035368376330160545,
+          -0.13161870227790426, 0.0, 0.0, 0.0, -0.5519770126872905,
+          0.950052042101435, -0.19584304626900237, -0.3236824826168416,
+          0.13182731595988517, -0.1528066169873507, 0.0, 0.0, 0.0,
+          0.3681380237629041, 0.9515016171107165, -0.31565382828459043,
+          -0.0126111115173689, -0.044939007241766415, 0.0, 0.0, 0.0,
+          -0.03736917412696918, 0.10182209526934911, 0.6940847283116183,
+          0.02669183765466029, 0.11634063511055588, 0.0, 0.0,
+          0.10657188104218557, 0.37803940191662716, 0.6745500661091312,
+          -0.17987060066316765, 0.19480139092796, 0.0, 0.0
+        ]
+      },
+      "targets": {
+        "checks": {
+          "dense_rms_nonregression": false,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": true,
+          "sampled_grip_angle": true,
+          "sampled_nonpenetration": false
+        },
+        "research_targets_met": false,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "driver_job_elapsed_wall_s": 34.63976869999897,
+      "optimizer_ran": true,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "initialization_receipts_preserved": true,
+      "full_bound_certificate_preserved_in_external_audit": true
+    },
+    {
+      "role": "variant",
+      "stage": "author",
+      "fit_id": "tiger-lower-knot-variant-seed-v13",
+      "fit_sha256": "sha256:f97a6f0754c984a85650d48ae80833c13c49c793cf0659c2d888b086ec19ac7d",
+      "metrics": {
+        "fit_id": "tiger-lower-knot-variant-seed-v13",
+        "fit_hash": "sha256:f97a6f0754c984a85650d48ae80833c13c49c793cf0659c2d888b086ec19ac7d",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 40.4433738383923,
+        "dense_original_rms_pixels": 43.00478375420236,
+        "maximum_sampled_grip_gap_m": 0.2968153508703211,
+        "maximum_sampled_grip_rotation_rad": 0.590678818384064,
+        "maximum_sampled_ground_penetration_m": 0.004639008766366436,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": false,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false
+      },
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-variant-seed-v13-audit.json",
+        "sha256": "sha256:116fe9561e0eb6d875cc4ec99e59ac93fc3c10ebd7cd5f3603015e017ceea7a9"
+      },
+      "source_and_probe_identities": {
+        "counts": {
+          "source_frame": 210,
+          "adjacent_source_midpoint": 209,
+          "coordinate_global_extremum": 88,
+          "contact_phase_boundary": 4,
+          "contact_phase_neighbor": 6
+        },
+        "source_png_and_exact_pts_metadata_verified": true,
+        "midpoint_rational_identities_verified": true,
+        "physical_time_qualified": false
+      },
+      "nodes": {
+        "time_count": 78,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 936,
+        "nonzero_ground_residual_row_count": 68,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 11954524.158940852,
+          "grip_rotation": 449762.8388555426,
+          "ground": 1587975.9616490456
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 1000,
+          "position_scale_m": 0.01,
+          "rotation_weight": 1000,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 1000,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 2340000000.0,
+          "grip_rotation_rad_inverse_squared": 23399999.999999996,
+          "ground_m_inverse_squared": 4680000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.29535160577467706,
+          "source_time": 19.896543333333334
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.5866413412128926,
+          "source_time": 18.501816666666667
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 0.0046371632240367056,
+          "source_time": 17.10709
+        }
+      },
+      "fresh_strict_restart": null,
+      "targets": {
+        "checks": {
+          "dense_rms_nonregression": false,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": false,
+          "sampled_grip_angle": false,
+          "sampled_nonpenetration": false
+        },
+        "research_targets_met": false,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "driver_job_elapsed_wall_s": 5.6257505000103265,
+      "optimizer_ran": false,
+      "optimizer_converged": false,
+      "optimizer_message": "Authored feasible initialization; optimizer not run",
+      "initialization_receipts_preserved": true,
+      "full_bound_certificate_preserved_in_external_audit": true
+    },
+    {
+      "role": "variant",
+      "stage": "fit",
+      "fit_id": "tiger-lower-knot-variant-fit-v13",
+      "fit_sha256": "sha256:9128ec06b7aafd5cdf0b0762289f48a17c734a2dd91a754ab9ad4ae4535185dd",
+      "metrics": {
+        "fit_id": "tiger-lower-knot-variant-fit-v13",
+        "fit_hash": "sha256:9128ec06b7aafd5cdf0b0762289f48a17c734a2dd91a754ab9ad4ae4535185dd",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 25.7477897850097,
+        "dense_original_rms_pixels": 28.781548513185022,
+        "maximum_sampled_grip_gap_m": 0.012155403316305928,
+        "maximum_sampled_grip_rotation_rad": 0.05381165750707778,
+        "maximum_sampled_ground_penetration_m": 0.003736459508984033,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false
+      },
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-variant-fit-v13-audit.json",
+        "sha256": "sha256:1587efb2b62f5e1aae612afdbb0e3d0935bf149f0bea5c080121e4afb77f4cb0"
+      },
+      "source_and_probe_identities": {
+        "counts": {
+          "source_frame": 210,
+          "adjacent_source_midpoint": 209,
+          "coordinate_global_extremum": 88,
+          "contact_phase_boundary": 4,
+          "contact_phase_neighbor": 6
+        },
+        "source_png_and_exact_pts_metadata_verified": true,
+        "midpoint_rational_identities_verified": true,
+        "physical_time_qualified": false
+      },
+      "nodes": {
+        "time_count": 78,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 936,
+        "nonzero_ground_residual_row_count": 68,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 16128.982914691924,
+          "grip_rotation": 4597.1163448430725,
+          "ground": 4013.837462582282
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 1000,
+          "position_scale_m": 0.01,
+          "rotation_weight": 1000,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 1000,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 2340000000.0,
+          "grip_rotation_rad_inverse_squared": 23399999.999999996,
+          "ground_m_inverse_squared": 4680000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.012158189041133553,
+          "source_time": 19.262576666666664
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.05351963039671698,
+          "source_time": 19.642956666666667
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 0.003743274074766746,
+          "source_time": 18.24823
+        }
+      },
+      "fresh_strict_restart": {
+        "initial_spline_six_fields_exact": true,
+        "initial_coefficient_sha256": "sha256:9a860aa1801afecd88ba9b9d0465f1519d92edd5da7aa19a7cd1b51f93d37444",
+        "fresh_initial_rms_pixels": 40.4433738383923,
+        "training_rms_pixels": 25.7477897850097,
+        "held_out_rms_pixels": 29.11467077934566,
+        "training_frame_count": 22,
+        "dense_frame_count": 210,
+        "training_observed_point_count": 286,
+        "dense_observed_point_count": 2730,
+        "unknown_visibility_weight": 0.5,
+        "initializer_optimizer_ran": false,
+        "prior_pose": [
+          0.447621780996792, -0.16085205751381282, 0.890336116072585,
+          -0.14233948981912836, -0.2757229504538238, 0.10940563773248405,
+          0.30571233711547685, 0.7612406486770893, 0.035368376330160545,
+          -0.13161870227790426, 0.0, 0.0, 0.0, -0.5519770126872905,
+          0.950052042101435, -0.19584304626900237, -0.3236824826168416,
+          0.13182731595988517, -0.1528066169873507, 0.0, 0.0, 0.0,
+          0.3681380237629041, 0.9515016171107165, -0.31565382828459043,
+          -0.0126111115173689, -0.044939007241766415, 0.0, 0.0, 0.0,
+          -0.03736917412696918, 0.10182209526934911, 0.6940847283116183,
+          0.02669183765466029, 0.11634063511055588, 0.0, 0.0,
+          0.10657188104218557, 0.37803940191662716, 0.6745500661091312,
+          -0.17987060066316765, 0.19480139092796, 0.0, 0.0
+        ]
+      },
+      "targets": {
+        "checks": {
+          "dense_rms_nonregression": true,
+          "all_32_authored_finite_ranges": true,
+          "sampled_grip_gap": false,
+          "sampled_grip_angle": true,
+          "sampled_nonpenetration": false
+        },
+        "research_targets_met": false,
+        "scientific_acceptance": false,
+        "continuous_certified": false,
+        "physical_time_qualified": false
+      },
+      "driver_job_elapsed_wall_s": 27.13205659997766,
+      "optimizer_ran": true,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "initialization_receipts_preserved": true,
+      "full_bound_certificate_preserved_in_external_audit": true
+    }
+  ]
+}
