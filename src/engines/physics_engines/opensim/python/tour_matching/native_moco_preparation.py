@@ -39,7 +39,11 @@ from .native_reference_conventions import (
 from .registration import CaptureRegistration, register_points
 from .native_prepared_state import DeclaredColdStart, reconstruct_declared_cold_start
 from .native_mixed_actuation import MixedActuationProfile
-from .native_body_inertia import NativeBodyInertiaAudit, audit_native_body_inertia
+from .native_body_inertia import (
+    NativeBodyInertiaAudit,
+    audit_native_body_inertia,
+    serialize_native_body_inertia_audit as _physical_audit_bytes,
+)
 from .native_diagnostic_contract import (
     DiagnosticCode,
     NativeDiagnosticAssessment,
@@ -595,22 +599,6 @@ def _load_observation_capture(
         return capture, clock_sha, blockers
     except (OSError, ValueError):
         return None, None, ["capture-trc-invalid"]
-
-
-def _physical_audit_bytes(audit: NativeBodyInertiaAudit) -> bytes:
-    """Serialize the exact native audit for preparation and later re-admission."""
-    return (
-        json.dumps(
-            {
-                "schema_version": "native-body-inertia-preflight/1.0.0",
-                "qualified": audit.admitted,
-                "audit": asdict(audit),
-            },
-            indent=2,
-            allow_nan=False,
-        )
-        + "\n"
-    ).encode()
 
 
 def _physical_body_preflight(

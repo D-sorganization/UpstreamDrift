@@ -6,6 +6,8 @@ from dataclasses import dataclass
 import hashlib
 from pathlib import Path
 from typing import Protocol, cast
+from dataclasses import asdict
+import json
 
 from defusedxml import ElementTree
 import numpy as np
@@ -189,3 +191,19 @@ def audit_native_body_inertia(
         native_actuators_sha256=_sha(Path(osim._actuators.__file__)),
         bodies=tuple(findings),
     )
+
+
+def serialize_native_body_inertia_audit(audit: NativeBodyInertiaAudit) -> bytes:
+    """Serialize the exact native audit for preparation and later re-admission."""
+    return (
+        json.dumps(
+            {
+                "schema_version": "native-body-inertia-preflight/1.0.0",
+                "qualified": audit.admitted,
+                "audit": asdict(audit),
+            },
+            indent=2,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode()

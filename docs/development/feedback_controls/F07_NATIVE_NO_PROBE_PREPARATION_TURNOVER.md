@@ -34,3 +34,15 @@ Both context commands passed. No SDK or native execution was performed.
 ## Current State
 
 Branch: `feat/native-no-probe-12353-20261012`. Changes are awaiting root review. The design-manual calculation inventory remains empty because this adds no new calculation. Canonical contract documentation is in chapter 56.
+
+## Integrated Maintenance Validation (2026-10-12)
+
+The combined source keeps the exact body-inertia audit serializer in
+`native_body_inertia.py` and retains `_physical_audit_bytes` as a preparation
+module alias. This keeps the combined preparation module under the 1,200-line
+file budget without changing audit bytes or digest semantics. The combined
+focused selection passed 35 tests and skipped 10 OpenSim-dependent tests in
+the SDK-free QA environment. Ruff check/format, architecture and file-size
+budgets passed. Agent-context render/check passed after adding the receipt,
+inertia adapter, and probe-mode test to the registered component. No SDK or
+native execution was performed.

@@ -10,6 +10,8 @@ from types import SimpleNamespace
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.engines.physics_engines.opensim.python.tour_matching import (
     native_moco_preparation,
 )
@@ -123,6 +125,43 @@ def test_skip_probe_report_and_gate_are_explicit(tmp_path: Path, monkeypatch) ->
         for finding in assessment["findings"]
     )
     assert report.ready_for_software_solve is False
+
+
+@pytest.mark.parametrize("run_capability_probe", [True, False])
+def test_public_runner_forwards_probe_setting(
+    run_capability_probe: bool, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching import (
+        native_moco_runner,
+    )
+
+    seen: list[tuple[bool, object, object]] = []
+    sentinel = object()
+
+    def prepare(
+        request: object,
+        output_dir: Path,
+        *,
+        wrapped_path_auditor: object,
+        probe_callable: object,
+        run_capability_probe: bool = True,
+    ) -> object:
+        seen.append((run_capability_probe, wrapped_path_auditor, probe_callable))
+        return sentinel
+
+    monkeypatch.setattr(
+        native_moco_runner._native_moco_preparation, "prepare_native_moco", prepare
+    )
+    result = native_moco_runner.prepare_native_moco(
+        object(), tmp_path / "output", run_capability_probe=run_capability_probe
+    )
+
+    assert result is sentinel
+    assert len(seen) == 1
+    forwarded, wrapped_auditor, probe_callable = seen[0]
+    assert forwarded is run_capability_probe
+    assert callable(wrapped_auditor)
+    assert callable(probe_callable)
 
 
 @pytest.mark.parametrize("invalid_value", ["false", None, 0])
