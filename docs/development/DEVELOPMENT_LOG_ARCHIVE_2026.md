@@ -1,5 +1,1148 @@
 # Development Log Archive — 2026
 
+### DL-#9700 · Deferred External Validation Plans
+
+- **State:** shipped
+- **Owner:** codex (session `codex-validation-planning-20260922-ud`)
+- **Issue:** #9700; #10375; #10382; #9619; #9613; #9546
+- **Branch:** `docs/deferred-validation-planning`
+- **PR:** #10741 (merged 2026-09-22; SHA 60e63ae114e1841fed9ece43bf1dd42895e94fcd)
+- **Paths:** `docs/development/planning/`, `docs/development/HANDOFF.md`, `AGENT_HANDOFF.md`
+- **Started:** 2026-09-22
+- **Shipped:** 2026-09-22
+- **Last verified:** 2026-10-11 (e68baeabde8ff639f846a167ca7703ace43bd0a9; source/path inspection only, no tests or experiments rerun)
+- **Summary:** Delivered six external-validation planning documents only: DV-10375, DV-10382, DV-9619, DV-9613, DV-9546 and DV-9700. Current source retains the six deferred plan records; no experiments, approvals, provider changes or scientific results are claimed.
+- **Next step:** Keep parent epic #9700 open. Evidence and approval for execution scopes #10375, #10382, #9619, #9613 and #9546 remain catalog-deferred; #9546 was historically closed via #10446, and that GitHub closure does not establish acceptance. Do not reopen #9546 or treat planning documents as execution results.
+
+### DL-#9349 · ADR-0046 G2 Workbench Re-Point Closure
+
+- **State:** shipped
+- **Owner:** not recorded in source
+- **Issue:** #9349 (ADR-0046 Stage 2; module retirement landed under #9348)
+- **Branch:** conductor/issue-9349
+- **PR:** #10178
+- **Paths:** src/config/launcher_manifest.json, src/config/models.yaml, tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py, docs/adr/0046-launch-monitor-analytics-single-model-layer.md, ui/public/capability-atlas, docs/architecture/CAPABILITY_ATLAS.md
+- **Started:** 2026-09-14
+- **Shipped:** 2026-09-23
+- **Last verified:** 2026-09-14 (SELF; new manifest test 4 pass; test_canonical_layer_parity.py and tests/ui/tools/launch_monitor pass against the vendored canonical layer at pin e83bd2e4; capability atlas regenerated)
+- **Summary:** Closes the last Stage 2 deliverable this repository owns: both launch-monitor tiles (UD workbench and Rate of Closure Impact Explorer) now state the "same analytics engine" relationship in models.yaml (desktop launcher) and launcher_manifest.json (web launcher), pinned by a test; ADR-0046 follow-ups record G2 as landed. No workbench code changed — both UIs keep their identity.
+- **Next step:** No additional #9349 software delivery remains. This record does not claim workbench behavior or physical qualification beyond the documented manifest/test change.
+- **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
+
+### DL-#10799 · Fail-Closed Qualification for Unsigned Legacy Evidence & Dynamic Inertia Digest (#10799, #10800)
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10799, #10800
+- **Branch:** `fix/10799-10800-qualification-integrity`
+- **Paths:** `src/shared/python/tour_baselines/qualification.py`; `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`; `tests/unit/tour_baselines/test_qualification.py`; `SPEC.md`
+- **Started:** 2026-09-24
+- **Shipped:** 2026-09-24
+- **Last verified:** 2026-10-11 (`6ad8b987`; collated from verified merged PR metadata)
+- **Summary:** Remediated bot review feedback on PR #10798:
+  1. Kept qualification strictly fail-closed for unsigned legacy evidence (#10799): removed silent auto-migration from `IndependentBaselineQualifier.qualify()`, ensuring packages without recorded controls, time, or identity hashes are rejected at the integrity gate with `IntegrityViolation`. Explicit `migrate_legacy_package` compatibility operations leave package status as `UNVERIFIED` with `has_native_replay=False` rather than silently passing qualification.
+  2. Built `fixed_inertia_hash` from actual dynamics parameters (#10800): introduced `compute_pendulum_inertia_hash` in pendulum qualification to digest segment masses, center-of-mass ratios, and rotational inertias from the actual `DoublePendulumDynamics` rollout parameters, ensuring changes to dynamics physics invalidate the inertia digest even when link lengths remain identical.
+- **Next step:** PR #10841 merged 2026-09-24 (6ad8b9877f1c6280f7d424c5b890ab576eb8a4ad), closing #10799 and #10800. This ships the software integrity change only; downstream qualification remains unmet.
+- **PR:** #10841
+
+### DL-#10943 · Reconciled Scopes From Duplicate Source Rows
+
+- **State:** shipped
+- **Owner:** antigravity (PR #10968; branch `agy/issue-10943`) | antigravity (PR not created; branch `agy/issue-10943`)
+- **Issue:** #10943
+- **PR:** #10968
+- **Branch:** `agy/issue-10943`
+- **Paths:** `knowledge/pack.yml`, `knowledge/wizard.yml`, `sidekick.spec`, `scripts/packaging/build_sidekick_binary.py`, `scripts/ci/lod_baseline.txt`, `.github/workflows/wizard-pack.yml`, `.github/WORKFLOWS.md`, `tests/unit/ai/test_drift_wizard.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`; `knowledge/wizard.yml`, `knowledge/pack.yml`, `tests/unit/ai/test_drift_wizard.py`, `.github/workflows/wizard-pack.yml`, `.github/WORKFLOWS.md`, `sidekick.spec`
+- **Started:** 2026-09-25
+- **Summary:** [antigravity (PR #10968; branch `agy/issue-10943`)] Define source catalog knowledge/pack.yml and wizard configuration knowledge/wizard.yml for UpstreamDrift product documentation and reference. Wire Sidekick packaging to compile and bundle the SQLite knowledge pack. Add wizard-pack CI workflow and test suite. Baseline child-copy LOD finding to preserve child-copy contract. [antigravity (PR not created; branch `agy/issue-10943`)] Author product knowledge pack definition and CI packaging for Drift Wizard in Sidekick chat.
+- **Next step:** Shipped knowledge-pack and wizard-pack CI delivery via PR #10968 on 2026-09-26 (merge SHA 28b37bd47eb85d977e530e60659c6f54ca0a1a2b). The PR-to-issue association is manually reconciled, not a direct closedBy link: exact PR title/timing, changed-file scope, and current-main ancestry match the canonical delivery. The contradictory duplicate-row claim that the wizard files still needed authoring is preserved in the source snapshot; current merged files resolve it. The baseline child-copy contract remains documented in the shipped scope.
+- **Last verified:** 2026-10-11 (`28b37bd4`; collated from manual reconciliation of merged PR #10968 metadata; association is not direct issue-closure evidence)
+- **Shipped:** 2026-09-26
+
+### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #8766
+- **Branch:** fix/8766-burndown-launcher-67
+- **PR:** #10035, #8997
+- **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md, tests/launchers/test_golf_launcher.py, docs/agent_context/
+- **Started:** 2026-09-12
+- **Last verified:** 2026-10-11 (`fe411260`; collated from verified GitHub merge metadata (PR #8997, 2026-08-23))
+- **Shipped:** 2026-08-23
+- **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), 29 shared Python / physics tests (#10015), 16 AI adapter / launcher tests (#10026), 20 safe launcher / pipeline / model sources tests (#10031), 13 CORS tests (#10033), and 32 security and module docstring tests (#10034). This tranche burns down 67 quarantined tests across tests/launchers/test_golf_launcher.py (25), tests/launchers/test_launcher_ui_setup.py (21), tests/launchers/test_launcher_process_manager.py (17), and tests/launchers/test_library_widget.py (4), ratcheting debt down from 298 to 231.
+- **Next step:** Shipped via PR #8997 on 2026-08-23 (merge SHA fe411260cab577dd197b54ad3eab4d9d9ffa4213).
+
+### DL-#10334 · Versioned Matched Swing Candidate (MS-15)
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #10334 (MS-15, epic #10363)
+- **Branch:** feat/10334-matched-swing-candidate
+- **PR:** #10668, #10475
+- **Paths:** src/shared/python/motion_matching/candidate.py; src/shared/python/motion_matching/candidate_io.py; src/shared/python/motion_matching/candidate_convert.py; src/tools/tour_matching_viewer/core.py; src/shared/python/motion_matching/cross_engine_replay.py; docs/development/full_body_models/CANDIDATES.md; tests/unit/motion_matching/test_candidate.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`8d452e09`; collated from verified GitHub merge metadata (PR #10475, 2026-09-19))
+- **Shipped:** 2026-09-19
+- **Summary:** Implemented unified MatchedSwingCandidate versioned package (matched-swing-candidate-v1) supporting distinct kinematic and dynamic profiles, full-body generalized coordinates and tangent velocities (nq != nv), virtual work power consistency verification, immutable arrays, and SHA-256 array tamper detection. Implemented converters for legacy returned81 replays and OpenSim MOT files, updated viewer loader, and authored complete CANDIDATES.md schema document.
+- **Next step:** Shipped via PR #10475 on 2026-09-19 (merge SHA 8d452e09f8443b540c0de8fe9cd324f99e76381c).
+- **Evidence:** docs/development/full_body_models/CANDIDATES.md; tests/unit/motion_matching/test_candidate.py; docs/development/full_body_models/evidence/replays/mujoco_returned81_candidate.npz; docs/development/full_body_models/evidence/viewer/opensim_os3b_candidate.npz.
+
+### DL-#10323 · Matched-Swing Run Ledger
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10323 (epic #10363 MS-02)
+- **Branch:** feat/ms02-matched-swing-run-ledger-10323
+- **PR:** open, #10387
+- **Paths:** src/shared/python/motion_matching/ledger.py; src/shared/python/motion_matching/ledger_schema.py; src/shared/python/motion_matching/**main**.py; src/shared/python/motion_matching/leaderboard.py; src/tools/motion_matching/pipeline.py; reports/matched_swing_ledger.json; tests/unit/motion_matching/test_ledger.py
+- **Started:** 2026-09-17
+- **Last verified:** 2026-10-11 (`94d593cf`; collated from verified GitHub merge metadata (PR #10387, 2026-09-17))
+- **Shipped:** 2026-09-17
+- **Summary:** Added matched-swing run ledger discovering, classifying, and indexing execution receipts across ground-support, native Simscape, OpenSim, calibration, and parity evidence trees. Deterministic serialization into reports/matched_swing_ledger.json, CLI subcommand `ledger --write`, and `list_runs()` API for tools.
+- **Next step:** Shipped via PR #10387 on 2026-09-17 (merge SHA 94d593cf119ffeceaad7658ef0502c9c22e6ea89).
+- **Evidence:** reports/matched_swing_ledger.json; tests/unit/motion_matching/test_ledger.py
+
+### DL-#10395 · OpenSim Anatomical Baseline Freeze and Qualification Fixtures
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10395 (epic #10394 / #10363, OG-01)
+- **Branch:** feat/og01-freeze-anatomical-baseline-10395
+- **PR:** #10404
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/model_audit.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; src/engines/physics_engines/opensim/python/tour_matching/cli.py; tests/opensim/test_anatomical_baseline_fixtures.py; tests/opensim/test_opensim_os0_qualification.py
+- **Started:** 2026-09-18
+- **Last verified:** 2026-10-11 (`1d302ba8`; collated from verified GitHub merge metadata (PR #10404, 2026-09-18))
+- **Shipped:** 2026-09-18
+- **Summary:** Delivered pure-Python OpenSim model geometry and structural qualification audit under OG-01. Verifies SHA-256 digests against pinned baseline models, audits body/coordinate/actuator counts (23/39/39/0), detects empty attached_geometry on equipment bodies (Club body) and unscaled arm meshes (scale factors 1 1 1 on humerus). Implements fail-closed `verify_model_qualification` gate with DbC assertions and structured receipts via `cli.py qualify`.
+- **Next step:** Shipped via PR #10404 on 2026-09-18 (merge SHA 1d302ba81e5f63dbc88112e2e80c088f09adcdfc).
+- **Evidence:** tests/opensim/test_anatomical_baseline_fixtures.py; tests/opensim/test_opensim_os0_qualification.py; docs/development/opensim_tour_matching/evidence/anatomical_review_20260918/inspection.json.
+
+### DL-#10397 · OpenSim Visible Parameterized Golf Club and Grip Frames
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10397 (epic #10394 / #10363, OG-03)
+- **Branch:** feat/og03-visible-golf-club-10397
+- **PR:** #10405, #10414
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/club_geometry.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_club_geometry.py; SPEC.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-10-11 (`9091b3de`; collated from verified GitHub merge metadata (PR #10414, 2026-09-18))
+- **Shipped:** 2026-09-18
+- **Summary:** Added parameterized visual geometry attachment (`attach_visual_club`) and frame calculation (`get_club_frame_offsets`) for the OpenSim Club body according to shared ClubSpec (Driver and 7-iron). Solves the missing visual club defect while strictly preserving physical mass properties (0.320 kg, COM, inertia). Fully verified against anatomical baseline fixtures and qualification gates.
+- **Next step:** Shipped via PR #10414 on 2026-09-18 (merge SHA 9091b3deebd90df90f400e089c32bd29d2100016).
+- **Evidence:** tests/opensim/test_golf_club_geometry.py; tests/opensim/test_anatomical_baseline_fixtures.py.
+
+### DL-#10401 · OpenSim Introduce Versioned Model Variants and Actuation Capabilities
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10401 (epic #10394 / #10363, OG-07)
+- **Branch:** feat/og07-versioned-model-variants-10401
+- **PR:** #10412, #10414
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/model_variants.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_model_variants.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-10-11 (`9091b3de`; collated from verified GitHub merge metadata (PR #10414, 2026-09-18))
+- **Shipped:** 2026-09-18
+- **Summary:** Implemented versioned OpenSim model variants and explicit actuation capabilities (`model_variants.py`) via composition: AnatomicalSkeletonSpec + GolfEquipmentSpec + Calibration + ActuationProfile (torque vs. muscle/tendon). Provides typed error boundaries and a clean adapter API without SDK leakage.
+- **Next step:** Shipped via PR #10414 on 2026-09-18 (merge SHA 9091b3deebd90df90f400e089c32bd29d2100016).
+- **Evidence:** tests/opensim/test_golf_model_variants.py; src/engines/physics_engines/opensim/python/tour_matching/model_variants.py.
+
+### DL-#10403 · OpenSim Package a Golf-Like Native Viewer and Release Evidence
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10403 (epic #10394 / #10363, OG-09)
+- **Branch:** feat/og09-golf-native-viewer-package-10403
+- **PR:** #10668, #10414
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/view_package.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_view_package.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-10-11 (`9091b3de`; collated from verified GitHub merge metadata (PR #10414, 2026-09-18))
+- **Shipped:** 2026-09-18
+- **Summary:** Packaged native viewer artifacts and release evidence (`view_package.py`) for the OpenSim golf humanoid. Provides visual layer options, truth-in-advertising muscle toggles, swing milestone stills, reproducible video animation export, reset-to-address with grip closure verification, continuous scrubbing, launcher entry generation, and deterministic package hashing. Completes all 9 child issues of OpenSim epic #10394.
+- **Next step:** Shipped via PR #10414 on 2026-09-18 (merge SHA 9091b3deebd90df90f400e089c32bd29d2100016). Preserved limitation: Viewer completion does not establish muscle qualification.
+- **Evidence:** tests/opensim/test_golf_view_package.py; src/engines/physics_engines/opensim/python/tour_matching/view_package.py.
+
+### DL-#10233 · Shadow Tracker Revision Integrity and Persistence
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #10233 (ST-04 / epic #10122)
+- **Branch:** fix/shadow-tracker-10233-pr
+- **PR:** #10450 (https://github.com/D-sorganization/UpstreamDrift/pull/10450), #10283
+- **Paths:** src/shared/python/shadow_tracker/segmentation.py; tests/unit/shadow_tracker/test_revision_persistence.py; docs/plans/shadow_tracker/
+- **Started:** 2026-09-18
+- **Last verified:** 2026-10-11 (`dd243d39`; collated from verified GitHub merge metadata (PR #10283, 2026-09-17))
+- **Shipped:** 2026-09-17
+- **Summary:** Complete-record idempotence, same-observation parents, current selection and strict atomic provider snapshots with legacy reading. Renderer preserved.
+- **Next step:** Shipped via PR #10283 on 2026-09-17 (merge SHA dd243d392232003b15db389d54d962cffe6fad14).
+- **Evidence:** docs/plans/shadow_tracker/TURNOVER_CURRENT.md; tests/unit/shadow_tracker/test_revision_persistence.py.
+
+### DL-#10460 · Consume Shared GSPro Open Connect V1 Codec From Tools
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10460
+- **Branch:** feat/10460-consume-tools-gspro-codec
+- **PR:** #10668, #10463
+- **Paths:** src/shared/python/golf_simulator/adapters/gspro/codec.py; tests/unit/golf_simulator/test_gspro_codec.py; vendor/ud-tools; Cargo.toml; requirements-tools.txt; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-10-11 (`db31d1f3`; collated from verified GitHub merge metadata (PR #10463, 2026-09-19))
+- **Shipped:** 2026-09-19
+- **Summary:** Upgraded vendor/ud-tools pin to Tools commit a9ed0e7c5c6905b1164082659051d6381068052d carrying shared GSPro Open Connect v1 codec (Tools#5228). Refactored UpstreamDrift's gspro adapter codec to retain ShotEnvelope canonical SI/radian unit conversion and profile handling, but delegate wire payload encoding and response decoding to shared.python.launch_monitor.gspro_connect.
+- **Next step:** Shipped via PR #10463 on 2026-09-19 (merge SHA db31d1f364903c4bb0451b049f3e9e98a3246b1f).
+- **Evidence:** tests/unit/golf_simulator/test_gspro_codec.py.
+
+### DL-#10482 · Expose Real Forces, Torques, and Explicit Counterfactual Semantics
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10482 (MV-06, epic #10476)
+- **Branch:** feat/10482-forces-torques-counterfactual
+- **PR:** #10504, #10505
+- **Paths:** src/api/models/requests.py; src/api/routes/analysis.py; src/api/services/simulation_service.py; src/shared/python/motion_matching/candidate_session.py; src/shared/python/motion_matching/counterfactual.py; src/shared/python/motion_matching/force_torque.py; src/tools/tour_matching_viewer/force_inspection.py; src/tools/tour_matching_viewer/gui.py; tests/unit/api/test_candidate_session_analysis_routes.py; tests/unit/motion_matching/test_candidate_session_forces.py; tests/unit/motion_matching/test_counterfactual.py; tests/unit/motion_matching/test_force_torque.py; tests/unit/tools/test_tour_matching_viewer_forces.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`4cfdba7c`; collated from verified GitHub merge metadata (PR #10505, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `SpatialWrench` and rigid-body `transform_wrench` with rotational mapping and cross-product moment arm calculation ($\tau_B = R \tau_A + r \times (R F_A)$). Implemented `compute_center_of_pressure` with strict threshold semantics ($F_z \le 5.0$ N returns `None` rather than fabricated zeros). Implemented `AccelerationDecomposition` (gravity, drift, control, ZTCF, ZVCF) and `create_counterfactual_rollout` with cryptographic baseline immutability assertion (SHA-256 byte check before and after execution). Enhanced `CandidateSession` with `get_wrench_at`, `get_center_of_pressure`, `get_joint_torques_at`, `get_closure_residual_at`, and `create_counterfactual_fork`. Added API endpoints `GET /analysis/candidate/forces` and `POST /analysis/candidate/counterfactual` (failing closed with 409 Conflict when session is absent or kinematic-only). Integrated `ForceInspectionWidget` into Tour Matching Viewer GUI synchronized with physical playback time.
+- **Next step:** Shipped via PR #10505 on 2026-09-20 (merge SHA 4cfdba7ce448ee0d236c1d8082052c10f4f3ad07).
+- **Evidence:** tests/unit/motion_matching/test_force_torque.py; tests/unit/motion_matching/test_counterfactual.py; tests/unit/motion_matching/test_candidate_session_forces.py; tests/unit/api/test_candidate_session_analysis_routes.py; tests/unit/tools/test_tour_matching_viewer_forces.py.
+
+### DL-#10514 · Group Engine Dashboards, Exercise Variants, and Repository Shortcuts
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10514 (ORG-07, epic #10508)
+- **Branch:** feat/issue-10514-org07-model-variant-grouping
+- **PR:** #10541
+- **Paths:** src/config/models.yaml; src/launchers/exercise_dashboard.py; src/launchers/launcher_model_handlers.py; src/shared/python/config/**init**.py; src/shared/python/config/model_pack_manifest.py; src/shared/python/config/model_registry.py; src/shared/python/config/model_variant_grouping.py; tests/config/test_model_variant_grouping.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`3ef6f91c`; collated from verified GitHub merge metadata (PR #10541, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection` in `src/shared/python/config/model_variant_grouping.py` to project 28 exercise variants across 4 providers (`MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`) into 7 logical choices without dropping any provider assets underneath. Preserved strict DbC on engine selection (never silently substitutes another engine). Added name collision protection across distinct canonical identities. Implemented `resolve_shortcut` mapping `biomech_sit_to_stand` (never falls back to gait) and `biomech_gait` to `biomech_exercise`, engine dashboards (`drake_dashboard`, `mujoco_dashboard`, `pinocchio_dashboard`) to engine advanced modes, and `movement_optimizer` / `tools_movement_optimizer` to unified task with #9406 authority resolution. Updated `SharedRepoHandler` with `get_missing_checkout_diagnostic` to emit actionable diagnostics when sibling repos are missing. Dynamicized exercise names in `exercise_dashboard.py`.
+- **Next step:** Shipped via PR #10541 on 2026-09-20 (merge SHA 3ef6f91c33057fb1e6dd4817996e82bc834d8299).
+- **Evidence:** tests/config/test_model_variant_grouping.py; tests/config/test_tile_paths_resolve.py; tests/unit/config/test_model_pack_manifest.py; tests/launchers/test_launcher_model_handlers.py.
+
+### DL-#10517 · Unified Artifact and Project Context Handoff Between Workspaces
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10517 (ORG-08, epic #10508)
+- **Branch:** feat/issue-10517-org08-workspace-handoff
+- **PR:** #10542
+- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/artifact_handoff.py; src/shared/python/workspace/project_store.py; tests/unit/workspace/test_artifact_handoff.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`2a854627`; collated from verified GitHub merge metadata (PR #10542, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Extended SessionProjectStore and ProjectMetadata with typed, versioned artifact handoffs (WorkspaceHandoff, ArtifactReference, ArtifactKind, RunMetadata). Enforced Design-by-Contract boundary preconditions (cross-session subject mismatch rejection, frame and schema validation, artifact existence and cryptographic sha256 hash checks before disk write, canceled/failed job qualification invariant). Added migration handling preserving unknown supported fields in older project.json files, atomic durability under interrupted writes, active context selection, and non-destructive run cloning without falsified output evidence. Implemented registered named artifact adapter conversion preserving provenance.
+- **Next step:** Shipped via PR #10542 on 2026-09-20 (merge SHA 2a854627054fb272167d8de67504c4fe25ebf71f).
+- **Evidence:** tests/unit/workspace/test_artifact_handoff.py; tests/unit/workspace/test_project_store.py; tests/unit/workspace/test_results_browser.py.
+
+### DL-#10518 · Guided Workflow Transitions Across Unified Workspaces
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10518 (ORG-09, epic #10508)
+- **Branch:** feat/issue-10518-org09-workflow-transitions
+- **PR:** #10544
+- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/workflow_coordinator.py; tests/unit/workspace/test_workflow_transitions.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`39092e54`; collated from verified GitHub merge metadata (PR #10544, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented WorkflowCoordinator coordinating the 7-stage workflow pipeline (`Capture/Import -> Inspect Targets -> Configure Model -> Fit -> Dynamics -> Compare -> Export`) over typed ArtifactReference inputs and outputs. Evaluates live step readiness and diagnostics directly from cryptographic sha256 hashes and on-disk artifact existence rather than superficial flags. Added support for single-view coaching mode skipping 3-D dynamics when physics engines are unavailable, enforced contract distinction preventing dynamics from inheriting purely kinematic passes, tracked cancellation reasons and retry attempts, supported later-stage entry from imported artifacts, and exposed a pure state projection with to_dict() for Qt and React/Tauri parity.
+- **Next step:** Shipped via PR #10544 on 2026-09-20 (merge SHA 39092e54caccd83edc00e514cade2014f25c866c).
+- **Evidence:** tests/unit/workspace/test_workflow_transitions.py; tests/unit/workspace/test_artifact_handoff.py; tests/unit/workspace/test_project_store.py; tests/unit/workspace/test_results_browser.py.
+
+### DL-#10519 · Connect Capture Rig, Optical Import, Pose Inspection, and Model Calibration Workspaces
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10519 (ORG-10, epic #10508)
+- **Branch:** feat/issue-10519-org10-capture-inspection-handoff
+- **PR:** #10545
+- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/capture_inspection_handoff.py; src/tools/capture_rig/gui.py; src/tools/capture_rig/journey_actions.py; tests/integration/test_capture_target_handoff.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`15bce228`; collated from verified GitHub merge metadata (PR #10545, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `CaptureInspectionHandoff` and `FreeMoCapJobAdapter` bridging Capture Rig to Inspect Targets and Model Calibration. Enforced that trim, crop, and time offsets survive handoffs with explicit clock calculations; maintained MediaPipe and OpenPose as explicit estimator choices with separate observation sets, confidence scores, and source pixels; provided FreeMoCap CLI input/output validation before process spawn and cancellation leaving sources untouched with preserved HMR2/AGPL license isolation; opened C3D and optical imports keeping missing samples masked (NaN) and rejecting incompatible units and frames; rejected pretending 2-D coordinates are metric 3-D; and registered targets into `SessionProjectStore` automatically preserving annotations, calibration, and club metadata. Added "Open in Inspect Targets" action to Capture Rig GUI and JourneyActions.
+- **Next step:** Shipped via PR #10545 on 2026-09-20 (merge SHA 15bce2283fb6954b2b285585d370b0b7d03ed545).
+- **Evidence:** tests/integration/test_capture_target_handoff.py; tests/tools/capture_rig/test_workflow.py; tests/unit/workspace/test_workflow_transitions.py.
+
+### DL-#10520 · Move Tour Matching Execution Out of Documentation Without Changing Results
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10520 (ORG-11, epic #10508)
+- **Branch:** feat/issue-10520-org11-motion-matching-packaging
+- **PR:** #10546
+- **Paths:** src/shared/python/motion_matching/execution/**init**.py; src/shared/python/motion_matching/execution/assets.py; src/shared/python/motion_matching/execution/spec_builder.py; src/shared/python/motion_matching/execution/downswing.py; src/shared/python/motion_matching/execution/mjx_export.py; src/shared/python/motion_matching/execution/driver.py; src/tools/motion_matching/pipeline.py; docs/development/full_body_models/build_anthropometric_spec.py; docs/development/full_body_models/evidence/ground_support/run_ground_support.py; docs/development/full_body_models/evidence/ground_support/downswing_experiment.py; docs/development/full_body_models/evidence/ground_support/export_mjx_package.py; tests/integration/test_installed_motion_matching.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`2715f5c8`; collated from verified GitHub merge metadata (PR #10546, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Extracted reusable execution out of documentation into `src/shared/python/motion_matching/execution/` (`spec_builder.py`, `downswing.py`, `mjx_export.py`, `driver.py`, `assets.py`). Preserved algorithms, numerical precision, parameters, coordinate frames, and output schemas. Resolved reference assets through standard resource resolution functions (`get_native_geometry_spec`, `get_opensim_model`, `get_candidate_geometry_spec`, `get_capture_c3d`, `resolve_output_root`) with environment variable overrides and clear error explanations for unavailable assets. Kept legacy script paths in `docs/development/full_body_models/` as thin compatibility wrappers issuing `DeprecationWarning` while delegating to packaged entry points and preserving CLI schemas and exit codes. Updated `pipeline.py` command constants (`BUILDER`, `DRIVER_SCRIPT`, `DOWNSWING_SCRIPT`, `EXPORT_MJX_SCRIPT`) to point to packaged entry points and write outputs outside docs/package.
+- **Next step:** Shipped via PR #10546 on 2026-09-20 (merge SHA 2715f5c87834c8efec84795e149cc69525cee489).
+- **Evidence:** tests/integration/test_installed_motion_matching.py; tests/tools/motion_matching/test_pipeline.py; tests/tools/motion_matching/test_motion_matching_gui.py.
+
+### DL-#10529 · Consume Provider Ownership Decisions and Verify Runtime Import Authority
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10529 (ORG-20, epic #10508)
+- **Branch:** feat/issue-10529-org20-provider-ownership
+- **Paths:** src/shared/python/config/tools_vendor_authority.py; tests/integration/test_installed_provider_authority.py
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`57ed7523`; collated from verified GitHub merge metadata (PR #10572, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Consumed provider ownership decisions and implemented runtime import authority and provenance verification across repository, installed, and packaged execution environments. Added `assert_runtime_provenance_parity` failing closed upon root divergence between pytest and packaged app contexts. Added `verify_provider_provenance` asserting module paths resolve within canonical provider roots. Implemented `inspect_provider_authority` handling pinned gitlinks, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback. Verified public seams for Sidekick, Movement Optimizer (`tools_movement_optimizer` via `ALIAS_MAP`), Pendulum (`swing_objective_lab`), and backward compatibility import delegation (`upstream_drift_tools` -> `sidekick`).
+- **Next step:** Shipped via PR #10572 on 2026-09-20 (merge SHA 57ed7523df51627b2c66b9e89c502a97efe44d3b).
+- **Evidence:** tests/integration/test_installed_provider_authority.py.
+- **PR:** #10572
+
+### DL-#10358 · Web Matched-Swing Results API and Results Page
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10358 (MS-85, epic #10363)
+- **Branch:** fix/issue-10358-ms-85-local
+- **Paths:** src/api/routes/matched_swings.py; src/api/services/matched_swings_service.py; tests/api/test_matched_swings.py; ui/src/pages/MatchedSwings.tsx; ui/src/api/matchedSwings.ts; ui/src/App.tsx; src/config/launcher_manifest.json; src/api/route_registry.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-10-11 (`e60228fa`; collated from verified GitHub merge metadata (PR #10664, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Added local-only read-only `/api/matched-swings` routes (ledger, receipt, candidate NPZ/preview, parity, GIF) keyed by receipt SHA-256 without leaking absolute paths. Web Results page at `/tools/matched-swings` lists runs with verdict badges, GIF playback, and MocapSkeleton3D marker preview; mounted CrossEngineDashboard at `/tools/cross-engine` with launcher manifest web routes for both tiles.
+- **Next step:** Shipped via PR #10664 on 2026-09-21 (merge SHA e60228fadfda763f10c5f4e095172bbca8f777e8).
+- **Evidence:** tests/api/test_matched_swings.py; ui/src/pages/MatchedSwings.test.tsx.
+- **PR:** #10664
+
+### DL-#10353 · Results Browser Tile for Matched Swing Program
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #10353 (MS-80, epic #10363)
+- **Branch:** feat/10353-results-browser
+- **PR:** #10543
+- **Paths:** src/tools/matched_swing_browser/**init**.py; src/tools/matched_swing_browser/**main**.py; src/tools/matched_swing_browser/gui.py; src/tools/matched_swing_browser/model.py; src/tools/matched_swing_browser/\_embed_adapter.py; src/config/models.yaml; src/config/launcher_manifest.json; src/config/feature_parity.json; src/launchers/embedded_tool_bootstrap.py; pyproject.toml; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; tests/tools/matched_swing_browser/test_model.py; docs/development/matched_swing_program/evidence/browser/screenshot.png
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`a1c13ed0`; collated from verified GitHub merge metadata (PR #10543, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `matched_swing_browser` embeddable PyQt6 desktop tool and data model. Left pane provides filterable table over 98 ledger receipts (by engine, capture, lane, verdict, search text). Right pane displays receipt summary, acceptance badge, five standardized metrics with units, physical gates breakdown, and lazy-loaded animated QMovie playback for rows with visual GIF artifacts. Provides action buttons to launch Tour Matching Viewer, Native Viewer (MS-83), and parity reports. Reuses `ResultFilter` lineage resolving #8824 and establishing contract for #10521 (ORG-13). Registered across all 5 canonical surfaces (`models.yaml`, `launcher_manifest.json`, `pyproject.toml`, `embedded_tool_bootstrap.py`, `feature_parity.json`).
+- **Next step:** Shipped via PR #10543 on 2026-09-20 (merge SHA a1c13ed0d56fd622f138961477651310ea254b13).
+- **Evidence:** tests/tools/matched_swing_browser/test_model.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; docs/development/matched_swing_program/evidence/browser/screenshot.png.
+
+### DL-#10531 · Generate Accurate Atlas, Help, Parity, and Completion Records
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10531 (ORG-21, epic #10508)
+- **Branch:** `feat/issue-10531-org21-accurate-atlas-parity`
+- **PR:** #10576
+- **Paths:** `tests/scripts/test_workspace_documentation_freshness.py`, `src/config/industrial_readiness.json`, `docs/operations/industrial-readiness-index.md`, `src/tools/training_controller/README.md`
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`777033b5`; collated from verified GitHub merge metadata (PR #10576, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented comprehensive regression tests in `test_workspace_documentation_freshness.py` covering workspace membership drift, undocumented/dangling aliases, broken source/help links, stale generated views, shell-only parity vs compute-complete separation, deterministic generators, training controller README accuracy, and reconciled industrial readiness item U3 (#8820 / PR #9995) with merge SHA and verified implementation/test paths.
+- **Next step:** Shipped via PR #10576 on 2026-09-20 (merge SHA 777033b5ef335c6c8b27ce568018b06de5a17860).
+- **Evidence:** `tests/scripts/test_workspace_documentation_freshness.py`, `tests/scripts/test_capability_atlas.py`.
+
+### DL-#10522 · Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10522 (ORG-12, epic #10508)
+- **Branch:** feat/issue-10522-org12-model-match-handoff
+- **PR:** #10547
+- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/model_match_handoff.py; tests/integration/test_model_match_handoff.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`81d32c30`; collated from verified GitHub merge metadata (PR #10547, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented task adapters over existing public APIs for model selection/generation, subject parameters, club snapshot, and initial canonical pose bound to active project/session (`SessionProjectStore`). Separated general-input motion pipeline and tour driver/7-iron matching routes with explicit routing refusing unsupported arbitrary video observations. Passed validated target/model/pose references into fit jobs and recorded outputs/receipts in `SessionProjectStore`. Exposed Fit Kinematics and Run Dynamics as distinct steps with explicit backend choices across all 6 engines (`mujoco`, `drake`, `pinocchio`, `opensim`, `myosuite`, `simscape`) without silent substitutions. Enforced that kinematic outputs cannot be marked as dynamic qualified. Implemented downstream state invalidation on model change, failed-fit diagnostics, cancellation preserving prior runs, and reopen descriptor linking to Results/Replay seam.
+- **Next step:** Shipped via PR #10547 on 2026-09-20 (merge SHA 81d32c3057c6ad8c4977e803df389031d9a789fb).
+- **Evidence:** tests/integration/test_model_match_handoff.py; tests/unit/workspace/test_workflow_transitions.py; tests/unit/workspace/test_artifact_handoff.py.
+
+### DL-#10523 · Connect Swing, Impact, Flight, and Preserved Trajectory Viewers
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10523 (ORG-14, epic #10508)
+- **Branch:** feat/issue-10523-org14-trajectory-viewers
+- **PR:** #10560
+- **Paths:** `src/shared/python/workspace/trajectory_handoff.py`; `src/shared/python/workspace/results_workspace.py`; `src/shared/python/workspace/__init__.py`; `src/shared/python/physics/flight_trajectory_export.py`; `src/shared/python/physics/swing_state_providers.py`; `tests/integration/test_shot_trajectory_handoff.py`
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`2da04559`; collated from verified GitHub merge metadata (PR #10560, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `ShotTrajectoryHandoffCoordinator` connecting swing-state providers, impact solvers, and aerodynamic ball flight simulation with specialized viewers per ADR-0047. Preserves viewer identities (Shot Tracer Qt, web BallFlight, and Impact Explorer ROC) without retiring viewers or merging distinct flight model families (`ud.flight_models` vs `swing_sim.flight`). Bridges `PipelineResult` to `swing_sim.ball_flight_trajectory/1` wire contract with immutable SI sample positions and timestamps. Enforces honest engine sourcing with fail-closed diagnostics (`UnsupportedEngineSourceError`, `ExtractionAdapterError`, `FrameUnitMismatchError`, `InvalidTrajectoryHashError`). Extends ResultsWorkspace with `COMPARE_FLIGHT_MODELS` and `OPEN_IN_IMPACT_EXPLORER` actions and provides atomic transaction staging/rollback.
+- **Next step:** Shipped via PR #10560 on 2026-09-20 (merge SHA 2da04559b07b87c73c2a46e41d4134fe12e9088a).
+- **Evidence:** tests/integration/test_shot_trajectory_handoff.py.
+
+### DL-#10524 · Compose Terrain, Putting, Scene, Bunker, and Simulator Delivery Modes
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10524 (ORG-15, epic #10508)
+- **Branch:** feat/issue-10524-org15-scene-delivery-modes
+- **PR:** #10561
+- **Paths:** src/shared/python/workspace/shot_course_workspace.py; src/shared/python/workspace/**init**.py; tests/integration/test_shot_course_workspace.py
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`41618f3a`; collated from verified GitHub merge metadata (PR #10561, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `ShotCourseWorkspaceCoordinator` composing Terrain, Putting, Scene, Bunker, and Simulator Delivery modes per ADR-0047 and issue #10524. Enforced explicit model boundaries: scene view is visual inspection only; bunker preserves F0-F3 fidelity tiers; putting conforms to rolling/ground contracts; terrain mutation increments revision and invalidates prior runs; simulator delivery verifies destination capabilities and produces explicit submission receipts.
+- **Next step:** Shipped via PR #10561 on 2026-09-20 (merge SHA 41618f3a41c78f58b111c64e57efdfe20c64813e).
+- **Evidence:** tests/integration/test_shot_course_workspace.py
+
+### DL-#10525 · Consolidate Optimization and Training Launchers Under Shared Project Workspace and Controller Authority
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10525 (ORG-16, epic #10508)
+- **Branch:** feat/issue-10525-org16-optimization-training
+- **PR:** #10563
+- **Paths:** src/shared/python/workspace/optimization_training_workspace.py; src/shared/python/workspace/**init**.py; tests/integration/test_optimization_training_workspace.py; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`5b1e5757`; collated from verified GitHub merge metadata (PR #10563, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `OptimizationTrainingWorkspaceCoordinator` consolidating optimization and training under shared workspace and scheduler authority. Bounded job form over the public optimizer and training controller authority, validating objectives, constraints, and model compatibility prior to dispatch. Enforced fail-closed handling for unsupported/uninstalled backends. Enforced cancel/pause/resume lifecycle invariants and deduplication of active submissions. Connected dataset selection with provenance directly to durable project sessions in `SessionProjectStore`.
+- **Next step:** Shipped via PR #10563 on 2026-09-20 (merge SHA 5b1e57578886f5dd52875786209b1f811b1d3c53).
+- **Evidence:** tests/integration/test_optimization_training_workspace.py; src/shared/python/workspace/optimization_training_workspace.py.
+
+### DL-#10528 · Unify Sidekick, Setup, Help, and Library as Global Utilities
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10528 (ORG-19, epic #10508)
+- **Branch:** feat/issue-10528-org19-global-utilities
+- **PR:** #10578
+- **Paths:** src/shared/python/workspace/global_utilities.py; src/shared/python/workspace/**init**.py; tests/launchers/test_global_workspace_utilities.py; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`e60d0927`; collated from verified GitHub merge metadata (PR #10578, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `GlobalWorkspaceUtilitiesCoordinator` unifying Sidekick, Setup, Help, and Library utilities into global, workspace-agnostic overlays per ADR-0047 and issue #10528. Enforced canonical alias resolution mapping legacy utility IDs (`legacy_assistant`, `setup_wizard`, `library_browser`, `help_center`) to canonical names. Preserved conversation history across workspace transitions while synchronizing run and project context. Maintained sticky onboarding dismissal across session reload and migration. Enforced fail-closed native action behavior in browser environments.
+- **Next step:** Shipped via PR #10578 on 2026-09-20 (merge SHA e60d09274f77e86c9bfb1beb3afe5e0e3a4324b5).
+- **Evidence:** tests/launchers/test_global_workspace_utilities.py; src/shared/python/workspace/global_utilities.py.
+
+### DL-#10530 · Reconcile and Document Intentionally Excluded, Research-Only, and Incomplete Workflows
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10530 (ORG-22, epic #10508)
+- **Branch:** feat/issue-10530-org22-research-lifecycle
+- **PR:** #10579
+- **Paths:** src/config/research_capability_lifecycle.py; src/config/**init**.py; src/config/capability_migration.py; src/tools/model_converter/**main**.py; tests/config/test_research_capability_lifecycle.py; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`f55cdd75`; collated from verified GitHub merge metadata (PR #10579, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `ResearchCapabilityLifecycleManager` and `IncompleteCapabilityRecord` reconciling intentionally excluded, research-only, and incomplete workflows per ADR-0047 and issue #10530. Audited every excluded package under `src/tools/` against launcher tiles and `src/config/registry_exclusions.yaml`. Enforced fail-closed prevention of adapting CLI-only tools as GUI tiles via `CLINotInteractiveGUIError`. Verified and standardized CLI entry points for retained tools (`contraction`, `drift_control`, `model_converter`, `sg_optimizer`). Disclosed structured owner/issue/next-action metadata for incomplete capabilities, honestly documenting the SG optimizer Phase 3 PyQt6 UI follow-up tied to #6272 without fake GUIs or premature claims of completion.
+- **Next step:** Shipped via PR #10579 on 2026-09-20 (merge SHA f55cdd752f72992d0714294580a743eda659bc64).
+- **Evidence:** tests/config/test_research_capability_lifecycle.py; src/config/research_capability_lifecycle.py.
+
+### DL-#10532 · Validate and Accept Every Enabled Recommended Task Journey Across Shipped Surfaces
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10532 (ORG-23, epic #10508)
+- **Branch:** feat/issue-10532-org23-installed-workspace-journeys
+- **PR:** #10580
+- **Paths:** src/shared/python/workspace/installed_journeys.py; src/shared/python/workspace/**init**.py; tests/integration/test_installed_workspace_journeys.py; src/tools/capture_rig/gui.py
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`70378c96`; collated from verified GitHub merge metadata (PR #10580, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `InstalledWorkspaceJourneysCoordinator` validating and accepting all enabled recommended task journeys across shipped surfaces per ADR-0047 and issue #10532. Covered optical/video import to inspection, model/pose to supported fit, shot to named flight comparison, optimization/training to result, bounded estimation to cross-engine comparison, and global utilities navigation. Enforced failure recovery preserving source media, actionable dependency diagnostics, and rejection of corrupted artifact schemas. Decoupled `CaptureRigWidget.open_in_inspect_targets()` from StepRail action set to preserve contract and fix test suites.
+- **Next step:** Shipped via PR #10580 on 2026-09-20 (merge SHA 70378c9602c68080efe942ad3f2affaae7d770e8).
+- **Evidence:** tests/integration/test_installed_workspace_journeys.py; src/shared/python/workspace/installed_journeys.py.
+
+### DL-#10533 · Reconcile, Audit, and Freeze Feature Preservation Across All Historical Boundaries
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10533 (ORG-24, epic #10508)
+- **Branch:** feat/issue-10533-org24-feature-preservation-audit
+- **PR:** #10581
+- **Paths:** src/shared/python/workspace/feature_preservation_audit.py; src/shared/python/workspace/**init**.py; tests/integration/test_feature_preservation_audit.py; docs/development/ORG24_FEATURE_PRESERVATION_AUDIT.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`5d73e455`; collated from verified GitHub merge metadata (PR #10581, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented `FeaturePreservationAuditor` providing comprehensive reconciliation, integrity auditing, and disposition freezing for Epic #10508 closeout per issue #10533. Validated that all 159 capabilities from the ORG-01 baseline are preserved without silent removals. Verified byte-exact SHA-256 and file size integrity across all supported preservation fixtures. Confirmed acyclic transitive resolution of legacy aliases (`starting_pose_matcher` -> `motion_target_preview`, `putting_green_gui` -> `putting_green`). Audited 5 core workspaces and confirmed honest physics engine qualifications (#10351, #10353). Generated and published frozen audit disposition report at `docs/development/ORG24_FEATURE_PRESERVATION_AUDIT.md`.
+- **Next step:** Shipped via PR #10581 on 2026-09-20 (merge SHA 5d73e45545c9498e1904eab8d7355cce7ef353c3).
+- **Evidence:** tests/integration/test_feature_preservation_audit.py; src/shared/python/workspace/feature_preservation_audit.py; docs/development/ORG24_FEATURE_PRESERVATION_AUDIT.md.
+
+### DL-#10432 · Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10432 (PF-02, epic #10427)
+- **Branch:** feat/issue-10432-pf02-pinocchio-kinematics-grip-calibration
+- **PR:** #10497 (auto-merge enabled)
+- **Paths:** src/engines/physics_engines/pinocchio/python/marker_kinematics.py; src/shared/python/motion_matching/kinematic_smoothing.py; tests/unit/motion_matching/test_pinocchio_kinematics_calibration.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`a80290b4`; collated from verified GitHub merge metadata (PR #10497, 2026-09-20))
+- **Shipped:** 2026-09-20
+- **Summary:** Implemented SolveDiagnostics for Pinocchio MarkerIkSolver capturing convergence, projected gradient norm, cost decrease, and active bound counts. Added multi-start resolution solve_frame_multi_start evaluating geometric tracking floors with and without weld closure. Added refine_overlapping_window with bounded temporal regularization. Implemented kinematic_smoothing module providing joint trajectory smoothing with analytical/numerical derivative compatibility (q_dot ≈ v, v_dot ≈ a), boundary spike auditing, and cutoff frequency sensitivity analysis. Verified human range of motion wrist compliance (MM-2, #10104) and address left elbow pit up-and-inward alignment (MM-5, #10107).
+- **Next step:** Shipped via PR #10497 on 2026-09-20 (merge SHA a80290b4d458159d1587eb354aa12de0b9adf652).
+- **Evidence:** tests/unit/motion_matching/test_pinocchio_kinematics_calibration.py; src/shared/python/motion_matching/kinematic_smoothing.py; src/engines/physics_engines/pinocchio/python/marker_kinematics.py.
+
+### DL-#10622 · NM-07 Compare Forward Surrogates and Physics-Structured Alternatives
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10622 (epic #10603)
+- **Branch:** feat/nm07-forward-surrogates-10622
+- **PR:** #10768
+- **Paths:** src/shared/python/motion_matching/surrogate/validate.py; src/shared/python/motion_matching/surrogate/nm07_comparison.py; src/shared/python/neural_motion/surrogates/; tests/unit/motion_matching/test_forward_surrogates_nm07.py; tests/unit/neural_motion/test_forward_surrogates_nm07.py; tests/unit/neural_motion/test_surrogate_nm07_discovery.py; docs/plans/neural_motion_matching/forward_surrogates.md; docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json
+- **Started:** 2026-09-23
+- **Last verified:** 2026-10-11 (`c79f9772`; collated from verified GitHub merge metadata (PR #10768, 2026-09-23))
+- **Shipped:** 2026-09-23
+- **Summary:** Compare forward surrogate inversion, hybrid polish, physics-structured residual dynamics, and diffusion fallback under schema neural-surrogate-comparison/1.0.0. Added real-clock timegrid resampling, antipodal quaternion geodesic distance, trust-region validation, directional derivative gradient fidelity check, and contact-boundary failure rejection to validate.py. Documented adversarial exploitation risk of unconstrained forward surrogate inversion and high latency/sample inefficiency of diffusion fallback.
+- **Next step:** Shipped via PR #10768 on 2026-09-23 (merge SHA c79f97724445d24a403d932bbd8bd8919cf81bac).
+- **Evidence:** docs/plans/neural_motion_matching/forward_surrogates.md; docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json
+
+### DL-#10623 · NM-08 Add Native Verification, Distribution Checks and Safe Fallback
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10623 (epic #10603)
+- **Branch:** feat/nm08-native-verification-10623
+- **PR:** #10770
+- **Paths:** src/shared/python/neural_motion/inference/; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_verified_inference_nm08.py; tests/unit/motion_matching/test_verified_inference_nm08.py; docs/plans/neural_motion_matching/native_verification.md; docs/plans/neural_motion_matching/evidence/nm08_native_verification_receipt.json
+- **Started:** 2026-09-23
+- **Last verified:** 2026-10-11 (`a0beddd8`; collated from verified GitHub merge metadata (PR #10770, 2026-09-23))
+- **Shipped:** 2026-09-23
+- **Summary:** Added VerifiedInferenceOrchestrator, DistributionBounds, and check_target_distribution under neural_motion/inference/ (schema neural-verified-inference/1.0.0). Enforces fail-closed validation of non-finite inputs, geometry/engine/control dimension mismatch, and incompatible checkpoint contracts. Validates empirical coverage (durations, peak velocities, contact regimes) with confidence scoring recorded as domain metrics, not golfer truth probability. Enforces mandatory independent replay before dynamic acceptance; on failed proposal or missing checkpoint, falls back to classical/retrieval solver with shared remaining wall-clock budget and retains all attempts with auditable statuses (NEURAL_ACCEPTED, CLASSICAL_FALLBACK, REJECTED). Integrated fit_swing_verified_inference into hybrid.py facade.
+- **Next step:** Shipped via PR #10770 on 2026-09-23 (merge SHA a0beddd8ecc8d53976a49179785712b3636a7ec7).
+- **Evidence:** docs/plans/neural_motion_matching/native_verification.md; docs/plans/neural_motion_matching/evidence/nm08_native_verification_receipt.json
+
+### DL-#10439 · Replace Synthetic Force Adapters With Native Model-Conformant Bridges
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10439 (PF-09, epic #10430, program #10363)
+- **Branch:** feat/issue-10439-pf09-native-force-bridges
+- **PR:** #10507
+- **Paths:** scripts/allocate_swing_torques.py; src/engines/physics_engines/pinocchio/python/force_adapter.py; src/engines/physics_engines/pinocchio/python/native_model.py; src/shared/python/motion_matching/multi_engine_torque_allocator.py; tests/integration/engines/pinocchio/test_force_adapter.py; tests/integration/engines/pinocchio/test_force_mapping.py; tests/unit/motion_matching/test_force_bridges_pf09.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_native_force_equations.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`20036a7c`; collated from verified GitHub merge metadata (PR #10507, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Quarantined `_AnalyticalMultibodyBase` production routes as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`, failing closed with `RuntimeError` on unbridged engines (Drake, OpenSim, Simscape). Extended `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`. Corrected `MujocoForceAdapter` to compute raw unconstrained generalized dynamic forces M a + bias eliminating `qfrc_inverse` passive/constraint force double counting, added input validation and state refresh before mutation, and verified exact acceleration parity. Implemented `PinocchioForceAdapter` with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`). Updated `allocate_swing_torques.py` CLI to support Pinocchio and enforce `--allow-synthetic` gate.
+- **Next step:** Shipped via PR #10507 on 2026-09-21 (merge SHA 20036a7c5fd7e9a38a342bb1c1a0c5b968cc8223).
+- **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
+
+### DL-#8684 · Coupled Grip, Shaft, Ground Rollup
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #8684
+- **Branch:** conductor/issue-8684
+- **PR:** #10668, #9998
+- **Paths:** docs/research/proximal_distal_energy_transfer/COMPREHENSIVE_RESEARCH_PROGRAM.md, MODEL_COMPLETION_FALSIFICATION_MATRIX.md
+- **Started:** 2026-09-11
+- **Last verified:** 2026-10-11 (`70560607`; collated from verified GitHub merge metadata (PR #9998, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Parent rollup of child tiers #8685/#8797/#8715/#8723 answering the four #8684 questions; manifests re-pinned.
+- **Next step:** Shipped via PR #9998 on 2026-09-21 (merge SHA 705606076622b0f886952401e15de6c8692999af).
+
+### DL-#10440 · Connect Qualified Matching Strategies to Existing Results and Engine Feature Contracts
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10440 (PF-10, epic #10430, program #10363)
+- **Branch:** feat/issue-10440-pf10-matching-strategies-contracts
+- **PR:** #10509
+- **Paths:** src/shared/python/motion_matching/matching_strategy.py; src/shared/python/motion_matching/**init**.py; tests/unit/motion_matching/test_matching_strategy.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`b633007c`; collated from verified GitHub merge metadata (PR #10509, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Implemented versioned matching strategy schema (`STRATEGY_SCHEMA_VERSION = "matched-strategy-v1"`), stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`), strategy presets, controller specifications, and contact reaction history containers. Created `CandidateStrategyPackage` supporting lossless .npz serialization without pickle, and fail-closed name-permuted coordinate remapping. Implemented `StrategyComparisonService` exposing cross-strategy torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs. Provided sample package generator for concrete handoff to MV-03 #10479 without modifying viewer files.
+- **Next step:** Shipped via PR #10509 on 2026-09-21 (merge SHA b633007c6ab323d71529ffc1109fca1c02218bc1).
+- **Evidence:** tests/unit/motion_matching/test_matching_strategy.py.
+
+### DL-#10433 · Enforce Contact, Actuator and Root Constraints in Force Allocation
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10433 (PF-03, epic #10430)
+- **Branch:** feat/issue-10433-pf03-contact-actuator-root-constraints
+- **PR:** #10498 (auto-merge enabled)
+- **Paths:** src/shared/python/motion_matching/contact_force_allocator.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_contact_force_allocator_pf03.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`7e6b3989`; collated from verified GitHub merge metadata (PR #10498, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Upgrades ContactForceAllocator with constrained QP inverse dynamics. Enforces 8-faceted polyhedral friction pyramid, non-negative normal ground forces along arbitrary terrain normals, exact contact separation masks, and strict actuator bounds without post-projection. Separates diagnostic root slack so ungrounded reactions never create false physical success. Introduces FeasibilityStatus, HARD_ZERO_TRAIL mode, and verify_torque_and_rate_bounds.
+- **Next step:** Shipped via PR #10498 on 2026-09-21 (merge SHA 7e6b39893674af3de31fb79efc6a2710f30c36de).
+- **Evidence:** tests/unit/motion_matching/test_contact_force_allocator_pf03.py; tests/unit/motion_matching/test_contact_force_allocator.py.
+
+### DL-#10589 · TB-04: Fit and Independently Replay the Actual Driven Double Pendulum
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10589 (TB-04, parent #10584, program #10363)
+- **Branch:** feat/tb04-double-pendulum-fit-10589
+- **PR:** #10638
+- **Paths:** src/engines/physics_engines/pendulum/python/motion_matching/adapters.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/provider.py; src/engines/physics_engines/pendulum/python/motion_matching/qualification.py; src/engines/physics_engines/pendulum/python/motion_matching/**init**.py; tests/unit/engines/physics_engines/pendulum/test_double_pendulum_fit.py; tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py; docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz; docs/plans/tour_baselines/evidence/tb04_iron_baseline_package.npz; docs/plans/tour_baselines/coverage_matrix.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`c04a22e0`; collated from verified GitHub merge metadata (PR #10638, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Built bidirectional mapping and verified mathematical & numerical acceleration parity (< 1e-14) between DoublePendulumDynamics and Tools physics.py. Formulated continuous smooth bounded joint torques via degree-6 Bernstein polynomials strictly bounded in [tau_min, tau_max] with curvature and effort regularization. Fixed frame-0 off-by-one initial state evaluation bug, implemented non-uniform timestep integration, and added independent 4x tighter substep replay verification. Produced authoritative qualification receipts and baseline packages for Driver and 7-Iron.
+- **Next step:** Shipped via PR #10638 on 2026-09-21 (merge SHA c04a22e0e0435583d31ea56f4c3167dc79b1f5fa). Preserved limitation: Only the small baseline is evidenced; avoid a broader production claim.
+- **Evidence:** docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json; tests/unit/engines/physics_engines/pendulum/test_double_pendulum_fit.py; tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py.
+
+### DL-#10434 · Qualify Contact Modes and Native Pinocchio Force Feasibility
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10434 (epic #10363, PF-04)
+- **Branch:** feat/issue-10434-pf04-qualify-contact-modes-pinocchio-forces
+- **PR:** #10499 (auto-merge enabled)
+- **Paths:** src/shared/python/motion_matching/contact_mode_qualifier.py; tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`9cb9b951`; collated from verified GitHub merge metadata (PR #10499, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Implemented ContactModeQualifier evaluating multi-sphere heel/toe support modes with clearance and velocity hysteresis, computing center of pressure (COP) and convex hull containment under arbitrary normal directions, evaluating slip velocity and friction saturation, and cross-checking allocated contact forces against constitutive Hunt-Crossley compliant models. Enforces separate linear force and moment residual budgets, rejects unphysical loads (> 5000 N or > 300 Nm), and generates parameter sensitivity reports.
+- **Next step:** Shipped via PR #10499 on 2026-09-21 (merge SHA 9cb9b951622f0bd8ddcb1c12eb224ad6822e1579).
+- **Evidence:** tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py; src/shared/python/motion_matching/contact_mode_qualifier.py.
+
+### DL-#10366 · MS-16: MuJoCo Native IK and MJ_Inverse Tracking
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10366 (MS-16, epic #10363)
+- **Branch:** fix/issue-10366-ms-16-mujoco-native-tools-marker-ik-on-m-cursor-composer-local
+- **PR:** #10660
+- **Paths:** src/engines/physics_engines/mujoco/python/ik_minimize.py; src/engines/physics_engines/mujoco/python/inverse_dynamics.py; src/shared/python/motion_matching/pipeline/reference.py; src/shared/python/motion_matching/pipeline/dynamics.py; src/shared/python/motion_matching/pipeline/cli.py; src/tools/motion_matching/pipeline.py; tests/unit/motion_matching/test_mujoco_ik_minimize.py; tests/unit/motion_matching/test_mujoco_mj_inverse.py; docs/development/matched_swing_program/README.md; tests/tools/matched_swing_browser/test_model.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-10-11 (`8e4ecee2`; collated from verified GitHub merge metadata (PR #10660, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Added selectable `--ik-backend mujoco-minimize` (MuJoCo `minimize.least_squares` with LM warm start) and `--tracking mj-inverse` (plant KKT torques with native `mj_inverse` audit). Wired backends through pipeline plant, dynamics replay, CLI, Motion Matching tile, and receipt fields with DbC validation at API boundaries.
+- **Next step:** Shipped via PR #10660 on 2026-09-21 (merge SHA 8e4ecee277d25cc305fcf8f4e37d333260e83a15).
+- **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_native_tools/receipt.json; tests/unit/motion_matching/test_mujoco_ik_minimize.py; tests/unit/motion_matching/test_mujoco_mj_inverse.py; tests/docs/test_matched_swing_status_freshness.py
+
+### DL-#10361 · MS-90: Generic Capture Contract & 44-DOF Identifiability
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10361 (MS-90, epic #10363)
+- **Branch:** feat/10361-generic-capture-contract
+- **PR:** #10633
+- **Paths:** src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/identifiability.py; tests/unit/motion_matching/test_capture_contract_generic.py; tests/unit/motion_matching/test_identifiability.py; evidence/anthropometry/identifiability_driver.json; docs/user_guide/motion_matching/loading_targets.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`b68ed246`; collated from verified GitHub merge metadata (PR #10633, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Implemented `CaptureContract` and `CaptureValidationReport` enabling validation and loading of arbitrary C3D captures without editing codebase source. Retained frozen tour captures as named instances of `CaptureContract`. Implemented `probe_spec_identifiability` and `probe_synthetic_chain_identifiability` performing linearised SVD identifiability analysis, detecting planted null directions and unobservable lower-body DOFs on the 44-DOF model, and demonstrating resolution to full rank via anthropometric prior regularization. Generated and committed `evidence/anthropometry/identifiability_driver.json`.
+- **Next step:** Shipped via PR #10633 on 2026-09-21 (merge SHA b68ed246cc78e63c118c2d8aebebd3ec9d226b2a).
+- **Evidence:** evidence/anthropometry/identifiability_driver.json; tests/unit/motion_matching/test_capture_contract_generic.py; tests/unit/motion_matching/test_identifiability.py.
+
+### DL-#10348 · Simscape Topology + Full-Marker Terminal (MS-61)
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10348 (MS-61, epic #10363)
+- **Branch:** feat/issue-10348-ms61-simscape-topology
+- **PR:** #10676
+- **Paths:** src/shared/python/motion_matching/{simscape_topology.py,full_marker_terminal.py,tour_metrics.py,acceptance.py}; scripts/matlab/{materialize_ms61_topology_receipts.py,run_simscape_candidate.ps1}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/; docs/development/matched_swing_program/{GATES.md,README.md,WAVES.md}; docs/development/simscape_tour_matching/CHECKPOINTS.md
+- **Started:** 2026-09-21
+- **Last verified:** 2026-10-11 (`bc5a7ff9`; collated from verified GitHub merge metadata (PR #10676, 2026-09-22))
+- **Shipped:** 2026-09-22
+- **Summary:** Fail-closed 27-DOF topology classification (no independent neck), dual terminal disclosure (full + head cluster; body-excluding-head diagnostic only), acceptance/tour_metrics dual-terminal contracts, and run-103 scaffolding derived from run-102 without inventing native G1 success; repair linked to MS-104 (#10378).
+- **Next step:** Shipped via PR #10676 on 2026-09-22 (merge SHA bc5a7ff90cfb0da3ed49a3ac3d20d1967ba267df). Preserved limitation: Scaffold only; do not represent scaffold as completed production behavior.
+- **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/{topology_report.json,terminal_breakdown.json,native_gate.json,runtime_license_receipt.json,parity_receipt.json,HANDOFF.md}; tests/unit/motion_matching/test_simscape_topology_ms61.py.
+
+### DL-#10359 · Wire Video and Fit-Quality Report Export
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #10359 (MS-86, epic #10363)
+- **Branch:** feat/10359-export-video-report
+- **PR:** #10632
+- **Paths:** src/shared/python/motion_matching/export.py; src/shared/python/motion_matching/**main**.py; src/tools/matched_swing_browser/gui.py; src/config/launcher_manifest.json; src/config/models.yaml; tests/unit/motion_matching/test_export.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; docs/development/matched_swing_program/evidence/reports/sample_fit_report.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-10-11 (`79ab1757`; collated from verified GitHub merge metadata (PR #10632, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Implemented `export_video` and `export_report` with fail-closed DbC contracts, standardized metrics, acceptance gate verdicts, physical constraints, and full cryptographic provenance (#8820 / U3). Added CLI subcommands `export-video` and `export-report` to motion_matching module. Added "Export Video..." and "Export Report..." buttons to Results Browser GUI Actions card with file dialogs. Registered `video_export` and `report_export` capabilities in launcher manifest and models config. Emitted sample Markdown fit report in matched swing program evidence directory.
+- **Next step:** Shipped via PR #10632 on 2026-09-21 (merge SHA 79ab1757c867d64419044468a607502c5bce6a56).
+- **Evidence:** docs/development/matched_swing_program/evidence/reports/sample_fit_report.md; tests/unit/motion_matching/test_export.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py.
+
+### DL-#8930 · Vectorize Rust Trajectory Post-Processing
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #8930
+- **Branch:** fix/8930-ball-flight-vectorized-rk4
+- **PR:** #10648 (open)
+- **Paths:** src/shared/python/physics/ball_simulator.py; tests/unit/physics/test_ball_simulator_post_process_vectorized_8930.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-10-11 (`f80c6193`; collated from verified GitHub merge metadata (PR #10648, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** `BallFlightSimulator._post_process_rust` called the scalar `_calculate_forces_single` path once per trajectory point instead of the existing vectorized `_calculate_forces_batch` path; now builds the `(3, N)` batch once and calls force calculation a single time per trajectory.
+- **Next step:** Shipped via PR #10648 on 2026-09-21 (merge SHA f80c6193316231adefa5bdc7a560ba10abb3635c).
+
+### DL-#10436 · Explore Feasible Force Null Spaces and Publish Torque-Distribution Tradeoffs
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10436 (PF-06, epic #10430)
+- **Branch:** feat/issue-10436-pf06-feasible-force-nullspace
+- **PR:** #10504
+- **Paths:** src/shared/python/motion_matching/force_nullspace.py; tests/unit/motion_matching/test_force_nullspace.py; tests/unit/motion_matching/test_force_nullspace_pf06.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`a5cec306`; collated from verified GitHub merge metadata (PR #10504, 2026-09-21))
+- **Shipped:** 2026-09-21
+- **Summary:** Extended force null space representation to support scaled SVD and column-pivoted QR decomposition with dynamic rank and contact mode reporting. Added `NullSpaceAnalysis` reporting condition number and machine-precision residuals (A N = 0, A x_p = b). Implemented `redistribute_trajectory` with physical rate penalties strictly invariant to basis sign changes. Implemented `explore_torque_tradeoffs` generating Pareto tradeoff alternatives across baseline minimum effort, conservative default, trail arm reduction sweeps (50%, 80%), hard-zero trail feasibility checks, relaxed minimum trail alternatives, grip squeeze minimization, and ground reaction regularization. Detailed diagnostics report per-joint torque, power, lead/trail effort, ground COP, grip wrench, and explicit SI units. Exported reproducible Pareto tradeoff tables to JSON and CSV. Selected conservative default with mechanical rationale without unfounded metabolic or injury claims.
+- **Next step:** Shipped via PR #10504 on 2026-09-21 (merge SHA a5cec3063e050da0f6b153381ac04d453ffcdad0).
+- **Evidence:** tests/unit/motion_matching/test_force_nullspace.py; tests/unit/motion_matching/test_force_nullspace_pf06.py.
+
+### DL-#10376 · Complete Engine and Model Inventory With Runnable Model Packages (MS-102)
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10376 (MS-102, epic #10363)
+- **Branch:** feat/ms102-engine-model-inventory
+- **PR:** #10677
+- **Paths:** src/engines/model_inventory.py; src/config/engine_model_inventory.json; tests/unit/engines/test_model_inventory.py; docs/development/matched_swing_program/evidence/ms102/
+- **Started:** 2026-09-21
+- **Last verified:** 2026-10-11 (`00e32b56`; collated from verified GitHub merge metadata (PR #10677, 2026-09-22))
+- **Shipped:** 2026-09-22
+- **Summary:** Authority-derived engine/model inventory (models.yaml + capability matrix + ENGINE_TIERS) with dual-club flagship packages, immutable hashes, qualification harness (resolve/hash/load/FK/dynamics/viewer/save), and named repair blockers. Not a competing catalog. Simscape entries require MATLAB R2025b.
+- **Next step:** Shipped via PR #10677 on 2026-09-22 (merge SHA 00e32b5646df5bd6506606886d9c0aa045857681).
+- **Evidence:** docs/development/matched_swing_program/evidence/ms102/
+
+### DL-#10344 · MyoSuite Golfer Scene: Pinned MyoSim Submodule + Dual-Grip Club Contacts (MS-51)
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10344 (MS-51, epic #10363)
+- **Branch:** fix/10344-ms51-myosuite-repair
+- **PR:** #10685
+- **Paths:** src/engines/physics_engines/myosuite/python/golfer_scene.py; coordinate_map_anthro.json; shared/models/myosuite/golf/body/; scripts/setup_myosuite_models.{ps1,sh}; src/engines/model_inventory.py; src/config/engine_model_inventory.json; docs/engines/myosuite.md; tests/unit/engines/myosuite/test_golfer_scene.py; tests/myosuite/test_golfer_scene_native.py
+- **Started:** 2026-09-22
+- **Last verified:** 2026-10-11 (`cfe7217b`; collated from verified GitHub merge metadata (PR #10685, 2026-09-22))
+- **Shipped:** 2026-09-22
+- **Summary:** Pinned myo_sim gitlink documented; bootstrap scripts; generated driver/iron golfer MJCF on myobody_simpleupper with dual-grip site welds and four foot contact markers; diagnostic 40-of-44 coordinate map; MS-102 inventory left repair after real probes.
+- **Next step:** Shipped via PR #10685 on 2026-09-22 (merge SHA cfe7217bf41ab59f546624e22df4712f1e75bb87). Preserved limitation: Map coverage is 40/44; preserve the four missing mappings as follow-up.
+- **Evidence:** shared/models/myosuite/golf/body/golfer*myobody_receipt.json; docs/development/matched_swing_program/evidence/ms102/myosuite*\*\_structural_receipt.json
+
+### DL-#9479 · Consolidate Engine Meta-Tiles and Clarify Confusable Launcher Tile Names
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #9479, #9480 (parent #9412; cluster #9410 Cluster B)
+- **Branch:** fix/9479-9480-launcher-tiles
+- **PR:** #10653
+- **Paths:** src/config/launcher_manifest.json; src/config/models.yaml; src/launchers/workspace_navigation.py; scripts/check_launcher_logo_families.py; tests/config/launcher_manifest/test_engine_hub_consolidation_9479.py; tests/config/launcher_manifest/test_tile_name_clarity_9480.py; tests/launchers/test_workspace_navigation.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-10-11 (`c70555a5`; collated from verified GitHub merge metadata (PR #10653, 2026-09-22))
+- **Shipped:** 2026-09-22
+- **Summary:** Hide duplicate per-engine dashboards with documented reasons; reclassify three specialized tools from `physics_engine` to `simulation`; clarify confusable data/video tile pairs; move non-golf utilities to `dev_research`.
+- **Next step:** Shipped via PR #10653 on 2026-09-22 (merge SHA c70555a5e1aed74c01ce1001dd2e28265fdcc0b7).
+- **Evidence:** tests/config/launcher_manifest/test_engine_hub_consolidation_9479.py; tests/config/launcher_manifest/test_tile_name_clarity_9480.py; tests/launchers/test_workspace_navigation.py::TestWorkspaceMembership::test_non_golf_utilities_moved_out_of_primary_workflow.
+
+### DL-#8883 · Video Analyzer Real GUI Replacing the Placeholder Label
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #8883 (related #8854, #10512)
+- **Branch:** fix/8883-video-analyzer-gui
+- **PR:** #10651, #10739
+- **Paths:** src/tools/video_analyzer/analyzer.py; src/tools/video_analyzer/gui.py; src/launchers/external_tools_adapter.py; src/launchers/task_launch_truthfulness.py; tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-10-11 (`5dd695f8`; collated from verified GitHub merge metadata (PR #10739, 2026-09-23))
+- **Shipped:** 2026-09-23
+- **Summary:** Replaced the static `QLabel("Video Analyzer (GUI placeholder)")` with a real `MainWidget` (choose video, Analyze, report pane) wired to a new `SwingAnalyzer.analyze_video()` that runs MediaPipe pose estimation (via the existing `pose_estimation` registry) and feeds the already-tested head-stability math. Removed the launcher's dead sibling-repo import fallback (`video_analyzer.launch_pyqt6`, confirmed nonexistent by #8854) so the tile no longer depends on an external Tools provider; updated `task_launch_truthfulness`'s audit entry from `PROVIDER_REQUIRED` to `PRODUCTION_SOLVER` accordingly.
+- **Next step:** Shipped via PR #10739 on 2026-09-23 (merge SHA 5dd695f89774a615af59ebc0e89b4f0a631049bf).
+- **Evidence:** tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/test_gui.py.
+
+### DL-#10743 · Docs-Consistency Cross-Repo Path Exemption
+
+- **State:** shipped
+- **Owner:** claude (session `fleet-remediation-k`)
+- **Issue:** #10743
+- **Branch:** `fix/10743-docs-consistency-cross-repo`
+- **PR:** #10744, #10752
+- **Paths:** `scripts/check_agent_docs_consistency.py`, `tests/architecture/test_check_agent_docs_consistency.py`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-10-11 (`2a9e7a4d`; collated from verified GitHub merge metadata (PR #10752, 2026-09-23))
+- **Shipped:** 2026-09-23
+- **Summary:** Exempt sibling-repo-qualified backticked paths (possessive or not) from the local-existence check so the fleet-managed deferred-validation block no longer fails `repo-structure-gates`; bare local paths stay strict.
+- **Next step:** Shipped via PR #10752 on 2026-09-23 (merge SHA 2a9e7a4d30bf169cc666eb81093f2ebe770f8678).
+
+### DL-#10751 · Fix CI Standard 'Deleted Python Test Files' Check False-Positives in Shallow Checkouts
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10751
+- **Branch:** fix/10751-deleted-tests-shallow-checkout
+- **PR:** #10762
+- **Paths:** scripts/ci/check_deleted_test_files.py; tests/scripts/test_check_deleted_test_files.py; .github/workflows/ci-standard.yml; tests/ci/test_ci_infrastructure.py
+- **Started:** 2026-09-23
+- **Last verified:** 2026-10-11 (`e1192b7c`; collated from verified GitHub merge metadata (PR #10762, 2026-09-23))
+- **Shipped:** 2026-09-23
+- **Summary:** Compute deleted tests diff against merge-base instead of base ref tip to prevent tests added on main from being falsely reported as deleted in PRs; set fetch-depth: 0 on checkout in tests job; invoke standalone check_deleted_test_files.py with unit and regression test coverage and fallback-to-base support directly from the CI workflow.
+- **Next step:** Shipped via PR #10762 on 2026-09-23 (merge SHA e1192b7c550cb4974570ba3a2b66d4c520b5a032).
+
+### DL-#10597 · Tour Baselines Baseline Guide, Agent Runbook, and End-to-End Acceptance (TB-12)
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10597 (TB-12, parent #10584, program #10363)
+- **Branch:** `feat/tb12-baseline-guide-acceptance-10597`
+- **Paths:** `docs/plans/tour_baselines/baseline_guide.md`; `docs/plans/tour_baselines/agent_runbook.md`; `docs/plans/tour_baselines/final_acceptance_report.md`; `tests/acceptance/test_tour_baselines_journey.py`; `docs/plans/tour_baselines/README.md`; `docs/development/matched_swing_program/README.md`; `docs/development/DEVELOPMENT_LOG.md`; `SPEC.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-10-11 (`fbebf5c4`; collated from verified GitHub merge metadata (PR #10814, 2026-09-24))
+- **Shipped:** 2026-09-24
+- **Summary:** Published concise Operator User Guide covering launcher navigation, driver vs. iron capture, complexity tradeoffs, loading/cloning, and physical error formulas; Agent Runbook with copyable clean-environment reproduction commands, hash verification, MATLAB R2025b requirements, and tamper detection; and Final Acceptance Report recording the completed two-capture coverage matrix, software integration sign-off, and governing issue links for outstanding full-body models. Authored comprehensive end-to-end acceptance test suite verifying the full user journey.
+- **Next step:** Shipped via PR #10814 on 2026-09-24 (merge SHA fbebf5c4785bfffa83b1e3890c8ee07217e09698).
+- **PR:** #10814
+
+### DL-#10849 · Pendulum Inertia Hash Integration Parameter Digest & Dynamics Cache Refresh
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10849, #10850, #10851
+- **PR:** #10860
+- **Branch:** `fix/10849-10850-inertia-hash-and-spec-keys`
+- **Paths:** `src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py`, `src/engines/physics_engines/pendulum/python/motion_matching/adapters.py`, `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`, `tests/unit/tour_baselines/test_qualification.py`, `SPEC.md`, `AGENT_HANDOFF.md`, `docs/development/HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-10-11 (`15ca47c2`; collated from verified GitHub merge metadata (PR #10860, 2026-09-24))
+- **Shipped:** 2026-09-24
+- **Summary:** Updated DoublePendulumDynamics and qualification routines to derive the inertia digest directly from the cached properties consumed by simulation integration, initialize calibrated segment lengths before parameter caching, and key SPEC.md change log rows accurately (#10849, #10850, #10851).
+- **Next step:** Shipped via PR #10860 on 2026-09-24 (merge SHA 15ca47c2ebfc7731972ff6a98f58ceb7074b9553).
+
+### DL-#10883 · Restore Green Main: Jules Bolt Learning Title Case Compliance
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10883
+- **PR:** #10884
+- **Branch:** `fix/10883-docs-governance-title-case`
+- **Paths:** `.jules/bolt.md`, `tests/scripts/test_document_title_case.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-10-11 (`b15558ec`; collated from verified GitHub merge metadata (PR #10884, 2026-09-24))
+- **Shipped:** 2026-09-24
+- **Summary:** Backticked code tokens (`np.linalg.norm`) in .jules/bolt.md heading to restore green main against required docs-governance-gates and added unit regression test (#10883).
+- **Next step:** Shipped via PR #10884 on 2026-09-24 (merge SHA b15558ec3cb230e0fa90efc3a702dbb7f15d4313).
+
+### DL-#10921 · Require Both Desktop and Start Menu Destinations and Update Handoff Governance
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10921 (companion #10918, #10919, #10920, #10924, #10925)
+- **PR:** #10923
+- **Branch:** `fix/10921-shortcuts-feedback`
+- **Paths:** `src/launchers/desktop_shortcuts.py`, `tests/unit/launchers/test_desktop_shortcuts.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-10-11 (`d8f5b0a3`; collated from verified GitHub merge metadata (PR #10923, 2026-09-25))
+- **Shipped:** 2026-09-25
+- **Summary:** Enforce that shortcut installation requires both Desktop and Start Menu destinations to succeed, and synchronize canonical handoff documentation and SPEC change log (#10918, #10919, #10920, #10921, #10924, #10925).
+- **Next step:** Shipped via PR #10923 on 2026-09-25 (merge SHA d8f5b0a39aef2823dac6520f1d11b8988f1b778c).
+
+### DL-#10946 · Keep Multi-Muscle Contracts and Torque Identical on the Rust Backend
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #10946
+- **PR:** draft PR from `agy/ud-10946-rust-muscle-parity`, #10976
+- **Branch:** `agy/ud-10946-rust-muscle-parity`
+- **Paths:** `src/shared/python/biomechanics/multi_muscle.py`, `tests/unit/biomechanics/test_multi_muscle_rust_parity.py`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-10-11 (`fee5b214`; collated from verified GitHub merge metadata (PR #10976, 2026-09-26))
+- **Shipped:** 2026-09-26
+- **Summary:** Python `HillMuscleModel`s were never forwarded to the Rust `MuscleGroup` (it summed zero muscles, so net torque was always 0.0) and the Rust path skipped the activation precondition. Muscles are now converted to their Rust equivalent (or the group drops to pure Python when a muscle has custom physics), activations are validated once before backend choice, the antagonist pair is rebuilt from the groups' current backends, and a parity test pins Rust == Python.
+- **Next step:** Shipped via PR #10976 on 2026-09-26 (merge SHA fee5b214ec81674e8626049ac9ff47907f567f3a).
+
+### DL-#10516 · Apply the Same Workspace Navigation to React and Tauri
+
+- **State:** shipped
+- **Shipped:** 2026-09-20
+- **Owner:** local
+- **Issue:** #10516 (ORG-06, epic #10508)
+- **Branch:** feat/issue-10516-org06-react-workspace-navigation
+- **PR:** #10540
+- **Paths:** ui/src/types/workspaceNavigation.ts; ui/src/api/capabilityAdapter.ts; ui/src/components/layout/WorkspaceNavigation.tsx; ui/src/components/layout/WorkspaceNavigation.test.tsx; ui/src/pages/WorkspacePage.tsx; ui/src/components/simulation/LauncherDashboard.tsx; ui/src/App.tsx; ui/src/utils/routeTitles.ts; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json)
+- **Summary:** Applied task-oriented workspace navigation across React and Tauri (ORG-06). Reused shared catalog metadata for the five primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`). Integrated `WorkspaceSidebar` and `WorkspaceBreadcrumb` within `WorkspaceShell` preserving browser history, bookmarkable task URLs (`/workspaces/:slug`), centralized route titles, and keyboard focus recovery. Created shared `resolveWorkspaceToolAction` capability adapter opening native tools under Tauri/desktop while providing actionable explanations and web alternatives for browser-only users.
+- **Next step:** Merged in PR #10540 on 2026-09-20; see parent #10508 for remaining ORG work.
+- **Evidence:** ui/src/components/layout/WorkspaceNavigation.test.tsx; ui/src/components/layout/WorkspaceNavigation.tsx.
+
+### DL-#10515 · Build Task-Oriented Desktop Navigation Over Existing Embedded Tools
+
+- **State:** shipped
+- **Shipped:** 2026-09-20
+- **Owner:** local
+- **Issue:** #10515 (ORG-05, epic #10508)
+- **Branch:** feat/issue-10515-org05-desktop-navigation
+- **PR:** #10539
+- **Paths:** src/launchers/workspace_navigation.py; src/launchers/launcher_layout_manager.py; src/launchers/\_launcher_navigation_ui.py; src/launchers/launcher_ui_setup.py; tests/launchers/test_workspace_navigation.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json)
+- **Summary:** Built task-oriented desktop navigation over embedded tools (ORG-05). Added 5 primary task workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`). Integrated `ALIAS_MAP` layout migration into `LayoutManager.load_layout` preserving user custom tile scaling, view mode, and dock state. Enforced single-instance tool reuse in `dock_widget_as_tab` and `focus_or_open_tool_tab`. Provided accessible names, keyboard navigation, narrow-window scrolling via `QScrollArea`, return-to-workspace breadcrumbs (`WorkspaceBreadcrumbBar`), and actionable status explanations for missing/unconfigured capabilities (`explain_tool_status`).
+- **Next step:** Merged in PR #10539 on 2026-09-20; see parent #10508 for remaining ORG work.
+- **Evidence:** tests/launchers/test_workspace_navigation.py; src/launchers/workspace_navigation.py.
+
+### DL-#10513 · Validate Every Browser, Tauri, and Native Launch Destination
+
+- **State:** shipped
+- **Shipped:** 2026-09-20
+- **Owner:** local
+- **Issue:** #10513 (ORG-04, epic #10508)
+- **Branch:** feat/issue-10513-org04-launch-destinations
+- **PR:** #10537
+- **Paths:** ui/src/routes.ts; ui/src/api/launcherReachability.ts; ui/src/api/launcherReachability.test.tsx; ui/src/App.tsx; ui/src/api/webLaunch.ts; src/config/launcher_manifest_loader.py; src/shared/python/movement_optimizer/model_pack.yaml; tests/config/launcher_manifest/test_parity.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json)
+- **Summary:** Established canonical route table `KNOWN_APP_ROUTES` and `isKnownAppRoute` in React UI; implemented browser and Tauri reachability evaluation and matrix generator (`evaluateTileReachability`, `generateReachabilityMatrix`); hardened `resolveTileLaunchAction` to reject unmapped routes with honest blocked/unavailable states; removed invalid web_route from Movement Optimizer model packs and sanitized in `LauncherManifestLoader` so Movement Optimizer resolves cleanly to `native-window`; expanded `test_route_mode_routes_exist_in_react_router` to inspect all loaded tiles from `LauncherManifest.load()` and added `test_every_tile_destination_resolves_authoritatively`.
+- **Next step:** Merged in PR #10537 on 2026-09-20; see parent #10508 for remaining ORG work.
+- **Evidence:** ui/src/api/launcherReachability.test.tsx; tests/config/launcher_manifest/test_parity.py.
+
+### DL-#10512 · Replace Misleading Launches With Real Tasks or Explicit Nonlaunchable States
+
+- **State:** shipped
+- **Shipped:** 2026-09-20
+- **Owner:** local
+- **Issue:** #10512 (ORG-03, epic #10508)
+- **Branch:** feat/issue-10512-org03-launch-truthfulness
+- **PR:** #10536
+- **Paths:** src/config/launcher_manifest.json; src/config/models.yaml; src/launchers/external_tools_adapter.py; src/launchers/launcher_model_handlers.py; src/launchers/launcher_process_manager.py; src/launchers/task_launch_truthfulness.py; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py; ui/public/capability-atlas/graph.json; ui/public/capability-atlas/index.html
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json)
+- **Summary:** Audited capability launches and replaced misleading launch actions. Simulator prototype marked inspection/demo-only and distinct from qualified solvers; FreeMoCap parametric CLI guarded against zero-argument headless launch with parameter validation and cancellation safety; Video Analyzer placeholder fallback replaced with explicit unavailable provider diagnostic window (\_UnavailableToolWindow); library-only components (swing_optimizer, injury_analysis, pinn_pure_rigid, pinn_hybrid) and dual-shell service previews (canonical_core_estimation, canonical_core_comparison) audited with truthful dispositions, status messages, and next actions; fixed process assignment to Windows job objects for mock/invalid pids; regenerated capability atlas with verified freshness.
+- **Next step:** Merged in PR #10536 on 2026-09-20; see parent #10508 for remaining ORG work.
+- **Evidence:** tests/launchers/test_task_launch_truthfulness.py; tests/launchers/test_simulation_guis.py; tests/launchers/test_launcher_process_manager.py; tests/scripts/test_capability_atlas.py.
+
+### DL-#10511 · Separate Capability Identity, Maturity, Availability, and Qualification (ORG-02)
+
+- **State:** shipped
+- **Shipped:** 2026-09-20
+- **Owner:** local
+- **Issue:** #10511 (ORG-02, epic #10508)
+- **Branch:** feat/issue-10511-org02-capability-state-contract
+- **PR:** #10535
+- **Paths:** src/config/capability_state.py; src/config/launcher_manifest_loader.py; src/config/models.yaml; tests/config/launcher_manifest/test_capability_state_contract.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json)
+- **Summary:** Disentangled overloaded capability status into four orthogonal typed dimensions: capability identity, lifecycle maturity (prototype/experimental/stable/deprecated), per-surface availability (desktop, web, api, cli) with actionable reason and remediation when unavailable, and evidence-backed qualification conforming to #10351 engine matrix contract (exempt for non-engine tools). Enforced invariant that installed engines without a qualified receipt never serialize as release-ready. Resolved Simscape/Matlab Models and Simulator/Golf Simulation Suite display names from a single canonical authority across native registry and web manifest views. Added lazy probing cache keyed on runtime identity without synchronous engine imports. Preserved backward-compatible legacy status field for API consumers.
+- **Next step:** Merged in PR #10535 on 2026-09-20; see parent #10508 for remaining ORG work.
+- **Evidence:** tests/config/launcher_manifest/test_capability_state_contract.py; src/config/capability_state.py; src/config/launcher_manifest_loader.py.
+
+### DL-#10510 · Baseline Every Capability and Preserve Tile, Layout, and Artifact Identity
+
+- **State:** shipped
+- **Shipped:** 2026-09-20
+- **Owner:** local
+- **Issue:** #10510 (ORG-01, epic #10508)
+- **Branch:** feat/issue-10510-org01-capability-baseline
+- **PR:** #10534
+- **Paths:** src/config/capability_migration.py; src/config/capability_migration.json; scripts/generate_capability_baseline.py; docs/development/ORG01_CAPABILITY_BASELINE.md; tests/config/test_capability_migration_coverage.py; scripts/capability_atlas/render.py; docs/architecture/CAPABILITY_ATLAS.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json)
+- **Summary:** Built the canonical machine-checkable capability baseline inventory (`capability_migration.json`) and schema/validation engine (`capability_migration.py`) for Epic #10508. Enforced explicit contracts: IDs are unique, aliases are acyclic and resolve to retained targets, every capability has exactly one primary workspace domain, provider absence changes availability rather than identity, and preserved test fixtures retain golden byte hashes. Preserved ADR-0047 viewer identity and provider seam rulings. Created `scripts/generate_capability_baseline.py` producing `docs/development/ORG01_CAPABILITY_BASELINE.md` with freshness validation.
+- **Next step:** Merged in PR #10534 on 2026-09-20; see parent #10508 for remaining ORG work.
+- **Evidence:** tests/config/test_capability_migration_coverage.py; docs/development/ORG01_CAPABILITY_BASELINE.md; src/config/capability_migration.json.
+
+### DL-#8932 · Debounce and Memoize Advanced Analysis Tab Refreshes
+
+- **State:** shipped
+- **Shipped:** 2026-09-24
+- **Owner:** antigravity
+- **Issue:** #8932
+- **Branch:** fix/8932-analysis-tab-debounce-idle
+- **Paths:** `src/shared/python/dashboard/_analysis_refresh.py`; `src/shared/python/dashboard/advanced_analysis.py`; `tests/unit/shared_python/test_analysis_tab_refresh.py`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-10-11 (`944d798e`; collated from docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json)
+- **Summary:** SpectrogramTab/WaveletTab/PhasePlaneTab/CoherenceTab spinboxes go through `DebouncedRefresh` (150 ms); CoherenceTab, SpectrogramTab, and WaveletTab memoize expensive transforms in `BoundedResultCache`; SwingPlaneTab builds its axes once and swaps artists; all six analysis tabs use non-blocking `draw_idle()`.
+- **PR:** #10892
+- **Next step:** Merged in PR #10892 on 2026-09-24.
+
+### DL-#11000 · Pass the Reynolds-Curve Base Cd to the Rust Ball-Flight Kernel
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #11000
+- **PR:** #11004 (merged 642729daa)
+- **Branch:** `claude/ud-rust-drag-base-cd`
+- **Paths:** `src/shared/python/physics/ball_simulator.py`, `tests/unit/physics/test_rust_drag_base_coefficient.py`, `tests/unit/physics/test_launch_conditions_units_7223.py`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — with upstream-physics 2.1.3 built from source: trackman + launch-units + new boundary test 25 passed; tests/unit/physics + ball-flight suites 1041 passed (remaining failures identical with and without the fix, or local-environment only); parity + rust_bindings ball/aero 41 passed.
+- **Summary:** `BallFlightSimulator` handed the kernel `BallProperties.cd0` (0.21, the spin polynomial's constant) as the base of its Reynolds drag curve; it now passes `GOLF_BALL_DRAG_COEFFICIENT` (0.25), as the enhanced engine does. Driver carry 275.0 -> 248.3 yd, 7-iron 194.3 -> 179.8 yd, matching the enhanced engine within 0.3 %. The degrees-regression test asserts the launch contract's refusal. The exported parity fixture stays byte-pinned and untouched.
+- **Next step:** None; shipped. UD#10997 consumes the fix in the Linux unit gate.
+
+### DL-#9406 · Retire UpstreamDrift Copies of Tools-Owned Sidekick Modules
+
+- **State:** shipped
+- **Owner:** claude (agy executor)
+- **Issue:** #9406
+- **PR:** #10991
+- **Branch:** `claude/ud-9406-sidekick-shadow-retire`
+- **Paths:** `src/shared/python/sidekick/standalone/`, `src/shared/python/sidekick/persistence/`, `src/shared/python/sidekick/__main__.py`, `src/shared/python/sidekick/ui/tools_sidebar/default_tabs.py`, `src/launchers/embedded_tool_bootstrap.py`, `sidekick.spec`, `scripts/config/unit_gate_quarantine.json`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — Linux CI: `test_bootstrap_registers_all_first_party_tools` still fails there (11 first-party tools do not bootstrap headless), re-quarantined; divergence inventory regenerated for the retired `sidekick/__main__.py`. Earlier: 14 target quarantine IDs pass with `-n 6 --tools-mode vendored`; affected suites (sidekick, launcher, launchers, packaging, repo_hygiene, integration/sidekick, c3d_viewer) show no new failure against the same run on `b8c27a7d2`; contract passes (141 IDs).
+- **Summary:** Delete the downstream `sidekick` standalone, persistence, `__main__` and default-tabs copies so they resolve from the pinned Tools tree; put the vendored/explicit Tools paths ahead of UpstreamDrift's own in the embedded-tool bootstrap; take the Windows icon from the pinned Tools assets; retarget three tests to the vendor API.
+- **Next step:** Shipped in #10991.
+
+### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10944
+- **PR:** #10945
+- **Branch:** `agy/issue-10944`
+- **Paths:** `Cargo.toml`, `requirements-tools.txt`, `src/config/impact_acceptance.json`, `src/shared/python/ai/`, `src/shared/python/tour_baselines/reconciliation.py`, `docs/shared_tools/divergence_inventory.v1.json`, `docs/shared_tools/divergence_inventory.md`, `docs/agent_context/`, `tests/unit/ai/test_knowledge_and_wizards.py`, `tests/unit/tour_baselines/test_reconciliation.py`, `vendor/ud-tools`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 40/40 companion tests pass, 20/20 child-copy contract tests pass, 10/10 divergence inventory tests pass, 18/18 spec changelog tests pass, 18/18 seam/pin tests pass, 3/3 knowledge/wizard tests pass, 27/27 impact acceptance tests pass, 3/3 reconciliation tests pass, agent-context check clean.
+- **Summary:** Advance vendor/ud-tools submodule gitlink to 95ed6b47857e9a47211ab1973d02b28beae718bc on Tools main incorporating K0 (Tools#5348) and K3a (Tools#5350). Synchronize child copy of src/shared/python/ai/ (knowledge package, wizards.py, base adapter, panel tools, RAG deprecation). Advance Cargo.toml, requirements-tools.txt, impact_acceptance.json, reconciliation.py, regenerate divergence inventory, and render agent context.
+- **Next step:** Shipped in PR #10945 (commit 2d5830d18).
+
+### DL-#10487 · Stable PyQt Desktop Shortcuts and Consistent Taskbar and Favicon Identity
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10487
+- **PR:** #10909
+- **Branch:** `fix/10487-desktop-shortcuts-identity`
+- **Paths:** `src/launchers/app_identity.py`, `src/launchers/desktop_shortcuts.py`, `src/launchers/upstream_drift_launcher.py`, `src/launchers/upstream_drift_launcher_main.py`, `launch_upstream_drift.py`, `scripts/create_shortcut.ps1`, `scripts/create_golf_robot_shortcut.ps1`, `ui/index.html`, `ui/public/favicon.ico`, `docs/development/desktop_viewer_setup.md`, `tests/unit/launchers/test_app_identity.py`, `tests/unit/launchers/test_desktop_shortcuts.py`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 (`73185d259`) — verified 15 unit tests pass in test_app_identity.py and test_desktop_shortcuts.py; verified favicon bitwise parity, canonical AUMID registration, and idempotent shortcut creation
+- **Summary:** Implemented canonical AppUserModelID registration and icon resolution hierarchy in app_identity.py, idempotent Desktop and Start Menu shortcut manager in desktop_shortcuts.py with readback validation, synchronized web UI favicon with launcher assets, and added setup documentation (Fixes #10487).
+- **Next step:** Shipped in PR #10909.
+
+### DL-#8886 · Unified Display Units Policy and Cross-Tool Consistency
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #8886
+- **PR:** #10893
+- **Branch:** `fix/8886-unify-tool-units`
+- **Paths:** `src/shared/python/ui/units.py`, `src/shared/python/ui/preferences_dialog.py`, `src/tools/ball_flight_gui/gui.py`, `src/tools/swing_flight_pipeline/gui.py`, `src/tools/putting_green_gui/gui.py`, `docs/development/unit_policy.md`, `docs/development/embedding_a_tool.md`, `tests/unit/shared_python/test_units.py`, `tests/tools/ball_flight_gui/test_ball_flight_gui.py`, `tests/tools/swing_flight_pipeline/test_gui.py`, `tests/tools/putting_green_gui/test_putting_green_gui.py`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — verified 133 unit tests pass across units conversions, settings persistence, ball flight, swing pipeline, putting green, and pose studio
+- **Summary:** Implemented unified display units module with UnitSystem enum, settings persistence in PreferencesDialog, dynamic unit switching in ball flight, swing pipeline, and putting green simulators, and published fleet unit policy documentation (Fixes #8886).
+- **Next step:** Shipped to main in PR #10893.
+
+### DL-#10842 · SPEC Change Log and Root Handoff Governance
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #10842, #10843
+- **PR:** #10853
+- **Branch:** `docs/10842-10843-spec-and-handoff-governance`
+- **Paths:** `SPEC.md`, `AGENT_HANDOFF.md`, `docs/development/HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — verified spec changelog rows, title-case consistency, and root handoff length <= 150 lines
+- **Summary:** Registered missing Tour Baselines exact capture (#10837) and fail-closed qualification (#10841) rows in SPEC.md, and synchronized root AGENT_HANDOFF.md with active state per repository guidelines.
+- **Next step:** Shipped to main in PR #10853.
+
+### DL-#10838 · Optimize GripContactModel Slip Margin Performance
+
+- **State:** shipped
+- **Owner:** jules
+- **Issue:** #10838
+- **PR:** #10838
+- **Branch:** `bolt-optimize-grip-margin-18311144978976259102`
+- **Paths:** `src/shared/python/physics/_grip_model.py`, `tests/unit/test_grip_contact_model.py`, `.jules/bolt.md`, `SPEC.md`, `docs/development/HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — verified slip margin speedup with float-promoted dot product to prevent integer overflow (#10845, #10848)
+- **Summary:** Optimized GripContactModel.check_slip_margin by replacing np.linalg.norm with float-promoted dot product magnitude, preventing integer overflow while providing ~2x performance speedup.
+- **Next step:** Shipped to main in PR #10838.
+
+### DL-#8866 · Remove Dead Skeleton Extractors Providers From Starting Pose Matcher
+
+- **State:** shipped
+- **Owner:** issue-remediator
+- **Issue:** #8866
+- **PR:** #10808
+- **Branch:** `staff/issue-remediator-task-2852a7`
+- **Paths:** `src/tools/starting_pose_matcher/skeleton_extractors/` (deleted); `tests/unit/tools/starting_pose_matcher/test_{drake,mujoco,opensim,pinocchio}_provider.py`, `test_observed_input_providers.py`, `test_provider_error_paths.py` (deleted); `tests/tools/starting_pose_matcher/test_{observed_extractors,physics_extractors_with_stubs}.py` (deleted); `scripts/config/full_src_mypy_baseline.json`, `scripts/config/suite_marker_baseline.json`, `scripts/ci/lod_baseline.txt`, `docs/development/opensim_tour_matching/EPIC_GOLF_MODEL.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 by 388650ec3 — ruff check passes, ruff format no new diffs, file-size budget passes; 9 mypy baseline stubs, 89 suite-marker baseline nodes, and 3 lod entries removed for deleted files
+- **Summary:** Deleted 6 per-engine skeleton extractors in `skeleton_extractors/` (~1,614 lines) that have no callers outside tests, plus their 8 test modules; pruned stale baseline rows.
+- **Next step:** Shipped to main in PR #10808.
+
+### DL-#10593 · Tour Baselines Bounded Fit Campaigns (TB-08)
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10593 (TB-08, parent #10584, program #10363)
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10775
+- **Branch:** `feat/tb08-bounded-fit-campaigns-10593`
+- **Paths:** `src/shared/python/tour_baselines/campaign.py`; `src/shared/python/tour_baselines/__init__.py`; `src/shared/python/motion_matching/tour_baselines.py`; `tests/unit/tour_baselines/test_fit_campaign.py`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 — 7 passed in `test_fit_campaign.py`, 64 passed in full `tests/unit/tour_baselines/` suite, 20 passed in repo hygiene child-copy contract. Ruff check and format clean. Merged via PR #10775.
+- **Summary:** Implemented `CampaignJobSpec`, `CampaignCandidate`, `CandidateRanking`, `rank_candidates`, `CampaignEvaluationRecord`, `CampaignManifest`, `CampaignResult`, `PilotBudget`, `GeneralizationDisclaimer`, and `FitCampaignService` enforcing deterministic Pareto ranking (feasible candidate beats infeasible lower-error candidate), immutable checkpointing, hash-checked resume (`IncompatibleResumeError`), diagnostic preservation on cancel/timeout without promotion, exact full-clock score verification, and holdout disclaimers.
+- **Next step:** Landed on main. Proceed to TB-09 (#10594).
+
+### DL-#10594 · Tour Baselines Independent Qualification (TB-09)
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10594 (TB-09, parent #10584, program #10363)
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10785
+- **Branch:** `feat/tb09-independent-qualification-10594`
+- **Paths:** `src/shared/python/tour_baselines/qualification.py`; `src/shared/python/tour_baselines/__init__.py`; `src/shared/python/tour_baselines/coverage.py`; `tests/unit/tour_baselines/test_qualification.py`; `tests/unit/tour_baselines/test_model_identities.py`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-24 — 20 passed in `test_qualification.py`, 84 passed in full `tests/unit/tour_baselines/` suite. Merged via PR #10785.
+- **Summary:** Implemented `IntegrityViolation`, `IntegrityReport`, `RolloutReconstructionResult`, `ConstraintEvaluationResult`, `RecomputedMetrics`, `EndpointCheckResult`, `ModelAdequacyDecomposition`, `compare_cross_complexity`, `RefinementSensitivityRecord`, `ForceIdentifiabilityDisclaimer`, `RosterVerdict`, `evaluate_full_roster_qualification`, and `ExpertSignoff` enforcing cryptographic hash integrity, forward dynamic rollout reconstruction from single (q0, v0), physical and geometric constraint evaluation, independent metric recomputation, 3-way model adequacy decomposition, cross-complexity comparison over common observation sets, refinement sensitivity under dt, force identifiability disclaimer, full 40-cell coverage matrix qualification verdicts with strict G3 reduced model exclusion, and auditable JSON export.
+- **Next step:** Landed on main. Proceed to TB-10 (#10595).
+
+### DL-#10595 · Tour Baselines Discovery, Portable Loading and Safe Model Presets (TB-10)
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10595 (TB-10, parent #10584, program #10363)
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10793
+- **Branch:** `feat/tb10-baseline-discovery-presets-10595`
+- **Paths:** `src/shared/python/tour_baselines/discovery.py`; `src/shared/python/tour_baselines/__init__.py`; `src/shared/python/tour_baselines/qualification.py`; `src/shared/python/motion_matching/ledger.py`; `tests/unit/tour_baselines/test_discovery.py`; `tests/unit/tour_baselines/test_qualification.py`; `docs/shared_tools/divergence_inventory.v1.json`; `docs/shared_tools/divergence_inventory.md`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-24 — 14 passed in `test_discovery.py`, 20 passed in `test_qualification.py`, 98 passed in full `tests/unit/tour_baselines/` suite. Merged via PR #10793.
+- **Summary:** Implemented `SafeModelPreset`, `IncompatiblePresetError`, `MissingDependencyError`, `BaselineNotFoundError`, `BaselineFilter`, `BaselineSummary`, `BaselineDetail`, `BaselineDiscoveryService`, `export_to_ledger_rows`, and headless CLI supporting catalog scanning across configurable search paths, multi-field filtering (model, club, horizon, qualification status), fail-closed preset compatibility checks (refusing topology mismatches and missing solver dependencies), fail-closed default preset selection (unverified packages cannot be auto-selected), safe session cloning preserving user workspace, portable export and clean-machine import with SHA-256 verification and dependency diagnostics, deterministic re-indexing, and result index ledger conversion. Also remediated bot review items #10786, #10787, #10789, #10790.
+- **Next step:** Landed on main. Address follow-up bot reviews #10794 and #10795.
+
+### DL-#10794 · Reconstruct Presets From Verified Arrays & Qualifiable Pendulum Baselines (#10794, #10795)
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10794, #10795
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10798
+- **Branch:** `fix/review-feedback-10794-10795`
+- **Paths:** `src/shared/python/tour_baselines/discovery.py`; `src/shared/python/tour_baselines/qualification.py`; `src/shared/python/tour_baselines/__init__.py`; `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`; `tests/unit/tour_baselines/test_discovery.py`; `tests/unit/tour_baselines/test_qualification.py`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-24 — Merged cleanly in PR #10798 with 100% green CI (all 53 checks passing).
+- **Summary:** Remediated bot review feedback on TB-10: reconstructed `SafeModelPreset` from verified archive array members and added `np.array_equal` check against manifest-embedded arrays to prevent manifest tampering (#10795); evaluated continuous torque into `tau`, recorded `time`, set `horizon="G1"`, and generated non-empty identity hashes in pendulum `_assemble_baseline_package`, and implemented `migrate_legacy_package` in `qualification.py` with auto-migration support in `IndependentBaselineQualifier.qualify()` (#10794).
+- **Next step:** Landed on main. Proceed to TB-11 (#10596).
+
+### DL-#10596 · Expose Tour Baselines in Motion Matching, Pendulum Tools and Replay (TB-11)
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10596 (TB-11, parent #10584, program #10363)
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10809
+- **Branch:** `feat/tb11-expose-tour-baselines-10596`
+- **Paths:** `src/tools/motion_matching/tour_baselines_presenter.py`; `src/tools/motion_matching/tour_baselines_widget.py`; `src/tools/motion_matching/gui.py`; `tests/unit/motion_matching/test_tour_baselines_presenter.py`; `tests/tools/motion_matching/test_motion_matching_gui.py`; `SPEC.md`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-24 — Exact-capture filtering applied to presenter roster package flags (#10829) and comparison (#10826); 10 unit tests passing in tests/unit/motion_matching/test_tour_baselines_presenter.py.
+- **Summary:** Implemented `TourBaselinesPresenter`, `TourBaselineDetailView`, `ModelItemView`, `WhereThisCameFromView`, `BaselineOpenResult`, `ModelComparisonReport`, `EvidenceInspectionReport`, and `ComputeBudgetView` exposing the canonical two-capture coverage matrix, accessible status badges with text labels and symbols without relying on color alone, visual semantics distinguishing 3D and projected 2D views and observed markers from simulated meshes, plain-language "Where This Came From" metadata linking raw hashes, preprocessing, geometry, fit configs, and scientific limitations (force identifiability and holdout disclaimers), and session actions (Open in Viewer, Clone for Experiment, Compare Models, Inspect Evidence, Reproduce). Enforced exact capture matching in roster package flags and detail views to eliminate cross-capture fallbacks. Integrated "Tour Baselines" tab into `MotionMatchingWidget` with interactive capture/model selectors, immediate metadata display, collapsible provenance panel, and action button dispatches.
+- **Next step:** Landed on main. Proceed to TB-12 (#10597).
+
+### DL-#10774 · Deferred Validation Project Projection
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #10774; parents Repository_Management#1687 and Runner_Dashboard#1248
+- **Branch:** `docs/deferred-project-projection`
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10776
+- **Paths:** `docs/project/`, `docs/index.md`, `docs/README.md`, `docs/development/HANDOFF.md`, `SPEC.md`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 (8c15de9dafdc0caf5d172c1aa97037ffd4655c74; merged #10776; six parked owner rows/links verified in post-reboot central UI/API receipt; original plans unchanged)
+- **Summary:** Projects all six published external-validation owner plans without inventing evidence, resource approval or completion. Software and research authorities are preserved.
+- **Next step:** Projection published; Board decisions remain pending. Enforcement continues in DL-#10783.
+
+### DL-#10750 · Keep Test-Generated JSON Out of Committed Working Tree
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10750
+- **Branch:** fix/10750-tests-in-place-json-mutation
+- **PR:** #10761
+- **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; tests/unit/motion_matching/test_club_fast_matching.py; src/engines/physics_engines/mujoco/python/humanoid_launcher.py; tests/unit/test_gui_coverage.py
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 (`008487870`)
+- **Summary:** Thread optional evidence_dir through save_fast_match_evidence and point tests at tmp_path; support optional config_path and avoid unconditional save_config on HumanoidLauncher instantiation so tests never rewrite committed JSON artifacts.
+- **Evidence:** PR #10761 merged cleanly to main at 008487870 with all CI checks passing.
+
 ### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
 
 - **State:** shipped
@@ -1234,4 +2377,3 @@
 - **Paths:** docs/architecture/C4.md, scripts/architecture_map_contract.py
 - **Started:** 2026-09-10
 - **Last verified:** 2026-09-10 (`09f6d22da3`)
-

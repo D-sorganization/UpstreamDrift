@@ -26,19 +26,26 @@ def compute_gear_effect_spin(
     v_scale: float = 150.0,
 ) -> np.ndarray:
 # fmt: on
-    """Compute spin from gear effect for off-center impact.
+    """Estimate an additive gear-spin contribution for right-handed delivery.
 
     Gear effect occurs when the ball contacts the clubface
     away from the center of gravity, causing the clubhead
     to rotate and impart spin to the ball.
 
+    This legacy heuristic does not solve coupled club/ball angular momentum
+    or represent measured equipment calibration. For forward +X and up +Z,
+    +Y is left. Positive toe offset adds +Z spin, whose Magnus direction
+    (spin cross velocity) is left; heel offset reverses it. Positive high-face
+    offset adds topspin about +Y, reducing a negative-Y backspin component.
+
     Args:
-        impact_offset: Offset from clubface center [m] (2,) [horizontal, vertical]
+        impact_offset: Offset from clubface center [m] (2,), toe-positive and
+            high-positive for the right-handed convention.
         clubhead_velocity: Clubhead velocity at impact [m/s] (3,)
         clubface_normal: Clubface normal vector [unitless] (3,)
         gear_factor: Gear effect amplification (0-1)
-        h_scale: Scaling factor for horizontal offset
-        v_scale: Scaling factor for vertical offset
+        h_scale: Heuristic horizontal scale [rad/m²]; not equipment calibration.
+        v_scale: Heuristic vertical scale [rad/m²]; not equipment calibration.
 
     Returns:
         Additional spin from gear effect [rad/s] (3,)
@@ -53,9 +60,9 @@ def compute_gear_effect_spin(
     # Speed affects spin magnitude
     speed = math.sqrt(np.dot(clubhead_velocity, clubhead_velocity))  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
 
-    # Gear effect spin rate (empirical relationship)
+    # Gear effect spin rate (uncalibrated heuristic relationship)
     # Higher offset = more spin, proportional to speed
-    horizontal_spin = -gear_factor * h_offset * speed * h_scale  # [rad/s]
+    horizontal_spin = gear_factor * h_offset * speed * h_scale  # [rad/s]
     vertical_spin = gear_factor * v_offset * speed * v_scale  # [rad/s]
 
     # Convert to 3D spin vector

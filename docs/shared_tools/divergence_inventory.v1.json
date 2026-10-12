@@ -13,7 +13,7 @@
   "totals": {
     "identical": 397,
     "diverged": 276,
-    "ud-only": 1615,
+    "ud-only": 1620,
     "tools-only": 808,
     "spelling-only": 123
   },
@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 295,
+      "ud-only": 296,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -588,7 +588,7 @@
     "physics": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 74,
+      "ud-only": 75,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -693,7 +693,7 @@
     "reporting": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 5,
+      "ud-only": 9,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -15549,7 +15549,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 19951,
+      "ud_bytes": 20269,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15609,7 +15609,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 36694,
+      "ud_bytes": 36632,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16582,6 +16582,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 11139,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/output_policy.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 5816,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -18981,7 +18993,7 @@
       "classification": "ud-only",
       "package": "neural_motion",
       "subpackage": "benchmark",
-      "ud_bytes": 3114,
+      "ud_bytes": 6517,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -21701,6 +21713,18 @@
       "spelling_only": false
     },
     {
+      "path": "physics/impact_model/README.md",
+      "classification": "ud-only",
+      "package": "physics",
+      "subpackage": "impact_model",
+      "ud_bytes": 724,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "physics/impact_model/__init__.py",
       "classification": "ud-only",
       "package": "physics",
@@ -24264,6 +24288,54 @@
       "ud_bytes": 1361,
       "tools_bytes": 1419,
       "byte_delta": -58,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/__init__.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 500,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/contract.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 9179,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/policy.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 1870,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/validator.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 13514,
+      "tools_bytes": null,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -38073,9 +38145,9 @@
     {
       "path": "__init__.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -39491,8 +39563,8 @@
       "path": "contracts.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-10-10",
-        "commit": "99a6fd48a2d12049ae3d36b6ace86d9a168e9cb5"
+        "date": "2026-08-01",
+        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -39555,9 +39627,9 @@
     {
       "path": "humanoid_character_builder/__init__.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -39646,9 +39718,9 @@
     {
       "path": "humanoid_character_builder/generators/_makehuman_generator.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -39672,9 +39744,9 @@
     {
       "path": "humanoid_character_builder/generators/_primitive_generator.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -39685,9 +39757,9 @@
     {
       "path": "humanoid_character_builder/generators/_smplx_generator.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -39711,9 +39783,9 @@
     {
       "path": "humanoid_character_builder/generators/mesh_generator_primitive.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -39724,9 +39796,9 @@
     {
       "path": "humanoid_character_builder/generators/mesh_generator_smplx.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -39763,9 +39835,9 @@
     {
       "path": "humanoid_character_builder/interfaces/api.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -39816,8 +39888,8 @@
       "path": "humanoid_character_builder/mesh/primitive_inertia.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-10-10",
-        "commit": "01ba652eb63caf380bf52e222e07e7cd8461f063"
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -39841,9 +39913,9 @@
     {
       "path": "humanoid_character_builder/presets/loader.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -39907,8 +39979,8 @@
       "path": "import_aliases.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-10-10",
-        "commit": "76c2dcc23c5a072fef9f249d11530685d6c3d3be"
+        "date": "2026-08-01",
+        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
         "author": "d-sorgclaudeagent[bot]",
@@ -39932,9 +40004,9 @@
     {
       "path": "model_generation/_convenience.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -39958,9 +40030,9 @@
     {
       "path": "model_generation/api/__init__.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -39984,9 +40056,9 @@
     {
       "path": "model_generation/api/rest_api_assets.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40036,9 +40108,9 @@
     {
       "path": "model_generation/api/rest_api_generation.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40075,9 +40147,9 @@
     {
       "path": "model_generation/builders/base_builder.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40088,9 +40160,9 @@
     {
       "path": "model_generation/builders/manual_builder.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40101,9 +40173,9 @@
     {
       "path": "model_generation/builders/parametric_builder.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40114,9 +40186,9 @@
     {
       "path": "model_generation/builders/urdf_writer.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40140,9 +40212,9 @@
     {
       "path": "model_generation/cli/main.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40166,9 +40238,9 @@
     {
       "path": "model_generation/converters/format_utils.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40179,9 +40251,9 @@
     {
       "path": "model_generation/converters/mjcf_converter.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40218,9 +40290,9 @@
     {
       "path": "model_generation/converters/simscape/simscape_converter.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40231,9 +40303,9 @@
     {
       "path": "model_generation/converters/urdf_parser.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40270,9 +40342,9 @@
     {
       "path": "model_generation/core/physics_validation.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40296,9 +40368,9 @@
     {
       "path": "model_generation/core/validation.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40322,9 +40394,9 @@
     {
       "path": "model_generation/editor/editor_clipboard.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40335,9 +40407,9 @@
     {
       "path": "model_generation/editor/editor_modifications.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40361,9 +40433,9 @@
     {
       "path": "model_generation/editor/frankenstein_editor.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40387,9 +40459,9 @@
     {
       "path": "model_generation/explorer/__init__.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40452,9 +40524,9 @@
     {
       "path": "model_generation/inertia/calculator.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -40530,9 +40602,9 @@
     {
       "path": "model_generation/library/model_library.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-10",
-        "commit": "7a11baee9cd4033ef391287df0342891c96095df"
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
       },
       "tools": {
         "author": "Dieter Olson",
