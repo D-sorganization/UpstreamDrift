@@ -30,7 +30,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomech` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `biomechanics` | 0 | 0 | 0 | 37 | 0 | 0 |
+| `biomechanics` | 0 | 0 | 0 | 38 | 0 | 0 |
 | `body_part_viz` | 0 | 0 | 0 | 38 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
 | `camera` | 0 | 0 | 0 | 0 | 4 | 0 |
@@ -59,7 +59,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `docker_config.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `engine_core` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `engine_loaders.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `estimation` | 0 | 0 | 0 | 43 | 0 | 0 |
+| `estimation` | 0 | 0 | 0 | 44 | 0 | 0 |
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |

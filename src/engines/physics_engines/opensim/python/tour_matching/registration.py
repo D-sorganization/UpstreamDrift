@@ -93,8 +93,14 @@ class CaptureRegistration:
         is_ortho = np.allclose(R @ R.T, np.eye(3), atol=1e-6)
         require(is_ortho, "Rotation matrix must be orthogonal (R @ R.T == I)")
 
-        object.__setattr__(self, "rotation", R)
-        object.__setattr__(self, "translation", t)
+        # Immutable byte backing prevents both caller alias mutation and callers
+        # re-enabling writes on a supposedly frozen calibration transform.
+        object.__setattr__(
+            self, "rotation", np.frombuffer(R.tobytes(), dtype=np.float64).reshape(3, 3)
+        )
+        object.__setattr__(
+            self, "translation", np.frombuffer(t.tobytes(), dtype=np.float64)
+        )
 
     def inverse(self) -> CaptureRegistration:
         """Compute the exact inverse transform: source = (target - t) @ R."""
@@ -154,6 +160,11 @@ def compute_capture_registration(
     if s_p[1] < 1e-6:
         raise ValueError(
             "Source points are collinear or degenerate; cannot compute 3D rotation"
+        )
+    _, s_q, _ = np.linalg.svd(q_centered)
+    if s_q[1] < 1e-6:
+        raise ValueError(
+            "Target points are collinear or degenerate; cannot compute 3D rotation"
         )
 
     R = kabsch_rotation(p_centered, q_centered)
