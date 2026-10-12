@@ -40,6 +40,7 @@ import numpy as np
 from src.shared.python.analysis.swing_events import detect_swing_events
 from src.shared.python.core.contracts import precondition
 from src.shared.python.data_io._schemas import validate_trajectory_array
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -271,8 +272,8 @@ class SwingCaptureImporter:
             raise FileNotFoundError(f"C3D file not found: {filepath}")
 
         try:
-            import ezc3d
-        except ImportError:
+            ezc3d = import_ezc3d()
+        except ModuleNotFoundError:
             raise ImportError(
                 "ezc3d is required for C3D import. Install with: pip install ezc3d"
             ) from None

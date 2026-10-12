@@ -60,6 +60,38 @@ class InventoryError(ValueError):
     """Raised when the inventory ledger or package contract is violated."""
 
 
+# Evidence kinds recorded on native probe results (issue #11945).  A bare MuJoCo
+# MJCF compile and a registered MyoSuite Gym provider are distinct claims.
+EVIDENCE_MJCF_COMPILE = "mujoco_mjcf_compile"
+EVIDENCE_MYOSUITE_GYM_PROVIDER = "myosuite_gym_provider"
+MYOSUITE_COMPILE_CLAIM_LIMIT = (
+    "MuJoCo MJCF compile/forward probe only; not a MyoSuite Gym provider, "
+    "no registered task was exercised, no replay qualification implied"
+)
+
+
+class ProviderEvidenceConflationError(InventoryError):
+    """Raised when MJCF-compile evidence is offered as MyoSuite provider evidence."""
+
+
+def require_myosuite_gym_provider_evidence(
+    loaded: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    """Admit ``loaded`` only if it is genuine MyoSuite Gym-provider evidence.
+
+    Precondition: ``loaded`` carries ``evidence_kind == EVIDENCE_MYOSUITE_GYM_PROVIDER``.
+    A bare MuJoCo MJCF compile (or an unlabelled result) is rejected.
+    """
+    kind = loaded.get("evidence_kind")
+    if kind != EVIDENCE_MYOSUITE_GYM_PROVIDER:
+        raise ProviderEvidenceConflationError(
+            f"evidence_kind {kind!r} is not a MyoSuite Gym provider; a bare "
+            "MuJoCo MJCF compile cannot represent registered-provider "
+            "availability or replay qualification"
+        )
+    return loaded
+
+
 class ClubKind(enum.Enum):
     """Flagship club variants required by MS-102."""
 
@@ -651,7 +683,11 @@ def _native_load_step(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
 
 
 def _native_myosuite(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
-    """Load the MS-51 generated golfer MJCF via MuJoCo (MyoSuite backend)."""
+    """Compile the MS-51 golfer MJCF with bare MuJoCo (not a MyoSuite provider).
+
+    The result is labelled ``EVIDENCE_MJCF_COMPILE``: it never constructs a
+    MyoSuite Gym environment, so it must not be read as provider availability.
+    """
     import importlib
 
     mujoco = importlib.import_module("mujoco")
@@ -675,6 +711,9 @@ def _native_myosuite(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
         "nu": int(model.nu),
         "mass_kg": float(sum(model.body_mass)),
         "generated_model": package.generated_model,
+        "evidence_kind": EVIDENCE_MJCF_COMPILE,
+        "backend": "mujoco",
+        "myosuite_gym_provider": False,
     }
 
 
@@ -846,11 +885,21 @@ def _native_success_pipeline(
     fk_ok = mass is None or (
         isinstance(mass, (int, float)) and mass == mass and mass > 0
     )
+    claim = (
+        f"; {MYOSUITE_COMPILE_CLAIM_LIMIT}"
+        if loaded.get("evidence_kind") == EVIDENCE_MJCF_COMPILE
+        else ""
+    )
+    label = (
+        "MuJoCo MJCF compile of myosuite package"
+        if claim
+        else f"loaded {package.engine} package"
+    )
     return [
         _step(
             QualificationStep.LOAD_COMPILE,
             QualificationOutcome.PASS,
-            f"loaded {package.engine} package ({loaded})",
+            f"{label} ({loaded}){claim}",
         ),
         _step(
             QualificationStep.INITIALIZE,

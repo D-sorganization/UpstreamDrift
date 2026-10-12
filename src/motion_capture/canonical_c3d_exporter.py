@@ -30,6 +30,8 @@ from pathlib import Path
 
 import numpy as np
 
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
+
 __all__ = ["export_markers_to_c3d"]
 
 logger = logging.getLogger(__name__)
@@ -111,8 +113,8 @@ def export_markers_to_c3d(
 
     # --- Optional dependency: ezc3d ---
     try:
-        import ezc3d  # noqa: PLC0415
-    except ImportError as exc:
+        ezc3d = import_ezc3d()
+    except ModuleNotFoundError as exc:
         raise ImportError(
             "ezc3d is required for C3D export. "
             "Install it with: pip install 'upstream-drift[c3d]' "
