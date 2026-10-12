@@ -41,3 +41,48 @@ Normal hooks and protected CI remain to be recorded after execution. The fleet
 inbox returned incomplete evidence with its known malformed/page-limit warnings;
 direct root coordination preserves the ownership partition. Generated manual
 release remains blocked.
+
+## Issue #12342: Persist the Observed Audit
+
+Native preparation now atomically stores the same `NativePassiveReadinessAudit`
+object returned by its single observation call. The receipt binds request and
+source identity, loaded model and runtime, prepared-state observation digest,
+observer implementation, explicit optional policy identity, and the complete
+muscle inventory. The solve entrypoint verifies receipt bytes and these expected
+identities before proceeding; a missing or stale receipt blocks admission. This
+is an observation receipt, not a complete restart-state artifact and not a
+physical qualification. Policy absence remains an explicit blocker, and the
+existing unqualified status is unchanged.
+
+This source-specific OpenSim receipt changes no qualification status in the
+17-row model inventory and makes no implementation or parity claim for other
+engines.
+
+Validation on the supported Python 3.12 QA environment:
+
+```text
+python -m pytest -o 'addopts=' -q -rA tests/opensim/test_native_passive_receipt.py tests/opensim/test_native_passive_readiness.py tests/opensim/test_native_moco_runner.py tests/opensim/test_native_moco_diagnostic.py tests/unit/engines/opensim/test_native_moco_chart_bounds.py
+```
+
+Result: 41 passed, 66 skipped because this QA environment has no OpenSim module,
+and 2 warnings. The full required pre_pr completed with exit 1 at the existing Fleet Policy
+Gate; the other required gates passed. The fleet findings include missing verifying
+SHAs for entries #8869 and #9193, missing State and Owner for #9349, 144 active
+entries against a 75-entry ceiling, and an oversized Development Log. These
+findings are existing policy debt and are not reported as passing.
+
+The durable pre_pr log is
+`C:\Users\diete\Repositories\_temp\passive_receipt_pre_pr_final_20261012.log`
+(SHA-256
+`af6c98b0bb766dfd9ebf6f78b34b3526bff4b88b0a37f6d0432561cb55ea1030`).
+An earlier pre_pr attempt was interrupted during consistency tests after an
+idle owned pytest process; that run is retained as incomplete, not counted as
+a pass. The later full pre_pr run completed the consistency gate successfully.
+The receipt tests cover complete audit roundtrip, one-observation propagation
+through preparation, consumer-side tamper and
+stale-identity rejection for opt-in and default modes, malformed payload and
+inventory refusal, and atomic-write failure through preparation. No native
+execution or solve was run for this receipt change. The fragment validator
+accepted the new #12342 fragment. Design-manual governance verified the 62 QMD
+sources and retained `release=blocked-inventory-required`; calculation/manual
+release remains blocked.
