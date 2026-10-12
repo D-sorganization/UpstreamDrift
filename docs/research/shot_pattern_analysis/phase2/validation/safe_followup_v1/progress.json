@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T09:43:08.573342+00:00",
+  "recorded_at_utc": "2026-10-12T10:49:58.359336+00:00",
   "checkpoint": "4317a39b461db30d59c7062d4b9cd0334ec37956",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "4317a39b461db30d59c7062d4b9cd0334ec37956",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete final-source gate pending fixture cohesion repair. All76historical consumers+2registry tests pass, fullCI scanner209rules271files passed before latestscopecheck. Broad scientific failures are preserved and tracked in12398; no fullresearchgreenclaim.",
+  "current_validation": "All seven original protected-CI unit failure nodes now pass locally; 51 strict ownership/provider guard cases pass. Eight auto-config scan findings have bounded reviewed repairs. Complete broad failure receipt preserved. Reconciliation of newer remote47df and fresh stable-source canonical gate are pending; no final-source pass or protected merge claimed.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -842,5 +842,197 @@
         "uncompressed_sha256": "c5491f004cd3f8300ffbb723732b51d1e47a73220e57eefb54ec0a20f8cc50be"
       }
     ]
+  },
+  "broader_research_gate": {
+    "status": "FAIL, retained complete receipt; not final-source acceptance",
+    "collected_source": "240548ac9c",
+    "source_changes_during_run": "Historical fixture consumer and registry test fixes committed as e0c35960b0 while this pre-existing collection continued. Final acceptance requires a fresh stable-source run.",
+    "summary": "26 failed, 8555 passed, 395 skipped, 43 deselected, 1 xpassed, 21 subtests passed",
+    "failed_nodes": [
+      "tests/research/test_bounded_event_reachability_evidence.py::test_registered_report_is_reproducible_and_source_current",
+      "tests/research/test_bounded_event_reachability_evidence.py::test_registered_arrays_exactly_match_recomputed_full_precision_evidence",
+      "tests/research/test_claim_numeric_registry.py::test_complete_registry_has_executable_numeric_traceability",
+      "tests/research/test_constraint_internal_force_diagnostics_evidence.py::test_registered_report_is_deterministic_and_source_bound",
+      "tests/research/test_forward_two_arm_evidence.py::test_committed_evidence_matches_executable_study",
+      "tests/research/test_historical_preflight_refactor.py::test_saved_preflight_exact_receipt_and_failure_order[success]",
+      "tests/research/test_historical_preflight_refactor.py::test_saved_preflight_exact_receipt_and_failure_order[source_change]",
+      "tests/research/test_historical_preflight_refactor.py::test_saved_preflight_exact_receipt_and_failure_order[audit_hash]",
+      "tests/research/test_historical_preflight_refactor.py::test_saved_preflight_exact_receipt_and_failure_order[comparison_change]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[complete]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[conditional]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[insufficient]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[unavailable]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[unavailable_scoring]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[corrupt_manifest]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[wrong_summary]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_pilot_audit_preserves_counts_maxima_hashes_and_failure_collection",
+      "tests/research/test_moving_base_flexible_evidence.py::test_committed_artifacts_match_executable_study",
+      "tests/research/test_shaft_contribution_evidence.py::test_outputs_replay_with_declared_numerical_tolerance",
+      "tests/research/test_transmission_stability_audit.py::test_committed_transmission_stability_audit_is_fresh",
+      "tests/research/wave6_research/test_differentiable.py::TestContactDifferentiableEngine::test_apply_phase_smoothing",
+      "tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_and_social_overhead_covariance_caption_containment_and_separation",
+      "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[pitching_wedge_shaft_only_narrow-pitching_wedge-77.402-2.0-2.0]",
+      "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_shaft_only_narrow-seven_iron-148.5-4.0-4.0]",
+      "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_combined_noise-seven_iron-148.5-5.0-3.8]",
+      "tests/tools/shot_pattern_analysis/test_social_summary.py::test_social_summary_writes_exact_facebook_preview_dimensions"
+    ],
+    "receipt": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-repaired-source-canonical-prepr.txt.gz",
+    "sha256": "3eb5b850b00fc6c598018839ed6fc25d97ad3548d19d5a58097dc0c90870f279",
+    "uncompressed_sha256": "9869852102c1f55755b34982316277b53be9214b43f97c41d365682700991888",
+    "remaining_science_followup": "#12398; includes moving-base, transmission and differentiable-engine failures; no acceptance renewal or tolerance change",
+    "plot_state_pollution": "Moving-base figure test reproducibly leaked axes.labelsize=9/savefig.bbox=tight into five later shot plot assertions; isolated with rc_context, no rendering-source or expected-value change",
+    "security": "Available auto-config Semgrep found eight further findings; repairs are in progress, original scan output retained"
+  },
+  "postpush_unit_and_auto_scan_repairs": {
+    "status": "Reviewed focused repairs pass; stable-source canonical gate and protected CI pending",
+    "auto_scan": "Eight findings repaired through fixed reviewed source trust and registered literal imports/whitelists; immutable copied verifier restored to original declared bytes in deterministic gzip; original altered preimage preserved",
+    "historical_verifier_scope": "Explicit historical candidate reproduces84comparisons; current-source freshness fails closed, no current science qualification renewed",
+    "focused": "13provider/import tests,8figure-state/shotassertions,40structuraltests,14release/reference/audittests pass",
+    "setup_error": "First release/reference command selected nonexistent test_open_research_release.py, collected none/exit4; corrected command uses actualtest_proximal_distal_release_bundle.py and14pass. Original output preserved.",
+    "structural": "Astra-approved exact ownership/alias classification, no shadow-ledger expansion;51focused cases and all7original CIunit failingnodes pass. Other focused structural40 and release/reference14pass.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-auto-import-security-red.txt.gz",
+        "sha256": "e3816d879c99e87f2dea3b38ad3f08f4ffaf74c35c96e09abb55e2dfe6496b7e",
+        "input_sha256": "7ddbe97b6f71f33be03fe69c7424f1cc8488366c5a8a5c4ac5143677d6e1bc4d"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-auto-import-security-green.txt.gz",
+        "sha256": "39777e277f766e46816e14e3cde3da092d22a7f720213d303d0b8918c425437b",
+        "input_sha256": "91ff7b9625ea933c0e4892bef288f064f301ea53d2c95e2886cf091e7d5fdd70"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-auto-import-security-semgrep-green.txt.gz",
+        "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+        "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-plot-moving-base-contamination-repro.txt.gz",
+        "sha256": "a1f42eddd3b46cbe1e7ac9e54309fc13ee709b1e21a536c89d59f87842fb5291",
+        "input_sha256": "27c33664e4dd18f54f79f693ee01d137b1aec1d60c867a141cc1ee8bceb2c913"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-plot-moving-base-isolation-root-green.txt.gz",
+        "sha256": "093fdd4dd0fed434bb140261f37391e98ad75402f749e034ef14bd1975a7b86d",
+        "input_sha256": "de90b0063ea9225fa8eb47eaf3038de0cfe784eb2ec8db0f5166e31cbabc8bc1"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-ci-final-6ce.tsv.gz",
+        "sha256": "0b526266413b1ac2efe0e24b2a77bedb9c382f18298254e6b569bef45e6b642d",
+        "input_sha256": "f49a3560b5b2db6ab3f938558cf306285a6be6ae73adb0172656289d5387dd46"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-unit-job-direct-red.txt.gz",
+        "sha256": "acd64bd9feb01de096ea13b97ede96d6bd14c64d4f66be8ff30f0a930b26cea6",
+        "input_sha256": "9b29e6e5a76a956ac65553530cdf7a1c6759b4ee9a647a5219bdc0914a5e9b0f"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-unit-structural-focused-green.txt.gz",
+        "sha256": "7550edf46e6a2cecb2c31cfd4431741b3e988f824fd26809fc984ddcc56fe15f",
+        "input_sha256": "38d3bce8636cca387b6630d27f08d687527b372d8b9e378568730e3b180cb8f0"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-unit-reference-integrity-green.txt.gz",
+        "sha256": "3f884280593b030c22886f4b7537b760da2441d4a6ef8793e903dff36a901a78",
+        "input_sha256": "170ecafe41bee5e928cd3ef4903b06ce9d167b717b42710f685d0a36fc5123d8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-unit-reference-integrity-corrected-green.txt.gz",
+        "sha256": "d8358fb32fd10e9d14669605d6c2e27f6afe7be26939e9c7e26803e6abcf6eee",
+        "input_sha256": "1eda7523896342d6c8a1f61830a6bffb87335548339f773c696fae2c9f8bb502"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-reference-link-integrity-delta.json.gz",
+        "sha256": "c4c16d22796c9420cf57b824c7179140958308777eb8d0835841819bc6b5e3f9",
+        "input_sha256": "1d99a9aee3d6b20ab4f91e59567923c6d8c7884e6576492e2140854a16746c4c"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-source-verifier-trust-red.txt.gz",
+        "sha256": "5584d57d507a60eb521a53a9e09383173ed55ebe53b9bb593325ba8d38ebc5cb",
+        "input_sha256": "23a4db63556c80f7c0adee77cc795c0f6e3a35f2d89a46479869c3e9c8d0d5b1"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-source-verifier-trust-green.txt.gz",
+        "sha256": "c532ba8fe7ac81f083b9d4d5f64d186b9b8984e33d04ed2e2d78d7bb02785418",
+        "input_sha256": "cc6183784986563732449da76c20d255d80e871969e581f44c086944b72225f7"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-plot-source-trusted-historical-green.json.gz",
+        "sha256": "1d8780b1875464e3fdef9679c5b62355aceabb729e59b343ed3a66f21503e838",
+        "input_sha256": "85bf16984785f078692f26a0ca86986cdb707c7bbf415ddada9fa4d570800511"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-course-scoring-trusted-green.json.gz",
+        "sha256": "73bb915a6c9ee5f0b9515165e39fb28f424db020ea8ac92ac9de5d6db8415dff",
+        "input_sha256": "befbcbc21116fdb65dff1bbc9e2eed79d7cfe730dee2c88477bfc8318576e62a"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-source-verifier-semgrep-green.txt.gz",
+        "sha256": "2e4437a76e73608e3369bf401862849e95cddb54e1fb3739b1b11403ef6d17f4",
+        "input_sha256": "1718c4803388fb008bc47260f8549c75ebc87c3af7e64da68309fb5fe90ff30d"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-qualified-bundle-post-nosec-preimage.py.gz",
+        "sha256": "60dfd58c2204b393c967d0e42332f3e8f7da8b97acfd6973088810b521c5afe9",
+        "input_sha256": "60dfd58c2204b393c967d0e42332f3e8f7da8b97acfd6973088810b521c5afe9"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-qualified-bundle-preimage-integrity.json.gz",
+        "sha256": "d502d79af02a375e7f6c80661772f19c50013f8891901458bcfbc207d37fb643",
+        "input_sha256": "30bc5597fb28696a120a41d0a70b1bfc48d27a786e8edce7bf22a570e5788dcd"
+      }
+    ],
+    "final_receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-seam-structural-guards-red.txt.gz",
+        "sha256": "692cb3ba09ead578590a0ff3918a2c9afb04c2dfafe120e858a99cb49cc24be0",
+        "uncompressed_sha256": "285cb33f25ffd8f33cd9863072137857bae1979b5ee7e40f8b668010d4a2b752"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-seam-structural-guards-tdd-red.txt.gz",
+        "sha256": "51a490effd65926c29c9f3068dee6a9f684bd82cb46c63652a27c71d8ccfcce6",
+        "uncompressed_sha256": "bf6077c53a285a76283a71e87314444d05bb759d2a99d61972b91843e67c3854"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-seam-structural-guards-green.txt.gz",
+        "sha256": "c1ce02fe7b2199216757c9a8f6119620ad513159c3d7cc162bf84de73e9799bd",
+        "uncompressed_sha256": "0fd0ef2e2d46707ee5af24444efbb90b2801376e2a3cd4f98ebee4529f022821"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-exact-seven-ci-unit-nodes-green.txt.gz",
+        "sha256": "4f573870ff8455a77272a0298134cd1ab08c02254101d894067e198b73ad669b",
+        "uncompressed_sha256": "92e43ab6431757bf939f9ebee3425f2e5aa4d67a34e89fdc0e3ae649ada95b35"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-root-unit-structural-mypy.txt.gz",
+        "sha256": "b1e8cc1d5424cb065ea6f9ece4e303d0192d317a5db044d5cde52d591d933a5c",
+        "uncompressed_sha256": "8228fcc5ce46d42d01caf3cd941f4e9c5f2bcc372bb5b147a2f0572d2dd675a8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-root-unit-structural-title.txt.gz",
+        "sha256": "58ea822d72b7e21775597436693052f681aa6e3d42dd9c2a26ff653178361069",
+        "uncompressed_sha256": "5b4773ab82564ecfc54da8eb3afbb1420338aab00497a2b40dae89c0bf79b740"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-size-budget-without-new-waivers.txt.gz",
+        "sha256": "7452830fe937955d9320e8ad96743b82a444759ae692b856c7385a21f13547b3",
+        "uncompressed_sha256": "65c5a3f15eec3fd998951fdc1b815bdda291fb7f6a727390432501a2233e9140"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-pre-final-gate-remote.json.gz",
+        "sha256": "8ee526b93a0a5af9a762ba380ef164c090cbd35412627a10b46073d36e3b19ea",
+        "uncompressed_sha256": "c31661a478c62251a98a26399a159b9382cfe7c147a9df9b832adbd3a4bb4813"
+      }
+    ]
+  },
+  "remote_reconciliation_pending": {
+    "head": "47df000da36fd7ae73fef5de623f4cb5feadd320",
+    "commits": [
+      "1bafd5c4b6",
+      "9beff1c905",
+      "7bf9515aa1",
+      "47df000da3"
+    ],
+    "plan": "Rebase onto actual advanced PR head without force; preserve useful ADR index and blocked manual pointers, remove two unnecessary size-budget exceptions (766/46250 bytes vs51200), restore original reviewed canonical heading and its truthful provenance. Then run full canonical on stable committed source."
   }
 }

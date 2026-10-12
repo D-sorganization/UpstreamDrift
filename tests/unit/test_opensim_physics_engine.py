@@ -1,7 +1,6 @@
 # ruff: noqa: E402
 """Unit tests for OpenSim Physics Engine."""
 
-import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -36,29 +35,19 @@ _OSIM_MANAGER_SPEC = [
     "setFinalTime",
 ]
 
-# Mock opensim using patch.dict (auto-cleans) before importing the engine
+# Each engine instance receives a scoped mock; collection never patches sys.modules.
 mock_opensim = MagicMock()
-
-with (
-    patch.dict(sys.modules, {"opensim": mock_opensim}),
-    # Also patch OPENSIM_AVAILABLE so the engine module picks up the mock
-    patch("src.shared.python.engine_core.engine_availability.OPENSIM_AVAILABLE", True),
-):
-    from src.engines.physics_engines.opensim.python import (  # noqa: E402
-        opensim_physics_engine as osim_module,
-    )
-    from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
-        OpenSimPhysicsEngine,
-    )
 
 
 @pytest.fixture
-def engine(monkeypatch: pytest.MonkeyPatch) -> OpenSimPhysicsEngine:
-    # Reset mock_opensim for each test
+def engine(monkeypatch: pytest.MonkeyPatch):
+    from src.engines.physics_engines.opensim.python import (
+        opensim_physics_engine as osim_module,
+    )
+
     mock_opensim.reset_mock()
-    # Ensure the engine module's opensim ref points to our mock
     monkeypatch.setattr(osim_module, "opensim", mock_opensim)
-    return OpenSimPhysicsEngine()
+    return osim_module.OpenSimPhysicsEngine()
 
 
 def test_opensim_physics_engine_initialization(engine) -> None:

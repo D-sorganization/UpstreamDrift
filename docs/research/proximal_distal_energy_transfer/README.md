@@ -48,9 +48,9 @@ double-pendulum evaluation has run. See
 [`NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md`](NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md),
 and [`NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md`](NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md).
 The current authority amendment is recorded in the editable
-[`Nonlinear-Controller Registration Authority Amendment`](nonlinear_controller_registration_amendment_20261011.tex);
+[`Nonlinear-Controller Registration Authority Amendment`](../nonlinear_controller_registration_amendment_20261011/nonlinear_controller_registration_amendment_20261011.tex);
 it requires fresh qualification and leaves historical results unchanged. The
-editable [`Uncertainty and Control Stability Audit Reference`](uncertainty_stability_audit_reference.tex)
+editable [`Uncertainty and Control Stability Audit Reference`](../uncertainty_stability_audit_reference/uncertainty_stability_audit_reference.tex)
 records the separate stability audit's calculation and evidence boundaries.
 
 Open research materials for a study of proximal-to-distal (P→D) energy
