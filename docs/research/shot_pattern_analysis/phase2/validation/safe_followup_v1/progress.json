@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T13:54:33.915563+00:00",
-  "checkpoint": "4a238e8b249f58242a680ffaa1958c1562d50739",
+  "recorded_at_utc": "2026-10-12T14:24:03.301550+00:00",
+  "checkpoint": "3d6a415bf941d4063986607f8d97536a513a5a2b",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "4a238e8b249f58242a680ffaa1958c1562d50739",
+  "source_commit": "3d6a415bf941d4063986607f8d97536a513a5a2b",
   "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately. Protected repo-structure then found10 source-level functions missing suite classification; only rightful unit markers are added, with22 unit cases and static ratchet passing. Production/assertions/baseline unchanged; updated canonical/protected CI pending.",
+  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -615,7 +615,7 @@
     ]
   },
   "latest_combined_gate": {
-    "source": "4a238e8b249f58242a680ffaa1958c1562d50739",
+    "source": "3d6a415bf941d4063986607f8d97536a513a5a2b",
     "status": "PASS all eight canonical gates with Semgrep available",
     "passes": 7594,
     "skipped": 377,
@@ -630,12 +630,12 @@
     "selection": "Unmodified canonical affected-test selection; historical fixture consumers and new strict historical-path resolver tests included. Earlier whole-research failure remains preserved; no whole research-suite pass is claimed.",
     "receipts": [
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-final-prepr.txt.gz",
-        "sha256": "d051cf3501bb9c085b57c7d99dafbc6840ad470f791c19a9fd4ea043762ad7c0",
-        "uncompressed_sha256": "c211b571d9967a3aa9c5d8be364e358f90aa84fcf769791f7fa1c4487fd961fe"
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-classification-final-prepr.txt.gz",
+        "sha256": "932fb92422c75059c23d2980f8fde648d37ae0d6c8ed4081d1d01d9c7a54bd1f",
+        "uncompressed_sha256": "149967c0c2ac0f3faeda71f14aedf046a47ce9ab3aa9fca55bbe51993606c978"
       },
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-semgrep.txt.gz",
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-classification-semgrep.txt.gz",
         "sha256": "bc7ac8336308ff36765ffffbcfa5d2d0cd4169fe79fee45641c6de6e381b423c",
         "uncompressed_sha256": "b8c39973d45c5a45713c3042a98614b6ed295252b7fc1bb76cf65b963659f7f4"
       },
@@ -1171,6 +1171,7 @@
         "sha256": "9216777e5ca4e2ca4d96a50a59a342b2fa3270bd05a5880965de950076df2203",
         "uncompressed_sha256": "0853b90c4f95a9ab32e4860ebe6482ee8d8ff40b20d271dfab6c6e76b921a58b"
       }
-    ]
+    ],
+    "status": "Ten new source-level test functions are correctly classified as unit tests; red/green drift gate and 22 unit cases pass, followed by all eight stable-source canonical gates. Updated protected CI remains pending."
   }
 }
