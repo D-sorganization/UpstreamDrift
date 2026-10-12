@@ -729,6 +729,7 @@ models:
       default_launch: "tab"
 
   - id: "shot_pattern_analysis"
+    help: "docs/help/shot_pattern_analysis.md"
     name: "Shot Pattern Analysis"
     description: "Compare straight, draw, and fade patterns with matched delivery, shaft rotation, strike variation, and covariance. Install: pip install -e '.[gui-tools]'; requires the native upstream-physics wheel."
     type: "special_app"
