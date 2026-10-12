@@ -30,6 +30,7 @@ from src.shared.python.lifting.barbell_bushing import (
 )
 from src.shared.python.lifting.bundles import BACK_SQUAT_BUNDLE
 from src.shared.python.motion_matching.same_input import InputBundle, VectorPlant
+from tests.support.real_engines import real_module
 
 pytestmark = pytest.mark.unit
 
@@ -256,7 +257,7 @@ def test_hand_jacobian_matches_mujoco_analytic(
 def test_cross_engine_parity_at_a_loaded_state(
     engine: str, loaded: BarbellBushingPlant, bundle: InputBundle
 ) -> None:
-    pytest.importorskip("pydrake" if engine == "drake" else "pinocchio")
+    real_module("pydrake" if engine == "drake" else "pinocchio")
     other = BarbellBushingPlant(
         VectorPlant(engine, bundle.spec_bytes),
         bundle.spec_bytes,
