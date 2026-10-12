@@ -417,7 +417,7 @@
       "source_spec": null,
       "source_sha256": null,
       "generated_model": "src/engines/physics_engines/opensim/models/golf_humanoid.osim",
-      "generated_sha256": "16823bb9313504722e8000449b7ded649a3860ac9376bb02984253e0a8400498",
+      "generated_sha256": "404d3f816cac0e53ea65c393e4338789104584ba872c1b2a9950cd8102ca0148",
       "generator": "scripts/build_humanoid_osim.py",
       "generator_version": "golf-humanoid-mvp",
       "units": "SI",

@@ -4615,7 +4615,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json": {
-      "sha256": "4e0e43ea29b73c597904e8b2d53595ac830541a524d1b723487d36a8b3e78858",
+      "sha256": "3ba672b6bfaef1a6a8d73c7921e29dc18606cae0caf7a934c8df62a33444ccef",
       "bytes": 12559,
       "referenced_by": [
         "PD-CLAIM-293",
@@ -6413,7 +6413,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "8df0d169f714970ddac335fbf68b89bf702a8f4ca2ae7bf18bb6dd5771ab9d6a",
+      "sha256": "f03c49652638a939e2388d42cd5ae1fe17e309434dc72a3610a26f1c6ff2ca9c",
       "bytes": 165205,
       "referenced_by": [
         "PD-CLAIM-241"

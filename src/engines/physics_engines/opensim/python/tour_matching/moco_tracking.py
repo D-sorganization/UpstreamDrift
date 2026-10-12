@@ -13,7 +13,7 @@ import logging
 import math
 from pathlib import Path
 from collections.abc import Mapping
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 import numpy as np
 
@@ -38,6 +38,7 @@ class MocoTrackingConfig:
     optim_convergence_tolerance: float = 1e-2
     optim_constraint_tolerance: float = 1e-2
     allow_unused_references: bool = True
+    optim_finite_difference_scheme: Literal["central", "forward"] = "central"
 
     def validate(self) -> None:
         """Validate configuration parameters (DbC precondition)."""
@@ -60,6 +61,12 @@ class MocoTrackingConfig:
             or self.optim_constraint_tolerance <= 0.0
         ):
             raise ValueError("Tolerances must be > 0")
+        if not isinstance(self.optim_finite_difference_scheme, str) or (
+            self.optim_finite_difference_scheme not in {"central", "forward"}
+        ):
+            raise ValueError(
+                "optim_finite_difference_scheme must be central or forward"
+            )
 
     @property
     def duration_s(self) -> float:
@@ -239,6 +246,17 @@ def _write_sanitized_trc(
         f.writelines(out_lines)
 
 
+def _configure_finite_difference_scheme(solver: Any, scheme: str) -> None:
+    """Set the requested finite-difference scheme and verify native readback."""
+    solver.set_optim_finite_difference_scheme(scheme)
+    actual_scheme = solver.get_optim_finite_difference_scheme()
+    if actual_scheme != scheme:
+        raise RuntimeError(
+            "OpenSim CasADi solver did not retain requested finite-difference "
+            f"scheme {scheme!r}; read back {actual_scheme!r}"
+        )
+
+
 @precondition(
     lambda model_path, trc_path, states_guess_path, config, initial_bindings=None, marker_weights=None: (
         isinstance(config, MocoTrackingConfig)
@@ -321,6 +339,7 @@ def build_moco_study(
     solver.set_optim_max_iterations(config.optim_max_iterations)
     solver.set_optim_convergence_tolerance(config.optim_convergence_tolerance)
     solver.set_optim_constraint_tolerance(config.optim_constraint_tolerance)
+    _configure_finite_difference_scheme(solver, config.optim_finite_difference_scheme)
     _notify_progress(progress_callback, "solver-configured")
 
     # Seed with IK initial guess trajectory

@@ -11,11 +11,11 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 399,
-    "diverged": 274,
-    "ud-only": 1614,
+    "identical": 397,
+    "diverged": 276,
+    "ud-only": 1619,
     "tools-only": 808,
-    "spelling-only": 121
+    "spelling-only": 123
   },
   "packages": {
     "README.md": {
@@ -509,11 +509,11 @@
       "spelling-only": 0
     },
     "model_generation": {
-      "identical": 27,
-      "diverged": 52,
+      "identical": 25,
+      "diverged": 54,
       "ud-only": 20,
       "tools-only": 1,
-      "spelling-only": 14
+      "spelling-only": 16
     },
     "motion_matching": {
       "identical": 0,
@@ -693,7 +693,7 @@
     "reporting": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 5,
+      "ud-only": 9,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -844,6 +844,13 @@
       "tools-only": 1,
       "spelling-only": 0
     },
+    "ud_import_alias_policy.py": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 1,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
     "ui": {
       "identical": 0,
       "diverged": 0,
@@ -938,9 +945,9 @@
       "classification": "diverged",
       "package": "__init__.py",
       "subpackage": "",
-      "ud_bytes": 2296,
+      "ud_bytes": 2304,
       "tools_bytes": 1588,
-      "byte_delta": 708,
+      "byte_delta": 716,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10958,9 +10965,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "",
-      "ud_bytes": 2946,
+      "ud_bytes": 2974,
       "tools_bytes": 2916,
-      "byte_delta": 30,
+      "byte_delta": 58,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11126,9 +11133,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 20430,
+      "ud_bytes": 20438,
       "tools_bytes": 20417,
-      "byte_delta": 13,
+      "byte_delta": 21,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11186,9 +11193,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 4532,
+      "ud_bytes": 4544,
       "tools_bytes": 4519,
-      "byte_delta": 13,
+      "byte_delta": 25,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11198,9 +11205,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 13797,
+      "ud_bytes": 13809,
       "tools_bytes": 13469,
-      "byte_delta": 328,
+      "byte_delta": 340,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11282,9 +11289,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 7657,
+      "ud_bytes": 7669,
       "tools_bytes": 7653,
-      "byte_delta": 4,
+      "byte_delta": 16,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -11294,9 +11301,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 17451,
+      "ud_bytes": 17463,
       "tools_bytes": 17447,
-      "byte_delta": 4,
+      "byte_delta": 16,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -11378,9 +11385,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "interfaces",
-      "ud_bytes": 22312,
+      "ud_bytes": 22320,
       "tools_bytes": 22284,
-      "byte_delta": 28,
+      "byte_delta": 36,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -11558,9 +11565,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "mesh",
-      "ud_bytes": 15766,
+      "ud_bytes": 15784,
       "tools_bytes": 15676,
-      "byte_delta": 90,
+      "byte_delta": 108,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11678,9 +11685,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "presets",
-      "ud_bytes": 11927,
+      "ud_bytes": 11931,
       "tools_bytes": 9060,
-      "byte_delta": 2867,
+      "byte_delta": 2871,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -12038,7 +12045,7 @@
       "classification": "ud-only",
       "package": "impact_parameters",
       "subpackage": "",
-      "ud_bytes": 12349,
+      "ud_bytes": 12392,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13190,9 +13197,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "",
-      "ud_bytes": 3337,
+      "ud_bytes": 3345,
       "tools_bytes": 3333,
-      "byte_delta": 4,
+      "byte_delta": 12,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13214,9 +13221,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 1539,
+      "ud_bytes": 1543,
       "tools_bytes": 1535,
-      "byte_delta": 4,
+      "byte_delta": 8,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13238,9 +13245,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 15287,
+      "ud_bytes": 15356,
       "tools_bytes": 15081,
-      "byte_delta": 206,
+      "byte_delta": 275,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13298,9 +13305,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 9160,
+      "ud_bytes": 9217,
       "tools_bytes": 8854,
-      "byte_delta": 306,
+      "byte_delta": 363,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13358,9 +13365,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 9372,
+      "ud_bytes": 9380,
       "tools_bytes": 7312,
-      "byte_delta": 2060,
+      "byte_delta": 2068,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13370,9 +13377,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 18466,
+      "ud_bytes": 18470,
       "tools_bytes": 18450,
-      "byte_delta": 16,
+      "byte_delta": 20,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13382,9 +13389,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 21897,
+      "ud_bytes": 21901,
       "tools_bytes": 21887,
-      "byte_delta": 10,
+      "byte_delta": 14,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13394,9 +13401,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 26699,
+      "ud_bytes": 26703,
       "tools_bytes": 25102,
-      "byte_delta": 1597,
+      "byte_delta": 1601,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13427,15 +13434,15 @@
     },
     {
       "path": "model_generation/cli/main.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "cli",
-      "ud_bytes": 28491,
+      "ud_bytes": 28543,
       "tools_bytes": 28491,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": 52,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "model_generation/converters/__init__.py",
@@ -13478,9 +13485,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 8073,
+      "ud_bytes": 8106,
       "tools_bytes": 8078,
-      "byte_delta": -5,
+      "byte_delta": 28,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13490,9 +13497,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 23452,
+      "ud_bytes": 23501,
       "tools_bytes": 21758,
-      "byte_delta": 1694,
+      "byte_delta": 1743,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13562,9 +13569,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 28850,
+      "ud_bytes": 28854,
       "tools_bytes": 28842,
-      "byte_delta": 8,
+      "byte_delta": 12,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13574,9 +13581,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 29632,
+      "ud_bytes": 29636,
       "tools_bytes": 22419,
-      "byte_delta": 7213,
+      "byte_delta": 7217,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13631,15 +13638,15 @@
     },
     {
       "path": "model_generation/core/physics_validation.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "core",
-      "ud_bytes": 19697,
+      "ud_bytes": 19709,
       "tools_bytes": 19697,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": 12,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "model_generation/core/types.py",
@@ -13658,9 +13665,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "core",
-      "ud_bytes": 16171,
+      "ud_bytes": 16179,
       "tools_bytes": 16150,
-      "byte_delta": 21,
+      "byte_delta": 29,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13718,9 +13725,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 6322,
+      "ud_bytes": 6326,
       "tools_bytes": 6095,
-      "byte_delta": 227,
+      "byte_delta": 231,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13730,9 +13737,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 24993,
+      "ud_bytes": 25013,
       "tools_bytes": 22376,
-      "byte_delta": 2617,
+      "byte_delta": 2637,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13754,9 +13761,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 22074,
+      "ud_bytes": 22078,
       "tools_bytes": 21744,
-      "byte_delta": 330,
+      "byte_delta": 334,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13814,9 +13821,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "explorer",
-      "ud_bytes": 782,
+      "ud_bytes": 790,
       "tools_bytes": 817,
-      "byte_delta": -35,
+      "byte_delta": -27,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13910,9 +13917,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "inertia",
-      "ud_bytes": 15098,
+      "ud_bytes": 15118,
       "tools_bytes": 20962,
-      "byte_delta": -5864,
+      "byte_delta": -5844,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13934,7 +13941,7 @@
       "classification": "ud-only",
       "package": "model_generation",
       "subpackage": "inertia",
-      "ud_bytes": 5235,
+      "ud_bytes": 5243,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14150,9 +14157,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 30932,
+      "ud_bytes": 30936,
       "tools_bytes": 30690,
-      "byte_delta": 242,
+      "byte_delta": 246,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -18974,7 +18981,7 @@
       "classification": "ud-only",
       "package": "neural_motion",
       "subpackage": "benchmark",
-      "ud_bytes": 3114,
+      "ud_bytes": 6517,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24257,6 +24264,54 @@
       "ud_bytes": 1361,
       "tools_bytes": 1419,
       "byte_delta": -58,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/__init__.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 500,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/contract.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 9179,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/policy.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 1870,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/validator.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 13514,
+      "tools_bytes": null,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -36802,6 +36857,18 @@
       "spelling_only": false
     },
     {
+      "path": "ud_import_alias_policy.py",
+      "classification": "ud-only",
+      "package": "ud_import_alias_policy.py",
+      "subpackage": "",
+      "ud_bytes": 4111,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "ui/__init__.py",
       "classification": "tools-only",
       "package": "ui",
@@ -40119,6 +40186,19 @@
       }
     },
     {
+      "path": "model_generation/cli/main.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-08-20",
+        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+      }
+    },
+    {
       "path": "model_generation/converters/__init__.py",
       "ud": {
         "author": "Dieter Olson",
@@ -40233,6 +40313,19 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
+      }
+    },
+    {
+      "path": "model_generation/core/physics_validation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-26",
+        "commit": "c45ad7a38939bec68b81f2af6eb0e7083dd28f9a"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-26",
+        "commit": "3678409fc51024150ab28970b72e3b468935f345"
       }
     },
     {
