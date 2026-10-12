@@ -1,3 +1,20 @@
+## Native Wrist Kinematic Compatibility (F07 Child #11834)
+
+`tour_matching.observe_native_wrist` accepts a pinned source and explicit
+`WristKinematicContract`. It observes actual native assembled coordinates,
+constraint errors, hand transform relative to the declared anchor, muscle
+path lengths, native moment arms and central differences on achieved coordinate
+spans. It rejects missing components, locked/prescribed/dependent input
+coordinates, unachieved requests, non-target independent drift and invalid
+numerics. Coupled motion types require explicit source-reviewed radian
+declarations; names do not establish units. Optional assembly accuracy is an
+explicit numerical policy with original/effective settings and prepared model
+identity. Source files and anatomical parameters are not edited. Derivative
+disagreement remains evidence; all results remain scientifically unqualified.
+Model admission, anatomical registration, capacity, contact/grip and independent
+complete-state excitation replay remain F07/F08 acceptance gates. See canonical
+chapter 29 and `docs/development/feedback_controls/F07_WRIST_TURNOVER.md`.
+
 ## Explicitly Unqualified Moco Feasibility (#12225)
 
 The native runner accepts a default-false boolean diagnostic disposition only
@@ -10781,9 +10798,12 @@ independent input reproduction, and observation accuracy have distinct
 receipts. Missing rows, stale model or
 provider identities, absent SHA-256 bindings, feedback-driven or reset replay,
 mixed torque/excitation, and incomparable same-input horizons/channels/policies
-fail closed. Truncated replay cannot establish within-engine or same-input
-levels; observation scoring requires its own time-grid digest, distinct from
-the applied-input grid. Contract `feedback-comparison/1.1.0` additionally
+fail closed. Replay admission requires `full_horizon=True` at the
+within-engine-replay and same-input levels (truncated replay raises
+`replay must cover the full horizon`); observation accuracy requires a separate
+`observation_time_grid_sha256` for the output/capture clock, distinct from the
+T01 applied-input grid hash, and capture timing is never inferred from actuator
+sampling (contract repair #11828, PR #12141; not a numerical qualification). Contract `feedback-comparison/1.1.0` additionally
 requires the exact Tools T01 initial-state payload digest for every independent
 replay level and equality of that digest for same-input comparison; older
 unbound receipts remain limited to identity/transcription admission. The legacy Euclidean `same-input-bundle/v1` cannot satisfy the

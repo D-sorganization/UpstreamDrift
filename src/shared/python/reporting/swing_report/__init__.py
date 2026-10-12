@@ -1,5 +1,7 @@
 """Cross-engine swing report contract (epic #11419, slice #12324)."""
 
+from .adapters_base import EngineResult, QuantityData, result_from_reporting_mixin
+from .builder import build_swing_report
 from .contract import SwingReport
 from .policy import (
     ADVERTISED,
@@ -15,6 +17,8 @@ from .validator import (
 )
 
 __all__ = [
+    "EngineResult",
+    "QuantityData",
     "ADVERTISED",
     "POLICY",
     "WITHHELD",
@@ -22,6 +26,8 @@ __all__ = [
     "SwingReport",
     "SwingReportContractError",
     "Violation",
+    "build_swing_report",
     "classify",
+    "result_from_reporting_mixin",
     "validate_swing_report",
 ]

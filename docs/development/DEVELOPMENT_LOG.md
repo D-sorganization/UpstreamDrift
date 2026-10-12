@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11792 — F08: Match Mocap With Muscle Excitations and Verify Pure OpenSim Replay
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11792 (parent #11784; children #12342, #12343, #12353)
+- **PR:** #12344 (draft); related #12355
+- **Branch:** `fix/native-path-connection-finalization-12233-20261012`
+- **Started:** 2026-10-09 (parent issue opened)
+- **Paths:** `changes/12233-bound-moco-optimizer-states-to-source-mo.md`; `docs/agent_context/README.md`; `docs/agent_context/index.html`; `docs/development/feedback_controls/F07_PATH_WORK_TURNOVER.md`; `manuals/upstreamdrift/chapters/24-native-path-work.qmd`; `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py`; `tests/unit/engines/opensim/test_native_path_optimizer_domains.py`
+- **Summary:** This software/readiness work moves native connection finalization before optimizer-domain and passive audits. It does not claim a solve, optimum, learned replay, or physical qualification; all 17 registered model/variant rows remain unqualified.
+- **Next step:** Complete the combined no-probe preparation and physiological-policy/solver full-clock replay work under the existing acceptance gates.
+- **Last verified:** 2026-10-12 (merge commit `f637c179e1bac10b410882b6499050b27f7b1ddf`; pinned QA 3.12 pre_pr all gates passed; 23 focused lifecycle tests passed, 2 warnings; no native calls).
+
 ### DL-#11719 · GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export
 
 - **State:** in_review
@@ -424,16 +437,17 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 ### DL-#11083 — Motion Matching Board Review
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** owner-requested documentation review; tracked by PR #11083
 - **PR:** #11083
 - **Branch:** `docs/motion-matching-board-review`
 - **Paths:** `docs/development/2026-09-28-motion-matching-board-review.md`
 - **Started:** 2026-09-28
-- **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
+- **Shipped:** 2026-09-29
+- **Last verified:** 2026-10-12 (merged PR #11083 at 64962e8d6b6263d5fb32bb1444712b28a9df4433; remote merge metadata only, no tests or native runs)
 - **Summary:** Evidence-backed engine/model review, recent GS3DX improvements, 18 issue proposals, anatomical Home-budget options and historical-video readiness; no implementation/qualification claim.
-- **Next step:** Board disposition and overlap reconciliation before creating implementation children.
+- **Next step:** The documentary review is shipped; its implementation proposals remain separately tracked and open. No qualification claim.
 
 ### DL-#11080 · Product Review for the Expert Panel
 
