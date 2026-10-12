@@ -7,6 +7,7 @@ harness records an honest fail/skip with remediation (never a fake pass).
 
 from __future__ import annotations
 
+import dataclasses
 import json
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.engines.model_inventory import (
+    EVIDENCE_MJCF_COMPILE,
+    EVIDENCE_MYOSUITE_GYM_PROVIDER,
+    ProviderEvidenceConflationError,
+    _native_myosuite,
+    _native_success_pipeline,
+    require_myosuite_gym_provider_evidence,
     ClubKind,
     InventoryError,
     ModelClass,
@@ -341,3 +348,61 @@ class TestInventorySummary:
         assert myo
         assert all(p["status"] == "ready" for p in myo if p.get("flagship"))
         assert not any(t["issue"] == 10344 for t in summary["repair_tasks"])
+
+
+class TestMyoSuiteProbeEvidenceClassification:
+    """Issue #11945: bare MuJoCo MJCF compile is not MyoSuite provider evidence."""
+
+    def test_native_myosuite_labels_result_as_mjcf_compile_only(
+        self, inventory: EngineModelInventory, tmp_path: Path
+    ) -> None:
+        pytest.importorskip("mujoco")
+        (tmp_path / "bare.xml").write_text(
+            "<mujoco><worldbody><body><joint type='hinge'/>"
+            "<geom size='.1'/></body></worldbody></mujoco>",
+            encoding="utf-8",
+        )
+        package = dataclasses.replace(
+            inventory.get("myosuite/driver"), generated_model="bare.xml"
+        )
+        loaded = _native_myosuite(package, tmp_path)
+        assert loaded["evidence_kind"] == EVIDENCE_MJCF_COMPILE
+        assert loaded["backend"] == "mujoco"
+        assert loaded["myosuite_gym_provider"] is False
+
+    def test_mjcf_compile_result_cannot_be_admitted_as_gym_provider(self) -> None:
+        compile_only = {
+            "evidence_kind": EVIDENCE_MJCF_COMPILE,
+            "backend": "mujoco",
+            "myosuite_gym_provider": False,
+            "nq": 1,
+        }
+        with pytest.raises(ProviderEvidenceConflationError, match="Gym provider"):
+            require_myosuite_gym_provider_evidence(compile_only)
+
+    def test_unlabelled_result_is_rejected_as_provider_evidence(self) -> None:
+        with pytest.raises(ProviderEvidenceConflationError):
+            require_myosuite_gym_provider_evidence({"nq": 1})
+
+    def test_genuine_provider_evidence_is_admitted(self) -> None:
+        genuine = {"evidence_kind": EVIDENCE_MYOSUITE_GYM_PROVIDER}
+        assert require_myosuite_gym_provider_evidence(genuine) is genuine
+
+    def test_receipt_states_claim_limit_for_myosuite_compile(
+        self, inventory: EngineModelInventory
+    ) -> None:
+        package = inventory.get("myosuite/driver")
+        loaded = {
+            "nq": 3,
+            "mass_kg": 5.0,
+            "evidence_kind": EVIDENCE_MJCF_COMPILE,
+            "backend": "mujoco",
+            "myosuite_gym_provider": False,
+        }
+        steps = _native_success_pipeline(package, loaded)
+        detail = next(
+            st.message for st in steps if st.step is QualificationStep.LOAD_COMPILE
+        )
+        assert "MuJoCo MJCF compile" in detail
+        assert "not a MyoSuite Gym provider" in detail
+        assert "MyoSuite backend" not in detail
