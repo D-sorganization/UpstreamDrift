@@ -82,8 +82,10 @@ def view_swing_report(request: SwingReportViewRequest) -> SwingReportViewRespons
         SwingReportPlotRow.model_validate(r, from_attributes=True) for r in model.rows
     ]
     model.set_mode("custom")
+    report_id = request.report["report_id"]
     return SwingReportViewResponse(
-        report_id=request.report["report_id"],
+        report_id=report_id,
+        package_filename=package_filename(report_id),
         rows=rows,
         default_custom_ids=list(model.selected_ids),
     )

@@ -501,6 +501,20 @@
       "id": "render.club_head_and_ball"
     },
     {
+      "feature_id": "reporting.swing_report_dialog",
+      "title": "Swing Report Full/Custom Plot Selection and Package Export",
+      "status": "parity",
+      "pyqt": "src/shared/python/ui/swing_report_dialog.py",
+      "api": "src/api/routes/swing_report.py",
+      "web": "ui/src/components/analysis/swingReport/SwingReportDialog.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Swing Report S6 (#12329) and its web parity (#12330), epic #11419. Both dialogs list the same validated swing-report-v1 plots through the Python ReportViewModel (POST /api/swing-report/view returns its text-only rows, so a withheld quantity never reaches the browser as a number): withheld plots are disabled with a 'Not Validated' label and their reason, advertised plots show their engine-spread uncertainty, Full selects every enabled plot and Custom keeps its own selection. Export writes the S4 package (export_package) to a chosen directory on the desktop and downloads it as a zip on the web (POST /api/swing-report/export). Neither dialog is wired to a launcher tile or page yet.",
+      "id": "reporting.swing_report_dialog"
+    },
+    {
       "feature_id": "settings.desktop_only_tabs",
       "title": "Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance)",
       "status": "exempt",
@@ -3146,7 +3160,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "e328a1f5ef14988077d53b83ed0bd7a2e86d0580e1b5e86883457292de0dcf88",
-    "src/config/feature_parity.json": "90f50e54e16a901d070b56dd56218ea92a019ee80ccba8c401f7e790b9dc5b5b",
+    "src/config/feature_parity.json": "bd5d510cb531366ad0d6caf84fe766d75839a4f93dc4bd2e6288e32e5b353d8c",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

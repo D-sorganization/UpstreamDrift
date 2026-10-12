@@ -52,6 +52,7 @@ class SwingReportViewResponse(BaseModel):
     """Rows of a validated report plus the default Custom selection."""
 
     report_id: str
+    package_filename: str = Field(..., description="Download name of the export")
     rows: list[SwingReportPlotRow]
     default_custom_ids: list[str] = Field(
         ..., description="Enabled plots selected by default in Custom mode"

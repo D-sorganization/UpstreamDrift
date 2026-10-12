@@ -85,6 +85,7 @@ def test_view_rows_match_pyqt_view_model(client, doc):
     ]
     assert body["rows"] == expected
     assert body["report_id"] == doc["report_id"]
+    assert body["package_filename"] == route.package_filename(doc["report_id"])
 
 
 def test_withheld_set_unchanged_and_disabled_with_reason(client, doc):
