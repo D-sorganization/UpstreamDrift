@@ -13,7 +13,7 @@
   "totals": {
     "identical": 397,
     "diverged": 276,
-    "ud-only": 1626,
+    "ud-only": 1629,
     "tools-only": 808,
     "spelling-only": 123
   },
@@ -693,7 +693,7 @@
     "reporting": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 11,
+      "ud-only": 13,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -24345,7 +24345,7 @@
       "classification": "ud-only",
       "package": "reporting",
       "subpackage": "swing_report",
-      "ud_bytes": 724,
+      "ud_bytes": 1010,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24389,11 +24389,35 @@
       "spelling_only": false
     },
     {
+      "path": "reporting/swing_report/plots.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 5486,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "reporting/swing_report/policy.py",
       "classification": "ud-only",
       "package": "reporting",
       "subpackage": "swing_report",
       "ud_bytes": 1870,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/selection.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 4673,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
