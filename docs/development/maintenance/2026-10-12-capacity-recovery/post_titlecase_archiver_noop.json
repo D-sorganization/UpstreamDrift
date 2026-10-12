@@ -1,0 +1,23 @@
+{
+    "command":  "C:\\Users\\diete\\Repositories\\_venvs\\mpp-domain-12233\\Scripts\\python.exe -m shared_scripts.development_log --repo-root . --archive --archive-days 0 --today 2026-10-12",
+    "working_directory":  "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-devlog-capacity-12391-20261012",
+    "python":  "C:\\Users\\diete\\Repositories\\_venvs\\mpp-domain-12233\\Scripts\\python.exe",
+    "pythonpath":  "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-devlog-capacity-12391-20261012;C:\\Users\\diete\\Repositories\\Repository_Management",
+    "python_dontwritebytecode":  "1",
+    "exit_code":  0,
+    "stdout_path":  "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\devlog-capacity-12391-post-title-idempotence\\stdout.log",
+    "stdout_bytes":  21,
+    "stdout_sha256":  "4d23c8d5a6bb1f4146a54998f9c6ae11e2725d9850d3719ec86e75d3c7c1874b",
+    "stderr_path":  "C:\\Users\\diete\\Repositories\\docs\\development\\feedback_controls_planning\\devlog-capacity-12391-post-title-idempotence\\stderr.log",
+    "stderr_bytes":  0,
+    "stderr_sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "before":  {
+                   "current_log":  "9d8a0467e3a1ab346a04235a4157eb634ff643c2c700e2a390441dec2adb8adc",
+                   "archive":  "7bb3560a62361e67619aac89fac76b216cf0e826cf0ca859374e3aa7912d6b82"
+               },
+    "after":  {
+                  "current_log":  "9d8a0467e3a1ab346a04235a4157eb634ff643c2c700e2a390441dec2adb8adc",
+                  "archive":  "7bb3560a62361e67619aac89fac76b216cf0e826cf0ca859374e3aa7912d6b82"
+              },
+    "files_unchanged":  true
+}

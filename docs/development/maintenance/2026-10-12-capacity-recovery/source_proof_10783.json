@@ -1,0 +1,76 @@
+{
+    "purpose":  "Scoped source evidence for Development Log #10783 status correction; documentary software-scope verification only.",
+    "issue":  {
+                  "repository":  "D-sorganization/UpstreamDrift",
+                  "number":  10783,
+                  "state":  "closed",
+                  "closed_at":  "2026-09-24T00:57:29Z",
+                  "evidence":  "Fresh authenticated GitHub REST review performed by root; this JSON records the returned metadata."
+              },
+    "pull_request":  {
+                         "repository":  "D-sorganization/UpstreamDrift",
+                         "number":  10784,
+                         "state":  "merged",
+                         "merged_at":  "2026-09-24T00:57:27Z",
+                         "merge_commit":  "79427d3391f46aeafb43866652946406019a4cda",
+                         "evidence":  "Fresh authenticated GitHub REST review performed by root."
+                     },
+    "verification":  {
+                         "python":  "3.12.10",
+                         "pytest":  "9.1.0",
+                         "observed":  "Five passing tests; focused deferred-catalog-hook module.",
+                         "stderr_output":  "focused_qa312.stderr.log",
+                         "executable":  "C:\\Users\\diete\\Repositories\\_venvs\\mpp-domain-12233\\Scripts\\python.exe",
+                         "pythonpath":  "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-devlog-capacity-12391-20261012;C:\\Users\\diete\\Repositories\\Repository_Management",
+                         "python_dontwritebytecode":  "1",
+                         "stdout_path":  "focused_qa312.stdout.log",
+                         "stderr_path":  "focused_qa312.stderr.log",
+                         "stdout_sha256":  "a3c2495bc24c0323e9db2b516d65da98b65e1f4a59938b482e9c01bfae64d345",
+                         "stderr_sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                         "stdout_bytes":  4665,
+                         "stderr_bytes":  0,
+                         "exit_code":  0,
+                         "python_version":  "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+                         "pytest_version":  "9.1.0",
+                         "source_head":  "8e9b4b974b98d0f1006514a121b3b0807ed42d9c",
+                         "command":  "C:/Users/diete/Repositories/_venvs/mpp-domain-12233/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/unit/repo_hygiene/test_deferred_catalog_hook.py",
+                         "working_directory":  "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-devlog-capacity-12391-20261012",
+                         "test_output":  "focused_qa312.stdout.log",
+                         "test_stderr":  "focused_qa312.stderr.log"
+                     },
+    "source_closure":  {
+                           "central_source_commit":  "0a1041018e737173e49ff97ed4b82283e3cb672f",
+                           "bundle_path":  "docs/development/deferred-catalog-bundle.json",
+                           "bundle_raw_sha256":  "956b130a95ac8bf7bb924530625c55f8e9b0f0488bdb0e9fcc2080ee0be9bdcd",
+                           "verified_files":  [
+                                                  {
+                                                      "path":  "shared_scripts/deferred_validation.py",
+                                                      "raw_sha256":  "152ab473b23daf5b3a32618563ef0cdcdcdb957d71580cf09aee03c17f9d5ee5",
+                                                      "git_blob":  "add778474c1ec93419cd5bbf980cb313953a79ac"
+                                                  },
+                                                  {
+                                                      "path":  "shared_scripts/deferred_planning.py",
+                                                      "raw_sha256":  "521f1a98fecf36990f1f31696144163c85d023be34a465dfbde9aacf81f33f94",
+                                                      "git_blob":  "c9785c34e353ab7e1f2df4440a555b7463b4b25e"
+                                                  },
+                                                  {
+                                                      "path":  "shared_scripts/handoff_validator.py",
+                                                      "raw_sha256":  "eac9039b72c2a2d7f5708b0cb098f84d2a1e78568ed1ec6d17f6756ca6274cd5",
+                                                      "git_blob":  "b49d90e4ada585e98d103583582e0aee77b69174"
+                                                  }
+                                              ],
+                           "claim":  "Closure evidence is limited to the named three-file bundle and its focused tests; this is not a transitive or fleet-wide source closure claim."
+                       },
+    "boundaries":  [
+                       "Only the UpstreamDrift software guard is marked shipped.",
+                       "The separately tracked Repository_Management #1687 rollout is not claimed complete.",
+                       "No empirical, physical, or model qualification is claimed.",
+                       "Three canonical-function exceptions expire 2026-10-23."
+                   ],
+    "initial_test_receipt":  {
+                                 "stdout":  "initial_test_run.stdout.log",
+                                 "stderr":  "initial_test_run.stderr.log",
+                                 "stdout_sha256":  "e1692d0817e0a72e08360944707078afe59c1d6eadab7c077d8991f193e8cd17",
+                                 "initial_environment_provenance":  "Earlier test receipt recorded Python 3.12.10/Pytest 9.1.0 but not exact executable/environment; raw logs retained."
+                             }
+}
