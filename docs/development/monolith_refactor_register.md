@@ -32,6 +32,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
 | 1176 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1173 | `src/launchers/upstream_drift_launcher.py` |
+| 1171 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1170 | `src/config/launcher_manifest_loader.py` |
 | 1168 | `src/api/routes/data_explorer.py` |
 | 1168 | `src/shared/python/shadow_tracker/ingestion.py` |
@@ -173,6 +174,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 843 | `src/shared/python/motion_pipeline/orchestrator.py` |
 | 842 | `src/shared/python/gui_pkg/help_content.py` |
 | 841 | `src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py` |
+| 840 | `src/engines/physics_engines/opensim/python/tour_matching/native_constrained_muscle.py` |
 | 840 | `src/tools/bunker_shot_gui/sandvolume.py` |
 | 837 | `src/bunkershot3d/calibration/f1_shear_cell.py` |
 | 836 | `src/shared/python/ai/gui/assistant/panel.py` |

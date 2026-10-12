@@ -15,6 +15,7 @@ import logging
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
 from src.shared.python.motion_pipeline.contracts import (
     Calibration,
     Marker,
@@ -47,7 +48,7 @@ except ImportError:  # pragma: no cover
     _HAS_RUST = False
 
 try:  # pragma: no cover - exercised only when ezc3d is installed
-    import ezc3d as _ezc3d  # type: ignore[import-not-found]
+    _ezc3d = import_ezc3d()
 
     _HAS_EZC3D = True
 except ImportError:  # pragma: no cover

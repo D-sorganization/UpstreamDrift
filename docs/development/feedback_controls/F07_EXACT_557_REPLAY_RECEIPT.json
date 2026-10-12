@@ -1,0 +1,78 @@
+{
+  "applied_input_sha256": "c5a0de96d650c06369a7c0100492e0a2836734d6f2a837f6aae9ba320cd55de2",
+  "capture_fit": false,
+  "changed_future_activation_difference": 0.0005770428853785967,
+  "clamped_source_ranges": 40,
+  "component_count": 6691,
+  "component_path_class_sha256": "c81fcb306692cfbf34b49466119943f6d1686dc8067d08eb0fe5f18a32d9db0b",
+  "constraint_count": 17,
+  "failed_attempts": [
+    {
+      "failure": "source seed SC_z below declared lower chart at first advancing sample; no replay admission",
+      "grid_seconds": [0.0, 0.001, 0.002],
+      "log_sha256": "afc80f376a49ceae41e1bf6ed8589b8b743c41e5f899b9e7a71d98df6316333e",
+      "script_sha256": "59970ec68ee6deace3338fad01bf9a150707ec89b79adeb086242e8a3fb67b4f"
+    },
+    {
+      "failure": "six-coordinate interior diagnostic seed SC_z below declared lower chart at first advancing sample; no replay admission",
+      "grid_seconds": [0.0, 0.001, 0.002],
+      "log_sha256": "24fa47acf93506f9a6e266de4eb3ed302d63ad02d639f6c22cfab0fc1c5f65b1",
+      "script_sha256": "72bf2e1b0dc5cd36646938d22ff5830f80a63eec3570af2c67d42d82e5430857"
+    }
+  ],
+  "full_horizon": false,
+  "future_input_sha256": "fcca1bfa268c29fea6b50595fb116d8ee856ba9f851f5967db36cd2b07b336c8",
+  "grid_seconds": [0.0, 0.0001, 0.0002],
+  "interior_adjustments": {
+    "/jointset/elbow_l/elbow_flex_l/value": 0.002618,
+    "/jointset/elbow_r/elbow_flex_r/value": 0.002618,
+    "/jointset/radioulnar_l/pro_sup_l/value": 0.0031415,
+    "/jointset/radioulnar_r/pro_sup_r/value": 0.0031415,
+    "/jointset/sc3/SC_z/value": 0.0006108652380000001,
+    "/jointset/sc3_l/SC_z_l/value": -0.0006108652380000001
+  },
+  "max_fresh_force_difference": 0.0,
+  "max_fresh_state_difference": 0.0,
+  "max_qerr": 6.27230114285851e-17,
+  "max_uerr": 1.5987211554602254e-14,
+  "model_loaded_sha256": "fc0777f2bad0a7c7a2f2a009d05ad7f531d6f85a926ee52459fec12b3d7f0c60",
+  "muscle_count": 557,
+  "native_restart_qualified": false,
+  "observer_sha256": "49f7316548630639a207eebf6744d4173e46b141affcd7744cf98d8d257dec4d",
+  "physiology_qualified": false,
+  "policy_sha256": "c51fe020fb7476ae75d7353c9f0c5c2f3de5d7d85aee74442e14078af9b827e0",
+  "prefix_state_difference": 0.0,
+  "preparation_sha256": "21f1095267f1b0d476c39df655118f134da2e7292aada7a4b9d0c45e9b9eca9b",
+  "provider_sha256": "c9c48c19fe9d209a6fab830e437caa44a004d39a0cb35d1e7993d216a791eeb2",
+  "runtime": "version 4.6-2026-06-22-85aaf64, build date 18:27:55 Jun 22 2026",
+  "runtime_extension_sha256": "950241f649dab8a113c4bb754a080d16db4a3f5f0aa1710ed2e53d03206eb09e",
+  "script_sha256": "26595e9f72e394f29e748516082ac7ed6ad9b3addaa4d97c13d69930a7ee98f1",
+  "simbody_extension_sha256": "81afadccfe9e55dd366255d09c319ccb8d50fdb54fee4ac45b64708c4f044aa6",
+  "source_code_sha256": {
+    "native_constrained_muscle.py": "6e65cc1dd13cf52515bb3ddec154933d4607aa90a8c076adb2a544a6131f4364",
+    "native_exact_557_profile.py": "f6d4db8343a4ccfcd17e2972a7b31c1bb4a542b95cdf3f549f758d1433a6eddb",
+    "native_muscle_bundle.py": "4eb823cb8aa53ab8a10f15844f59b7443b7d66aa9d51ebe936cdfb731a47396d",
+    "native_scalar_replay.py": "d3550e016e4eb8fcec165ff96d00cb68f7ac7f529fabe34222218a812eec4fc1"
+  },
+  "source_sha256": "453e09c4e42dcc3f4b74a3b2efeff063e96c3820b3eee1efe95eef249579010d",
+  "state_count": 1226,
+  "state_lineage": {
+    "derived_named_state_count": 1226,
+    "muscle_activation_changes": 0,
+    "muscle_fiber_changes": 0,
+    "original_prepared_named_state_count": 1238,
+    "postrestore_assembly_calls": 0,
+    "postrestore_equilibrium_calls": 0,
+    "q_value_changes_only": 6,
+    "speed_changes": 0
+  },
+  "status": "short_exact_source_native_diagnostic_only",
+  "unresolved_source_barriers": [
+    "four physically invalid donor-body inertia tensors require separate source qualification",
+    "muscle/passive law and anatomy unqualified",
+    "106 visual meshes absent from this runtime",
+    "0.2 ms diagnostic is not full-horizon or captured swing matching"
+  ],
+  "visual_mesh_reference_count": 106,
+  "visual_reference_manifest_sha256": "617127d1cb80a2b19c5e9fa106cd51080d8729b53e137ae30c2fe03c615d9f87"
+}
