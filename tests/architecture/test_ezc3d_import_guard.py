@@ -21,6 +21,12 @@ SANCTIONED = {
     "src/shared/python/data_io/native_dll_guard.py",
     "tests/helpers/ezc3d_support.py",
 }
+# Tools-owned child copies cannot be edited here (test_tools_child_copy_contract);
+# they migrate in D-sorganization/Tools first, then arrive with the vendor pin bump.
+# Remove each entry when its pinned copy imports through the guard (#12065 PR3).
+TOOLS_CHILD_COPY_PENDING = {
+    "src/shared/python/sidekick/lab/bio/c3d_reader.py",
+}
 
 pytestmark = pytest.mark.gate
 
@@ -61,7 +67,7 @@ def _candidate_files() -> list[str]:
 def test_no_module_imports_ezc3d_outside_the_guard() -> None:
     offenders: list[str] = []
     for rel in _candidate_files():
-        if rel in SANCTIONED:
+        if rel in SANCTIONED or rel in TOOLS_CHILD_COPY_PENDING:
             continue
         source = (ROOT / rel).read_text(encoding="utf-8")
         offenders.extend(f"{rel}:{n}" for n in direct_ezc3d_imports(source))

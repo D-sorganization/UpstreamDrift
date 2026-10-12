@@ -23,10 +23,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, cast
 
-from src.shared.python.data_io.native_dll_guard import import_ezc3d
-
 try:
-    ezc3d = import_ezc3d()
+    import ezc3d
 except ImportError:
     ezc3d = None  # type: ignore[assignment, unused-ignore]
 
@@ -560,11 +558,19 @@ class C3DDataReader:
                 columns=self._force_plate_columns(include_time, compute_cop)
             )
 
-        plate_channels = self._select_plate(plate_channels, plate_number)
+        # Filter to specific plate if requested
+        if plate_number is not None:
+            if plate_number not in plate_channels:
+                raise ValueError(
+                    f"Force plate {plate_number} not found. "
+                    f"Available plates: {list(plate_channels.keys())}"
+                )
+            plate_channels = {plate_number: plate_channels[plate_number]}
 
         # Get analog data
         analog_df = self.analog_dataframe(include_time=False)
-        analog_rate = self.get_metadata().analog_rate
+        metadata = self.get_metadata()
+        analog_rate = metadata.analog_rate
 
         # Pivot to wide format
         analog_wide = analog_df.pivot(
@@ -605,20 +611,6 @@ class C3DDataReader:
         )
 
         return result
-
-    @staticmethod
-    def _select_plate(
-        plate_channels: dict[int, dict[str, str]], plate_number: int | None
-    ) -> dict[int, dict[str, str]]:
-        """Restrict *plate_channels* to *plate_number*; all plates when None."""
-        if plate_number is None:
-            return plate_channels
-        if plate_number not in plate_channels:
-            raise ValueError(
-                f"Force plate {plate_number} not found. "
-                f"Available plates: {list(plate_channels.keys())}"
-            )
-        return {plate_number: plate_channels[plate_number]}
 
     @staticmethod
     def _force_plate_columns(
