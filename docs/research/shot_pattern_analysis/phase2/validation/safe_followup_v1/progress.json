@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T08:37:36.835853+00:00",
+  "recorded_at_utc": "2026-10-12T08:44:56.859628+00:00",
   "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
@@ -614,5 +614,16 @@
     "review": "Astra approved exact public-API candidate and byte preservation",
     "plan": "docs/development/provenance/shot-pattern-devlog-reconciliation/plan.json",
     "qualification": "Metadata-only; no new fleet-runtime, scientific or physical acceptance"
+  },
+  "published_tools": {
+    "pr": 5573,
+    "merged_at": "2026-10-12T08:38:08Z",
+    "sha": "8a11691b4e9aee7d04dfc39628a8269ca561b07d",
+    "queue_ci": 38222319843,
+    "status": "Protected merge PASS; three pins agree; Rust check and served bundle PASS; Python exact Git installation in progress",
+    "served_assets": 76,
+    "javascript_assets": 5,
+    "served_bytes": 2801426,
+    "acceptance_metadata": "Pending capability recheck; unchanged historical record retained"
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "0436d983018181efb235df52ba4a16f0406ef948",
+  "tools_pin": "8a11691b4e9aee7d04dfc39628a8269ca561b07d",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
