@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T14:41:52.546354+00:00",
+  "recorded_at_utc": "2026-10-12T15:03:28.360712+00:00",
   "checkpoint": "3d6a415bf941d4063986607f8d97536a513a5a2b",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "3d6a415bf941d4063986607f8d97536a513a5a2b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Marker-fix source3d6a passes all eight canonical gates and protected repository-structure/quality gates. Later complete full-unit lane surfaced enum-identity failure; scoped compatibility repair passes focused and independent review, with combined canonical/protected verification pending. Final live publication53checks/fourbrowsercells/exact39pagePDF pass.",
+  "current_validation": "Remotea3 protectedCIStandardPASS with27450fullunittests; finalpreventiveenumrepair+testisolationpassfocusedchecksandreviews. Its updatedcombinedcanonical/protectedgatespending. Finalpublicationworkflowand53/fourcell/exact39PDFacceptancePASS.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -1183,7 +1183,7 @@
     "scope": "UD-owned compatibility bridge normalizes incoming level into its local enum and mirrors into each receiving module own enum; no vendor/production contracts implementation, type assertions, numerical criteria or original evidence changed.",
     "tdd": "Both directions reproduce foreign-enum identity failure before repair and pass afterward. Sol70 related cases on Python3.12 and30 onPython3.11; root focused run exits0.",
     "independent_review": "Astra approves allthreelevels with correctOFF enablement, and invalidinputs rejectbeforestate mutation.",
-    "status": "Focused checks and current agent-context check pass; complete stable-source canonical and updated protected CI pending.",
+    "status": "Enumrepair independentlyreviewed; initial combinedcanonicalexposed older alias-test WARNstateleak, nowrestored in finally with40case red/green proof. Updated complete stable-sourcecanonical andprotectedCIpending.",
     "receipts": [
       {
         "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-full-unit-failed.log.gz",
@@ -1211,7 +1211,44 @@
         "uncompressed_sha256": "fc0530f227c37098b50a6b4888012137f15107117ad57cb3832617d3ee04dc8f"
       }
     ],
-    "tdd_provenance": "Baseline RED is a new explicit reproduction, not an original raw log: bb416 committed regression tests with only alias bridge byte-restored from a3a00181a21b4dc517607d3ec2d8acfd1021d5fb, two failures exit1. Fixed bb416 source70PASS Python3.12 and30PASS Python3.11. Original red was tool output only. Provider files and root worktree were not modified by the baseline reproduction."
+    "tdd_provenance": "Baseline RED is a new explicit reproduction, not an original raw log: bb416 committed regression tests with only alias bridge byte-restored from a3a00181a21b4dc517607d3ec2d8acfd1021d5fb, two failures exit1. Fixed bb416 source70PASS Python3.12 and30PASS Python3.11. Original red was tool output only. Provider files and root worktree were not modified by the baseline reproduction.",
+    "test_state_isolation_followup": {
+      "failed_canonical_source": "52d8f78e474ac20e04855204f1c8c778a80c2308",
+      "canonical_result": "7/8gatesPASS; affectedtests7failed/7590passed/377skip/43deselect/1knownxpass/21subtests. ExactCIscan209rules280fileszero findings.",
+      "cause": "New canonical selection includes older first alias-sync test that setsWARNwithoutrestoring. Reportingpreconditiontests thenrightfullyfail.",
+      "repair_source": "a4b891d769",
+      "scope": "Existing alias-sync test now snapshots currentlevel and restores in finally, matching newregressions. All assertion ASTs preserved; bridge/reporting implementation unchanged.",
+      "focused_red_green": "Exactaliasmodule+reportingmodule sequence7failed33passed before restoration ->40passed afterward.",
+      "preceding_protected_pass": "Remotea3 CIStandardSUCCESS and fullunit27450passed1163skip8xfail; order-dependentidentityproblem reproducedbynewtests.",
+      "receipts": [
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-identity-final-prepr.txt.gz",
+          "sha256": "7b4ee8a6e3f17e4beba94841aaca63037403161ab11eaf9956e0adfcbc2d605c",
+          "uncompressed_sha256": "ba0f67c62dd36d0ee84eaf7d8642d93f8761e6d8afa4fa07bbd4a83890cc9b9b"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-identity-semgrep.txt.gz",
+          "sha256": "cfa2e768870ae20cb291886b42973f3f5195c3434b75b23cd11ece2fce48fa4a",
+          "uncompressed_sha256": "98a78feece9340c758f00813457fff586459ae120f1baee35fd948723f7a58aa"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-reporting-red.txt.gz",
+          "sha256": "87b2768d22df67176520ecacf2338aea8035d18f7196b0e9ad13ce2b6f5089d9",
+          "uncompressed_sha256": "1cc2ac262c6c6610dbbed58afa160e82e0a086f42bd16cfd2c6625b4b9d30cb8"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-reporting-green.txt.gz",
+          "sha256": "ef66d03d5e0ec23d1ad701a6fd405c71a7015e8dc255886ed43a9579bd0e5218",
+          "uncompressed_sha256": "cb3b6c2b6cd75cd94f01b160029dd45a53438b2ec870459488c580920d299d1c"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-classification-full-unit-pass.log.gz",
+          "sha256": "567c56f7faf4843af6a338630bf367646b6d0692f5535df189561e57e0e1e625",
+          "uncompressed_sha256": "1140120e918389447a8b2f55131666162c28ab6511ebc30d768084a7cbaa7e5f"
+        }
+      ],
+      "status": "Rootreview and focusedsequencePASS; complete combinedcanonical/protectedverificationpending."
+    }
   },
   "final_live_publication": {
     "status": "PASS article-specific live acceptance; global whole-site post-deployment scan still in progress at checkpoint",
