@@ -4106,7 +4106,7 @@ Unlock golf swing coordinates, widen joint excursion limits, and calibrate drive
 - Unlock critical arm and lumbar coordinates (`lumbar_extension`, `lumbar_bending`, `lumbar_rotation`, `arm_flex_r/l`, `arm_add_r/l`, `arm_rot_r/l`, `elbow_flex_r/l`, `pro_sup_r/l`, `wrist_flex_r/l`, `wrist_dev_r/l`, `subtalar_angle_r/l`, `mtp_angle_r/l`).
 - Calibrate coordinate clamp ranges for full golf swing excursion (arm flexion $[-120^\circ, 180^\circ]$, lumbar rotation $[-120^\circ, 120^\circ]$, wrist deviation $[-45^\circ, 45^\circ]$).
 - Calibrate club dimensions and inertia matching tour-average capture (distal clubhead translation $-1.042\text{ m}$, mass center $-0.786\text{ m}$, $I_{xx} = I_{zz} = 0.1158\text{ kg}\cdot\text{m}^2$).
-- Verified via pure-XML structural assertions in `tests/test_opensim_model_loads.py`.
+- Verified via pure-XML structural assertions in `tests/engines/opensim/test_opensim_model_loads.py`.
 
 ## Full-Body Model Specification Schema, Shared Contact Law, and Tour Capture Contract (#10063, #10064, #10003)
 

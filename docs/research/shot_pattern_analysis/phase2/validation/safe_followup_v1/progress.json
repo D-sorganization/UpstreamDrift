@@ -1065,5 +1065,13 @@
     "main_commit": "51f563776a",
     "combined_source": "36ab82a1be0e0967b8cd3045386adb25a92db34e",
     "scope": "Actual conflicts in two generated divergence inventories; official regeneration preserves all six incoming swing-report files, two tests and fragment byte-for-byte.32 exporter tests and inventory check pass. Astra approved combined resolution. Both main51f and remote47df retained in ancestry."
+  },
+  "protected_ci_integrity_followup": {
+    "source_commit": "0e525333207a3c1ecb64c5932c1dd487519a92c0",
+    "status": "Three protected CI metadata/path failures reproduced and repaired locally; full updated gate and protected CI pending.",
+    "claim_manifest": "Only three reviewed artifact entries/five SHA-or-size leaves refreshed via official content-integrity builder; original gzip and field delta retained. Claims/references/counts/scientific scope unchanged. Complete computational publication qualification command passes with PDF inspection.",
+    "archive_title": "Inline code workflow if: key satisfies repo title checker; former archive gzip preserved, prior capitalization receipt retained historically. No original raw evidence or record fields changed.",
+    "spec_paths": "Current OpenSim reference corrected; exact immutable historical fitting row resolves only with original Git identity and independently pinned published provider identity.16TDD cases pass; no blanket historical exemption or implementation equivalence claim.",
+    "scientific_approval": "No renewal; frozen evidence/acceptance limits unchanged."
   }
 }

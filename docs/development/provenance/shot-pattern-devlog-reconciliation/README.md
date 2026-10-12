@@ -17,3 +17,7 @@ Use the repository public APIs `new_fragment`, `load_fragment`, `apply_devlog_en
 ## Subsequent Title Normalization
 
 The canonical pre-PR title checker then required `Same-Repo if:` to become `Same-Repo If:` in the heading for DL-#11556. The public `shared_scripts.document_title_case.apply_text_fixes` formatter applied only that finding. `title-normalization.json` binds the archive before and after, the checker source, and the unchanged original gzip evidence. The lossless archive-move review above remains a historical checkpoint; it does not describe the current archive as wholly byte-identical after this formatting correction. No entry fields, statuses, scientific acceptance, or validation limits changed.
+
+## Workflow-Key Literal Follow-Up
+
+The protected CI repository checker treats `if` as a minor word, while the canonical RM checker had required `If`. The current archive now marks the workflow key as inline code (`if:`), preserving its literal spelling under both checkers. `workflow-literal-normalization.json` records the single heading edit and current archive hash; `archive-before-workflow-literal.md.gz` preserves the preceding archive exactly. The earlier title-normalization receipt remains historical. No record fields, statuses, acceptance claims or limits change.
