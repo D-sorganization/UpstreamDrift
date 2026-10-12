@@ -30,7 +30,7 @@ from .native_passive_readiness import (
 )
 from .native_passive_receipt import (
     NativePassiveObservationReceiptReference,
-    write_native_passive_observation_receipt,
+    prepare_native_passive_observation,
 )
 from .native_reference_conventions import (
     ReferenceStateDeclaration,
@@ -1159,82 +1159,26 @@ def prepare_native_moco(
         probe_callable,
         passive_audit_sink=passive_audits.append,
     )
-    passive_receipt = None
-    if passive_audits:
-        try:
-            if len(passive_audits) != 1:
-                raise ValueError("passive audit sink received multiple observations")
-            observed = passive_audits[0]
-            if (
-                model_result.loaded_sha256 is None
-                or model_result.runtime_sha256 is None
-            ):
-                raise ValueError(
-                    "passive receipt requires loaded model and runtime identities"
-                )
-            if observed.native_state.loaded_model_sha256 != model_result.loaded_sha256:
-                raise ValueError(
-                    "passive audit loaded model identity does not match preparation"
-                )
-            if observed.observation_sha256 != model_result.passive_sha256:
-                raise ValueError("passive audit digest does not match preparation")
-            passive_receipt = write_native_passive_observation_receipt(
-                directory,
-                observed,
-                request_sha256=request.identity_sha256,
-                source_sha256=request.model_sha256,
-                runtime_sha256=model_result.runtime_sha256,
-                observer_sha256=hashlib.sha256(
-                    Path(
-                        audit_native_passive_readiness.__code__.co_filename
-                    ).read_bytes()
-                ).hexdigest(),
-            )
-        except (OSError, ValueError, TypeError):
-            passive_receipt = None
-    loaded = model_result.loaded_sha256
-    reference_sha = model_result.reference_sha256
-    passive_sha = model_result.passive_sha256
-    runtime_sha = model_result.runtime_sha256
-    probe_sha = model_result.probe_sha256
-    probe_failure = model_result.probe_failure
-    probe_attempted = model_result.probe_attempted
-    probe_start, probe_end = model_result.probe_start, model_result.probe_end
-    wrapped_findings = model_result.wrapped_findings
-    receipt_required = (
-        passive_sha is not None or request.allow_unqualified_passive_diagnostic
-    )
-    receipt_blockers = (
-        ("native-passive-observation-receipt-unavailable",)
-        if receipt_required and passive_receipt is None
-        else ()
+    passive_receipt, receipt_blockers = prepare_native_passive_observation(
+        directory, passive_audits, request, model_result
     )
     final_blockers, assessment = _assess_native_preparation(
         request, directory, preflight, model_result, receipt_blockers
     )
-    loaded = model_result.loaded_sha256
-    reference_sha = model_result.reference_sha256
-    passive_sha = model_result.passive_sha256
-    physical_sha = preflight.physical_sha256
-    physical_qualified = preflight.physical_qualified
-    capture = preflight.capture
-    clock_sha = preflight.clock_sha256
-    registered_sha = preflight.registered_sha256
-    actual = preflight.actual_digests
     report = NativeMocoPreparation(
         request.identity_sha256,
-        actual["model"],
-        actual["capture"],
-        actual["guess"],
-        loaded,
-        reference_sha,
-        passive_sha,
-        clock_sha,
-        registered_sha,
-        physical_sha,
-        physical_qualified,
+        preflight.actual_digests["model"],
+        preflight.actual_digests["capture"],
+        preflight.actual_digests["guess"],
+        model_result.loaded_sha256,
+        model_result.reference_sha256,
+        model_result.passive_sha256,
+        preflight.clock_sha256,
+        preflight.registered_sha256,
+        preflight.physical_sha256,
+        preflight.physical_qualified,
         len(request.marker_weights),
-        capture.frames if capture is not None else 0,
+        preflight.capture.frames if preflight.capture is not None else 0,
         len(request.excluded_markers),
         final_blockers,
         time.perf_counter() - wall,
@@ -1242,7 +1186,7 @@ def prepare_native_moco(
         allow_unqualified_passive_diagnostic=request.allow_unqualified_passive_diagnostic,
         diagnostic_assessment=assessment,
         passive_observation_receipt=passive_receipt,
-        native_runtime_sha256=runtime_sha,
+        native_runtime_sha256=model_result.runtime_sha256,
     )
     (directory / "preparation.json").write_text(
         json.dumps(asdict(report), indent=2, allow_nan=False) + "\n", encoding="utf-8"
