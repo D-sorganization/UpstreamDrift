@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately.",
+  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately. Actual later main21b24c2f57 creates two generated context-map conflicts; exact pinned renderer resolves them without review renewal, all8 incoming non-conflicting files and single registry resolution retained,27 tests pass. Updated combined canonical/protected gate pending.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -1090,5 +1090,57 @@
     "archive": "Both branch and main archives are byte-identical:SHA25673675e99cd33bd54b3ec8804c29bc5b8adabbc4636ab57ca4c3f6493fa84f85d. No duplicate move.",
     "validation": "Official development-log validator passes; existing22-entry portfolio WIP warning retained. Both original active logs are lossless gzip; detailed merge proof committed.",
     "gate": "Complete stable-source canonical passes; protected updated CI pending."
+  },
+  "latest_main_native_receipt_reconciliation": {
+    "main": "21b24c2f57c6a64dd6023c9db0879724b1339ce8",
+    "byte_exact_incoming_files": [
+      {
+        "path": "changes/11792-passive-observation-receipt-12342.md",
+        "sha256": "b980244424522fb144347a78b50ea48719d01513e1196e2190acb681335ffc4c"
+      },
+      {
+        "path": "docs/agent_context/catalog.json",
+        "sha256": "87874f6a0652763603718813ab973f0e3e9a0bc892fd1a90889c8c74264dd285"
+      },
+      {
+        "path": "docs/development/feedback_controls/F07_PASSIVE_READINESS_TURNOVER.md",
+        "sha256": "245e65d8c27ad490a39666fe00dd070ffa351709b733a7ae4b30e8c01d377b7d"
+      },
+      {
+        "path": "manuals/upstreamdrift/chapters/33-native-passive-readiness.qmd",
+        "sha256": "339a1bdb641bd782b33ca6e0834413e7b122e0f9aa0e9e84a0fa542aa54fd810"
+      },
+      {
+        "path": "src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py",
+        "sha256": "0f26aa69dd3faf3df8599ee15f721c9be2ff73dfd9307b65355e78aef74024f1"
+      },
+      {
+        "path": "src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py",
+        "sha256": "4d38ad2c562cb272ca9ee2fb4ca62b336d426794beb017519248e00bef7dd637"
+      },
+      {
+        "path": "src/engines/physics_engines/opensim/python/tour_matching/native_passive_receipt.py",
+        "sha256": "36c80227c33bbd40640df643e0325035092c190a7da7e96053d70079cfde7d9c"
+      },
+      {
+        "path": "tests/opensim/test_native_passive_receipt.py",
+        "sha256": "35d60f55b69dbf1eeb8e0ab1f5113a9dd51d62ad6843ed72d319b5f2f017e849"
+      }
+    ],
+    "maps": "Regenerated with exact pinned Tools CLI; check passes; no review renewal.",
+    "registry": "Only the incoming UP-D1-native-passive-readiness-inventory blocker resolution is combined; all other consumer registry content is unchanged.",
+    "tests": "27 incoming passive-receipt cases pass; local source-contract tests only, no physical acceptance.",
+    "manual_governance": "63 QMD structural sources pass; inventory and release remain blocked.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-native-receipt-tests.txt.gz",
+        "sha256": "b7f708cf8d3f2e1059fe7af7db88053ed59bee914c01a9a34d8cc01bba97299e"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-native-manual-governance.txt.gz",
+        "sha256": "b676571e3fec9bed6e04a4c7a56fd2e48beba45e7d5e2ff114ca2c37cb800fde"
+      }
+    ],
+    "gate": "Updated complete stable-source canonical and protected CI pending."
   }
 }
