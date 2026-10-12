@@ -13,12 +13,17 @@ address_poses.json``):
    address, where the sole rests) maps to y = 0.
 3. Inverse kinematics over the Rajagopal coordinates (bounded by their
    ranges) puts each hand's :data:`msk_club.HAND_GRIP_POINT_M` on its grip
-   point on the shaft (2 mm weight), lays the shaft diagonally across each
-   palm toward the thumb (0.1 weight), keeps the wrists in their
-   physiological deviation range and follows the landmarks (4 cm weight), with a
-   weak pull toward the neutral pose.
+   point on the shaft (2 mm weight), turns each hand to its specified grip
+   rotation (:func:`grip_hand_rotation`, 0.05 rad weight: the shaft diagonal
+   across the palm toward the thumb, the trail palm facing the target with
+   its fingers wrapping under the shaft and the lead palm facing away from
+   it, #12306), keeps the wrists in their physiological deviation range and
+   follows the landmarks (4 cm weight), with a weak pull toward the neutral
+   pose.
 4. Each hand-side grip frame is the club grip frame seen from that hand at
-   the solution, so both welds are exact at the address pose and the club
+   the solution (within a degree of the specified rotation; the report
+   records the residual and the coordinates left at a range bound), so both
+   welds are exact at the address pose and the club
    sits exactly where the generated model holds it: with the shared face
    roll the face reproduces the capture's own address face (open or closed,
    #12117), which the tests check by OpenSim FK.
@@ -75,7 +80,9 @@ FOOT_TEMPLATE = {
 FOOT_WEIGHT_M = 0.01
 GENERATED_CLUB_BODY = "Clubhead"
 GRIP_WEIGHT_M = 0.002
-THUMB_WEIGHT = 0.1
+#: Weight (rad) of each hand's orientation toward its specified grip
+#: rotation (:func:`grip_hand_rotation`), about 3 deg.
+GRIP_ORIENTATION_WEIGHT_RAD = 0.05
 LANDMARK_WEIGHT_M = 0.04
 NEUTRAL_WEIGHT_RAD = 2.0
 #: Angle of the shaft from the radial axis toward the fingers: in a golf grip
@@ -89,14 +96,70 @@ THUMB_AXIS = {
     "L": np.array([0.0, -np.sin(_DIAGONAL), -np.cos(_DIAGONAL)]),
     "R": np.array([0.0, -np.sin(_DIAGONAL), np.cos(_DIAGONAL)]),
 }
+#: Palm normal in both Rajagopal hand frames: the palmar side, toward which the
+#: phalanges curl and on which the pisiform sits (hand meshes, #12306).
+PALM_AXIS = np.array([1.0, 0.0, 0.0])
+#: Horizontal target direction in the Rajagopal world (native target -Y).
+TARGET_DIRECTION = NATIVE_TO_OPENSIM @ np.array([0.0, -1.0, 0.0])
+#: Side of the grip each palm faces: the trail palm faces the target, the lead
+#: palm faces away from it, so the palms are parallel and opposed.
+PALM_FACING = {"L": -1.0, "R": 1.0}
 #: Static address limits narrower than the golf models' swing ranges: the
 #: Rajagopal physiological wrist deviation (the golf models widen it to
 #: +/-45 deg for the swing, #10003), so the address pose also loads in the
 #: muscle model, which keeps the physiological range.
+#: Distance (rad or m) from a range bound below which the report lists a
+#: coordinate as sitting at that bound.
+BOUND_MARGIN = 0.01
 ADDRESS_RANGES = {
     "wrist_dev_r": (-0.43633231, 0.61086524),
     "wrist_dev_l": (-0.43633231, 0.61086524),
 }
+_SCALED_WRIST = (
+    "the scaled skeleton misses the generated landmarks by 4-7 cm (straight "
+    "knees, shorter reach) and reaches the grip only at the physiological "
+    "wrist deviation limit; it sat there before #12306 too"
+)
+#: Recorded reasons, by model, for an address coordinate of
+#: :data:`ADDRESS_RANGES` that the calibration leaves at its bound.
+ADDRESS_BOUND_REASONS = {
+    "golf_humanoid_scaled": {
+        "wrist_dev_l": _SCALED_WRIST,
+        "wrist_dev_r": _SCALED_WRIST,
+    },
+}
+
+
+def grip_hand_rotation(side: str, shaft: Sequence[float] | np.ndarray) -> np.ndarray:
+    """Specified ground rotation of hand ``side`` holding a shaft along ``shaft``.
+
+    ``shaft`` points from the grip to the head (club +y). The hand's
+    :data:`THUMB_AXIS` lies along the shaft (the shaft diagonal across the
+    palm, thumb down the shaft) and its :data:`PALM_AXIS` faces
+    :data:`PALM_FACING` times the target direction, projected square to the
+    shaft: the trail palm faces the target with its fingers wrapping under the
+    shaft, the lead palm faces away from it. Postcondition: a proper rotation
+    with ``R @ THUMB_AXIS[side]`` the unit shaft. Raises ``ValueError`` for an
+    unknown side, a non-finite or zero shaft, or a shaft along the target line.
+    """
+    if side not in THUMB_AXIS:
+        raise ValueError(f"side must be 'L' or 'R', got {side!r}")
+    axis = np.asarray(shaft, dtype=float)
+    if axis.shape != (3,) or not np.isfinite(axis).all():
+        raise ValueError("shaft must be a finite 3-vector")
+    norm = float(np.linalg.norm(axis))
+    if norm == 0.0:
+        raise ValueError("shaft must be non-zero")
+    axis = axis / norm
+    palm = PALM_FACING[side] * TARGET_DIRECTION
+    palm = palm - (palm @ axis) * axis
+    if np.linalg.norm(palm) < 1e-6:
+        raise ValueError("shaft is parallel to the target line")
+    palm = palm / np.linalg.norm(palm)
+    thumb = THUMB_AXIS[side]
+    ground = np.column_stack([axis, palm, np.cross(axis, palm)])
+    hand = np.column_stack([thumb, PALM_AXIS, np.cross(thumb, PALM_AXIS)])
+    return ground @ hand.T
 
 
 def planted_feet(hips: Mapping[str, np.ndarray]) -> dict[str, np.ndarray]:
@@ -257,6 +320,13 @@ def grip_frames(club: mc.MskClub, club_in_ground: np.ndarray) -> dict[str, np.nd
     return frames
 
 
+def _rotation_error(actual: np.ndarray, target: np.ndarray) -> np.ndarray:
+    """Rotation vector (rad) taking ``target`` to ``actual`` (3x3 rotations)."""
+    from scipy.spatial.transform import Rotation
+
+    return Rotation.from_matrix(target.T @ actual).as_rotvec()
+
+
 class _Residual:
     """Weighted IK residual over the free coordinates."""
 
@@ -268,7 +338,8 @@ class _Residual:
         grips: dict[str, np.ndarray],
     ) -> None:
         self.probe, self.names, self.targets, self.grips = probe, names, targets, grips
-        self.shaft = targets.club_in_ground[:3, 1]
+        shaft = targets.club_in_ground[:3, 1]
+        self.orientations = {s: grip_hand_rotation(s, shaft) for s in mc.HAND_BODIES}
         self.landmarks = targets.landmarks
         self.rotational = np.array([not n.startswith("pelvis_t") for n in names])
 
@@ -279,8 +350,10 @@ class _Residual:
             pose = self.probe.body(hand)
             point = pose[:3, :3] @ mc.hand_grip_point(side) + pose[:3, 3]
             parts.append((point - self.grips[side][:3, 3]) / GRIP_WEIGHT_M)
-            thumb = pose[:3, :3] @ THUMB_AXIS[side]
-            parts.append(np.array([(1.0 - float(thumb @ self.shaft)) / THUMB_WEIGHT]))
+            parts.append(
+                _rotation_error(pose[:3, :3], self.orientations[side])
+                / GRIP_ORIENTATION_WEIGHT_RAD
+            )
         for body, target in self.landmarks.items():
             residual = self.probe.body(body)[:3, 3] - target
             parts.append(residual / landmark_weight(body))
@@ -322,12 +395,14 @@ def solve_address(
     )
     q = dict(zip(names, (float(v) for v in fit.x), strict=True))
     probe.set(q)
-    hand_frames, gaps = {}, {}
+    hand_frames, gaps, turns = {}, {}, {}
     for side, hand in mc.HAND_BODIES.items():
         pose = probe.body(hand)
         hand_frames[side] = np.linalg.inv(pose) @ grips[side]
         point = pose[:3, :3] @ mc.hand_grip_point(side) + pose[:3, 3]
         gaps[side] = float(np.linalg.norm(point - grips[side][:3, 3]))
+        error = _rotation_error(pose[:3, :3], residual.orientations[side])
+        turns[side] = float(np.degrees(np.linalg.norm(error)))
     landmark_rms = float(
         np.sqrt(
             np.mean(
@@ -338,10 +413,17 @@ def solve_address(
             )
         )
     )
+    at_bounds = sorted(
+        name
+        for name, value, (low, high) in zip(names, fit.x, bounds, strict=True)
+        if min(value - low, high - value) < BOUND_MARGIN
+    )
     report = {
         "status": int(fit.status),
+        "coordinates_at_bounds": at_bounds,
         "nfev": int(fit.nfev),
         "hand_grip_point_gap_m": gaps,
+        "grip_orientation_error_deg": turns,
         "landmark_rms_m": landmark_rms,
         "floor_native_z_m": targets.floor_native_z,
     }
