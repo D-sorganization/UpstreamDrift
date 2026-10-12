@@ -5,8 +5,22 @@ import * as THREE from 'three';
 import type { SimulationFrame } from '@/api/client';
 import { ClubHead } from './ClubHead';
 import { HeadModel } from './HeadModel';
+import { BallModel } from './BallModel';
+import { ballPositionAtAddress, type Vec3 } from './ballGeometry';
 
 const MAX_TRAIL_POINTS = 100;
+
+// Default-pose club head in the golfer frame (torso y=1, right arm at
+// (0.25, 0.2) rotated 0.3 rad about z, club 1.1 m below the arm origin).
+// Horizontal face normal: the ball ignores the vertical component anyway.
+const ARM_TILT_RAD = 0.3;
+const CLUB_REACH_M = 1.1;
+const ADDRESS_FACE_CENTRE: Vec3 = [
+  0.25 + CLUB_REACH_M * Math.sin(ARM_TILT_RAD),
+  1.2 - CLUB_REACH_M * Math.cos(ARM_TILT_RAD),
+  0,
+];
+const ADDRESS_BALL: Vec3 = ballPositionAtAddress(ADDRESS_FACE_CENTRE, [1, 0, 0], 0);
 
 interface GolferModelProps {
   frame: SimulationFrame | null;
@@ -149,6 +163,9 @@ export function GolferModel({
           </group>
         </mesh>
       </mesh>
+
+      {/* Decorative ball at address, resting on the ground (GCV-13, #11719) */}
+      <BallModel position={ADDRESS_BALL} />
 
       {/* Legs (static for now) */}
       <mesh

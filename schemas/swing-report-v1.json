@@ -1,0 +1,526 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/swing_report/swing-report-v1.json",
+  "title": "UpstreamDrift Cross-Engine Swing Report (v1)",
+  "description": "Versioned contract for a cross-engine swing report (epic #11419). Fail-closed output policy of #10382: clubhead position/speed and kinematic-sequence timing are advertised_with_uncertainty (provisional cross-engine spread until DV-10382); everything else (face angle, joint loads, impact/ball flight, joint angles, segment angular velocity, ...) is withheld as 'not validated' and can never carry values. 'validated' is reserved for campaign-backed results and is not accepted in v1. Cross-reference rules (plot->quantity ids, series->run ids, unique ids) are enforced by validate_swing_report().",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report_id",
+    "generated_utc",
+    "scope",
+    "provenance",
+    "runs",
+    "quantities",
+    "plots",
+    "sections"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer; major pinned to 1 by this schema. Consumers accept any 1.x.y."
+    },
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["full", "custom"],
+      "description": "Mirrors ReportScope (dime_report_integration)."
+    },
+    "provenance": {
+      "$ref": "#/$defs/ReportProvenance"
+    },
+    "runs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/EngineRun"
+      }
+    },
+    "quantities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Quantity"
+      }
+    },
+    "plots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PlotDescriptor"
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Section"
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Namespaced (x-<vendor>) optional data; consumers MUST ignore unknown keys here.",
+      "propertyNames": {
+        "pattern": "^x-[a-z0-9_.-]+$"
+      }
+    }
+  },
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "Engine": {
+      "type": "string",
+      "description": "Value of engine_core.engine_registry.EngineType.",
+      "enum": [
+        "mujoco",
+        "drake",
+        "pinocchio",
+        "jaxsim",
+        "opensim",
+        "myosim",
+        "matlab_2d",
+        "matlab_3d",
+        "pendulum",
+        "golf_swing_pendulum",
+        "putting_green"
+      ]
+    },
+    "ReportProvenance": {
+      "type": "object",
+      "description": "Subset projection of data_io.provenance.ProvenanceInfo; do not add parallel fields.",
+      "required": [
+        "timestamp_utc",
+        "software_name",
+        "software_version",
+        "git_commit_sha",
+        "capture"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "timestamp_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "software_name": {
+          "type": "string"
+        },
+        "software_version": {
+          "type": "string"
+        },
+        "git_commit_sha": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "git_is_dirty": {
+          "type": "boolean"
+        },
+        "capture": {
+          "type": "object",
+          "required": ["capture_id", "visibility"],
+          "additionalProperties": false,
+          "properties": {
+            "capture_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "visibility": {
+              "type": "string",
+              "enum": ["public", "private"]
+            },
+            "capture_sha256": {
+              "$ref": "#/$defs/Sha256"
+            }
+          },
+          "if": {
+            "properties": {
+              "visibility": {
+                "const": "private"
+              }
+            },
+            "required": ["visibility"]
+          },
+          "then": {
+            "not": {
+              "required": ["capture_sha256"]
+            }
+          }
+        }
+      }
+    },
+    "EngineRun": {
+      "type": "object",
+      "required": [
+        "run_id",
+        "engine",
+        "engine_version",
+        "model_file_hash",
+        "run_class"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "engine": {
+          "$ref": "#/$defs/Engine"
+        },
+        "engine_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_file_hash": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "run_class": {
+          "type": "string",
+          "enum": [
+            "inverse_kinematics",
+            "inverse_dynamics",
+            "forward_dynamics",
+            "hybrid_estimation"
+          ],
+          "description": "Mirrors RunClassification."
+        },
+        "force_provenance": {
+          "type": "string",
+          "enum": ["measured", "inferred", "regularized", "unavailable"],
+          "description": "Mirrors ReportForceProvenance."
+        }
+      }
+    },
+    "Units": {
+      "type": "string",
+      "enum": [
+        "m",
+        "m/s",
+        "m/s^2",
+        "rad",
+        "rad/s",
+        "deg",
+        "deg/s",
+        "s",
+        "ratio",
+        "N",
+        "N*m",
+        "J",
+        "1"
+      ]
+    },
+    "Frame": {
+      "type": "string",
+      "enum": ["world_Zup", "adr0041_world", "body", "segment", "none"]
+    },
+    "Uncertainty": {
+      "type": "object",
+      "description": "Provisional cross-engine spread until DV-10382 budgets exist.",
+      "required": ["kind", "budget_source", "units", "lower", "upper"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "engine_spread"
+        },
+        "budget_source": {
+          "const": "provisional_cross_engine_spread"
+        },
+        "units": {
+          "$ref": "#/$defs/Units"
+        },
+        "lower": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          }
+        },
+        "upper": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "Series": {
+      "type": "object",
+      "description": "One numeric series. DbC: units + engine + run_id always present; time_s and values equal length; null = missing sample, never zero-filled.",
+      "required": ["engine", "run_id", "units", "frame", "time_s", "values"],
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "$ref": "#/$defs/Engine"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "units": {
+          "$ref": "#/$defs/Units"
+        },
+        "frame": {
+          "$ref": "#/$defs/Frame"
+        },
+        "channel": {
+          "type": "string",
+          "description": "Optional sub-channel, e.g. segment or axis name."
+        },
+        "time_s": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          }
+        },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": ["number", "null"]
+          }
+        }
+      }
+    },
+    "QuantityId": {
+      "description": "Closed catalog. Class is fixed by membership; adding an id is MINOR and defaults to withheld.",
+      "enum": [
+        "clubhead_position",
+        "clubhead_speed",
+        "kinematic_sequence",
+        "segment_angular_velocity",
+        "joint_angle",
+        "face_angle",
+        "joint_load",
+        "joint_torque",
+        "ground_reaction_force",
+        "impact_state",
+        "ball_flight"
+      ]
+    },
+    "Quantity": {
+      "type": "object",
+      "required": ["quantity_id", "status"],
+      "properties": {
+        "quantity_id": {
+          "$ref": "#/$defs/QuantityId"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["advertised_with_uncertainty", "withheld"],
+          "description": "'validated' is reserved for DV-10382-backed results and is rejected in v1."
+        }
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/AdvertisedQuantity"
+        },
+        {
+          "$ref": "#/$defs/WithheldQuantity"
+        }
+      ]
+    },
+    "AdvertisedQuantity": {
+      "title": "Advertised: clubhead position/speed, kinematic-sequence timing - with uncertainty",
+      "type": "object",
+      "required": ["quantity_id", "status", "series", "uncertainty"],
+      "additionalProperties": false,
+      "properties": {
+        "quantity_id": {
+          "enum": ["clubhead_position", "clubhead_speed", "kinematic_sequence"]
+        },
+        "status": {
+          "const": "advertised_with_uncertainty"
+        },
+        "series": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Series"
+          }
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/Uncertainty"
+        }
+      }
+    },
+    "WithheldQuantity": {
+      "title": "Withheld (everything not explicitly advertised) - NO values of any kind",
+      "type": "object",
+      "required": ["quantity_id", "status", "reason", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "quantity_id": {
+          "enum": [
+            "face_angle",
+            "joint_load",
+            "joint_torque",
+            "ground_reaction_force",
+            "impact_state",
+            "ball_flight",
+            "joint_angle",
+            "segment_angular_velocity"
+          ]
+        },
+        "status": {
+          "const": "withheld"
+        },
+        "label": {
+          "type": "string",
+          "const": "not validated"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ref": {
+          "type": "string",
+          "description": "e.g. DV-10382; pointer only, never numbers."
+        }
+      }
+    },
+    "PlotDescriptor": {
+      "type": "object",
+      "required": [
+        "plot_id",
+        "title",
+        "quantity_id",
+        "kind",
+        "engines",
+        "render"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "plot_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quantity_id": {
+          "$ref": "#/$defs/QuantityId"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["time_series", "bar", "sequence_timeline", "scatter"]
+        },
+        "units": {
+          "$ref": "#/$defs/Units"
+        },
+        "frame": {
+          "$ref": "#/$defs/Frame"
+        },
+        "engines": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Engine"
+          }
+        },
+        "uncertainty_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["value", "lower", "upper"]
+          },
+          "uniqueItems": true
+        },
+        "selectable": {
+          "type": "boolean",
+          "default": true
+        },
+        "default_selected": {
+          "type": "boolean",
+          "default": false
+        },
+        "render": {
+          "type": "string",
+          "enum": ["values", "unavailable"]
+        },
+        "unavailable_reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "render": {
+                "const": "unavailable"
+              }
+            },
+            "required": ["render"]
+          },
+          "then": {
+            "required": ["unavailable_reason"]
+          },
+          "else": {
+            "required": ["units", "frame"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "quantity_id": {
+                "enum": [
+                  "face_angle",
+                  "joint_load",
+                  "joint_torque",
+                  "ground_reaction_force",
+                  "impact_state",
+                  "ball_flight",
+                  "joint_angle",
+                  "segment_angular_velocity"
+                ]
+              }
+            },
+            "required": ["quantity_id"]
+          },
+          "then": {
+            "properties": {
+              "render": {
+                "const": "unavailable"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Section": {
+      "type": "object",
+      "required": ["section_id", "title", "plot_ids"],
+      "additionalProperties": false,
+      "properties": {
+        "section_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "plot_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
