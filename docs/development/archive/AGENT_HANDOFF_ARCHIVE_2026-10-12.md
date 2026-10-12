@@ -1,0 +1,1438 @@
+# Agent handoff archive — 2026-10-12
+
+> Historical turnover entries moved verbatim from `AGENT_HANDOFF.md` by PR #12393 / issue #9415.
+> The live handoff is current-state only (150 lines).
+
+# Character Builder Docs and Tutorial, CMB-12 #11663
+
+- User docs: `docs/help/character_builder.md`, `docs/user_guide/character_builder_quickstart.md`, `character_presets.md` and the end-to-end `character_builder_tutorial.md` (build, dress, swap the club, export spec/URDF/MJCF/OpenSim/glTF, desktop walkthrough, simulate in MuJoCo). Desktop screenshots regenerate with `scripts/capture_character_builder_screenshots.py`.
+- Every number in the tutorial is checked by `tests/unit/character_builder/test_cmb12_*.py`. The spec hash `4ee2c43d` follows the driver document, so a change to the canonical driver spec must update the tutorial and these tests together. Step 6 runs only where `mujoco` imports; its exported MJCF has no floor or actuators, so the body free-falls (-0.198 m after 0.2 s).
+- Open elsewhere: smooth skin blend weights and MuJoCo per-segment meshes (CMB-6 #11657), the Playwright flow (CMB-7 #11658, owner decision on adopting Playwright), lower limbs not scaling with `mass_kg` (#12199).
+
+# Active: Adopted Per-Capture Grip Rotation, #12221
+
+- Branch `claude/12221-grip-adopt`, stacked on #12270. Applies the fitted `grip_rotation_deg` to `full_body_spec_anthro_driver.json` only; calibrated driver commands now add `--fix-club-markers`. Driver receipts regenerated on ControlTower (address / IK / dynamics, mm): `anthro_driver_seeds` 11.0 / 30.3 / 82.0, `anthro_driver_drake` 11.0 / 30.3 / 86.3 (dynamics worse), `anthro_driver` 50.9 / 46.5 / 71.9. Replay is sensitive at 3 to 15 mm to tiny parameter changes (CANONICAL_RUN.md §2A).
+- Driver club-face fixture regenerated at `9fe74740a5` (impact speed -2.5 %, peak 4.4 ms early, face 16.88 / 14.96 deg; meets GCV-20 and OSV-10); #12266 no longer blocks it. The MSK driver grip calibration and both `golf_humanoid*.osim` clubs were regenerated from it (`rebuild_club`). The OpenSim bushing grip exceeds its 2 deg / 50 N full-swing bounds only in the 6 ms ball-impact window (2.62 deg, 51.3 N): strict xfail, decision on #12272.
+- 7-iron deferred: document, OpenSim export and receipts unchanged (4.0 / 28.4 / 109.9 and 41.5 / 45.2 / 104.9). Its refit passes on the tracked swing but its same-input export gives -5.0 %, -5.1 ms, 8.71 deg face, which would redden eight face tests; fit receipt stays committed for a follow-up.
+- The PR awaits the owner decision on making `--fix-club-markers` the calibrated default.
+
+# Active: Per-Capture Grip Refit on the Fixed Clusters, #12221
+
+- Branch `claude/12221-grip-refit`, stacked on #12265. Landed: refit tooling (`grip_fit.weighted_frames`, `compose_rotation_deg`, `apply_grip_rotation`, `scripts/set_spec_grip_rotation.py`), the per-capture fit receipts `fit_grip_rotation_receipt_driver.json` / `_iron7.json`, and the evidence. Documents are NOT changed.
+- Fixture flags with the cluster fixed: driver speed −1.9 %, face gap 0.56°; 7-iron −1.9 %, 0.62°; no wrist on its bound at address. The refit is invalid with the cluster free (static trial moves the capture face). Calc record: "Per-Capture Grip Rotation on the Fixed Clusters".
+- Open: owner decision on `--fix-club-markers` default; then apply with `scripts/set_spec_grip_rotation.py` and regenerate receipts; #12266 blocks the driver fixture export.
+
+# Active: 7-Iron MSK Grip Calibration, #12042
+
+- Branch `claude/12042-iron7-msk-cal` (stacked on #12247). `msk_club_grip_calibration.json` now has `iron7` entries for `golf_humanoid` (grip gaps 0.04 / 0.02 mm, landmark RMS 14.9 mm) and `golf_humanoid_scaled` (0.24 / 0.25 mm, 40.0 mm), from the existing `msk_club_calibration --club iron7` CLI. `render_msk_club.py` now draws and measures the `--club` it tracks: before, the viewer loaded `golf_humanoid.osim` with its committed driver, so a 7-iron render showed the driver.
+
+# Active: Neutral Hip Zero-Twist and the MSK Turn Render, #12042
+
+- Branch `claude/12042-turn-slices`. `hip_rotation_zero` places `hip_rotation = 0` at the measured address thigh twist, and the ±40° bound moves with it. The canonical specs carry +45/−26° (lead/trail), so the lead hip is pinned at +40° at impact. `--hip-zero-twist neutral` (opt-in; default `capture` keeps the canonical receipts) uses 0/0. Pelvis turn is then within 3.2° of the markers at top and impact on both captures, with IK 25.6/22.9 mm. FD is 51.2 mm on the driver, but 91.2 mm on the 7-iron (after impact). Evidence: `evidence/hip_zero_twist_12042/`; calc record in `hip_axis_mirroring.tex`, section "Neutral Hip Zero-Twist and the Pelvis at Impact".
+- `render_msk_club.py --capture --club --mode` tracks with the capture turn targets and planted feet (shared `msk_turn_targets.tracking_inputs`).
+- Open: owner decision on the `neutral` default (regenerates canonical receipts and fixtures); trail hip now reaches −40°; upper-trunk over-twist at the top (slice 7).
+
+# Active: Measured Driver Club Cluster, #12221
+
+- Branch `claude/12221-driver-cluster`, stacked on `claude/12221-fixed-triad`. `evidence/club_markers/driver.json` (from the calibrated `anthro_driver_seeds` receipt at `1bef553457`) is now in the driver document. `anthro_driver`, `anthro_driver_seeds` and `anthro_driver_drake`, the OpenSim driver export, the inventory hashes and the tutorial hash `4ee2c43d` are regenerated.
+- Fixed cluster, fixture flags: capture face 5.50 / 14.96° (the canonical frame), model impact face 16.13°, speed −3.6 %, peak −0.3 ms. The canonical seeds receipt reads 7.5 / 30.5 / 82.6 mm (was 6.4 / 29.5 / 80.8). The nominal driver reads 41.7 / 46.1 / 73.6 mm (was 42.6 / 52.7 / 97.3).
+- Open: the same-input export of the fixed driver run diverges at impact; refit `grip_rotation_deg`; decide whether `--fix-club-markers` should be the default. Calc record: "Measured Driver Club Cluster".
+
+# Native Wrapped-Path Closure Handoff — #12234
+
+`native_wrapped_path.py` carries a source-hash-bound declaration for
+WrapCylinder/WrapEllipsoid/WrapSphere geometry, exact PathWrap targets and
+owners, and ConditionalPathPoint coordinate ranges. The constrained muscle
+path remains default-reject unless the caller supplies the declaration. Native
+reference observation reports the evaluated route without changing it. It
+does not prove global worklessness or guide-work bounds and makes no
+physiological claim. Eleven OpenSim 4.6 wrapped-path fixtures pass; the
+shared Chapter 56 typed findings/request integration is present in the
+current feature history. See provisional Chapter 57 and
+`docs/development/native_wrapped_path_diagnostic.qmd`.
+
+# Native Contact Source Closure Handoff — #12244
+
+Commits `316b011324` and `b48f7b053b` bind the exact-source contact declaration,
+shared sampler, and `opensim_force_torque.py` implementation digest into
+constrained replay identity. OpenSim 4.6 tests cover Smooth and HuntCrossley
+force identities, sphere/half-space geometry closure, source mutation, changed
+provider digest, default rejection, and finite constrained Smooth wrench
+sampling. HuntCrossley constrained replay remains untested because strict
+self-contained XML validation previously rejected its generated fixture;
+the parser fix and new source audit tests now pass. Request/runner serialization,
+preparation closure, export identity, and fresh-replay digest checks are
+integrated. No capture contact, support/grip, or physical qualification is
+claimed. See provisional Chapter 58 and
+`docs/development/feedback_controls/F07_NATIVE_CONTACT_SOURCE_CLOSURE_TURNOVER.md`.
+
+# Active: Fixed Club Cluster in the Static Trial, #12221
+
+- Branch `claude/12221-fixed-triad`. Opt-in `--fix-club-markers` (needs `--static-seeds`) keeps the six `Clubhead` markers at the document's per-club offsets, so a grip rotation can no longer move the capture's own face through the static trial. Default receipts are unchanged.
+- Fixture flags at `87ba5b2f39`: 7-iron −15.6 % (control, corrected #12210 cluster) → −2.6 %, peak 0.0 ms, impact face 7.18 vs 3.21°. The driver document's cluster puts the capture address face at −20.8°, so it is not a valid face frame.
+- Next: a measured driver cluster (#12210 procedure), then refit `grip_rotation_deg` on the fixed clusters. Calc record: `simscape_matching_reference.tex`, "Fixed Club Cluster in the Static Trial".
+
+# Active: Club-Face Fixtures on the Current Spec, #12117
+
+- Branch `claude/12117-club-face-fixtures`. Fixtures from `657c811bcd` (#12145 sources; input receipts value-identical to main's #12166 receipts). Feet now flat (3.2–3.8 cm), address face follows the capture (5.43 / −5.41° vs 5.50 / −5.35°).
+- `club_face.impact_frame` now enforces the 0.15 m ball radius on the peak-speed frame (the driver replay peaks 0.351 m short of the ball). OSV-8 and OSV-9 address-face tests compare with the capture's address face (2° unchanged). OSV-9 MSK grip calibration and both `golf_humanoid*.osim` regenerated (control reproduces main byte for byte). Calc record: `simscape_matching_reference.tex`, "Fixtures Regenerated on the Current Spec".
+- Strict xfails: 7-iron impact face 10.97 vs 3.21° (#12221, club-in-hand rotation); GCV-20 speed −6.1 / −10.2 % (#11767). Toe-out miss filed as #12222.
+
+# Active: Drake and MuJoCo IK Parity, Weld Rotation Row — #12039
+
+# Active: Necromatcher Reviewed Fitting Scope — #11414
+
+- Branch `claude/12039-drake-address-parity`. Drake's dual-grip weld rotation row was the small-angle vee with Jacobian `J_a - J_b` (up to 0.84 off finite differences); MuJoCo's is the principal log with its exact Jacobian. Both now use `full_body_ik._closure_rotation_row`; Drake `closure_error` reports the principal angle. Tests: `tests/unit/motion_matching/test_drake_mujoco_ik_parity.py`.
+- Address stages (static seeds, foot progression capture), Drake minus MuJoCo: driver +1.64 → 0.00 mm, 7-iron −0.54 → +0.02 mm; toe-out identical. Capture-A Drake receipt regenerated: 6.3 / 29.2 / 78.8 mm against MuJoCo's 6.3 / 29.5 / 80.8 mm. Evidence `evidence/foot_progression/drake_parity_12039/`; calc record "Weld Rotation Row Parity" in `simscape_matching_reference.tex`.
+
+# Active: Nominal 7-Iron IK and the Club-Face Triad Gate, #12030
+
+- Branch `claude/12030-nominal-iron-ik`. Root cause: `full_body_spec_anthro_iron7.json` carries the driver's clubhead triad offsets (edges 92/52/96 mm against the 7-iron capture's 106/127/40 mm), so the nominal run's face residual (OSV-10) fitted a meaningless rotation. `club_face_target.observe_frame_rotations` now raises `TriadShapeMismatchError` above a 5 mm median rigid residual (0.2 mm when matched, 42.4 mm here). Face targets, the impact split and the receipt's `ik.face_orientation` record the reason. The IK report adds `frame0_marker_rms_m`.
+- Nominal 7-iron: IK 264.8 → 67.9 mm (frame 0 70.2 mm against a 70.4 mm address), dynamics 1355 → 79.2 mm, 0 IK range-of-motion flags. The nominal driver is unchanged by the gate; its dynamics 79.3 → 97.3 mm comes from main's GCV-20 code (a control on main is identical). Calc record: `simscape_matching_reference.tex`, subsection "Triad-Shape Validity Gate".
+- Open: correct the 7-iron document's nominal head triad, which changes every 7-iron receipt's base spec hash.
+
+# Physical Inertia Helper Handoff — #12183
+
+`validate_physical_inertia` now uses sorted principal moments instead of frame
+diagonals, and absolute symmetry tolerance with zero relative tolerance. Two
+rotated impossible tensors and a masked asymmetry failed before the fix; affected
+calibration/human-prior tests now pass 25 cases. Chapter 51 gives reproduction
+and numerical tolerances. Values are preserved on success. Native source
+admission and optimizer enforcement are separate integration work; physical
+source provenance, matching and all-model qualification remain open.
+
+# Active: Closed-Loop Gaze Neck, #11729
+
+- OSV-3d. Branch `claude/osv-3d-gaze-closed-loop` (PR #12194; builds on the merged #12154). `--fd-neck gaze-closed`: `GazeNeckFeedback` is a kkt `reference_hook(t, q, q_t, v_t)` (`tracking_controller.py`) that re-solves the neck on the simulated state once per capture frame and adds the correction and its rate to the neck position/velocity targets. Receipt: `dynamics.head_gaze.feedback`.
+- Result (`evidence/head_gaze/fd_neck_closed_loop.json`): release-window RMS 17.2→1.7 deg (driver), 8.6→1.2 deg (7-iron); driver hold window 1.1→2.9 deg (ball-impact torso transient). Position-only first version lagged (hold 4.8 deg); the rate term is required.
+- Open: MyoSuite/OpenSim neck actuation and other engines, a gaze schedule that lets the head turn with the torso (neck still at range on 93/69 updates).
+
+# Active: Forward-Dynamics Gaze Neck, #11729
+
+- Branch `claude/osv-3c-gaze-neck-tracking`. `motion_matching/pipeline/gaze_tracking.py`: `--fd-neck gaze` re-solves the tracked reference's neck to the gaze schedule (model FK, bounded, after the feasibility filters); `dynamics.head_gaze` reports schedule error per window for the tracked reference and the replay. `render_head_gaze_clips --trajectory replay` renders the replay; `scripts/summarize_fd_neck_tracking.py` writes `evidence/head_gaze/fd_neck_tracking.json`.
+- Result: replay schedule error RMS address→impact 20.3→1.8 deg (driver), 19.0→1.2 deg (7-iron); release 15.4/6.3 deg from open-loop torso error; neck yaw saturates ±80 deg on 213/114 frames; head-marker RMS doubles. Published head rotation at the top: −33.6/−25.4 deg (Zhang et al. 2026).
+- Open: closed-loop gaze controller (neck re-solved from the simulated torso), MyoSuite/OpenSim neck actuation and other engines' receipts, a gaze schedule that lets the head turn with the torso.
+
+# Active: MSK Retarget Turn Targets - #12042 Slice 4
+
+- Branch `claude/msk-turn-targets` (on `claude/turn-metrics-core`, #12068). `msk_club_tracking.track_swing(..., turn_targets=, feet=)` adds pelvis/upper-trunk yaw residuals (0.02 rad, relative to the calibrated address heading) from the shared marker turn lines, and feet planted from the capture's foot markers (`msk_turn_targets.py`). Opt-in; the default tracking and renders are unchanged.
+- Capture A with targets + feet: pelvis 40.6/-49.7 (markers 40.9/-49.8), upper trunk 95.8/-19.1 (92.2/-19.2). Costs: trail-hand gap 15 -> 50 mm (early downswing), lead grip 1.3 -> 4.3 mm. Shoulder girdle is 7-10 deg short (no Rajagopal scapula). `scripts/msk_turn_audit.py` reproduces; capture B needs an uncommitted iron7 grip calibration.
+- Next: wire targets into `render_msk_club.py` (needs the private capture path), slice 7 (source trunk over-twist) to remove the trail-gap trade-off.
+
+# Active: Drake IK Coordinate Order — #12042 Slice 5
+
+- Branch `claude/drake-ik-twist`. Root cause of the Drake thorax under-twist: Drake's plant position order is not the spec `coordinate_order` (spine/torso/arms/neck permuted). `DrakeFullBodyIK._set` and the model's array paths skipped the permutation, so the twist was solved under the `SpineInputX` ±35° bound. Fixed with `to_plant_positions`/`named_columns` on `FullBodyDrakeModel`; tests in `tests/unit/motion_matching/test_drake_coordinate_order.py`.
+- Capture-A receipt `evidence/ground_support/anthro_driver_drake` regenerated: IK 47.2 → 34.6 mm, FD 382 → 60.1 mm; the twist now matches MuJoCo (inherits MuJoCo's +16°/+20° top over-twist, slice 7). Calc record: `simscape_matching_reference.tex`, section "Drake Full-Body IK Coordinate Order".
+- Open: shared spec FK misplaces the `Clubhead` triad by about 1 m versus Drake/MuJoCo (do not use it for club markers).
+
+# Active: Shoulder, Trunk and Pelvis Turn Metrics - #12042 Slices 1-2
+
+- Branch `claude/turn-metrics-core`; refs #11726. `swing_comparison/turn.py` splits the old "thorax yaw" into `shoulder_girdle` (ShoulderBack, scapular) and `upper_trunk` (BackLeft/BackRight) lines, keeps `pelvis`, and reports X-factor as upper trunk minus pelvis (plus a shoulder-girdle variant). Turn is relative to address, + = backswing, unwrapped. Gaps over 0.10 s stay NaN with a reason; unavailable is never zero. `SegmentRotationMetrics.thorax_yaw*` is a deprecated alias (shoulder girdle).
+- Model side: `spec_model_points` (shared FK; hip centres, `LS`/`RS`, thorax attachments) or model marker sites. Receipt block: `motion_matching/turn_receipt.py` (`turn_block/v1`), wired into the MuJoCo pipeline (`pipeline/cli.py`) and Pinocchio (`full_body_fit.py`); schema check in `receipt_schema.validate_receipt`. No thresholds (slice 8 gates).
+- Follow-ups: Drake, OpenSim, MyoSuite, MuJoCo replay, Simscape writers (`FOLLOW_UP_WRITERS`, with reasons). Next: slice 3 (OSV-6 #11737). Definitions: `simscape_matching_reference.tex`, section on turn definitions.
+
+# Active: Two-Hand Club in Tour-Matching Variants and Static Optimisation, OSV-9 Slice 2 #11756
+
+- Branch `claude/osv-9b-msk-club-variants`. `tour_matching/model_variants.equipment_from_model` reads the `Club` the model carries (shared-club hash, spec mass, weld/bushing topology, both hands, all meshes) and fails closed; both variant factories use it.
+- `run_musculoskeletal_swing.py --club driver --club-control`: SO with the club plus a no-club control. The IK does not close the two-hand loop (with the trail weld, 14 arm coordinates failed at every frame tried), so SO releases the trail weld (`release_trail_weld`; `--enforce-trail-weld` keeps it). Per-frame convergence is recorded from the native SO log (violation <= 1e-3): 234/262 with the club, 237/262 without.
+- Club load on 225 jointly converged frames: lead wrist deviation +32.9 N m RMS, lead shoulder flexion +45.0, trail arm exactly 0. Receipt `evidence/musculoskeletal/receipt.json`; the ledger is regenerated. No MyoFullBody OpenSim export exists.
+
+# Active: Two-Hand Grip Pose - OSV-2 #11728 (Slice 1)
+
+- Branch `claude/osv-2-grip-pose` (PR #12032), merged with main after OSV-9 (#11795). `model_appearance/grip_pose.py` is the club-agnostic grip definition; its lead (3.2 cm below the butt) and trail (10.82 cm) positions mirror the generated-spec `GripInterface`, the single source, and `tests/opensim/test_grip_closure_both_hands.py` fails on drift. `club_geometry`, `address.py` and the MyoSuite scene sites import it. The Rajagopal models keep the OSV-9 topology (lead `WeldJoint hand_l_to_club`, trail `WeldConstraint hand_r_to_club`); `msk_club_grip_calibration.json` is untouched.
+- Canned-swing closure residual (`python3 -m scripts.grip_closure_report --output r.json`): MuJoCo, Drake (ControlTower), Pinocchio, OpenSim full-body weld <= 1.8e-7 m; MyoSuite unavailable. Open: owner review of a 1.5 cm lead position (needs `msk_club_calibration` rerun for both models and clubs), finger meshes, stills and clips (slice 2), no `golf_humanoid` swing residual.
+
+# Active: Gaze Weight Selection, #11729
+
+- Branch `claude/osv-3b-gaze-default`. `motion_matching/gaze_sweep.py` (feasible set, Pareto knee, cross-capture `select_default`, `REPORTING_GAZE_WEIGHT = 0.1`), `scripts/sweep_gaze_weight.py` (IK-stage run per capture and weight), `scripts/summarize_gaze_sweep.py` (evidence JSON + Pareto plot), `scripts/render_head_gaze_clips.py` (MuJoCo side by side, 1080p60, 1x/0.5x/impact 0.25x), `scripts/render_head_gaze_engines.py` (Drake/Pinocchio/OpenSim/MyoSuite native clips + pairing).
+- Result: knee 0.1 in both captures (common feasible {0, 0.1, 0.2}); theta_gaze RMS 20.2 to 8.5 deg (driver), 18.6 to 6.1 deg (iron), marker RMS +0.6/+1.3 mm. `--gaze-weight` still defaults to 0 for qualified receipts. Evidence `docs/development/full_body_models/evidence/head_gaze/gaze_weight_sweep.{json,png}`; method in `HEAD_GAZE_REFERENCE.md` (Gaze Weight Selection) and the `.tex`.
+- Open: neck PD tracking in forward dynamics, published tour head ranges.
+
+# Active: Hip Rewrite Uses the Spec's Own Pelvis Alignment - #12109
+
+- Branch `claude/trail-hip-12109`, stacked on #12113. `cli._calibrate_and_scale` took `hip_from_opensim_pelvis` from `build_receipt_v2.json` for every spec, so `apply_hip_calibration` rotated the anthro hips (femur 24-66 deg off the pelvis at zero coordinates) and pinned `hip_rotation` at +-40 deg. `hip_calibration.pelvis_alignment_from_spec` now recovers the alignment from the spec's own hips (reproduces the v1/v2 receipts exactly) and fails closed when the hips disagree.
+- Address (MuJoCo, foot progression on): toe-out trail/lead -0.11/0.22 deg (driver) and -0.05/0.19 deg (7-iron); `hip_rotation` -17/+10 and -24/+18 deg. Evidence `evidence/foot_progression/pelvis_alignment_12109/`; diagnostic `scripts/diagnose_address_leg_yaw.py`. Reference: `docs/research/hip_axis_mirroring/` (Hip Rewrite Pelvis Alignment section).
+- Every calibrated anthro run changes: the canonical ground-support receipts are regenerated in this branch. Likely also the lead-hip limit in #12042 slice 3 / #11737.
+
+# Active: Web Club Head and Golfer Head - GCV-11 #11717, GCV-12 #11718
+
+- Branch `claude/gcv-11-12-web-head-club`. `ClubHead.tsx` (`clubHeadGeometry.ts`, `clubHeadAssets.ts`) draws the committed `assets/club_heads` STLs at spec loft and lie. `HeadModel.tsx` (`headModel.ts`) mirrors `model_appearance/head.py`. Both are mounted in `GolferModel.tsx`. The Vite dev server is allowed to read `../assets` only.
+- Open: the web ball (#11719) keeps `render.club_head_and_ball` at `gap`. There is no web club selector (the driver is always drawn), no WebGL stills, and the GCV-12 iron renders for Drake, Pinocchio, OpenSim and MyoSuite still need an engine host.
+
+# Active: MyoSuite Version 3 Native Export Worker - #11997 (GCV-14 #11720)
+
+- Branch `claude/myosuite-worker-3x`, stacked on PR #12026. myosuite 3.x has no `envs.env_base`, so the worker builds its own `mujoco` model and takes `MJRenderer` from `myosuite.viz.mj_renderer` (3.x) or `myosuite.renderer.mj_renderer` (2.x). The arena scene moved to the `myo_sim` package (`models/scene/myosuite_quad.xml`). Both lookups live in `backends/myosuite_compat.py`, which `MyoSuiteArenaBackend.unavailable_reason()` also probes (one import path).
+- Tests: `tests/unit/tools/native_viewer_export/test_myosuite_compat.py` (3.x preferred, 2.x fallback, unavailable reason string, scene lookup).
+
+# Active: Golf Ball in Engine Scenes - GCV-13 #11719, Epic #11706
+
+- Branch `claude/gcv-13-ball-scenes`. `src/shared/python/model_appearance/ball.py` (landed in #11772) already had the regulation-radius address-geometry function; this slice adds `resolve_ball_visual` (enabled/override/computed, "unavailable" with a reason rather than a guess) and a `ball` block (`enabled`, `position_m`, `source` in `BALL_SOURCES = (address_geometry, measured, model_estimate)`) on `AppearanceDocument`/`appearance_v1.schema.json`.
+- MuJoCo: `visual_layer.attach_visual_layer` now attaches a massless, non-colliding `visual_ball` sphere geom fixed to the world body whenever the spec has a club (`_attach_decorative_ball`/`_club_face_world`). An explicit `appearance.ball.position_m` (e.g. a mocap-matched swing's measured ball) is trusted verbatim; the computed address-geometry fallback is only used when the exporter's static reference-pose face centre is plausibly grounded (within 0.5 m) — it does **not** drive the model to a true biomechanical address qpos (that needs a per-swing pose this static exporter does not have), so for the real `full_body_spec_anthro_*.json` fixtures (reference pose is a rest stance, not address) the ball reports `{"enabled": False, "reason": "..."}` until a caller supplies `position_m` from a resolved address pose.
+- Open (next slices, in order the issue prefers): (b) wire a resolved address/measured ball position through the native-export/overlay frame path so every engine's rendered video gets the ball; (c) Drake/Pinocchio MeshCat, OpenSim, MyoSuite visual layers; (d) web `GolferModel.tsx`. Also open: GCV-15 impact detection to drive the post-impact hide/launch behaviour (ball currently always shown pre-impact, by construction never moves). Feature-parity entry `render.club_head_and_ball` (#11717) notes updated; still `gap` until web + the other engines land.
+
+# Active: MyoSuite Hip Retarget - #12052 (Stacked On #12051)
+
+- Branch `claude/osv-6e-myosuite-hip-retarget`. `myosuite/python/hip_retarget.py` maps each femur's orientation relative to the pelvis from the fitted (hip-calibrated) spec into the `myolegs` Z-X-Y hip hinges; `retarget_frame/retarget_trajectory(..., hip_spec=spec)` and `ReplayConfig.hip_spec` use it. The map's `knee_angle_l` sign is now -1.
+- MyoSuite address toe-out error, lead/trail: driver +0.12/-0.37 deg, 7-iron -0.04/-1.46 deg (was -45/+33, -40/+36). Evidence: `docs/development/full_body_models/evidence/foot_progression/osv6_myosuite/`. Open: #12057, where the spec's right knee flexes positive but its range caps it at +10 deg (canonical IK sits on the bound).
+
+# Active: Reference ZMP Split at the Ball Impact - #12117 (GCV-20 #11767)
+
+- Branch `claude/zmp-impact-split-12117`, stacked on #11960 (GCV-20). `reference_zmp(..., split_time_s=)` uses `impact_force.reference_rates`; the pipeline calls `pipeline.dynamics.lane_reference_zmp` (passes `lane.impact_time_s`). Without it the ZMP of frames impact-1..+2 was 4-29 m outside the feet and the cart-table shift dragged the 7-iron reference off its IK over the downswing.
+- 7-iron on GCV-20 + #12125: dynamics RMS 264 -> 54.5 mm, export no longer diverges, impact speed -10.2 % (reference +0.9 %, replay -9.2 %). Driver unchanged (-6.1 %; no ZMP filter). Acceptance still open; no tolerance changed.
+- Next: computed-torque replay speed loss through the release; regenerate club-face fixtures after #11960 and #12125 merge. Reference: calc reference, GCV-20 "Third Pass".
+
+# Active: Clubhead Speed Timing — GCV-20 #11767, Epic #11706
+
+- Branch `claude/gcv-20-speed-timing`. Ball contact impulse in every dynamics replay (`impact_parameters` collision), reference low-pass split at impact, release-preserving pre-contact cutoff (`pipeline/release_cutoff.py`, 25 Hz for both captures) and grip-weld projection of the tracked reference (`pipeline/weld_projection.py`).
+- Full re-solve at `5f8ee41fe5`: peak timing passes (driver -3.7 ms, 7-iron -4.2 ms; limit 5 ms); impact speed does not (driver -7.4 %, 7-iron -4.1 %; limit 3 %). `test_clubhead_speed_peaks_with_the_capture_and_matches_it_at_impact` is a strict xfail with those numbers; tolerances unchanged; fixtures not regenerated.
+- Next: the remaining gap is the unactuated root's ground yaw slip (DESIGN_DECISIONS decision 13). It needs a foot yaw-moment / contact model change, tracked outside GCV-20. Details: calculation reference, GCV-20 "Second Pass" and "Full Re-Solve".
+
+# Active: Right Knee Flexes Negative Like the Left - #12057
+
+- Branch `claude/knee-r-axis-12057`. `spec_builder.leg_extension` mirrors any knee whose hinge points to -z (`AXIS_MIRROR`), and `scripts/mirror_spec_right_knee.py` fixed the committed anthro specs. Spec-to-Rajagopal knee sign is -1 on both sides, and MyoSuite `knee_angle_r` is -1. The generated osims and the inventory hashes are refreshed.
+- Canonical receipts were regenerated on ControlTower; a control at the parent commit reproduced the old receipt exactly. Calibrated driver 7.7/33.0/61.6 -> 5.6/31.0/77.0 mm, 7-iron 6.5/31.1/47.0 -> 5.0/28.8/71.2 mm. The trail knee at address is now -27/-21 deg (was pinned near 0).
+- Open: the dynamics replay regresses (#12110). Trail toe-out is -2.1/-4.4 deg with `hip_rotation_r` at its -40 deg limit (#12109). Reference: `docs/research/hip_axis_mirroring/` (Right Knee Axis Convention section).
+
+# Active: Grip Wrench Gaps - GCV-8 #11714
+
+- Branch `claude/gcv-8-grip-wrench-gaps`. The MuJoCo grip-modelling tab shows the `grip_weld_l/r` wrench via `grip_efc` and reports "unavailable" for contact-only scenes. Drake URDF: `humanoid_urdf.right_hand_grip_analysis` gives the right-hand wrench from club Newton-Euler (`full_body_model.club_newton_euler`); the left hand is unavailable, with a reason. Pinocchio: `PinocchioForceAdapter.grip_analysis_from_allocation` routes `lambda_grip` through `grip_from_allocation`.
+- Open: `allocate_trajectory` does not store `q`, so callers pass it themselves. MyoSuite per-hand emission needs the pinned `myo_sim`.
+
+# Active: MuJoCo Native Export Backend - GCV-14 #11720
+
+- Branch `claude/gcv-14-mujoco-backend`, stacked on PR #12026 (`claude/gcv-14-speed-variants`). `native_viewer_export` has a fifth engine, `mujoco` (`backends/mujoco_native.py` + `mujoco_worker.py`): full-body MJCF with the default appearance document (body, head, club meshes, scene) rendered by `mujoco.Renderer` through the shared view presets and glyph overlay. It replaces the earlier throwaway stick-figure evidence renderer.
+- Tests: `tests/unit/tools/native_viewer_export/test_mujoco_backend.py` (registration, `unavailable_reason()`, appearance/club scene, `requires_gl` render); the speed-variant frame-count and 0 ms HUD test iterates `ENGINES`, so it covers MuJoCo.
+- Evidence: ControlTower renders `gcv14/mujoco_native` (`MUJOCO_GL=osmesa`), see the PR body for frame counts and the impact frame.
+
+# Active: OpenSim Contact Grip, OSV-7 Phase 4 #11739
+
+- Branch `claude/osv-7-opensim-contact` (stacked on #11985). `grip_model="contact"` in `export_full_body_osim` builds pad `ContactSphere`s against closed `ContactMesh` cylinders with one `ElasticFoundationForce` per pad (`opensim/python/full_body_grip_contact.py`, `grip_contact_osim_sim.py`, meshes in `grip_contact/grip_mesh.py`). Weld stays default. CPodes is required (RK-Merson needs about 1e-7 s steps); the club is released with the weld velocity.
+- Full swings (CT, accuracy 1e-8): net force peak -2.6 % (driver) and -3.1 % (7-iron) against the bushing; per-hand and internal pairs differ (hyperstatic, section 19). Evidence `evidence/grip_kinetics/contact/opensim_*_acc1e-8_*`. Slow tests run on CT with `-m 'slow or not slow'`.
+
+# Active: Quarter-Speed Export Variants for Every Engine - GCV-14 #11720
+
+- Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
+- Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
+- Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
+
+# Active: Same-Input Parity Design-Manual Chapter - SIP P-9 #11614
+
+- Branch `claude/sip-p9-manual-chapter-11614`; epic #11605. Provisional QMD chapter `manuals/upstreamdrift/chapters/16-same-input-parity.qmd` (renumbered from 14 after `14-muscle-qualification-evidence.qmd` landed) (KKT, closure projection, ZOH RK4, bundle, L0-L3 levels and results, failed experiments, limitations) and registry blocker `UP-D1-same-input-parity-inventory`; registry stays blocked with no calculations. `same_input_parity.tex` cross-links the chapter and compiles with pdflatex.
+- Open: Simscape P-8 (#11613) must update both documents when it lands.
+
+# Active: Contact Grip and MyoSuite Bushing, OSV-7 Phase 3 #11739
+
+- Branch `claude/osv-7-contact-grip` (stacked on #11963). Pad contact grip with pad stiffness matched to the bushing (`grip_contact/pad_layout.py`, `pad_contact.py`); MuJoCo full swing (dt 1e-5 s), Drake and Pinocchio holds; MyoSuite bushing parity passes (worst 0.013 % peak). Quasi-static balance closes (`static_balance.py`). See GRIP_PARITY_DECISIONS.md section 19.
+- Open and flagged: contact per-hand force is about 4x the bushing's with matching net force (indeterminacy, not tuned); no OpenSim contact variant; no full-swing Drake or Pinocchio contact run.
+- #11986 (branch `claude/grip-contact-internal-force`, stacked on `claude/osv-7-contact-grip`): the 4x is not input drift (hand-to-hand drift 4e-13 mm); it is the hyperstatic internal force of two stiff rings (26 to 44 N per micron of mismatch). Friction softening loses the grip. Section 19 "Why the Contact Grip Carries 4 Times". No default changed.
+
+# Active: Lead-Foot Address Corrections - OSV-6 #11737 (Stacked On #12031)
+
+- Branch `claude/osv-6b-leg-azimuth`. With `--foot-progression` on, two corrections apply. `hip_calibration.knee_flexion_axis` removes the lateral-marker tilt from the zero twist (it was biased by 17-43 deg). `pipeline/leg_marker_constraints.py` keeps the knee and ankle marker azimuth and keeps the forefoot square and centred.
+- MuJoCo address toe-out is within 2 deg on both captures, and so is Drake once the #12039 coordinate-order fix (PR #12047) lands. Pinocchio and MyoSuite evidence is on the stacked branch `claude/osv-6c-feet-evidence`. Canonical receipts are unchanged: the default-on correction is a recorded failed experiment (see `docs/research/hip_axis_mirroring/`). The finish-feasibility ratchet is strict-xfail on #12040.
+
+# Active: Mirrored Left Hip Axis - OSV-6 #11737
+
+- Branch `claude/osv-6-hip-mirror`. `spec_builder.hip_axis_signs` mirrors left hip adduction and rotation like OpenSim; specs regenerated by `scripts/mirror_spec_left_hip.py`. Calibrated receipts: driver 7.7/33.0/61.6 mm, 7-iron 6.5/31.1/47.0 mm. Nominal receipts were regenerated, and the old ones moved to `evidence/ground_support/anthro_*_pre_osv6/`. Reference: `docs/research/hip_axis_mirroring/`.
+- The nominal 7-iron trajectory IK (269 mm) fails on `main` without the mirror too, so the bug is pre-existing (#12030). Open for OSV-6: the lead foot is still 15-32 deg out at address in MuJoCo and Drake (`hip_rotation_l` at its limit), the heel-proxy malleolus correction, and the Pinocchio/MyoSuite stills.
+
+# Active: Lead-Foot Address Corrections - OSV-6 #11737 (Stacked On #12031)
+
+- Branch `claude/osv-6b-leg-azimuth`. With `--foot-progression` on, two corrections apply. `hip_calibration.knee_flexion_axis` removes the lateral-marker tilt from the zero twist (it was biased by 17-43 deg). `pipeline/leg_marker_constraints.py` keeps the knee and ankle marker azimuth and keeps the forefoot square and centred.
+- MuJoCo address toe-out is within 2 deg on both captures, and so is Drake once the #12039 coordinate-order fix (PR #12047) lands. Pinocchio and MyoSuite evidence is on the stacked branch `claude/osv-6c-feet-evidence`. Canonical receipts are unchanged: the default-on correction is a recorded failed experiment (see `docs/research/hip_axis_mirroring/`). The finish-feasibility ratchet is strict-xfail on #12040.
+
+# Active: Mirrored Left Hip Axis - OSV-6 #11737
+
+- Branch `claude/osv-6-hip-mirror`. `spec_builder.hip_axis_signs` mirrors left hip adduction and rotation like OpenSim; specs regenerated by `scripts/mirror_spec_left_hip.py`. Calibrated receipts: driver 7.7/33.0/61.6 mm, 7-iron 6.5/31.1/47.0 mm. Nominal receipts were regenerated, and the old ones moved to `evidence/ground_support/anthro_*_pre_osv6/`. Reference: `docs/research/hip_axis_mirroring/`.
+- The nominal 7-iron trajectory IK (269 mm) fails on `main` without the mirror too, so the bug is pre-existing (#12030). Open for OSV-6: the lead foot is still 15-32 deg out at address in MuJoCo and Drake (`hip_rotation_l` at its limit), the heel-proxy malleolus correction, and the Pinocchio/MyoSuite stills.
+
+# Active: Native Export Impact Time From Ball Passage - GCV-14 #11720
+
+- Branch `claude/gcv-14-impact-evidence`. `native_viewer_export.overlay.detect_impact_time_s` called `model_appearance.club_face.impact_frame` and reported that frame's exact timestamp; on the committed driver fixture the accepted peak-speed sample sits 9.2 cm above and 9.2 cm from address (the height check alone let it through), not the true closest approach. It now returns `club_face.ball_passage`'s sub-sample `t_impact` on the same `Clubhead`-origin trajectory (one detector, OSV-10); docstring and README (`src/tools/native_viewer_export/README.md`) updated.
+- Kept the `Clubhead` frame origin rather than the true face-centre point (`club_assembly.clubface_centre`): deriving the centre here would need the club spec resolved into a `ClubAssembly` and composed with the frame's rotation, a larger change than this fix's scope.
+- Tests added/updated in `tests/unit/tools/native_viewer_export/test_grip_tracking.py`: `test_hud_impact_time_matches_ball_passage` (basic contract), `test_hud_impact_time_uses_ball_passage_not_the_peak_speed_sample` (reproduces the bug with a synthetic overshoot trajectory), `test_hud_impact_time_raises_when_the_head_never_returns_to_the_ball`, and the capture-A fixture test now compares against `ball_passage` instead of `impact_frame`.
+
+# Active: Shared Club in the Musculoskeletal OpenSim Models, OSV-9 #11756
+
+- Branch `claude/osv-9-msk-club`, epic #11726. `golf_humanoid.osim`, `golf_humanoid_scaled.osim` and the muscle model (`musculoskeletal_swing.build_musculoskeletal_model`) hold the shared club (`msk_club.py`: spec mass/inertia, shared STLs, `GripInterface` grips) in both hands: lead `WeldJoint hand_l_to_club` plus trail `WeldConstraint hand_r_to_club`, or `--grip-model bushing`.
+- Hand frames and address pose: `msk_club_calibration.py` (IK to the generated model's FK at the captured address; feet planted because the generated feet are unobserved) into `models/msk_club_grip_calibration.json`; the muscle model is calibrated on build. `msk_club_tracking.track_swing` follows a generated swing; `scripts/render_msk_club.py` renders under xvfb.
+- Base models are not in the clone (submodule fetch failed): set `UPSTREAMDRIFT_RAJAGOPAL_OPENSENSE` / `UPSTREAMDRIFT_MSK_BASE_MODEL`.
+- Open: no MyoFullBody OpenSim export exists; static optimisation not run; scaled-model address fit is weaker (wrists at their bounds); `opensim_golf/fk.py` `State.isValid` failure predates this.
+
+# Active: Native Platform Integration — F10i #12060
+
+Read `docs/development/feedback_controls/F10I-NATIVE-PLATFORM-INTEGRATION-TURNOVER.md`.
+The guarded controls and published native platform implementations now coexist.
+Preserve Tools 86d0f28, private contract class identity, preparation blockers and
+Astra's full-model qualification firewall. Actual runtime evidence and broad
+capture-runtime failures are separate; integration does not complete the goal.
+
+# Prior: Prediction Integrity Consolidation — F09p #12055
+
+Branch `feat/f09p-prediction-integrity-12055` begins at published F09o
+`98784e8374f3adf31f3b22d6bb9e54c0bfa3d081`. Read its plan and turnover.
+Final preparation verification follows conversion and bundle validation, rejects
+changed source/model/handles/callback/live state before stepping, and retains
+complete provider-byte checks at entry/pre-execution/exit. No cross-call cache.
+Controlled native short-fixture ABAB measurements retain identical state digests
+and 25 percent fewer native-library bytes read. No full-capture speed claim.
+Preserve original source-specific receipts; all seventeen rows, six ecosystems
+and private muscular OpenSim matching plus independent replay remain required.
+
+# Prior: Native Tools Integration — F09o #12044
+
+Branch `feat/f09o-native-tools-integration-12044` integrates F09n `df9f3b9538`
+with the admitted F01b/Tools/private-consumer stack `d232efcc69`. Read
+`docs/development/feedback_controls/F09O-NATIVE-TOOLS-INTEGRATION-PLAN.md`.
+Tools `86d0f28b1cc5acf61185e07e320c816c2d005512` is the admitted pin. Native
+contracts use the explicit private package loader; retain one class identity.
+The prior native 170-test receipt applies to its older source/pin. Fresh actual
+MyoSuite 3.0/MuJoCo 3.6 evidence passes 170 tests with zero skips in 208.34s;
+50 integration files and 8,122 tracked Tools files match before/after. The
+separate MuJoCo 3.8 consumer lane passes 81 with three explicit optional skips.
+Impact capability/served verification precedes metadata reconciliation; all
+27 matrix tests pass. Read the F09o turnover for exact source/evidence scope.
+Do not infer controlled speed improvement or scientific acceptance.
+All seventeen model rows, six ecosystems and muscular OpenSim remain required.
+
+# Prior Native Command Solve — F09n #12036
+
+Branch `feat/f09n-native-command-solve-12036` starts at F09m `ab0a1a37d2`.
+Reuse the exact shared F02 kernel/test dependency from PR #12024 `4f9d2e4b9f`.
+The new native solve admits/replays fallback first, applies complete-horizon
+command/increment and declared state margins, and requires guarded candidate
+improvement plus independent canonical replay. Source/state/criteria mutation
+fails. No live command, private fit, contact, physiology or parity is qualified.
+
+Read `docs/development/feedback_controls/F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md`.
+The initial 169-test SDK campaign predates the final criteria-mutation fix.
+The final 170-test campaign passes with zero failures/errors/skips in 250.31s;
+all twenty executed hashes match current source. Global central five gates,
+pinned mypy hook, LoD/DRY/architecture/title/size checks pass. The synthetic
+objective improves 16.3614 to 0.000299930, but whole solve takes 44.93s/189
+evaluations for three native steps: rapid matching remains unqualified.
+Preserve genuine RED receipts, historical runs, missing local mypy-provider
+result and stopped exploratory type check. Parent CI still needs actual Tools
+capability probes/served-bundle reconciliation; the monolith register is refreshed.
+Current context and normal commit/push validation remain required. Full
+epic remains active. Sol/Luna/Astra account quota exhaustion is unchanged.
+
+# Prior Native Tracking Objective — F09m #12023
+
+Branch `feat/f09m-native-tracking-objective-12023` starts at published F09l
+`d5f003614426aef0ec6fdf2c0ed203942e25101c`, draft PR #12017. Read
+`docs/development/feedback_controls/F09M-NATIVE-TRACKING-TURNOVER.md` for frozen
+objective semantics, TDD and promotion boundaries. Cost scales are physical
+magnitudes; command slew cost does not enforce hard slew. No fitted private
+motion or physiological acceptance is claimed. All seventeen models and six
+ecosystems remain required, ending in muscular OpenSim and independent replay.
+
+# Active: Persistent Project MyoSuite Native Search — F09l #12014
+
+Branch `feat/f09l-persistent-native-search-12014` starts at published F09k
+`d50db51b603e967c9e09a4b3c31f7f97a0fdaaac`, draft PR #12011. Read
+`docs/development/feedback_controls/F09L-NATIVE-SEARCH-TURNOVER.md` for the
+provisional-search/guarded-promotion authority boundary and retained TDD evidence.
+The shared forecast admission extraction changes executed source identity;
+historical F09k receipts apply to their published head, not this new source.
+
+## Previous Forecast Foundation
+
+Branch `feat/f09k-owned-sdk-forecast-12009` starts at F09j
+`43e925dd7171f12593d6c8149e3468c720048bc7` (draft PR #12005).
+The owned forecast restores complete current native state and reuses the SDK
+recorder. Read chapter 38 and
+`docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md` for lifecycle,
+actual executed evidence and remaining boundaries. Preserve the live task and
+the separate independent replay authority. All 17 model rows and six ecosystems
+remain required; the endpoint is a private-capture-matched muscular OpenSim
+model with full-state, full-horizon independent excitation/contact replay.
+
+# Active: Project MyoSuite Feedback Recording — F09j #12003
+
+Branch `feat/f09j-project-feedback-recording-12003` starts at F09i `976feaf051`.
+Actual SDK campaign passes 89 tests with zero skips. The feedback source shares
+the admitted recorder loop; immutable snapshots, callback mutation rejection and
+independent replay are tested. Read chapter 38 and
+`docs/development/feedback_controls/F09J-FEEDBACK-RECORDING-TURNOVER.md`.
+Source/parameter provenance is declared, not signed. No production assembly,
+mocap fit, muscle-only physiology or all-model completion is claimed.
+
+# Active: Project MyoSuite Task and Independent Replay — F09i #11983
+
+Draft PR #11996 is based on surviving parent #11857 after intermediate parent
+merges; it remains unarmed. Exact original-source nominal driver/iron duration
+replay now passes with poor contact/constraint diagnostics retained. CI exposed
+install-pin mismatches and two exporter architecture-budget violations; those
+are corrected locally. The fingerprint scratch optimization retains every
+per-step check and has six native 3.8 RED-to-GREEN storage/hash regressions.
+Actual SDK revalidation after these local changes passed 76 tests with zero
+failures, errors or skips; all five central pre-PR gates also pass.
+
+Branch `feat/f09i-myosuite-task-producer-11983` stacks on published F01f source
+`73319871c74dbafeefc6548081e606cadc61de54`; parent merges and actual Tools main
+authority remain required. Read canonical chapter 38 and
+`docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md`. Actual SDK
+production probes cover resource closure, T01/profile freeze and full-state
+uninterrupted/suffix/changed-future replay. Preserve original source bytes,
+separate SDK/helper/native-provider identities and all-model/full-horizon gates.
+Native evidence does not qualify anatomy, capture fit or muscle-only OpenSim.
+Read-only diagnosis found active grip-site gaps and no native foot contact at
+reset. Initial assembly must preserve source and distinguish reference-derived
+from optimizer-assembled poses; qualify named constraints/support and full-state
+reload before fitting. Tools-main ancestry is the current completed CI hold.
+
+# Active: Same-Input Bushing Grip Parity, OSV-7 Phase 2 #11739
+
+- Branch `claude/osv-7-grip-parity`. The shared OpenSim `BushingForce` law (`grip_contact/bushing_law.py`) and a `SimmSpline`-equivalent prescribed input (`grip_contact/prescribed_motion.py`) drive MuJoCo (`mjcb_passive`, RK4 1e-4 s), Drake (native `LinearBushingRollPitchYaw`, RK3 error controlled) and Pinocchio (`aba`, DOP853) on a free club, with each engine's own weld FK. Metrics are in `grip_contact/parity.py` (peak 5 %, RMS 2 % of peak), routed through GCV-10 `GripSeries`.
+- Driver: every engine passes every quantity. The worst case is the Drake squeeze, 0.96 % peak and 0.42 % RMS, from the RPY and midpoint convention. See GRIP_PARITY_DECISIONS.md section 18. Evidence: `evidence/grip_kinetics/parity/`. Plots: `~/Videos/Parity Audit/golfer_realism/grip_kinetics/parity/`.
+- Full-swing parity tests are `slow` (10 to 30 minutes per engine and club on a loaded host). Open: a contact-model grip, and Drake with the shared law to isolate its integrator.
+
+# Active: Simscape URDF Exchange — #11569 Task 3
+
+- Branch `claude/simscape-urdf-exchange-11569`; commit `SELF`. `smexport` is absent in R2025b, so `scripts/matlab/simscape_model_inventory.m` reads joints (type, DOF) and solid/inertia masses (unit-converted, density x volume where needed; NaN when not evaluable) from the canonical `GolfSwing3D_Kinetic` and from an `smimport` of the spec `golfer.urdf`. `export_simscape_urdf_exchange.m` writes `tests/fixtures/simscape/simscape_urdf_exchange_receipt.json`; `src/engines/simscape/urdf_exchange.py` diffs it against the URDF.
+- R2025b result: smimport round trip exact (43/43 coordinates, 77.969 kg, error 0). Canonical 27 coordinates vs spec 43; totals 77.606 vs 77.969 kg, but the Simscape model has no legs and puts +17 kg in the shoulder bars (`HubtoLS`/`HubtoRS`), +4.3 kg trunk, +2.0 kg head/neck.
+- Next: #11569 task 1 (inverse dynamics) or task 4 (run-102 playback video). The mass redistribution is a model decision for the owner.
+
+# Active: GRF Engine Wiring and CoP Consolidation - GCV-2 #11708, GCV-6 #11712
+
+- Branch `claude/gcv-2-grf-wiring`. MuJoCo, MyoSuite, Drake and OpenSim emit `contact:grf_/free_moment_/moment_com_` per foot and net from native contacts; Pinocchio from shared-contact-law `ContactSample`s (else `ground_reaction_unavailable`); Simscape is unavailable (GCV-3 #11709). `BundleOverlayProvider` uses `ground_reaction_overlay`, so the native videos show per-foot and net GRF.
+- Every CoP goes through `biomechanics.ground_reaction.center_of_pressure`; legacy helpers are `DeprecationWarning` shims. Tests: `tests/integration/cross_engine/test_ground_reaction_parity.py` plus per-engine `*ground_reaction*` tests (static stance net Fz = weight within 2 %).
+- GCV-5 (#11711) plots, API and web display landed in #11781; the remaining #11711 item is the real-MuJoCo-run plot sheet. Open for GCV-2: Pinocchio GRF render (1x + 0.5x) on an engine host.
+
+# Active: Native OpenSim Geometry — #11903
+
+Scoped F07/F08 branch `feat/feedback-native-markers-11903`. Read canonical
+`manuals/upstreamdrift/chapters/26-native-opensim-geometry.qmd` and
+`docs/development/feedback_controls/F07_NATIVE_GEOMETRY_TURNOVER.md` before
+continuing. Explicit native frame/station geometry and bounded shared IK are
+implemented; metadata-only physical placeholders fail closed. The unchanged
+520-muscle candidate's three-pose pelvis probe remains unqualified and reaches
+its source rotation bound. Preserve native replay, anatomy and registration gates.
+
+# Active: MeshCat Camera Framing - NV-9 #11697
+
+- Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.
+- Open (engine host): verify the Drake/Pinocchio renders at 720p, feed the per-swing body bounding box from engine FK into `fit_distance_m` per view, and judge glyph legibility.
+
+# Active: Run-102 Simscape Playback MP4 — #11569 Task 4
+
+- Branch `claude/run102-playback-mp4-11569`; commit `SELF`. `export_video(..., size_px=(w, h))` and `cross_engine_replay.render_replay_frames(size_px=...)` set the frame size (default 480x480 unchanged; text scales with height). Run-102 marker playback rendered from the committed `two_window_fit_9967_102/candidate.npz` at 1920x1080, 60 fps, 1x / 0.5x / 0.1x into DeskComputer `~/Videos/Parity Audit/simscape/run102_playback/` (not committed).
+- This is the marker-overlay playback (capture vs Simscape markers), not a Mechanics Explorer render (a GUI window, which the headless rule excludes on agent hosts). Run-103 is still blocked (`native_gate.json`).
+
+# Active: Muscle Qualification Evidence Guard — F07 #11791
+
+Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR #11814. Scoped child #11810: parameter-only orchestration now returns no native replay and no unperformed audit successes. The test-first commit records two failures; 31 focused tests pass after correction. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Merged current main while preserving its impact chapter and this evidence chapter. Next: normal protected PR checks; F07 and native model qualification remain open.
+
+# Active: Native Muscle-Model Asset Admission — #11819
+
+Branch `feat/feedback-native-admission-11819`, commit `SELF`. Source pinning and
+native structural inventory remain scientifically unqualified; caller anatomy
+maps and complete dependency closure require review. Read
+[F07 Turnover](docs/development/feedback_controls/F07_MODEL_ADMISSION_TURNOVER.md)
+and canonical manual chapter 18. F07 #11791 remains open; no external full-body
+model, raw capture, native optimizer or replay was qualified by this slice.
+
+# Active: Feedback Controls Planning — #11784
+
+Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
+
+# Active: Impact-Phase Bushing Grip, OSV-7 #11739
+
+- Branch `claude/osv-7-impact-grip`. The OpenSim bushing grip is driven over 0 to 1.8 s by the OSV-10 fits (`tests/fixtures/club_face/swing_q_*.npz`), mapped by name with `grip_contact.load_coordinate_swing`. Loop closure is below 0.001 mm and hand speeds are within 12 % of the measured wrist markers.
+- Deflection is 0.56 / 0.58 mm and 0.84 deg, inside the bounds. Owner decision on PR #11774: the flat 500 N internal-force bound is replaced by `grip_contact.couple_check` (squeeze at most 50 N; transverse pair equals the couple/d Newton-Euler prediction within 5 %, 2 N m noise floor). Both pass for driver and iron (squeeze 3.3 / 3.9 N), so the full-window test is no longer an xfail. The club-welded-to-hand demand is 89 / 87 N m against the realised 100 / 99 N m (bushing amplification). Grip-frame spacing is 80.3 mm, not 76. See DESIGN_DECISIONS.md section 17.
+- Next: MuJoCo (soft weld) and Drake (`LinearBushingRollPitchYaw`) bushing parity on the same fixtures. The plan is on #11739.
+
+# Active: Ground Reaction Design Manual Slice - GCV-18 #11724
+
+- Branch `claude/gcv-18-grf-design-manual`. Provisional QMD chapter `manuals/upstreamdrift/chapters/10-ground-reaction.qmd` (GCV-1 equations, conventions, unavailable values, symbols, tests, limitations) and registry blocker `UP-D1-ground-reaction-breakdown-inventory`; the registry stays `blocked-inventory-required` with no calculations. User manual §12.4/§12.7 now state what `grf_metrics.py`/`stability_metrics.py` do not compute and give the correct CoP and free-moment equations.
+- Open in #11724: grip wrench (GCV-7) and impact parameters (GCV-15) chapters, ADR-0052, force-overlay and native-export user guides, shared-infrastructure and C4 entries.
+
+# Active: Club Force and Torque Overlays - GCV-10 #11716
+
+- Branch `claude/gcv-10-grip-overlays`; epic #11706. Per-hand, net-at-midpoint and couple glyphs (groups `grip_per_hand`, `grip_net`, `grip_couple`, `grip_mof`) carry the `split_method` label; unavailable quantities are listed as unavailable, never zero (`force_overlay/grip_frame.py`, frame metadata `grip_unavailable_labels`).
+- Plots: `biomechanics/grip_plot_model.py` (series), `GET /analysis/grip-wrench`, web `GripWrenchCharts.tsx`, PyQt tile `grip_wrench_plots` (`src/tools/grip_wrench_plots/`). `analysis.grip_wrench` parity gap closed.
+- Native export: `--grip` adds the overlay (Drake uses its own KKT multiplier; other viewers show the MuJoCo plant at that engine's pose) and writes `<swing>_<engine>_grip_wrench.json`; `--views hands_closeup --no-grid` tracks the grip midpoint per frame (`view_lookats`, `WorkerJob.lookats`).
+- Videos: `~/Videos/Parity Audit/forces_and_impact/club_forces/` (MyoSuite/MuJoCo arena, 1080p60, 1x/0.5x, clean 0.25x impact clip, plot PNG). Follow-up: Drake render did not finish under load (14 frames in about 12 minutes, then a Playwright EPIPE crash); rerun when the host is idle.
+- Open: `hands_closeup` azimuth is judged by eye only; Pinocchio gives a net allocation only and OpenSim is unavailable.
+
+# Active: Lift Pack Parity Baseline - LIFT-1 #11741, Epic #11740
+
+- Branch `claude/lift-1-pack-parity-baseline` (PR #11771). Audit package `src/shared/python/lifting/pack_audit/`; run `python3 scripts/lifting/run_pack_parity_baseline.py`; results in `docs/development/lifting/PACK_PARITY_BASELINE.md` and `pack_parity_baseline.json`.
+- Finding: same-q FK, feet and total mass agree across the four packs; grips, start poses, limits, phases, bench mass and contacts do not. Nine new pack issues filed (MuJoCo_Models#427-#428, OpenSim_Models#414-#416, Drake_Models#390-#391, Pinocchio_Models#449-#451).
+- Next: LIFT-2 shared exercise spec.
+
+# Active: Shared Ground Reaction Core — GCV-1, Epic #11706
+
+- Branch `claude/gcv-1-ground-reaction` (PR #11733): per-foot and net GRF, CoP, free moment and moment about the CoM in `src/shared/python/biomechanics/ground_reaction.py`. Next: GCV-2 (#11708) engine wiring.
+
+# Active: Force Arrow Scaling — GCV-4, Epic #11706
+
+- Branch `claude/gcv-4-arrow-scaling` (PR #11738): body-weight and peak arrow scale modes; overlay route takes a `ForceOverlayQuery` dependency. Next: GCV-5 (#11711) plots, API and web.
+
+# Active: Club-Face Orientation Residual, OSV-10 #11759
+
+- Branch `claude/osv-10-face-roll-refit`, stacked on PR #11752 (OSV-8). The shared marker IK adds `sqrt(w)(R(q)a - R_capture a)` on the `Clubhead` frame from the capture head triad (`motion_matching/club_face_target.py`, `FACE_ORIENTATION_WEIGHT = 3`, `--face-weight 0` = marker-only). It applies in the full-capture IK, the consistency re-solve and the ZMP/shooting re-solves through the existing `axis_targets` path.
+- Fixtures: `tests/fixtures/club_face/*` are regenerated only by `python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture {driver,iron}` (about 40 min each); `provenance.json` holds the hashes, calibrated triad offsets and before/after face events.
+- Result (model vs capture, each at its own sub-sample impact `club_face.ball_passage`): the driver impact is 11.3 vs 8.8 deg (was 29.5) and the iron 7.6 vs 8.4 (was 17.9); top and address are within 1.1 deg. Marker RMS: driver IK +2.5 %, iron flat; dynamics improved. The strict xfail is replaced by `test_face_tracks_the_capture_at_address_top_and_impact` (5 deg, every engine's FK). MyoSuite was not installed locally.
+- Open: the model's peak clubhead speed falls about 24 ms before the ball (the capture's falls about 3 ms before it). Reference: `docs/research/simscape_matching_reference/simscape_matching_reference.tex` (OSV-10 section).
+
+# Active: Clubface Roll at Address, OSV-8 #11755
+
+- On PR #11752. The matched hand-club chain leaves the club roll to fitted wrist constants, so club `+x` was open 30.7 deg (driver) and 44.8 deg (7-iron) at address in every engine. One shared constant, `ADDRESS_SQUARE_FACE_ROLL_DEG` in `model_appearance/club_assembly.py`, now rolls the head about the shaft (and defines `clubface_vector`); `club.face_roll_deg` in a spec overrides it.
+- Tests: `tests/unit/model_appearance/test_clubface_square_at_address.py` (each engine's own FK at the captured address pose, `tests/fixtures/club_face/address_poses.json`). OpenSim STLs and `provenance.json` regenerated.
+- Impact: `club_face.impact_frame` (shared `detect_impact_index`, closest-approach fallback, raises if not at the ball). True impact face is +30 deg (driver, t=1.327) and +18 deg (iron, t=1.337) open, while the capture head triad is about +2 deg: the IK/matched trajectory under-rotates the club through release (grows from 4 deg at the top), so a constant roll cannot fix it; needs an IK refit with head-triad weight (test `test_face_is_square_at_impact` is a strict xfail). `tour_matching` club models are unrolled.
+
+# Active: Visible Head and Neck (GCV-12) - #11718
+
+- Branch `claude/gcv-12-visible-head`; epic #11706. The anthropometric specs already carry a `Head` body on a three-axis neck at the cervicale; only the native Simscape spec (v1/v2) has none, so the head rides the `Head` body (follows the fitted neck) and falls back to the torso for v1/v2 in MuJoCo only.
+- Code: `model_appearance/head.py` (procedural head, face, ears, neck, hair or cap), `mujoco/python/head_visual.py`, native viewer `backends/_head.py`; schema fields `head` and `body_model`. Visual only: no mass, inertia or DOF change (identity tests). Gaze channel `head.orientation_override` plus `drive_visual_head` for OSV-3 #11729.
+- Blend balls are capped at 1.1x the adjoining limb radius (test); `*hubto*` bodies are a small `shoulder` part, not torso-sized pads.
+- Not done: `body_model: meshes` (rejected until CMB-6 #11657), web `GolferModel.tsx` head. Owner renders in `~/Videos/Parity Audit/forces_and_impact/visuals/head/`.
+
+# Active: Head Gaze Stabilisation - #11729
+
+- Branch `claude/osv-3-head-gaze`; epic #11726. `motion_matching/gaze.py` (eye point, gaze error, schedule, metrics, neck IK), `pipeline/gaze_residual.py` (soft residual, receipt `head_gaze`), `model_appearance/ball.py` (the one ball-at-address function, reuse in GCV-13). `--gaze-weight` defaults to 0 (marker-faithful).
+- Reference: `docs/development/full_body_models/HEAD_GAZE_REFERENCE.md` (+ `.tex`). Capture-A driver, weight 10: theta_gaze RMS 21.3 to 0.8 deg, marker RMS 28.0 to 33.8 mm. Gaze axis is calibrated at address (nominal +x is 37 deg off).
+- Open: iron and other engines, neck PD in forward dynamics, MyoSuite neck map audit (X is lateral bending, Y flexion; map not changed), published tour head ranges.
+
+# Active: Compliant Bushing Grip Model - #11739
+
+- Branch `claude/osv-7-bushing-grip` (phase 1, Refs #11739 #11726): `src/shared/python/grip_contact/` interface, OpenSim `grip_model="bushing"` (`weld` default unchanged, `contact` raises), `split_method="bushing"`.
+- Valid window 0 to 0.94 s with designed damping (zeta 0.7): per-hand peak 142/162 N, internal 151 N (bound 500), 0.16 mm and 0.22 deg. Beyond 0.95 s the committed OpenSim IK candidate is unusable (marker RMS 262 mm, branch switches); the full-window test is a strict xfail.
+- Next: phase 2 contact model, other engine parity, full 1.8 s run, `golf_humanoid.osim` builder.
+- Next: qualified closure-consistent OpenSim IK input, then re-run the receipt; phase 2 contact model, other engine parity, `golf_humanoid.osim` builder.
+
+# Active: Impact Parameters Panel - GCV-17 (#11723)
+
+- Branch `claude/gcv-17-impact-panel`, stacked on GCV-16 (PR #11769, adapters); epic #11706. Shared card model `impact_parameters/panel_model.py` feeds `GET /api/analysis/impact-parameters`, the PyQt6 dock `src/tools/impact_parameters_panel/` (tile `impact_parameters`) and web `ImpactParametersPanel.tsx`. Parity entry `analysis.impact_parameters`.
+- Run series come from `run.simulation_data["clubhead_series"]`, an engine `get_clubhead_series()`, or a MuJoCo run with a `clubhead` body; otherwise the card is unavailable with a reason. Matched-swing ledger ids are not simulation run ids, so that view shows unavailable until candidates carry a club series.
+- Next: wire engine runs to record `clubhead_series`; video HUD stamp (GCV-14); Impact Explorer prefill is owned by Tools (#9546).
+
+# Active: ClubheadSeries Engine Adapters - GCV-16 (#11722)
+
+- Branch `claude/gcv-16-clubhead-adapters`; epic #11706. Package `src/shared/python/impact_parameters/adapters/`: one `ClubFaceSpec` (face centre and axes in the club body frame) and one `rigid_body_series` kernel; MuJoCo/MyoSuite, Drake, Pinocchio, OpenSim and Simscape adapters only supply their own FK.
+- Impact time: `adapters/impact_time.py::select_impact_index` is the single integration point for the OSV-8/OSV-10 closest-approach rule (not on main yet). `ClubFaceSpec` default centre is the club body origin until GCV-11 face geometry lands.
+- Next: GCV-17 impact panel consumes these adapters.
+
+# Active: Centroidal Feasibility Filter V2 — #11669
+
+- Branch `feat/centroidal-filter-v2-11669` (PR #11703); epic #11667. Next: Balance-3 contact-consistent inverse dynamics.
+
+# Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
+
+- Branch `claude/gcv-14-frame-schedule` (PR #11734): half- and full-speed video variants. Next: impact-time detection from clubhead kinematics.
+
+# Active: Shared Grip Wrench Core — #11713
+
+- Branch `claude/gcv-7-grip-wrench`; epic #11706. Module `src/shared/python/biomechanics/grip_wrench.py` (hand-on-club wrench, midpoint net force and couple, contact-moment/free-torque split, per-hand MOF, club-local frame, `split_method`).
+- Simscape fixtures (`tests/unit/engines/simscape/test_force_channels.py`) have only total hand force, LH MOF and midpoint couple, no per-hand forces, so the Simscape cross-check is deferred to GCV-9 (#11715).
+- Next: engine adapters populate `ContactReaction.grip_wrench` through `to_contact_reaction_wrench`.
+
+# Active: Finish Feasibility Balance - #11667
+
+- Balance-1 (#11668), branch `feat/finish-feasibility-metrics-11668`: `pipeline/finish_feasibility.py` adds ZMP-inside fraction, friction-cone utilisation, foot slide and yaw pivot, pelvis yaw error and vertical force range to `dynamics.finish_feasibility` (reference and simulation). `finish_feasibility_cli` annotates saved runs.
+- Baseline: `evidence/ground_support/finish_feasibility_baseline.json` (driver reference ZMP inside 0.29 over 1.0-1.5 s, iron 0.55). The committed canonical receipts were not edited: their trajectories are not committed and a rerun does not reproduce their spec hash.
+- Next: Balance-2 (#11669) centroidal feasibility filter v2; a linearised joint-space QP prototype has not yet reduced the outside fraction.
+
+# Active: Address Foot Progression — #11730 (OSV-4, Epic #11726)
+
+- `motion_matching/foot_progression.py` defines and measures per-foot toe-out; `pipeline/address_feet.py` seeds and refits it; `--foot-progression {off,capture,default}` is opt-in (default `off`, so existing receipts stay valid).
+- Findings: the spec's left `hip_rotation` axis is not mirrored (OpenSim's is), and the stock toe marker seeds carry a 12.5 degree yaw bias; see `docs/development/full_body_models/DESIGN_DECISIONS.md` section 15.
+- Tour captures measure 15 to 16 degrees lead and 0 to 4 degrees trail, not 20. Owner capture O is private and was not on the implementing host: run `python3 -m scripts.foot_progression_report` with `CAPTURE_DATA_DIR` set.
+- Driver result: legacy 41.7/-2.8 vs option 37.0/4.05 (lead/trail, capture 16.4/4.0); lead is pinned by the hip_rotation_l limit. Next: let the address solve trade hip adduction against stance width; regenerate qualified receipts with the option only on request; Drake, Pinocchio and MyoSuite stills need their own renderers.
+
+# Active: MyoFullBody Muscle-Driven Swing, Epic #11642
+
+- Branch `feat/myofullbody-muscle-swing-11642`; children #11643 to #11647 (MFB-6 #11648 is blocked and not started). Code: `src/shared/python/myofullbody/`; scripts `fetch_myofullbody.py`, `run_myofullbody_swing.py`, `render_myofullbody_swing.py`; reference `docs/research/myofullbody_swing/myofullbody_swing.tex`.
+- Assets are fetched to `~/.cache/upstreamdrift/myofullbody` (pinned `myo_sim` commit, sha256 per file); never commit them. Arm muscles are MoBL-derived (non-commercial); owner ruled the app non-commercial.
+- Hybrid: spec inverse dynamics gives the efforts, MyoFullBody gives only moment arms and force capacity. Receipts are fail-closed (`NOT_QUALIFIED` when reserves exceed 10 % of effort RMS); the current status is `NOT_QUALIFIED` for driver and iron.
+- MFB-7 (#11689): share IK, a bounded torque neck (not a muscle) and reserve attribution landed. Driver reserve over effort: arms 65 %, legs 32 %, trunk 53 %, neck 0 %; iron is within 3 points. Still `NOT_QUALIFIED`. Arms have a structural floor of about 55 % (no independent scapula or clavicle joints); trunk and legs are capacity-limited (unlimited capacity: 13-15 %).
+- Next: add independent shoulder-girdle joints for the arms, a justified strength model for trunk and legs, an impact-window treatment, and a thoracic muscle model.
+
+# Active: MOSAIC Model-Aware Matching — #11532
+
+- Branch `feat/mosaic-model-aware-matching`; audits closed epic #11421 (change fragment `changes/11532-mosaic-model-aware-multi-trial-matching.md`). Design: `docs/plans/EPIC_MOSAIC_MODEL_AWARE_MATCHING.md`.
+- Implemented (`src/shared/python/estimation/mosaic/`): vectorized planar inertial regressor fixture (`inertial.py`, `planar_chain.py`); B-spline kinematic basis; variable-projection inner solve; Levenberg-Marquardt outer solve with continuation; inertial observability subspace and IK init; TVLQR local policy and replay gate; torque template; subject-fit pipeline.
+- Docs: methods reference `docs/research/model_aware_matching/model_aware_matching.tex` (+README, structural test); DIME section corrections and restored tabular opening in `docs/research/simscape_matching_reference/simscape_matching_reference.tex`.
+- Validation: 36 mosaic tests and 10 doc tests pass; ruff clean; both LaTeX references compile with pdflatex.
+- Limits: planar fixture only; no human capture qualified; no engine regressor provider yet.
+- Next: MOSAIC-01/02/13 (#11533, #11534, #11545): benchmark freeze, Pinocchio regressor provider, DIME defect remediation (#11547–#11554).
+
+# Active: OpenCap to OpenSim Integration — #11400
+
+- Branch `feat/opencap-import-11409` at SELF; PR #11409. Slice covers #11409 (OpenCap: Import Session Action in PyQt6 and React/Tauri).
+- Implemented: `OpenCapImportAction` and `OpenCapImportDialog` in PyQt6 (`src/engines/physics_engines/opensim/python/opencap_import_action.py`), `MainWidget` OpenCap session loading in `opensim_gui.py`, `load_opencap_session` in `OpenSimPhysicsEngine`, `OpenCapImportModal` in React/Tauri (`ui/src/components/opencap/OpenCapImportModal.tsx`), FastAPI routes in `src/api/routes/opencap.py`, and `inspect_opencap_session` in `opencap_session.py`.
+- Validation: 21 Python tests passing in `tests/ui/engines/opensim/test_opencap_import_action.py`, `tests/unit/api/test_routes_opencap.py`, and `tests/unit/motion_pipeline/sources/test_opencap_session.py`; 5 Vitest tests passing in `OpenCapImportModal.test.tsx`; 39 feature parity tests passing; ruff lint/format clean.
+
+# Active: Necromatcher Native Fit Delivery — #11240
+
+- Portable replay impact SELF (#11464): public receipt export/recall preserves all state vectors and extraction metadata, binds exact canonical trajectory bytes and refuses overwrite or tampering. Root 69 Python cases and 87 focused React cases pass; configured mypy, TypeScript, scoped lint and formatting pass. Normal Library Actions now imports, recalls and downloads verified authored replays with explicit parents, clock and unqualified status. [Procedure](docs/development/necromatcher-replay-impact.md). A five-page supplemental methods report is compiled and visually reviewed on the local Desktop; earlier Methods V8 is unchanged. Normal app impact execution and historical qualification remain open.
+
+- Replay impact SELF (#11464): authenticated public extraction uses explicit native point/face assumptions, Jv and rigid-triad angular velocity on authored seconds. Declared flight vectors reach the actual impact solver unchanged. Root combined app/impact cohort: 83 Python cases; extraction/impact/viewer subset: 38. [Procedure](docs/development/necromatcher-replay-impact.md). Portable receipt persistence, normal app action and historical qualification remain open; no historical replay executed.
+
+- App checkpoint SELF: explicit lossless restriction mode and exact saved-frame review now work in both hosts; root 45 Python/45 React cases pass. Edited choices survive mode switching; excluded Tiger frames 191–209 never reach fitted projection. [App Procedure](docs/development/necromatcher-app-restriction-and-frame-review.md). Historical V22 results are unchanged; CI remains unverified.
+
+- Branch: `feat/necromatcher-native-fit-11235`; PR #11359 remains open. Published scope checkpoint `3a1a6a8e428afffc20346d7a32044b4c602d4c1b`; upload responsiveness follow-up SELF.
+- Registered raw reviews, exact selected-domain checks and native/web/export provenance are implemented. Root 294 Python/39 UI cases and static checks pass. Preserved failures and procedures are in [Camera and Scope Procedure](docs/development/necromatcher-conditional-camera-and-scope.md).
+- Restricted trial at published `6695085027bdf4f354d867136930931591002d80`: explicit contact restriction retained existing 105/120 anchors, author stage saved `tiger-both-hands-authored-seed-v21`; strict fitting timed out at unchanged 300-second wall budget. Session 32543 closed exit 1; no final fit/candidate/completion. Original non-index bytes/index records preserved; ten allowed files added. Solver evaluations/elapsed unavailable. This is an unoptimized seed, not a successful match.
+- Current: Independent partial-stage verification is accepted (V4 partial checker, actual root release V2). Setup profile V1 failed on an ambiguous ndarray adapter/receipt JSON and is preserved; V2 measured five public stages successfully, with independent serialized acceptance. At published `0143b39f571cbe67c57091fb2ae19e7d7eadae3b`, both independent audits preserved complete 14,826-source-file/401-library-file maps. The same 191-frame confidence-weighted dense body RMS is 35.102046 px for the seed versus 24.082673 px for its parent; retain the parent. Actual selected seed stills 0/150/190 show opacity 0.35 proxy shapes, skeleton and an explicit unoptimized authored research seed caption. Independent serialized source/image verification is accepted; unweighted display-marker RMS is approximately 6.45/44.14/18.27 px, separate from weighted body metrics. Native projection and complete overlay-union pixel parity were not independently recomputed. No timeout cause, qualified match, new full video or ControlTower delivery is established. Tiger matching remains [0,191), exact physical release is unmeasured, and Hogan is unchanged. Full goal remains active.
+- Performance child #11445 now implements public authenticated_read: one canonical full PNG/BGR/clock validation per capture per operation, fresh complete file hashes and metadata checks on reuse/close, cross-library/thread/task and nested-context rejection, immutable DTOs and failure reset. Final root validation passed 93 cases across two lanes (86 plus seven public-owner/fingerprint cases; one Windows symlink-privilege skip and inherited import warnings). Canonical public SHA256 validation is reused, and execution fingerprints cover shadow_tracker; this API checkpoint is separate from the accepted artifacts at 0143. This integration checkpoint implements short authentication boundaries for queue admission, worker setup and fresh output checks, candidate/delayed publication and storage. Contexts close before scheduling, computation, delivery or persistence; delayed publication closes before add_fit, which uses its own fresh validation context. Root passed 188 distinct cases (185 SDK-free plus three native temporary-fixture cases; one Windows symlink-privilege skip, three native cases deselected in the SDK-free lane and nine inherited warnings). Published integration f2dfe completed read-only Profile V3: five stages took 0.672506/1.464802/9.053819/1.511551/0.460402 s; only seed binding decoded 210 PNGs, once in one canonical full authentication. Source 14,835/Library 401, project/runtime/config were preserved; assessment is byte-identical to V2. Root acceptance SHA256 b8469dc86d8aa72e1be2499786a107c847dd2e11d32f20567aa1effb1947a8e4 records this invocation; differing instrumentation/context/hardware prevents an isolated speedup or timeout-cause claim. No strict retry or new ControlTower delivery is authorized; accepted 0143 artifacts are unchanged. Pure restriction #11450 has a frozen V2 core (SHA256 b3504e6c64c7f97116a108b97a06d6ecba8732f3d38dd004751789e0bc93ce58) with 23 plus 53 agent cases. Root accepted 91 distinct cases (23 core plus 68 disjoint compatibility/bounds/initialization cases; synthetic MuJoCo-first fixtures only, nine inherited warnings and 38 unmarked cases reported only). Root acceptance SHA256 c0c2c44509650d37dc9516aa4185a54b828a49767bcca4ab8d8b2af64786b2ff records Ruff/format, pinned mypy and governance checks; manual release remains inventory-blocked. Pure q/v/a roundoff and Bernstein encoding evidence 17ddcd74c27276a376174c202500baa10e389d09b97ca27c3c42e9d1e4b778b5 is not native feasibility, pixel agreement, seed adoption or queue integration. Subsequently, native session 50689 closed exit0 at published 81aa448794a0ce763cdc2dd6e503d3f9b42200e9; root serialized closure accepted ce833a420c5e208b82bc430fe4be4c4c16830aee54d9c8c357bdb1af9e775e9c. Full source 14,837/Library 401/project/runtime/config/helpers matched the fresh baseline. Restricted-parent body RMS exactly equals saved parent (dense 24.082673308003265, remaining 24.337344114034266, training 21.776977995696026 px); 381-point q/v/a roundoff and typed receipt equality hold. The full 176 x 12 dimensionless scaled constraint matrix has maximum 17.023155533359613 at ground:heel_l, source 18.501816666666667; continuous contact is uncertified and nodes differ from V21, so no V21 656 comparison applies. Retained frame 0 raw shaft RMS 66.69082241158017 px/angle 28.301292322830996deg remains mismatched. No optimizer/convergence/physical qualification, telemetry null; no adopted seed, new fit, overlay rendering/pixel-parity evaluation or ControlTower delivery. Subsequent backend software checkpoint: root accepted paired restrict_initialization/restricted_spline operations with canonical SDK-free restriction receipts, preserved prior/bounds, parent agreement within 1e-12, scope/hash admission and worker/storage/recall/delayed-publication checks. Legacy semantics and public counts (eight option fields, seven start_native_refit arguments, eight builder arguments) are unchanged. Root passed 87 distinct SDK-free cases with nine inherited warnings; pinned mypy on all five owners and Ruff/format passed. Root acceptance SHA256 dc43749d0e69c6c43051712c5d37b819fbbe950edd3cf5dfb12f426a61b80bed authenticates the software freezes. Backend software was published at 5197f8639818321b7cf8f86d4748a25ce79aa278 with all normal hooks passing. Synthetic native end-to-end session 4534 then closed exit 0: the public queue, clean worker, storage and recall preserved the nonuniform restricted curve on [1,6), with four training/five dense frames, 43 locked coordinates and five rejected queue/storage counterexamples. Root closure SHA256 a26073a9c7bef6c8d5f2dd12b249c8e5f848be49c9fb0ba63d0a5c98f011d9bc authenticates the independently closed SDK-free audit (session 97412): fresh 14,844-source-file/401-historical-file/runtime maps are unchanged. Independent pure q/v/a errors are 3.47e-18/2.78e-17/1.78e-15; saved native pixel metrics agree with the actual run, but were not independently reprojected by the serialized audit. Optimizer counts remain null; no optimization, historical seed registration, new overlay or ControlTower delivery occurred. This synthetic software acceptance does not alter the earlier Methods V6 historical native-evaluation checkpoint or establish physical qualification. Subsequent caption software adds UNOPTIMIZED RESTRICTED RESEARCH SEED through the shared still/video composer and authenticated manifest, with eight strict DTO fields and mutually exclusive authored/restricted flags. Root passed 80 distinct cases in MuJoCo-first temporary fixtures: canonical exports and tampered lineage, manifest claims and exact legacy/authored pixels; configured pinned mypy, Ruff and format pass. Caption root acceptance SHA256 12a5e9e99d0b5d3827fcddc229324bf9e5525e448ae430acb4a3e0881a1f73d0 records this later software checkpoint, separate from the Methods V7 appendix at 5197. No new historical seed or overlay is claimed. Next: publish through normal hooks, then separately reviewed historical admission and the unchanged strict restart. The full goal remains active. Subsequent V22 checkpoint: Tiger remains within reviewed source frames 0-190. The accepted lossless seed has a local 191-frame shape/skeleton video; the ordinary strict fit modestly reduces same-domain weighted dense RMS from 24.08 to 23.57 px but remains nonconverged and REJECTED. Independent acceptance SHA256 8bb98838915c914c4dab8b9c9b9fff871ec7b02294a8cfd155d57657852aa72d records preserved source and original non-index Library bytes. Methods V8 is the earlier 21-page seed/stills report, not this later fit/video checkpoint. Three optimized research stills are accepted locally (proof 0d244648c2f76bb2c4be9f232d81215a58c5a1779963f50bcb575f76ff402d13); ControlTower delivery remains pending. Hogan is unchanged; physical/anatomical/contact qualification is false and the goal remains active. Detailed evidence is retained in the camera-and-scope procedure.
+
+- Methods V7 is the latest compiled supplement: root reviewed all eighteen pages in contact sheets and new pages 17 and 18 full-size; V2/V3/V4/V5/V6 remain preserved. The root V7 acceptance SHA256 is 51a8da1aaa9b590100354d8db1956431450b955d87ba57894b97da0df673c810. The two new pages describe the reusable restriction workflow and synthetic native end-to-end evidence at 5197. Its three pinned external Desktop PNGs remain earlier V21 authored-seed figures and local repeatability dependencies, not a portable standalone bundle or newly rendered restricted fit.
+
+# Isolated Native Hypothesis Admission — #11376
+
+- Branch: `feat/necromatcher-hypothesis-admission-11376`, isolated from the frozen real-player workspace.
+- Public typed request, authenticated source/model/clock binding and explicit saved-final Hermite rebinding produce an unoptimized research seed through the existing clean-worker/initializer/store path.
+- Registered model/XML hashes, compiled scalar units/order, body-local markers and complete PNG/decoded-BGR/PTS identities fail closed. Recall reauthenticates lineage; source/runtime fingerprints include all new helpers.
+- No canonical player hypothesis, optimizer job, camera/anatomy/physical-time qualification, issue closure or public release is claimed. Root owns final review/commit and subsequent trial authorization.
+- Procedure: `docs/development/necromatcher-native-hypothesis-admission.md`; focused red/green/static/native fixture evidence is reported at source freeze.
+- Validation: 160 focused/compatibility cases passed; final formatted source passed 19 native-worker, SDK-free import and fingerprint cases. Eight worker-response tamper cases reject publication, including full recipe/scales/training-frame changes. Pinned mypy, scoped Ruff/format, title case and design-manual governance passed; release remains blocked.
+
+# Active: Necromatcher Source-Bound Shaft Continuation — #11318
+
+- Branch: `feat/necromatcher-native-fit-11235`; historical PR #11240 merged; continuation PR #11359 published at dfdfeb3ad0bddaa05303ec4f385d2d4fc42e5ed0, normal push hooks passed. Parent #11232; Tiger #11226; Hogan #11229. Full goal remains active.
+- Canonical optional queue/worker/persistence and native/web evidence controls are implemented. D 102 combined/19 independent, renderer 20 focused/80 combined/20 independent, stable video/job/API 41, native 32 offscreen and web 30 scoped cases passed; Ruff/format/pinned mypy and TypeScript/ESLint passed. Earlier665 regression 476 remains a historical source checkpoint, not a new total.
+- Actual producer `3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5` completed Tiger control/variant V16 and Hogan control/variant V13 matched final-start trials; all four finite historical target sets and 32 authored scalar bounds pass, 12 coordinates remain unbounded, and every optimizer remains budget-exhausted/nonconverged/rejected. Independent assessment `b1f3898d3d9e2cac5c460ceb33fd2e6c5b85371158b4eb2a823e4f027ede002e`. Raw training improves; Tiger held-out shaft agreement worsens and Hogan is essentially unchanged.
+- Canonical V2 admission `8c2327b6af8a1c5977adb424ccf38e5b73e2b4a5ffc132a1bda762c2a00956e1` preserves uncalibrated reviewed weights/abstentions. Tiger 150 withholds shaft labels on a body-training image; Hogan 200/550 are outside body training. Original605 sparse admission and candidate receipts remain historical.
+- Four display-only V1/V2 exports verify 1,920 original-sized frames and unchanged source/runtime/library brackets; receipt `f60d277ce81e7d1d3dc2ddace626a1bacd9bd3a83708375ffefe1e7dcdd39dd0`. Twelve selected overlays and six originals reviewed independently; full-video visual/manual OS acceptance false. Exact manifest PTS differ from Tiger rounded encoder playback by at most 6.9736403 microseconds; Hogan 30/1 exact. No objective or physical qualification changes.
+- Actual 605 provider and 8fde consumer remain the historical TigerV15/HoganV12 sanitized cohort. Affine PR #4834 merged externally 2026-10-03T02:38:02Z at 6ade1c1; no new sanitized shaft cohort or public deployment is claimed.
+- Current published report 74 pages: PDF `36319afeb6ec6132f7684387d04c1b8cde8d2854a38cf718354325334e4fdffd`, source `41c61a755f72a3b8928c5938f545e0a8a32aa19e4f84437ffc5ac07c92d7b6e9`; three clean installer-disabled passes and all-page visual review. Desktop manifest 1,504 artifacts `49868b903a729a147d188b03a0fc5ecf3f68e4973345f08b0191d79de2b85228`. Exact previous 66 edition/reviews/1,260 index/README preserved under Report/handoff-shaft-66-page-publication; older editions retained.
+- Next: integrate separate follow-up source/docs and retain failed generalization evidence. #11318 remains partial: head observations/errors and physical shaft endpoints are unmeasured; camera/anatomy/physical-time/continuous dynamics/impact and manual/compiler release limitations remain open. Old 11240 exhausted CI remediation budget is unchanged; no issue closure, auto merge or public deployment.
+- Additional active requirements: actual model shapes with variable transparency while retaining skeleton layers (#11356); camera, player dimensions, shutter/field/exposure effects and human ROM qualification (#11357). Distinguish previously inspected evaluation labels from unseen validation; diagnose exact model geometry/attachments/sensitivities before another optimizer run. These features remain pending.
+- ControlTower delivery: `C:/Users/diete/Desktop/Necromatcher-Matched-Review-2026-10-02-V16-V13` contains 124 size/SHA-verified files, including four videos, twelve stills, exact model/capture/source inputs and the 74-page report. Remote receipt SHA `e752477f136cd504ce06c0af775b70f07ef556991e3844f44824f370997f72e8`; existing local 1,504-artifact snapshot remains unchanged.
+- Required local hook correction #11358 explicitly declares the incoming Simscape force-channel TypeAlias; same pinned mypy now passes and 28 existing behavior tests pass. Four normal-hook formatting changes preserve Markdown text/table cells and JSON semantics. This does not restart the exhausted historical remote CI repair budget.
+- Source/camera qualification checkpoint: accepted Tiger15-22s/Hogan110-135s audit verifies all960 original PTS/BGR identities; shutter/exposure/playback remain unknown. Generic stature/mass are1.71m/78kg for both players, not measurements. See docs/development/necromatcher-camera-morphology-shutter-review.md.
+- ControlTower incremental delivery: Desktop/Necromatcher Source Audit 2026-10-02 V2 contains77 SHA/size-verified files: source diagnostics, nine-page compiled supplement and conditional saved-camera descriptions. Remote receipt 8a1cbabad4552cdd53f9a0e4f93b22409da8dd3259fa6d7823c549053230c6b3. Prior124-file delivery and1,504-artifact index are unchanged.
+
+# Necromatcher Workspace Handoff — #11239 (Merged)
+
+- Current workspace implementation: `feat/necromatcher-workspace-11234` in `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-necromatcher-workspace`, baseline commit `1b0099a405`. Both hosts create players/swings, import immutable versions, review original images/landmarks and export packages. Real Hogan and Tiger web imagery is verified; Hogan frame navigation reaches frame 750 at source PTS 134.967 s. 31 library/API/native/launcher tests and 10 inventory tests pass; scoped mypy passes eight production files. Further web form tests and fitting remain active.
+- Dependency PR #11237 (library) is published as a draft over #11231. CI #11231 has an unrelated `.jules/bolt.md:208` title-case failure inherited from main; capture unit/structure/code checks are green. No CI bypass or unrelated code edits.
+- Workspace draft PR [#11239](https://github.com/D-sorganization/UpstreamDrift/pull/11239) is published over #11237 and attached to this chat. Cleanup LoD fix `d762816466` passed native tests, global LoD and push hooks; its LoD CI gate passed. Navigation tests reproduced stale assets on URL recall and endless frame loading after failure; scoped results and retry fix both, and reject a player/swing URL mismatch. Sixteen UI tests pass. CI cycle 2 addresses stale launcher context/atlas views using canonical generators and explicit boundary review. Continue form verification, CI tracking and actual fitting under #11235; keep the full goal active.
+
+- Owner priority/goal: Necromatcher epic #11232; persistent library #11233; Tiger #11226 and Hogan #11229 remain open.
+- Owned worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-necromatcher`, branch `feat/necromatcher-library-11233`; depends on capture foundation PR #11231. Library code is published in draft PR #11237; tile/review work continues separately under #11234.
+- Current contracts, TDD evidence, CI status and continuation: [Necromatcher Turnover](docs/development/necromatcher-turnover.md).
+- Implemented in progress: immutable source/model/control versions, restart recall, checked capture archives, portable exports and local HTTP API. 43 workspace/API tests passed; scoped library mypy passed; real capture imports verified after reopening. Malformed-profile and export-mutation failures are covered by the passing suite.
+- Next: finish library acceptance/import real captures, publish focused PR, add player tiles and web/desktop review, integrate real fitting and downstream simulation/impact/analysis. Do not certify fixed-output coordinator artifacts or uncalibrated source time.
+
+# Historical Player Capture Handoff
+
+## Active: Grip Wrench Extraction in Every Engine (GCV-8 #11714, Epic #11706)
+
+Per-hand `WrenchKind.GRIP` frames, wrench exerted by the hand ON THE CLUB (ADR-0052):
+
+- MuJoCo and MyoSuite scene: `mujoco/python/grip_efc.py` reads the weld `efc_force` rows (`efc_type`, `efc_id`) and maps them to a club wrench with the club-point Jacobians; `MujocoForceTorqueSource` emits it when `grip_weld_l`/`grip_weld_r` exist.
+- Full-body MuJoCo, MyoSuite spec and Drake: `solve_with_multipliers` (qacc bitwise unchanged) and `grip_analysis`; the closing (right) hand is the multiplier, the holding (left) hand is club Newton-Euler, see `biomechanics/grip_extraction.py`.
+- Pinocchio: `PinocchioForceTorqueSource.grip_from_allocation` gives the net with `split_method="allocation"`, no per-hand values. OpenSim: `grip_analysis()` is unavailable with a reason.
+- Open: web/video overlays are GCV-10 (#11716, `analysis.grip_wrench` is a gap). The pinned myo_sim assets are absent on some hosts, so the golfer-scene test skips there.
+
+## Active: Realistic Club Meshes in Every Engine Visual Layer (#11717, #11727)
+
+- One adapter, `src/shared/python/model_appearance/club_head_mesh.py`, builds the head from the Tools parametric builder, with committed STLs in `assets/club_heads/` as fallback. `club_assembly.py` adds the shaft and grip. Never edit `vendor/ud-tools` for this.
+- Wired: MuJoCo (appearance and plain visual layers), OpenSim (`club_visuals.py`, `full_body_osim.py`, `tour_matching/club_geometry.py`), Drake and Pinocchio MeshCat exports, MyoSuite via the plain visual layer, and the native OpenSim viewer.
+- Open: the web `ClubHead` component (#11717) and the ball visual (#11719) are tracked by gap entry `render.club_head_and_ball`. The head centre of mass is not moved to the mesh centre.
+- Saved OpenSim models use bare mesh names; loaders call `club_visuals.register_geometry_path()`.
+
+## Active: Same-Input Cross-Engine Dynamics Parity (Epic #11605)
+
+Same spec, same initial state, same joint torques: every engine must reproduce
+the MuJoCo motion. Shared code is `src/shared/python/motion_matching/same_input/`
+(`VectorPlant`, closure projection, `StepPolicy` RK4 ZOH integrator with 8
+substeps, `InputBundle` `same-input-bundle/v1`, scoring). CLI:
+`python -m scripts.same_input_bundle {export,replay,closed-loop} --engine
+{mujoco,drake,pinocchio,opensim,myosuite}`. Full-swing results (driver and
+7-iron): closed loop at most 7e-10 rad for Drake/Pinocchio, 5e-12 rad for OpenSim, and
+bit-identical for MyoSuite. The 50 ms segmented open loop is at most 1.1e-9 rad. The full-horizon open
+loop is limited by the swing's physical instability (about 40 1/s), so it stays
+within bound to about 0.5 s. Reference: `docs/research/same_input_parity/`.
+Do not reintroduce MJCF `fullinertia` (MuJoCo's eigen-solve is inaccurate;
+the exporter emits `diaginertia` + `quat`). Open: P-8 Simscape (#11613) on the
+MATLAB R2025b host.
+
+## Active: OpenSim Musculoskeletal Swing (#11617, Epic #11605)
+
+- Branch `feat/opensim-musculoskeletal-swing`: `musculoskeletal_*.py` in `src/engines/physics_engines/opensim/python/`, runner `scripts/run_musculoskeletal_swing.py`, receipt under `docs/development/full_body_models/evidence/musculoskeletal/`.
+- Static Optimization only, leg muscles only, estimated GRF; valid for the backswing (0-1.08 s). Moco did not converge. Superseded inputs, see phase 2.
+- Phase 2 (branch `feat/opensim-msk-spec-driven`, stacked on phase 1): same-input bundles drive a spec-skeleton model with 80 grafted leg muscles, exact contact, per-frame bounded-LSQ static optimisation (`musculoskeletal_pipeline_v2.py`, `scripts/run_musculoskeletal_spec_swing.py`, receipts `receipt_v2_*.json`, notes `docs/research/musculoskeletal_swing/README.md`). ID matches bundle efforts (median 0.01 N m); leg reserve RMS about 35 N m; arms/trunk are torque stand-ins; not qualified. Next: arm/trunk muscle graft from an officially downloaded model (needs approval), left hip rotation capacity, independent open-loop replay.
+
+## Simscape Matching Review (2026-10-02)
+
+GS3DX manual inventory follow-through (2026-10-03 UTC): canonical calculation-registry blocker `UP-D1-gs3dx-whole-body-matching-inventory` records the matching, frames/units, observation/calibration, C2/rate, actuation/contact/replay and media-provenance calculations still needing governed QMD coverage. The separate editable research LaTeX is linked evidence, not an approved canonical manual. The registry remains empty and release-blocked; no publication exemption or generated-artifact edit is introduced.
+
+Original-fit regularity review (2026-10-03 UTC): the separate LaTeX reference and `tangent_c2_checkpoint_20261003.json` contain the equations, source hashes, actual receipts and rejected experiments. Full-clock rate fitting has an independent 2,042-pose audit; adding low/moderate acceleration regularization produces another 2,042 poses. The acceleration fitter saves its results but hangs at shutdown (watchdog 125); a fresh independent native process rechecks all new poses and exits naturally with process/wrapper 0 at 17:47:42 UTC. Stronger smoothing reduces the owner's maximum wrist step from 13.24 to 9.53 degrees, but increases root motion from 6.54 to 9.39 mm and worsens marker error. The tour also trades better shoulder continuity for worse wrist motion. No new best video is promoted. These sampled position checks and finite-window derivative proxies do not qualify continuous motion, contact or independent dynamics.
+
+The current 14-position-target objective includes the clubhead, not the grip centroid. Raw club triads provide an orientation observation with address fixture alignment, while changing relative head/grip orientation prevents an unsupported rigid observation assumption. Ten native input-contract tests verify scalar validation and mask isolation without model loading. Completed club-orientation window evaluation tests baseline, zero, and two positive weights across 536 window poses (four trials each, 75 tour poses and 59 owner poses per trial), establishing exact whole-output parity at zero weight. The original window fitter saves results and hangs at shutdown (watchdog 125); a fresh independent native audit rechecks all 536 new poses and exits naturally with process/wrapper 0 at 18:18:38 UTC. Mean club orientation error improves from 10.30 to 5.92 degrees for Tour (capture_A) and 19.20 to 10.73 degrees for Owner (capture_O), while position target error shifts from 27.242 to 27.248 mm (Tour) and 37.989 to 38.014 mm (Owner), with boundary transition tradeoffs from sparse dt 1/30 s into dense steps.
+
+A subsequent full source-clock club comparison evaluates 3,063 trial poses across both captures (three trials each, with 654 tour poses at 360 Hz and 367 owner poses at 240 Hz per trial), producing 2,042 new poses from positive weights (0.025 and 0.075) and retaining 1,021 rate-control poses without refitting. Observed club triads are available at 618 tour and 345 owner samples; missing frames remain excluded rather than counted as agreement. The original fitting process saved all poses before hanging at shutdown (receipt 125 at 19:13:08 UTC); a separate fresh native R2025b audit verified all 3,063 saved poses, club rotation matrices, observation masks, metrics, and source hashes with maximum physical joint residual <= 9.93e-16, exiting naturally with process/wrapper 0 at 19:15:18 UTC. For private video previews at 30 fps (55 tour display frames, 46 owner display frames), owner weight 0.025 and tour weight 0.075 are selected as a documented tradeoff: tour mean club error improves from 11.859 to 5.476 degrees with derived 14-target position RMS shifting from 16.887 to 16.944 mm and near-unchanged wrist and root steps, while owner weight 0.025 improves mean club error from 21.143 to 19.287 degrees, reduces derived position RMS from 20.800 to 20.762 mm, and reduces maximum wrist step from 13.240 to 13.060 degrees as well as shoulder geodesic and root displacement. The stronger owner weight 0.075 worsens maximum wrist step to 17.536 degrees (shoulder step to 12.534 degrees, root displacement to 7.006 mm) and is not selected for default preview.
+
+Eight Human ellipsoid H.264 MP4 previews are delivered on both Desktops in Simscape_Matches_20261003_Club_Refined_1080p, with a verified ZIP. Native render-to-pose parity, independent full decoding of 404 frames, 1080p/30fps/PTS checks, hashes and sampled visual review pass; the render process exits naturally with code 0 at 19:32:57 UTC. These previews remain inverse-kinematic (IK) visualizations, not forward dynamics (FD). Native actuator discovery on the nominal 80 kg model identifies 25 joint blocks (19 actuated spanning 35 active actuator axes, 6 passive/unactuated blocks) and 99 logged leaf series in an independent 0.02 s pilot with verified neck torque (+/-0.25 N*m) exiting naturally with code 0 at 18:48:51 UTC, but leaves expose state and acceleration quantities rather than measured actuator torque. Native peer and input-graph audits across 267 connection ports and 27 driving converters document native input parameter units in aggregate: 21 scalar converters with Unit 1 (7 revolute axes, 14 universal axes across 7 body joints), 2 neck converters with N*m (adapted torque drive), and 4 spherical vector converters with N\*m (FollowerFrame 3D torque vectors across 4 spherical joints). Input Unit 1 applies no scaling and does not by itself imply a torque-unit error; physical output units are inferred from the destination. This is a parameter inventory, not physical torque measurement. Moving swing, contact, and feedback-off replay across all 35 axes remain outstanding without speculative all-35 measurement or anatomical truth.
+
+The controller XYZ chart remains a separate concern: the owner's left-shoulder peak condition number rises from 21.2 to 54.2 after rate smoothing. Native joint inventory identifies 33 input-torque components plus two prescribed neck axes; only the bounded two-neck pilot has measured primitive-actuator evidence. The complete 35-axis moving/contact/open-loop goal remains open. Six owner session videos are locally downloaded and decoded; exact capture-system trial pairing and anatomical calibration remain unresolved. Existing Human ellipsoid Desktop previews remain kinematic fits. Canonical manual governance still reports two QMD sources, zero registered calculations and an owned inventory blocker. The existing LaTeX editor continues to report its standard-directories platform error; no compiled-PDF claim is made.
+
+Closed-arm regularity and foot review (2026-10-03 UTC): six additional assembled support poses retain all 101 original anchors and 11 prior projections. Native dense acceptance improves to A 1,295/1,297 and O 721/721; remaining two tour failures are midpoints. The returned velocities nevertheless reach right-wrist peaks of 113,025 and 169,742 degrees/s, and the owner has a 99.72-degree wrapped scalar step and 115.22-degree shoulder SO(3) step across consecutive accepted samples. Both curves remain rejected for moving-reference/dynamics promotion; pointwise compatibility is insufficient. A fresh native styled-foot audit shows forefoot-minus-rearfoot direction aligned with sole forward axis (dot above 0.9937), with small address yaw errors. Later right-foot horizontal reversals occur when projection lengths are small; their 3D marker-to-visual angles remain about 24 degrees for tour and 11 degrees for owner despite near-180-degree projected yaw. Preserve the documented ankle-marker-height/flat-sole calibration assumptions; no blind shoe flip is justified. Initial World-Frame uniqueness probe exit-one is retained alongside corrected natural-zero audits. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX. Alternate coordinate-target allocation is a private unqualified hypothesis; no physical model/actuator authority change is claimed.
+
+Denser C2/fit review (2026-10-03 UTC): evaluating the SAME candidate curves at 2,018 source and midpoint samples reproduces all 1,010 source samples exactly, but native acceptance is A 1,294/1,297 and O 718/721: three new midpoint assembly failures per capture. Original source samples and all 101 anchors still pass; full-path acceptance is rejected. The new failure diagnostic finds six nearby assembled states with unchanged root translation and all 11 controls passing. A separate native dense fit audit exits naturally zero with original anchor point/RMS parity: mean/peak derived target RMS is 16.98/38.02 mm for A and 21.06/59.60 mm for O; mean/peak directly measured three-back-marker RMS is 26.77/54.66 mm and 38.41/88.12 mm respectively. Valid derived target coverage is 7..14 per frame, with gaps excluded. These mean per-frame RMS scores use different sampling from sparse previews and are not direct model/golfer rankings. No curve or video is promoted to full-path or forward-dynamics acceptance. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX.
+
+Tangent/C2 review (2026-10-03 UTC): fresh native checking passes all 48 saved q/v states; original timeout 124 and tour shutdown 125 remain recorded. Private C2 TDD passes 19 tests. Closed-arm guess correction eliminates all 11 owner anchor mismatches while preserving independent targets bitwise; 6 tour and 5 owner assembly failures remain. Nearby assembled states pass fresh position gates, but a same-target closest-seed retry recovers none of the 11 failures (six controls pass). A controlled projected C2 curve adds eleven upper-limb support poses, preserves original 55/46 fitted anchors, root motion, lower body and unaffected curves, and naturally exits zero with ALL 649 tour and 361 owner source-rate q/v/fresh-state checks accepted. Maximum scalar/spherical target deformation is 0.112/0.173 degrees for A and 0.338/0.343 degrees for O; dense raw-marker RMS is not evaluated. Three axis-contract tests pass after real RED/GREEN correction. The candidate remains unpromoted pending between-state closure, acceleration, full raw-clock coverage, all 35 input torques including neck, contact and independent full-swing forward replay. Parent verifies 104 Desktop video hashes and 5,252 decoded 1080p frames; comparison topologies differ and Human ellipsoids remain the new matching standard. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX. PDF compilation remains unavailable due to missing platform standard directories.
+
+Aligned refined-objective review (2026-10-03 UTC): actual sparse refined previews have zero consecutive source-frame transitions; largest root increments are 17.827 mm (A) and 30.166 mm (O) over 1/30 s. Address-prefix controlled eight-pose windows preserve the spine prior. Private parameter TDD has eight RED failures/eight GREEN passes. The original 344-pose fit wrapper returned 125 after completion; a fresh independent saved-pose recheck exited naturally with zero and verified all 344 poses plus exact whole-output zero parity. Small root improvements accompany worse wrist increments; no candidate is promoted. Native counts distinguish 48 position variables, 43 velocity variables, 37 floating IK parameters and 35 requested control axes. See aligned_refined_checkpoint_20261003.json and the maintained LaTeX. Full continuous references, contact, all 35 input torques including the neck, independent replay and PDF qualification remain open.
+
+- **2026-10-03 04:27 UTC observation export update**: The actual owner two-frame hash/forwarding/cache probe exited naturally with success; 39 production contracts pass. The optional source observation contract is caller-bound and declares physical measurement unverified. Six Google Photos originals are verified locally. Refined peer PR11351 previews remain IK candidates. Dense source-seeded reconstruction preserves all anchors but rejects owner frames 253--256 and contains large adjacent rotations. Continuous fitting and full 35-actuator forward dynamics/replay remain open. See the maintained LaTeX and observation_export_contract_checkpoint_20261003.json.
+
+Current reviewed evidence: **267 native checks pass** (12:34:19Z), zero failed/incomplete. Corrected A/O no-head and zero-weight parity is exact on four frames each. The 46-frame owner head candidate improves against its cold-start baseline but remains worse in mean positional RMS than the selected clip; no Desktop replacement. Owner contact clearances remain -64.462 to -48.262 mm; assembled pose verified under the diagnostic settings; stance unqualified. See the current handoff and sanitized head/quiet review evidence.
+
+Active review branch: `feat/simscape-matching-review-main-20261002`; draft PR [#11256](https://github.com/D-sorganization/UpstreamDrift/pull/11256), reviewed continuation commit `SELF`. Source and runtime qualification remain in progress; no merge, complete goal, or physical acceptance is claimed. Reviewed original worker commits `144e81188` through `f2ca443a0` (documentation-only continuation); unpublished original `144e81188` baseline.
+See [Current Handoff](docs/development/HANDOFF.md), [Modeling Reference](docs/research/simscape_matching_reference/README.md), and [Refinement Requirements](docs/research/simscape_matching_reference/MATCHING_REFINEMENT.md).
+
+- **Captures and Avatars**: Capture A is the tour reference (360 Hz, 654 frames); Capture O is the owner's optical capture (240 Hz, 367 frames). Golfer skill or athletic ability cannot and must not be inferred from avatar appearance or kinematic fitting distortions.
+- **Verified Baseline Desktop Exports**: Four Desktop Fit IK H.264 30 fps clips represent the verified baseline (natural exit 0 both; Capture A mean 12.745748 mm / max 40.208544 mm across 55 frames; Capture O mean 26.558095 mm / max 116.576104 mm across 46 frames; diagnostic worst sampled: Capture O clubhead 375.358 mm at frame 89, Capture A trailElbow 96.517 mm at frame 517). These are legacy GS3DX_Fit IK clips; refined Human clips now exist separately, preserving these baselines.
+- **Candidate Rejection**: Owner backward pass (same identity + offsets: mean 32.185137 mm / max 46.052114 mm, receipt `03:57:32.790355Z`, natural exit 0) was rejected because improved peak error does not justify worsened mean error. Fitted marker offset norms cluster 70–100 mm on owner vs tour mostly smaller (hypothesized capture definitions / geometry compensation, not provenance proof).
+- **Coordinate Topology (37 vs 39 vs 33)**: Native Human fit has 37 independent coordinates with grip closed; actual joint roles yield 37 independent coordinates (the earlier hardcoded 33 failure reported 39 because of mismatched indices; this distinction matters). Native 3-frame [1, 13, 25] probe: position RMS 13.296 / 12.536 / 12.374 mm, but left foot orientation residual 165.0 / 167.0 / 167.2 deg vs calibrated shoe $R$ (receipt `04:54:21.730288Z`, natural exit 0), proving position does not identify foot orientation.
+- **Foot Orientation Calibration**: Shared calibrated foot triads and SVD address mean $R = F_f F_0^T R_z(\text{yaw})$; flat sole at frame 1 is an assumption, not dynamic force evidence (missing frame 1 fails closed). Foot orientation weight 0.1 trial (position 51.263 / 43.243 / 39.399 mm, left foot 36.505 / 17.058 / 13.764 deg, receipt `04:57:13.758186Z`, natural exit 0) was rejected due to degraded positions. Fresh Human calibration probe on the same three frames completed with natural exit 0 at 05:01:00.641030Z: position RMS 1.188/1.195/1.208 mm, both foot angular errors below 0.7 deg. Calibration frames do not qualify full-swing generalization. Full $\text{SO}(3)$ 18-component chordal weight 0.1 is exploratory, not certified (excludes position RMS, gap foot metric NaN).
+- **Test Inventory and Visual Adapters**: Pure tests: 102 PASS, 0 skip after final strict validators. Human ellipsoid adapter: 10 native tests pass (natural exit 0); scales longitudinal geometry, artistic width/head/shoe fixed, body mass/inertia remains baseline (not owner 104.3 kg), dynamics unqualified. Future ellipsoid Human-only export policy requires calibrated foot roll/pitch/yaw, private source hash/cache, and independently recorded 14 target RMS and orientation metrics. Selected clips do not constrain head/neck orientation. The optional head candidate is software-tested and compared natively below; anatomy and candidate selection remain unqualified.
+- **Stance Stability and Open Gates**: 1 sec resampled / quiet / frozen address / still upper body tests all fail stance (force zero after 0.5s, 1s tilt 101/108/114/124 deg, pelvis far below floor). Historical EXIT 0 was not natural receipt qualification. The damping-times-ten experiment failed (initial 15,513 N heel force; 1s tilt117 deg, pelvis z -1.83m). Original worker f2ca443a0 queued a composed pelvis-level 0.02s check; preserve it, do not duplicate/cancel/save/claim success. Gates #11156, #11160, #11173 remain RED; no full swing open-loop qualification.
+- **Reference Documentation**: Earlier 16-page LaTeX revision compiled and visually reviewed; latest full-export additions remain uncompiled (built-in compiler platform directory error); standalone separate canonical QMD manual policy. Current goal includes full refined A/O exports + continued tour and owner physical matching + protected delivery, unfinished.
+
+- **Full Human Exports**: A mean/max frame RMS 13.188/40.121 mm; O 16.767/37.626 mm. Native full solves natural exit 0; all four H.264 30-fps clips completely decoded. Desktop shareable ZIP contains sanitized provenance and same-frame comparisons, excluding raw captures/caches. A has a small mean position tradeoff; O improves both metrics. Native sphere/grip/physics tests pass (15/12/18, zero incomplete); the functional-grip candidate worsened 24 held-out samples and was rejected; physical gates remain red. Latest LaTeX full-export additions remain uncompiled due to editor platform directory error.
+- **Fresh Contact Geometry / Import Contract**: Read-only native owner address FK exited naturally at 06:42:14Z; current-plane contact clearances -64.399 to -48.619 mm. No dynamics or simulation initial-target update. Both C3D files specify metres and have no EVENT annotations; timing remains proxy-only. Importer and runtime/dependency provenance hardening is under review.
+
+Main integration passed 187 native MATLAB tests and 44 focused Python tests against model hash `919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f`. The verified Desktop clips retain the separately identified `9a26ee80` model. Current-main anatomical meshes, compiled-budget diagnostics and promoted model files are preserved.
+
+Latest selected package: `Best_Human_Matches_20261002.zip` on Desktop. Tour retains model `9a26ee80` (13.188/40.121 mm); current-model `91997471` owner improves to 16.643/36.865 mm with small mixed foot-orientation changes. Both current-model native exports exited naturally; all four selected clips fully decoded. Forty-two runner tests and five reference checks pass after the function-budget refactor; current protected CI remains pending. See canonical handoff for receipts and exact limits.
+
+### Native Target Binding and Head-Cluster Continuation
+
+The selected shareable clips remain tour 13.188/40.121 mm and owner 16.643/36.865 mm mean/max frame position RMS. Both use Human ellipsoids and IK; full forward dynamics remains unqualified. The controlled common-source/runtime tour comparison produced identical poses with the old and current model, so the newer model binary alone does not explain the changed fit.
+
+Two new pure helpers passed 18 native initialization-mapping tests and 8 marker-cluster tests, with zero failed/incomplete tests. Parent review added actual failing regressions for matrix-shaped poses and a scale-dependent degeneracy cutoff before fixes passed. These counts are separate from the earlier 187-test integration suite. The first native state-target-expression check failed (original loop status 1, mapped -1, scalar discrepancy 16.320 degrees). A compiled diagram update refreshed stale masked start values; a fresh KinematicsSolver then reproduced all 22 joint frames for both captures, with maximum translation error 4.44e-16 m and rotation-matrix error below 9.49e-15. The run exited naturally with code zero at 10:03:13Z. No simulation ran and no model was saved; state-target priorities, controller references and physical initialization remain unqualified.
+
+HeadTop/HeadFront/HeadSide tracks are finite and nondegenerate in all 654 tour and 367 owner frames. Pair-distance variation reaches 6.761% for the owner; cluster axes require body-frame calibration and do not establish anatomical orientation. A conservative optional head-motion candidate is under development and has not replaced selected clips. See `native_helper_review_20261002.json` and `head_track_audit_20261002.json` in the research reference directory. The latest LaTeX source remains uncompiled: the built-in compiler reports `Unable to find standard directories for platform`.
+
+## Active: Tiger 2000 and Ben Hogan
+
+- Branch/worktree: `feat/historical-player-capture-11226`, `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-historical-capture`; commit SELF; PR [#11231](https://github.com/D-sorganization/UpstreamDrift/pull/11231), main merged at 7b98249f0e89f9ba452e40d887f3fa38855a9273; CI pending.
+- Tracking: shared runner #11230, Tiger #11226, Hogan #11229. Full reconstruction remains active.
+- Continuation and exact checks: [Detailed State](docs/development/HANDOFF.md); [Procedure](docs/development/historical-capture-procedure.md).
+- Implemented: source-bound streaming image observations, rational container PTS, missingness, lossless frames and source/frame/model/code hashes.
+- Real Results: Tiger 2000/1994 detections; Hogan practice 750/739; higher-resolution Hogan 899/892. MediaPipe 1.0.1; no qualified 3D motion or dynamics.
+- Validation: 364 Shadow Tracker tests passed; repository-wide Ruff lint/format and file-size budget passed; scoped mypy passed. TDD red/green evidence is documented.
+- Source media/results: `C:/Users/diete/Downloads/historical-capture/`; Tiger video plus audio downloaded. [Source Catalog](docs/development/historical_capture/source-catalog.json).
+- Additional Hogan source: `DJDYMjmvFwg.mp4`, 10:23, 1080p60 with audio; cataloged; 253-267 s extracted (839/769 detections), timing/lineage unverified.
+- Next: publish focused PR, inspect dense overlays, split continuous swings, bind P1-P10 checkpoints, calibrate cameras/time/body, qualify native parity/replay, then integrate eligible site artifacts.
+- Constraints: physical time, event/year lineage and rights remain unverified; missing club landmarks; contact sheets are preliminary review. Keep epics open.
+- Ownership: original checkout and other worktrees preserved. Presence inbox unavailable (board page limit/malformed evidence); checked issue leases succeeded.
+
+# Motion-Matching Handoff
+
+## Active: Fix the PreconditionError Exception-Identity Split at the Shared Contracts Seam (#11175)
+
+- Branch: `bot/contracts-exception-identity`; PR #11175; owner `fleet-orchestrator` (agent: claude).
+- `_contracts_exceptions.py` redefined the DbC exception classes in parallel with the public `src.shared.python.contracts` module, so `@precondition` failures raised through `contracts` could not be caught as the shard-imported `PreconditionError` — `tests/unit/motion_matching/test_stability_matrix.py::TestStabilityMatrix::test_get_canonical_test_invalid` stayed red on main after the #11171 restore (`27632bd195`).
+- Fix: the shard re-exports the SAME class objects; `ContractEvaluationError` stays shard-local (with message validation). Both import paths remain usable and referentially identical, asserted in the test.
+- Verification: red on main HEAD with the extended identity test; 27 passed in the stability-matrix module, 95 passed in shard contract suites; ruff check + format clean on changed files.
+- Next: merge #11175 (squash) when CI green; see `DL-#11175`.
+
+## Active: Repair Reduced-Model and Club-Only Product Claims (MMR-11 #11097)
+
+- Branch: `feat/mmr-11-reduced-model-claims-11097`; PR #11130 (Refs, not Closes — partial slice); worktree `/tmp/wtk/mmr-11-reduced-model-claims-11097`; last code commit `46b804bc69`.
+- Shipped (code-level fail-closed gates, unit-test verified): driven-triple receipts disqualified at projection time (evidence files untouched, packages NOT regenerated); promoted-package hash + `out_of_plane_rmse_m <= 0.0` integrity gates; club-only fresh continuous replay and labeled inferred posture; matrix all-complete claims fail closed while unresolved cells remain; pendulum planar-floor early rejection gated on the CURRENT target's plane distances with a DbC-validated finite-positive `max_marker_rmse_m`.
+- Verification (scoped, at `46b804bc69`): 18 passed (`tests/unit/motion_matching/test_fit_options_dbc.py` + pendulum provider tests), 86 passed (tour_baselines/matrix/UI scoped files); `ruff check` clean on changed files. Full suite/mypy/CI were not run by this slice.
+- Open per MMR-11 acceptance: raw-to-package reproduction/regeneration, Board-selected required club-only cells, native qualification runs. See `docs/development/HANDOFF.md` and `DL-#11097`.
+
+## MMR-16 Best-Candidate Viewer Review Fixes (#11102)
+
+Current slice (desktop PyQt): PR [#11132](https://github.com/D-sorganization/UpstreamDrift/pull/11132), branch `feat/mmr-16-best-candidate-viewer-11102`, review fixes at `e86a4d4f1c`, docs at HEAD.
+
+- `rank_candidates` is wired into the matched-swing browser's real list-build path (`_apply_filters`): the auto-selected first row is the best comparable candidate by ascending `whole_marker_rmse_m`; rejected rows stay visible with their verdicts (Codex P1: zero production callers).
+- Viewer RMS (`_evaluate_single_frame_residual`, `viewer_frame`, `get_per_engine_rms`) pools per-marker 3D distances (`sqrt(mean(sum(valid_diff**2, axis=-1)))`) matching canonical `tour_metrics.compute_shared_metrics`, so residual summaries, physics scores and captions agree with the ledger's `whole_marker_rmse_m` (Codex P1).
+- Frames with zero valid markers claim no worst marker (`FrameResidual.valid_markers`) and are excluded from global-worst selection and `mean_rms_m`; the Worst Residual jump never lands on unobserved placeholder data (Codex P2).
+- `TourMatchingViewerWidget.load_file` accepts optional receipt provenance (`candidate_hash`, `engine_name`, `drive_mode`, `is_accepted`, `rejection_reason`), and the browser's `_on_open_tour_matching_viewer` forwards the selected `LedgerRow`'s hash, engine, drive mode and verdict, so captions match the selected receipt and rejected candidates show their failure banner (Codex P1).
+- Validation: scoped pytest with `/tmp/ud-venv-11132` (PyQt6 + mujoco, offscreen) — red outcomes recorded pre-fix for every finding; then `tests/unit/tools/test_matched_swing_browser_best_candidate.py tests/unit/tools/test_tour_matching_viewer_residuals.py` 21 passed, targeted viewer suites 29 passed; `ruff check` / `ruff format --check` clean on changed files. Two stale combo pins updated (flattened-RMS value, removed `#d9534f` literal from 70762eb7fe).
+- Honest remainder on #11102: web/API surface parity, accessibility and native visual review, and the remaining acceptance checkboxes are NOT exercised by this slice; no "all acceptance criteria" claim is made.
+- Next: main-lane rebase/CI of PR #11132 and frontier review.
+
+## Motion Matching Board Review — 2026-09-28
+
+- Branch: `docs/motion-matching-board-review`; owner-requested documentation review, PR #11083.
+- Packet: `docs/development/2026-09-28-motion-matching-board-review.md`; 18 draft issue bodies, native evidence matrix, recent GS3DX branch review, anatomical/Home-budget options and historical-video roadmap.
+- Main reviewed: `94ade65293`; GS3DX PR #10963 reviewed at `752a94fdd9444f98b5e6f9a39b6e1638ffdb269e`. Active #10979 remains with its owner; no implementation claim or dispatch.
+- Validation: 375 focused tests passed; full Ruff lint/format and packet title case passed. No new native fit or MATLAB qualification campaign.
+- Next: Board dispositions via packet prompt, deduplicate against existing programs and product-review R05/R06/R12, then claim bounded approved implementation slices.
+
+## Product Review for Expert Panel — 2026-09-28
+
+- Branch: `docs/product-review-20260928`; documentation-only owner request; PR #11080.
+- Report: `docs/development/2026-09-28-product-review-board-proposals.md` — 12 prioritized issue briefs, source permalinks, executable counterexamples, dependencies and RunnerDashboard panel prompt.
+- Reviewed UpstreamDrift `599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309` and Tools `3678409fc51024150ab28970b72e3b468935f345`; implementation and vendor pin unchanged.
+- Validation: 108 focused tests passed; report title case and full Ruff lint passed. Native engine, physical and human usability qualification were not performed.
+- Publication: GitHub CLI restored by selecting the valid stored account; live issue/PR reconciliation completed. Implementation issues are proposed only; no lease or claim on another agent's work.
+- Next: review R01–R12, deduplicate against current issues/PRs (closed #10960 and open critic PR #10977), and approve bounded implementation slices. No automatic merge, dispatch or scientific approval.
+
+Deferred external validation: six Board plans live in `docs/development/planning/`.
+Software remains active; no physical evidence is supplied. See the current
+`docs/development/HANDOFF.md` for #10783 enforcement, prior #9546 closure and publication gates.
+
+## Active: Bump `vendor/ud-tools` to Tools Main With K0 + K3a (#10944)
+
+Branch `agy/issue-10944`; PR for #10944 (prereq for #10943).
+Advances `vendor/ud-tools` gitlink to `95ed6b47857e9a47211ab1973d02b28beae718bc` (Tools#5348 K0 knowledge-pack engine, Tools#5350 K3a Sidekick Wizards). Synchronizes child copy of `src/shared/python/ai/` (`knowledge/`, `wizards.py`, base adapter, panel tools, assistant panel, RAG deprecation). Pins in `Cargo.toml`, `requirements-tools.txt`, `src/config/impact_acceptance.json`, and `reconciliation.py` aligned. Divergence inventory regenerated.
+Focused verification: `pytest tests/companion/test_companion_catalog.py tests/unit/repo_hygiene/test_tools_child_copy_contract.py tests/unit/ai/test_knowledge_and_wizards.py tests/config/impact_acceptance/test_impact_acceptance_matrix.py tests/unit/tour_baselines/test_reconciliation.py -q -n 0 --no-cov`.
+
+## Markerless Mocap Program (#9063)
+
+- Tools #4706 owns capture and contract schemas; UpstreamDrift #9069 (folded into #9422) owns app orchestration and makes no physical-lab qualification claim.
+- ADR-0041 Amendment 1 (#9630, #9619): consumer-side self-calibration fitters live in `src/motion_capture/reconstruct/`; Tools keeps vendor-neutral reference geometry.
+- Real-data acceptance is deferred to `docs/development/planning/DV-9619.md`; the rig soak to `DV-9613.md`.
+
+## TB-12: Publish Baseline Guide, Agent Runbooks and End-to-End Acceptance (#10597) [MERGED] / Epic #10584 [CLOSED]
+
+Branch `feat/tb12-baseline-guide-acceptance-10597`; PR [#10814](https://github.com/D-sorganization/UpstreamDrift/pull/10814) merged to `main` (`fbebf5c47`) on 2026-09-24. Parent Epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) (CLOSED); governing issue [#10597](https://github.com/D-sorganization/UpstreamDrift/issues/10597).
+
+- Deliverables:
+  - User Guide: `docs/plans/tour_baselines/baseline_guide.md` (Title-Case headings, launcher navigation, Driver/Iron physics, 4-tier model hierarchy, visual semantics, physical 3D RMSE formulas, cryptographic provenance).
+  - Agent Runbook: `docs/plans/tour_baselines/agent_runbook.md` (clean-environment reproduction, submodule pin checks, MATLAB R2025b requirements for Simscape, tamper verification).
+  - Final Acceptance Report: `docs/plans/tour_baselines/final_acceptance_report.md` (coverage matrix, software integration sign-off vs. ongoing full-body physical qualification under #10363, #10378, #10430, #10440).
+  - End-to-End Acceptance Tests: `tests/acceptance/test_tour_baselines_journey.py` (8 acceptance tests covering roster completeness, detail inspectability, where-this-came-from provenance, headless replay, safe cloning, model comparisons, evidence audits, and reproduction commands).
+- Scientific Status & Boundaries:
+  - Planar double pendulum baselines (`driven_double_pendulum`) qualify within tolerance ($< 15$ mm 3D marker RMSE) with valid cryptographic packages.
+  - Planar upper-body golfer models reject due to out-of-plane planar projection residuals ($> 110$ mm normal residual vs 55 mm ceiling).
+  - Full-body and spatial models (Simscape, Pinocchio, Drake, OpenSim, MyoSuite) remain governed by their dedicated program issues (#10363, #10378, #10430, #10440) and fail-closed software contracts; no physical qualification or fake convergence is claimed.
+- Epic Closure: Concludes all 13 child work packages under Epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) (TB-00 through TB-12). All child packages are merged and closed.
+- Next Handoff: Full-body native model qualifications under governing programs (#10363, #10378, #10430, #10440).
+- Focused verification: `pytest tests/acceptance/test_tour_baselines_journey.py tests/unit/motion_matching/test_tour_baselines_presenter.py -q -n 0 --no-cov`.
+
+## NM-12: Publish Model Cards, Reproduction Commands and Final Turnover (#10627)
+
+Branch `feat/nm12-model-cards-repro-turnover-10627`; PR against `main`. Parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); governing issue [#10627](https://github.com/D-sorganization/UpstreamDrift/issues/10627).
+
+- Implements `neural_motion.turnover`: publication-ready `ModelReproductionCard` schema (`neural-model-reproduction-card/1.0.0`), `build_reproduction_catalog`, `save_reproduction_catalog`, `load_reproduction_card`, `generate_reproduction_commands`, and `verify_end_to_end_flow`.
+- Comprehensive 20-model catalog covering all registered golf models in `list_golf_models()` without omissions or fabricated dynamics.
+- Clean-environment CLI reproduction commands for 5 lifecycle phases: `generate`, `train`, `evaluate`, `infer`, `replay`.
+- Promotion verdicts partitioned into `PROMOTED` (planar/constrained with favorable 12.3x speedups), `RESEARCH_ONLY` (kinematic reconstruction without torque supervision), `BLOCKED_PREREQUISITE` (uninstalled full-body runtimes with fail-closed honesty), and `REFERENCE_ONLY` (standard catalog URDFs).
+- 5-step automated user flow verification (`DATASET_REGISTRATION` -> `TRAINING_RUN` -> `CHECKPOINT_SELECTION` -> `OBSERVED_MOTION_MATCHING` -> `PHYSICAL_REPLAY`).
+- Evidence receipt: `docs/plans/neural_motion_matching/evidence/nm12_model_cards_turnover_receipt.json`.
+- Plan report: `docs/plans/neural_motion_matching/model_cards_reproduction_turnover.md`.
+- Concludes and completes Epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603) (all NM-00 through NM-12 deliverables fulfilled).
+- Focused verification: `python -m pytest tests/unit/neural_motion/test_turnover_nm12.py -q -n 0 --no-cov --timeout=60` (16 passed in 7.6s).
+
+## NM-11: Integrate Model-Specific Training and Inference With Existing Tools (#10626)
+
+Branch `feat/nm11-training-inference-tools-10626`; PR against `main`. Parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); governing issue [#10626](https://github.com/D-sorganization/UpstreamDrift/issues/10626).
+
+- Multi-runner framework dispatch in `src/shared/python/training/runtime/runner_registry.py` registering both classical and neural runners (`neural_motion`).
+- `NeuralMotionRunner` (`src/shared/python/training/runtime/adapters/neural_motion.py`) conforming to `TrainingJobRunner`, emitting `ProgressSink` events, respecting cooperative cancellation via `CancelToken`, and generating verifiable `ModelCheckpointCard` outputs.
+- Portable training job packaging (`src/shared/python/training/portable.py`): `export_job_package` and `import_job_package` with SHA-256 manifest verification and zip-slip directory traversal defenses.
+- GUI training controller integration (`src/tools/training_controller/`): exposed view models `ModelTopologyItem` and `DatasetSchemaItem` dynamically queryable via `TrainingDashboardController`.
+- Motion Matching GUI integration (`src/tools/motion_matching/gui.py`): added `Neural Motion Matching` controls (Mode: Classical Only / Neural Preview / Neural Verified, model selection, classical fallback checkbox) and results inspection badges (`neural_status_badge`, `metric_neural_confidence`, `metric_time_breakdown`).
+- Focused verification: `pytest tests/unit/training/test_neural_motion_runner_nm11.py tests/unit/training/test_portable_packaging_nm11.py tests/unit/training/test_view_model_nm11.py tests/tools/motion_matching/test_motion_matching_gui.py -q -n 0 --no-cov`.
+
+## NM-10: Benchmark Accepted-Match Speed, Data Efficiency and Break-Even (#10625)
+
+Branch `feat/nm10-benchmark-speed-10625`; PR against `main`. Parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); governing issue [#10625](https://github.com/D-sorganization/UpstreamDrift/issues/10625).
+
+- Implements `neural_motion.benchmark`: comparative 5-method benchmarking (`cold_solver`, `retrieval_solver`, `existing_neural`, `forward_surrogate_polish`, `learned_proposal_polish`).
+- Latency decomposition accounts for preprocessing, native initialization, proposal inference, rejected attempts, native polish, verification replay, and I/O.
+- Acceptance rate calculation strictly includes rejected attempts in denominator ($A_{\text{rate}} = \frac{N_{\text{acc}}}{N_{\text{acc}} + N_{\text{rej}}}$).
+- Truthful break-even calculation: if savings $\le 0$, explicitly reports `has_break_even=False` with no queries.
+- Frozen promotion gates enforce $\ge 2\times$ median speedup, non-worse p95 latency, and non-worse accepted quality rate; failing models marked as `RESEARCH_ONLY`.
+- Data efficiency trajectory confirms active acquisition superiority (1.48x sample multiplier over random).
+- Evidence receipt: `docs/plans/neural_motion_matching/evidence/nm10_benchmark_speed_efficiency_receipt.json` (labeled `DIAGNOSTIC` under #10960 / #11146; historical unmeasured baselines).
+- Markdown report: `docs/plans/neural_motion_matching/benchmark_accepted_speed.md`.
+- Focused verification: `python -m pytest tests/unit/neural_motion/test_benchmark_nm10.py -q -n 0 --no-cov --timeout=60` (13 passed in 0.58s).
+
+## NM-09: Train and Qualify a Checkpoint for Every Physical Model (#10624)
+
+Branch `feat/nm09-checkpoint-matrix-10624`; PR against `main`. Parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); governing issue [#10624](https://github.com/D-sorganization/UpstreamDrift/issues/10624).
+
+- Implements `neural_motion.matrix`: `NeuralCheckpointMatrix` and `ModelCheckpointCard` evaluating all 20 models across the #10585 roster.
+- Models with variable dimensions ($n_q, n_v, n_u, n_c$) strictly match registered `GolfModelIdentity`.
+- Precondition `assert_model_checkpoint_compatible` enforces that no model can accidentally load another's card.
+- Native ODE forward replay verified on reduced planar mechanisms (`driven_double_pendulum`, `driven_triple_pendulum`) and constrained upper body (`constrained_upper_body_golfer`, loop constraint violation $< 10^{-4}$).
+- Reconstruction models provide kinematic proposals without fabricated torques.
+- Missing runtimes (Simscape/MATLAB R2025b, Drake, OpenSim, MyoSuite) fail closed with explicit named blockers.
+- Deterministic cryptographic hash chain (`dataset_hash` -> `split_hash` -> `weight_digest` -> `checkpoint_hash` -> `matrix_digest`).
+- Focused verification: `python -m pytest tests/unit/neural_motion/test_checkpoint_matrix_nm09.py -q -n 0 --no-cov --timeout=60`.
+
+## Main Red Fix: Docs-Consistency Cross-Repo Paths (#10743)
+
+Branch `fix/10743-docs-consistency-cross-repo` teaches `scripts/check_agent_docs_consistency.py` that a backticked path directly after a sibling repo name (`_SIBLING_REPOS`) is cross-repo. Durable upstream fix (full URL in the synced block) belongs to Repository_Management #1689.
+
+## Hip-Calibrated Receipt Provenance (#10271)
+
+Branch `fix/10271-hipcal-provenance`; PR [#10722](https://github.com/D-sorganization/UpstreamDrift/pull/10722). Restores receipt provenance chain (`receipt-provenance-chain/1`) on `anthro_driver`/`anthro_iron` (software-contract; native regen deferred on low disk).
+
+## GolfSwingVisualizer MATLAB Consolidation (#9225)
+
+PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715) (open; implementation commit `f33b40c9c`); branch
+`bot/issue-9225-golfviz-consolidation` off `origin/main` @ `901b2de5e`;
+worktree `C:/Users/diete/Repositories/UpstreamDrift-worktrees/local-9225`;
+governing issue [#9225](https://github.com/D-sorganization/UpstreamDrift/issues/9225)
+(source:assessment P2, DRY PP1); DL-#9225.
+The four per-tree `GolfSwingVisualizer.m` copies (1180–1183 lines each; 323
+shared 8-line blocks between the worst pair) are deleted and replaced by one
+fleet-shared package class at
+`src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m`
+(the 2D-variant superset, restoring the `rng(1)` reproducible ground texture the
+3D copies had silently lost). Both `launch_gui.m` launchers add the shared
+directory to the MATLAB path and fail loudly if it is missing; all four call
+sites use `golfviz.GolfSwingVisualizer(...)`. Verified headless in MATLAB
+R2025b: package resolution from a bare `addpath`, class parse, DbC
+precondition, and both launchers' path setups. Honest gap: the DRY duplication
+ratchet is Python-scoped and does not fingerprint `.m` files, so no baseline
+drop is claimed (follow-up). Full GUI launch/render is not exercised (headless
+GUI rule).
+Next step: Confirm `quality-gate` green on the PR; squash auto-merge lands.
+
+## Tour Baselines: Exact-Capture Matching & Fail-Closed Qualification (#10829, #10830, #10831, #10799, #10800, #10844, #10849) [MERGED]
+
+PRs [#10837](https://github.com/D-sorganization/UpstreamDrift/pull/10837), [#10841](https://github.com/D-sorganization/UpstreamDrift/pull/10841), [#10844](https://github.com/D-sorganization/UpstreamDrift/pull/10844), and [#10853](https://github.com/D-sorganization/UpstreamDrift/pull/10853) merged to `main` on 2026-09-24.
+
+- Exact capture match enforced across `TourBaselinesPresenter` and baseline package generation; unmatching session captures fail closed with `has_exact_capture_match=False` rather than silently falling back to unmatching session captures.
+- Fail-closed legacy evidence: eliminated auto-migration from `IndependentBaselineQualifier.qualify()`; explicit migration sets `UNVERIFIED` and `has_native_replay=False` until native evidence is regenerated.
+- Dynamics inertia digest & cache refresh: `compute_pendulum_inertia_hash` digests actual cached physical properties consumed during rollout integration; `create_calibrated_double_pendulum_dynamics` passes calibrated lengths to constructor before parameter caching; `refresh_cache()` synchronizes runtime parameter mutations (#10849).
+- Surrogate validation quaternion norm optimization: vectorized norm calculation via `np.einsum` (#10844).
+- Focused verification: `pytest tests/unit/tour_baselines/ tests/unit/motion_matching/test_tour_baselines_presenter.py -q -n 0 --no-cov`.
+
+## Required Before Continuing
+
+- Read `AGENTS.md`, `CLAUDE.md`, and `docs/development/DEVELOPMENT_LOG.md`.
+- Epic #10584 and all child packages TB-00 through TB-12 are closed. Full-body models remain under governing programs (#10363, #10378, #10430, #10440).
+- Manual governance: UP-D0 (#9066) and UP-D1 (#9067) remain release blockers. Edit only the `manuals/upstreamdrift` QMD source and run `python3 -m scripts.check_design_manual_governance` for governed changes.
+- Update this handoff, the development-log entry, and exactly one `SPEC.md` change-log row for every substantive PR.
+
+## Raw Shaft Fragment Diagnostic Core Handoff (#11357)
+
+Pure typed historical-fit diagnostics now reuse public marker derivatives and
+camera projection, with immutable raw px/rad rows, finite authored bound checks,
+explicit unavailable/null states and disabled no-provider behavior. Curated
+exports and execution-fingerprint inclusion are covered by SDK-free synthetic
+regressions. Source/PNG/model/clock rebind and future workspace/job/native/web
+integration remain required; no historical fit, role or objective changed.
+See [Procedure](docs/development/necromatcher-shaft-fragment-diagnostics.md) and
+[Turnover](docs/development/necromatcher-turnover.md). Registered calculations
+remain incomplete and canonical manual release remains blocked; local derivative
+agreement grants no clinical, historical or physical-time qualification.
+
+# Arm Morphology Current Continuation — #11357 / #11394
+
+- Future Tiger matching retains reviewed conservative frames 0–190 inclusive ([0, 191)); twenty selected originals reviewed, exact physical release time unmeasured. Applied to the completed conditional camera comparison; historical fits remain unchanged. Scope code under #11414 is implemented; controlled scoped fitting remains pending.
+- Documentation SELF; four unoptimized research admissions and twelve selected stills are provenance-verified, with grip degradation and no anatomy/physical qualification. See [Current Continuation](docs/development/HANDOFF.md) and [Procedure](docs/development/necromatcher-arm-morphology-admission.md); prior reports remain unchanged.
+
+## Scoped Camera Closure Checkpoint — #11357 / #11414
+
+Producer 55d17 native session 74740 and independent session 92074 closed exit 0 with full 14,805-source/391-library preservation. Tiger [0,191) and Hogan [0,750) compared; keep saved cameras after mixed body/shaft outcomes. Six-page Methods V2 is compiled and all pages reviewed, with independent serialized preservation accepted and physical qualification unclaimed. See [Procedure](docs/development/necromatcher-conditional-camera-and-scope.md). SourceFitScope is implemented with registered portable receipts, exact selected-domain publication and scoped overlay provenance; root validation passed 294 Python and 39 interface cases. No new scoped motion fit has run. Full goal remains active.
+
+## Authored Replay Impact Application Checkpoint — #11464
+
+The normal React journey now previews impact from a verified authored replay,
+with exact geometry/sample/flight declarations, bounded native execution,
+cancellation, persisted run-ID recall and authenticated four-file download.
+Saved results display their own assumptions and metrics. Canonical receipt and
+trajectory owners remain unchanged; source/runtime/parent and artifact checks
+fail closed. Research acceptance remains rejected, with authored seconds and
+false physical/scientific qualification.
+
+Root final validation: 125 focused Python cases pass with one Windows symlink
+capability skip; one additional opt-in native case passes with actual MuJoCo,
+clean process transport, impact solver and Rust flight (no substitutions).
+The React cohort passes 104 cases; configured six-owner mypy, scoped lint and
+format checks pass. Earlier failures and immutable agent freezes are retained
+in the application review. Four-page LaTeX Application Supplement 1 is compiled
+without final layout warnings and all pages visually reviewed; editable source,
+PDF and the explicitly synthetic native bundle are saved on the local Desktop.
+Earlier Methods V8 and the five-page extraction report remain unchanged.
+
+See [Application Procedure](docs/development/necromatcher-replay-impact.md) and its linked review/report. Tiger stays
+within original frames 0–190 ([0,191)); Hogan stays [0,750). No historical
+Library mutation, qualified match or new ControlTower delivery is established.
+Remaining goal work includes improved historical matching, authored dynamics,
+simulation golf integration and desktop parity. The full goal remains active.
+
+## Native Desktop Replay Impact Checkpoint — #11487
+
+The native Necromatcher tile now imports registered authored replays, runs the
+shared bounded replay-impact session off the GUI thread, cancels owned jobs,
+recalls retained run IDs after restart and exports an authenticated four-file
+ZIP exclusively. Saved assumptions remain separate from editable declarations.
+The public Shot Tracer handoff retains exact detached positions and provenance.
+
+Root validation passes 146 focused Qt/viewer/parity cases without skips and
+configured mypy on three production owners. One additional opt-in actual
+MuJoCo/HDF5/clean-worker/impact/Rust native Qt case passes with Python exit 0.
+The three final synthetic screenshots are readable and visually reviewed;
+retained positions are verified, while OpenGL pixel accuracy is unverified.
+Test-only font bootstrap uses existing Windows Segoe UI when the offscreen
+font database is empty. The 120-second whole-test cap does not change the
+60-second native budget; earlier timeout evidence is preserved.
+
+The three-page Native Desktop Supplement 1 and editable LaTeX, screenshots and
+intact synthetic bundle are saved on the local Desktop. See [Procedure](docs/development/necromatcher-replay-impact.md)
+and [Frozen Review](docs/development/historical_capture/native-desktop-replay-impact-review.json). Tiger remains [0,191), Hogan [0,750).
+Historical fits, scientific qualification, simulation golf and final overall
+desktop parity acceptance remain open. No new ControlTower delivery or remote
+CI-green claim is made. The full goal remains active.
+
+## Local Research Golf Checkpoint — #11493
+
+API, native and React now provide explicit Connect → Prepare Research → Arm → Submit → Recall through the actual local session. The authenticated bridge retains exact saved impact vectors and a declared proper Aim rotation; MODEL_CONTACT and contact/numerical/scientific qualification remain unverified. React passed 106 cases; one actual temporary-Library MuJoCo/clean-worker/Rust API and native case passed in 23.07 s with seven exact retained samples; configured mypy passed on seven owners. The final root cohort passed 209 cases with 12 warnings and no skips in 58.64 s; the actual native case is one additional pass. All 13 modified Python owners pass pinned Ruff check/format. The capability atlas was refreshed without claiming overall gap closure. Core V1 is superseded only by the root delivery_status unknown-ID KeyError→None contract fix. The three-page local report and procedure document the new local flight, saved assumptions and explicit lifecycle. No fit improvement, avatar/course capability, GL accuracy, ControlTower delivery or new remote CI claim is established. Tiger remains [0,191), Hogan [0,750); the full goal remains ACTIVE.
+
+See [Procedure](docs/development/necromatcher-local-research-golf.md) and [Three-Page Report Source](docs/development/necromatcher-local-research-golf-methods.tex). Native acceptance: `Temp/necromatcher-local-research-golf-native-freeze-v1/freeze.json`; source inventory covers 6,697 src/test files, not a whole-repository baseline.
+
+## Local Research Admission Race Follow-Up — #11493
+
+A concurrent request regression reproduced reused shot-ID admission after another
+request prepared and cancelled during authentication. The API now applies the
+same identity guard before and immediately after authentication. All 10 API
+cases pass; a fresh additional actual MuJoCo/clean-worker/Rust API and Qt
+acceptance passes in 24.56 s, with seven exact retained samples and no
+re-simulation on recall. Configured mypy passes for the changed API owner.
+The earlier 209-case cohort and 106 React cases remain separate checkpoint
+evidence. The follow-up preserves unverified qualification and all historical
+limits; the full goal remains active.
+
+See [Follow-Up Review](docs/development/historical_capture/local-research-golf-admission-race-review.json). Source inventory covers 6,697 src/test
+files, with equal before/after maps; this is not a whole-repository baseline.
+
+## User-Requested Handoff and Stop Checkpoint
+
+The user requested a committed checkpoint and instructed this agent to stop
+pursuing the goal after turnover. See [Next-Agent Turnover](docs/development/necromatcher-next-agent-turnover.md) for the
+exact implementation state at f0e14944, scoped work packets, public owners,
+validation commands, historical evidence boundaries and remaining acceptance.
+No proposed optimized video export or new fit was started. This documentation
+checkpoint follows the published local research integration; the full goal is
+unfinished and is to be paused after normal commit/push and handoff publication.
+
+### Reviewed Native Helper Checkpoint
+
+The combined suite passed 213 MATLAB R2025b checks with zero failed or
+incomplete tests; the serialized process exited naturally with code zero at
+10:27:31Z. The 18 mapping and 8 cluster tests are included in that total.
+See `native_helper_integration_tests_20261002.json` in the research reference
+directory. These are software/parameter checks, with no physical acceptance.
+
+The unfinished head prototype was withheld after review found insufficient
+gap/coverage validation and an unproven baseline-preservation claim. Its
+source, tests and partial execution evidence are retained privately for
+continuation; the baseline IK source was restored before the combined check.
+No head-constrained candidate or new selected video is claimed. Protected CI
+still requires a fresh run after regenerating the monolith register. The
+leaderboard runner's missing local action remains unexplained: its checkout
+log already records sparse-checkout disable, so an additional cleanup patch
+was not accepted on the proposed explanation alone.
+
+Simscape #11256 continuation: keyed seed software275 GREEN; full seeded A/O head0.03 candidates miss the 30% screen and remain unselected. Minimum-touch ground registration removes initial penetration but bilateral support remains unqualified. See the current calculation-level research reference and sanitized seeded/contact receipts; Human-default migration and protected CI repair remain active.
+
+Simscape #11256 latest: Human-default native TDD2 GREEN and combined277 GREEN; head0.10 candidates pass prospective body/head/foot screens and all four H264 views are reviewed, fully decoded and saved on the local user Desktop in Best_Human_Matches_20261002_HeadTracked.zip. Earlier selections preserved. Standalone LaTeX updated but compiler unavailable. See current research reference/evidence; protected CI/current-main reconciliation and bilateral-contact/gravity-support/full forward replay remain active.
+
+### Leg Orientation Contract and Selected Contact Geometry
+
+The analytical leg IK previously accepted a 180-degree orientation mismatch because
+its skew residual vanished. Native R2025b TDD reproduced false success (RED: one
+pass, five failures, zero incomplete), then passed all six contract tests after
+reusing the shared SO(3) chordal residual with a 12x6 Jacobian and separate final
+position/orientation bounds. The existing welded-foot native FK test, reachable
+IK and trajectory tests also pass. The combined suite passed **287 native
+software/parameter checks**, zero failed/incomplete, natural exit zero at
+**2026-10-02T14:57:32Z**. This does not qualify Human ankle-to-foot-solid frame
+correspondence, anatomical limits, or independent forward dynamics.
+
+Fresh native FK evaluated BOTH promoted head0.10 addresses without simulation
+or model save. Per-foot lowest-contact heights differ **29.081 mm tour** and
+**15.097 mm owner**; within-foot spreads are below 1.5 mm. With the ground normal
+fixed, one plane translation cannot remove this two-foot discrepancy. The bounded
+native correction passes both captures: each minimum clearance 0.250 mm, sole spreads below 1.5 mm, foot XY/orientation retained, leg rotations at most 8.731 degrees tour / 4.229 degrees owner. Root/upper coordinates, passive midfoot and fitted geometry are unchanged. The accepted address candidates are staged for assembled-state/contact diagnostics;
+equilibrium, gravity torques and forward replay remain open. The selected Desktop
+MP4s are unchanged IK visualizations. See the standalone LaTeX reference and
+`leg_orientation_contract_review_20261002.json`,
+`selected_contact_geometry_review_20261002.json`, and
+`native_leg_contact_integration_tests_20261002.json` for equations and receipts.
+
+Latest LaTeX source is maintained in the same editor. Built-in compilation still
+fails with `Unable to find standard directories for platform`; no new PDF is
+claimed. Changelog duplicates for PR #11256 were consolidated. Subsequent CI
+code-quality failed a GitHub fetch because of runner certificate verification;
+no certificate validation was disabled and protected review remains required.
+
+### Bilateral Address and Assembled Gravity Diagnostics
+
+Both selected Human address candidates pass their prospectively fixed native
+geometry gates. Each foot minimum clearance is 0.250 mm against one plane;
+horizontal foot-solid position/orientation, root/trunk/upper coordinates,
+passive midfoot coordinates and fitted geometry are retained. Maximum leg
+rotation changes are 8.731 degrees tour and 4.229 degrees owner. These are
+address corrections, not a new measured whole-swing fit or Desktop promotion.
+
+Separate 20 ms R2025b simulations verify the actual assembled scalar and
+spherical pose plus all ten contact clearances. Both feet develop support:
+at 20 ms, tour left/right normal force is 443.969/407.322 N, owner
+502.848/407.399 N. Maximum pelvis displacement is 1.513/1.482 mm. Both
+native processes exited naturally with zero status; geometry/physics were
+reapplied before logged-pose FK and the Human binary was not saved. The
+tour body mass is model-default 80 kg, owner 104.3 kg; total mechanism
+masses include unchanged equipment. Zero initial force reflects 0.25 mm
+clearance. Endpoint support does not establish standing equilibrium.
+
+A separate one-second constant-reference hold is registered before results:
+each foot >=0.05 BW and summed normal force 0.8-1.2 BW over 0.5-1 s;
+whole-run sum peak <=2 BW, pelvis displacement <=5 mm and rotation change
+<=1 degree. It retains upper PD tracking, prescribed neck and zero upper
+feedforward, with balance correction off. Even a passing hold is not
+independent open-loop replay. Actual gravity and native mass define BW.
+
+Read `bilateral_stance_geometry_review_20261002.json` and
+`bilateral_assembled_contact_review_20261002.json` alongside the same
+standalone LaTeX reference. Its abstract now identifies the latest head0.10
+Desktop selections; historical force trials are explicitly attributed and
+zero support is not treated as proof of airborne geometry. PDF compilation
+remains unavailable. Full-swing physical gates and protected review stay open.
+
+The tour one-second hold is rejected: all three force screens pass, but pelvis displacement 246.153 mm and rotation 14.989 degrees violate the fixed 5 mm / 1 degree bounds. Native process exits naturally with zero at 15:18:18Z; successful execution does not establish physical success. Owner hold and reference/torque/COM diagnosis remain separate active work. See `tour_constant_hold_review_20261002.json`.
+
+The owner one-second hold also rejects the fixed pose limits: force screens
+pass but pelvis displacement is 118.109 mm and rotation change 7.866 degrees.
+Native exit is naturally zero at 15:23:43Z; final left/right forces are
+531.659/499.520 N. Both captures require controller/reference/COM diagnosis;
+neither hold qualifies standing stability or independent open-loop motion.
+Read `owner_constant_hold_review_20261002.json`. Gates remain unchanged.
+
+Saved native endpoint diagnosis completed naturally in R2025b at 15:54:34Z.
+COM horizontal displacement is 230.802 mm (tour) and 110.766 mm (owner);
+terminal projected COM lies outside the contact-point hull by 167.030 and
+13.899 mm. Native ankle rotations change 12.485/12.476 degrees (tour L/R)
+and 4.069/4.525 degrees (owner L/R). This is endpoint motion, not continuous
+contact-slip measurement or a causal diagnosis. Initial forces are zero;
+there is no initial active support hull. Native workspace and hold scripts
+confirm zero leg feedforward and unchanged servo gains. A preliminary probe
+rejected its incorrect rigid five-sphere constellation assumption; the
+corrected probe measures ankle followers directly and preserves midfoot
+articulation. No new simulation or model save occurred. See
+`saved_native_hold_diagnosis_review_20261002.json` and the updated LaTeX.
+Next: verify Human ankle FK/gain compatibility before a same-stance
+balance-enabled hold with the unchanged registered force/drift gates.
+
+Native Human ankle/gain interface checks passed for both exact fitted address
+stances (R2025b natural exit zero at16:03:31Z). Native/analytical Jacobian
+differences are below2.3e-13 m/degree and gain differences below7.5e-9 degree/m.
+Same-stance balance-on holds retain all original gains, zero feedforward,
+prescribed neck and fixed force/drift gates. Tour pelvis displacement/rotation
+is 20.041 mm / 5.582 degrees;
+owner is 14.818 mm / 4.408 degrees.
+Hold screens: tour REJECT, owner REJECT.
+Improvement is not physical acceptance. See
+`human_ankle_gain_interface_review_20261002.json` and
+`balance_enabled_hold_comparison_review_20261002.json`. The historical upper-only API hardcoded FitTrack and overwrote starts;
+that restriction is resolved by the configured-model implementation and native
+lifecycle probes below. Those probes do not qualify full forward dynamics.
+
+Simscape #11256: both controlled Human 20–50 ms startup ramps pass all five fixed one-second hold gates: tour 3.176 mm / 0.836 deg, owner 2.321 mm / 0.699 deg. Native receipts at 19:54:39Z / 20:01:28Z. Earlier 0–50 ms tour rejected peak 2.000907 BW. Current feedback/prescribed-neck scope remains explicit; no full-swing or independent forward qualification. Actual equations, failed receipts and aggregate evidence are in the maintained LaTeX reference. Selected-reference metadata and full-motion handoff are next; private video epic #11268 is incorporated. Prior b21836863 checks passed; new changes need their own protected checks.
+
+Simscape #11256: the native reader and independent logger trace establish actual net leg effort of 45.954/56.019 N m RMS. Sampled feedforward TDD and balance regression passed 16 tests with zero failures/incomplete. The actual Human tour ramp improves motion to 11.012 mm/2.773 degrees; all three force gates pass, but both fixed pose gates reject. The gain-four diagnostic also rejects peak force. Owner execution is separate; no new best video or independent replay is claimed. Source, the maintained LaTeX reference and aggregate evidence agree. Earlier head 78918cde CI passed; new-head checks, PDF review and full physical qualification remain open.
+
+Local acquisition update (2026-10-03 UTC): the complete six-video source export is now also on the operator local machine; archive and all MP4 hashes verified. Indoor surface-marker placements were reviewed, with exact labels, anatomical offsets, trial pairing and physical clock still unverified. Private source-mask TDD passed 13 baseline and nine new tests after RED; actual owner importer default data/callback parity and masked callbacks passed. No production integration, candidate promotion or full forward-dynamics qualification. The existing LaTeX editor remains open; compilation is unverified because the built-in compiler cannot find platform standard directories. See `local_video_marker_placement_checkpoint_20261003.json` and the reference acquisition subsection.
+
+Source observation update (2026-10-03 UTC): optional logical masks now enter the canonical converter before importer callbacks. Native production integration passed 13 existing and nine new contract tests and exact tour/owner default data, callback, joint-centre and head-target parity. Full owner refit on the same 627 source-available targets changed mean RMS 16.677 to 16.658 mm and peak 36.987 to 37.050 mm; largest root increment increased 53.926 to 55.295 mm and 13 signed implementation-ROM rows remain flagged. No candidate/video promotion or dynamics qualification. See `source_mask_full_owner_checkpoint_20261003.json` and the maintained LaTeX reference. Existing unmasked caches/media cannot be relabelled as source-mask-qualified.
+
+Native neck recovery checkpoint (2026-10-03 UTC): the owner one-second supported hold recovered Rx/Ry computed primitive actuation torques through two verified N*m PS–Simulink logging converters. Sample RMS/peak values are 5.950843/9.530841 and 3.574840/5.157831 N*m (1,483 finite samples per primitive). All five original hold gates still pass, with the same 2.321210 mm / 0.699395 degree pelvis motion as the preserved control. Sensing-only logs lacked these channels; connected outputs establish recovery. Neck motion remains prescribed and upper/balance feedback remains active. Four temporary blocks were discarded without saving the model. This is not full-swing torque recovery or independent replay. See `owner_neck_supported_hold_checkpoint_20261003.json` and the maintained LaTeX reference.
+
+Tour neck recovery repetition (2026-10-03 UTC): natural R2025b completion at 02:04:26Z recovered Rx/Ry computed actuation torques (sample RMS/peak 3.827226/7.366211 and 2.061589/3.959804 N\*m; 1,587 finite samples per primitive). All five unchanged supported-hold gates pass; full-precision pelvis displacement/rotation match the preserved control exactly (3.175803 mm / 0.836223 degrees). Both captures now verify the connected prescribed-neck logging route. Neck motion and upper/balance feedback remain present; full-swing recovery and independent replay remain unqualified. See `tour_neck_supported_hold_checkpoint_20261003.json` and the maintained LaTeX reference.
+
+Human moving-reference binding update (2026-10-03 UTC): the upper-body reference helper now accepts an explicit native joint-variable table and resolves block-path/primitive keys through the shared key authority. Human never reuses Fit numbered IDs; legacy explicit Fit retains its unbound interface. Seven contract tests pass. Production native integration completed naturally at 02:21:45Z for all 55 tour and 46 owner selected samples: 21 upper actuator-coordinate references at 30 Hz match the preserved numerical filter/rate/start calculations exactly after verified native block/ID/unit binding. Model hash unchanged, no simulation or save. Moving-start/contact reconciliation and full-swing torque recovery/replay remain open. See `upper_reference_binding_checkpoint_20261003.json` and the maintained LaTeX reference.
+
+Closed-chain reference update (2026-10-03 UTC): independent upper-angle filtering returns native status -1 for all 55 tour and 46 owner requested poses (model constraints satisfied, some targets missed). Native-adjusted poses pass a complete target recheck. The explicit `filter_reference=false` conversion preserves checked sample geometry; eight contract tests and production native roundtrips pass for all selected and adjusted A/O poses. Dependent-arm trials and their adverse changes remain unpromoted. Tangent velocities, between-sample interpolation, moving contact initialization and complete torque coverage still need verification; saved holds have neck/leg datasets but no upper torque buses. See `reference_filter_closure_checkpoint_20261003.json` and the maintained LaTeX reference. No dynamics or new best-video qualification is claimed.
+
+Native moving-reference audit (2026-10-03 UTC): all 101 original sampled poses accept zero native velocity. All 101 differentiated moving requests and all 99 complete-coordinate chart midpoint requests return status -1, missing some complete native targets. A separate nonzero root-rotation/frame-output control verifies follower-resolved spherical velocity. The native results do not qualify an accepted continuous curve, unchanged returned moving poses, measured player velocities or full dynamics. Preserve these adverse outcomes and require constraint-aware trajectory construction, derivative consistency and native initialization before complete torque recovery/replay. See `reference_velocity_midpoint_checkpoint_20261003.json` and the maintained LaTeX calculations. No model save, simulation or new best-video promotion occurred.
+
+Root-availability review (2026-10-03 UTC): saved-array analysis reproduces the legacy owner-window root-step maxima and associates the largest approximately 40 mm increment with restoration of seven derived lower-body targets. Waist-marker gaps can propagate through the pelvis-axis joint-centre estimator despite visible raw leg markers. This is association, not causation. The current refined preview uses a different head-axis, back-marker, spine/scapula and gap-weight objective; the legacy-window maximum does not establish its root error. The private translation-option TDD completed naturally with eight RED failures and eight GREEN passes, no incomplete tests and no model/simulation. The aligned refined port remains source-only and unpromoted. See root_availability_checkpoint_20261003.json and the maintained LaTeX calculations. Full moving references, contact, all 35 actuators, independent replay and PDF qualification remain open.
+
+### Selected Club Continuity Update (2026-10-03)
+
+PR #11256 merged at `7db86ff173653a235ea63bb4af347af0a8a5ab83`. The eight verified Human ellipsoid MP4s remain on both Desktops in `Simscape_Matches_20261003_Club_Refined_1080p`; these are IK reconstructions. The source reference now presents this current selection before historical experiments.
+
+The selected club fits were tested at all anchors and midpoints using independent native position, velocity and fresh 91-state checks. Sequential seeding accepted 1,306/1,307 tour states and 732/733 owner states. A targeted diagnostic recovered the owner's rejected original anchor from its saved closed-arm seed; the previous accepted pose reproduced an alternate branch. A complete anchor-seeded rerun exited naturally at 20:31:23 UTC and accepted all 733 owner states (367 anchors and 366 midpoints), while the tour still rejected midpoint 998 at 1.3847222 s. All original anchors matched within 1.73e-15 physical residual. The peak accepted dependent angular rates remain approximately 1,639 and 4,118 deg/s; sampled-state acceptance does not qualify between-sample branch continuity, dependent acceleration, anatomy, contact or forward dynamics.
+
+The private production integration candidate passed 17 native pre-model contract cases (parent RED, candidate GREEN, 51 recorded checks) at 20:20:58 UTC. Numerical whole-output parity and positive-fit validation remain separate pending gates. Original failed runner receipts are preserved. A custom vector measurement block built successfully, but the eight-axis instrumented simulation hit the Home license's 1,000-nonvirtual-block limit. No all-35 measured torque or moving feedback-off replay claim follows from these tests. Original physical model files were not saved.
+
+See the separate editable research reference and the extended aggregate `tangent_c2_checkpoint_20261003.json` for scope and provenance. The built-in LaTeX compiler still fails with `Unable to find standard directories for platform`; PDF compilation/page review are unverified. Canonical calculation inventory and governed manual release remain blocked; this update grants neither a release exemption nor scientific approval.
+
+### Impact Parameters Package (GCV-15, 2026-10-07)
+
+`src/shared/python/impact_parameters/` extracts speed, attack angle, club path, face angle, face-to-path, dynamic and spin loft, swing plane and low point relative to an explicit `TargetFrame` (default recorded: Z-up, target -Y, ADR-0041). Definitions are in the package docstring for design-manual transfer via GCV-18. Tools delivery and D-plane are reached only through the fail-closed `tools_gateway.py` and agree with the UD definitions within 0.01 deg. Open: launch direction has no Tools provider; toe/high needs GCV-11 face geometry and GCV-13 ball; smash factor needs an impact model with calibration status; `rate_of_closure` `delivery_at` is not called directly.
+
+## F05d Native Manifold Control Candidate (#11932; 2026-10-09)
+
+The contact-free floating-root/two-hinge Crocoddyl BoxFDDP action uses the
+actual native Euler MuJoCo step and $n_x=17$, $n_{dx}=16$ manifold state.
+It checks candidate plans against a nonlinear native rollout and verified
+zero-torque fallback, then shares the direct-torque executor for post-limit
+ZOH export and independent complete-native-state replay. The supported
+MuJoCo 3.8/Crocoddyl 3.2.1 paired receipt binds two starts, common T01
+preflight, every accepted/timed-out call, cost, wall time and replay hashes.
+The reachable reference is generated by native steps. BoxFDDP accepts
+3/8 synthetic steps at the 0.2 s cooperative budget; SciPy SLSQP accepts
+0/8. All other steps use verified fallback. Neither method completes a
+fully accepted four-step run, although BoxFDDP has lower realized native
+cost in both starts. This does not prove
+a hard 10 ms deadline or golfer/contact/muscle/capture qualification.
+Read provisional manual chapter 26 and
+`docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md`.
+
+Parent F05 #11789, F09/F10 and manual publication remain open.
+PR #11944 merged into the F05c feature base at
+`c1e76ce91db11b257604d9ddbd227268d2e27db1`; F05c PR #11922 is
+still open on F05b, issue #11932 is still open, and this has not reached
+`main`.
+
+## F02 Native Manifold Feedback Child (#11946)
+
+F02 now has an actual MuJoCo floating-root feedback runner using the F05c
+tangent derivative admission and F06 complete-state torque replay; see
+provisional manual chapter 27 and
+`docs/development/feedback_controls/F02_NATIVE_MANIFOLD_FEEDBACK_TURNOVER.md`.
+The source-hashed static receipt shows 0.1261 rad final hip error versus
+0.4 rad frozen nominal over 12 steps. A second test consumes a varying
+native-replayed torque trajectory, derives per-step native tangent Jacobians
+and MOSAIC gains, then compares held-out frozen-feedforward and total-
+feedback replays at 0.07508 versus 0.02460 rad final hip error. Their
+post-limit input digests differ, while each fresh native replay reproduces
+the complete integration-state trajectory exactly. F03 still lacks a native
+9/8/2 optimized trajectory export; the teacher is admissible but is not
+captured or optimized. This child is stacked on F05c #11922 and must remain
+unarmed until its prerequisite reaches `main`; F02 #11786 and full
+production/capture qualification remain open.
+
+### F09b Native Observation Scoring (#11837)
+
+`src/engines/feedback_observation_qualification.py` scores supplied native
+marker positions against exact measured observations using F01's registry,
+F09a's position-only sampler, and the existing acceptance evaluator. A case
+requires a validated T01 `ExperimentReplayBundle`; identity includes its
+actual complete initial-state payload SHA-256, model-identity digest, and
+capability-declaration digest. Input values/grid and executed policy are
+cross-checked against F01 evidence before scoring. Reports preserve every
+required comparison row and all six required engines; scores do not promote
+unqualified rows or missing evidence.
+
+The focused synthetic suite covers all-six denominator retention, measured
+clock scoring, gate/configuration identity, stale-input rejection, and full
+initial-state payload binding. It does not establish native replay,
+cross-engine parity, muscle physiology, or private-capture acceptance. Resume
+from `docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`;
+rerun the focused command recorded there with the pinned Tools submodule.
+
+## Native Pinocchio Replay Handoff (#11900)
+
+Native RED f273e45f2f precedes implementation; twelve actual Pinocchio4.1 tests pass including saturated torque reproduction and fixture refinement. See docs/development/feedback_controls/F06_PINOCCHIO_NATIVE_TURNOVER.md and canonical chapter25 for equations, commands, failed setups, resource ownership and remaining full-model/capture gates. Shared native admission changes require actual Drake/MuJoCo regression evidence before publication. This child does not close F06 or the full matching epic.
+
+## F09e Pinocchio Native Marker FK (#11914)
+
+Branch `feat/11914-f09e-pinocchio-marker-fk` is stacked on F09d #11913 and
+merges the exact native replay provider head from #11906. Actual Pinocchio 4.1
+`nq=8`, `nv=7` marker FK passes with independent nonzero floating-base and
+frame-offset transforms. The public `PinocchioPhysicsEngine.get_link_transforms`
+frame index was made compatible with Pinocchio 4.1. Native receipts retain
+separate inventory and adapter identities, complete q/v, and unknown reset
+count; marker results remain unqualified. See
+`docs/development/feedback_controls/F09E-NATIVE-MARKER-FK.md` and chapter30.
+
+## F09f MyoSuite Native Excitation Replay (#11918)
+
+Branch `feat/11918-f09f-myosuite-native-replay` adds a distinct MyoSuite
+muscle-excitation consumer to the F09 native execution path. It writes exact
+post-mapping normalized excitation directly to native `data.ctrl`; it never
+calls Gym `step` or treats `[-1, 1]` actions as muscle excitation. MyoSuite
+3.0.0/MuJoCo 3.6.0 public elbow fixture passes in the owned Python 3.12 runtime.
+The built-in fixture does not bind required production driver/iron models;
+those rows and the six-engine denominator remain unqualified. See
+`docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md` and
+canonical chapter31. The generic legacy four-value Gym step issue remains
+separate because this provider uses native plant stepping only.
+
+# Source-Preserving BUET–Hamner Native Candidate - #12157
+
+- Branch `feat/f07-buet-hamner-assembly-12157` includes merged #12153 for
+  the shared native mass, body velocity, force-projection and constraint
+  observers. Its own source-preserving candidate remains separately reviewed.
+- Exact reviewed donor XML hashes, fresh derived XML hash, loaded OpenSim 4.6
+  extension hashes and sampled native findings are in
+  `docs/development/feedback_controls/F07_BUET_HAMNER_ASSEMBLY_RECEIPT.json`.
+  The donor and derived source artifacts remain outside the public PR.
+- The factory retains BUET's upper/trunk and adds only Hamner's eight distal
+  bodies/joints and 84 lower muscles. The separate Abdjnt reduction, donor
+  visual resource closure, passive-force policy, native Moco, full native
+  replay, capture registration and muscle-only golf endpoint remain open.
+  Manual chapter 44 and turnover record reproduction and limitations.
+
+# Source-Bound Bilateral Zero-Subtalar Reduction - #12167
+
+- Branch `feat/f07-buet-zero-subtalar-12167` is stacked on BUET–Hamner
+  assembly #12165 and its zero-MTP helper ancestry #12153. Keep the PR
+  unarmed until prerequisites land; use normal ancestry merge, not force.
+- Exact v4 source and native derived output remain outside the public repo.
+  `F07_SUBTALAR_REDUCTION_RECEIPT.json` retains source/output hashes, OpenSim
+  binary and reducer/helper identities, four sampled mechanical poses and a
+  rank-complete mobility lift. Chapter 46 and
+  `F07_ZERO_SUBTALAR_REDUCTION_TURNOVER.md` are calculation/handoff sources.
+- Separate complete named-state V2 and one-equilibrium receipts live in owned
+  planning. Their extreme passive-force observations are **not** physiological
+  admission. Root owns separate abdominal reduction #12161 and composition;
+  MTP and subtalar policies are not silently applied together.
+
+# Exact Bilateral Zero-MTP CustomJoint Reduction - #12176
+
+- Branch `feat/f07-buet-zero-custom-mtp-12176` stacks on the subtalar and
+  BUET–Hamner source-preparation children. Keep it unarmed until the parent
+  lands. The original PinJoint MTP reducer remains unchanged.
+- The actual assembled source has two locked-zero MTP CustomJoints. The exact
+  profile shares the zero-CustomJoint mechanical comparison with subtalar,
+  rejecting altered targets/laws/consumers. Source and output stay in owned
+  staging. The public `F07_CUSTOM_MTP_REDUCTION_RECEIPT.json` binds the native
+  final step from the abdominal→subtalar artifact, not a full Moco solve.
+- Chapter 47, calculation registry and
+  `F07_CUSTOM_MTP_REDUCTION_TURNOVER.md` retain reproduction and open gates.
+  Root independently verified original→final sampled composition and native
+  Moco initialization at three prepared coupled states. Native Moco solve,
+  full-state excitation replay, source physiology and capture matching remain
+  blocked.
+
+# Active: Assistance-Explicit OpenSim Replay, F07 #12147
+
+- Branch `feat/f07-opensim-mixed-replay-12147`; separate native scalar-muscle and CoordinateActuator T01 admission and fresh replay with explicit assistance role/bounds/gain/unit identity, immutable physical outputs and input/state/policy provenance. Root assistance follows ground-parent topology, including renamed coordinates. Other regional roles remain declared hypotheses.
+- Shared native scalar executor preserves old muscle/contact semantics; time and saved applied controls are verified. Native extension presence is checked independently of helper file count. Actual OpenSim4.6 mixed profile tests pass; broader regression passes 214 with two inapplicable contact-fixture skips before final lineage refinements. Failed CasADi-path attempt retained and corrected without installing an environment.
+- Canonical chapter27 and `docs/development/feedback_controls/F07_MIXED_ACTUATION_TURNOVER.md` own equations, scope and reproduction. Astra reviewed the corrected bounded source. Mixed Moco dispatch, full Rajagopal/520 topology, source physiology, capture horizon, own-contact/grip and all-model parity remain open. Do not label these synthetic runs as mocap matching or a muscle-only result.
+
+## F07 Constrained Muscle Moco and Replay (#12143)
+
+The versioned OpenSim 4.6 constrained-muscle policy binds source, named
+state, explicit lock targets/charts/couplers, native muscle options and exact
+T01 excitation knots before independent fresh-model replay. Actual native
+tests include CustomJoint, moving path, two Millard muscles, changed-future
+excitation and a reachable coupler-only Moco endpoint with measured replay
+error. Installed Moco rejects locked coordinates; the unchanged 520-muscle
+source remains blocked by anatomy/passive/assistance/contact and private
+marker registration. See chapter42 and
+`docs/development/feedback_controls/F07_CONSTRAINED_MUSCLE_MOCO_TURNOVER.md`.
+
+## Active Mixed Moco Link (#12147)
+
+Branch `feat/f07-mixed-moco-link-12147` composes preserved constrained prerequisites and adds optional mixed scalar Moco dispatch. The new native test writes a nonzero 40 ms target and measures fresh replay independently. Exact roles/bounds are bound into requests; mixed NPZ fields preserve controls, physical units, assistance, powers and work. Retained unscaled-cost and coarse-transcription failures motivate per-state refinement. Full-body/source physiology/contact and private capture remain open; chapter39 and F07_MIXED_ACTUATION_TURNOVER own the calculation and handoff.
+
+## Native Abdominal Reduction Handoff
+
+See docs/development/feedback_controls/F07_ABDOMINAL_REDUCTION_TURNOVER.md and canonical chapter45. Preserve exact source/joint/coupler authority and complete source state readback; verify the assembled557-muscle source separately. Full horizon, contact and17-variant parity remain open.
+
+## Constrained Mixed Moco and Replay (#12173)
+
+Child #12173 adds an opt-in composition of the declared cold-start constraint
+policy and the existing assistance-explicit mixed profile. Exact coordinate
+optimizer boxes must fit within declared charts; linear chart constraints are
+checked by conservative interval extrema. Fresh replay rejects a native
+`Manager` that changes any requested named state value or the initial time,
+and records actual native constraint enforcement and position/velocity
+residuals at every sample. No native constraints are disabled and the strict
+default muscle-only path is unchanged. Mixed output preserves dimensionless
+muscle excitation and mechanical commands separately from physical N or N\*m
+actuation, power and sampled work. The 40 ms synthetic Moco fixture exports
+exact knots and independently replays, but it is not a private capture or
+production qualification. The frozen native regression reports 73 passed and
+one optional provider skip. Canonical calculation is chapter48; turnover is
+`docs/development/feedback_controls/F07_CONSTRAINED_MIXED_MOCO_TURNOVER.md`.
+The calculation registry remains empty and release blocked; full-body
+anatomy, calibration, physiology, contact/grip, capture horizon, production
+variants and six-engine parity remain unresolved.
+
+## OpenSim Mixed Replay Marker Scoring (#12195)
+
+Issue #12195 adds `native_mixed_marker_observation.py` on the constrained
+mixed replay seam. It consumes an exact frozen T01 bundle and runs the
+maintained fresh native replay once. For marker FK it restores the full
+ordered named state and exact replay clock, then evaluates explicit
+PhysicalFrame/local-offset bindings through the existing no-assembly native
+observer. Existing position alignment/scoring retains the separate measured
+clock and rejects extrapolation. The actual OpenSim 4.6 constrained-mixed
+module reports 12 passed, including source-mismatch and out-of-horizon
+negatives. Two portable contract tests protect the unqualified status.
+
+The result and receipt digest are diagnostic records only, explicitly
+unqualified; they are not an authenticated native execution receipt or F01
+admission. Bindings remain caller-declared and no calibration is inferred.
+Private-capture fit, anatomy, resource closure, physiology, contact, production
+variants and six-engine parity remain open. Canonical chapter62 and turnover
+are `manuals/upstreamdrift/chapters/62-native-opensim-mixed-marker-observation.qmd`
+and `docs/development/feedback_controls/F09Q-OPENSIM-MIXED-MARKER-SCORING.md`.
+
+## F07 Exact 557-Muscle Excitation Diagnostic (#12182)
+
+The exact-derived-source v3 profile is stacked on #12181 and merges the
+reviewed #12173 shared scalar executor. It does not widen v1/v2. The
+original 1,226-state seed exits its source SC_z chart at 1 ms; the retained
+failure remains authoritative. A separately declared six-coordinate
+interior diagnostic seed independently replays 557 saved excitations for
+only 0.2 ms on two fresh OpenSim 4.6 models with 17 native couplers observed.
+Changed future excitation alters native activation while preserving the
+prefix. See chapter50 and `F07_EXACT_557_REPLAY_TURNOVER.md` for source,
+runtime, input, policy and failure hashes. Four invalid original body
+inertias, physiology, visual assets, full-horizon private capture fit, and
+all-variant/six-engine qualification remain open. Keep the stacked PR
+unarmed until prerequisites merge.
+
+## F07 Native Source-Body Inertia Gate (#12191)
+
+The read-only OpenSim body gate reuses #12183's coordinate-invariant inertia
+validator and binds XML to fresh native Body mass, COM and inertia for every
+source body. A welded exact-zero-mass/zero-inertia routing carrier is distinct
+from a positive-mass solid. Actual OpenSim 4.6 tests include the rotated
+invalid case, native readback mutation and unchanged 557 source: bilateral
+clavicle/scapula tensors fail. The diagnostic replay in #12182 is unchanged
+and remains physically unqualified. See chapter52,
+`F07_NATIVE_BODY_INERTIA_TURNOVER.md` and the source-bound receipt; no
+parameter repair or private data was committed. This slice depends on #12183
+and #12182 and must remain unarmed until prerequisites merge.
+
+## F07 Generic Shoulder Lamina Candidate (#12211)
+
+The branch `feat/f07-generic-shoulder-lamina-12211` adds a separately
+identified generic 557-muscle shoulder mass candidate. It binds the exact
+reduced source and retained right CEINMS meshes, explicitly hypothesizes
+right identity and left local-z reflection, and calls the pending Tools
+#5503 triangle-lamina provider without changing the vendored pin. An actual
+OpenSim 4.6 candidate reload passes the 40-body physical audit, while the
+original retains four failures; native all-body FK and QErr/UErr agree at
+three sampled poses. See chapter54 and
+`F07_GENERIC_SHOULDER_LAMINA_TURNOVER.md`. Keep the PR draft/unarmed until
+Tools #5503 and #12207 are integrated. No source anatomy, physiology,
+force/work chart, contact/grip, captured match or parity claim follows.
+
+## Explicitly Unqualified Moco Feasibility — #12225
+
+Draft PR #12228 contains the diagnostic opt-in and 51 actual native test passes.
+See `F07_UNQUALIFIED_MOCO_FEASIBILITY_TURNOVER.md` and canonical chapter 55.
+Full-clock private preflight retains unavailable passive admission and blocked
+independent replay. #12231 addresses strict visual asset closure; wrapped/chart,
+support/grip, captured matching and parity gates remain open.
+
+The earlier 20-interval replay failed its speed, activation and fiber-length
+limits. Separately, the 21-interval child failed strict planned-clock validation
+at 9 of 43 values by one ULP. A later replay on those saved timestamps failed
+only the activation limit (`5.078110452592238e-5` versus `1e-8`); coordinate,
+speed, fiber-length and endpoint limits passed. This diagnostic does not repair
+the clock rejection or identify the activation discrepancy's cause. Exact
+attempts, hashes, limits and failures remain in the historical appendices
+linked from `F07_NATIVE_MOCO_COMPLEXITY_LADDER_TURNOVER.md`.
+The agent-context catalog is unchanged because its `vendor/ud-tools` junction
+escapes to the frozen `feedback-drake-native-11838` donor; the context CLI
+rejected that path and the donor was not traversed or modified.
+
+The #12198 CI receipt-preservation follow-up restores two canonical
+ground-support receipts to their recorded hashes and adds explicit formatter
+exclusions. See `F07_NATIVE_BODY_INERTIA_TURNOVER.md` for the failed run,
+provenance and validation. Full epic qualification remains open.
+Concurrent remote ledger refresh `7877625369` is retained through a normal merge;
+the generated ledger is refreshed from the restored immutable receipt bytes.
+
+## Manufactured Native Diagnostics — #12275
+
+Exact synthetic MuJoCo geometry/zero-effort, short feedback replay, OpenSim property, Pinocchio and Drake observations are retained at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/`. See its README and SHA-bound manifest. Failed attempts are preserved. No capture, equilibrium, contact calibration, physiology, production replay or 17-row/six-ecosystem qualification is implied; all production variants remain unqualified.
