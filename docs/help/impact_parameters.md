@@ -12,22 +12,22 @@ Show launch-monitor-style delivery numbers for any engine run or matched swing: 
 
 ## Inputs
 
-| Input | Units | Description |
-| --- | --- | --- |
-| Clubhead series | m, m/s | World-frame face-centre position and velocity with face normal, from the engine's own forward kinematics |
-| Target heading | deg | Target line direction, counter-clockwise from the default -Y axis |
-| Handedness | right or left | Left-handed mirrors lateral signs only |
-| Units | mph or m/s | Display unit for clubhead speed |
+| Input           | Units         | Description                                                                                              |
+| --------------- | ------------- | -------------------------------------------------------------------------------------------------------- |
+| Clubhead series | m, m/s        | World-frame face-centre position and velocity with face normal, from the engine's own forward kinematics |
+| Target heading  | deg           | Target line direction, counter-clockwise from the default -Y axis                                        |
+| Handedness      | right or left | Left-handed mirrors lateral signs only                                                                   |
+| Units           | mph or m/s    | Display unit for clubhead speed                                                                          |
 
 ## Outputs
 
-| Output | Units | Description |
-| --- | --- | --- |
+| Output                                                   | Units           | Description                                                                            |
+| -------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------- |
 | Speed, attack angle, club path, face angle, face to path | mph or m/s, deg | Positive path is in-to-out, positive face is open, negative attack angle is descending |
-| Dynamic loft, spin loft | deg | Face elevation and the 3-D angle between velocity and face normal |
-| Low point ahead of ball | m | Positive toward the target |
-| Impact location, smash factor | mm, ratio | Shown only when face geometry, ball contact and an impact-model ball speed exist |
-| D-plane and path views | diagram | Top view (path, face) and side view (attack angle, loft) |
+| Dynamic loft, spin loft                                  | deg             | Face elevation and the 3-D angle between velocity and face normal                      |
+| Low point ahead of ball                                  | m               | Positive toward the target                                                             |
+| Impact location, smash factor                            | mm, ratio       | Shown only when face geometry, ball contact and an impact-model ball speed exist       |
+| D-plane and path views                                   | diagram         | Top view (path, face) and side view (attack angle, loft)                               |
 
 ## Method
 

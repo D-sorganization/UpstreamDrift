@@ -102,6 +102,18 @@
       "owner": "@maintainers",
       "reason": "Root Claude instructions include fleet-managed sections synced from Repository_Management.",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "docs/agents/shared-infrastructure.md",
+      "owner": "@maintainers",
+      "reason": "Shared agent infrastructure documentation temporarily exceeds budget; staged for decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "docs/development/necromatcher-turnover.md",
+      "owner": "@maintainers",
+      "reason": "Necromatcher native fit turnover log for issue #11235; staged for archival or section decomposition.",
+      "expires_on": "2026-10-31"
     }
   ]
 }

@@ -16,7 +16,7 @@ Datasets and workbooks are referenced solely by neutral identifiers:
 - `club-workbook-main`: Main club data workbook (`e91f760171f5.xlsx`, private).
 - `club-workbook-wiffle`: Wiffle ProV1 3D club data workbook (`d61999450688.xlsx`, private).
 
-## Private Data And `CAPTURE_DATA_DIR`
+## Private Data and `CAPTURE_DATA_DIR`
 
 Public captures (`capture-A`, `capture-B`) reside directly in the repository under `data/` and are available in public CI without special configuration.
 

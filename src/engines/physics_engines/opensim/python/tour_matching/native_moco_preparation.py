@@ -25,7 +25,12 @@ from .native_capability_probe import (
 )
 from .native_passive_readiness import (
     PassiveReadinessPolicy,
+    NativePassiveReadinessAudit,
     audit_native_passive_readiness,
+)
+from .native_passive_receipt import (
+    NativePassiveObservationReceiptReference,
+    prepare_native_passive_observation,
 )
 from .native_reference_conventions import (
     ReferenceStateDeclaration,
@@ -84,6 +89,8 @@ class NativeMocoPreparation:
     qualification: str = "not-qualified-for-muscle-matching"
     allow_unqualified_passive_diagnostic: bool = False
     diagnostic_assessment: NativeDiagnosticAssessment | None = None
+    passive_observation_receipt: NativePassiveObservationReceiptReference | None = None
+    native_runtime_sha256: str | None = None
 
     @property
     def ready_for_software_solve(self) -> bool:
@@ -97,6 +104,10 @@ class NativeMocoPreparation:
             and self.diagnostic_assessment is not None
             and self.diagnostic_assessment.blocker_receipt_sha256 == blocker_receipt
             and self.diagnostic_assessment.execution_permitted
+            and (
+                self.passive_observation_sha256 is None
+                or self.passive_observation_receipt is not None
+            )
             and (
                 not self.allow_unqualified_passive_diagnostic
                 or self.passive_observation_sha256 is not None
@@ -130,6 +141,7 @@ def _audit_native_passive(
     policy: Any,
     mixed: MixedActuationProfile | None = None,
     declared: DeclaredColdStart | None = None,
+    passive_audit_sink: Callable[[NativePassiveReadinessAudit], None] | None = None,
 ) -> tuple[str | None, list[str]]:
     try:
         if declared is not None:
@@ -141,6 +153,8 @@ def _audit_native_passive(
 
             admit_native_mixed_profile(model, state, mixed, declared)
         passive = audit_native_passive_readiness(model, state, policy)
+        if passive_audit_sink is not None:
+            passive_audit_sink(passive)
         blockers = list(passive.blockers)
         blockers.extend(
             item
@@ -458,6 +472,7 @@ def _native_preparation(
     probe_callable: Callable[
         ..., tuple[str, float, float]
     ] = _native_short_capability_probe,
+    passive_audit_sink: Callable[[NativePassiveReadinessAudit], None] | None = None,
 ) -> tuple[
     str | None,
     str | None,
@@ -478,6 +493,11 @@ def _native_preparation(
     blockers: list[str] = _declared_chart_blockers(request)
     loaded: str | None = None
     model = osim.Model(str(request.model_path))
+    try:
+        model.finalizeConnections()
+    except (OSError, ValueError, RuntimeError, TypeError, AttributeError):
+        blockers.append("native-moco-path-optimizer-domain-invalid")
+        return loaded, None, None, blockers, None, None, False, None, None, None
     blockers.extend(_native_path_optimizer_blockers(model, request, osim))
     runtime_sha = _native_runtime_identity(osim)
     probe_sha: str | None = None
@@ -499,7 +519,12 @@ def _native_preparation(
     loaded = _audit_native_state_bindings(model, state, request, blockers)
 
     passive_sha, passive_blockers = _audit_native_passive(
-        model, state, request.passive_policy, request.mixed_actuation, declared
+        model,
+        state,
+        request.passive_policy,
+        request.mixed_actuation,
+        declared,
+        passive_audit_sink,
     )
     blockers.extend(passive_blockers)
 
@@ -866,6 +891,7 @@ def _prepare_native_model(
     blockers: list[str],
     wrapped_path_auditor: Callable[..., Any],
     probe_callable: Callable[..., tuple[str, float, float]],
+    passive_audit_sink: Callable[[NativePassiveReadinessAudit], None] | None = None,
 ) -> _NativeModelPreparation:
     empty = _NativeModelPreparation(
         None, None, None, None, None, False, None, None, None, ()
@@ -911,7 +937,10 @@ def _prepare_native_model(
             end,
             failure,
         ) = _native_preparation(
-            request, run_probe=run_probe, probe_callable=probe_callable
+            request,
+            run_probe=run_probe,
+            probe_callable=probe_callable,
+            passive_audit_sink=passive_audit_sink,
         )
         blockers.extend(native_blockers)
         return _NativeModelPreparation(
@@ -1009,9 +1038,10 @@ def _assess_native_preparation(
     directory: Path,
     preflight: _NativePreflight,
     model: _NativeModelPreparation,
+    additional_blockers: tuple[str, ...] = (),
 ) -> tuple[tuple[str, ...], NativeDiagnosticAssessment]:
     """Bind audited inputs, probe evidence and blockers to one typed assessment."""
-    blockers = preflight.blockers
+    blockers = list(dict.fromkeys((*preflight.blockers, *additional_blockers)))
     probe_failure_sha = _private_probe_failure_digest(request, model, directory)
     evidence = hashlib.sha256(
         json.dumps(
@@ -1120,50 +1150,43 @@ def prepare_native_moco(
     capture = preflight.capture
     clock_sha = preflight.clock_sha256
     registered_sha = preflight.registered_sha256
+    passive_audits: list[NativePassiveReadinessAudit] = []
     model_result = _prepare_native_model(
-        request, actual, blockers, wrapped_path_auditor, probe_callable
+        request,
+        actual,
+        blockers,
+        wrapped_path_auditor,
+        probe_callable,
+        passive_audit_sink=passive_audits.append,
     )
-    loaded = model_result.loaded_sha256
-    reference_sha = model_result.reference_sha256
-    passive_sha = model_result.passive_sha256
-    runtime_sha = model_result.runtime_sha256
-    probe_sha = model_result.probe_sha256
-    probe_failure = model_result.probe_failure
-    probe_attempted = model_result.probe_attempted
-    probe_start, probe_end = model_result.probe_start, model_result.probe_end
-    wrapped_findings = model_result.wrapped_findings
+    passive_receipt, receipt_blockers = prepare_native_passive_observation(
+        directory, passive_audits, request, model_result
+    )
     final_blockers, assessment = _assess_native_preparation(
-        request, directory, preflight, model_result
+        request, directory, preflight, model_result, receipt_blockers
     )
-    loaded = model_result.loaded_sha256
-    reference_sha = model_result.reference_sha256
-    passive_sha = model_result.passive_sha256
-    physical_sha = preflight.physical_sha256
-    physical_qualified = preflight.physical_qualified
-    capture = preflight.capture
-    clock_sha = preflight.clock_sha256
-    registered_sha = preflight.registered_sha256
-    actual = preflight.actual_digests
     report = NativeMocoPreparation(
         request.identity_sha256,
-        actual["model"],
-        actual["capture"],
-        actual["guess"],
-        loaded,
-        reference_sha,
-        passive_sha,
-        clock_sha,
-        registered_sha,
-        physical_sha,
-        physical_qualified,
+        preflight.actual_digests["model"],
+        preflight.actual_digests["capture"],
+        preflight.actual_digests["guess"],
+        model_result.loaded_sha256,
+        model_result.reference_sha256,
+        model_result.passive_sha256,
+        preflight.clock_sha256,
+        preflight.registered_sha256,
+        preflight.physical_sha256,
+        preflight.physical_qualified,
         len(request.marker_weights),
-        capture.frames if capture is not None else 0,
+        preflight.capture.frames if preflight.capture is not None else 0,
         len(request.excluded_markers),
         final_blockers,
         time.perf_counter() - wall,
         time.process_time() - cpu,
         allow_unqualified_passive_diagnostic=request.allow_unqualified_passive_diagnostic,
         diagnostic_assessment=assessment,
+        passive_observation_receipt=passive_receipt,
+        native_runtime_sha256=model_result.runtime_sha256,
     )
     (directory / "preparation.json").write_text(
         json.dumps(asdict(report), indent=2, allow_nan=False) + "\n", encoding="utf-8"

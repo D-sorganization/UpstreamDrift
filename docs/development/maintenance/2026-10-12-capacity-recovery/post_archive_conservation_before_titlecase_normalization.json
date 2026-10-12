@@ -1,0 +1,28 @@
+{
+  "baseline_current_entries": 144,
+  "baseline_archive_entries": 179,
+  "after_current_entries": 76,
+  "after_archive_entries": 247,
+  "moved_entries": 68,
+  "preexisting_duplicate_ids": {
+    "DL-#10336": 2
+  },
+  "baseline_combined_unique_ids": 322,
+  "after_combined_unique_ids": 322,
+  "baseline_and_after_id_multiplicities_equal": true,
+  "non_target_records_semantically_conserved": true,
+  "previous_archive_raw_bytes": 218446,
+  "previous_archive_raw_sha256": "ff19451640b913ad056967f9a6c9e5cb5af813c9b7ba90262709aa677307ddf8",
+  "previous_archive_exact_body_suffix_preserved": true,
+  "new_archive_raw_bytes": 280375,
+  "new_archive_sha256": "c4789e2dbfd4f810149becafcc69be3294d1acbecae15e9fc943c5a7c28754e5",
+  "current_log_raw_bytes": 162340,
+  "current_log_sha256": "9d8a0467e3a1ab346a04235a4157eb634ff643c2c700e2a390441dec2adb8adc",
+  "10783_state": "shipped",
+  "10783_next_step": "The UpstreamDrift software guard is complete; the three canonical-function exceptions expire 2026-10-23. Broader fleet rollout remains separately tracked in Repository_Management #1687.",
+  "11792_state": "in_progress",
+  "first_archiver_exit": 0,
+  "second_archiver_exit": 0,
+  "second_pass_noop": true,
+  "no_duplicate_claim": "DL-#10336 was already duplicated once across current log plus the pre-existing archive; this maintenance preserved that multiplicity and did not edit either record."
+}

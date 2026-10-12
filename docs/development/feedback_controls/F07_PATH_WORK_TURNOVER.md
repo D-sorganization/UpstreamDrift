@@ -142,3 +142,24 @@ intersection independently of CPP activity, unsupported/missing-domain refusal,
 and refusal before a capability probe. A small OpenSim fixture assertion checks
 the loaded GeometryPath/MovingPathPoint inventory when the optional SDK is
 available; it is not a full-model replay claim.
+
+## Native Model Connection Finalization
+
+The optimizer-domain audit now runs after one Model.finalizeConnections() call
+at the native-preparation boundary. This ensures MovingPathPoint axes are
+connected before the source-domain reader inspects them. If finalization fails,
+preparation returns the existing hard domain blocker immediately; it does not continue
+into component/state/passive audits or the capability probe. No initSystem or
+integration was added.
+
+An isolated source-bound diagnostic observed that the model constructor alone
+left moving-point coordinate associations unresolved. After one connection
+finalization, the audit resolved all requested axes and the resulting knee
+intervals matched the request bounds exactly. This is lifecycle and source-domain
+evidence only. It does not qualify a full-model preparation or optimization;
+the independent passive-policy blocker remains, and all 17 registered
+model/variant rows remain unqualified.
+
+The orchestration regressions exercise both success ordering and fail-closed
+behavior. On a finalization exception, spies for component, state, domain,
+passive-policy, reference, and capability-probe work remain untouched.

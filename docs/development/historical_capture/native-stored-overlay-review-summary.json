@@ -1,0 +1,77 @@
+{
+  "scope": "Offscreen programmatic PyQt6/QTest; not native OS or human-click acceptance",
+  "new_jobs_created": false,
+  "baseline_commit": "3106b8e2ca",
+  "source_state": "Uncommitted recall changes on baseline; no frozen source claim",
+  "file_dialog_scope": "Controlled save destination response; not OS dialog acceptance",
+  "export_recall_ui_available": true,
+  "source_sha256": {
+    "src\\tools\\necromatcher\\video_dialog.py": "b80eb3277cc1009a73341d6759b1a76cf40b24ca5f3af91b35da1b89970afdf9",
+    "src\\shared\\python\\workspace\\necromatcher_video_jobs.py": "87caf02d8c466c446631f943d18b325ae1bc707bea5dd45f768fb24afbfa82c9"
+  },
+  "schema": "necromatcher/native-stored-overlay-review/1",
+  "full_receipt_sha256": "48b28fc4dc12ddd0520fc795f0e84dda6234066ea34699ee329765f201c0b8df",
+  "players": [
+    {
+      "player": "tiger",
+      "fit_id": "tiger-authored-contact-phase-fit-v10",
+      "capture_id": "tiger-usga-range-capture-v1",
+      "run_id": "f6a0cbdae46941e49e23f6549076ba87",
+      "saved_zip_sha256": "dc0a8835ac50c33cb272b8ed77365f0c31f6de7c28741750ab91ff17faa8034e",
+      "existing_run_render_scope": "QTest keyboard selection of fit-scoped stored run; QTest save click with controlled Desktop file dialog response",
+      "frames": [
+        {
+          "frame_index": 0,
+          "status": "Frame 1/210 \u00b7 PTS 450450 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "tiger-fit-000000.png",
+          "sha256": "f975ae56700eb48d918b36773a776ec43a939103dfb42a1afe4c0ff111c50f0d"
+        },
+        {
+          "frame_index": 104,
+          "status": "Frame 105/210 \u00b7 PTS 554554 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "tiger-fit-000104.png",
+          "sha256": "e5566d58f51a69b83e6d0cc03756d0e0888ed410db7e2a0839b872c47d38545f"
+        },
+        {
+          "frame_index": 209,
+          "status": "Frame 210/210 \u00b7 PTS 659659 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "tiger-fit-000209.png",
+          "sha256": "e51f8fbc207ac0700bc4ce97de264c44f22e24e270886cbef94d32a992b00b13"
+        }
+      ],
+      "status": "succeeded",
+      "acceptance": "rejected"
+    },
+    {
+      "player": "hogan",
+      "fit_id": "hogan-authored-contact-phase-fit-v10",
+      "capture_id": "hogan-practice-capture-v1",
+      "run_id": "75a550bd870c400299f1626ada462c66",
+      "saved_zip_sha256": "25820c44de3544d3c1ce9b2494e8cd2e97ce37c1bfdc2b8b01a8fa4bcc0a9cb8",
+      "existing_run_render_scope": "QTest keyboard selection of fit-scoped stored run; QTest save click with controlled Desktop file dialog response",
+      "frames": [
+        {
+          "frame_index": 0,
+          "status": "Frame 1/750 \u00b7 PTS 3300000 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "hogan-fit-000000.png",
+          "sha256": "1ca28f180f17a4aa8c356cb3f9ae8595b758cf84f6d3dece94290c4b12f37edc"
+        },
+        {
+          "frame_index": 374,
+          "status": "Frame 375/750 \u00b7 PTS 3674000 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "hogan-fit-000374.png",
+          "sha256": "6e8ee94d90436ec45d5c32d531e53e25eb3b5cda35acccede964f5fc48ec089a"
+        },
+        {
+          "frame_index": 749,
+          "status": "Frame 750/750 \u00b7 PTS 4049000 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "hogan-fit-000749.png",
+          "sha256": "ec31a8aaedda70acc5ea8a75ca3f74b27d4a6cf3139ee6d8290e23e87e71a8c0"
+        }
+      ],
+      "status": "succeeded",
+      "acceptance": "rejected"
+    }
+  ],
+  "library_changes": "Canonical checked downloads add owned ZIP files and refresh verification baselines; original fits/captures are unchanged."
+}

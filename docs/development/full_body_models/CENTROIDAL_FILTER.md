@@ -20,7 +20,7 @@ Frames before `t_on = 0.9 s` are untouched. Over the finish the joint trajectory
   - linearised ZMP inside every edge of the support polygon shrunk by 0.03 m (central-difference sensitivity of `p` to `(c, F, M)`);
   - `F_z >= 0.5 m g`;
   - `|F_h| <= 0.6 F_z` on an inscribed octagon.
-  They enter through an active-set quadratic penalty (`penalty = 100`).
+    They enter through an active-set quadratic penalty (`penalty = 100`).
 - Trust region: every spline coefficient satisfies `|x| <= bound` (0.03 rad initially).
 - Acceptance: the exact (nonlinear) merit, the sum over `t >= 1.0 s` of squared ZMP distance outside the polygon, squared vertical-force shortfall and squared friction-cone excess, must fall. Otherwise the step is rejected and `bound` halves. Ten iterations.
 
