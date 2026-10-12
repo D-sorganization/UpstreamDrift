@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T15:03:28.360712+00:00",
-  "checkpoint": "3d6a415bf941d4063986607f8d97536a513a5a2b",
+  "recorded_at_utc": "2026-10-12T15:25:47.928343+00:00",
+  "checkpoint": "0a323cf18ad1fe6f2a727fa62dcbed530ca49a64",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "3d6a415bf941d4063986607f8d97536a513a5a2b",
+  "source_commit": "0a323cf18ad1fe6f2a727fa62dcbed530ca49a64",
   "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Remotea3 protectedCIStandardPASS with27450fullunittests; finalpreventiveenumrepair+testisolationpassfocusedchecksandreviews. Its updatedcombinedcanonical/protectedgatespending. Finalpublicationworkflowand53/fourcell/exact39PDFacceptancePASS.",
+  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7597 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/280 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 is live at9002c8a2:53 exact checks,four browser cells and root-agent visual review pass;39-page PDF hash matches. Whole-site post-deploy workflow status is separate.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -615,29 +615,29 @@
     ]
   },
   "latest_combined_gate": {
-    "source": "3d6a415bf941d4063986607f8d97536a513a5a2b",
+    "source": "0a323cf18ad1fe6f2a727fa62dcbed530ca49a64",
     "status": "PASS all eight canonical gates with Semgrep available",
-    "passes": 7594,
+    "passes": 7597,
     "skipped": 377,
     "deselected": 43,
     "xpassed": 1,
     "subtests": 21,
     "exact_ci_scan": {
       "rules": 209,
-      "files": 278,
+      "files": 280,
       "findings": 0
     },
     "selection": "Unmodified canonical affected-test selection; historical fixture consumers and new strict historical-path resolver tests included. Earlier whole-research failure remains preserved; no whole research-suite pass is claimed.",
     "receipts": [
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-classification-final-prepr.txt.gz",
-        "sha256": "932fb92422c75059c23d2980f8fde648d37ae0d6c8ed4081d1d01d9c7a54bd1f",
-        "uncompressed_sha256": "149967c0c2ac0f3faeda71f14aedf046a47ce9ab3aa9fca55bbe51993606c978"
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-isolation-final-prepr.txt.gz",
+        "sha256": "2a3c8a3bbaf2099ab41001ea85ddaf531dadc51156afcefea083c6987dfc6da4",
+        "uncompressed_sha256": "998e5e993969983ab2cae558aa788a16fcb98c929e1ef45437411b0086840473"
       },
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-classification-semgrep.txt.gz",
-        "sha256": "bc7ac8336308ff36765ffffbcfa5d2d0cd4169fe79fee45641c6de6e381b423c",
-        "uncompressed_sha256": "b8c39973d45c5a45713c3042a98614b6ed295252b7fc1bb76cf65b963659f7f4"
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-isolation-semgrep.txt.gz",
+        "sha256": "cfa2e768870ae20cb291886b42973f3f5195c3434b75b23cd11ece2fce48fa4a",
+        "uncompressed_sha256": "98a78feece9340c758f00813457fff586459ae120f1baee35fd948723f7a58aa"
       },
       {
         "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/history-free-verifier-test.txt.gz",
@@ -1183,7 +1183,7 @@
     "scope": "UD-owned compatibility bridge normalizes incoming level into its local enum and mirrors into each receiving module own enum; no vendor/production contracts implementation, type assertions, numerical criteria or original evidence changed.",
     "tdd": "Both directions reproduce foreign-enum identity failure before repair and pass afterward. Sol70 related cases on Python3.12 and30 onPython3.11; root focused run exits0.",
     "independent_review": "Astra approves allthreelevels with correctOFF enablement, and invalidinputs rejectbeforestate mutation.",
-    "status": "Enumrepair independentlyreviewed; initial combinedcanonicalexposed older alias-test WARNstateleak, nowrestored in finally with40case red/green proof. Updated complete stable-sourcecanonical andprotectedCIpending.",
+    "status": "Two direction-specific red/green enum regressions, focused cross-version checks, Astra review and all eight stable-source canonical gates pass. Updated full protected CI/merge remains pending.",
     "receipts": [
       {
         "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-full-unit-failed.log.gz",
@@ -1247,11 +1247,19 @@
           "uncompressed_sha256": "1140120e918389447a8b2f55131666162c28ab6511ebc30d768084a7cbaa7e5f"
         }
       ],
-      "status": "Rootreview and focusedsequencePASS; complete combinedcanonical/protectedverificationpending."
+      "status": "Root assertion-preservation review,40-case red/green sequence and all eight combined canonical gates PASS; updated protectedCIpending."
+    },
+    "preceding_full_unit_pass": {
+      "source": "a3a00181a21b4dc517607d3ec2d8acfd1021d5fb",
+      "run": 38262719295,
+      "job": 114857528791,
+      "status": "PASS27450tests,1163skips,8expectedfailures; confirms order-dependent failure, not proof of final bridge repair. CIStandard alsoSUCCESS. Own auto-merge temporarily disabled before queue while deterministic preventive fix is verified.",
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-classification-full-unit-pass.log.gz",
+      "sha256": "567c56f7faf4843af6a338630bf367646b6d0692f5535df189561e57e0e1e625"
     }
   },
   "final_live_publication": {
-    "status": "PASS article-specific live acceptance; global whole-site post-deployment scan still in progress at checkpoint",
+    "status": "PASS full deployment workflow and final article-specific live acceptance:53checks,fourbrowsercells,root-agentvisualreview and exact39-pagePDF.",
     "revision": "9002c8a2f94050e013762c08de053abab48711ee",
     "run": 38255088410,
     "pages_step": "SUCCESS",
@@ -1267,8 +1275,15 @@
       "name": "shot-pattern-live-verification-20261012-9002c8a2f940.tar.gz",
       "size": 4805381
     },
-    "original_payloads": "All21 frozenpayloads andtwoearlierverificationassets preserved; this is an additional24threleaseasset with owninventory.",
+    "original_payloads": "All21 frozenpayloads andtwoearlierverificationassets preserved; additional live-verification archive and final deployment supplement bring totalreleaseassets to25 without overwrite.",
     "affine_issue_5004": "Closed completed with merged5005/5016implementation andlinkedliveacceptance evidence.",
-    "remaining_scientific_gates": "Upstream11984,12120,12398 remainopen; no empirical/physical/scientificqualificationrenewal."
+    "remaining_scientific_gates": "Upstream11984,12120,12398 remainopen; no empirical/physical/scientificqualificationrenewal.",
+    "workflow_status": "SUCCESS including manifest/every-public-page live verification and evidence upload.",
+    "final_deployment_supplement": {
+      "browser_download_url": "https://github.com/D-sorganization/UpstreamDrift/releases/download/shot-pattern-phase2-research-2026-10-10/shot-pattern-live-final-acceptance-20261012-9002c8a2f940.tar.gz",
+      "digest": "sha256:6862dd91a5dcf8d693d7b4a42906e865ee7b206fbd2321c167e61e70156b4007",
+      "name": "shot-pattern-live-final-acceptance-20261012-9002c8a2f940.tar.gz",
+      "size": 16932
+    }
   }
 }
