@@ -606,7 +606,7 @@ class CharacterBuilder:
         """
         if preset_name is None:
             raise ValueError("preset_name must be provided")
-        from shared.python.humanoid_character_builder.presets.loader import (
+        from src.shared.python.humanoid_character_builder.presets.loader import (
             load_body_preset,
         )
 
@@ -615,7 +615,7 @@ class CharacterBuilder:
     @staticmethod
     def list_presets() -> list[str]:
         """List available body presets."""
-        from shared.python.humanoid_character_builder.presets.loader import (
+        from src.shared.python.humanoid_character_builder.presets.loader import (
             list_available_presets,
         )
 

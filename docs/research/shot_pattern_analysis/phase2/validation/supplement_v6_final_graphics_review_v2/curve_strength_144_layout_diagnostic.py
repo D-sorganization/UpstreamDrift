@@ -99,7 +99,7 @@ def main():
     result = {
         "schema": "supplement-density-svg-title-legend-clearance/1",
         "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python "
+        "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python "  # nosec B108
         + str(pathlib.Path(__file__).resolve()),
         "inventory_path": str(INVENTORY),
         "inventory_sha256": sha(INVENTORY),

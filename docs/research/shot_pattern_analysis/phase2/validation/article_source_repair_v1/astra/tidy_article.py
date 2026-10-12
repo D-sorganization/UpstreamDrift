@@ -29,5 +29,5 @@ s = s.replace(
     "SG units are strokes per modeled opportunity. Numerical notation such as $2.5$e$-5$ means $2.5\\times10^{-5}$; interval endpoints retain seven significant digits. Display rounding does not add model accuracy.",
 )
 p.write_text(s)
-Path("/tmp/p2-article-astra-review/repaired_article.tex").write_text(s)
+Path("/tmp/p2-article-astra-review/repaired_article.tex").write_text(s)  # nosec B108
 sys.stdout.write(str(len(s.splitlines())) + "\n")

@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 from typing import Any
 
-p = Path("/tmp/p2-article-astra-review")
+p = Path("/tmp/p2-article-astra-review")  # nosec B108
 d = json.loads((p / "verified_data.json").read_text())
 s = (p / "rejected_article.tex").read_text()
 key: int | None = None

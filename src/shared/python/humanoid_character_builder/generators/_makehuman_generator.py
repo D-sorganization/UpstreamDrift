@@ -370,7 +370,7 @@ generate_human()
         """Segment mesh into body parts using vertex groups or geometry."""
         if visual_dir is None:
             raise ValueError("visual_dir must be provided")
-        from shared.python.humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 
@@ -540,7 +540,7 @@ generate_human()
         return groups
 
     def get_supported_segments(self) -> list[str]:
-        from shared.python.humanoid_character_builder.core.segment_definitions import (
+        from src.shared.python.humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
         )
 

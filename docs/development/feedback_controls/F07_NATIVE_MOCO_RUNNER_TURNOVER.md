@@ -151,3 +151,56 @@ protocol exist. It does not close F07, F08 or the six-engine/17-row denominator.
 The privately staged diagnostic has source/clock/mask receipts and its own
 local reproduction script. Its raw TRCs are deliberately outside this public
 repository and are not a public artifact or approved capture release.
+
+## Typed Finite-Difference Configuration
+
+MocoTrackingConfig now exposes optim_finite_difference_scheme, defaulting to
+central for requests that omit the setting. The typed request admits only
+central and forward; it rejects other values before MocoStudy creation.
+The builder applies the selected scheme to MocoCasADiSolver, reads it back,
+and refuses a mismatch before creating its initial guess. Because the serialized config participates in request
+identity, loading an older request with the omitted field supplies the default
+but produces a new typed identity; historical request bytes and receipts remain
+unchanged.
+
+The pinned OpenSim 4.6 property audit confirmed that a fresh solver stores and
+returns the requested forward value. It also stored an unsupported string,
+so a setter/getter round trip does not prove solver validation or numerical
+support. This change contains no solve evidence and makes no performance,
+convergence, or numerical-accuracy claim. A future executed solve needs its own
+source-bound evidence and identity.
+
+## Reviewed Software Integration (2026-10-11)
+
+The source integration checkpoint on branch
+feat/moco-reviewed-numerics-11792-20261011 is based on
+e68baeabde8ff639f846a167ca7703ace43bd0a9 at
+a24e72a112ecf5b21067acf18d388379f083970b. It normally merges the reviewed
+finite-difference configuration (cf11b2a4015a941e6b3607c5dd48c1ae0857ef71),
+source MovingPathPoint optimizer-domain guard
+(836dd3028a7641b5c22702e34ed7a2dc56671a32), and solve-progress
+instrumentation (fd7b3d7b21c0d3b12c6837efff786788d84e850a). The only merge
+conflicts were generated agent-context views; both were regenerated with the
+pinned Tools 6b6e4be55e7086a33db43b36d2632765be619bde renderer.
+
+The combined software behavior keeps the typed central/forward
+finite-difference setting in request identity and verifies native setter
+readback before guess creation. Before solver capability probing, preparation
+intersects each applicable MovingPathPoint coordinate domain with native
+coordinate limits and any declared chart; absent optional charts do not block
+otherwise valid source domains. CPP active ranges remain regime switches, not
+optimizer-wide bounds. Progress events remain atomically written and
+identity-bound. This integration adds no model-specific qualification,
+optimizer result, or physiological evidence. All 17 registered model/variant
+rows remain
+unqualified, including the three legacy demo rows; the broader F07 evidence and
+blockers above remain in force.
+
+On the supported Python 3.12 QA environment, the combined affected selection
+passed 74 tests with 53 SDK-dependent skips because OpenSim was unavailable.
+The explicit-base pre-PR run passed lint/format, diff mypy, affected tests,
+consistency tests, Semgrep/import policy (Semgrep unavailable, advisory scan
+skipped), policy/fragment validators, and workflow lint. Its Fleet Policy Gate
+remains blocked by inherited DEVELOPMENT_LOG.md issues (invalid/missing
+metadata and active-entry/size ceilings); this branch does not modify that
+file. No native SDK execution or solve was performed for this integration.

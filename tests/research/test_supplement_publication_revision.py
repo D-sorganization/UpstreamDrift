@@ -316,12 +316,20 @@ def verifier_pin(tmp_path):
     commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=root, text=True
     ).strip()
+    study_folders = (
+        "src/tools/shot_pattern_analysis",
+        "scripts/research/shot_pattern_analysis",
+    )
     return root, {
         "source_root": str(root),
         "source_commit": commit,
         "python_executable": sys.executable,
         "python_sha256": sha(Path(sys.executable)),
-        "source_sha256": {str(p.relative_to(root)): sha(p) for p in root.rglob("*.py")},
+        "source_sha256": {
+            path.relative_to(root).as_posix(): sha(path)
+            for folder in study_folders
+            for path in (root / folder).rglob("*.py")
+        },
         "execution": {"native": "pinned"},
     }
 

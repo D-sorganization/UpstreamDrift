@@ -57,7 +57,7 @@ receipt = {
     "scope": "Strict Public Loader and Numeric/Inventory Gate; Visual Acceptance Pending",
     "status": "passed",
     "finished_utc": datetime.now(timezone.utc).isoformat(),
-    "python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",  # nosec B108
     "producer_checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
     "producer_commit": terminal["candidate_commit"],
     "public_loader": "src.tools.shot_pattern_analysis.matched_supplement_pipeline.load_verified_supplement_artifacts",

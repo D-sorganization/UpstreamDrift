@@ -111,7 +111,10 @@ def check_inertia_delegation() -> list[str]:
     if not target.exists():
         return violations
     text = target.read_text(encoding="utf-8")
-    if "from model_generation.inertia" not in text:
+    if (
+        "from model_generation.inertia" not in text
+        and "from src.shared.python.model_generation.inertia" not in text
+    ):
         rel = target.relative_to(REPO_ROOT)
         violations.append(
             f"{rel}: missing `from model_generation.inertia.primitives import ...`. "

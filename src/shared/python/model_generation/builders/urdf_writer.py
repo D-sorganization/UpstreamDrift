@@ -269,7 +269,7 @@ class URDFWriter:
 
         lines.append(f"{indent}<geometry>")
 
-        from shared.python.model_generation.core.types import GeometryType
+        from src.shared.python.model_generation.core.types import GeometryType
 
         if geometry.geometry_type == GeometryType.BOX:
             size = geometry.dimensions

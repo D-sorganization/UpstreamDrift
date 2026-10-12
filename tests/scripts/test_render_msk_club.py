@@ -133,3 +133,22 @@ def test_render_refuses_the_real_display(monkeypatch) -> None:  # noqa: ANN001
     monkeypatch.setenv("NATIVE_VIEWER_XVFB", "1")
     with pytest.raises(RuntimeError, match="real display"):
         _script().render(Path("unused.osim"), Path("unused"), None)
+
+
+def test_hands_close_up_view_follows_the_grip_at_the_preset_distance() -> None:
+    """The stills include a hands close-up on the grip midpoint (#12306)."""
+    import numpy as np
+
+    from src.shared.python.golf_view_presets import get_view_preset
+
+    script = _script()
+    assert "hands_closeup" in script.VIEWS
+    lookat, hands = np.array([0.0, 0.95, 0.0]), np.array([0.3, 1.0, 0.1])
+    point, distance = script.view_target("hands_closeup", lookat, hands)
+    np.testing.assert_allclose(point, hands)
+    assert distance == get_view_preset("hands_closeup").default_distance_m
+    point, distance = script.view_target("face_on", lookat, hands)
+    np.testing.assert_allclose(point, lookat)
+    assert distance == script.DISTANCE_M
+    with pytest.raises(ValueError, match="view"):
+        script.view_target("sideways", lookat, hands)

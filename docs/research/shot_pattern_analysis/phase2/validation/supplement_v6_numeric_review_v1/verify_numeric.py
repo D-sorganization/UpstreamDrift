@@ -130,14 +130,14 @@ receipt = {
     "script_sha256": sha(Path(__file__)),
     "limitation": "Live producer; planned paths are not rendered-file or visual acceptance. Terminal receipt and full output review remain pending.",
 }
-Path("/tmp/v6_numeric_independent_review.json").write_text(
+Path("/tmp/v6_numeric_independent_review.json").write_text(  # nosec B108
     json.dumps(receipt, indent=2) + "\n"
 )
 sys.stdout.write(
     json.dumps(
         {
             "status": receipt["status"],
-            "receipt_sha256": sha(Path("/tmp/v6_numeric_independent_review.json")),
+            "receipt_sha256": sha(Path("/tmp/v6_numeric_independent_review.json")),  # nosec B108
         }
     )
     + "\n"

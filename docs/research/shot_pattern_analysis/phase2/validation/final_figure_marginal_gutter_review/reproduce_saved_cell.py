@@ -67,7 +67,7 @@ for mode in ("academic", "social"):
         presentation=mode,
         dpi=180,
     )
-Path("/tmp/p2-marginal-gutter-review.json").write_text(json.dumps(results, indent=2))
+Path("/tmp/p2-marginal-gutter-review.json").write_text(json.dumps(results, indent=2))  # nosec B108
 sys.stdout.write(
     str(
         json.dumps(

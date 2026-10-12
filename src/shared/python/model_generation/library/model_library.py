@@ -432,7 +432,7 @@ class ModelLibrary:
             raise ValueError("path must be provided")
         import defusedxml.ElementTree as DefusedET
 
-        from shared.python.model_generation.converters.mjcf_converter import (
+        from src.shared.python.model_generation.converters.mjcf_converter import (
             MJCFConverter,
         )
 

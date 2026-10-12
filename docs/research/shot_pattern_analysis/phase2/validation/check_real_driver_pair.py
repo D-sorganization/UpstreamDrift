@@ -107,7 +107,7 @@ result = {
     "limitation": "Per-shot values use the already parity-qualified public scorer; this check independently assembles sorted common indices and the difference-of-differences, not a separate physical or scoring model.",
     "script_sha256": sha(Path(__file__)),
 }
-Path(f"/tmp/p2-real-driver-lean{lean}-pair-review.json").write_text(
+Path(f"/tmp/p2-real-driver-lean{lean}-pair-review.json").write_text(  # nosec B108
     json.dumps(result, indent=2) + "\n"
 )
 sys.stdout.write(

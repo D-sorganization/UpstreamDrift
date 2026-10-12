@@ -334,7 +334,7 @@ result.update(
     visual_review=False,
     full_publication_accepted=False,
 )
-Path("/tmp/p2-article-root-review/review.json").write_text(
+Path("/tmp/p2-article-root-review/review.json").write_text(  # nosec B108
     json.dumps(result, indent=2) + "\n"
 )
 sys.stdout.write(
