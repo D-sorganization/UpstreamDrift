@@ -208,6 +208,46 @@ def quasi_static_hold(
     )
 
 
+def hold_balance_geometry(
+    spec_bytes: bytes, q_hold: Array, barbell: Barbell
+) -> dict[str, Any]:
+    """Centres of mass and foot contact points at the start of the hold.
+
+    Returns the body and the body-plus-bar centres of mass, the forefoot and
+    heel contact-sphere centres (by sphere name) and the horizontal unit
+    ``forward_axis`` from the mean heel to the mean forefoot, all in metres in
+    the world frame, so a caller can see on which side of the feet each
+    centre of mass falls.
+    """
+    pose = np.asarray(q_hold, dtype=float)
+    _, q0, v0, _, simulator = _tracking(
+        spec_bytes, np.array([0.0, 1.0]), np.vstack([pose, pose]), 1.0
+    )
+    q0 = _preload_bar(simulator, q0, barbell.load_kg)
+    loaded, q_aug, _ = _attached_start(spec_bytes, q0, v0, barbell)
+    adapter = simulator.adapter
+    body_com = np.asarray(simulator.centre_of_mass(q0)[0], dtype=float)
+    bar_com = np.asarray(q_aug[-6:-3], dtype=float)
+    mass = float(simulator.mass_kg)
+    _contact_force(adapter, loaded.body_order, q0, v0)  # leaves the sites placed at q0
+    spheres = adapter._spheres  # noqa: SLF001 - contact-sphere site ids
+    sites = {k: adapter.data.site_xpos[i["site_id"]].copy() for k, i in spheres.items()}
+    forefoot = {k: p for k, p in sites.items() if k.startswith("forefoot")}
+    heel = {k: p for k, p in sites.items() if k.startswith("heel")}
+    normal = np.asarray(adapter.ground_plane.normal, dtype=float)
+    normal /= np.linalg.norm(normal)
+    axis = np.mean(list(forefoot.values()), 0) - np.mean(list(heel.values()), 0)
+    axis -= (axis @ normal) * normal
+    return {
+        "body_com_m": body_com,
+        "combined_com_m": (mass * body_com + barbell.load_kg * bar_com)
+        / (mass + barbell.load_kg),
+        "forefoot_m": forefoot,
+        "heel_m": heel,
+        "forward_axis": axis / np.linalg.norm(axis),
+    }
+
+
 def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
     """Re-track ``source``'s reference in MuJoCo with the bar on both hands.
 
