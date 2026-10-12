@@ -24,6 +24,7 @@ from .matched_figure_identity import (
     validate_planned_figure_identities as validate_planned_figure_identities,
 )
 from .density import DensityComparison, shared_histogram_density
+from .figure_style import PUBLICATION_PATTERN_COLORS, reproducible_metadata
 from .matched_matrix import PROFILES
 from .matched_pair_social import PairSocialContext, write_pair_social_density
 from .matched_report import load_individually_supported_endpoints
@@ -387,7 +388,11 @@ def _save_figure(
         if suffix not in formats:
             continue
         path = stem.with_suffix(f".{suffix}")
-        options: dict[str, Any] = {"bbox_inches": "tight", "facecolor": "white"}
+        options: dict[str, Any] = {
+            "bbox_inches": "tight",
+            "facecolor": "white",
+            "metadata": reproducible_metadata(suffix),
+        }
         if dpi is not None:
             options["dpi"] = dpi
         figure.savefig(path, **options)
@@ -545,7 +550,7 @@ def _draw_pair_density_panels(
 
     norm = Normalize(vmin=0.0, vmax=estimate.density_vmax_per_m2)
     color_mesh = None
-    pattern_colors = {"Straight": "#286090", "Draw": "#c66a19", "Fade": "#7b4a9e"}
+    pattern_colors = PUBLICATION_PATTERN_COLORS
     for row_index, (condition_name, _) in enumerate(row_conditions):
         for col_index, pattern in enumerate(_PATTERNS):
             key = f"{pattern} · {condition_name}"
@@ -782,7 +787,7 @@ def _create_pair_overhead_figure(
         facecolor="white",
     )
     figure.subplots_adjust(top=0.70, bottom=0.19, left=0.085, right=0.98, wspace=0.13)
-    colors = {"Straight": "#286090", "Draw": "#c66a19", "Fade": "#7b4a9e"}
+    colors = PUBLICATION_PATTERN_COLORS
     conditions: tuple[_StyledCondition, _StyledCondition] = (
         (first_label, first, "solid"),
         (second_label, second, "dashed"),

@@ -15,6 +15,7 @@ from .core import PATTERN_NAMES
 from .matched_report import load_validated_cell
 from .provenance import manifest_files_match, publish_new_text, sha256_file
 from .scenario_scoring import score_course_endpoints
+from .uncertainty import HISTORICAL_RESAMPLES
 
 
 def _source_hashes() -> dict[str, str]:
@@ -176,6 +177,8 @@ def analyze_saved_sensitivity(cell_dir: Path, plan_path: Path) -> dict:
                 club_id=club_id,
                 target_x_m=target_x_m,
                 seed=seed,
+                # Reproduces the frozen October 2026 sensitivity records.
+                resamples=HISTORICAL_RESAMPLES,
                 **dimensions,
             )
         except ValueError as exc:

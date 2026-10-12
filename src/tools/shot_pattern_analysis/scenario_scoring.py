@@ -9,6 +9,7 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -109,7 +110,7 @@ def _add_sensitivities(
 ) -> None:
     """Add supported course-geometry sensitivity results to a scored report."""
 
-    def sensitivity(**changes: float) -> dict:
+    def sensitivity(**changes: Any) -> dict:
         try:
             return score_course_endpoints(
                 endpoints, club_id=club_id, target_x_m=target, seed=seed, **changes

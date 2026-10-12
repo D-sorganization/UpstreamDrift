@@ -45,13 +45,13 @@
       },
       "paired_benefit_vs_straight": {
         "Draw": {
-          "estimate": 7.461555935228144e-5,
-          "lower_95": -7.238072922554182e-5,
+          "estimate": 7.461555935228144e-05,
+          "lower_95": -7.238072922554182e-05,
           "upper_95": 0.00022504269561618776
         },
         "Fade": {
-          "estimate": 6.825953225868768e-5,
-          "lower_95": -5.8712051970253875e-5,
+          "estimate": 6.825953225868768e-05,
+          "lower_95": -5.8712051970253875e-05,
           "upper_95": 0.0001849031205379826
         }
       },
@@ -61,44 +61,44 @@
         "unavailable_variants": [],
         "Draw": {
           "nominal": {
-            "estimate": 7.461555935228144e-5,
-            "lower_95": -7.238072922554182e-5,
+            "estimate": 7.461555935228144e-05,
+            "lower_95": -7.238072922554182e-05,
             "upper_95": 0.00022504269561618776
           },
-          "estimate_min": 3.85135722760053e-5,
+          "estimate_min": 3.85135722760053e-05,
           "estimate_max": 0.00022227061998640352,
-          "band_lower_95": -9.703448082050228e-5,
+          "band_lower_95": -9.703448082050228e-05,
           "band_upper_95": 0.00040955813746751315,
           "direction": "spans_zero",
           "variant_estimates": {
             "cg_depth_x0.8": 0.00022227061998640352,
             "cg_depth_x1.2": 0.0001333066057072404,
-            "face_radii_x0.8": 7.461555935228152e-5,
-            "face_radii_x1.2": 7.461555935228152e-5,
-            "inertia_x0.8": 3.85135722760053e-5,
+            "face_radii_x0.8": 7.461555935228152e-05,
+            "face_radii_x1.2": 7.461555935228152e-05,
+            "inertia_x0.8": 3.85135722760053e-05,
             "inertia_x1.2": 0.0001545265953046342,
-            "newton_contact_law": 7.46155593519092e-5
+            "newton_contact_law": 7.46155593519092e-05
           }
         },
         "Fade": {
           "nominal": {
-            "estimate": 6.825953225868768e-5,
-            "lower_95": -5.8712051970253875e-5,
+            "estimate": 6.825953225868768e-05,
+            "lower_95": -5.8712051970253875e-05,
             "upper_95": 0.0001849031205379826
           },
-          "estimate_min": 6.752023693944891e-5,
+          "estimate_min": 6.752023693944891e-05,
           "estimate_max": 0.00012442088051639464,
-          "band_lower_95": -6.264914352089215e-5,
+          "band_lower_95": -6.264914352089215e-05,
           "band_upper_95": 0.00026444813198137415,
           "direction": "spans_zero",
           "variant_estimates": {
             "cg_depth_x0.8": 0.00012442088051639464,
-            "cg_depth_x1.2": 9.588480681894091e-5,
-            "face_radii_x0.8": 6.825953225868763e-5,
-            "face_radii_x1.2": 6.825953225868763e-5,
-            "inertia_x0.8": 6.752023693944891e-5,
-            "inertia_x1.2": 8.300734287868378e-5,
-            "newton_contact_law": 6.825953225831538e-5
+            "cg_depth_x1.2": 9.588480681894091e-05,
+            "face_radii_x0.8": 6.825953225868763e-05,
+            "face_radii_x1.2": 6.825953225868763e-05,
+            "inertia_x0.8": 6.752023693944891e-05,
+            "inertia_x1.2": 8.300734287868378e-05,
+            "newton_contact_law": 6.825953225831538e-05
           }
         }
       },
@@ -165,12 +165,12 @@
       },
       "paired_benefit_vs_straight": {
         "Draw": {
-          "estimate": 2.6911773453713196e-5,
+          "estimate": 2.6911773453713196e-05,
           "lower_95": -0.00015935937549650092,
           "upper_95": 0.00020969988138414073
         },
         "Fade": {
-          "estimate": 4.217545316065038e-5,
+          "estimate": 4.217545316065038e-05,
           "lower_95": -0.00016528314247285454,
           "upper_95": 0.00025585260050272214
         }
@@ -181,11 +181,11 @@
         "unavailable_variants": [],
         "Draw": {
           "nominal": {
-            "estimate": 2.6911773453713196e-5,
+            "estimate": 2.6911773453713196e-05,
             "lower_95": -0.00015935937549650092,
             "upper_95": 0.00020969988138414073
           },
-          "estimate_min": 2.6911773453713196e-5,
+          "estimate_min": 2.6911773453713196e-05,
           "estimate_max": 0.0005438778977135754,
           "band_lower_95": -0.00015935937549650092,
           "band_upper_95": 0.0008370485903783465,
@@ -202,7 +202,7 @@
         },
         "Fade": {
           "nominal": {
-            "estimate": 4.217545316065038e-5,
+            "estimate": 4.217545316065038e-05,
             "lower_95": -0.00016528314247285454,
             "upper_95": 0.00025585260050272214
           },
@@ -218,7 +218,7 @@
             "face_radii_x1.2": 0.00016921521748422254,
             "inertia_x0.8": 0.00028630362303732,
             "inertia_x1.2": -0.000197698169303529,
-            "newton_contact_law": -6.367504596496369e-5
+            "newton_contact_law": -6.367504596496369e-05
           }
         }
       },
@@ -526,12 +526,12 @@
       "paired_benefit_vs_straight": {
         "Draw": {
           "estimate": 0.00032501705747193805,
-          "lower_95": 7.456434228212151e-5,
+          "lower_95": 7.456434228212151e-05,
           "upper_95": 0.0005826977443577484
         },
         "Fade": {
           "estimate": 0.00023438701772961358,
-          "lower_95": 3.3015703546797855e-5,
+          "lower_95": 3.3015703546797855e-05,
           "upper_95": 0.00043421351096278296
         }
       },
@@ -542,12 +542,12 @@
         "Draw": {
           "nominal": {
             "estimate": 0.00032501705747193805,
-            "lower_95": 7.456434228212151e-5,
+            "lower_95": 7.456434228212151e-05,
             "upper_95": 0.0005826977443577484
           },
           "estimate_min": 0.000296413927357724,
           "estimate_max": 0.0005263709515963153,
-          "band_lower_95": 5.2034239219477476e-5,
+          "band_lower_95": 5.2034239219477476e-05,
           "band_upper_95": 0.0008153509383058848,
           "direction": "positive",
           "variant_estimates": {
@@ -563,12 +563,12 @@
         "Fade": {
           "nominal": {
             "estimate": 0.00023438701772961358,
-            "lower_95": 3.3015703546797855e-5,
+            "lower_95": 3.3015703546797855e-05,
             "upper_95": 0.00043421351096278296
           },
           "estimate_min": 0.00023438701772961358,
           "estimate_max": 0.0003983891519337404,
-          "band_lower_95": 3.3015703546797855e-5,
+          "band_lower_95": 3.3015703546797855e-05,
           "band_upper_95": 0.0006062072220251182,
           "direction": "positive",
           "variant_estimates": {
@@ -650,7 +650,7 @@
           "upper_95": 0.0008765933715184659
         },
         "Fade": {
-          "estimate": 9.461602514952952e-5,
+          "estimate": 9.461602514952952e-05,
           "lower_95": -0.000222917785699981,
           "upper_95": 0.00042039555304374513
         }
@@ -682,22 +682,22 @@
         },
         "Fade": {
           "nominal": {
-            "estimate": 9.461602514952952e-5,
+            "estimate": 9.461602514952952e-05,
             "lower_95": -0.000222917785699981,
             "upper_95": 0.00042039555304374513
           },
-          "estimate_min": -5.626699233097683e-5,
+          "estimate_min": -5.626699233097683e-05,
           "estimate_max": 0.00052274861132185,
           "band_lower_95": -0.0004192123291248916,
           "band_upper_95": 0.0008274001500385155,
           "direction": "spans_zero",
           "variant_estimates": {
-            "cg_depth_x0.8": -3.868888628858038e-5,
+            "cg_depth_x0.8": -3.868888628858038e-05,
             "cg_depth_x1.2": 0.0003724608561773979,
-            "face_radii_x0.8": -3.630252764767583e-7,
+            "face_radii_x0.8": -3.630252764767583e-07,
             "face_radii_x1.2": 0.00052274861132185,
             "inertia_x0.8": 0.0005206150411723107,
-            "inertia_x1.2": -5.626699233097683e-5,
+            "inertia_x1.2": -5.626699233097683e-05,
             "newton_contact_law": 0.00032327404327404496
           }
         }
@@ -2013,13 +2013,13 @@
       },
       "paired_benefit_vs_straight": {
         "Draw": {
-          "estimate": 9.508286074337279e-5,
-          "lower_95": -6.740884235175359e-5,
+          "estimate": 9.508286074337279e-05,
+          "lower_95": -6.740884235175359e-05,
           "upper_95": 0.00027534162651518074
         },
         "Fade": {
-          "estimate": 9.389912244001256e-5,
-          "lower_95": -3.716499662472288e-5,
+          "estimate": 9.389912244001256e-05,
+          "lower_95": -3.716499662472288e-05,
           "upper_95": 0.00023672355033216001
         }
       },
@@ -2029,40 +2029,40 @@
         "unavailable_variants": [],
         "Draw": {
           "nominal": {
-            "estimate": 9.508286074337279e-5,
-            "lower_95": -6.740884235175359e-5,
+            "estimate": 9.508286074337279e-05,
+            "lower_95": -6.740884235175359e-05,
             "upper_95": 0.00027534162651518074
           },
-          "estimate_min": -1.0735754490663478e-5,
-          "estimate_max": 9.508286074337279e-5,
+          "estimate_min": -1.0735754490663478e-05,
+          "estimate_max": 9.508286074337279e-05,
           "band_lower_95": -0.00014888334904782896,
           "band_upper_95": 0.00027534162651518074,
           "direction": "spans_zero",
           "variant_estimates": {
-            "cg_depth_x0.8": 3.1940828535693994e-5,
-            "cg_depth_x1.2": 4.88716032409961e-5,
-            "inertia_x0.8": -1.0735754490663478e-5,
-            "inertia_x1.2": 4.173434880387614e-5,
-            "newton_contact_law": 3.737131882245809e-5
+            "cg_depth_x0.8": 3.1940828535693994e-05,
+            "cg_depth_x1.2": 4.88716032409961e-05,
+            "inertia_x0.8": -1.0735754490663478e-05,
+            "inertia_x1.2": 4.173434880387614e-05,
+            "newton_contact_law": 3.737131882245809e-05
           }
         },
         "Fade": {
           "nominal": {
-            "estimate": 9.389912244001256e-5,
-            "lower_95": -3.716499662472288e-5,
+            "estimate": 9.389912244001256e-05,
+            "lower_95": -3.716499662472288e-05,
             "upper_95": 0.00023672355033216001
           },
-          "estimate_min": 7.657704866305935e-5,
-          "estimate_max": 9.950055293982024e-5,
-          "band_lower_95": -8.435899927943448e-5,
+          "estimate_min": 7.657704866305935e-05,
+          "estimate_max": 9.950055293982024e-05,
+          "band_lower_95": -8.435899927943448e-05,
           "band_upper_95": 0.00024227914002019978,
           "direction": "spans_zero",
           "variant_estimates": {
-            "cg_depth_x0.8": 8.56890867461716e-5,
-            "cg_depth_x1.2": 9.950055293982024e-5,
-            "inertia_x0.8": 7.657704866305935e-5,
-            "inertia_x1.2": 8.809766742266765e-5,
-            "newton_contact_law": 7.745978786835312e-5
+            "cg_depth_x0.8": 8.56890867461716e-05,
+            "cg_depth_x1.2": 9.950055293982024e-05,
+            "inertia_x0.8": 7.657704866305935e-05,
+            "inertia_x1.2": 8.809766742266765e-05,
+            "newton_contact_law": 7.745978786835312e-05
           }
         }
       },
@@ -2462,12 +2462,12 @@
       "paired_benefit_vs_straight": {
         "Draw": {
           "estimate": 0.00025130495486543904,
-          "lower_95": -3.883216118976e-5,
+          "lower_95": -3.883216118976e-05,
           "upper_95": 0.000554649653001833
         },
         "Fade": {
           "estimate": 0.00029192277778935453,
-          "lower_95": 2.62846012084824e-5,
+          "lower_95": 2.62846012084824e-05,
           "upper_95": 0.0005753260545622655
         }
       },
@@ -2478,10 +2478,10 @@
         "Draw": {
           "nominal": {
             "estimate": 0.00025130495486543904,
-            "lower_95": -3.883216118976e-5,
+            "lower_95": -3.883216118976e-05,
             "upper_95": 0.000554649653001833
           },
-          "estimate_min": 7.816068228721374e-5,
+          "estimate_min": 7.816068228721374e-05,
           "estimate_max": 0.0003141317106249536,
           "band_lower_95": -0.00021316299537231813,
           "band_upper_95": 0.0006239362428145475,
@@ -2489,7 +2489,7 @@
           "variant_estimates": {
             "cg_depth_x0.8": 0.00026175029517388874,
             "cg_depth_x1.2": 0.00018612621291987032,
-            "inertia_x0.8": 7.816068228721374e-5,
+            "inertia_x0.8": 7.816068228721374e-05,
             "inertia_x1.2": 0.0002152192426134906,
             "newton_contact_law": 0.0003141317106249536
           }
@@ -2497,12 +2497,12 @@
         "Fade": {
           "nominal": {
             "estimate": 0.00029192277778935453,
-            "lower_95": 2.62846012084824e-5,
+            "lower_95": 2.62846012084824e-05,
             "upper_95": 0.0005753260545622655
           },
           "estimate_min": 0.0002602439499380912,
           "estimate_max": 0.00029653797590785787,
-          "band_lower_95": -2.11924579318222e-5,
+          "band_lower_95": -2.11924579318222e-05,
           "band_upper_95": 0.0005922028046714397,
           "direction": "spans_zero",
           "variant_estimates": {
@@ -2766,7 +2766,10 @@
         "driver_lean0_curve1_rotation1_shaft_only",
         "driver_lean0_curve1_rotation2_shaft_only"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "available",
       "target_x_m": 178.94875782337786,
       "common_six_n": 10000,
@@ -2810,7 +2813,10 @@
         "driver_lean0_curve1_rotation2_shaft_only",
         "driver_lean0_curve2_rotation2_shaft_only"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "available",
       "target_x_m": 178.94875782337786,
       "common_six_n": 10000,
@@ -2824,7 +2830,7 @@
         "Fade": {
           "estimate": -0.00023541937361689288,
           "lower_95": -0.0005663606717119732,
-          "upper_95": 9.329878343612068e-5
+          "upper_95": 9.329878343612068e-05
         }
       },
       "sources": [
@@ -2854,7 +2860,10 @@
         "driver_lean0_curve1_rotation1_combined2",
         "driver_lean0_curve1_rotation2_combined2"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "available",
       "target_x_m": 178.94875782337786,
       "common_six_n": 10000,
@@ -2898,7 +2907,10 @@
         "driver_lean0_curve1_rotation2_combined2",
         "driver_lean0_curve2_rotation2_combined2"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "available",
       "target_x_m": 178.94875782337786,
       "common_six_n": 10000,
@@ -2910,7 +2922,7 @@
           "upper_95": 0.005064704350633376
         },
         "Fade": {
-          "estimate": 9.2985393232592e-5,
+          "estimate": 9.2985393232592e-05,
           "lower_95": -0.00027386633465902277,
           "upper_95": 0.00046184858563667045
         }
@@ -2942,20 +2954,23 @@
         "seven_iron_lean0_curve1_rotation1_shaft_only",
         "seven_iron_lean0_curve1_rotation2_shaft_only"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "available",
       "target_x_m": 127.88194166336235,
       "common_six_n": 10000,
       "total_n_per_population": 10000,
       "effect_modification": {
         "Draw": {
-          "estimate": 6.4485471218489035e-6,
-          "lower_95": -7.302063631914756e-5,
-          "upper_95": 4.9357780961393666e-5
+          "estimate": 6.4485471218489035e-06,
+          "lower_95": -7.302063631914756e-05,
+          "upper_95": 4.9357780961393666e-05
         },
         "Fade": {
-          "estimate": 1.999968811025618e-5,
-          "lower_95": -6.0719816499139404e-5,
+          "estimate": 1.999968811025618e-05,
+          "lower_95": -6.0719816499139404e-05,
           "upper_95": 0.00013304390847614897
         }
       },
@@ -2986,7 +3001,10 @@
         "seven_iron_lean0_curve1_rotation2_shaft_only",
         "seven_iron_lean0_curve2_rotation2_shaft_only"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "available",
       "target_x_m": 127.88194166336235,
       "common_six_n": 10000,
@@ -2994,7 +3012,7 @@
       "effect_modification": {
         "Draw": {
           "estimate": 0.0002108861249960735,
-          "lower_95": 6.885165251815802e-5,
+          "lower_95": 6.885165251815802e-05,
           "upper_95": 0.00036060320605274884
         },
         "Fade": {
@@ -3030,20 +3048,23 @@
         "seven_iron_lean0_curve1_rotation1_combined2",
         "seven_iron_lean0_curve1_rotation2_combined2"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "conditional_only",
       "target_x_m": 127.88194166336235,
       "common_six_n": 9996,
       "total_n_per_population": 10000,
       "effect_modification": {
         "Draw": {
-          "estimate": -6.027502181628796e-5,
+          "estimate": -6.027502181628796e-05,
           "lower_95": -0.00028927684162666326,
           "upper_95": 0.0001555642991275521
         },
         "Fade": {
           "estimate": 0.000217539684880919,
-          "lower_95": -5.8165234113700454e-5,
+          "lower_95": -5.8165234113700454e-05,
           "upper_95": 0.0005075193415471592
         }
       },
@@ -3074,7 +3095,10 @@
         "seven_iron_lean0_curve1_rotation2_combined2",
         "seven_iron_lean0_curve2_rotation2_combined2"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "conditional_only",
       "target_x_m": 127.88194166336235,
       "common_six_n": 9996,
@@ -3083,7 +3107,7 @@
         "Draw": {
           "estimate": -0.0002475919060323463,
           "lower_95": -0.0004943879007167445,
-          "upper_95": 1.1321046623105803e-5
+          "upper_95": 1.1321046623105803e-05
         },
         "Fade": {
           "estimate": 0.0011829007931870577,
@@ -3118,7 +3142,10 @@
         "pitching_wedge_lean0_curve1_rotation1_shaft_only",
         "pitching_wedge_lean0_curve1_rotation2_shaft_only"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "available",
       "target_x_m": 77.40247724866299,
       "common_six_n": 10000,
@@ -3162,7 +3189,10 @@
         "pitching_wedge_lean0_curve1_rotation2_shaft_only",
         "pitching_wedge_lean0_curve2_rotation2_shaft_only"
       ],
-      "source_protocols": ["original_control/1", "pw-primary-face-bounds/1"],
+      "source_protocols": [
+        "original_control/1",
+        "pw-primary-face-bounds/1"
+      ],
       "status": "available",
       "target_x_m": 77.40247724866299,
       "common_six_n": 10000,
@@ -3206,7 +3236,10 @@
         "pitching_wedge_lean0_curve1_rotation1_combined2",
         "pitching_wedge_lean0_curve1_rotation2_combined2"
       ],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "status": "conditional_only",
       "target_x_m": 77.40247724866299,
       "common_six_n": 9999,
@@ -3250,7 +3283,10 @@
         "pitching_wedge_lean0_curve1_rotation2_combined2",
         "pitching_wedge_lean0_curve2_rotation2_combined2"
       ],
-      "source_protocols": ["original_control/1", "pw-primary-face-bounds/1"],
+      "source_protocols": [
+        "original_control/1",
+        "pw-primary-face-bounds/1"
+      ],
       "status": "conditional_only",
       "target_x_m": 77.40247724866299,
       "common_six_n": 9999,

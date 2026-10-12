@@ -60,8 +60,10 @@ def head_variants(club: MatchedConfig) -> tuple[tuple[str, MatchedConfig], ...]:
                 f"inertia_x{scale:g}",
                 replace(
                     club,
-                    inertia_diagonal_kg_m2=tuple(
-                        value * scale for value in club.inertia_diagonal_kg_m2
+                    inertia_diagonal_kg_m2=(
+                        club.inertia_diagonal_kg_m2[0] * scale,
+                        club.inertia_diagonal_kg_m2[1] * scale,
+                        club.inertia_diagonal_kg_m2[2] * scale,
                     ),
                 ),
             )

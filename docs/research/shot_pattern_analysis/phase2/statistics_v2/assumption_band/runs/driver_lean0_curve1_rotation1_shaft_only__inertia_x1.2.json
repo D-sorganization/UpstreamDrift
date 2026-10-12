@@ -10,7 +10,11 @@
       "shaft_lean_deg": 0.0,
       "attack_angle_deg": -0.9,
       "clubhead_mass_kg": 0.2,
-      "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
+      "inertia_diagonal_kg_m2": [
+        0.0003,
+        0.00048,
+        0.00054
+      ],
       "cg_depth_m": 0.035,
       "face_half_width_m": 0.05,
       "face_half_height_m": 0.027,
@@ -26,7 +30,15 @@
       "loft_source": "https://www.titleist.com/golf-clubs/drivers/gt2"
     },
     "noise": {
-      "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "standard_deviations": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
       "correlation": null
     },
     "n_shots": 10000,
@@ -36,7 +48,10 @@
     "match_tolerance_m": 0.05,
     "target_radius_m": 15.0,
     "match_face_bounds_deg": null,
-    "match_speed_factors": [0.75, 1.25]
+    "match_speed_factors": [
+      0.75,
+      1.25
+    ]
   },
   "resamples": 2000,
   "status": "available",
@@ -45,12 +60,12 @@
   "paired_benefit_vs_straight": {
     "Draw": {
       "estimate": 0.0001545265953046342,
-      "lower_95": -4.2499169899278995e-6,
+      "lower_95": -4.2499169899278995e-06,
       "upper_95": 0.00033051395602811686
     },
     "Fade": {
-      "estimate": 8.300734287868378e-5,
-      "lower_95": -4.107082141137733e-5,
+      "estimate": 8.300734287868378e-05,
+      "lower_95": -4.107082141137733e-05,
       "upper_95": 0.00019883170021700648
     }
   },

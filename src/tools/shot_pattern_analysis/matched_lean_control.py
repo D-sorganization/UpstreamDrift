@@ -21,7 +21,7 @@ from .matched_sensitivity import _source_hashes, _supported_endpoints
 from .provenance import manifest_files_match, publish_new_text, sha256_file
 from .scenario_scoring import score_course_endpoints
 from .course_score_vectors import score_course_endpoint_vectors
-from .uncertainty import PUBLICATION_RESAMPLES, paired_mean_difference
+from .uncertainty import HISTORICAL_RESAMPLES, paired_mean_difference
 
 PATTERNS = PATTERN_NAMES
 LEANS = (0.0, 5.0, 10.0)
@@ -59,7 +59,7 @@ def _paired_pattern_metrics(
     target_x_m: float,
     radius_m: float,
     seed: int,
-    resamples: int = PUBLICATION_RESAMPLES,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> dict:
     a: np.ndarray = np.asarray([(x, y) for _, x, y in before], dtype=float)
     b: np.ndarray = np.asarray([(x, y) for _, x, y in after], dtype=float)
@@ -94,6 +94,7 @@ def _paired_pattern_metrics(
             target_x_m=target_x_m,
             green_radius_m=radius_m,
             seed=seed,
+            resamples=resamples,
         )
     except ValueError as exc:
         result["course_sg"] = {"status": "unavailable", "reason": str(exc)}
@@ -542,7 +543,7 @@ def _paired_effect_modification(
     curved_b: np.ndarray,
     *,
     seed: int,
-    resamples: int = PUBLICATION_RESAMPLES,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> dict:
     """Bootstrap (curve−straight)_B − (curve−straight)_A by shared index."""
     arrays = tuple(
@@ -822,7 +823,7 @@ def _populate_explicit_metrics(
     population: _PairedPopulation,
     target_x_m: float,
     comparison_kind: str,
-    resamples: int = PUBLICATION_RESAMPLES,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> None:
     config_a, config_b = first.config, second.config
     club_a, club_b = config_a["club"], config_b["club"]
@@ -886,7 +887,7 @@ def _populate_effect_modification(
     config_a: dict,
     config_b: dict,
     target_x_m: float,
-    resamples: int = PUBLICATION_RESAMPLES,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> None:
     club_a, club_b = config_a["club"], config_b["club"]
     try:
@@ -939,7 +940,7 @@ def analyze_explicit_source_pair(
     target_x_m: float,
     transition_receipt_path: Path | None = None,
     transition_receipt_sha256: str | None = None,
-    resamples: int = PUBLICATION_RESAMPLES,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> dict:
     """Pair two validated source cells without conflating their protocols.
 

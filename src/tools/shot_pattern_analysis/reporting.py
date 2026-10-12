@@ -18,6 +18,7 @@ from src.shared.python.physics.impact_model import ImpactParameters
 
 from .core import PATTERNS, AnalysisConfig, AnalysisResult, ShotRecord
 from .dispersion_stats import landing_dispersion
+from .figure_style import DARK_PATTERN_COLORS
 from .provenance import source_snapshot
 from .range_control import equal_range_endpoint, equal_range_summary
 from .uncertainty import (
@@ -26,7 +27,7 @@ from .uncertainty import (
     paired_variance_ratio,
 )
 
-_COLORS = {"Straight": "#83d7ff", "Draw": "#f8bf58", "Fade": "#e98ac0"}
+_COLORS = DARK_PATTERN_COLORS
 _LIMITATION = (
     "Simplified central rigid-body impulse and shaft-axis delivery geometry; "
     "no measured player covariance, off-center gear physics, or ground roll. "

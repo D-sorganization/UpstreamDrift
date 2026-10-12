@@ -94,7 +94,7 @@ class ExperimentConfig:
         club["inertia_diagonal_kg_m2"] = tuple(club["inertia_diagonal_kg_m2"])
         noise = values["noise"]
         correlation = noise.get("correlation")
-        options = {
+        options: dict[str, Any] = {
             key: tuple(value) if isinstance(value, list) else value
             for key, value in values.items()
             if key not in ("club", "noise")
@@ -187,7 +187,7 @@ class MatchedPhysicsProtocol(Protocol):
         path_deg: float,
         config: MatchedConfig,
         sample_trajectory: bool = False,
-        nominal_face_deg: float = 0.0,
+        nominal_face_deg: float | None = None,
     ) -> ShotOutcome: ...
     def simulate_delivery(
         self,
