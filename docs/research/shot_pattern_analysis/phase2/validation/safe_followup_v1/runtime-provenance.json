@@ -1,0 +1,329 @@
+{
+  "recorded_at_utc": "2026-10-11T23:49:39.780714+00:00",
+  "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
+  "executable": "/tmp/shot-safe-final-venv/bin/python",
+  "requirements_lock_sha256": "12324d651f09af06d234f74ad16e741be082cdc72dcbf72390d850d294c0ad0d",
+  "scope": "Current local unit/type-gate overlay provenance, not frozen-study producer or lock-reproduction acceptance",
+  "matching": 23,
+  "total_pins_evaluated": 76,
+  "differences": [
+    {
+      "package": "absl-py",
+      "locked": "==2.4.0",
+      "installed": "2.5.0",
+      "matches": false
+    },
+    {
+      "package": "alembic",
+      "locked": "==1.17.2",
+      "installed": "1.20.0",
+      "matches": false
+    },
+    {
+      "package": "annotated-doc",
+      "locked": "==0.0.4",
+      "installed": "0.0.5",
+      "matches": false
+    },
+    {
+      "package": "annotated-types",
+      "locked": "==0.7.0",
+      "installed": "0.8.0",
+      "matches": false
+    },
+    {
+      "package": "anyio",
+      "locked": "==4.14.2",
+      "installed": "4.15.1",
+      "matches": false
+    },
+    {
+      "package": "bcrypt",
+      "locked": "==4.3.0",
+      "installed": "5.0.0",
+      "matches": false
+    },
+    {
+      "package": "bokeh",
+      "locked": "==3.9.0",
+      "installed": "3.10.0",
+      "matches": false
+    },
+    {
+      "package": "certifi",
+      "locked": "==2026.1.4",
+      "installed": "2026.7.22",
+      "matches": false
+    },
+    {
+      "package": "cffi",
+      "locked": "==2.0.0",
+      "installed": "2.1.1",
+      "matches": false
+    },
+    {
+      "package": "charset-normalizer",
+      "locked": "==3.4.7",
+      "installed": "3.5.2",
+      "matches": false
+    },
+    {
+      "package": "click",
+      "locked": "==8.4.2",
+      "installed": "8.5.0",
+      "matches": false
+    },
+    {
+      "package": "contourpy",
+      "locked": "==1.3.3",
+      "installed": "1.4.0",
+      "matches": false
+    },
+    {
+      "package": "cryptography",
+      "locked": "==50.0.0",
+      "installed": "50.0.2",
+      "matches": false
+    },
+    {
+      "package": "etils",
+      "locked": "==1.13.0",
+      "installed": "1.14.0",
+      "matches": false
+    },
+    {
+      "package": "fastapi",
+      "locked": "==0.136.3",
+      "installed": "0.142.2",
+      "matches": false
+    },
+    {
+      "package": "fsspec",
+      "locked": "==2026.6.0",
+      "installed": "2026.9.0",
+      "matches": false
+    },
+    {
+      "package": "glfw",
+      "locked": "==2.10.0",
+      "installed": "2.10.2",
+      "matches": false
+    },
+    {
+      "package": "greenlet",
+      "locked": "==3.2.4",
+      "installed": "3.5.6",
+      "matches": false
+    },
+    {
+      "package": "httptools",
+      "locked": "==0.7.1",
+      "installed": "0.8.0",
+      "matches": false
+    },
+    {
+      "package": "idna",
+      "locked": "==3.15",
+      "installed": "3.20",
+      "matches": false
+    },
+    {
+      "package": "importlib-resources",
+      "locked": "==6.5.2",
+      "installed": null,
+      "matches": false
+    },
+    {
+      "package": "mako",
+      "locked": "==1.3.12",
+      "installed": "1.4.3",
+      "matches": false
+    },
+    {
+      "package": "markupsafe",
+      "locked": "==3.0.3",
+      "installed": "3.0.4",
+      "matches": false
+    },
+    {
+      "package": "narwhals",
+      "locked": "==2.20.0",
+      "installed": "2.26.0",
+      "matches": false
+    },
+    {
+      "package": "packaging",
+      "locked": "==26.2",
+      "installed": "26.3",
+      "matches": false
+    },
+    {
+      "package": "pandas",
+      "locked": "==2.3.3",
+      "installed": "3.0.6",
+      "matches": false
+    },
+    {
+      "package": "platformdirs",
+      "locked": "==4.3.8",
+      "installed": "4.13.0",
+      "matches": false
+    },
+    {
+      "package": "pycparser",
+      "locked": "==2.23",
+      "installed": "3.0",
+      "matches": false
+    },
+    {
+      "package": "pydantic",
+      "locked": "==2.12.5",
+      "installed": "2.13.5",
+      "matches": false
+    },
+    {
+      "package": "pydantic-core",
+      "locked": "==2.41.5",
+      "installed": "2.46.5",
+      "matches": false
+    },
+    {
+      "package": "pydantic-settings",
+      "locked": "==2.14.2",
+      "installed": "2.15.0",
+      "matches": false
+    },
+    {
+      "package": "pyjwt",
+      "locked": "==2.15.0",
+      "installed": "2.15.1",
+      "matches": false
+    },
+    {
+      "package": "pyproj",
+      "locked": "==3.7.2",
+      "installed": "3.8.0",
+      "matches": false
+    },
+    {
+      "package": "python-dotenv",
+      "locked": "==1.2.2",
+      "installed": "1.2.4",
+      "matches": false
+    },
+    {
+      "package": "python-multipart",
+      "locked": "==0.0.31",
+      "installed": "0.0.32",
+      "matches": false
+    },
+    {
+      "package": "pytz",
+      "locked": "==2026.2",
+      "installed": null,
+      "matches": false
+    },
+    {
+      "package": "pyyaml",
+      "locked": "==6.0.2",
+      "installed": "6.0.3",
+      "matches": false
+    },
+    {
+      "package": "requests",
+      "locked": "==2.33.1",
+      "installed": "2.34.2",
+      "matches": false
+    },
+    {
+      "package": "scipy",
+      "locked": "==1.13.1",
+      "installed": "1.18.1",
+      "matches": false
+    },
+    {
+      "package": "simpleeval",
+      "locked": "==1.0.5",
+      "installed": "1.0.8",
+      "matches": false
+    },
+    {
+      "package": "slowapi",
+      "locked": "==0.1.9",
+      "installed": "0.1.10",
+      "matches": false
+    },
+    {
+      "package": "sqlalchemy",
+      "locked": "==2.0.44",
+      "installed": "2.1.3",
+      "matches": false
+    },
+    {
+      "package": "starlette",
+      "locked": "==1.3.1",
+      "installed": "1.7.0",
+      "matches": false
+    },
+    {
+      "package": "structlog",
+      "locked": "==25.5.0",
+      "installed": "26.1.0",
+      "matches": false
+    },
+    {
+      "package": "typing-extensions",
+      "locked": "==4.15.0",
+      "installed": "4.16.0",
+      "matches": false
+    },
+    {
+      "package": "typing-inspection",
+      "locked": "==0.4.2",
+      "installed": "0.4.4",
+      "matches": false
+    },
+    {
+      "package": "tzdata",
+      "locked": "==2026.3",
+      "installed": null,
+      "matches": false
+    },
+    {
+      "package": "uvicorn",
+      "locked": "==0.40.0",
+      "installed": "0.54.0",
+      "matches": false
+    },
+    {
+      "package": "uvloop",
+      "locked": "==0.22.1",
+      "installed": "0.23.0",
+      "matches": false
+    },
+    {
+      "package": "watchfiles",
+      "locked": "==1.1.1",
+      "installed": "1.3.0",
+      "matches": false
+    },
+    {
+      "package": "websockets",
+      "locked": "==16.0",
+      "installed": "17.2",
+      "matches": false
+    },
+    {
+      "package": "xyzservices",
+      "locked": "==2026.3.0",
+      "installed": "2026.9.1",
+      "matches": false
+    },
+    {
+      "package": "zipp",
+      "locked": "==3.23.0",
+      "installed": "4.1.1",
+      "matches": false
+    }
+  ]
+}

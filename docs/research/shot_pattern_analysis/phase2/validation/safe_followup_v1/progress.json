@@ -1,10 +1,10 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-11T23:45:39.534095+00:00",
+  "recorded_at_utc": "2026-10-12T00:18:12.413700+00:00",
   "checkpoint": "adc1fb0627",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "ef0f14a36b37f24a0e77fe09db3a30969d9af910",
-  "integration": "Incoming9c9000 reconciled in isolated worktree; conflict resolutions staged and under focused validation. No force push.",
+  "source_commit": "17ad20777773f3ae69a42bcfd28a5179a5af1135",
+  "integration": "Incoming 9c9000 reconciled at cb4948eb1b; writer API repair committed at 17ad207777. Frozen rows and approved DRY baseline unchanged. No force push.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
     "change": "Include copied research scripts in frozen fixture source hashes",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Premerge canonical mypy gate passed60sourcefiles with corrected dependency overlay; merge-focused tests running; complete postmerge pre-PR pending.",
+  "current_validation": "Clean CI runtime matches all 126 evaluated requirements-dev.lock pins; Rust wheel built and import/smoke probe passed. Contact node, full DRY, architecture, and file-size checks passed locally. Complete canonical post-fix pre-PR still pending; no repository acceptance claim.",
   "development_log_blocker": {
     "issue": 11935,
     "owned_by_other_session": true,
@@ -76,7 +76,52 @@
     "green": "Four compatibility tests pass; scoped mypy4files PASS; Ruff and format PASS",
     "review": "Astra accepted compatibility defaults/pass-through/mixed-input rejection; no science changes",
     "receipt": "writer_api_compatibility.txt",
-    "canonical_postfix": "pending"
+    "canonical_postfix": "pending clean CI pre-PR"
   },
-  "dry_postmerge_attempt": "Stopped without summary when writer source repair began; no pass claimed. Approved baseline bytes remain unchanged; rerun after final source commit."
+  "dry_postmerge_attempt": "Stopped without summary when writer source repair began; no pass claimed. Approved baseline bytes remain unchanged; rerun after final source commit.",
+  "postfix_overlay_gate": {
+    "mypy": "PASS148sourcefiles",
+    "affected_tests": "Stopped before summary after runtime provenance comparison showed inherited packages differ from CI dev lock",
+    "full_acceptance": false,
+    "receipt": "postfix-overlay-mypy-pass-incomplete.txt.gz",
+    "receipt_sha256": "cbc346ac9ed65b1a432ed32a796b264c51fe3263b0b2c803255f6335ca4b088f",
+    "next": "Complete clean requirements-dev.lock environment and rerun canonical gate"
+  },
+  "full_repository_dry": {
+    "result": "PASS",
+    "exit_code": 0,
+    "source_commit": "17ad207777",
+    "approved_baseline_changed": false,
+    "new_exemptions": false,
+    "receipt": "postfix-full-repository-dry-pass.txt.gz",
+    "receipt_sha256": "9fe02c3bbe89873a210c087021b8ff9e8e40823d9a0c4a20585dfbb86dfd0199",
+    "historical_quarantine_count": 594
+  },
+  "clean_ci_local_gates": {
+    "source_commit": "17ad20777773f3ae69a42bcfd28a5179a5af1135",
+    "runtime_provenance": "ci-runtime-provenance.json",
+    "requirements_dev_lock_pins": "126/126 match",
+    "contact_node": {
+      "result": "PASS",
+      "receipt": "contact-ci-runtime.txt.gz",
+      "receipt_sha256": "1174b2f119e5b311ff29604fc149964615ecc4e82b7202eac2bfc9955ee10472"
+    },
+    "architecture": {
+      "result": "PASS",
+      "receipt": "safe-postfix-architecture.txt.gz",
+      "receipt_sha256": "24f59f08c1073c345aea1209c2a64562fd0ec07acba984576df1d1ce5ed2ddb0"
+    },
+    "file_size": {
+      "result": "PASS",
+      "receipt": "safe-postfix-file-size.txt.gz",
+      "receipt_sha256": "398a0868ee37384c154d5e896a42583088d7201e69e82470b6a4b4621603810f"
+    },
+    "rust_wheel": {
+      "result": "BUILD AND PROBE PASS",
+      "receipt": "upstream-ci-rust-build-v2.txt.gz",
+      "probe": "upstream-ci-rust-probe.txt.gz"
+    },
+    "generated_ignored_cargo_lock_sha256": "a986247a943e2f3a4b3881f5e259d7abf9c3b783679ec33e97d5db569fd2a8df",
+    "complete_pre_pr": "pending"
+  }
 }
