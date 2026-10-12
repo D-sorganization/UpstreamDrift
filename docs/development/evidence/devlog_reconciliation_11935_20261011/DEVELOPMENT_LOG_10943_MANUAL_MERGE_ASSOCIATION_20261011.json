@@ -1,0 +1,21 @@
+{
+  "issue": 10943,
+  "state_after": "shipped",
+  "shipped_scope": "knowledge-pack and wizard-pack CI delivery only",
+  "pr": 10968,
+  "merge_sha": "28b37bd47eb85d977e530e60659c6f54ca0a1a2b",
+  "merged_date": "2026-09-26",
+  "association": "manual reconciliation; no direct closedBy PR relationship was present",
+  "basis": [
+    "exact PR title and timing",
+    "changed-file scope covers both original duplicate subscopes",
+    "merged PR is an ancestor of current main",
+    "current files/tests/CI/packaging are substantive"
+  ],
+  "github_response_path": "dl-10943-11719-response.json",
+  "github_response_sha256": "b496bd3dfe669b242b6ce2ff3dcd71887ef8be248114399d4ce4549d7ac4e396",
+  "source_blocks": "Exact original duplicate blocks remain in DEVELOPMENT_LOG_RECONCILIATION_SOURCE_20261011.md; the superseded 'still need authoring' assertion is retained as history, not current status.",
+  "limitations": "No scientific, physical, or model qualification is implied.",
+  "archive_policy_days": 14,
+  "archive_files_written": ["docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md"]
+}

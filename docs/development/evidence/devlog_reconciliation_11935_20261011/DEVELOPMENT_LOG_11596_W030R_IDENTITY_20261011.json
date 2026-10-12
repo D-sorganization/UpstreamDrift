@@ -1,0 +1,26 @@
+{
+  "source_commit": "e68baeabde8ff639f846a167ca7703ace43bd0a9",
+  "candidate": {
+    "path": "evidence/matched/driver_g1_crocoddyl_w030r/candidate.npz",
+    "bytes": 308261,
+    "sha256": "90b80cf50f8b86bf72bc8a5a85610227820a355bb32d7b7df26ab19af5568599"
+  },
+  "receipt": {
+    "path": "evidence/matched/driver_g1_crocoddyl_w030r/receipt.json",
+    "bytes": 8059,
+    "sha256": "456a86d0199f592971d52056e7bb1caba3742d0aa6518e055a28a56d701a7b61",
+    "candidate_sha256": "90b80cf50f8b86bf72bc8a5a85610227820a355bb32d7b7df26ab19af5568599"
+  },
+  "recovered_inputs": {
+    "path": "evidence/matched/driver_g1_crocoddyl_w030r/recovered_inputs.json",
+    "bytes": 1396,
+    "sha256": "7dc87d4be2113e56f306d6969cef2fd3b05d6ded1c8f6171bffa1310c6859fdf",
+    "identity_check": {
+      "candidate_sha256": "90b80cf50f8b86bf72bc8a5a85610227820a355bb32d7b7df26ab19af5568599",
+      "matches_source_run_candidate": true,
+      "matches_receipt_candidate_sha256": true
+    },
+    "candidate_role": "Crocoddyl FDDP candidate over 0-0.30 s (109 nodes); warm-start source of driver_g1_crocoddyl_rk45"
+  },
+  "qualification_note": "Chain-root provenance only; recovered_inputs.json explicitly says not registered in acceptance ledger and not acceptance evidence."
+}

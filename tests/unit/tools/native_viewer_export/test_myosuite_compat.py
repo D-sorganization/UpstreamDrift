@@ -73,7 +73,7 @@ def test_unavailable_reason_probes_worker_import(
     reason = MyoSuiteArenaBackend().unavailable_reason()
     assert reason is not None
     assert "MJRenderer" in reason
-    assert seen["argv"] == ["/fake/python", "-c", "import myosuite, mujoco"]
+    assert seen["argv"] == ["/fake/python", "-c", PROBE_CODE]
 
 
 def test_unavailable_reason_none_when_probe_passes(
@@ -112,3 +112,21 @@ def test_find_scene_missing_lists_candidates(tmp_path: Path) -> None:
         )
         with pytest.raises(FileNotFoundError, match="myo_sim|models"):
             compat.find_scene()
+
+
+def test_worker_does_not_import_removed_env_base() -> None:
+    """Regression for #11997: myosuite 3.x has no ``myosuite.envs.env_base``."""
+    from src.tools.native_viewer_export.backends import myosuite_worker
+
+    source = Path(myosuite_worker.__file__).read_text(encoding="utf-8")
+    assert "env_base" not in source
+    assert "MujocoEnv" not in source
+
+
+def test_worker_scene_path_uses_compat_lookup(tmp_path: Path) -> None:
+    from src.tools.native_viewer_export.backends import myosuite_worker
+
+    scene = tmp_path / SCENE_NAME
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(myosuite_worker, "find_scene", lambda: scene)
+        assert myosuite_worker.arena_scene_path() == scene
