@@ -9,13 +9,14 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.api.routes import motion_capture as mc
+from tests.helpers.ezc3d_support import ezc3d_installed, require_ezc3d
 from src.api.routes.motion_capture import router, _sessions, _recordings
 
 pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _LAUNCHER_MANIFEST = _REPO_ROOT / "src" / "config" / "launcher_manifest.json"
-_HAS_EZC3D = importlib.util.find_spec("ezc3d") is not None
+_HAS_EZC3D = ezc3d_installed()
 
 
 @pytest.fixture
@@ -135,8 +136,9 @@ def test_c3d_skeleton_template_is_empty(client: TestClient) -> None:
 @pytest.fixture
 def mm_c3d_file(tmp_path: Path) -> Path:
     """Generate a tiny C3D with mm units and known marker coordinates."""
-    import ezc3d
     import numpy as np
+
+    ezc3d = require_ezc3d()
 
     c3d = ezc3d.c3d()
     c3d["parameters"]["POINT"]["RATE"]["value"] = [60.0]

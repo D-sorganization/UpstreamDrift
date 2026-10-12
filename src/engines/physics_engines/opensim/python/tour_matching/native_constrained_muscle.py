@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
 _VERSION = "2.1.0"
+_EXACT_557_POLICY_ID = "exact-557-coupler-muscle-cold-start"
 _ACCURACY = 1e-8
 _ALLOWED_COMPONENTS = native_muscle_bundle._COMPONENTS | {
     "CoordinateCouplerConstraint",
@@ -87,6 +88,12 @@ class NativeNamedStateReplay(Protocol):
 
     @property
     def input_sha256(self) -> str: ...
+
+
+def _reject_exact_557_mixing(exact_557: bool, *declarations: object) -> None:
+    """Keep the exact-source diagnostic free of any other admission surface."""
+    if exact_557 and any(item is not None for item in declarations):
+        raise ValueError("exact 557 diagnostic cannot combine other declarations")
 
 
 def _audit_moving_path_points(
@@ -339,8 +346,16 @@ def _owned_prepared(
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
     contact_declaration: NativeContactExecutionDeclaration | None = None,
+    *,
+    exact_557: bool = False,
 ) -> Any:
     """Yield a fresh model with one time-only player and explicit lock recipe."""
+    _reject_exact_557_mixing(
+        exact_557,
+        wrapped_path_declaration,
+        native_mechanics_profile,
+        contact_declaration,
+    )
     from contextlib import contextmanager
 
     @contextmanager
@@ -349,20 +364,30 @@ def _owned_prepared(
 
         path = declaration.model_path
         raw = path.read_bytes()
-        native_muscle_bundle._validate_self_contained_source(raw)
+        if exact_557:
+            from .native_exact_557_profile import validate_exact_source_bytes
+
+            validate_exact_source_bytes(raw)
+        else:
+            native_muscle_bundle._validate_self_contained_source(raw)
         if hashlib.sha256(raw).hexdigest() != declaration.source_sha256:
             raise ValueError("native constrained muscle source identity differs")
 
         def before_initialize(model: Any) -> None:
             model.finalizeConnections()
-            _audit_source_components(
-                model,
-                model.getMuscles(),
-                declaration,
-                wrapped_path_declaration=wrapped_path_declaration,
-                native_mechanics_profile=native_mechanics_profile,
-                contact_declaration=contact_declaration,
-            )
+            if exact_557:
+                from .native_exact_557_profile import validate_exact_loaded_model
+
+                validate_exact_loaded_model(model, declaration)
+            else:
+                _audit_source_components(
+                    model,
+                    model.getMuscles(),
+                    declaration,
+                    wrapped_path_declaration=wrapped_path_declaration,
+                    native_mechanics_profile=native_mechanics_profile,
+                    contact_declaration=contact_declaration,
+                )
             muscles = model.getMuscles()
             names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
             if len(set(names)) != len(names) or set(names) != set(controls):
@@ -403,6 +428,8 @@ def _bundle_for(
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
     contact_declaration: NativeContactExecutionDeclaration | None = None,
+    *,
+    exact_557: bool = False,
 ) -> ExperimentReplayBundle:
     contracts = native_replay_contract_types()
     with _owned_prepared(
@@ -412,6 +439,7 @@ def _bundle_for(
         wrapped_path_declaration,
         native_mechanics_profile,
         contact_declaration,
+        exact_557=exact_557,
     ) as (
         model,
         state,
@@ -422,14 +450,12 @@ def _bundle_for(
         state_names = tuple(declaration.named_state)
         options = native_muscle_bundle._registered_options(model, state, muscles)
         identity, adapter_sha = _constrained_bundle_identity(
-            declaration,
-            model,
-            state,
-            state_names,
-            names,
-            options,
+            native_muscle_bundle.BundleSubject(
+                declaration.model_path, model, state_names, names, options
+            ),
             contracts,
             native_mechanics_profile,
+            exact_557=exact_557,
         )
         policy = _constrained_bundle_policy(
             declaration,
@@ -439,6 +465,7 @@ def _bundle_for(
             native_mechanics_profile,
             contact_declaration,
             contracts,
+            exact_557=exact_557,
         )
         values, capability, channels = _constrained_bundle_channels(
             declaration, state_names, options, names, contracts
@@ -458,23 +485,25 @@ def _bundle_for(
 
 
 def _constrained_bundle_identity(
-    declaration: DeclaredColdStart,
-    model: Any,
-    state: Any,
-    state_names: tuple[str, ...],
-    muscle_names: tuple[str, ...],
-    options: Mapping[str, Any],
+    subject: native_muscle_bundle.BundleSubject,
     contracts: Any,
     mechanics_profile: NativeMechanicsExecutionProfile | None,
+    *,
+    exact_557: bool = False,
 ) -> tuple[Any, str]:
+    coupled_rotation_paths: frozenset[str] = frozenset()
+    variant, version, profile_material = "declared-constrained-muscles", _VERSION, b""
+    if exact_557:
+        from . import native_exact_557_profile as exact
+
+        coupled_rotation_paths = exact.COUPLED_ROTATION_PATHS
+        variant, version = exact.VARIANT_ID, exact.PROFILE_VERSION
+        profile_material = bytes.fromhex(exact.profile_source_sha256())
     identity = native_muscle_bundle._identity(
-        declaration.model_path,
-        model,
-        state_names,
-        muscle_names,
-        options,
+        subject,
         contracts,
         mechanics_profile,
+        coupled_rotation_paths=coupled_rotation_paths,
     )
     adapter_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     provider_sources = (
@@ -488,13 +517,14 @@ def _constrained_bundle_identity(
     provider_sha = hashlib.sha256(
         bytes.fromhex(identity.provider_sha256)
         + bytes.fromhex(adapter_sha)
+        + profile_material
         + b"".join(path.read_bytes() for path in provider_sources)
     ).hexdigest()
     return (
         replace(
             identity,
-            variant_id="declared-constrained-muscles",
-            model_version=_VERSION,
+            variant_id=variant,
+            model_version=version,
             provider_sha256=provider_sha,
         ),
         adapter_sha,
@@ -509,18 +539,31 @@ def _constrained_bundle_policy(
     mechanics_profile: NativeMechanicsExecutionProfile | None,
     contact_declaration: NativeContactExecutionDeclaration | None,
     contracts: Any,
+    *,
+    exact_557: bool = False,
 ) -> Any:
     policy = native_muscle_bundle._policy(identity, contracts)
+    version = identity.model_version
+    if exact_557:
+        from .native_exact_557_profile import profile_source_sha256
+
+        adapter_sha = hashlib.sha256(
+            bytes.fromhex(adapter_sha) + bytes.fromhex(profile_source_sha256())
+        ).hexdigest()
     return replace(
         policy,
-        initialization_policy_id="declared-coupler-lock-muscle-cold-start",
-        initialization_policy_version=_VERSION,
+        initialization_policy_id=(
+            _EXACT_557_POLICY_ID
+            if exact_557
+            else "declared-coupler-lock-muscle-cold-start"
+        ),
+        initialization_policy_version=version,
         contact_policy_id=(
             "native-declared-sphere-halfspace-contact"
             if contact_declaration is not None
             else "native-coupler-lock-no-contact"
         ),
-        contact_policy_version=_VERSION,
+        contact_policy_version=version,
         contact_policy_sha256=_admission_identity(
             declaration,
             adapter_sha,
@@ -567,6 +610,7 @@ def build_constrained_muscle_bundle(
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
     contact_declaration: NativeContactExecutionDeclaration | None = None,
+    exact_557: bool = False,
 ) -> ExperimentReplayBundle:
     """Bind native source, complete initial muscle state and declared constraints."""
     if (
@@ -591,6 +635,7 @@ def build_constrained_muscle_bundle(
         wrapped_path_declaration,
         native_mechanics_profile,
         contact_declaration,
+        exact_557=exact_557,
     )
 
 
@@ -601,6 +646,7 @@ def replay_constrained_muscle_bundle(
     wrapped_path_declaration: WrappedPathDeclaration | None = None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None = None,
     contact_declaration: NativeContactExecutionDeclaration | None = None,
+    exact_557: bool = False,
 ) -> ConstrainedMuscleReplay:
     """Independently reconstruct and replay the same frozen excitation policy."""
     contracts = native_replay_contract_types()
@@ -628,6 +674,7 @@ def replay_constrained_muscle_bundle(
             wrapped_path_declaration=wrapped_path_declaration,
             native_mechanics_profile=native_mechanics_profile,
             contact_declaration=contact_declaration,
+            exact_557=exact_557,
         )
         _require_matching_constrained_bundle(bundle, expected)
         return _replay_constrained_snapshot(
@@ -638,6 +685,7 @@ def replay_constrained_muscle_bundle(
             wrapped_path_declaration,
             native_mechanics_profile,
             contact_declaration,
+            exact_557=exact_557,
         )
 
 
@@ -659,6 +707,8 @@ def _replay_constrained_snapshot(
     wrapped_path_declaration: WrappedPathDeclaration | None,
     native_mechanics_profile: NativeMechanicsExecutionProfile | None,
     contact_declaration: NativeContactExecutionDeclaration | None,
+    *,
+    exact_557: bool = False,
 ) -> ConstrainedMuscleReplay:
     """Integrate and detach numeric replay output before native teardown."""
     import opensim as osim
@@ -674,6 +724,7 @@ def _replay_constrained_snapshot(
         wrapped_path_declaration,
         native_mechanics_profile,
         contact_declaration,
+        exact_557=exact_557,
     ) as (model, state, initial_audit):
         muscles = model.getMuscles()
         names = tuple(muscles.get(i).getName() for i in range(muscles.getSize()))
