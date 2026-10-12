@@ -1,0 +1,713 @@
+{
+  "generated_utc": "2026-10-11",
+  "repo_head": "944d798ed3748fc09e115825cf9db30b65d1f232",
+  "audit_subject": "restored candidate before additional residual metadata changes",
+  "log_sha256": "d157ded07e9a03d2eeb05ead3a77e9af91c62c60f8fc49daaa644acc6559c50c",
+  "log_bytes": 216881,
+  "entry_count": 141,
+  "active_count": 74,
+  "state_counts": {
+    "in_review": 54,
+    "in_progress": 19,
+    "shipped": 62,
+    "": 5,
+    "proposed": 1
+  },
+  "finding_counts": {
+    "placeholder": 2,
+    "missing_field": 28,
+    "unusable_last_verified": 61,
+    "missing_state": 5,
+    "portfolio_wip_breach": 1,
+    "size_ceiling": 1
+  },
+  "finding_total": 98,
+  "findings": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 47,
+      "kind": "placeholder",
+      "message": "DL-#10965 field 'Summary' holds a placeholder.",
+      "remediation": "Replace angle-bracket placeholders with real values."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 73,
+      "kind": "missing_field",
+      "message": "DL-#11285 is missing required field 'Started'.",
+      "remediation": "Add '- **Started:** ...' to DL-#11285."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 73,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11285 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 183,
+      "kind": "missing_field",
+      "message": "DL-#11161 is missing required field 'PR'.",
+      "remediation": "Add '- **PR:** ...' to DL-#11161."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 183,
+      "kind": "missing_field",
+      "message": "DL-#11161 is missing required field 'Next step'.",
+      "remediation": "Add '- **Next step:** ...' to DL-#11161."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 183,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11161 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 194,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11421 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 207,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11400 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 246,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11313 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 259,
+      "kind": "unusable_last_verified",
+      "message": "DL-#1900 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 272,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11278 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 285,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11268 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 366,
+      "kind": "missing_field",
+      "message": "DL-#11234 is missing required field 'Started'.",
+      "remediation": "Add '- **Started:** ...' to DL-#11234."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 366,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11234 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 377,
+      "kind": "missing_field",
+      "message": "DL-#11230 is missing required field 'Started'.",
+      "remediation": "Add '- **Started:** ...' to DL-#11230."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 377,
+      "kind": "missing_field",
+      "message": "DL-#11230 is missing required field 'Next step'.",
+      "remediation": "Add '- **Next step:** ...' to DL-#11230."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 388,
+      "kind": "missing_state",
+      "message": "DL-#11095 has no State field.",
+      "remediation": "Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 388,
+      "kind": "missing_field",
+      "message": "DL-#11095 is missing required field 'State'.",
+      "remediation": "Add '- **State:** ...' to DL-#11095."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 388,
+      "kind": "missing_field",
+      "message": "DL-#11095 is missing required field 'Owner'.",
+      "remediation": "Add '- **Owner:** ...' to DL-#11095."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 388,
+      "kind": "missing_field",
+      "message": "DL-#11095 is missing required field 'PR'.",
+      "remediation": "Add '- **PR:** ...' to DL-#11095."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 388,
+      "kind": "missing_field",
+      "message": "DL-#11095 is missing required field 'Started'.",
+      "remediation": "Add '- **Started:** ...' to DL-#11095."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 396,
+      "kind": "missing_state",
+      "message": "DL-#11096 has no State field.",
+      "remediation": "Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 396,
+      "kind": "missing_field",
+      "message": "DL-#11096 is missing required field 'State'.",
+      "remediation": "Add '- **State:** ...' to DL-#11096."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 396,
+      "kind": "missing_field",
+      "message": "DL-#11096 is missing required field 'Owner'.",
+      "remediation": "Add '- **Owner:** ...' to DL-#11096."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 396,
+      "kind": "missing_field",
+      "message": "DL-#11096 is missing required field 'PR'.",
+      "remediation": "Add '- **PR:** ...' to DL-#11096."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 396,
+      "kind": "missing_field",
+      "message": "DL-#11096 is missing required field 'Started'.",
+      "remediation": "Add '- **Started:** ...' to DL-#11096."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 404,
+      "kind": "missing_state",
+      "message": "DL-#11094 has no State field.",
+      "remediation": "Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 404,
+      "kind": "missing_field",
+      "message": "DL-#11094 is missing required field 'State'.",
+      "remediation": "Add '- **State:** ...' to DL-#11094."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 404,
+      "kind": "missing_field",
+      "message": "DL-#11094 is missing required field 'PR'.",
+      "remediation": "Add '- **PR:** ...' to DL-#11094."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 404,
+      "kind": "missing_field",
+      "message": "DL-#11094 is missing required field 'Started'.",
+      "remediation": "Add '- **Started:** ...' to DL-#11094."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 414,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11083 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 440,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11058 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 453,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11059 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 466,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11051 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 479,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11055 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 492,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11049 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 505,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11046 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 518,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11052 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 531,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11044 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 544,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11043 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 557,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11039 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 570,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11037 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 583,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11032 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 596,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11029 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 609,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11024 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 622,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11021 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 635,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11014 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 648,
+      "kind": "unusable_last_verified",
+      "message": "DL-#11003 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 712,
+      "kind": "unusable_last_verified",
+      "message": "DL-#1755 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 725,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10286 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 738,
+      "kind": "missing_field",
+      "message": "DL-#9619 is missing required field 'PR'.",
+      "remediation": "Add '- **PR:** ...' to DL-#9619."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 738,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9619 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 763,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9688 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 776,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9613 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 828,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9415 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 854,
+      "kind": "unusable_last_verified",
+      "message": "DL-#8907 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 894,
+      "kind": "unusable_last_verified",
+      "message": "DL-#8941 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 907,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10385 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 921,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10271 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 934,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10378 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 947,
+      "kind": "unusable_last_verified",
+      "message": "DL-#8880 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 974,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10345 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 987,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9545 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1000,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9544 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1028,
+      "kind": "missing_state",
+      "message": "DL-#9546 has no State field.",
+      "remediation": "Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1028,
+      "kind": "missing_field",
+      "message": "DL-#9546 is missing required field 'State'.",
+      "remediation": "Add '- **State:** ...' to DL-#9546."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1028,
+      "kind": "missing_field",
+      "message": "DL-#9546 is missing required field 'Owner'.",
+      "remediation": "Add '- **Owner:** ...' to DL-#9546."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1028,
+      "kind": "missing_field",
+      "message": "DL-#9546 is missing required field 'Started'.",
+      "remediation": "Add '- **Started:** ...' to DL-#9546."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1028,
+      "kind": "placeholder",
+      "message": "DL-#9546 field 'Summary' holds a placeholder.",
+      "remediation": "Replace angle-bracket placeholders with real values."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1039,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10590 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1068,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10349 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1082,
+      "kind": "missing_field",
+      "message": "DL-#10342 is missing required field 'PR'.",
+      "remediation": "Add '- **PR:** ...' to DL-#10342."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1082,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10342 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1095,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9422 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1109,
+      "kind": "missing_field",
+      "message": "DL-#9162 is missing required field 'PR'.",
+      "remediation": "Add '- **PR:** ...' to DL-#9162."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1109,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9162 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1121,
+      "kind": "missing_field",
+      "message": "DL-#9410 is missing required field 'PR'.",
+      "remediation": "Add '- **PR:** ...' to DL-#9410."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1133,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10602 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1147,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10603 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1203,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10355 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1232,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10402 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1246,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10400 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1260,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10399 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1274,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10398 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1288,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10396 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1316,
+      "kind": "missing_field",
+      "message": "DL-#9967 is missing required field 'PR'.",
+      "remediation": "Add '- **PR:** ...' to DL-#9967."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1316,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9967 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1342,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10188 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1356,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10003 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1370,
+      "kind": "unusable_last_verified",
+      "message": "DL-#10062 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1479,
+      "kind": "unusable_last_verified",
+      "message": "DL-#8869 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1493,
+      "kind": "unusable_last_verified",
+      "message": "DL-#9193 'Last verified' has no commit SHA.",
+      "remediation": "Include the verifying commit SHA in 'Last verified'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1506,
+      "kind": "missing_state",
+      "message": "DL-#9349 has no State field.",
+      "remediation": "Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1506,
+      "kind": "missing_field",
+      "message": "DL-#9349 is missing required field 'State'.",
+      "remediation": "Add '- **State:** ...' to DL-#9349."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1506,
+      "kind": "missing_field",
+      "message": "DL-#9349 is missing required field 'Owner'.",
+      "remediation": "Add '- **Owner:** ...' to DL-#9349."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": 1662,
+      "kind": "missing_field",
+      "message": "DL-#11233 is missing required field 'Started'.",
+      "remediation": "Add '- **Started:** ...' to DL-#11233."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": null,
+      "kind": "portfolio_wip_breach",
+      "message": "19 concurrent WIP entries (in_progress) exceeds the 'golf' portfolio cap of 8.",
+      "remediation": "Park or ship entries to bring WIP to <= 8 before starting new work."
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-dl-collation-11935-20261011\\docs\\development\\DEVELOPMENT_LOG.md",
+      "line": null,
+      "kind": "size_ceiling",
+      "message": "Development log exceeds 200000 bytes.",
+      "remediation": "Move shipped entries to DEVELOPMENT_LOG_ARCHIVE_<year>.md."
+    }
+  ]
+}
