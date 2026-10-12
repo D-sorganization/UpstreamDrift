@@ -1,0 +1,34 @@
+{
+  "schema_version": "shot-pattern-post-f6dd-reconciliation/1",
+  "recorded_at_utc": "2026-10-12T15:55:38.503580+00:00",
+  "source_commit": "1532baa27c9402d78e6efda90b121f6a851813a2",
+  "incoming_main_commit": "f6ddaffc66965740be47f43f9540b8b86ebd924f",
+  "canonical_pre_pr": "PASS all eight gates; 7629 passed, 377 skipped, 43 deselected, 1 xpassed, 21 subtests",
+  "ci_semgrep": "PASS; 209 rules, 280 targets, zero findings",
+  "manual_governance": "PASS; 64 QMD sources, zero registered calculations, release blocked",
+  "agent_context": "PASS",
+  "divergence_inventory": "PASS official --check",
+  "document_titles": "PASS two changed documents",
+  "preservation": "Astra approved; incoming analytic paths byte-identical, all 82 incoming blockers retained and own shot-pattern blocker added, calculations/release unchanged",
+  "receipts": {
+    "post-f6dd-canonical-prepr": {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/post-f6dd-canonical-prepr.gz",
+      "source_sha256": "dfdbc29ff0d5c4aac8c7a53cc26e6a528ea4fadc5204f1f0b35685d760423afb",
+      "gzip_sha256": "320e31e24a9528e03a4c46e0d7733125cc60a62a566d81dc63251c1cdf870aae",
+      "bytes": 102653
+    },
+    "post-f6dd-ci-semgrep": {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/post-f6dd-ci-semgrep.gz",
+      "source_sha256": "98a78feece9340c758f00813457fff586459ae120f1baee35fd948723f7a58aa",
+      "gzip_sha256": "2d0b5b329a7a9f69b11dcfc9bfe79aa541cf1cc94523b30c7e748ccb9d77c887",
+      "bytes": 1736
+    },
+    "post-f6dd-preservation": {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/post-f6dd-preservation.gz",
+      "source_sha256": "a7f335c2f1e062b01068a57f4a87f41e6f1250e1532663f17896fffbcc714166",
+      "gzip_sha256": "dcea46e23df736bc150a996702403a8af13f1a3f9eae6c6524a48a9086314e3c",
+      "bytes": 1200
+    }
+  },
+  "protected_pr": "#12278 pending ordinary push and merge queue; no protected merge claimed"
+}
