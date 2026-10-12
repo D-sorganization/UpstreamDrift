@@ -1,10 +1,10 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T00:50:28.035619+00:00",
-  "checkpoint": "adc1fb0627",
+  "recorded_at_utc": "2026-10-12T04:41:51.268105+00:00",
+  "checkpoint": "0504feab4c11063a66e0853d6ef338d73d40dfd4",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "bbd33905253340d24945c939a0a04e7cd0b251f9",
-  "integration": "Incoming 9c9000 reconciled at cb4948eb1b; writer API repair committed at 17ad207777. Frozen rows and approved DRY baseline unchanged. No force push.",
+  "source_commit": "0504feab4c11063a66e0853d6ef338d73d40dfd4",
+  "integration": "Remote PR 99f8d6f8816 and actual conflicting origin/main ba57e27033 reconciled locally; later fixes through 0504feab4c. No push; frozen rows and approved DRY baseline unchanged.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
     "change": "Include copied research scripts in frozen fixture source hashes",
@@ -30,18 +30,12 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Clean CI runtime matches 126/126 dev-lock pins. Repaired-source focused suite passed 67 tests including writer compatibility, frozen verifier fixtures, numeric evidence, independent supplement audit, handoff compaction, and feature-parity matrix. Mypy passed 148 source files in the final attempted pre-PR, which was stopped before pytest because the separate required development-log validator fails repository-wide under issue #11935 owned by another session. Full canonical pre-PR is incomplete and no repository acceptance is claimed.",
+  "current_validation": "Development-log policy blocker #11935 is closed by merged #12337/d8a6e303 and local validator passed after reconciliation. Clean CI 126/126 lock pins and MyoSuite gitlink initialized; current Rust source matches wheel build source. Post-main focused suite 95 passed, 1 optional-reportlab skip; layout migration scoped suite 387 passed, 31 skipped, 11 inherited engine failures deselected. Stability audit/results/release-bundle focused suite 11 passed. Latest full canonical pre-PR remains incomplete (interrupted at 24% on prior source with 1494 passed, 150 skipped, 6 failed); remaining protocol amendment is in progress. No full merge acceptance claimed.",
   "development_log_blocker": {
     "issue": 11935,
-    "owned_by_other_session": true,
-    "modified": false,
-    "validator_command": "/tmp/shot-upstream-ci-venv/bin/python shared_scripts/development_log.py --repo-root .",
-    "result": "FAIL exit 1; duplicate entries, missing fields and unusable last-verified provenance, 144 active entries above 75, and size over 200000 bytes",
-    "receipt": {
-      "receipt": "development-log-validator-blocked.txt.gz",
-      "receipt_sha256": "a59bdf907855b36d6fa7a685faad76ca970980eed590d0518ead2b301ac04f11"
-    },
-    "owner_lease": "Parent reported active fleet lease session 01a11e27-dl-collation-11935-20261011 through 02:01 UTC; current-state only, not a waiver"
+    "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
+    "modified_in_this_branch": false,
+    "current_validator": "PASS after remote/main reconciliation; earlier blocked receipt remains historical"
   },
   "affinedrift": {
     "pr": 5005,
@@ -129,7 +123,7 @@
       "probe": "upstream-ci-rust-probe.txt.gz"
     },
     "generated_ignored_cargo_lock_sha256": "a986247a943e2f3a4b3881f5e259d7abf9c3b783679ec33e97d5db569fd2a8df",
-    "complete_pre_pr": "BLOCKED pending separate development-log validator issue #11935; final full run stopped before pytest (exit 130), not acceptance"
+    "complete_pre_pr": "Latest full canonical attempt after remote merge was interrupted on prior source at 24% with six failures; final-source complete pre-PR pending protocol amendment, not acceptance."
   },
   "canonical_pre_pr_diagnostics": {
     "command": "/tmp/shot-upstream-ci-venv/bin/python -u /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main",
@@ -181,7 +175,7 @@
       "generator_check": "PASS",
       "focused_tests": "3 PASS"
     },
-    "next": "Fetch and reconcile independently advanced PR head 3a23fa0e9679023b96328bfc98b96528e5b265b2; after separately owned issue #11935 is repaired, rerun complete canonical pre-PR on reconciled source, then follow protected integration. No push from this local checkpoint.",
+    "next": "Finish nonlinear registration amendment, refresh integrity records, rerun complete canonical pre-PR on final reconciled source. #11935 development-log policy is now resolved.",
     "root_clutter_repair": {
       "commit": "5fab697b635d0fded7805880796a2cc6284dc4e4",
       "action": "Relocated eight byte-identical handoff sidecars from repository root to archive, updated manifest and link contracts",
@@ -205,8 +199,73 @@
     }
   },
   "remote_pr_head_observed": {
-    "commit": "3a23fa0e9679023b96328bfc98b96528e5b265b2",
-    "observation": "Parent observed via REST that the existing PR branch advanced independently (fix(security): nosec review artifacts); local successor reconciled only through 9c9000. No fetch, merge, or push performed in this checkpoint.",
-    "required_before_push": "Fetch and reconcile the advanced PR branch in the owned worktree; after separately owned issue #11935 is repaired, rerun complete canonical pre-PR on the reconciled source before any push."
-  }
+    "commit": "99f8d6f8816",
+    "observation": "Advanced PR branch fetched and reconciled locally at 15059675d5; actual dirty main conflict resolved locally at 57df058371; no push from successor branch.",
+    "required_before_push": "Complete final-source canonical pre-PR and review protected PR state before authorized push."
+  },
+  "latest_local_reconciliation": {
+    "remote_pr": "99f8d6f8816",
+    "main": "ba57e27033",
+    "post_remote_incomplete_prepr": {
+      "result": "INTERRUPTED exit 130 after 1494 passed, 150 skipped, 6 failed at 24%; not acceptance",
+      "receipt": "prepr-after-remote-merge-incomplete-six-failures.txt.gz",
+      "receipt_sha256": "3f89c2587e732de66575b34e9dd06078d1b3fd67e3843496b8d7843dd28aacfe"
+    },
+    "myosuite": "required gitlink 33f3ded946 initialized; two replay nodes PASS",
+    "rust": "merged rust_core/upstream-physics source byte-identical to prior qualified wheel source"
+  },
+  "root_layout_migration": {
+    "commit": "392d98bfdf",
+    "moved_test_files": 28,
+    "collection_mapping": "all 429 collected test IDs preserved",
+    "regression": "8 passed",
+    "scoped_migrated_tests": "387 passed, 31 skipped, 11 inherited direct-suite engine failures deselected; not full suite acceptance",
+    "receipts": {
+      "root-tests-before-collection.txt.gz": {
+        "source": "/tmp/shot-safe-root-tests-before-collection.txt",
+        "source_sha256": "1958c8d25e80a2131362bd5643eafcb6da4d789c55fc29fbf3ddeb5c64998804",
+        "receipt_sha256": "b06fb654ad0b4aa63ccd555b8507528fff674f50f676cfb3f7629df069c2e22f"
+      },
+      "root-tests-after-collection.txt.gz": {
+        "source": "/tmp/shot-safe-root-tests-after-collection.txt",
+        "source_sha256": "7a3434c117cf83c7baa89dc77a5d15b1cb929337dd52e295baea26692300da0d",
+        "receipt_sha256": "b60f8764a410191683c2c4b965d50270e1566c9fa5399328807ae9a222f08cdf"
+      },
+      "root-layout-regression.txt.gz": {
+        "source": "/tmp/shot-safe-layout-regression.txt",
+        "source_sha256": "f434621bbd944ecaf196b5c5c449494c9ea9abf23c7435e72c17f08e4e94aa44",
+        "receipt_sha256": "c7c670e008550f803c52dd9e75b1f9adb0b164a3dcb5fd358b27ded7406dd0b6"
+      },
+      "root-migrated-tests-all.txt.gz": {
+        "source": "/tmp/shot-safe-migrated-tests.txt",
+        "source_sha256": "a3b60bfb8c7ff118769bd02a2b08afcbadf416ff16ef10ac3246f771b65d9d62",
+        "receipt_sha256": "b9c719a1a8b7c86249102dee3022767ea52951b1af5b870345e17006d017461a"
+      },
+      "root-migrated-tests-scoped-green.txt.gz": {
+        "source": "/tmp/shot-safe-migrated-tests-scoped-green.txt",
+        "source_sha256": "f313889fcb770991af3dc7f9f9efa2c3da8f25ec9158939f31bb4365386acdd8",
+        "receipt_sha256": "31e1036621259127238a295e042996b1cb6ccebbd914755978f6bff701de7a00"
+      },
+      "root-migration-proof.json.gz": {
+        "source": "/tmp/shot-safe-root-tests-migration-proof.json",
+        "source_sha256": "a4dd53994bc8fd9c787f6df4c1ef803ac1a5bf64f69716361a70e24a9e340178",
+        "receipt_sha256": "3dfa1721319438eae2255ea6db87e377f195fd4450df0b41d41f904f72c28ab1"
+      }
+    }
+  },
+  "stability_repair": {
+    "commit": "0504feab4c",
+    "input_contract": "primary study JSON and NPZ exact release-manifest SHA/bytes; published singular values reported; four threshold ranks independently recomputed and checked",
+    "historical_study_output_changed": false,
+    "focused": "11 passed (audit, results chapter, release bundle)",
+    "receipt": {
+      "source": "/tmp/shot-safe-stability-repair-focused.txt",
+      "source_sha256": "5e8dac5c2d2bc4e8330640fab86a1c2c97734759e02689ccddc524a8f0e15906",
+      "receipt_sha256": "ab56dc48acccec75e3608063da85f494ac00c5d83eb16a8de45045e989e42b66"
+    },
+    "red_and_compile_limitations": "stability-red-and-tool-limitations.json",
+    "latex_compilation": "UNAVAILABLE: uncached Tectonic bundle fetch failed; no compilation success claim",
+    "manifest_refresh": "Only audit source SHA/bytes and its CHECKSUMS line changed; prior bytes preserved outside artifact glob"
+  },
+  "next_required": "Finish and review nonlinear registration amendment, refresh release integrity records for that source and README, run complete canonical pre_pr on final source in clean CI environment, then protected PR integration. Do not rerun frozen simulation study or claim this checkpoint as full acceptance."
 }
