@@ -1,0 +1,5 @@
+{
+  "producing_engine": "mujoco",
+  "status": "withheld-not-validated-as-simscape",
+  "receipt": "No generator script or MATLAB receipt exists. Measured in #12013: the arrays reproduce the pre-#11811 self-colliding MuJoCo golfer to 0.026 mm. This is NOT Simscape Multibody ground truth. A real baseline requires MATLAB R2025b, a committed scripts/matlab generator, and a receipt (release, model hash, solver settings); the producing_engine must then be changed to simscape by that generator, not by hand."
+}

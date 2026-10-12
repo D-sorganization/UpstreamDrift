@@ -1,0 +1,173 @@
+{
+  "title": "Development log metadata-only reconciliation audit",
+  "as_of": "2026-10-11",
+  "base_head": "944d798ed3748fc09e115825cf9db30b65d1f232",
+  "source_log_git_blob": "cfa0c48e1a47a620228bebfa326c4138d7e5912a",
+  "source_log_sha256": "d9268879c0527199ae588dcf91a93a50556d1f29dac28924a658a2a43bca4bdb",
+  "preserved_source_blocks": "docs/development/archive/DEVELOPMENT_LOG_RECONCILIATION_SOURCE_20261011.md",
+  "preserved_source_blocks_sha256": "03179796850ee77db2c8f518933c2989f20456875b8f677756bedd951a33aeaa",
+  "rationale": "Normalize exactly seven rows already labeled completed to shipped using independently recorded merged pull-request metadata. This does not assert new tests, scientific qualification, or acceptance. Original owner, scope, paths, and supporting prose remain available in the exact source-block snapshot.",
+  "entries": [
+    {
+      "issue": 8932,
+      "result": "shipped_metadata_only",
+      "pr": 10892,
+      "merged_at_utc_date": "2026-09-24",
+      "merge_commit": "8eb68545a6c7c7be30ee099f0e0b6e97504fb7e8",
+      "github_response_file": "dl-complete-response-0.json",
+      "github_response_sha256": "500d2f1837485386733c1866721535c9b0ad56bca4a930ba192395bedc656f9c",
+      "no_test_or_scientific_qualification_claim": true
+    },
+    {
+      "issue": 10510,
+      "result": "shipped_metadata_only",
+      "pr": 10534,
+      "merged_at_utc_date": "2026-09-20",
+      "merge_commit": "4334dbc8c2cb965d8ad5bbd323762f237c3f7827",
+      "github_response_file": "dl-complete-response-0.json",
+      "github_response_sha256": "500d2f1837485386733c1866721535c9b0ad56bca4a930ba192395bedc656f9c",
+      "no_test_or_scientific_qualification_claim": true
+    },
+    {
+      "issue": 10511,
+      "result": "shipped_metadata_only",
+      "pr": 10535,
+      "merged_at_utc_date": "2026-09-20",
+      "merge_commit": "4123d9f6fb94a2893a5988d074102813e4467ae1",
+      "github_response_file": "dl-complete-response-0.json",
+      "github_response_sha256": "500d2f1837485386733c1866721535c9b0ad56bca4a930ba192395bedc656f9c",
+      "no_test_or_scientific_qualification_claim": true
+    },
+    {
+      "issue": 10512,
+      "result": "shipped_metadata_only",
+      "pr": 10536,
+      "merged_at_utc_date": "2026-09-20",
+      "merge_commit": "65ea5d018938264244b5f86d9b4bfdbe5642b25d",
+      "github_response_file": "dl-complete-response-0.json",
+      "github_response_sha256": "500d2f1837485386733c1866721535c9b0ad56bca4a930ba192395bedc656f9c",
+      "no_test_or_scientific_qualification_claim": true
+    },
+    {
+      "issue": 10513,
+      "result": "shipped_metadata_only",
+      "pr": 10537,
+      "merged_at_utc_date": "2026-09-20",
+      "merge_commit": "68166400c0b73e580fc91225abe0926db86c78de",
+      "github_response_file": "dl-complete-response-0.json",
+      "github_response_sha256": "500d2f1837485386733c1866721535c9b0ad56bca4a930ba192395bedc656f9c",
+      "no_test_or_scientific_qualification_claim": true
+    },
+    {
+      "issue": 10515,
+      "result": "shipped_metadata_only",
+      "pr": 10539,
+      "merged_at_utc_date": "2026-09-20",
+      "merge_commit": "22323105a5111dd23c5de9e298f5da96419f1c4e",
+      "github_response_file": "dl-complete-response-1.json",
+      "github_response_sha256": "6fe812f318ced924ccfdb23700d24b7b6b6a55d6d59f3bcc1632edbf8ba15b72",
+      "no_test_or_scientific_qualification_claim": true
+    },
+    {
+      "issue": 10516,
+      "result": "shipped_metadata_only",
+      "pr": 10540,
+      "merged_at_utc_date": "2026-09-20",
+      "merge_commit": "6d284e25affda20e0622aaf172f3ddb9e2eb148b",
+      "github_response_file": "dl-complete-response-1.json",
+      "github_response_sha256": "6fe812f318ced924ccfdb23700d24b7b6b6a55d6d59f3bcc1632edbf8ba15b72",
+      "no_test_or_scientific_qualification_claim": true
+    }
+  ],
+  "excluded_from_normalization": [
+    {
+      "issue": 11285,
+      "reason": "Parent epic with unresolved tracked follow-up #11313; restored exact original completed state and metadata. A merged PR does not establish that the parent follow-up is complete."
+    }
+  ],
+  "proposal_outcome": {
+    "source_baseline": {
+      "entries": 221,
+      "findings": 207,
+      "log_bytes": 336131,
+      "source_git_blob": "cfa0c48e1a47a620228bebfa326c4138d7e5912a",
+      "source_sha256": "d9268879c0527199ae588dcf91a93a50556d1f29dac28924a658a2a43bca4bdb"
+    },
+    "after_standard_archive_only": {
+      "entries": 206,
+      "findings": 198,
+      "log_bytes": 316708,
+      "archived_terminal_rows": 15
+    },
+    "after_proposal": {
+      "entries": 195,
+      "active_entries": 140,
+      "findings": 170,
+      "log_bytes": 304099,
+      "additional_rows_archived": 7,
+      "duplicate_issue_rows_consolidated": 4
+    },
+    "finding_counts_after": {
+      "invalid_state": 2,
+      "missing_field": 45,
+      "unusable_last_verified": 112,
+      "placeholder": 2,
+      "missing_state": 5,
+      "entry_id_issue_mismatch": 1,
+      "wip_ceiling": 1,
+      "portfolio_wip_breach": 1,
+      "size_ceiling": 1
+    },
+    "policy_failures_unchanged": {
+      "active_ceiling": "140 active entries exceeds the ceiling of 75. Work is being started faster than it is finished.",
+      "portfolio_wip": "49 concurrent WIP entries (in_progress) exceeds the 'golf' portfolio cap of 8.",
+      "log_size": "Development log exceeds 200000 bytes."
+    },
+    "full_validator_output": "docs/development/archive/DEVELOPMENT_LOG_VALIDATOR_20261011.json",
+    "full_validator_output_sha256": "41bfa220e015e1d54d6110944ecd8ca0d5a9f73ffb743118a2157afca72d62fc",
+    "full_validator_output_bytes": 61040,
+    "duplicate_groups": [
+      {
+        "issue": 11034,
+        "state": "in_review",
+        "owners": ["local", "claude"],
+        "scopes": [
+          "module import cleanup",
+          "intermittent failure diagnostic/root-cause follow-up"
+        ],
+        "reason": "both source records preserved; issue closed by merged #11069 but original root-cause follow-up retained for human review"
+      },
+      {
+        "issue": 10965,
+        "state": "in_review",
+        "owners": ["claude"],
+        "scopes": [
+          "coverage gate authority/strict CI",
+          "XML/JSON parsing and #10989 follow-up"
+        ],
+        "reason": "kept active pending confirmation of work after closing #11113"
+      },
+      {
+        "issue": 10381,
+        "state": "in_progress",
+        "owners": ["claude"],
+        "scopes": [
+          "analytic pelvis-yaw implementation",
+          "G1 evidence and rejection"
+        ],
+        "reason": "G1 remains REJECTED; follow-up levers preserved"
+      },
+      {
+        "issue": 10943,
+        "state": "in_progress",
+        "owners": ["antigravity"],
+        "scopes": [
+          "knowledge-pack/CI work with merged #10968",
+          "wizard files/test authoring source row"
+        ],
+        "reason": "source scopes conflict on completion; left active for human confirmation"
+      }
+    ],
+    "scope_note": "Only seven completed software rows were normalized to shipped. #11285 remains exactly in its original completed state because it is a parent epic with unresolved follow-up #11313; its original source block is preserved and no shipment claim was added."
+  }
+}

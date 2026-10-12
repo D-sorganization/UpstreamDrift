@@ -24,6 +24,10 @@ from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.candidate import MatchedSwingCandidate
 from src.shared.python.motion_matching.candidate_io import load_candidate
+from src.shared.python.motion_matching.output_policy import (
+    evaluate_output_policy,
+    render_output_policy_markdown,
+)
 from src.shared.python.video_timing.frame_schedule import (
     SPEED_VARIANTS,
     FrameSchedule,
@@ -438,6 +442,10 @@ def _format_markdown_report(
     gates_section = (
         f"## Quantitative Acceptance Gates\n\n{_build_gates_block(receipt_data)}\n"
     )
+    policy_section = (
+        "## Output Validation Policy (#10382)\n\n"
+        f"{render_output_policy_markdown(evaluate_output_policy(receipt_data))}\n"
+    )
     prov_section = (
         f"## Cryptographic Provenance (#8820 / U3)\n\n{_build_provenance_block(prov)}\n"
     )
@@ -450,6 +458,7 @@ def _format_markdown_report(
             qual_section,
             metrics_section,
             gates_section,
+            policy_section,
             prov_section,
         ]
     )
