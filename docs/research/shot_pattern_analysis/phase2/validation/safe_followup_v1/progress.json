@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T10:49:58.359336+00:00",
+  "recorded_at_utc": "2026-10-12T10:51:32.900437+00:00",
   "checkpoint": "4317a39b461db30d59c7062d4b9cd0334ec37956",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "4317a39b461db30d59c7062d4b9cd0334ec37956",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "All seven original protected-CI unit failure nodes now pass locally; 51 strict ownership/provider guard cases pass. Eight auto-config scan findings have bounded reviewed repairs. Complete broad failure receipt preserved. Reconciliation of newer remote47df and fresh stable-source canonical gate are pending; no final-source pass or protected merge claimed.",
+  "current_validation": "All7originalprotected-CIunit failure nodes pass;51strict ownership/provider guardcases,40otherstructuralcases,14release/reference/auditcases pass. Eight auto-configfindings have reviewed bounded repairs. Actualadvancedremote47df reconciled; fresh stable-source completecanonical gate is next, notyetclaimed.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -1033,6 +1033,13 @@
       "7bf9515aa1",
       "47df000da3"
     ],
-    "plan": "Rebase onto actual advanced PR head without force; preserve useful ADR index and blocked manual pointers, remove two unnecessary size-budget exceptions (766/46250 bytes vs51200), restore original reviewed canonical heading and its truthful provenance. Then run full canonical on stable committed source."
+    "plan": "Rebase onto actual advanced PR head without force; preserve useful ADR index and blocked manual pointers, remove two unnecessary size-budget exceptions (766/46250 bytes vs51200), restore original reviewed canonical heading and its truthful provenance. Then run full canonical on stable committed source.",
+    "status": "Completed by ordinary rebase onto47df000da3; originalremotecommits retained in ancestry; no forcepush",
+    "rebased_source_before_final_metadata_commit": "7a1defd5e57e72e133f1637d206505c9a54d32ac",
+    "result": "Useful ADR0014/15/16indexrows, manualblockers and officialmonolithinventory retained; redundant duplicatepointers removed; two unnecessarysizewaiversremoved with original51200-bytebudget PASS; Ifheading/provenancerestoredexacte0/7bb3560a hash; Astraapproved.",
+    "budget_receipt": {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-remote-reconciled-size-budget-green.txt.gz",
+      "sha256": "7452830fe937955d9320e8ad96743b82a444759ae692b856c7385a21f13547b3"
+    }
   }
 }
