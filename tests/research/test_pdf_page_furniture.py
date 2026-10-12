@@ -5,6 +5,11 @@ from unittest.mock import Mock, call
 
 import pytest
 
+try:
+    import reportlab  # noqa: F401
+except (ImportError, OSError) as exc:
+    pytest.skip(f"PDF review dependency unavailable: {exc}", allow_module_level=True)
+
 pytestmark = pytest.mark.unit
 
 
