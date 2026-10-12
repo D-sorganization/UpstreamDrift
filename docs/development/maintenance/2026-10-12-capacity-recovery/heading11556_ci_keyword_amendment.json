@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "scope": "one archived heading presentation correction only; no issue state changes",
+  "ci_evidence": {
+    "run_id": 38233912941,
+    "job_id": 114759819639,
+    "job_name": "doc-governance",
+    "conclusion": "failure",
+    "head_sha": "d2c7d8258b6d086ceba54323064782201999010e",
+    "html_url": "https://github.com/D-sorganization/UpstreamDrift/actions/runs/38233912941/job/114759819639"
+  },
+  "archive": {
+    "path": "docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md",
+    "line_number_1based": 791,
+    "before_sha256": "7bb3560a62361e67619aac89fac76b216cf0e826cf0ca859374e3aa7912d6b82",
+    "after_sha256": "73675e99cd33bd54b3ec8804c29bc5b8adabbc4636ab57ca4c3f6493fa84f85d",
+    "before_line_utf8_hex": "23232320444c2d23313135353620c2b7204369285365637572697479293a2052652d56656e646f7220666f726b5f70725f72756e6e65725f67756172642e707920616e64204e657720666f726b5f70725f67756172645f616e616c797369732e70792046726f6d205265706f7369746f72795f4d616e6167656d656e742028524d2331393936293a2053616d652d5265706f2049663a204578656d7074696f6e20616e642053696e6b2d426173656420486561642d436865636b6f757420416e616c797369732e0a",
+    "before_line_sha256": "c649befb1a88775d44cf53a657e2e0cef50f04624bd3fc32f711be33045560d7",
+    "after_line_utf8_hex": "23232320444c2d23313135353620c2b7204369285365637572697479293a2052652d56656e646f7220666f726b5f70725f72756e6e65725f67756172642e707920616e64204e657720666f726b5f70725f67756172645f616e616c797369732e70792046726f6d205265706f7369746f72795f4d616e6167656d656e742028524d2331393936293a2053616d652d5265706f206069663a60204578656d7074696f6e20616e642053696e6b2d426173656420486561642d436865636b6f757420416e616c797369732e0a",
+    "after_line_sha256": "1ba8ca221cbe471f8343153f7e2671b68881881e318b97541d9ce50824d8e251",
+    "inverse_replacement_restores_before_sha256": "7bb3560a62361e67619aac89fac76b216cf0e826cf0ca859374e3aa7912d6b82",
+    "inverse_restores_exact_before_bytes": true
+  },
+  "expected_title_implementations": [
+    {
+      "implementation": "UpstreamDrift",
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-worktrees\\codex-devlog-capacity-12391-20261012\\scripts\\check_document_title_case.py",
+      "raw_sha256": "47c216fa5789578509d5a3a804a6701ed297d5265c090160b40bf5d8a79f91d1",
+      "git_blob_sha1": "c8291de890b216b765cc7d64cfbb02937a3a79cd",
+      "old_expected_title": "### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.",
+      "proposed_expected_title": "### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo `if:` Exemption and Sink-Based Head-Checkout Analysis.",
+      "proposed_is_identity": true
+    },
+    {
+      "implementation": "Repository_Management",
+      "path": "C:\\Users\\diete\\Repositories\\Repository_Management\\shared_scripts\\document_title_case.py",
+      "raw_sha256": "c6ec3c3243bb08dec0f0a31a5bf9306d3d948e40522f73bf97b8caa3f6f5131d",
+      "git_blob_sha1": "c9a01ec2581df8d22ddad7af5a20a3570c0f4b9c",
+      "old_expected_title": "### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo If: Exemption and Sink-Based Head-Checkout Analysis.",
+      "proposed_expected_title": "### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo `if:` Exemption and Sink-Based Head-Checkout Analysis.",
+      "proposed_is_identity": true
+    }
+  ],
+  "readme": {
+    "path": "docs\\development\\maintenance\\2026-10-12-capacity-recovery\\README.md",
+    "before_sha256": "5dd9bec35906d64cd59fe8fa34ed0d6b3a2c6c8863c8e1300a51ced85bd84710",
+    "after_sha256": "37d09a9515420138a31ca31b5338badf8a3395fec0375e469bee30642191e650"
+  },
+  "change_fragment": {
+    "path": "changes\\12391-development-log-capacity-maintenance.md",
+    "before_sha256": "90fc71ffefabe9ce6340dd07cc19940ff3c6b29d434d51ff4bcb55166ab76548",
+    "after_sha256": "6e9cb934154e76ac84baad4768db9c7e82e610b75479cf053e1564540df76942"
+  }
+}
