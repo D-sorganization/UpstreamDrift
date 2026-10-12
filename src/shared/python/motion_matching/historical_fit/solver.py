@@ -3,25 +3,42 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from functools import partial
 
 import numpy as np
 
 from src.shared.python.estimation import (
+    SolverTelemetry,
+    AuthoredHermiteInitialization,
     CubicHermiteSplineTrajectory,
+    HermiteBoundsDomain,
     MapEstimatorOptions,
     MapEstimatorProblem,
     SharedParameterBlock,
     SplineTrajectoryEvaluation,
     finite_difference_jacobian,
+    initialize_authored_hermite,
     solve_single_trial_map,
 )
 from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
+from src.shared.python.motion_matching.marker_kinematics import (
+    MarkerLinearization,
+    MarkerLinearizationPlant,
+    MarkerLinearizer,
+)
 from src.shared.python.motion_matching.constraint_kinematics import (
     ConstraintLinearization,
 )
-from .contracts import CameraProjection, ImageFitConfig, ImageFitInputs, ImageFitResult
+from .shaft_residuals import AdditionalImageResiduals, ImageResidualTerm
+from .contact_schedule import ScheduledConstraintOptions
+from .contracts import (
+    CameraProjection,
+    ImageFitConfig,
+    ImageFitInputs,
+    ImageFitResult,
+    ImageSplineStart,
+)
 
 
 class _Fit:
@@ -32,6 +49,7 @@ class _Fit:
         camera: CameraProjection,
         inputs: ImageFitInputs,
         config: ImageFitConfig,
+        additional_images: AdditionalImageResiduals | None = None,
     ) -> None:
         self.native, self.attachments, self.camera = native, attachments, camera
         self.inputs, self.config = inputs, config
@@ -56,21 +74,103 @@ class _Fit:
             for left, right in zip(knots[:-1], knots[1:], strict=True)
             for fraction in config.interior_fractions
         ]
+        if isinstance(config.constraint_options, ScheduledConstraintOptions):
+            schedule = config.constraint_options.schedule
+            boundaries = schedule.boundary_times()
+            if (
+                boundaries[0] != inputs.source_times[0]
+                or boundaries[-1] != inputs.source_times[-1]
+            ):
+                raise ValueError(
+                    "Contact schedule interval must match image source interval"
+                )
+            probes.extend(boundaries)
         self.evaluation_times = np.unique(np.concatenate([inputs.source_times, probes]))
+        self.additional_images = additional_images
+        self.additional_sizes: dict[int, int] = {}
+        extra_times = self._additional_times()
+        self.map_evaluation_times = np.unique(
+            np.concatenate([self.evaluation_times, extra_times])
+        )
         self.source_indices = np.searchsorted(
-            self.evaluation_times, inputs.source_times
+            self.map_evaluation_times, inputs.source_times
+        )
+        self.constraint_indices = np.searchsorted(
+            self.map_evaluation_times, self.evaluation_times
         )
         self.ik = (
             native.create_ik(attachments)
             if config.constraint_options is not None
             else None
         )
+        self.marker_ik: MarkerLinearizer | None = None
+        if isinstance(native, MarkerLinearizationPlant):
+            provider = (
+                self.ik
+                if isinstance(self.ik, MarkerLinearizer)
+                else native.create_marker_linearizer(attachments)
+            )
+            if not isinstance(provider, MarkerLinearizer):
+                raise ValueError(
+                    "Marker linearization factory must return a public provider"
+                )
+            self.marker_ik = provider
+
+    def _additional_times(self) -> list[float]:
+        if self.additional_images is None:
+            return []
+        if not isinstance(self.additional_images, AdditionalImageResiduals):
+            raise ValueError("Typed additional image residual bundle required")
+        self.additional_images.validate(self.native)
+        times: list[float] = []
+        for term in self.additional_images.terms:
+            current = np.asarray(term.source_times, dtype=float)
+            if (
+                current.ndim != 1
+                or not len(current)
+                or not np.isfinite(current).all()
+                or not np.all(np.diff(current) > 0)
+            ):
+                raise ValueError(
+                    "Additional image times must be nonempty finite and strictly increasing"
+                )
+            if (
+                current[0] < self.inputs.source_times[0]
+                or current[-1] > self.inputs.source_times[-1]
+            ):
+                raise ValueError(
+                    "Additional image times must remain inside source interval"
+                )
+            poses = np.tile(self.inputs.seed, (len(current), 1))
+            self.additional_sizes[id(term)] = len(
+                self._additional_residual(term, poses)
+            )
+            times.extend(current.tolist())
+        return times
+
+    def _additional_residual(
+        self, term: ImageResidualTerm, poses: np.ndarray
+    ) -> np.ndarray:
+        residual = np.asarray(
+            term.residual(self.native, self.camera, poses), dtype=float
+        )
+        expected = self.additional_sizes.get(id(term))
+        if (
+            residual.ndim != 1
+            or not len(residual)
+            or not np.isfinite(residual).all()
+            or (expected is not None and len(residual) != expected)
+        ):
+            raise ValueError(
+                "Additional image residual must retain finite one-dimensional fixed rows"
+            )
+        return residual
 
     def source_evaluation(
         self, evaluation: SplineTrajectoryEvaluation
     ) -> SplineTrajectoryEvaluation:
         """Select original evidence rows without inventing observations at probes."""
-        if not np.array_equal(evaluation.times, self.evaluation_times):
+        if not np.array_equal(evaluation.times, self.map_evaluation_times):
             raise ValueError(
                 "Fit evaluation must match configured source and probe times"
             )
@@ -86,13 +186,25 @@ class _Fit:
             a_basis=evaluation.a_basis[indices],
         )
 
-    def constraint_linearizations(self, q: np.ndarray) -> list[ConstraintLinearization]:
+    def constraint_linearizations(
+        self, q: np.ndarray, times: np.ndarray | None = None
+    ) -> list[ConstraintLinearization]:
         """Use the declared public IK capability with stable rows and native order."""
         if self.ik is None or self.config.constraint_options is None:
             return []
+        if times is None:
+            times = self.evaluation_times
+        if times.shape != (len(q),) or not np.isfinite(times).all():
+            raise ValueError("Constraint times must match finite pose rows")
+        options = self.config.constraint_options
         rows = [
-            self.ik.constraint_residual_jacobian(pose, self.config.constraint_options)
-            for pose in q
+            self.ik.constraint_residual_jacobian(
+                pose,
+                options.resolve(float(time))
+                if isinstance(options, ScheduledConstraintOptions)
+                else options,
+            )
+            for pose, time in zip(q, times, strict=True)
         ]
         if any(not isinstance(row, ConstraintLinearization) for row in rows):
             raise ValueError(
@@ -143,7 +255,8 @@ class _Fit:
                     [
                         row.residual
                         for row in self.constraint_linearizations(
-                            self.expand(evaluation.q)
+                            self.expand(evaluation.q[self.constraint_indices]),
+                            self.evaluation_times,
                         )
                     ]
                 )
@@ -153,6 +266,12 @@ class _Fit:
                 self.config.closure_weight
                 * np.array([self.native.closure_residuals(pose) for pose in q]).ravel()
             )
+        if self.additional_images is not None:
+            for term in self.additional_images.terms:
+                indices = np.searchsorted(evaluation.times, term.source_times)
+                pieces.append(
+                    self._additional_residual(term, self.expand(evaluation.q[indices]))
+                )
         return np.concatenate(pieces)
 
     def rms(self, residual: np.ndarray) -> float:
@@ -178,7 +297,8 @@ class _Fit:
     ) -> np.ndarray:
         """Differentiate native frame poses once, then apply exact spline bases.
 
-        Native pose derivatives use the canonical central-difference helper.
+        Optional native marker derivatives avoid central pose differences.
+        Unsupported providers retain the canonical central-difference helper.
         They depend on free DOF count rather than the number of spline knots.
         Pose and speed priors use exact derivatives; no engine internals enter.
         """
@@ -193,9 +313,7 @@ class _Fit:
             source.q_basis,
             strict=True,
         ):
-            native_jacobian = finite_difference_jacobian(
-                partial(self._frame_residual, observed=observed, weights=weights), free
-            )
+            native_jacobian = self._frame_jacobian(free, observed, weights)
             chained = native_jacobian @ basis
             image_rows.append(chained[:pixel_size])
             if self.ik is None and self.config.closure_weight:
@@ -220,18 +338,292 @@ class _Fit:
             speed.reshape(-1, columns),
         ]
         if self.ik is not None:
-            rows = self.constraint_linearizations(self.expand(evaluation.q))
+            rows = self.constraint_linearizations(
+                self.expand(evaluation.q[self.constraint_indices]),
+                self.evaluation_times,
+            )
             pieces.append(
                 np.vstack(
                     [
                         row.jacobian[:, self.indices] @ basis
-                        for row, basis in zip(rows, evaluation.q_basis, strict=True)
+                        for row, basis in zip(
+                            rows,
+                            evaluation.q_basis[self.constraint_indices],
+                            strict=True,
+                        )
                     ]
                 )
             )
         elif closure_rows:
             pieces.append(np.vstack(closure_rows))
+        if self.additional_images is not None:
+            pieces.extend(
+                self._additional_jacobian(evaluation, term)
+                for term in self.additional_images.terms
+            )
         return np.vstack(pieces)
+
+    def _frame_jacobian(
+        self, free: np.ndarray, observed: np.ndarray, weights: np.ndarray
+    ) -> np.ndarray:
+        """Compose optional point derivatives, preserving legacy closure fallback."""
+        if self.marker_ik is not None:
+            pose = self.expand(free[None, :])[0]
+            row = self._marker_linearization(pose)
+            if row is not None:
+                projected = (
+                    self.camera.project_jacobian(row.positions)
+                    @ row.jacobian[:, :, self.indices]
+                )
+                pixels = (projected * np.sqrt(weights)[:, None, None]).reshape(
+                    -1, len(free)
+                )
+                if self.ik is None and self.config.closure_weight:
+                    closure = finite_difference_jacobian(
+                        lambda value: (
+                            self.config.closure_weight
+                            * self.native.closure_residuals(
+                                self.expand(value[None, :])[0]
+                            )
+                        ),
+                        free,
+                    )
+                    return np.vstack((pixels, closure))
+                return pixels
+        return finite_difference_jacobian(
+            partial(self._frame_residual, observed=observed, weights=weights), free
+        )
+
+    def _marker_linearization(self, pose: np.ndarray) -> MarkerLinearization | None:
+        """Unsupported capabilities fall back; malformed declared providers fail."""
+        if self.marker_ik is None:
+            return None
+        try:
+            row = self.marker_ik.marker_linearization(pose)
+        except NotImplementedError:
+            return None
+        if (
+            not isinstance(row, MarkerLinearization)
+            or row.coordinate_order != tuple(self.native.coordinate_order)
+            or row.marker_labels != tuple(self.attachments)
+        ):
+            raise ValueError("Marker linearization must retain exact fit identities")
+        return row
+
+    def _term_pose_residual(
+        self, free: np.ndarray, poses: np.ndarray, index: int, term: ImageResidualTerm
+    ) -> np.ndarray:
+        modified = poses.copy()
+        modified[index] = self.expand(free[None, :])[0]
+        return self._additional_residual(term, modified)
+
+    def _additional_jacobian(
+        self, evaluation: SplineTrajectoryEvaluation, term: ImageResidualTerm
+    ) -> np.ndarray:
+        indices = np.searchsorted(evaluation.times, term.source_times)
+        poses = self.expand(evaluation.q[indices])
+        result = np.zeros(
+            (
+                len(self._additional_residual(term, poses)),
+                evaluation.q_basis.shape[-1],
+            )
+        )
+        for index, time_index in enumerate(indices):
+            function = partial(
+                self._term_pose_residual, poses=poses, index=index, term=term
+            )
+            result += (
+                finite_difference_jacobian(function, evaluation.q[time_index])
+                @ evaluation.q_basis[time_index]
+            )
+        return result
+
+
+def _trajectory_domain(fit: _Fit, knots: np.ndarray) -> HermiteBoundsDomain | None:
+    """Bind explicit native named limits without changing fixed coordinates."""
+    if not fit.config.coordinate_bounds:
+        return None
+    bounds = {
+        name: (lower, upper) for name, lower, upper in fit.config.coordinate_bounds
+    }
+    order = fit.native.coordinate_order
+    free_coords = fit.inputs.free_coordinates
+    seed = fit.inputs.seed
+    for name, (lower, upper) in bounds.items():
+        if name not in order:
+            raise ValueError("Coordinate bounds name an unknown native coordinate")
+        if name not in free_coords:
+            value = seed[order.index(name)]
+            if not lower <= value <= upper:
+                raise ValueError("Coordinate bounds reject the locked native seed")
+    return HermiteBoundsDomain(
+        tuple(knots), tuple(bounds.get(name) for name in fit.inputs.free_coordinates)
+    )
+
+
+@dataclass(frozen=True)
+class _PreparedFit:
+    fit: _Fit
+    trajectory: CubicHermiteSplineTrajectory
+    coefficients: np.ndarray
+    domain: HermiteBoundsDomain | None
+    initialization: AuthoredHermiteInitialization | None
+    initial_rms: float
+    initial_spline: ImageSplineStart
+
+
+def _preserved_coefficients(
+    fit: _Fit, knots: np.ndarray, start: ImageSplineStart
+) -> np.ndarray:
+    if not isinstance(start, ImageSplineStart):
+        raise ValueError("Preserved start must be an ImageSplineStart")
+    if fit.config.initialization_policy != "strict":
+        raise ValueError("Preserved spline requires strict initialization policy")
+    if start.model_sha != fit.native.plant_sha:
+        raise ValueError("Preserved spline model identity differs from native model")
+    if (
+        start.coordinate_order != tuple(fit.native.coordinate_order)
+        or start.free_coordinates != fit.inputs.free_coordinates
+    ):
+        raise ValueError("Preserved spline coordinate orders differ from fit")
+    if not np.array_equal(knots, start.knot_times):
+        raise ValueError("Preserved spline knot grid differs from explicit input knots")
+    if (start.knot_times[0], start.knot_times[-1]) != (
+        fit.inputs.source_times[0],
+        fit.inputs.source_times[-1],
+    ):
+        raise ValueError("Preserved spline source interval differs from evidence")
+    return np.asarray(start.spline_coefficients, dtype=float)
+
+
+def _prepare_fit(
+    fit: _Fit, initial_spline: ImageSplineStart | None = None
+) -> _PreparedFit:
+    inputs = fit.inputs
+    knots = inputs.source_times if inputs.knot_times is None else inputs.knot_times
+    trajectory = CubicHermiteSplineTrajectory(knots, len(fit.indices))
+    initial = (
+        np.tile(inputs.seed[fit.indices], (len(inputs.source_times), 1))
+        if inputs.initial_samples is None
+        else inputs.initial_samples[:, fit.indices]
+    )
+    coefficients = (
+        _preserved_coefficients(fit, knots, initial_spline)
+        if initial_spline is not None
+        else trajectory.initial_coefficients_from_samples(inputs.source_times, initial)
+    )
+    domain = _trajectory_domain(fit, knots)
+    initialization = None
+    if fit.config.initialization_policy != "strict":
+        if domain is None:
+            raise ValueError("Authored initialization requires coordinate bounds")
+        initialization = initialize_authored_hermite(
+            domain, coefficients, inputs.free_coordinates
+        )
+        coefficients = np.asarray(initialization.coefficients)
+    if domain is not None:
+        domain.encode(coefficients)
+    residual = fit.image_residuals(
+        fit.expand(trajectory.evaluate(coefficients, inputs.source_times).q)
+    )
+    start = ImageSplineStart.from_coefficients(
+        knots,
+        coefficients,
+        tuple(fit.native.coordinate_order),
+        inputs.free_coordinates,
+        fit.native.plant_sha,
+    )
+    return _PreparedFit(
+        fit, trajectory, coefficients, domain, initialization, fit.rms(residual), start
+    )
+
+
+def _fit_result(
+    prepared: _PreparedFit,
+    coefficients: np.ndarray,
+    converged: bool,
+    message: str,
+    optimizer_ran: bool,
+    telemetry: SolverTelemetry | None = None,
+) -> ImageFitResult:
+    fit, trajectory = prepared.fit, prepared.trajectory
+    inputs = fit.inputs
+    q = fit.expand(trajectory.evaluate(coefficients, inputs.source_times).q)
+    residual = fit.image_residuals(q)
+    weighted = residual.reshape(inputs.confidence.shape + (2,))
+    distances = np.empty(inputs.confidence.shape, dtype=object)
+    distances[:] = None
+    valid = inputs.confidence > 0
+    distances[valid] = np.sqrt(
+        np.sum(weighted[valid] ** 2, axis=1) / inputs.confidence[valid]
+    )
+    rows = fit.constraint_linearizations(
+        fit.expand(trajectory.evaluate(coefficients, fit.evaluation_times).q),
+        fit.evaluation_times,
+    )
+    return ImageFitResult(
+        inputs.source_times.copy(),
+        q,
+        fit.rms(residual),
+        prepared.initial_rms,
+        distances,
+        int(np.count_nonzero(valid)),
+        fit.native.plant_sha,
+        fit.native.coordinate_order,
+        converged,
+        message,
+        trajectory.knot_times,
+        coefficients,
+        inputs.free_coordinates,
+        constraint_times=fit.evaluation_times if rows else np.empty(0),
+        constraint_residuals=np.array([row.residual for row in rows])
+        if rows
+        else np.empty((0, 0)),
+        constraint_row_labels=rows[0].row_labels if rows else (),
+        optimizer_ran=optimizer_ran,
+        telemetry=telemetry,
+        initialization=prepared.initialization,
+        initial_spline=prepared.initial_spline,
+        additional_image_assessments=tuple(
+            term.assess(
+                fit.native,
+                fit.camera,
+                fit.expand(
+                    trajectory.evaluate(coefficients, np.asarray(term.source_times)).q
+                ),
+            )
+            for term in fit.additional_images.terms
+        )
+        if fit.additional_images is not None
+        else (),
+    )
+
+
+def initialize_image_trajectory(
+    native: MatchingPlant,
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+    camera: CameraProjection,
+    inputs: ImageFitInputs,
+    config: ImageFitConfig,
+    initial_spline: ImageSplineStart | None = None,
+    additional_images: AdditionalImageResiduals | None = None,
+) -> ImageFitResult:
+    """Author a feasible seed and measure original pixels without running an optimizer."""
+    if config.initialization_policy == "strict" and initial_spline is None:
+        raise ValueError("Seed authoring requires explicit initialization policy")
+    prepared = _prepare_fit(
+        _Fit(native, attachments, camera, inputs, config, additional_images),
+        initial_spline,
+    )
+    return _fit_result(
+        prepared,
+        prepared.coefficients,
+        False,
+        "Preserved spline evaluation; optimizer not run"
+        if initial_spline is not None
+        else "Authored feasible initialization; optimizer not run",
+        False,
+    )
 
 
 def fit_image_trajectory(
@@ -240,63 +632,34 @@ def fit_image_trajectory(
     camera: CameraProjection,
     inputs: ImageFitInputs,
     config: ImageFitConfig = ImageFitConfig(),
+    initial_spline: ImageSplineStart | None = None,
+    additional_images: AdditionalImageResiduals | None = None,
 ) -> ImageFitResult:
-    """Fit native poses to pixels; camera, geometry and priors remain explicit assumptions."""
-    fit = _Fit(native, attachments, camera, inputs, config)
-    knots = inputs.source_times if inputs.knot_times is None else inputs.knot_times
-    trajectory = CubicHermiteSplineTrajectory(knots, len(fit.indices))
-    initial = (
-        np.tile(inputs.seed[fit.indices], (len(inputs.source_times), 1))
-        if inputs.initial_samples is None
-        else inputs.initial_samples[:, fit.indices]
+    """Fit native pixels with explicit initialization, unchanged observations and priors."""
+    prepared = _prepare_fit(
+        _Fit(native, attachments, camera, inputs, config, additional_images),
+        initial_spline,
     )
-    coefficients = trajectory.initial_coefficients_from_samples(
-        inputs.source_times, initial
-    )
-    initial_residual = fit.image_residuals(
-        fit.expand(trajectory.evaluate(coefficients, inputs.source_times).q)
-    )
+    fit = prepared.fit
     problem = MapEstimatorProblem(
-        trajectory,
-        fit.evaluation_times,
-        coefficients,
+        prepared.trajectory,
+        fit.map_evaluation_times,
+        prepared.coefficients,
         SharedParameterBlock(()),
         fit.residual,
         jacobian=fit.jacobian,
         options=MapEstimatorOptions(
-            max_iterations=config.max_iterations, non_finite_policy="raise"
+            max_iterations=config.max_iterations,
+            non_finite_policy="raise",
+            trajectory_domain=prepared.domain,
         ),
     )
     solved = solve_single_trial_map(problem)
-    q = fit.expand(trajectory.evaluate(solved.coefficients, inputs.source_times).q)
-    final_residual = fit.image_residuals(q)
-    weighted = final_residual.reshape(inputs.confidence.shape + (2,))
-    distances = np.empty(inputs.confidence.shape, dtype=object)
-    distances[:] = None
-    valid = inputs.confidence > 0
-    distances[valid] = np.sqrt(
-        np.sum(weighted[valid] ** 2, axis=1) / inputs.confidence[valid]
-    )
-    constraint_rows = fit.constraint_linearizations(
-        fit.expand(trajectory.evaluate(solved.coefficients, fit.evaluation_times).q)
-    )
-    return ImageFitResult(
-        inputs.source_times.copy(),
-        q,
-        fit.rms(final_residual),
-        fit.rms(initial_residual),
-        distances,
-        int(np.count_nonzero(valid)),
-        native.plant_sha,
-        native.coordinate_order,
+    return _fit_result(
+        prepared,
+        solved.coefficients,
         solved.success,
         solved.message,
-        knots,
-        solved.coefficients,
-        inputs.free_coordinates,
-        constraint_times=fit.evaluation_times if constraint_rows else np.empty(0),
-        constraint_residuals=np.array([row.residual for row in constraint_rows])
-        if constraint_rows
-        else np.empty((0, 0)),
-        constraint_row_labels=constraint_rows[0].row_labels if constraint_rows else (),
+        True,
+        solved.telemetry,
     )

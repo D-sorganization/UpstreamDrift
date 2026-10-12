@@ -1,0 +1,96 @@
+{
+  "schema": "necromatcher/standalone-research-supplement-checkpoint/1",
+  "source": "necromatcher-fixed-row-time-sensitivity.tex",
+  "source_sha256": "ffa5c9a1eb3f446a15bb9269f157bf5b896b60f6a029fdcad6b37b0d606f281b",
+  "pdf_sha256": "3dff46c6960617a1a9cff1c3dbf1644f7a1f3073775cf51cbf257a55d054a863",
+  "pages": 4,
+  "desktop_bundle": "Necromatcher Fixed Row-Time Sensitivity 2026-10-03 V1",
+  "all_pages_visually_reviewed": true,
+  "scientific_acceptance": false,
+  "physical_calibration": false,
+  "generated_pdf_committed": false,
+  "original_media_committed": false,
+  "compiler": "Installed MiKTeX, installer disabled, three passes; built-in platform-directory failure preserved in bundle.",
+  "relative_assets_external": true,
+  "reproduction": "Compile an exact copy from the supplied Desktop bundle root; relative plot assets and hash-pinned raw rows remain external controlled review inputs.",
+  "execution_producer": "e0042ba61870f88543cb1305e3f6d21903c97fb8",
+  "actual_assessment_sha256": "750453ad2e2d9e02c0ada9eafcc9a18db3628aef9aa72e2fc9e794856d5dbe2f",
+  "independent_closure_sha256": "f3481f936e4ba619aa06ff0beee579eb3cd179e60b7c67b4595add8f5b59114c",
+  "report_review_sha256": "870d0144b018e7db9428f15521f31fe387b627e41417807968af2a33ea47aad8",
+  "root_review_sha256": "7d5e9c099af889dcd3cd121e0a066185b1306caeb0ff1eb7f3a14afb7066bd70",
+  "controltower_payload_count": 13,
+  "controltower_payload_bytes": 5242778,
+  "controltower_destination": "C:/Users/diete/Desktop/Necromatcher Fixed Row-Time Sensitivity 2026-10-03 V1",
+  "controltower_manifest_sha256": "8d8e8378ce64e62bbd057a5f1b7d2f93302224cc2b4bcce7a8a7cd9acd093885",
+  "controltower_zip_sha256": "cf8e90a9c4ff4fe5d629e34f979ff7be6e03516f70df1b3fbd675f800c93601d",
+  "controltower_remote_receipt_sha256": "15c0bc5deed7d11163c74a53baa734e8ff9a8c8537531990a589b3f1a6e6ee74",
+  "controltower_local_receipt_sha256": "67a7b18d5519182bfc142fe4993f5cc6e3c607f87e97687d2071d0a553a45c6c",
+  "controltower_payload_pins": [
+    {
+      "path": "fixed-row-time-sensitivity.tex",
+      "bytes": 10774,
+      "sha256": "ffa5c9a1eb3f446a15bb9269f157bf5b896b60f6a029fdcad6b37b0d606f281b"
+    },
+    {
+      "path": "fixed-row-time-sensitivity.pdf",
+      "bytes": 257427,
+      "sha256": "3dff46c6960617a1a9cff1c3dbf1644f7a1f3073775cf51cbf257a55d054a863"
+    },
+    {
+      "path": "all-56-raw-rows.json",
+      "bytes": 85632,
+      "sha256": "592b33ba082170bfc51feafe3b8362a1cf9446cb95744da6dce5b8863549fc4b"
+    },
+    {
+      "path": "all-56-raw-rows.csv",
+      "bytes": 12802,
+      "sha256": "89e9d1e81453ad278d2e297f9e5a17e1466180a0da9d73c70ffca48855529c8b"
+    },
+    {
+      "path": "input-pins.json",
+      "bytes": 1089,
+      "sha256": "000a2c0862b1eaf0002f98bcf923317d41c4659e19c57ca80a213b4341920d16"
+    },
+    {
+      "path": "builtin-compiler-diagnostic.json",
+      "bytes": 169,
+      "sha256": "ab991bc4c5ff4e7a7336fa200cef1e51cb81f8627e58e9c254eb506965ca5cd6"
+    },
+    {
+      "path": "report-review-v1.json",
+      "bytes": 2733,
+      "sha256": "870d0144b018e7db9428f15521f31fe387b627e41417807968af2a33ea47aad8"
+    },
+    {
+      "path": "assets/seen-delta-rms.pdf",
+      "bytes": 21467,
+      "sha256": "214b1e8510e5af4fc7dc259809c38840498fb147b47076932a286ec135e848eb"
+    },
+    {
+      "path": "assets/seen-delta-rms.png",
+      "bytes": 106234,
+      "sha256": "e2409c03985a389c16ef8d3ad0aaf9337d2dd9fb7b00dd7d2164a4e8dc067d8c"
+    },
+    {
+      "path": "evidence/assessment.json",
+      "bytes": 161707,
+      "sha256": "750453ad2e2d9e02c0ada9eafcc9a18db3628aef9aa72e2fc9e794856d5dbe2f"
+    },
+    {
+      "path": "evidence/fixed-row-time-independent-review-v2.json",
+      "bytes": 1740,
+      "sha256": "f3481f936e4ba619aa06ff0beee579eb3cd179e60b7c67b4595add8f5b59114c"
+    },
+    {
+      "path": "evidence/fixed-row-time-preservation-v2.json",
+      "bytes": 4578760,
+      "sha256": "20ef0fdf8fc303cfcb1b7ca85aafb6dd5c918b3ccc5872961add8676088ab4c9"
+    },
+    {
+      "path": "root-report-visual-review-v1.json",
+      "bytes": 2244,
+      "sha256": "7d5e9c099af889dcd3cd121e0a066185b1306caeb0ff1eb7f3a14afb7066bd70"
+    }
+  ],
+  "evaluation_budget_semantics": "30 and 120 describe requested residual-evaluation ceilings; actual canonical counts are unavailable."
+}

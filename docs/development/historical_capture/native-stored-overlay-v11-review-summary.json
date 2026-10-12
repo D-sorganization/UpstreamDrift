@@ -1,0 +1,112 @@
+{
+  "schema": "necromatcher/native-stored-overlay-review/1",
+  "title": "Native Stored V11 Overlay Recall Review",
+  "issue": 11282,
+  "parent_issue": 11246,
+  "source_commit": "b32878a828d3b96bfc796bee368ef60cb692d117",
+  "stored_export_producer": "f570e5f421d84d54275f7c7b36ab3d4051aa0112",
+  "producer_matches_current": false,
+  "scope": "Actual offscreen PyQt6/QTest public widget selection and controlled Qt save dialog; native OS/manual acceptance unverified. No new fit/export jobs.",
+  "file_dialog_scope": "Controlled Qt save destination response; native OS/manual acceptance unverified.",
+  "new_jobs_created": false,
+  "original_receipt_sha256": "4386d69afcc3274abe8d7fb73b21ff2652142f31b4c71aa86f1f6169d756206a",
+  "independent_addendum_sha256": "a681b20915de629ab82b7789bf809495cdcb3b70eab3dcfb5387d105fc8506f0",
+  "driver_sha256": "a0013326c8cad470a4a5ab4d7292be2a7b20724ef2adc1e75e603dc140c3df02",
+  "validation_driver_exit": 1,
+  "validation_driver_failure": "Final review whitelist compared Windows backslash snapshot keys to slash prefixes. Original driver exited1 AFTER both successful QTest recall/saves; original log/receipt retained. No application or source failure. No rerun.",
+  "normalized_changed_library_paths": [
+    "video-runs/3175527f24994a769bde92e29232e33a/complete.json",
+    "video-runs/d0ce1c135e594dbdb019335f5f172aae/overlay-8ba52337bf694ada82a51ab91654e13c.zip",
+    "video-runs/d0ce1c135e594dbdb019335f5f172aae/complete.json",
+    "video-runs/3175527f24994a769bde92e29232e33a/overlay-d4a49b5a14534a13b8918dd9a5cd2e07.zip"
+  ],
+  "permitted_mutation_scope": "Exactly two selected owned runs: refreshed complete.json artifact baseline plus one new checked ZIP per run.",
+  "immutable_parent_file_count": 102,
+  "immutable_parent_bytes_unchanged": true,
+  "production_files_unchanged": true,
+  "current_head_unchanged": true,
+  "players": [
+    {
+      "player": "tiger",
+      "fit_id": "tiger-wrist-expanded-fit-v11",
+      "capture_id": "tiger-usga-range-capture-v1",
+      "run_id": "d0ce1c135e594dbdb019335f5f172aae",
+      "saved_zip_sha256": "f49ed55b99a77543a0b19dbb16f92c99f28651bc4de922418a324530608551c7",
+      "frames": [
+        {
+          "frame_index": 0,
+          "status": "Frame 1/210 \u00b7 PTS 450450 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "tiger-fit-000000.png",
+          "sha256": "49ff9f7aa3d3e192b750b996c6b4fab41b7bdcf4703090c605024b7c1dc6b1cf"
+        },
+        {
+          "frame_index": 105,
+          "status": "Frame 106/210 \u00b7 PTS 555555 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "tiger-fit-000105.png",
+          "sha256": "5d72139c41d9f7405fd48700c0ed3d49ffb7549f353a4943b00cc9fff82e6d6b"
+        },
+        {
+          "frame_index": 209,
+          "status": "Frame 210/210 \u00b7 PTS 659659 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "tiger-fit-000209.png",
+          "sha256": "aab981b5d1995961025ae817327c7ff9c9e91636ee25639e363f4d1e1acafd3e"
+        }
+      ],
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "qualification": "monocular_research_hypothesis",
+      "status_screenshot": "tiger-existing-export-status.png",
+      "existing_run_render_scope": "QTest keyboard selection of fit-scoped stored run; QTest save click with controlled Desktop file dialog response"
+    },
+    {
+      "player": "hogan",
+      "fit_id": "hogan-wrist-expanded-fit-v11",
+      "capture_id": "hogan-practice-capture-v1",
+      "run_id": "3175527f24994a769bde92e29232e33a",
+      "saved_zip_sha256": "75cce2f1380ce67caa824423a8ac2eace823f853ed5dbc6e7b5763a4891d381b",
+      "frames": [
+        {
+          "frame_index": 0,
+          "status": "Frame 1/750 \u00b7 PTS 3300000 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "hogan-fit-000000.png",
+          "sha256": "a6c2cd1dc59023dae2d283d233a3e08fff66263f00f11880cfe59c31dc883dda"
+        },
+        {
+          "frame_index": 375,
+          "status": "Frame 376/750 \u00b7 PTS 3675000 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "hogan-fit-000375.png",
+          "sha256": "91d4cbcd4177df4ae5460126af262f233ced2fcdaf77d6dbb1c9e2a7169bc0db"
+        },
+        {
+          "frame_index": 749,
+          "status": "Frame 750/750 \u00b7 PTS 4049000 \u00d7 1/30000 s \u00b7 Physical Time Unknown \u00b7 detected \u00b7 Rings: Native Projection \u00b7 Camera Unqualified",
+          "screenshot": "hogan-fit-000749.png",
+          "sha256": "a50c60b865aae756470f1210f5df6ac6163511b85ed24bef09b46536cd935fa7"
+        }
+      ],
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "qualification": "monocular_research_hypothesis",
+      "status_screenshot": "hogan-existing-export-status.png",
+      "existing_run_render_scope": "QTest keyboard selection of fit-scoped stored run; QTest save click with controlled Desktop file dialog response"
+    }
+  ],
+  "visual_review": {
+    "viewed_frames": {
+      "tiger": [0, 105, 209],
+      "hogan": [0, 375, 749]
+    },
+    "viewed_status_dialogs": ["tiger", "hogan"],
+    "findings": [
+      "Both actual saved V11 fits selected in public library widgets; native projection rings and camera-unqualified/physical-time-unknown labels visible at first/middle/end.",
+      "Tiger middle/end projection rings remain displaced from observed body landmarks; final source crops feet.",
+      "Hogan projection is closer to blurred body outline but large rings and low resolution prevent precise anatomical claims.",
+      "Stored-run combo shows actual correct run and succeeded/rejected; save status preserves historic producer and research boundary.",
+      "Native stills show image plus observation/projection rings, not the export video skeleton/shaft geometry. The screenshots do not establish club/contact acceptance."
+    ]
+  },
+  "result": "Programmatic recall and guarded save verified with parent/source byte brackets; scientific qualification remains rejected.",
+  "artifact_folder_label": "Necromatcher Native Stored V11 Recall 2026-10-02",
+  "scientific_acceptance": "rejected",
+  "continuous_certified": false
+}

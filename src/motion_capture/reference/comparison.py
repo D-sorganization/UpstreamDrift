@@ -28,7 +28,7 @@ MAX_COMPARISON_BYTES = 256_000
 ComparisonView = Annotated[
     str, Field(min_length=1, max_length=64, pattern=r"^[\w -]+$")
 ]
-_VIEW_ADAPTER = TypeAdapter(ComparisonView)
+_VIEW_ADAPTER: TypeAdapter[str] = TypeAdapter(ComparisonView)
 
 
 class ComparisonLayer(BaseModel):

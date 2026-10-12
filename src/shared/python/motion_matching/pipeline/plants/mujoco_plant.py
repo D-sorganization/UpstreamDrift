@@ -113,6 +113,12 @@ class MujocoMatchingPlant:
         ik = self.create_ik(mapping)
         return ik.body_poses(q_array, tuple(body for body, _ in mapping.values()))
 
+    def create_marker_linearizer(
+        self, attachments: Mapping[str, tuple[str, Sequence[float]]]
+    ) -> FullBodyMarkerKinematics:
+        """Create one fit-owned analytic marker resource on the compiled model."""
+        return self.create_ik(attachments)
+
     def marker_positions(
         self, q: np.ndarray, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> np.ndarray:

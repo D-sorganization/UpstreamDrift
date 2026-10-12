@@ -1,0 +1,136 @@
+{
+  "schema": "necromatcher/forearm-results-supplement-review/1",
+  "edition": "Final Paired Visual Supplement V1",
+  "producer": "00b7d9846bd2fb2572b7c84f03cfc6c9699323cb",
+  "tex": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\forearm-matching-results-supplement.tex",
+    "sha256": "8603cc4b62736230711667b80addf01782be55bb129c2b52efbf12d546c01c03",
+    "bytes": 26117
+  },
+  "pdf": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\forearm-matching-results-supplement.pdf",
+    "sha256": "3935db139d694018e1e43608c4ef7f70f759a8cd8d08cef4f3879d1c37f3f5c6",
+    "bytes": 6451989
+  },
+  "exact_data": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\forearm-results-data.json",
+    "sha256": "5fbe17fececdcff8bd2423dc882bee7832843256c3d45f313c944614b7f6748c",
+    "bytes": 304869
+  },
+  "csv": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\forearm-results.csv",
+    "sha256": "6f4f27849d4ba232dde06369487292812620f51d1cff0d120e4028fb488c893b",
+    "bytes": 840
+  },
+  "assets_and_proofs": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-pilot-assets-verified.json",
+    "sha256": "52e6ce00b063420cd49f5f13040cb363a6d64a08b23374ca4bef5609abb0591d",
+    "bytes": 7836
+  },
+  "page_count": 12,
+  "visual_review": {
+    "all_pages_rendered": true,
+    "all_pages_reviewed": true,
+    "final_changed_pages_reviewed": [1, 9, 12],
+    "other_final_render_pngs_byte_identical_to_reviewed_draft": [
+      2, 3, 4, 5, 6, 7, 8, 10, 11
+    ],
+    "all12_source_composites_viewed": true,
+    "no_visible_clipping_or_overflow": true,
+    "layout_renders": [
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-01.png",
+        "sha256": "0ece9e78221fee1dd669f3d844e7497a62dfabd329b778553375b89476bb3d5d",
+        "bytes": 84926
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-02.png",
+        "sha256": "f3ef72a4cd93b2804c9a8c71f1c2ddf2391db63533c6a2489b6b55048f708ed8",
+        "bytes": 114967
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-03.png",
+        "sha256": "c51a52d806f41846ad19ad97061ac014fa987d9ef6e341bf846732d8d7f95ae9",
+        "bytes": 113486
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-04.png",
+        "sha256": "4313532cb11b04628e3bc3eecb79c0f2abd9cb103c1de744d5c54065f1c5a6f8",
+        "bytes": 108430
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-05.png",
+        "sha256": "6cb5d0beca06b886fabea4116ee6619d2b22531c58a6844b17e49cfd8c3afb7f",
+        "bytes": 94372
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-06.png",
+        "sha256": "93fb79db98d7944a3f4cfe14bee2d59a2e315da3d24c963e5fbdddd9aa2f95a6",
+        "bytes": 106715
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-07.png",
+        "sha256": "e19bf17b762b706fb13693f332383c970c2b62cd675dc78b5e89a2455bdabf3d",
+        "bytes": 103289
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-08.png",
+        "sha256": "c74009aa79846a6e4a86a725af58a2269afa2de5e4b1a664908f759a32ba412f",
+        "bytes": 124695
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-09.png",
+        "sha256": "1668e5839cdeab5e429ca577dd5f5314350d75e69f090c1e2862ab8a5cda1ab3",
+        "bytes": 151099
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-10.png",
+        "sha256": "aa1988ca37f952b2c170907e1035f71ddd7286283e067945bbfeda220442029b",
+        "bytes": 581468
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-11.png",
+        "sha256": "b082410550eb193baa5343013455b4ff2ecc5be4ff45dfe56c7516ecce62d1fc",
+        "bytes": 312987
+      },
+      {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\paired-layout-review-final-v1\\page-12.png",
+        "sha256": "6a1164ddac63705673f1c6d6ddc74940645e8183ed73ae01f5192237f6902f30",
+        "bytes": 170198
+      }
+    ]
+  },
+  "compile": {
+    "builtin": "Infrastructure failure: Unable to find standard directories for platform; source editor remains queued/open",
+    "fallback": "Existing MiKTeX pdflatex --disable-installer, no installs",
+    "log": {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Forearm Matching Results Supplement V1\\repeatability\\final-compile-pass1.log",
+      "sha256": "e075b73822471654befb7d88a6077e89ad81afa1bb2855a89d9b87b06b31d0cb",
+      "bytes": 8131
+    },
+    "tex_unresolved_reference_or_overflow_diagnostics": false
+  },
+  "pilot_scope": {
+    "displayed_composites": 12,
+    "independent_all_PNGs": 72,
+    "independent_depth_NPZs": 12,
+    "full_shaded_video_exported": false,
+    "T_control_heuristic_gate": true,
+    "T_variant_heuristic_gate": true,
+    "H_control_gate": false,
+    "H_variant_gate": false,
+    "heuristic_pass_is_not_fullclip_certificate": true
+  },
+  "qualification": {
+    "all_four_finite_targets_pass": true,
+    "all_four_converged": false,
+    "all_four_stored_acceptance": "rejected",
+    "historical_physical_qualified": false,
+    "continuous_nonlinear_certified": false,
+    "grip_release_is_conditional_hypothesis_only": true
+  },
+  "preserved_numerical_edition_receipt": "b5f34921cb1904b4c2b756c56ef76acc1da5859e4b500894025b4c4460d54c26",
+  "canonical_74page_and_other_original_supplements_modified": false,
+  "engineering_design_manual": false,
+  "source_or_library_mutated": false
+}

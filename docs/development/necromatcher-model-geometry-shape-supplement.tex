@@ -1,0 +1,344 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=0.85in,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,graphicx,xcolor,xurl,hyperref,fancyhdr}
+\definecolor{ink}{HTML}{17334A}\definecolor{accent}{HTML}{187E91}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,pdftitle={Necromatcher: Native Geometry and Model Shape Overlay Methods},pdfauthor={UpstreamDrift Development}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\textcolor{ink}{\textbf{NECROMATCHER} / GEOMETRY}}
+\fancyhead[R]{\small Methods Supplement}\fancyfoot[L]{\small Research Evidence / Qualification Remains Open}\fancyfoot[R]{\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}\setlength{\emergencystretch}{2em}
+\renewcommand{\arraystretch}{1.15}
+\newcommand{\code}[1]{\nolinkurl{#1}}\newcommand{\hash}[1]{{\footnotesize\nolinkurl{#1}}}
+\newcommand{\chapterpage}[1]{\clearpage\section{#1}}
+\begin{document}
+\hypersetup{pageanchor=false}
+\begin{titlepage}\thispagestyle{empty}\vspace*{0.55in}
+{\large\textcolor{accent}{UPSTREAMDRIFT / REPEATABLE RESEARCH METHODS}}\par\vspace{0.25in}
+{\Huge\bfseries\textcolor{ink}{Necromatcher}}\par\vspace{0.18in}
+{\LARGE Native Geometry, Joint Sensitivity,\\and Model Shape Overlays}\par\vspace{0.3in}
+{\large Tiger Woods and Ben Hogan / Supplemental Technical Record}\par\vspace{0.35in}
+\par\smallskip
+\begin{tabular}{@{}p{1.3in}p{4.65in}@{}}\toprule
+Purpose & Separate numerical correctness, visual comparison and historical reconstruction validity.\\
+Executed Audit & Four saved fits, 1,920 source poses, unchanged source/runtime/library brackets and independent FK/closure comparisons.\\
+Overlay Method & Saved native FK and camera, shared model-conditioned visual proxies, nearest model depth and explicit opacity.\\
+Producer Record & Geometry audit: \code{7228fabe9b}; shared-renderer fingerprint correction: \code{6ac96d0c6f}; original numerical fits: \code{3ab5c2ac87}.\\
+Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; report \#11247; shape export \#11356; camera/morphology/shutter/ROM \#11357; PR \#11359.\\\bottomrule
+\end{tabular}
+\vfill
+\textcolor{ink}{\textbf{Interpretation Boundary}}\par
+All four audited fits remain rejected, nonconverged research candidates.
+Numerical FK agreement identifies implementation consistency, not historical
+camera, anatomy, shaft shape, physical timing or dynamics. Surface geometry is
+an authored model proxy; it is not a measured reconstruction of either player.
+This standalone supplement accompanies the preserved 74-page methods report
+and nine-page source/shutter audit. The canonical engineering manual remains
+\code{manuals/upstreamdrift}; its scientific release inventory is separate.
+\end{titlepage}
+\hypersetup{pageanchor=true}
+\section{Evidence Identity and Reproduction Boundaries}
+A comparison must bind the immutable fit, native definition/XML, capture,
+source frames, decoder semantics, camera, renderer settings and producer.
+These identities have different byte domains and must not be substituted.
+\par\smallskip
+\begin{tabular}{@{}p{.27\linewidth}p{.67\linewidth}@{}}\toprule
+Identity & Exact Meaning\\\midrule
+File SHA256 & Encoded MP4, PNG, JSON, XML, ZIP or PDF bytes. Different encodings may have identical decoded pixels.\\
+Capture Frame Hash & Decoder/pixel-format provenance prefix followed by decoded BGR byte order.\\
+Native Model Hash & Bound XML bytes, reproduced from the saved native definition.\\
+Visual Description Hash & Shared derived visual-description bytes, including authored hints/default policy.\\
+Source Fingerprint & Canonical Python dependencies, including the entire shared \code{body_part_viz} tree.\\
+Runtime Fingerprint & Recorded software versions, platform and Tools pin; not complete binary/hardware certification.\\\bottomrule
+\end{tabular}
+For the accepted capture convention,
+\[
+h_i=\operatorname{SHA256}(\texttt{decoder:bgr24:}\Vert\operatorname{bytes}(I_i^{\mathrm{BGR}})),
+\qquad t_i=n_i a_i/b_i.
+\]
+Use public \code{compute_frame_hash} with the recorded decoder name. Store the
+encoded original PNG hash separately. Retain rational PTS; do not replace it
+with the nominal MP4 output rate or claim physical exposure time.
+
+The first surface pilot stopped before rendering because a preparation helper
+compared encoded PNG bytes to decoded capture identity. Its failure and
+post-failure preservation receipt remain separate. The correction uses the
+canonical frame-hash provider and tests changed pixels/decoder identity.
+Preparation tests must exercise the real identity schema rather than a mock
+that assigns an encoded-file digest to a decoded-frame field.
+
+No source edit, optimizer, annotation change or fit registration belongs inside
+a read-only audit. Bracket helper/config/source/runtime/library bytes before
+and after; use absent exclusive output directories. Owned export jobs may
+create only their newly returned run roots, with all pre-existing files unchanged.
+\chapterpage{Authored Native Geometry and Closure Audit}
+The execution used the four immutable Tiger V16 and Hogan V13 control/variant
+fits. Every saved source pose was checked: 210 poses per Tiger fit and 750 per
+Hogan fit. The independent verification bound 14,738 tracked source files and
+318 unchanged library files. Full output includes camera matrices, all native
+coordinates/units, source identities and free/locked values.
+
+Public native body poses return rotation then translation, $(R_b,t_b)$.
+For a local marker $\ell$ and authored attachment transform $A$,
+\[
+x_w=R_b\ell+t_b,\qquad T_w=\begin{bmatrix}R_b&t_b\\0&1\end{bmatrix}A.
+\]
+Compare marker FK against these placed body frames without refitting an
+attachment or changing local offsets. The maximum observed marker difference
+was $8.89\times10^{-16}\,\mathrm{m}$.
+
+For right-hand/club attachment frames, compare the signed world separation
+vector against the native plant's metre vector. Compare translation and
+principal rotation norms separately against public IK closure diagnostics.
+Never combine metres and radians into an unexplained norm. The left wrist is a
+joint; its relative rotation is not a weld requirement.
+
+\par\smallskip
+\begin{tabular}{@{}lrr@{}}\toprule
+Saved Fit & Maximum Source Grip Gap (mm) & Maximum Rotation Gap (rad)\\\midrule
+Tiger Control & 1.8303 & 0.01597199\\
+Tiger Variant & 1.8681 & 0.01557341\\
+Hogan Control & 2.1867 & 0.00785642\\
+Hogan Variant & 2.1852 & 0.00785433\\
+\bottomrule\end{tabular}
+
+These gaps use authored attachment placements at source poses. They are not
+measured physical grip errors, nor automatically identical to stored fit
+metrics sampled at other geometry times. Numerical agreement tolerances were
+$10^{-8}\,\mathrm{m}$ and $10^{-8}\,\mathrm{rad}$; all comparisons passed.
+The authored head solid COM differs from the named head frame by 0.5 mm,
+projecting to at most 0.231 px for Tiger and 0.061 px for Hogan in the tested
+poses. That convention difference cannot explain the gross shaft disagreement.
+\chapterpage{Joint Sensitivity and Human Motion Constraints}
+Compute canonical central differences at native-coordinate steps $10^{-6}$
+and $2\times10^{-6}$. Retain both Jacobians and their difference; this is a
+numerical local check, not analytic proof or a globally identified motion.
+\[
+J_j\simeq\frac{f(q+h e_j)-f(q-h e_j)}{2h}.
+\]
+Partition rows into five authored club references and thirteen body landmarks.
+Report world sensitivity in m/native-unit and image sensitivity in px/native-unit.
+Native coordinates comprise 3 translations and 41 rotations; do not merge
+metres and radians or interpret a total Jacobian norm as a clinical quantity.
+
+Both \code{LFInput} and \code{RFInput} were locked at zero radians at every
+saved pose. At first/middle/last samples, left-forearm club sensitivity ranged
+1.026--1.696 m/rad and 83.970--480.758 px/rad; its body sensitivity was much
+smaller. Right-forearm direct club sensitivity was zero in this authored tree,
+while body sensitivity remained nonzero. Closure influence requires its own
+signed-translation and rotation diagnostics. Zero landmark derivative does not
+prove absence of a mechanically relevant joint effect.
+
+The current definitions impose 32 finite authored ranges and leave 12 native
+coordinates unbounded. Forearm limits are $\pm\pi/2$ radians. These are model
+hypotheses, not measured subject ROM or a coupled clinical constraint system.
+Review axes, sign, attachment placements and rotation sequence before mapping
+native coordinates onto anatomical flexion, pronation or axial rotation.
+
+The next controlled comparison keeps the original camera, generic body,
+training/evaluation roles and budget fixed. It tests 31 versus 33 free
+coordinates rather than simultaneously changing camera, morphology and shutter.
+Range, ground, grip and phase checks remain separate from image residuals;
+finite sampled passes do not certify complete continuous dynamics.
+\chapterpage{Preserving Motion While Expanding Coordinates}
+Each player's current variant final trajectory supplies both experimental
+starts. The locked control restarts its original preserved spline. The expanded
+arm adds only the formerly locked left/right forearms, constant at zero with
+zero knot velocities. No authored range projection, clipping or resampling is
+allowed in this preparation.
+
+For a Hermite interval with normalized clock $u$, positions $q_0,q_1$ and
+velocities $v_0,v_1$,
+\[
+q(u)=h_{00}(u)q_0+h_{10}(u)\Delta t\,v_0+h_{01}(u)q_1+h_{11}(u)\Delta t\,v_1.
+\]
+Copying old position/velocity coefficient columns preserves their polynomial
+motion. Added columns $q_0=q_1=0$, $v_0=v_1=0$ have zero position, velocity and
+acceleration. Decision-size changes may alter floating-point evaluation;
+verify all 44 native-coordinate $q,v,a$ at every source time and interval
+midpoint with absolute tolerance $10^{-12}$ per coordinate/unit. Here $v,a$
+are derivatives with respect to container PTS seconds; preserving them does
+not identify physical velocities or accelerations.
+
+Use shared \code{expand_image_spline_coordinates}, a freshly evaluated strict
+native initializer and public \code{build_native_fit_payload}. Register a
+separate unoptimized seed with \code{coordinate_expansion_only}; it cannot
+claim convergence or reuse fitted shaft metrics. Then submit both arms through
+\code{NativeRefitSession}. No second scheduler or optimizer is introduced.
+
+Both arms use the same V1 shaft objective, body observations, first-pose prior,
+44 coordinate scales, knot clock/count, configuration and 30-evaluation/
+300-second budget. The position prior already has 44 native rows per body-training time;
+the two forearm rows become variable. The speed prior adds exactly two
+free-coordinate rows per training time, with the same coefficient, duration
+and scales and zero added initial cost. No unchanged total prior-mass claim
+is made. V2 observations have already been inspected; later
+adaptive trials cannot describe them as unseen validation. Compare raw body,
+shaft and closure errors, rejection/convergence status and all source/interior
+constraints independently before accepting any improvement.
+\chapterpage{Three-Dimensional Model Proxy Rendering}
+The saved plain MJCF currently contains no authored body visual solids.
+Rendering therefore reuses the shared visual-skeleton provider's capsules,
+ellipsoids and boxes, derived from exact saved geometry and visual hints/defaults.
+Mass-derived radii are model assumptions, not measured player circumferences.
+Cache shared local meshes once per export and apply the public native body FK.
+
+Project through the saved camera, $x_c=R_c x_w+t_c$ and
+$p=\pi(Kx_c)$. Clip triangles against $z_c=10^{-6}$ m before projection.
+Use canonical projection rather than a second camera implementation.
+At integer pixel centres with projected barycentric coordinates $\lambda_k$,
+perspective-correct surface depth is
+\[
+z(p)=\left(\sum_{k=1}^{3}\lambda_k(p)/z_k\right)^{-1}.
+\]
+Retain the nearest model depth; deterministic geometry ordering resolves ties.
+This establishes model-to-model occlusion only. The original scene's foreground,
+clothing and hidden body surfaces are not segmented or calibrated.
+
+Public \code{surface_layer} exposes sealed BGR pixels, Boolean coverage mask,
+positive finite covered depths, infinite uncovered depths and exact string
+geometry identities. Save Unicode IDs so the NPZ can be loaded with
+\code{allow_pickle=False}. The inspection layer is the compositing layer,
+not a separate approximate renderer. Verify silhouette, depth/ID invariants,
+canonical layer equality and separately decoded saved-camera projection equations.
+These checks establish implementation consistency, not measured depth.
+\chapterpage{Transparency, Skeleton Retention and Export Verification}
+For source pixels $S$, rendered surface $M$, coverage $m$ and opacity
+$\alpha\in[0,1]$,
+\[
+C(p)=\begin{cases}\operatorname{round}((1-\alpha)S(p)+\alpha M(p)),&m(p)=1,\\S(p),&m(p)=0.\end{cases}
+\]
+Blend once with no black-background contribution. Validate typed finite opacity
+and BGR source dimensions before FK. Surface-only opacity zero equals original
+pixels and performs no FK; final video opacity zero also retains the existing
+skeleton/observations/captions, so it is not a claim that the final annotated
+frame is the raw photograph. Disabled shape exports preserve legacy pixel and
+manifest behavior.
+
+The pilot protocol inspects Tiger 0/150/209 and Hogan 200/375/550 at opacity
+0, 0.35 and 1. The full canonical jobs select Tiger 0/105/209 and Hogan
+0/375/749 stills and retain all 210/750 source frames. Keep those cohorts distinct.
+Maximum measured opacity-0.35 pilot time times source count gates the unchanged
+600-second worker budget; this is a heuristic, not a full-video timing certificate.
+
+Full-export authorization binds the exact pilot producer, fit ID/raw hash,
+selected indices, source count and opacity. Journal owned run IDs immediately;
+verify package ZIP members/CRC/size/SHA, all 960 decoded frames, dimensions,
+rational source identities and selected PNGs independently. Lossy MP4 pixels
+need not equal original PNGs or the exact unencoded compositor output.
+Shape manifests bind native definition/XML/visual-description hashes, opacity,
+tessellation and occlusion limitations. Native/web controls share the typed
+options, canonical queue/worker and guarded publication/download boundary.
+\chapterpage{Tiger Original Footage and Translucent Model Proxies}
+These are surface-only source-frame comparisons at opacity 0.35. The existing
+skeleton is retained by the final export pipeline but is deliberately absent
+from this surface-inspection pilot. Camera, anatomy and club motion remain
+unqualified; visible disagreement is evidence to investigate, not acceptance.
+\par\smallskip
+\textbf{Source Frame 0}\par
+\begin{minipage}{.48\linewidth}\centering\small Original Source\par
+\includegraphics[width=\linewidth]{\detokenize{assets/tiger/frame-000000/original.png}}\end{minipage}\hfill
+\begin{minipage}{.48\linewidth}\centering\small Model Proxy / Opacity 0.35\par
+\includegraphics[width=\linewidth]{\detokenize{assets/tiger/frame-000000/surface-only-alpha-0.35.png}}\end{minipage}\par\medskip
+\textbf{Source Frame 150}\par
+\begin{minipage}{.48\linewidth}\centering\small Original Source\par
+\includegraphics[width=\linewidth]{\detokenize{assets/tiger/frame-000150/original.png}}\end{minipage}\hfill
+\begin{minipage}{.48\linewidth}\centering\small Model Proxy / Opacity 0.35\par
+\includegraphics[width=\linewidth]{\detokenize{assets/tiger/frame-000150/surface-only-alpha-0.35.png}}\end{minipage}\par\medskip
+\textbf{Source Frame 209}\par
+\begin{minipage}{.48\linewidth}\centering\small Original Source\par
+\includegraphics[width=\linewidth]{\detokenize{assets/tiger/frame-000209/original.png}}\end{minipage}\hfill
+\begin{minipage}{.48\linewidth}\centering\small Model Proxy / Opacity 0.35\par
+\includegraphics[width=\linewidth]{\detokenize{assets/tiger/frame-000209/surface-only-alpha-0.35.png}}\end{minipage}\par\medskip
+The six-frame pilot generated all comparisons but failed the Hogan timing
+gate. Tiger's maximum measured alpha-0.35 time predicted 355.974 seconds
+for its 210 frames. Precise Hogan timings were not persisted before the
+failed gate; they are not reconstructed or invented here. Full exports remain
+blocked pending measured performance improvement and new verification.
+\chapterpage{Hogan Original Footage and Translucent Model Proxies}
+These are surface-only source-frame comparisons at opacity 0.35. The existing
+skeleton is retained by the final export pipeline but is deliberately absent
+from this surface-inspection pilot. Camera, anatomy and club motion remain
+unqualified; visible disagreement is evidence to investigate, not acceptance.
+\par\smallskip
+\textbf{Source Frame 200}\par
+\begin{minipage}{.38\linewidth}\centering\small Original Source\par
+\includegraphics[width=\linewidth]{\detokenize{assets/hogan/frame-000200/original.png}}\end{minipage}\hfill
+\begin{minipage}{.38\linewidth}\centering\small Model Proxy / Opacity 0.35\par
+\includegraphics[width=\linewidth]{\detokenize{assets/hogan/frame-000200/surface-only-alpha-0.35.png}}\end{minipage}\par\medskip
+\textbf{Source Frame 375}\par
+\begin{minipage}{.38\linewidth}\centering\small Original Source\par
+\includegraphics[width=\linewidth]{\detokenize{assets/hogan/frame-000375/original.png}}\end{minipage}\hfill
+\begin{minipage}{.38\linewidth}\centering\small Model Proxy / Opacity 0.35\par
+\includegraphics[width=\linewidth]{\detokenize{assets/hogan/frame-000375/surface-only-alpha-0.35.png}}\end{minipage}\par\medskip
+\textbf{Source Frame 550}\par
+\begin{minipage}{.38\linewidth}\centering\small Original Source\par
+\includegraphics[width=\linewidth]{\detokenize{assets/hogan/frame-000550/original.png}}\end{minipage}\hfill
+\begin{minipage}{.38\linewidth}\centering\small Model Proxy / Opacity 0.35\par
+\includegraphics[width=\linewidth]{\detokenize{assets/hogan/frame-000550/surface-only-alpha-0.35.png}}\end{minipage}\par\medskip
+The six-frame pilot generated all comparisons but failed the Hogan timing
+gate. Tiger's maximum measured alpha-0.35 time predicted 355.974 seconds
+for its 210 frames. Precise Hogan timings were not persisted before the
+failed gate; they are not reconstructed or invented here. Full exports remain
+blocked pending measured performance improvement and new verification.
+\chapterpage{Camera, Morphology and Shutter Qualification Procedure}
+Both current native definitions use generic stature 1.71 m, mass 78 kg,
+arm-length factor 1.1 and trunk factor 1.15. They are not measurements of
+Tiger Woods or Ben Hogan. Saved camera centres/FOV are conditional on this
+model and assumed intrinsics; they do not establish historical camera height,
+lens calibration or target-line angle. Single-view image agreement leaves
+camera/scale/body-shape ambiguity.
+
+Order experiments: authored geometry and joint constraints; controlled forearm
+freedom; individually versioned body/camera hypotheses; then distortion/time
+alternatives. Reuse shared anthropometric-candidate/segment-scaling and camera
+initialization providers. Population proportions remain population priors.
+Do not substitute a later listed body weight for capture-date mass.
+
+Retain zero-readout as a baseline. A row-time hypothesis has
+$t(y)=t_0+\tau\rho(y)$ and evaluates moving geometry and camera pose at that time.
+Readout direction, sensor-row mapping, cropping/resizing, field conversion and
+playback retiming may be unidentifiable. Exposure integration is separate from
+row timing, and shaft flexure is separate from a rigid authored line. Neither
+progressive encoded frames nor a curved shaft alone identifies original shutter.
+The separate nine-page source audit documents all 960 accepted decoded frames
+and the corrected Hogan-window screening history.
+
+Declare parameter bounds, priors, uncertainty, gauge and stopping rules before
+comparison. Preserve original footage and version every transformed derivative.
+An attractive overlay, lower training error or a finite geometric pass cannot
+by itself qualify historical anatomy, motion, timing, impact or torque profiles.
+\chapterpage{Provenance and Turnover Record}
+Geometry execution receipt:\\
+\hash{2cddb400a82d41c270857de6e26c571e013b597f4209a9720c5df6f4c8bffd7e}\\
+Independent geometry verification:\\
+\hash{2dc1fb9397224e4103d8a2edeed95072c132afdd7e2388861eecb3145b979ab4}\\
+Shared renderer freeze:\\
+\hash{92176402f7f75a31c2ec35acb0e12403fcfd4210ab495b7fd74c3a8f22ccb09a}\\
+Shared rendering source-fingerprint regression freeze:\\
+\hash{033972be07d48daa89770201a4d2255c56afb0ad3b42de23153326f90a0d152a}
+
+TDD receipts retain failing tests before implementation, followed by 81 focused
+renderer, seam, geometry, export and shaft cases and 44 source-stamp/job compatibility
+cases. An independent three-case fixed-commit mutation check also passed.
+Earlier combined integration, UI/type and disabled-path checks remain separately
+recorded; these counts are not added as a unique-test total.
+
+Normal commit and push hooks passed for the published source correction.
+A transient HTTP 401 upload failed after validation and succeeded on a normal
+retry with all hooks retained. Remote branch and PR head were independently
+verified. No remote CI-green claim or scientific release is implied.
+
+Keep source-only audit, native geometry audit, surface pilots, owned full
+exports and new fitting trials in separate immutable receipt domains. A failed
+attempt is preserved; correction requires a new tested protocol/config and
+exclusive output, not replacement or blind resubmission. Add a new historical
+figure by binding its own capture/model/fit/evidence versions to these same
+shared interfaces, with player assumptions and acquisition rights reviewed.
+
+\textbf{Review Status}\par
+This edition records executed geometry and implemented rendering
+methods. Six actual surface-only comparisons are shown; the timing-gate failure
+and source/library preservation checks are retained separately. Full-video
+verification remains pending; no new forearm optimizer run is claimed here. All eleven pages were rendered and visually reviewed; portable figure assets
+are byte-identical copies of the preserved source-frame comparisons.
+\end{document}
