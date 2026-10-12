@@ -450,12 +450,9 @@ def _bundle_for(
         state_names = tuple(declaration.named_state)
         options = native_muscle_bundle._registered_options(model, state, muscles)
         identity, adapter_sha = _constrained_bundle_identity(
-            declaration,
-            model,
-            state,
-            state_names,
-            names,
-            options,
+            native_muscle_bundle.BundleSubject(
+                declaration.model_path, model, state_names, names, options
+            ),
             contracts,
             native_mechanics_profile,
             exact_557=exact_557,
@@ -488,12 +485,7 @@ def _bundle_for(
 
 
 def _constrained_bundle_identity(
-    declaration: DeclaredColdStart,
-    model: Any,
-    state: Any,
-    state_names: tuple[str, ...],
-    muscle_names: tuple[str, ...],
-    options: Mapping[str, Any],
+    subject: native_muscle_bundle.BundleSubject,
     contracts: Any,
     mechanics_profile: NativeMechanicsExecutionProfile | None,
     *,
@@ -508,11 +500,7 @@ def _constrained_bundle_identity(
         variant, version = exact.VARIANT_ID, exact.PROFILE_VERSION
         profile_material = bytes.fromhex(exact.profile_source_sha256())
     identity = native_muscle_bundle._identity(
-        declaration.model_path,
-        model,
-        state_names,
-        muscle_names,
-        options,
+        subject,
         contracts,
         mechanics_profile,
         coupled_rotation_paths=coupled_rotation_paths,
