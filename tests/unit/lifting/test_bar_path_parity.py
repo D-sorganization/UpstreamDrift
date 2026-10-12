@@ -95,11 +95,10 @@ def test_full_window_bar_path_is_inside_the_l2_frame_bound(record) -> None:
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "Open-loop instability: over the full 0.2 s window Drake, Pinocchio and "
-        "OpenSim drift up to 4.5e-3 rad from MuJoCo (the bar only 5.0e-6 m), "
-        "above the 1e-6 rad L2 coordinate bound.  Without feedback the standing "
-        "body diverges exponentially from 1e-16 engine differences (scoring.py); "
-        "the segmented replay below is the horizon-independent parity measure."
+        "Measured full 0.2 s window: Drake, Pinocchio and OpenSim end up to "
+        "4.5e-3 rad from MuJoCo (worst coordinate subtalar_angle_r; the bar "
+        "only 5.0e-6 m), above the 1e-6 rad L2 coordinate bound.  The "
+        "divergence starts in the 80-100 ms segment; see the segmented xfail."
     ),
 )
 def test_full_window_coordinates_are_inside_the_l2_coordinate_bound(
@@ -122,10 +121,12 @@ def test_segmented_replay_bar_and_frames_are_inside_the_l2_frame_bound(
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "Measured 20-step re-anchored replay: Drake 1.8e-4, Pinocchio 1.9e-4, "
-        "OpenSim 2.0e-4 rad (worst coordinate subtalar_angle_r), above the "
-        "1e-6 rad L2 coordinate bound; every spec frame stays within 2.2e-7 m. "
-        "Tracked on #11745; the bound is not loosened."
+        "Measured 20-step re-anchored replay: the 80-100 ms segment, ending at "
+        "the squat bottom, ends 1.8e-4 (Drake), 1.9e-4 (Pinocchio) and 2.0e-4 rad "
+        "(OpenSim) from MuJoCo in subtalar_angle_r, above the 1e-6 rad L2 "
+        "coordinate bound; the other nine segments stay within 2.3e-7 rad and "
+        "every spec frame within 2.2e-7 m.  Tracked on #11745; the bound is "
+        "not loosened."
     ),
 )
 def test_segmented_replay_coordinates_are_inside_the_l2_coordinate_bound(

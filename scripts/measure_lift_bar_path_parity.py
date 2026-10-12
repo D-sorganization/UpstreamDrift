@@ -129,9 +129,10 @@ def main(argv: list[str] | None = None) -> int:
         "generator": "scripts/measure_lift_bar_path_parity.py",
         "engines": engines,
     }
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-    logger.info("wrote %s", args.out)
+    out: Path = args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    logger.info("wrote %s", out)
     return 0
 
 
