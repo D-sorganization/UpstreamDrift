@@ -1291,3 +1291,7 @@ the generated ledger is refreshed from the restored immutable receipt bytes.
 ## Manufactured Native Diagnostics — #12275
 
 Exact synthetic MuJoCo geometry/zero-effort, short feedback replay, OpenSim property, Pinocchio and Drake observations are retained at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/`. See its README and SHA-bound manifest. Failed attempts are preserved. No capture, equilibrium, contact calibration, physiology, production replay or 17-row/six-ecosystem qualification is implied; all production variants remain unqualified.
+
+## Explicit No-Probe Preparation (#12353)
+
+The `prepare_native_moco` API and `moco-native --prepare-only` CLI now support an explicit capability-probe skip. The default remains probe-enabled. A skip-requested preparation records `capability_probe_requested: false`, `runtime_viability: not-attempted`, and remains ineligible for software solve. No forward integration runs on this preparation path; preparation may still perform the native construction/finalization/state work needed for its existing audits. This does not alter passive-policy gates or physical qualification. See `F07_NATIVE_NO_PROBE_PREPARATION_TURNOVER.md` and chapter 56. Work remains under review; no native run was performed for this change.

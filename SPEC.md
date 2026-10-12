@@ -11254,3 +11254,8 @@ private full-horizon matching and all17/six-engine qualification remain open.
 ## Manufactured Native Diagnostics Evidence (#12275)
 
 The hash-bound evidence package at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/` preserves compact probe/test snapshots, exact receipts, and supervisor metadata for synthetic MuJoCo, OpenSim, Pinocchio, and Drake observations. It includes recorded failures and does not copy raw private captures, model binaries, or vendor runtimes. The OpenSim 4.6 property probe observed activation/deactivation constants and minimum activation for exactly two named synthetic muscles; short feedback replay and same-pose geometry/acceleration observations remain narrowly scoped. See the package README and manifest for source, runtime, and byte identities. No production model/variant is qualified; supported contact, calibration, physiology, capture matching, complete muscular replay, and six-ecosystem parity remain open.
+
+
+## Probe-Suppressed OpenSim Preparation (#12353)
+
+The file-driven native Moco preparation API retains its capability probe by default. An explicit API flag or `moco-native --prepare-only --skip-capability-probe` suppresses only that short probe. The report records the request, leaves runtime viability `not-attempted`, and cannot become ready for software solve. No forward integration runs on this preparation path. Ordinary preparation audits and any model finalization, state restoration, or initialization they require still apply. This mode does not qualify runtime, physiology, capture matching, replay, or cross-engine parity. See canonical chapter 56 and `docs/development/feedback_controls/F07_NATIVE_NO_PROBE_PREPARATION_TURNOVER.md`.

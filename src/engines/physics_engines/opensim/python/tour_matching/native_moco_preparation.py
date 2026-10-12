@@ -84,6 +84,7 @@ class NativeMocoPreparation:
     qualification: str = "not-qualified-for-muscle-matching"
     allow_unqualified_passive_diagnostic: bool = False
     diagnostic_assessment: NativeDiagnosticAssessment | None = None
+    capability_probe_requested: bool = True
 
     @property
     def ready_for_software_solve(self) -> bool:
@@ -92,7 +93,8 @@ class NativeMocoPreparation:
             json.dumps(self.blockers, allow_nan=False).encode()
         ).hexdigest()
         return (
-            self.physical_body_inertia_qualified
+            self.capability_probe_requested
+            and self.physical_body_inertia_qualified
             and self.physical_body_inertia_sha256 is not None
             and self.diagnostic_assessment is not None
             and self.diagnostic_assessment.blocker_receipt_sha256 == blocker_receipt
@@ -871,6 +873,7 @@ def _prepare_native_model(
     blockers: list[str],
     wrapped_path_auditor: Callable[..., Any],
     probe_callable: Callable[..., tuple[str, float, float]],
+    run_capability_probe: bool = True,
 ) -> _NativeModelPreparation:
     empty = _NativeModelPreparation(
         None, None, None, None, None, False, None, None, None, ()
@@ -901,8 +904,12 @@ def _prepare_native_model(
             ),
         )
     try:
-        run_probe = not blockers and not any(
-            finding.execution_effect.value == "block" for finding in wrapped
+        run_probe = (
+            run_capability_probe
+            and not blockers
+            and not any(
+                finding.execution_effect.value == "block" for finding in wrapped
+            )
         )
         (
             loaded,
@@ -1105,8 +1112,12 @@ def prepare_native_moco(
     probe_callable: Callable[
         ..., tuple[str, float, float]
     ] = _native_short_capability_probe,
+    run_capability_probe: bool = True,
 ) -> NativeMocoPreparation:
     """Collect all independent, obtainable blockers before any expensive solve."""
+    if not isinstance(run_capability_probe, bool):
+        raise TypeError("run_capability_probe must be a bool")
+
     directory = Path(output_dir)
     directory.mkdir(parents=True, exist_ok=True)
     wall = time.perf_counter()
@@ -1126,7 +1137,12 @@ def prepare_native_moco(
     clock_sha = preflight.clock_sha256
     registered_sha = preflight.registered_sha256
     model_result = _prepare_native_model(
-        request, actual, blockers, wrapped_path_auditor, probe_callable
+        request,
+        actual,
+        blockers,
+        wrapped_path_auditor,
+        probe_callable,
+        run_capability_probe=run_capability_probe,
     )
     loaded = model_result.loaded_sha256
     reference_sha = model_result.reference_sha256
@@ -1169,6 +1185,7 @@ def prepare_native_moco(
         time.process_time() - cpu,
         allow_unqualified_passive_diagnostic=request.allow_unqualified_passive_diagnostic,
         diagnostic_assessment=assessment,
+        capability_probe_requested=run_capability_probe,
     )
     (directory / "preparation.json").write_text(
         json.dumps(asdict(report), indent=2, allow_nan=False) + "\n", encoding="utf-8"
