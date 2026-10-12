@@ -12,6 +12,12 @@ if TYPE_CHECKING:
     from src.engines.physics_engines.opensim.python.tour_matching.native_passive_readiness import (
         NativePassiveReadinessAudit,
     )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_moco_request import (
+        NativeMocoRequest,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.native_moco_preparation import (
+        _NativeModelPreparation,
+    )
 
 from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_bytes
 
@@ -218,3 +224,56 @@ def validate_native_passive_observation_receipt(
     ):
         raise ValueError("receipt passive muscle coverage mismatch")
     return payload
+
+
+def prepare_native_passive_observation(
+    directory: Path,
+    audits: list[NativePassiveReadinessAudit],
+    request: NativeMocoRequest,
+    model_result: _NativeModelPreparation,
+) -> tuple[NativePassiveObservationReceiptReference | None, tuple[str, ...]]:
+    """Validate and persist the one passive audit returned during preparation."""
+    reference: NativePassiveObservationReceiptReference | None = None
+    if audits:
+        try:
+            if len(audits) != 1:
+                raise ValueError("passive audit sink received multiple observations")
+            observed = audits[0]
+            if (
+                model_result.loaded_sha256 is None
+                or model_result.runtime_sha256 is None
+            ):
+                raise ValueError(
+                    "passive receipt requires loaded model and runtime identities"
+                )
+            if observed.native_state.loaded_model_sha256 != model_result.loaded_sha256:
+                raise ValueError(
+                    "passive audit loaded model identity does not match preparation"
+                )
+            if observed.observation_sha256 != model_result.passive_sha256:
+                raise ValueError("passive audit digest does not match preparation")
+            from .native_passive_readiness import audit_native_passive_readiness
+
+            observer_sha256 = hashlib.sha256(
+                Path(audit_native_passive_readiness.__code__.co_filename).read_bytes()
+            ).hexdigest()
+            reference = write_native_passive_observation_receipt(
+                directory,
+                observed,
+                request_sha256=request.identity_sha256,
+                source_sha256=request.model_sha256,
+                runtime_sha256=model_result.runtime_sha256,
+                observer_sha256=observer_sha256,
+            )
+        except (OSError, ValueError, TypeError):
+            reference = None
+    required = (
+        model_result.passive_sha256 is not None
+        or request.allow_unqualified_passive_diagnostic
+    )
+    blockers = (
+        ("native-passive-observation-receipt-unavailable",)
+        if required and reference is None
+        else ()
+    )
+    return reference, blockers
