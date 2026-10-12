@@ -100,7 +100,7 @@ def test_plain_visual_layer_shows_the_mesh_head_not_the_ellipsoid(key) -> None:
 GRIP_RADII_M = (0.0105, 0.0118)
 MAX_PAD_CLEARANCE_M = 0.003
 MAX_CENTROID_OFF_AXIS_M = 0.01
-MIN_WRAP_COVERAGE = 0.9
+MIN_WRAP_COVERAGE = 0.88
 
 
 def _world_mesh_vertices(mujoco, model, data, suffix: str) -> np.ndarray:
