@@ -1,0 +1,53 @@
+{
+  "captured_at_utc": "2026-10-12T16:18:31.202758+00:00",
+  "request": "Stop goal pursuit; update all turnover documents for another agent; preserve originals for a possible slim Git dataset.",
+  "UpstreamDrift_pr": {
+    "number": 12278,
+    "html_url": "https://github.com/D-sorganization/UpstreamDrift/pull/12278",
+    "state": "open",
+    "merged": false,
+    "merged_at": null,
+    "merge_commit_sha": "8603c6bfa5b6b2ad1b89f77ca22f7d9e980365bb",
+    "auto_merge": null,
+    "mergeable_state": "blocked",
+    "head": "57480c5b5793391e9b54aabfbe523a3a24397f02",
+    "base": "f6ddaffc66965740be47f43f9540b8b86ebd924f"
+  },
+  "AffineDrift_pr": {
+    "number": 5022,
+    "html_url": "https://github.com/D-sorganization/AffineDrift/pull/5022",
+    "state": "open",
+    "merged": false,
+    "merged_at": null,
+    "merge_commit_sha": "0a078dd38bd4ce54c4fc796b2eab35059bb6217d",
+    "auto_merge": {
+      "enabled_by": {
+        "login": "dieterolson",
+        "id": 198168927,
+        "node_id": "U_kgDOC8_RXw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/198168927?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dieterolson",
+        "html_url": "https://github.com/dieterolson",
+        "followers_url": "https://api.github.com/users/dieterolson/followers",
+        "following_url": "https://api.github.com/users/dieterolson/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dieterolson/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dieterolson/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dieterolson/subscriptions",
+        "organizations_url": "https://api.github.com/users/dieterolson/orgs",
+        "repos_url": "https://api.github.com/users/dieterolson/repos",
+        "events_url": "https://api.github.com/users/dieterolson/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dieterolson/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "merge_method": "squash",
+      "commit_title": null,
+      "commit_message": null
+    },
+    "mergeable_state": "blocked",
+    "head": "d9258f86c1160f5734d4f67346f585921fc4c5c3",
+    "base": "9002c8a2f94050e013762c08de053abab48711ee"
+  }
+}

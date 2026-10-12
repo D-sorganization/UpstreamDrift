@@ -1,10 +1,10 @@
 {
-  "status": "active",
-  "recorded_at_utc": "2026-10-12T15:25:47.928343+00:00",
-  "checkpoint": "0a323cf18ad1fe6f2a727fa62dcbed530ca49a64",
+  "status": "stopped_by_user_for_turnover",
+  "recorded_at_utc": "2026-10-12T16:21:54.615796+00:00",
+  "checkpoint": "57480c5b5793391e9b54aabfbe523a3a24397f02",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "0a323cf18ad1fe6f2a727fa62dcbed530ca49a64",
-  "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
+  "source_commit": "1532baa27c9402d78e6efda90b121f6a851813a2",
+  "integration": "Stopped by user; successor owns pursuit. Latest main f6dd preserved; local eight gates pass, protected full unit fails one alias test. Two uncommitted fixture/test files preserved.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
     "change": "Include copied research scripts in frozen fixture source hashes",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7597 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/280 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 is live at9002c8a2:53 exact checks,four browser cells and root-agent visual review pass;39-page PDF hash matches. Whole-site post-deploy workflow status is separate.",
+  "current_validation": "Local canonical eight gates PASS:7629pass377skip43deselect1knownxpass21subtests; Semgrep209rules280files0findings. Protected38273876469 FAIL:1failed27483passed1163skipped8xfailed. Proposed fixture repair incomplete: combined1failed29passed1skipped.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -38,32 +38,19 @@
     "current_validator": "PASS after remote/main reconciliation; earlier blocked receipt remains historical"
   },
   "affinedrift": {
-    "pr": 5005,
-    "source_review_commit": "6f0d81eb",
-    "audit_commit": "f5ee7c1d",
-    "full_gates": "Initial publication5005 protected merged ace2a1ac; mobile repair5016 armed after all eight local gates and independent review",
-    "public_routes": "Initial live53 checks PASS; all nine assets/PDF exact. Final mobile repair deployment verification pending.",
-    "pushed_commit": "5b658b733c4591f318687540e0ca4e571ee25d8a",
-    "canonical_pre_pr": "PASS after actual main conflict reconciliation",
-    "ci_run": "https://github.com/D-sorganization/AffineDrift/actions/runs/38203470000",
-    "merge_queue_sha": "eabbb3233a3644f11324d5dc39252db8589d71cc",
-    "live_verification": {
-      "revision": "ace2a1ac49ec179f982f4457b0e3a2ccb3c16a84",
-      "checks_passed": 53,
-      "assets": 9,
-      "pdf": "39 pages, exact accepted SHA256",
-      "browser_automated_cells_passed": 4,
-      "axe_serious_critical": 0,
-      "manual_visual": "Desktop coherent; mobile headline narrow/word-splitting FAIL, Sol repair in progress",
-      "overall": "Publication visual acceptance pending mobile repair"
-    },
-    "mobile_repair": {
-      "pr": 5016,
-      "head": "3b318ae4be86778383e7ec258b3c9d933816a240",
-      "status": "Protected auto-merge armed; local regression Chromium and Mobile Chrome PASS; final live verification pending"
-    }
+    "publication_prs_merged": [
+      5005,
+      5016
+    ],
+    "published_revision": "9002c8a2f94050e013762c08de053abab48711ee",
+    "live_checks": "53/53;9assets exact;39pagePDF exact;4visual/browsercellsPASS",
+    "deployment_run": 38255088410,
+    "deployment_result": "success",
+    "stability_pr": 5022,
+    "stability_head": "d9258f86c1160f5734d4f67346f585921fc4c5c3",
+    "stability_state": "OPEN/unmerged at stop; squash auto-merge armed; E2E running at last observation; local watcher stopped"
   },
-  "protected_merge": "pending",
+  "protected_merge": "unmerged_at_stop",
   "overall_complete": false,
   "premerge_mypy": {
     "receipt": "premerge-mypy-pass.txt.gz",
@@ -1319,5 +1306,12 @@
       }
     },
     "protected_pr": "#12278 pending ordinary push and merge queue; no protected merge claimed"
+  },
+  "user_requested_turnover": {
+    "handoff": "../../RESUME_HANDOFF.md",
+    "data_slimming": "../../DATA_SLIMMING_HANDOFF.md",
+    "evidence": "../user_requested_turnover_20261012/",
+    "slimming_performed": false,
+    "processes": "All session local tests and watchers stopped; GitHub CI/armed merge left untouched."
   }
 }

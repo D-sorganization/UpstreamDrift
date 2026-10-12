@@ -1,36 +1,37 @@
 # Shot Pattern Phase-Two Artifact Delivery Plan
 
-## Current Delivery Checkpoint
+## Current Delivery and Stop Status
 
-The illustrated article is now accepted: 33 pages, 13 source-bound figures,
-local Tectonic 0.15.0 compilation with zero warnings, and rendered-page review.
-The authoritative current staging inventory is
-`phase2/validation/artifact_delivery_v3/release_staging_inventory_v3.json`:
-21 assets, including `ILLUSTRATED_REPORT.pdf` and `illustrated-report-source.zip`.
-The prior `report__REPORT.pdf` remains a clearly identified historical text-only
-artifact. The new source archive restores the canonical TeX and all 13 figures;
-its independent restoration receipt is in the same v3 validation directory.
-The local staging path is `/tmp/shot-pattern-delivery-resume/release-assets-v2`.
-The report-presentation hold is resolved, and the research prerelease is
-published at [shot-pattern-phase2-research-2026-10-10](https://github.com/D-sorganization/UpstreamDrift/releases/tag/shot-pattern-phase2-research-2026-10-10),
-bound to DELIVERY checkpoint `cb5eff6dcd9df7d878f10578078b6fea69c8b681`.
-Fresh download verification passed for all 21 inventory assets, exact trusted
-manifest bytes, 690 primary, 548 control and 6,465 supplement members, the
-15-member illustrated source ZIP including 13 selected figures, and 98/98
-supplement links. The durable receipt is
-`phase2/validation/artifact_delivery_v3/remote-restoration-v3.json.gz`
-(compressed SHA256 `94f1fdea97207cb0eb8bf59db981d09cffd60d74d02f3ddd8957a3990e728843`).
-The initial restore attempt exposed a mismatch between manifest archive names
-and release asset prefixes after all 21 asset hashes matched. Sol reviewed the
-corrected bijection by unique size and SHA256; the fresh isolated rerun exited 0
-without changing assets. `phase2/validation/artifact_delivery_v3/remote_verification_summary.json`
-records both attempts; the gzip restoration receipt records the successful full
-byte check.
-The examples below are historical execution recipes; this completed release is
-a research artifact publication, not a production release. Repository gates
-remain unresolved and the PR is not merge-ready.
+The user stopped goal pursuit on October12,2026 for another agent to take over.
+Read [Current Successor Handoff](../RESUME_HANDOFF.md) and
+[Data Slimming Handoff](../DATA_SLIMMING_HANDOFF.md). No data slimming or new
+artifact publication was performed during turnover.
 
-## Earlier Packaging Plan and Evidence
+The live article/PDF is accepted at deployed9002c8a2f940:53/53 revision-bound
+checks, all nine assets, four browser/visual cells and the exact39-page PDF hash
+`fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b`.
+The historical33-page illustrated PDF in the original release is a prior edition.
+The [research prerelease](https://github.com/D-sorganization/UpstreamDrift/releases/tag/shot-pattern-phase2-research-2026-10-10)
+contains25files:21original payloads, two earlier receipts and two additional
+live-verification archives. Original payloads and all98links were remotely
+restored and verified. Do not recreate or overwrite the release.
+
+Integration PR #12278 remains unmerged with one protected full-unit alias failure;
+local canonical all eight gates passed before that full-suite failure. AffineDrift
+#5022 remains unmerged at stop with auto-merge armed and browser CI running.
+These states are separate from completed live publication.
+
+## Historical Packaging Recipes and Evidence
+
+The remainder preserves the exact earlier packaging inventories and execution
+recipes. Statements such as33-page current report, unopened PR, failed older
+gates, former DELIVERY checkout or pending publication describe those historical
+checkpoints, not current instructions. Do not execute these examples as a
+restart plan: the old main-integration worktree was safely retired, the release
+already exists, and the current integration checkout is the safe-followup tree.
+Use the current handoff and existing accepted manifests for successor work.
+
+
 
 This earlier packaging plan binds the phase-two delivery data to the accepted repaired child v2 graphics. Its text-only REPORT.pdf was not an acceptable primary visual deliverable at that checkpoint. The illustrated article has since passed the 33-page, 13-figure document review and is the primary report in the v3 staging inventory above. Preserve the accepted dataset and reviewed figures; this document records no simulation or graphics regeneration.
 

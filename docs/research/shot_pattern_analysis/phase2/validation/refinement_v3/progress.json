@@ -1,5 +1,5 @@
 {
-  "status": "active",
+  "status": "stopped_by_user_for_turnover",
   "integration_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-refinement-integration/UpstreamDrift",
   "integration_base": "3172c3986afd17f49589814b45efc3685ea8e046",
   "integration_branch": "codex/shot-pattern-refinement-integration",
@@ -103,5 +103,10 @@
     "new_slow_test_watchdog_seconds": 240,
     "evidence": "https://github.com/D-sorganization/UpstreamDrift/issues/12309#issuecomment-6114197016",
     "note": "Final root runs exited0:8fast tests (footer_fast_tests.txt) and explicit -m slow native integration test (footer_native_explicit.txt), verifying9assets and3previews. Ruff and scoped mypy pass."
+  },
+  "turnover": {
+    "recorded_at_utc": "2026-10-12T16:22:53.514189+00:00",
+    "handoff": "../../RESUME_HANDOFF.md",
+    "note": "Historical refinement evidence below is retained; current publication verified, integration unmerged. No more pursuit in this session."
   }
 }
