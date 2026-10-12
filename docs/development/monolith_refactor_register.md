@@ -29,6 +29,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
 | 1173 | `src/launchers/upstream_drift_launcher.py` |
+| 1171 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1170 | `src/config/launcher_manifest_loader.py` |
 | 1168 | `src/api/routes/data_explorer.py` |
 | 1168 | `src/shared/python/shadow_tracker/ingestion.py` |
@@ -47,7 +48,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1140 | `src/shared/python/motion_matching/full_body_ik.py` |
 | 1139 | `src/api/routes/launch_monitor_analytics.py` |
 | 1136 | `src/engines/feedback_native_execution.py` |
-| 1134 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
@@ -128,8 +128,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 920 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
 | 914 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
+| 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
 | 911 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
-| 908 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
 | 907 | `src/tools/bunker_shot_gui/widgets.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
@@ -169,6 +169,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 843 | `src/shared/python/motion_pipeline/orchestrator.py` |
 | 842 | `src/shared/python/gui_pkg/help_content.py` |
 | 841 | `src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py` |
+| 840 | `src/engines/physics_engines/opensim/python/tour_matching/native_constrained_muscle.py` |
 | 840 | `src/tools/bunker_shot_gui/sandvolume.py` |
 | 837 | `src/bunkershot3d/calibration/f1_shear_cell.py` |
 | 836 | `src/shared/python/ai/gui/assistant/panel.py` |
