@@ -150,7 +150,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `__init__.py` | +716 |  | Dieter Olson 2026-09-26 | d-sorgcodexagent[bot] 2026-06-16 |
+| `__init__.py` | +716 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 
 ### Package `ai` (75 Diverged Files)
 
@@ -299,29 +299,29 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `humanoid_character_builder/__init__.py` | +58 |  | Dieter Olson 2026-09-26 | Dieter Olson 2026-09-26 |
+| `humanoid_character_builder/__init__.py` | +58 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-09-26 |
 | `humanoid_character_builder/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/core/anthropometry.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/core/body_parameters.py` | +1288 |  | Dieter Olson 2026-08-09 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/core/model.py` | +478 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/generators/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/_makehuman_generator.py` | +21 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
+| `humanoid_character_builder/generators/_makehuman_generator.py` | +21 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
 | `humanoid_character_builder/generators/_mesh_types.py` | +1917 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/_primitive_generator.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
-| `humanoid_character_builder/generators/_smplx_generator.py` | +340 |  | Dieter Olson 2026-08-09 | Dieter Olson 2026-06-20 |
+| `humanoid_character_builder/generators/_primitive_generator.py` | +25 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
+| `humanoid_character_builder/generators/_smplx_generator.py` | +340 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
 | `humanoid_character_builder/generators/mesh_generator.py` | +380 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/mesh_generator_primitive.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/generators/mesh_generator_smplx.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/generators/mesh_generator_primitive.py` | +16 | yes | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/generators/mesh_generator_smplx.py` | +16 | yes | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/generators/urdf_generator.py` | -442 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/interfaces/__init__.py` | +74 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/interfaces/api.py` | +36 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `humanoid_character_builder/interfaces/api.py` | +36 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/inertia_calculator.py` | -108 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
-| `humanoid_character_builder/mesh/primitive_inertia.py` | +108 |  | Dieter Olson 2026-08-03 | Dieter Olson 2026-08-20 |
+| `humanoid_character_builder/mesh/primitive_inertia.py` | +108 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/presets/__init__.py` | +226 |  | Dieter Olson 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/presets/loader.py` | +2871 |  | Dieter Olson 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/presets/loader.py` | +2871 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/tests/test_api.py` | -423 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-26 |
 | `humanoid_character_builder/tests/test_inertia_calculator.py` | -4 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
@@ -338,53 +338,53 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `model_generation/__init__.py` | +60 |  | d-sorgclaudeagent[bot] 2026-09-06 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/_convenience.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
+| `model_generation/_convenience.py` | +12 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-06-20 |
 | `model_generation/_lazy_map.py` | +546 |  | Dieter Olson 2026-09-19 | Dieter Olson 2026-04-26 |
-| `model_generation/api/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/api/__init__.py` | +8 | yes | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/api/rest_api.py` | +1096 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-06 |
-| `model_generation/api/rest_api_assets.py` | +275 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-25 |
+| `model_generation/api/rest_api_assets.py` | +275 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-25 |
 | `model_generation/api/rest_api_core.py` | +4240 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/api/rest_api_fastapi.py` | -27 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/api/rest_api_flask.py` | -72 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-06 |
-| `model_generation/api/rest_api_generation.py` | +363 |  | Dieter Olson 2026-09-21 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/api/rest_api_generation.py` | +363 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/api/rest_api_support.py` | +457 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/builders/__init__.py` | +25 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/builders/base_builder.py` | +2068 |  | d-sorgclaudeagent[bot] 2026-09-06 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/builders/manual_builder.py` | +20 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `model_generation/builders/parametric_builder.py` | +14 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `model_generation/builders/urdf_writer.py` | +1601 |  | Dieter Olson 2026-09-19 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/builders/base_builder.py` | +2068 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/builders/manual_builder.py` | +20 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
+| `model_generation/builders/parametric_builder.py` | +14 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
+| `model_generation/builders/urdf_writer.py` | +1601 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/cli/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/cli/main.py` | +52 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `model_generation/cli/main.py` | +52 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `model_generation/converters/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/converters/format_utils.py` | +28 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `model_generation/converters/mjcf_converter.py` | +1743 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
+| `model_generation/converters/format_utils.py` | +28 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
+| `model_generation/converters/mjcf_converter.py` | +1743 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `model_generation/converters/simscape/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/converters/simscape/mdl_parser.py` | -32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `model_generation/converters/simscape/simscape_converter.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `model_generation/converters/urdf_parser.py` | +7217 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
+| `model_generation/converters/simscape/simscape_converter.py` | +12 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
+| `model_generation/converters/urdf_parser.py` | +7217 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `model_generation/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/core/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/core/physics_validation.py` | +12 | yes | Dieter Olson 2026-09-26 | Dieter Olson 2026-09-26 |
+| `model_generation/core/physics_validation.py` | +12 | yes | Dieter Olson 2026-10-11 | Dieter Olson 2026-09-26 |
 | `model_generation/core/types.py` | +652 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
-| `model_generation/core/validation.py` | +29 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/core/validation.py` | +29 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/editor/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/editor/editor_clipboard.py` | +231 |  | d-sorgclaudeagent[bot] 2026-09-06 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/editor/editor_modifications.py` | +2637 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/editor/editor_clipboard.py` | +231 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/editor/editor_modifications.py` | +2637 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/editor/editor_types.py` | +1022 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/editor/frankenstein_editor.py` | +334 |  | d-sorgclaudeagent[bot] 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/editor/frankenstein_editor.py` | +334 |  | Dieter Olson 2026-10-11 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/editor/text_editor_diff_mixin.py` | +591 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-08-20 |
-| `model_generation/explorer/__init__.py` | -27 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `model_generation/explorer/__init__.py` | -27 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `model_generation/explorer/model_explorer.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
 | `model_generation/export/__init__.py` | +438 |  | Dieter Olson 2026-09-19 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/humanoid/__init__.py` | +251 |  | Dieter Olson 2026-09-11 | Dieter Olson 2026-08-20 |
 | `model_generation/inertia/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/inertia/calculator.py` | -5844 |  | Dieter Olson 2026-09-27 | Dieter Olson 2026-09-26 |
+| `model_generation/inertia/calculator.py` | -5844 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-09-26 |
 | `model_generation/inertia/primitives.py` | +317 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/__init__.py` | +20 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/library/_rate_limiter.py` | +604 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/cache.py` | +1744 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/github_importer.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/library/model_library.py` | +246 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
+| `model_generation/library/model_library.py` | +246 |  | Dieter Olson 2026-10-11 | Dieter Olson 2026-08-20 |
 | `model_generation/library/repository.py` | +4968 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/unified_loader.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `model_generation/mesh/__init__.py` | +76 |  | Dieter Olson 2026-09-11 | Dieter Olson 2026-08-20 |

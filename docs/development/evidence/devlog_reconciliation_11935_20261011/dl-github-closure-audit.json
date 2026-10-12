@@ -1,0 +1,4815 @@
+[
+  {
+    "id": "DL-#11596",
+    "issue_number": 11596,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11596,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-07T16:05:02Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11598],
+    "closing_merged_prs": [
+      {
+        "number": 11598,
+        "state": "MERGED",
+        "mergedAt": "2026-10-07T16:05:01Z",
+        "mergeCommit": {
+          "oid": "d4a763d822464b53515bcbc6c798af37af164330"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11553",
+    "issue_number": 11553,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11553,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-07T16:02:43Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11638, 11687],
+    "closing_merged_prs": [
+      {
+        "number": 11687,
+        "state": "MERGED",
+        "mergedAt": "2026-10-07T16:02:41Z",
+        "mergeCommit": {
+          "oid": "71cc60b28b30cfda52391ff5610feb493dffa707"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11614",
+    "issue_number": 11614,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11614,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11616, 11625],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11589",
+    "issue_number": 11589,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11589,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-06T21:20:36Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11590],
+    "closing_merged_prs": [
+      {
+        "number": 11590,
+        "state": "MERGED",
+        "mergedAt": "2026-10-06T21:20:35Z",
+        "mergeCommit": {
+          "oid": "a4031aa02ccb410936de6976090dc63abe2d7887"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11532",
+    "issue_number": 11532,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11532,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11555],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11513",
+    "issue_number": 11513,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11513,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-05T03:08:45Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11519],
+    "closing_merged_prs": [
+      {
+        "number": 11519,
+        "state": "MERGED",
+        "mergedAt": "2026-10-05T03:08:44Z",
+        "mergeCommit": {
+          "oid": "739df607f6e658ff966f33010f67d5fb6cc1e3c3"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11190",
+    "issue_number": 11190,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11190,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-05T02:37:38Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11518],
+    "closing_merged_prs": [
+      {
+        "number": 11518,
+        "state": "MERGED",
+        "mergedAt": "2026-10-05T02:37:36Z",
+        "mergeCommit": {
+          "oid": "d816c9985835ba78f275ee4f6ae5efc7c6ae152c"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9507",
+    "issue_number": 9507,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9507,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-05T11:59:57Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11522],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11161",
+    "issue_number": 11161,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11161,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11421",
+    "issue_number": 11421,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11421,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-04T13:48:25Z",
+      "author": {
+        "login": "codex-scheduled-tasks"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11436],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11400",
+    "issue_number": 11400,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11400,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11451],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11313",
+    "issue_number": 11313,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11313,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-04T23:31:39Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11313],
+    "closing_merged_prs": [
+      {
+        "number": 11509,
+        "state": "MERGED",
+        "mergedAt": "2026-10-04T23:31:38Z",
+        "mergeCommit": {
+          "oid": "d2b68f75b38a4633098859c970955064a74470e1"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#1900",
+    "issue_number": 1900,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 1900,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-03-19T10:42:09Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11510],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11278",
+    "issue_number": 11278,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11278,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-04T22:51:44Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11278],
+    "closing_merged_prs": [
+      {
+        "number": 11508,
+        "state": "MERGED",
+        "mergedAt": "2026-10-04T22:51:42Z",
+        "mergeCommit": {
+          "oid": "e61b9945eb69361e705206db665d75ce5b03d481"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11268",
+    "issue_number": 11268,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11268,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11417, 11273, 11268],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11235",
+    "issue_number": 11235,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11235,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11240],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11246",
+    "issue_number": 11246,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11246,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-04T16:27:11Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11240],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11247",
+    "issue_number": 11247,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11247,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11240],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11233",
+    "issue_number": 11233,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11233,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-02T08:34:30Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11237],
+    "closing_merged_prs": [
+      {
+        "number": 11237,
+        "state": "MERGED",
+        "mergedAt": "2026-10-02T08:34:28Z",
+        "mergeCommit": {
+          "oid": "93b5aa1a5a2bd0d6ce4beceaf57904fc903780fc"
+        },
+        "author": {
+          "login": "d-sorgcodexagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11230",
+    "issue_number": 11230,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11230,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-02T06:43:53Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11231],
+    "closing_merged_prs": [
+      {
+        "number": 11231,
+        "state": "MERGED",
+        "mergedAt": "2026-10-02T06:43:51Z",
+        "mergeCommit": {
+          "oid": "cee0a65e038e492ac184fcd5c28ac4db70e18126"
+        },
+        "author": {
+          "login": "d-sorgcodexagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11184",
+    "issue_number": 11184,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11184,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-30T13:38:59Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 11187,
+        "state": "MERGED",
+        "mergedAt": "2026-09-30T11:31:47Z",
+        "mergeCommit": {
+          "oid": "1a7f7f5e8fdbd3f82b69b0f8bb0fc43df7557791"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11175",
+    "issue_number": 11171,
+    "reason": "manual_review",
+    "issue": {
+      "__typename": "PullRequest",
+      "number": 11171,
+      "state": "MERGED",
+      "mergedAt": "2026-09-30T08:39:39Z",
+      "mergeCommit": {
+        "oid": "27632bd19517bc623161ec9a3b3624e918529c85"
+      },
+      "author": {
+        "login": "dieterolson"
+      },
+      "closingIssuesReferences": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11124",
+    "issue_number": 11124,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11124,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-29T21:12:53Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 11131,
+        "state": "MERGED",
+        "mergedAt": "2026-09-29T21:12:51Z",
+        "mergeCommit": {
+          "oid": "657d95287e7848dfc568ca4e70236bd5e982393a"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11107",
+    "issue_number": 11107,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11107,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-01T04:48:08Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 11198,
+        "state": "MERGED",
+        "mergedAt": "2026-10-01T04:48:07Z",
+        "mergeCommit": {
+          "oid": "ee806b50cb7db3e7001ce25b94c536895712625a"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      },
+      {
+        "number": 11387,
+        "state": "MERGED",
+        "mergedAt": "2026-10-03T09:41:25Z",
+        "mergeCommit": {
+          "oid": "b6d62f0e66755299ce119e363f011bdf81658737"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11098",
+    "issue_number": 11098,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11098,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-01T04:04:12Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 11197,
+        "state": "MERGED",
+        "mergedAt": "2026-10-01T04:04:11Z",
+        "mergeCommit": {
+          "oid": "add9a1bd59ba21d99e6c65d04058b6db8a870d91"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      },
+      {
+        "number": 11387,
+        "state": "MERGED",
+        "mergedAt": "2026-10-03T09:41:25Z",
+        "mergeCommit": {
+          "oid": "b6d62f0e66755299ce119e363f011bdf81658737"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11097",
+    "issue_number": 11097,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11097,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-01T07:17:46Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 11202,
+        "state": "MERGED",
+        "mergedAt": "2026-10-01T07:17:45Z",
+        "mergeCommit": {
+          "oid": "2cb3d58cfe3b181c12c26015d236dcdb234cf574"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      },
+      {
+        "number": 11387,
+        "state": "MERGED",
+        "mergedAt": "2026-10-03T09:41:25Z",
+        "mergeCommit": {
+          "oid": "b6d62f0e66755299ce119e363f011bdf81658737"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11102",
+    "issue_number": 11102,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11102,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-10-01T05:49:30Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 11200,
+        "state": "MERGED",
+        "mergedAt": "2026-10-01T05:49:29Z",
+        "mergeCommit": {
+          "oid": "9c23f1a2efcbc722de1bd86299b8351c5e96c41e"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      },
+      {
+        "number": 11387,
+        "state": "MERGED",
+        "mergedAt": "2026-10-03T09:41:25Z",
+        "mergeCommit": {
+          "oid": "b6d62f0e66755299ce119e363f011bdf81658737"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10965",
+    "issue_number": 10965,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10965,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-29T12:21:18Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 11113,
+        "state": "MERGED",
+        "mergedAt": "2026-09-29T12:21:17Z",
+        "mergeCommit": {
+          "oid": "4883c5950ffe8771589f532d682d40ce0b36c809"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11083",
+    "issue_number": 11083,
+    "reason": "manual_review",
+    "issue": {
+      "__typename": "PullRequest",
+      "number": 11083,
+      "state": "MERGED",
+      "mergedAt": "2026-09-29T04:57:21Z",
+      "mergeCommit": {
+        "oid": "64962e8d6b6263d5fb32bb1444712b28a9df4433"
+      },
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "closingIssuesReferences": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11083],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11080",
+    "issue_number": 11080,
+    "reason": "manual_review",
+    "issue": {
+      "__typename": "PullRequest",
+      "number": 11080,
+      "state": "MERGED",
+      "mergedAt": "2026-09-29T00:51:44Z",
+      "mergeCommit": {
+        "oid": "9003a40fe86d087a2fb8d5554c9a6d0b01ea2535"
+      },
+      "author": {
+        "login": "dieterolson"
+      },
+      "closingIssuesReferences": {
+        "nodes": [
+          {
+            "number": 10960
+          }
+        ]
+      }
+    },
+    "cited_pr_numbers": [11080],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#11071",
+    "issue_number": 11071,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11071,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-28T12:49:04Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11075],
+    "closing_merged_prs": [
+      {
+        "number": 11075,
+        "state": "MERGED",
+        "mergedAt": "2026-09-28T12:49:02Z",
+        "mergeCommit": {
+          "oid": "0206717f70a654744165990fe4b229fcdd4f3dd7"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11034",
+    "issue_number": 11034,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11034,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-28T07:39:37Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11069],
+    "closing_merged_prs": [
+      {
+        "number": 11069,
+        "state": "MERGED",
+        "mergedAt": "2026-09-28T07:39:36Z",
+        "mergeCommit": {
+          "oid": "d6a25ee7165f33b58c1b3608883e11865ee92945"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11008",
+    "issue_number": 11008,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11008,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-27T18:54:54Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11012],
+    "closing_merged_prs": [
+      {
+        "number": 11012,
+        "state": "MERGED",
+        "mergedAt": "2026-09-27T18:54:52Z",
+        "mergeCommit": {
+          "oid": "0aa8bb660d138c9255a4f224902dd6133f21a3c0"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#11003",
+    "issue_number": 11003,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 11003,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-27T04:21:24Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11010],
+    "closing_merged_prs": [
+      {
+        "number": 11010,
+        "state": "MERGED",
+        "mergedAt": "2026-09-27T04:21:23Z",
+        "mergeCommit": {
+          "oid": "d716c698f92073b01a5da84db1838313a36f24f1"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#1755",
+    "issue_number": 1755,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 1755,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-03-27T02:55:59Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10978],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10286",
+    "issue_number": 10286,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10286,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9619",
+    "issue_number": 9619,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9619,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9549",
+    "issue_number": 9549,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9549,
+      "state": "OPEN",
+      "stateReason": "REOPENED",
+      "closedAt": null,
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9688",
+    "issue_number": 9688,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9688,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "codex-scheduled-tasks"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9613",
+    "issue_number": 9613,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9613,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9411",
+    "issue_number": 9411,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9411,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-29T06:06:05Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 11082,
+        "state": "MERGED",
+        "mergedAt": "2026-09-29T06:06:04Z",
+        "mergeCommit": {
+          "oid": "2f3a97696f4401d99da64c3a4d4b04f913c02e2a"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      },
+      {
+        "number": 11115,
+        "state": "MERGED",
+        "mergedAt": "2026-09-29T12:59:21Z",
+        "mergeCommit": {
+          "oid": "7b74fb68c6bd255659789b02b00d34b68671e411"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9703",
+    "issue_number": 9703,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9703,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10946",
+    "issue_number": 10946,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10946,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-26T09:34:01Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10976,
+        "state": "MERGED",
+        "mergedAt": "2026-09-26T09:34:00Z",
+        "mergeCommit": {
+          "oid": "fee5b214ec81674e8626049ac9ff47907f567f3a"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10960",
+    "issue_number": 10960,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10960,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-27T06:51:29Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10974],
+    "closing_merged_prs": [
+      {
+        "number": 11017,
+        "state": "MERGED",
+        "mergedAt": "2026-09-27T06:51:28Z",
+        "mergeCommit": {
+          "oid": "e95675127847e50ddf441b5874a7aa9c9d87f99b"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      },
+      {
+        "number": 11080,
+        "state": "MERGED",
+        "mergedAt": "2026-09-29T00:51:44Z",
+        "mergeCommit": {
+          "oid": "9003a40fe86d087a2fb8d5554c9a6d0b01ea2535"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9415",
+    "issue_number": 9415,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9415,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10965",
+    "issue_number": 10965,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10965,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-29T12:21:18Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10988, 10989],
+    "closing_merged_prs": [
+      {
+        "number": 11113,
+        "state": "MERGED",
+        "mergedAt": "2026-09-29T12:21:17Z",
+        "mergeCommit": {
+          "oid": "4883c5950ffe8771589f532d682d40ce0b36c809"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9191",
+    "issue_number": 9191,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9191,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-30T00:52:42Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 11140,
+        "state": "MERGED",
+        "mergedAt": "2026-09-30T00:52:41Z",
+        "mergeCommit": {
+          "oid": "27af7ffe41f1fa8e26c367f27f9cdd0fe79da866"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10943",
+    "issue_number": 10943,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10943,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-26T07:03:06Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10968],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10921",
+    "issue_number": 10921,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10921,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-25T02:02:09Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10923],
+    "closing_merged_prs": [
+      {
+        "number": 10923,
+        "state": "MERGED",
+        "mergedAt": "2026-09-25T02:02:08Z",
+        "mergeCommit": {
+          "oid": "d8f5b0a39aef2823dac6520f1d11b8988f1b778c"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10883",
+    "issue_number": 10883,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10883,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-24T16:14:25Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10884],
+    "closing_merged_prs": [
+      {
+        "number": 10884,
+        "state": "MERGED",
+        "mergedAt": "2026-09-24T16:14:23Z",
+        "mergeCommit": {
+          "oid": "b15558ec3cb230e0fa90efc3a702dbb7f15d4313"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10849",
+    "issue_number": 10849,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10849,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-24T13:01:47Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10860],
+    "closing_merged_prs": [
+      {
+        "number": 10860,
+        "state": "MERGED",
+        "mergedAt": "2026-09-24T13:01:46Z",
+        "mergeCommit": {
+          "oid": "15ca47c2ebfc7731972ff6a98f58ceb7074b9553"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10783",
+    "issue_number": 10783,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10783,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-24T00:57:29Z",
+      "author": {
+        "login": "codex-scheduled-tasks"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10784],
+    "closing_merged_prs": [
+      {
+        "number": 10784,
+        "state": "MERGED",
+        "mergedAt": "2026-09-24T00:57:27Z",
+        "mergeCommit": {
+          "oid": "79427d3391f46aeafb43866652946406019a4cda"
+        },
+        "author": {
+          "login": "codex-scheduled-tasks"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10597",
+    "issue_number": 10597,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10597,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-24T07:40:33Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10814,
+        "state": "MERGED",
+        "mergedAt": "2026-09-24T07:40:32Z",
+        "mergeCommit": {
+          "oid": "fbebf5c4785bfffa83b1e3890c8ee07217e09698"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10751",
+    "issue_number": 10751,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10751,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T12:43:32Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10762],
+    "closing_merged_prs": [
+      {
+        "number": 10762,
+        "state": "MERGED",
+        "mergedAt": "2026-09-23T12:43:31Z",
+        "mergeCommit": {
+          "oid": "e1192b7c550cb4974570ba3a2b66d4c520b5a032"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10743",
+    "issue_number": 10743,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10743,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T06:43:16Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10744],
+    "closing_merged_prs": [
+      {
+        "number": 10752,
+        "state": "MERGED",
+        "mergedAt": "2026-09-23T06:43:15Z",
+        "mergeCommit": {
+          "oid": "2a9e7a4d30bf169cc666eb81093f2ebe770f8678"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#8907",
+    "issue_number": 8907,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 8907,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-24T19:53:58Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10742],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9225",
+    "issue_number": 9225,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9225,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T07:47:23Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10715],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#8883",
+    "issue_number": 8883,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 8883,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T01:45:21Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10651],
+    "closing_merged_prs": [
+      {
+        "number": 10739,
+        "state": "MERGED",
+        "mergedAt": "2026-09-23T01:45:20Z",
+        "mergeCommit": {
+          "oid": "5dd695f89774a615af59ebc0e89b4f0a631049bf"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#8941",
+    "issue_number": 8941,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 8941,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-24T19:09:06Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10881],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10385",
+    "issue_number": 10385,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10385,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T06:43:18Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10723],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10271",
+    "issue_number": 10271,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10271,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T07:48:04Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10722],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10378",
+    "issue_number": 10378,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10378,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T07:48:08Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10707],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#8880",
+    "issue_number": 8880,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 8880,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-22T21:33:07Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10656],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9479",
+    "issue_number": 9479,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9479,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-22T09:09:49Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10653],
+    "closing_merged_prs": [
+      {
+        "number": 10653,
+        "state": "MERGED",
+        "mergedAt": "2026-09-22T09:09:48Z",
+        "mergeCommit": {
+          "oid": "c70555a5e1aed74c01ce1001dd2e28265fdcc0b7"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10333",
+    "issue_number": 10333,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10333,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-22T08:46:58Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10684],
+    "closing_merged_prs": [
+      {
+        "number": 10684,
+        "state": "MERGED",
+        "mergedAt": "2026-09-22T08:46:56Z",
+        "mergeCommit": {
+          "oid": "df386e41b5290b2e8d9813a1d8753083b6f7c1a1"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10344",
+    "issue_number": 10344,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10344,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-22T06:42:29Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10685],
+    "closing_merged_prs": [
+      {
+        "number": 10685,
+        "state": "MERGED",
+        "mergedAt": "2026-09-22T06:42:28Z",
+        "mergeCommit": {
+          "oid": "cfe7217bf41ab59f546624e22df4712f1e75bb87"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10376",
+    "issue_number": 10376,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10376,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-22T01:49:22Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10677],
+    "closing_merged_prs": [
+      {
+        "number": 10677,
+        "state": "MERGED",
+        "mergedAt": "2026-09-22T01:49:21Z",
+        "mergeCommit": {
+          "oid": "00e32b5646df5bd6506606886d9c0aa045857681"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10345",
+    "issue_number": 10345,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10345,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T20:02:42Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10666],
+    "closing_merged_prs": [
+      {
+        "number": 10666,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T20:02:40Z",
+        "mergeCommit": {
+          "oid": "dcdc85a6f3b0fc1c05bee36e69b33e103158d6e3"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10436",
+    "issue_number": 10436,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10436,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T19:17:25Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10504],
+    "closing_merged_prs": [
+      {
+        "number": 10504,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T19:17:24Z",
+        "mergeCommit": {
+          "oid": "a5cec3063e050da0f6b153381ac04d453ffcdad0"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#8930",
+    "issue_number": 8930,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 8930,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T13:06:12Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10648],
+    "closing_merged_prs": [
+      {
+        "number": 10648,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T13:06:11Z",
+        "mergeCommit": {
+          "oid": "f80c6193316231adefa5bdc7a560ba10abb3635c"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9545",
+    "issue_number": 9545,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9545,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [11516],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9544",
+    "issue_number": 9544,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9544,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T08:18:50Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10455],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9543",
+    "issue_number": 9543,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9543,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T07:56:41Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10457],
+    "closing_merged_prs": [
+      {
+        "number": 10457,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T07:56:40Z",
+        "mergeCommit": {
+          "oid": "e95c30bd2c7b4fe6b0fe1d097504d9209bd3232d"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10590",
+    "issue_number": 10590,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10590,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T06:43:17Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10644],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9548",
+    "issue_number": 9548,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9548,
+      "state": "OPEN",
+      "stateReason": "REOPENED",
+      "closedAt": null,
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10311],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10359",
+    "issue_number": 10359,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10359,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T07:00:24Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10632],
+    "closing_merged_prs": [
+      {
+        "number": 10632,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T07:00:23Z",
+        "mergeCommit": {
+          "oid": "79ab1757c867d64419044468a607502c5bce6a56"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10349",
+    "issue_number": 10349,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10349,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T18:01:29Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10665],
+    "closing_merged_prs": [
+      {
+        "number": 10665,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T18:01:28Z",
+        "mergeCommit": {
+          "oid": "c4834e9e5a2ea46ad49d2995ff802ddec72f325f"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10348",
+    "issue_number": 10348,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10348,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-22T03:09:33Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10676],
+    "closing_merged_prs": [
+      {
+        "number": 10676,
+        "state": "MERGED",
+        "mergedAt": "2026-09-22T03:09:32Z",
+        "mergeCommit": {
+          "oid": "bc5a7ff90cfb0da3ed49a3ac3d20d1967ba267df"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10342",
+    "issue_number": 10342,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10342,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T15:48:10Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10659,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T15:48:09Z",
+        "mergeCommit": {
+          "oid": "c24afe02e5e5938e99792fdd663d18530f48ea4e"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10361",
+    "issue_number": 10361,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10361,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T06:32:20Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10633],
+    "closing_merged_prs": [
+      {
+        "number": 10633,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T06:32:18Z",
+        "mergeCommit": {
+          "oid": "b68ed246cc78e63c118c2d8aebebd3ec9d226b2a"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10366",
+    "issue_number": 10366,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10366,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T21:51:11Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10660],
+    "closing_merged_prs": [
+      {
+        "number": 10660,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T21:51:09Z",
+        "mergeCommit": {
+          "oid": "8e4ecee277d25cc305fcf8f4e37d333260e83a15"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9422",
+    "issue_number": 9422,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9422,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T05:47:34Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10466],
+    "closing_merged_prs": [
+      {
+        "number": 10466,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T05:47:33Z",
+        "mergeCommit": {
+          "oid": "c7d3509a609e96ca8f16dd2a143ecd2539a319c4"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10434",
+    "issue_number": 10434,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10434,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T02:00:59Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10499],
+    "closing_merged_prs": [
+      {
+        "number": 10499,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T05:03:27Z",
+        "mergeCommit": {
+          "oid": "9cb9b951622f0bd8ddcb1c12eb224ad6822e1579"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10589",
+    "issue_number": 10589,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10589,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T07:39:08Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10638],
+    "closing_merged_prs": [
+      {
+        "number": 10638,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T07:39:07Z",
+        "mergeCommit": {
+          "oid": "c04a22e0e0435583d31ea56f4c3167dc79b1f5fa"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10433",
+    "issue_number": 10433,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10433,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T06:03:20Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10498],
+    "closing_merged_prs": [
+      {
+        "number": 10498,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T06:03:19Z",
+        "mergeCommit": {
+          "oid": "7e6b39893674af3de31fb79efc6a2710f30c36de"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10440",
+    "issue_number": 10440,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10440,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T04:34:27Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10509],
+    "closing_merged_prs": [
+      {
+        "number": 10509,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T04:34:26Z",
+        "mergeCommit": {
+          "oid": "b633007c6ab323d71529ffc1109fca1c02218bc1"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9162",
+    "issue_number": 9162,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9162,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T04:16:28Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10239,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T04:16:27Z",
+        "mergeCommit": {
+          "oid": "0332f8028a8b0daf142a4d28e6b3f54226366c49"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9410",
+    "issue_number": 9410,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9410,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T03:59:48Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10245,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T03:59:47Z",
+        "mergeCommit": {
+          "oid": "b561a0d58d8970daf51df5f674bb09883ecfba76"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#8684",
+    "issue_number": 8684,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 8684,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-19T17:34:40Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10668],
+    "closing_merged_prs": [
+      {
+        "number": 9998,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T03:00:16Z",
+        "mergeCommit": {
+          "oid": "705606076622b0f886952401e15de6c8692999af"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10439",
+    "issue_number": 10439,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10439,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T02:36:01Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10507],
+    "closing_merged_prs": [
+      {
+        "number": 10507,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T02:36:00Z",
+        "mergeCommit": {
+          "oid": "20036a7c5fd7e9a38a342bb1c1a0c5b968cc8223"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10623",
+    "issue_number": 10623,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10623,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T18:29:29Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10770],
+    "closing_merged_prs": [
+      {
+        "number": 10770,
+        "state": "MERGED",
+        "mergedAt": "2026-09-23T18:29:28Z",
+        "mergeCommit": {
+          "oid": "a0beddd8ecc8d53976a49179785712b3636a7ec7"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10622",
+    "issue_number": 10622,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10622,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T17:01:53Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10768],
+    "closing_merged_prs": [
+      {
+        "number": 10768,
+        "state": "MERGED",
+        "mergedAt": "2026-09-23T17:01:51Z",
+        "mergeCommit": {
+          "oid": "c79f97724445d24a403d932bbd8bd8919cf81bac"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10602",
+    "issue_number": 10602,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10602,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10603",
+    "issue_number": 10603,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10603,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-23T22:02:54Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10628],
+    "closing_merged_prs": [
+      {
+        "number": 10782,
+        "state": "MERGED",
+        "mergedAt": "2026-09-23T22:02:52Z",
+        "mergeCommit": {
+          "oid": "789e1658bf0c926290764565baf256e1973f26cb"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9550",
+    "issue_number": 9550,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9550,
+      "state": "OPEN",
+      "stateReason": "REOPENED",
+      "closedAt": null,
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10441],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9541",
+    "issue_number": 9541,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9541,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T01:14:09Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10459],
+    "closing_merged_prs": [
+      {
+        "number": 10459,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T01:14:08Z",
+        "mergeCommit": {
+          "oid": "558e7ae8fa6ca1245cd034be9cfdcfa13d55e267"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10363",
+    "issue_number": 10363,
+    "reason": "governing_issue_open",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10363,
+      "state": "OPEN",
+      "stateReason": null,
+      "closedAt": null,
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10432",
+    "issue_number": 10432,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10432,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T23:56:38Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10497],
+    "closing_merged_prs": [
+      {
+        "number": 10497,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T23:56:37Z",
+        "mergeCommit": {
+          "oid": "a80290b4d458159d1587eb354aa12de0b9adf652"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10381",
+    "issue_number": 10381,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10381,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T23:34:08Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10599],
+    "closing_merged_prs": [
+      {
+        "number": 10599,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T23:34:07Z",
+        "mergeCommit": {
+          "oid": "79123f7bb4f59fef1575efca7c6b4d97fe8cb9b2"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10533",
+    "issue_number": 10533,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10533,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T22:32:42Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10581,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T22:32:41Z",
+        "mergeCommit": {
+          "oid": "5d73e45545c9498e1904eab8d7355cce7ef353c3"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10532",
+    "issue_number": 10532,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10532,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T21:39:51Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10580],
+    "closing_merged_prs": [
+      {
+        "number": 10580,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T21:39:50Z",
+        "mergeCommit": {
+          "oid": "70378c9602c68080efe942ad3f2affaae7d770e8"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10530",
+    "issue_number": 10530,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10530,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T21:20:23Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10579,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T21:20:21Z",
+        "mergeCommit": {
+          "oid": "f55cdd752f72992d0714294580a743eda659bc64"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10528",
+    "issue_number": 10528,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10528,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T20:40:51Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10578],
+    "closing_merged_prs": [
+      {
+        "number": 10578,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T20:40:50Z",
+        "mergeCommit": {
+          "oid": "e60d09274f77e86c9bfb1beb3afe5e0e3a4324b5"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10525",
+    "issue_number": 10525,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10525,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T20:25:56Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10563],
+    "closing_merged_prs": [
+      {
+        "number": 10563,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T20:25:55Z",
+        "mergeCommit": {
+          "oid": "5b1e57578886f5dd52875786209b1f811b1d3c53"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10524",
+    "issue_number": 10524,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10524,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T20:06:14Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10561],
+    "closing_merged_prs": [
+      {
+        "number": 10561,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T20:06:13Z",
+        "mergeCommit": {
+          "oid": "41618f3a41c78f58b111c64e57efdfe20c64813e"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10523",
+    "issue_number": 10523,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10523,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T19:52:09Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10560],
+    "closing_merged_prs": [
+      {
+        "number": 10560,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T19:52:08Z",
+        "mergeCommit": {
+          "oid": "2da04559b07b87c73c2a46e41d4134fe12e9088a"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10522",
+    "issue_number": 10522,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10522,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T18:42:38Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10547],
+    "closing_merged_prs": [
+      {
+        "number": 10547,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T18:42:37Z",
+        "mergeCommit": {
+          "oid": "81d32c3057c6ad8c4977e803df389031d9a789fb"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10531",
+    "issue_number": 10531,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10531,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T15:57:32Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10576],
+    "closing_merged_prs": [
+      {
+        "number": 10576,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T15:57:31Z",
+        "mergeCommit": {
+          "oid": "777033b5ef335c6c8b27ce568018b06de5a17860"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10353",
+    "issue_number": 10353,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10353,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T16:23:25Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10543],
+    "closing_merged_prs": [
+      {
+        "number": 10543,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T16:23:24Z",
+        "mergeCommit": {
+          "oid": "a1c13ed0d56fd622f138961477651310ea254b13"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10358",
+    "issue_number": 10358,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10358,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T17:32:05Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10664,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T17:32:04Z",
+        "mergeCommit": {
+          "oid": "e60228fadfda763f10c5f4e095172bbca8f777e8"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10529",
+    "issue_number": 10529,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10529,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T14:20:37Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10572,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T14:20:36Z",
+        "mergeCommit": {
+          "oid": "57ed7523df51627b2c66b9e89c502a97efe44d3b"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10520",
+    "issue_number": 10520,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10520,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T18:18:50Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10546],
+    "closing_merged_prs": [
+      {
+        "number": 10546,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T18:18:49Z",
+        "mergeCommit": {
+          "oid": "2715f5c87834c8efec84795e149cc69525cee489"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10519",
+    "issue_number": 10519,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10519,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T16:53:38Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10545],
+    "closing_merged_prs": [
+      {
+        "number": 10545,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T16:53:37Z",
+        "mergeCommit": {
+          "oid": "15bce2283fb6954b2b285585d370b0b7d03ed545"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10518",
+    "issue_number": 10518,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10518,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T14:48:27Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10544],
+    "closing_merged_prs": [
+      {
+        "number": 10544,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T14:48:25Z",
+        "mergeCommit": {
+          "oid": "39092e54caccd83edc00e514cade2014f25c866c"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10517",
+    "issue_number": 10517,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10517,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T13:57:11Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10542],
+    "closing_merged_prs": [
+      {
+        "number": 10542,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T13:57:10Z",
+        "mergeCommit": {
+          "oid": "2a854627054fb272167d8de67504c4fe25ebf71f"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10355",
+    "issue_number": 10355,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10355,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T16:54:46Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10995],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10514",
+    "issue_number": 10514,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10514,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T13:37:29Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10541],
+    "closing_merged_prs": [
+      {
+        "number": 10541,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T13:37:28Z",
+        "mergeCommit": {
+          "oid": "3ef6f91c33057fb1e6dd4817996e82bc834d8299"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10482",
+    "issue_number": 10482,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10482,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T02:13:10Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10504],
+    "closing_merged_prs": [
+      {
+        "number": 10505,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T02:13:09Z",
+        "mergeCommit": {
+          "oid": "4cfdba7ce448ee0d236c1d8082052c10f4f3ad07"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10460",
+    "issue_number": 10460,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10460,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-19T03:45:54Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10668],
+    "closing_merged_prs": [
+      {
+        "number": 10463,
+        "state": "MERGED",
+        "mergedAt": "2026-09-19T03:45:53Z",
+        "mergeCommit": {
+          "oid": "db31d1f364903c4bb0451b049f3e9e98a3246b1f"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10336",
+    "issue_number": 10336,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10336,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-19T22:01:20Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10448],
+    "closing_merged_prs": [
+      {
+        "number": 10500,
+        "state": "MERGED",
+        "mergedAt": "2026-09-19T22:01:19Z",
+        "mergeCommit": {
+          "oid": "1676807377b6c07623f730c893f6a9c813448815"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10233",
+    "issue_number": 10233,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10233,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-17T02:37:11Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10450],
+    "closing_merged_prs": [
+      {
+        "number": 10283,
+        "state": "MERGED",
+        "mergedAt": "2026-09-17T02:37:10Z",
+        "mergeCommit": {
+          "oid": "dd243d392232003b15db389d54d962cffe6fad14"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      },
+      {
+        "number": 10450,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T18:20:04Z",
+        "mergeCommit": {
+          "oid": "b455aa4fd8d2a8aa094af92d505f6b7bdb700805"
+        },
+        "author": {
+          "login": "d-sorgcodexagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10403",
+    "issue_number": 10403,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10403,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-18T05:56:02Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10668],
+    "closing_merged_prs": [
+      {
+        "number": 10414,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T05:55:59Z",
+        "mergeCommit": {
+          "oid": "9091b3deebd90df90f400e089c32bd29d2100016"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10402",
+    "issue_number": 10402,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10402,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-18T05:56:02Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10413],
+    "closing_merged_prs": [
+      {
+        "number": 10414,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T05:55:59Z",
+        "mergeCommit": {
+          "oid": "9091b3deebd90df90f400e089c32bd29d2100016"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10401",
+    "issue_number": 10401,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10401,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-18T05:56:02Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10412],
+    "closing_merged_prs": [
+      {
+        "number": 10414,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T05:55:59Z",
+        "mergeCommit": {
+          "oid": "9091b3deebd90df90f400e089c32bd29d2100016"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10400",
+    "issue_number": 10400,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10400,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-18T05:56:02Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10410],
+    "closing_merged_prs": [
+      {
+        "number": 10414,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T05:55:59Z",
+        "mergeCommit": {
+          "oid": "9091b3deebd90df90f400e089c32bd29d2100016"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10399",
+    "issue_number": 10399,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10399,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-18T05:56:01Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10409],
+    "closing_merged_prs": [
+      {
+        "number": 10414,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T05:55:59Z",
+        "mergeCommit": {
+          "oid": "9091b3deebd90df90f400e089c32bd29d2100016"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10398",
+    "issue_number": 10398,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10398,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-18T05:56:01Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10408],
+    "closing_merged_prs": [
+      {
+        "number": 10414,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T05:55:59Z",
+        "mergeCommit": {
+          "oid": "9091b3deebd90df90f400e089c32bd29d2100016"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10396",
+    "issue_number": 10396,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10396,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-18T05:56:00Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10407],
+    "closing_merged_prs": [
+      {
+        "number": 10414,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T05:55:59Z",
+        "mergeCommit": {
+          "oid": "9091b3deebd90df90f400e089c32bd29d2100016"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10397",
+    "issue_number": 10397,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10397,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-18T05:56:01Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10405],
+    "closing_merged_prs": [
+      {
+        "number": 10414,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T05:55:59Z",
+        "mergeCommit": {
+          "oid": "9091b3deebd90df90f400e089c32bd29d2100016"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10395",
+    "issue_number": 10395,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10395,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-18T05:16:19Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10404],
+    "closing_merged_prs": [
+      {
+        "number": 10404,
+        "state": "MERGED",
+        "mergedAt": "2026-09-18T05:16:18Z",
+        "mergeCommit": {
+          "oid": "1d302ba81e5f63dbc88112e2e80c088f09adcdfc"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10323",
+    "issue_number": 10323,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10323,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-17T23:55:10Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10387,
+        "state": "MERGED",
+        "mergedAt": "2026-09-17T23:55:09Z",
+        "mergeCommit": {
+          "oid": "94d593cf119ffeceaad7658ef0502c9c22e6ea89"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10362",
+    "issue_number": 10362,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10362,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-17T22:45:51Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10334",
+    "issue_number": 10334,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10334,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-19T17:02:01Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10668],
+    "closing_merged_prs": [
+      {
+        "number": 10475,
+        "state": "MERGED",
+        "mergedAt": "2026-09-19T17:02:00Z",
+        "mergeCommit": {
+          "oid": "8d452e09f8443b540c0de8fe9cd324f99e76381c"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10381",
+    "issue_number": 10381,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10381,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-20T23:34:08Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 10599,
+        "state": "MERGED",
+        "mergedAt": "2026-09-20T23:34:07Z",
+        "mergeCommit": {
+          "oid": "79123f7bb4f59fef1575efca7c6b4d97fe8cb9b2"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#9967",
+    "issue_number": 9967,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9967,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-11T19:42:56Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": [
+      {
+        "number": 9984,
+        "state": "MERGED",
+        "mergedAt": "2026-09-11T19:42:55Z",
+        "mergeCommit": {
+          "oid": "0352cd58c66ded4e9160f4f71ffcd24981c79d7a"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      },
+      {
+        "number": 10219,
+        "state": "MERGED",
+        "mergedAt": "2026-09-15T22:58:24Z",
+        "mergeCommit": {
+          "oid": "8b24175f839657cbe39bc92b9952ced8f9d11d17"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      },
+      {
+        "number": 10223,
+        "state": "MERGED",
+        "mergedAt": "2026-09-16T00:51:04Z",
+        "mergeCommit": {
+          "oid": "2f0460d25ae2f922c913d5a42759634bf5024baa"
+        },
+        "author": {
+          "login": "dieterolson"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10204",
+    "issue_number": 10204,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10204,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-15T19:11:25Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10211],
+    "closing_merged_prs": [
+      {
+        "number": 10211,
+        "state": "MERGED",
+        "mergedAt": "2026-09-15T19:11:24Z",
+        "mergeCommit": {
+          "oid": "fc57ab32a939b8f64109ec085424f72d7a245aad"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10188",
+    "issue_number": 10188,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10188,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-16T03:38:06Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [
+      10227, 10199, 10226, 10198, 10225, 10197, 10222, 10196, 10220, 10195,
+      10217, 10194, 10215, 10193, 10213, 10192, 10208, 10189, 10190, 10191,
+      10201
+    ],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10003",
+    "issue_number": 10003,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10003,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-14T00:28:39Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10071],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#10062",
+    "issue_number": 10062,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10062,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-14T09:38:30Z",
+      "author": {
+        "login": "d-sorgclaudeagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [
+      10092, 10069, 10090, 10089, 10068, 10203, 10218, 10155, 10224, 10156,
+      10235, 10161, 10236, 10158, 10249, 10111, 10228, 10157, 10261, 10250,
+      10258, 10108
+    ],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#8766",
+    "issue_number": 8766,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 8766,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-08-23T02:10:33Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10035],
+    "closing_merged_prs": [
+      {
+        "number": 8997,
+        "state": "MERGED",
+        "mergedAt": "2026-08-23T02:10:32Z",
+        "mergeCommit": {
+          "oid": "fe411260cab577dd197b54ad3eab4d9d9ffa4213"
+        },
+        "author": {
+          "login": "d-sorgcodexagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#8869",
+    "issue_number": 8869,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 8869,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-22T13:18:31Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10655],
+    "closing_merged_prs": []
+  },
+  {
+    "id": "DL-#9193",
+    "issue_number": 9193,
+    "reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 9193,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-21T13:43:28Z",
+      "author": {
+        "login": "d-sorgcodexagent"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [10668],
+    "closing_merged_prs": [
+      {
+        "number": 10388,
+        "state": "MERGED",
+        "mergedAt": "2026-09-21T13:43:26Z",
+        "mergeCommit": {
+          "oid": "835efaee37c9f242a72e53ba269a4906683c6253"
+        },
+        "author": {
+          "login": "d-sorgclaudeagent"
+        },
+        "repository": {
+          "name": "UpstreamDrift",
+          "owner": {
+            "login": "D-sorganization"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "DL-#10943",
+    "issue_number": 10943,
+    "reason": "completed_no_verified_closing_pr",
+    "issue": {
+      "__typename": "Issue",
+      "number": 10943,
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "closedAt": "2026-09-26T07:03:06Z",
+      "author": {
+        "login": "dieterolson"
+      },
+      "assignees": {
+        "nodes": []
+      }
+    },
+    "cited_pr_numbers": [],
+    "closing_merged_prs": []
+  }
+]

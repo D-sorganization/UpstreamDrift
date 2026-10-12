@@ -151,6 +151,13 @@ def test_generic_audit_consumes_native_path_and_independent_force_fixture(
         )
         assert identity.domain_provenance == "native-loaded-source"
         assert identity.function_bounds == pytest.approx((-0.3, 0.3))
+        from src.engines.physics_engines.opensim.python.tour_matching.native_path_work_audit import (
+            native_path_optimizer_domains,
+        )
+
+        assert native_path_optimizer_domains(model, declaration, osim) == {
+            coordinate.getAbsolutePathString(): pytest.approx((-0.3, 0.3))
+        }
     else:
         from src.engines.physics_engines.opensim.python.tour_matching.native_path_work_audit import (
             NativePathWorkIdentity,
