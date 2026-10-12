@@ -1,0 +1,1005 @@
+{
+  "title": "Governed Development Log Reconciliation: 66 Verified Merged Deliveries",
+  "date": "2026-10-11",
+  "base_head": "944d798ed3748fc09e115825cf9db30b65d1f232",
+  "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+  "candidate_plan_sha256": "013a8dbcc9cae87f67be896c8ae6b1075c56e531b2ceb92b1d4208545ff14b4c",
+  "source_snapshot_sha256": "8d49d012e39a4bedf7f0ac5aeb27e1ac7a9165f688effecd8768b26a9fc8789a",
+  "rows": [
+    {
+      "issue": 11589,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11590,
+      "merge_sha": "a4031aa02ccb410936de6976090dc63abe2d7887",
+      "merged_date": "2026-10-06",
+      "shipped_date": "2026-10-06",
+      "risk_note": null,
+      "source_block_sha256": [
+        "ef8d2b66b9f9c85bad0f637eb256ada34a3854a0704f862a68f81b8c081e8636"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11590 on 2026-10-06 (merge SHA a4031aa02ccb410936de6976090dc63abe2d7887)."
+    },
+    {
+      "issue": 11513,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11519,
+      "merge_sha": "739df607f6e658ff966f33010f67d5fb6cc1e3c3",
+      "merged_date": "2026-10-05",
+      "shipped_date": "2026-10-05",
+      "risk_note": null,
+      "source_block_sha256": [
+        "3c9fcc73a9ecd93e704cd09ff3cce9f72fe74be9aa594ef2a8ee23ee4f287bb7"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11519 on 2026-10-05 (merge SHA 739df607f6e658ff966f33010f67d5fb6cc1e3c3)."
+    },
+    {
+      "issue": 11190,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11518,
+      "merge_sha": "d816c9985835ba78f275ee4f6ae5efc7c6ae152c",
+      "merged_date": "2026-10-05",
+      "shipped_date": "2026-10-05",
+      "risk_note": null,
+      "source_block_sha256": [
+        "bfbbd2e1501e26b756e46bea07f2cc9acdc6a3297a5001152afab9475bd2c669"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11518 on 2026-10-05 (merge SHA d816c9985835ba78f275ee4f6ae5efc7c6ae152c)."
+    },
+    {
+      "issue": 11233,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 11237,
+      "merge_sha": "93b5aa1a5a2bd0d6ce4beceaf57904fc903780fc",
+      "merged_date": "2026-10-02",
+      "shipped_date": "2026-10-02",
+      "risk_note": "Model status remains unqualified; preserve that state and all downstream blockers.",
+      "source_block_sha256": [
+        "f7e549d9289658339ee268e122f5f36ed8029aa9628ba8bfb8702d8e9ef72383"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11237 on 2026-10-02 (merge SHA 93b5aa1a5a2bd0d6ce4beceaf57904fc903780fc). Preserved limitation: Model status remains unqualified; preserve that state and all downstream blockers."
+    },
+    {
+      "issue": 11184,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11187,
+      "merge_sha": "1a7f7f5e8fdbd3f82b69b0f8bb0fc43df7557791",
+      "merged_date": "2026-09-30",
+      "shipped_date": "2026-09-30",
+      "risk_note": null,
+      "source_block_sha256": [
+        "7244c13b3195523bf0ba5044f4dbbcafd7275275fc86ef52d28ce062362d7013"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11187 on 2026-09-30 (merge SHA 1a7f7f5e8fdbd3f82b69b0f8bb0fc43df7557791)."
+    },
+    {
+      "issue": 11124,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11131,
+      "merge_sha": "657d95287e7848dfc568ca4e70236bd5e982393a",
+      "merged_date": "2026-09-29",
+      "shipped_date": "2026-09-29",
+      "risk_note": null,
+      "source_block_sha256": [
+        "290e5b39823a285b816cb4a449734a9a7a0d00830ac4ef95dd1323eecb075d36"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11131 on 2026-09-29 (merge SHA 657d95287e7848dfc568ca4e70236bd5e982393a)."
+    },
+    {
+      "issue": 11107,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11198,
+      "merge_sha": "ee806b50cb7db3e7001ce25b94c536895712625a",
+      "merged_date": "2026-10-01",
+      "shipped_date": "2026-10-01",
+      "risk_note": "Run 102 was rejected; keep rejection visible and do not claim physical acceptance.",
+      "source_block_sha256": [
+        "76fc963eea0fdd743ccdad89f1b1e0354e1537f21411d95922a7b463b73381d4"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11198 on 2026-10-01 (merge SHA ee806b50cb7db3e7001ce25b94c536895712625a). Preserved limitation: Run 102 was rejected; keep rejection visible and do not claim physical acceptance."
+    },
+    {
+      "issue": 11098,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11197,
+      "merge_sha": "add9a1bd59ba21d99e6c65d04058b6db8a870d91",
+      "merged_date": "2026-10-01",
+      "shipped_date": "2026-10-01",
+      "risk_note": null,
+      "source_block_sha256": [
+        "9e1759341da782ab32edf8097d37f6c04f54d4ab45f2e2798a4ca4df544eaaf5"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11197 on 2026-10-01 (merge SHA add9a1bd59ba21d99e6c65d04058b6db8a870d91)."
+    },
+    {
+      "issue": 11097,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11202,
+      "merge_sha": "2cb3d58cfe3b181c12c26015d236dcdb234cf574",
+      "merged_date": "2026-10-01",
+      "shipped_date": "2026-10-01",
+      "risk_note": null,
+      "source_block_sha256": [
+        "af7f6e049eb8d0e148b81ecaca1862383e65a11c787671278361604fb28dbcf7"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11202 on 2026-10-01 (merge SHA 2cb3d58cfe3b181c12c26015d236dcdb234cf574)."
+    },
+    {
+      "issue": 11102,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11200,
+      "merge_sha": "9c23f1a2efcbc722de1bd86299b8351c5e96c41e",
+      "merged_date": "2026-10-01",
+      "shipped_date": "2026-10-01",
+      "risk_note": null,
+      "source_block_sha256": [
+        "becbdd3af10698975f3eac3d5504a02603983014392b068723fa50a443c597f3"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11200 on 2026-10-01 (merge SHA 9c23f1a2efcbc722de1bd86299b8351c5e96c41e)."
+    },
+    {
+      "issue": 11071,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11075,
+      "merge_sha": "0206717f70a654744165990fe4b229fcdd4f3dd7",
+      "merged_date": "2026-09-28",
+      "shipped_date": "2026-09-28",
+      "risk_note": "Both captures did not converge; the no-MJX default decision is not an accepted physical result.",
+      "source_block_sha256": [
+        "74e8282885a1369c1f147fd548ea496e9f0b08d0fff11682d21d97cdf401a9fc"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11075 on 2026-09-28 (merge SHA 0206717f70a654744165990fe4b229fcdd4f3dd7). Preserved limitation: Both captures did not converge; the no-MJX default decision is not an accepted physical result."
+    },
+    {
+      "issue": 11008,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11012,
+      "merge_sha": "0aa8bb660d138c9255a4f224902dd6133f21a3c0",
+      "merged_date": "2026-09-27",
+      "shipped_date": "2026-09-27",
+      "risk_note": null,
+      "source_block_sha256": [
+        "78bc52ea761b2001a1b96b6e34214e0320422c2cf05c737cfbf3319b9e757754"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11012 on 2026-09-27 (merge SHA 0aa8bb660d138c9255a4f224902dd6133f21a3c0)."
+    },
+    {
+      "issue": 10946,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10976,
+      "merge_sha": "fee5b214ec81674e8626049ac9ff47907f567f3a",
+      "merged_date": "2026-09-26",
+      "shipped_date": "2026-09-26",
+      "risk_note": null,
+      "source_block_sha256": [
+        "cdca6271f9a3ab4e93bd39bd7810e3b2250199aa099835e81335cc7530356cc8"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10976 on 2026-09-26 (merge SHA fee5b214ec81674e8626049ac9ff47907f567f3a)."
+    },
+    {
+      "issue": 9191,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 11140,
+      "merge_sha": "27af7ffe41f1fa8e26c367f27f9cdd0fe79da866",
+      "merged_date": "2026-09-30",
+      "shipped_date": "2026-09-30",
+      "risk_note": "Only 6 of 74 screenshots exist; documentation completion cannot imply full visual inventory.",
+      "source_block_sha256": [
+        "691190638b19f6006bf4edbf2ef9a0d4e03696f0a64baa83891f9d079fb2e23d"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #11140 on 2026-09-30 (merge SHA 27af7ffe41f1fa8e26c367f27f9cdd0fe79da866). Preserved limitation: Only 6 of 74 screenshots exist; documentation completion cannot imply full visual inventory."
+    },
+    {
+      "issue": 10921,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10923,
+      "merge_sha": "d8f5b0a39aef2823dac6520f1d11b8988f1b778c",
+      "merged_date": "2026-09-25",
+      "shipped_date": "2026-09-25",
+      "risk_note": null,
+      "source_block_sha256": [
+        "691ff1fa5924af0d7f33a6248404c0ad4bc9589341e51c1d07eb1c45aa8aa259"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10923 on 2026-09-25 (merge SHA d8f5b0a39aef2823dac6520f1d11b8988f1b778c)."
+    },
+    {
+      "issue": 10883,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10884,
+      "merge_sha": "b15558ec3cb230e0fa90efc3a702dbb7f15d4313",
+      "merged_date": "2026-09-24",
+      "shipped_date": "2026-09-24",
+      "risk_note": null,
+      "source_block_sha256": [
+        "b49e98cdf841cdacc69463623984ce7e88ebf48e79259b80b7239f2558484579"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10884 on 2026-09-24 (merge SHA b15558ec3cb230e0fa90efc3a702dbb7f15d4313)."
+    },
+    {
+      "issue": 10849,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10860,
+      "merge_sha": "15ca47c2ebfc7731972ff6a98f58ceb7074b9553",
+      "merged_date": "2026-09-24",
+      "shipped_date": "2026-09-24",
+      "risk_note": null,
+      "source_block_sha256": [
+        "9b408fdbcee208ea369f2021bd4afc8825de7af788877e63ea0bdffc302a5fbb"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10860 on 2026-09-24 (merge SHA 15ca47c2ebfc7731972ff6a98f58ceb7074b9553)."
+    },
+    {
+      "issue": 10597,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10814,
+      "merge_sha": "fbebf5c4785bfffa83b1e3890c8ee07217e09698",
+      "merged_date": "2026-09-24",
+      "shipped_date": "2026-09-24",
+      "risk_note": null,
+      "source_block_sha256": [
+        "fe3c4832f5433ef8733170d73fdc73a55bdfdedb027def1403bfa083cde14de9"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10814 on 2026-09-24 (merge SHA fbebf5c4785bfffa83b1e3890c8ee07217e09698)."
+    },
+    {
+      "issue": 10751,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10762,
+      "merge_sha": "e1192b7c550cb4974570ba3a2b66d4c520b5a032",
+      "merged_date": "2026-09-23",
+      "shipped_date": "2026-09-23",
+      "risk_note": null,
+      "source_block_sha256": [
+        "86c4e8cdb344576b8fe7d09fcdbc5f75e24457ce379a11e903703115fa08436a"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10762 on 2026-09-23 (merge SHA e1192b7c550cb4974570ba3a2b66d4c520b5a032)."
+    },
+    {
+      "issue": 10743,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10752,
+      "merge_sha": "2a9e7a4d30bf169cc666eb81093f2ebe770f8678",
+      "merged_date": "2026-09-23",
+      "shipped_date": "2026-09-23",
+      "risk_note": null,
+      "source_block_sha256": [
+        "e0178581dadecb565bd3bd95230657caeb27c9a2e9f6624632c6f1b15e523d1f"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10752 on 2026-09-23 (merge SHA 2a9e7a4d30bf169cc666eb81093f2ebe770f8678)."
+    },
+    {
+      "issue": 8883,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10739,
+      "merge_sha": "5dd695f89774a615af59ebc0e89b4f0a631049bf",
+      "merged_date": "2026-09-23",
+      "shipped_date": "2026-09-23",
+      "risk_note": null,
+      "source_block_sha256": [
+        "0fe958c7cfd831ddec16195aa377fba992dd7f36ce1816d97c29c631748051a8"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10739 on 2026-09-23 (merge SHA 5dd695f89774a615af59ebc0e89b4f0a631049bf)."
+    },
+    {
+      "issue": 9479,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10653,
+      "merge_sha": "c70555a5e1aed74c01ce1001dd2e28265fdcc0b7",
+      "merged_date": "2026-09-22",
+      "shipped_date": "2026-09-22",
+      "risk_note": null,
+      "source_block_sha256": [
+        "25fd209235a43c529280002f6269a7d247a290639c26646a9e053582e06afba6"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10653 on 2026-09-22 (merge SHA c70555a5e1aed74c01ce1001dd2e28265fdcc0b7)."
+    },
+    {
+      "issue": 10344,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10685,
+      "merge_sha": "cfe7217bf41ab59f546624e22df4712f1e75bb87",
+      "merged_date": "2026-09-22",
+      "shipped_date": "2026-09-22",
+      "risk_note": "Map coverage is 40/44; preserve the four missing mappings as follow-up.",
+      "source_block_sha256": [
+        "c8cbc2e65ae25a97f3173e048c88ab185731b03dffa9a93d186f327dd6e04021"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10685 on 2026-09-22 (merge SHA cfe7217bf41ab59f546624e22df4712f1e75bb87). Preserved limitation: Map coverage is 40/44; preserve the four missing mappings as follow-up."
+    },
+    {
+      "issue": 10376,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10677,
+      "merge_sha": "00e32b5646df5bd6506606886d9c0aa045857681",
+      "merged_date": "2026-09-22",
+      "shipped_date": "2026-09-22",
+      "risk_note": null,
+      "source_block_sha256": [
+        "c35134c6fedaa4a4fc749ac55330ef47023b25942dac5c66631fe1ebf123a720"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10677 on 2026-09-22 (merge SHA 00e32b5646df5bd6506606886d9c0aa045857681)."
+    },
+    {
+      "issue": 10436,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10504,
+      "merge_sha": "a5cec3063e050da0f6b153381ac04d453ffcdad0",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "6236ba9857b7df3a9c8bbe86f63417a3d31c75369a8340ca2a766f2c20a2492d"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10504 on 2026-09-21 (merge SHA a5cec3063e050da0f6b153381ac04d453ffcdad0)."
+    },
+    {
+      "issue": 8930,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10648,
+      "merge_sha": "f80c6193316231adefa5bdc7a560ba10abb3635c",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "3602d46c5da6c0e2a083117da888cb7b7bba2a7f393e080497c2c9581464fa08"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10648 on 2026-09-21 (merge SHA f80c6193316231adefa5bdc7a560ba10abb3635c)."
+    },
+    {
+      "issue": 10359,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10632,
+      "merge_sha": "79ab1757c867d64419044468a607502c5bce6a56",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "c7b6a96d87ddb993fdb7b9f973d4fc2469c30577acfccde577a345bd2e7eb760"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10632 on 2026-09-21 (merge SHA 79ab1757c867d64419044468a607502c5bce6a56)."
+    },
+    {
+      "issue": 10348,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10676,
+      "merge_sha": "bc5a7ff90cfb0da3ed49a3ac3d20d1967ba267df",
+      "merged_date": "2026-09-22",
+      "shipped_date": "2026-09-22",
+      "risk_note": "Scaffold only; do not represent scaffold as completed production behavior.",
+      "source_block_sha256": [
+        "fb2dcde2da418402bb8391e60bef104021346a76aab76b4fdf85cd34cf0d40ee"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10676 on 2026-09-22 (merge SHA bc5a7ff90cfb0da3ed49a3ac3d20d1967ba267df). Preserved limitation: Scaffold only; do not represent scaffold as completed production behavior."
+    },
+    {
+      "issue": 10361,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10633,
+      "merge_sha": "b68ed246cc78e63c118c2d8aebebd3ec9d226b2a",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "df36bdd131ab155817d25fec65125cd105ae0e93f020dc87297fc09841b22284"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10633 on 2026-09-21 (merge SHA b68ed246cc78e63c118c2d8aebebd3ec9d226b2a)."
+    },
+    {
+      "issue": 10366,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10660,
+      "merge_sha": "8e4ecee277d25cc305fcf8f4e37d333260e83a15",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "6697ea071c9cba0ef1b12d1f884a008c7e6ee0c73ab15986ccc35af602994afa"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10660 on 2026-09-21 (merge SHA 8e4ecee277d25cc305fcf8f4e37d333260e83a15)."
+    },
+    {
+      "issue": 10434,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10499,
+      "merge_sha": "9cb9b951622f0bd8ddcb1c12eb224ad6822e1579",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "678033166336ea83ce0ff87da7952744fa5b054bfff07b2a15db7f9f87098ffb"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10499 on 2026-09-21 (merge SHA 9cb9b951622f0bd8ddcb1c12eb224ad6822e1579)."
+    },
+    {
+      "issue": 10589,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10638,
+      "merge_sha": "c04a22e0e0435583d31ea56f4c3167dc79b1f5fa",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": "Only the small baseline is evidenced; avoid a broader production claim.",
+      "source_block_sha256": [
+        "c9c59f68746dbddbd2d313cd56b9d85a0150adc5426ef91982d6cf71d8e4d89f"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10638 on 2026-09-21 (merge SHA c04a22e0e0435583d31ea56f4c3167dc79b1f5fa). Preserved limitation: Only the small baseline is evidenced; avoid a broader production claim."
+    },
+    {
+      "issue": 10433,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10498,
+      "merge_sha": "7e6b39893674af3de31fb79efc6a2710f30c36de",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "b9e6906cfa45811ce48740c8ca67ad0f56354b3a9102ef8fe28a91bce55e7448"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10498 on 2026-09-21 (merge SHA 7e6b39893674af3de31fb79efc6a2710f30c36de)."
+    },
+    {
+      "issue": 10440,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10509,
+      "merge_sha": "b633007c6ab323d71529ffc1109fca1c02218bc1",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "79d05f57cd392e449af164d688ec66c406b772f95189c5d0203d1ae1e938ab0c"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10509 on 2026-09-21 (merge SHA b633007c6ab323d71529ffc1109fca1c02218bc1)."
+    },
+    {
+      "issue": 8684,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 9998,
+      "merge_sha": "705606076622b0f886952401e15de6c8692999af",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "048693d8c2c2809f628d0cbd945438d4e41db379ef19c41b3656ce8a93684730"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #9998 on 2026-09-21 (merge SHA 705606076622b0f886952401e15de6c8692999af)."
+    },
+    {
+      "issue": 10439,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10507,
+      "merge_sha": "20036a7c5fd7e9a38a342bb1c1a0c5b968cc8223",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "e33612e064415f6263e89bd3853a3083d080ec76d2777c4ce1add028a75d6929"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10507 on 2026-09-21 (merge SHA 20036a7c5fd7e9a38a342bb1c1a0c5b968cc8223)."
+    },
+    {
+      "issue": 10623,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10770,
+      "merge_sha": "a0beddd8ecc8d53976a49179785712b3636a7ec7",
+      "merged_date": "2026-09-23",
+      "shipped_date": "2026-09-23",
+      "risk_note": null,
+      "source_block_sha256": [
+        "c8fcda1cabbf5fab450e4fc02de35fb8bccac7d10d665861e69d40db05ac1717"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10770 on 2026-09-23 (merge SHA a0beddd8ecc8d53976a49179785712b3636a7ec7)."
+    },
+    {
+      "issue": 10622,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10768,
+      "merge_sha": "c79f97724445d24a403d932bbd8bd8919cf81bac",
+      "merged_date": "2026-09-23",
+      "shipped_date": "2026-09-23",
+      "risk_note": null,
+      "source_block_sha256": [
+        "abb9c4274f39469057af5e312a2f499416f6d00a6863115f19b1c9864bb918cd"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10768 on 2026-09-23 (merge SHA c79f97724445d24a403d932bbd8bd8919cf81bac)."
+    },
+    {
+      "issue": 10432,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10497,
+      "merge_sha": "a80290b4d458159d1587eb354aa12de0b9adf652",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "191163750dd6f5ddb884866a5f794c49a54a34ee4e0c2d6a2fef69e0d477bc6c"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10497 on 2026-09-20 (merge SHA a80290b4d458159d1587eb354aa12de0b9adf652)."
+    },
+    {
+      "issue": 10533,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10581,
+      "merge_sha": "5d73e45545c9498e1904eab8d7355cce7ef353c3",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "8c6709daaf7f49d15fb4a019988d58666180d50d5d20d6a786407e1183927f7e"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10581 on 2026-09-20 (merge SHA 5d73e45545c9498e1904eab8d7355cce7ef353c3)."
+    },
+    {
+      "issue": 10532,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10580,
+      "merge_sha": "70378c9602c68080efe942ad3f2affaae7d770e8",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "723e07243a11960913395ccc2c7c53866c2278a7426cac9b79c14080ddd17f0a"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10580 on 2026-09-20 (merge SHA 70378c9602c68080efe942ad3f2affaae7d770e8)."
+    },
+    {
+      "issue": 10530,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10579,
+      "merge_sha": "f55cdd752f72992d0714294580a743eda659bc64",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "bc42227e8d1ad7bf09583f3d1120075fac2a15ff48acdf1f77ccccf4861bd742"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10579 on 2026-09-20 (merge SHA f55cdd752f72992d0714294580a743eda659bc64)."
+    },
+    {
+      "issue": 10528,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10578,
+      "merge_sha": "e60d09274f77e86c9bfb1beb3afe5e0e3a4324b5",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "1f3e81ab3d39061b4087b8de50188314c37208663f750b94507d3084f8a55085"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10578 on 2026-09-20 (merge SHA e60d09274f77e86c9bfb1beb3afe5e0e3a4324b5)."
+    },
+    {
+      "issue": 10525,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10563,
+      "merge_sha": "5b1e57578886f5dd52875786209b1f811b1d3c53",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "7ee7401cc8ae3fcc7bd007804565368314462693d8e0bee1da55d7b915917950"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10563 on 2026-09-20 (merge SHA 5b1e57578886f5dd52875786209b1f811b1d3c53)."
+    },
+    {
+      "issue": 10524,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10561,
+      "merge_sha": "41618f3a41c78f58b111c64e57efdfe20c64813e",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "8970b5a5d2235dd633eb1ff6ad11bc38d84766e0a7a410bfb766ca5c8faa59d0"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10561 on 2026-09-20 (merge SHA 41618f3a41c78f58b111c64e57efdfe20c64813e)."
+    },
+    {
+      "issue": 10523,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10560,
+      "merge_sha": "2da04559b07b87c73c2a46e41d4134fe12e9088a",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "c74d51155ab953ae745a010b04d70646d4f04249ef2f3e44c267486aa08dfc30"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10560 on 2026-09-20 (merge SHA 2da04559b07b87c73c2a46e41d4134fe12e9088a)."
+    },
+    {
+      "issue": 10522,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10547,
+      "merge_sha": "81d32c3057c6ad8c4977e803df389031d9a789fb",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "98508fd7c04daddae29c6491f0ffdf9246a4b195af5ef483a71146d5acf671ed"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10547 on 2026-09-20 (merge SHA 81d32c3057c6ad8c4977e803df389031d9a789fb)."
+    },
+    {
+      "issue": 10531,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10576,
+      "merge_sha": "777033b5ef335c6c8b27ce568018b06de5a17860",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "86f58b7702b4990ab736a7b03310f502659c0ac7b374e1903e828fe1abb2e51d"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10576 on 2026-09-20 (merge SHA 777033b5ef335c6c8b27ce568018b06de5a17860)."
+    },
+    {
+      "issue": 10353,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10543,
+      "merge_sha": "a1c13ed0d56fd622f138961477651310ea254b13",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "9b94f5ce90c197b68b162b783ffaca10c0396d7da525436f3454a539936f780c"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10543 on 2026-09-20 (merge SHA a1c13ed0d56fd622f138961477651310ea254b13)."
+    },
+    {
+      "issue": 10358,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10664,
+      "merge_sha": "e60228fadfda763f10c5f4e095172bbca8f777e8",
+      "merged_date": "2026-09-21",
+      "shipped_date": "2026-09-21",
+      "risk_note": null,
+      "source_block_sha256": [
+        "25ef07be312fa94437eac3459286d3b7c3819f128bad3d891ee8478eac7651fa"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10664 on 2026-09-21 (merge SHA e60228fadfda763f10c5f4e095172bbca8f777e8)."
+    },
+    {
+      "issue": 10529,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10572,
+      "merge_sha": "57ed7523df51627b2c66b9e89c502a97efe44d3b",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "e01aa7d033f36c552f6b1f8a187e13121f0118db12348d9e239680272e0b91ba"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10572 on 2026-09-20 (merge SHA 57ed7523df51627b2c66b9e89c502a97efe44d3b)."
+    },
+    {
+      "issue": 10520,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10546,
+      "merge_sha": "2715f5c87834c8efec84795e149cc69525cee489",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "68fe6d5a2b84eb4f9ddad774f41a7c2fa6011cbeeb66dd0665b19da44910408e"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10546 on 2026-09-20 (merge SHA 2715f5c87834c8efec84795e149cc69525cee489)."
+    },
+    {
+      "issue": 10519,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10545,
+      "merge_sha": "15bce2283fb6954b2b285585d370b0b7d03ed545",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "51c6819f2ab28271d494b0b9ec20aee4c18d0ca0725e7aa1f58bc6ee9e1e9432"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10545 on 2026-09-20 (merge SHA 15bce2283fb6954b2b285585d370b0b7d03ed545)."
+    },
+    {
+      "issue": 10518,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10544,
+      "merge_sha": "39092e54caccd83edc00e514cade2014f25c866c",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "8ad1b6c63b6a051d58f40aa8869681a0634d4b152eac5b14e067831bcb2ee65c"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10544 on 2026-09-20 (merge SHA 39092e54caccd83edc00e514cade2014f25c866c)."
+    },
+    {
+      "issue": 10517,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10542,
+      "merge_sha": "2a854627054fb272167d8de67504c4fe25ebf71f",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "98a843c04c728213b1eaa5c3e7365b622cc3ed7f7fdd50c524bbf8900502fd28"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10542 on 2026-09-20 (merge SHA 2a854627054fb272167d8de67504c4fe25ebf71f)."
+    },
+    {
+      "issue": 10514,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10541,
+      "merge_sha": "3ef6f91c33057fb1e6dd4817996e82bc834d8299",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "b5107a6c361dbc9c731e05b57aa32e9097e7e128e1fa04d33e2aaaaaea83f3b7"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10541 on 2026-09-20 (merge SHA 3ef6f91c33057fb1e6dd4817996e82bc834d8299)."
+    },
+    {
+      "issue": 10482,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10505,
+      "merge_sha": "4cfdba7ce448ee0d236c1d8082052c10f4f3ad07",
+      "merged_date": "2026-09-20",
+      "shipped_date": "2026-09-20",
+      "risk_note": null,
+      "source_block_sha256": [
+        "3beb56c56451029b3db0e4fdf7db85ca323179e71b0db7db7488d48651402425"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10505 on 2026-09-20 (merge SHA 4cfdba7ce448ee0d236c1d8082052c10f4f3ad07)."
+    },
+    {
+      "issue": 10460,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10463,
+      "merge_sha": "db31d1f364903c4bb0451b049f3e9e98a3246b1f",
+      "merged_date": "2026-09-19",
+      "shipped_date": "2026-09-19",
+      "risk_note": null,
+      "source_block_sha256": [
+        "ba862f215d903dd002d677642ddb49a74a97b0e7688a8085454f59fdc7416731"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10463 on 2026-09-19 (merge SHA db31d1f364903c4bb0451b049f3e9e98a3246b1f)."
+    },
+    {
+      "issue": 10233,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10283,
+      "merge_sha": "dd243d392232003b15db389d54d962cffe6fad14",
+      "merged_date": "2026-09-17",
+      "shipped_date": "2026-09-17",
+      "risk_note": null,
+      "source_block_sha256": [
+        "2e80288491d39f38e7d68dcf8b76bfa4f358a56f4222ede7482ae8ab00b6faf1"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10283 on 2026-09-17 (merge SHA dd243d392232003b15db389d54d962cffe6fad14)."
+    },
+    {
+      "issue": 10403,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10414,
+      "merge_sha": "9091b3deebd90df90f400e089c32bd29d2100016",
+      "merged_date": "2026-09-18",
+      "shipped_date": "2026-09-18",
+      "risk_note": "Viewer completion does not establish muscle qualification.",
+      "source_block_sha256": [
+        "3ce646494ee192155a4c8a8afaad6b748aec5d9b5b4e310b3cc0c45a9547d570"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10414 on 2026-09-18 (merge SHA 9091b3deebd90df90f400e089c32bd29d2100016). Preserved limitation: Viewer completion does not establish muscle qualification."
+    },
+    {
+      "issue": 10401,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10414,
+      "merge_sha": "9091b3deebd90df90f400e089c32bd29d2100016",
+      "merged_date": "2026-09-18",
+      "shipped_date": "2026-09-18",
+      "risk_note": null,
+      "source_block_sha256": [
+        "35cf9e6c9fbc1e2f32e44ab029eade6f2d62aadf8992bcf8ba8d1520c924742c"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10414 on 2026-09-18 (merge SHA 9091b3deebd90df90f400e089c32bd29d2100016)."
+    },
+    {
+      "issue": 10397,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10414,
+      "merge_sha": "9091b3deebd90df90f400e089c32bd29d2100016",
+      "merged_date": "2026-09-18",
+      "shipped_date": "2026-09-18",
+      "risk_note": null,
+      "source_block_sha256": [
+        "b175e50569b7f914feeca8e7f9ac7a59a5975833a2b54d26a5e38733bd2b3b0a"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10414 on 2026-09-18 (merge SHA 9091b3deebd90df90f400e089c32bd29d2100016)."
+    },
+    {
+      "issue": 10395,
+      "state_before": "in_review",
+      "state_after": "shipped",
+      "pr": 10404,
+      "merge_sha": "1d302ba81e5f63dbc88112e2e80c088f09adcdfc",
+      "merged_date": "2026-09-18",
+      "shipped_date": "2026-09-18",
+      "risk_note": null,
+      "source_block_sha256": [
+        "a09356f133ec2671e2bc59f6517de37024d8bbabe2293ec3d96d2e312cedd0e4"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10404 on 2026-09-18 (merge SHA 1d302ba81e5f63dbc88112e2e80c088f09adcdfc)."
+    },
+    {
+      "issue": 10323,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10387,
+      "merge_sha": "94d593cf119ffeceaad7658ef0502c9c22e6ea89",
+      "merged_date": "2026-09-17",
+      "shipped_date": "2026-09-17",
+      "risk_note": null,
+      "source_block_sha256": [
+        "5e97f308b1bb77f959372c505d24748d12fb34eb802458805880deeb91ecc8a7"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10387 on 2026-09-17 (merge SHA 94d593cf119ffeceaad7658ef0502c9c22e6ea89)."
+    },
+    {
+      "issue": 10334,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 10475,
+      "merge_sha": "8d452e09f8443b540c0de8fe9cd324f99e76381c",
+      "merged_date": "2026-09-19",
+      "shipped_date": "2026-09-19",
+      "risk_note": null,
+      "source_block_sha256": [
+        "313df7cd0e18309ea9ac7336752ea6048dc9f5093702093c9bbf9c53c657e5be"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #10475 on 2026-09-19 (merge SHA 8d452e09f8443b540c0de8fe9cd324f99e76381c)."
+    },
+    {
+      "issue": 8766,
+      "state_before": "in_progress",
+      "state_after": "shipped",
+      "pr": 8997,
+      "merge_sha": "fe411260cab577dd197b54ad3eab4d9d9ffa4213",
+      "merged_date": "2026-08-23",
+      "shipped_date": "2026-08-23",
+      "risk_note": null,
+      "source_block_sha256": [
+        "3964a0f102260fe59f98f18a61284db82bd14d2c1b983d375cb885859dd55938"
+      ],
+      "original_next_step_retained_in_source_snapshot": true,
+      "next_step_after": "Shipped via PR #8997 on 2026-08-23 (merge SHA fe411260cab577dd197b54ad3eab4d9d9ffa4213)."
+    }
+  ],
+  "archive_policy_days": 14,
+  "archive_files_written": [
+    "docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md"
+  ],
+  "warning": "Software/documentation delivery status only; preserved limitations do not qualify scientific or physical outcomes."
+}

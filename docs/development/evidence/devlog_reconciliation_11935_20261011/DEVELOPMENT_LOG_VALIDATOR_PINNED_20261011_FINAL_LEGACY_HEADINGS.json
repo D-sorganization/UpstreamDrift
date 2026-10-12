@@ -1,0 +1,31 @@
+{
+  "title": "Final pinned development-log validation",
+  "date_utc": "2026-10-11",
+  "source_commit": "944d798ed3748fc09e115825cf9db30b65d1f232",
+  "source_inventory_commit": "e68baeabde8ff639f846a167ca7703ace43bd0a9",
+  "tools_gitlink": "6b6e4be55e7086a33db43b36d2632765be619bde",
+  "validator_sha256": "aee931c8ae1f584c3c36df49c013a4381acbcbd372621feb84fed2c5a07b5f5b",
+  "schema_sha256": "4ad2c79060a9e15b092d9e361aea1f6f54f53cb222210438bb2568405328d64f",
+  "command": "python -m shared_scripts.development_log --repo-root <worktree>",
+  "live_log_sha256": "a954ba0adf47ba05ffde0ba250a52d19c89bb7f0cfe8ed84b037d6163c73474b",
+  "live_log_bytes": 193876,
+  "live_entries": 142,
+  "archive_sha256": "ff19451640b913ad056967f9a6c9e5cb5af813c9b7ba90262709aa677307ddf8",
+  "archive_bytes": 218446,
+  "archive_entries": 179,
+  "errors": 0,
+  "findings": [
+    {
+      "path": "C:/Users/diete/Repositories/UpstreamDrift-worktrees/codex-dl-collation-11935-20261011/docs/development/DEVELOPMENT_LOG.md",
+      "line": null,
+      "kind": "portfolio_wip_breach",
+      "message": "20 concurrent WIP entries (in_progress) exceeds the 'golf' portfolio cap of 8.",
+      "remediation": "Park or ship entries to bring WIP to <= 8 before starting new work."
+    }
+  ],
+  "raw_heading_coverage_json": {
+    "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RAW_HEADING_COVERAGE_20261011.json",
+    "sha256": "7945efd35d09356073d0dcb23c05fa319bd3b2751c10e31f39a813841cae6d38",
+    "bytes": 6008
+  }
+}
