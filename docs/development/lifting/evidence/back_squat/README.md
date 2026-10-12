@@ -55,6 +55,45 @@ at most 0.54 mm. The largest residuals come from the full-body spec's own
 left/right asymmetry (segment lengths, calibrated hip centres), which a
 symmetric planar chain cannot reproduce.
 
+## Cross-Engine Bar-Path Parity
+
+`bar_path_parity.json` records every engine replaying the whole bundle open
+loop (same start state, same efforts, shared ZOH-RK4 integrator,
+`src/shared/python/lifting/bar_path_parity.py`) and placing the bar landmark
+with its own forward kinematics. Deviations are measured against the MuJoCo
+bar path stored in the bundle (`window_bar_path_m`). The tolerances were fixed
+before measuring: the epic #11605 level-L2 bounds (1e-3 m for frames,
+1e-6 rad for coordinates) for the full window and for a replay re-anchored
+to the reference every 20 steps, and 1e-9 m for the 20-step CI replay.
+
+| Engine    | Full Window Bar Max (m) | Full Window Coordinate Max (rad) | 20-Step Segments Coordinate Max (rad) | 20-Step Segments Frame Max (m) |
+| --------- | ----------------------- | -------------------------------- | ------------------------------------- | ------------------------------ |
+| MuJoCo    | 0 (bit exact)           | 0                                | 0                                     | 0                              |
+| Drake     | 4.9e-6                  | 4.4e-3                           | 1.8e-4                                | 2.0e-7                         |
+| Pinocchio | 5.0e-6                  | 4.5e-3                           | 1.9e-4                                | 2.1e-7                         |
+| OpenSim   | 4.9e-6                  | 4.4e-3                           | 2.0e-4                                | 2.2e-7                         |
+
+The bar path, and every spec frame, agrees across all four engines well
+inside the 1 mm L2 frame bound. The coordinate bound is not met, and the
+measured cause is local rather than steady exponential growth: in the
+segmented replay, five of the ten 20-step segments end at round-off
+(below 1e-14 rad) in every engine, while the segment from 80 to 100 ms, ending at
+the squat bottom, ends 1.8e-4 to 2.0e-4 rad from MuJoCo in
+`subtalar_angle_r` in all three other engines; the following segments decay
+from 2.3e-7 rad back to round-off. The same 80 ms onset drives the full-window
+drift (the bar path agrees to within 1e-15 m for the first 80 ms). A
+non-smooth contact event in the foot spheres is consistent with this but is
+not yet confirmed. Both coordinate gates are recorded as strict xfails in
+`tests/unit/lifting/test_bar_path_parity.py` with these numbers; the bounds
+are not loosened. The CI test replays the first 20 steps in each importable
+engine and asserts the bar path to 1e-9 m.
+
+Regenerate (one to two minutes per engine on an unloaded host):
+
+```bash
+MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py
+```
+
 ## Limitations
 
 - The only spec the same-input harness replays in MuJoCo, Drake and
