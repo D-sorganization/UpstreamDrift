@@ -17,7 +17,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 import numpy as np
 import pytest
 
-from tests.research.historical_fixture_security import read_fixture, verify_source
+from tests.research.test_historical_fixture_security import read_fixture, verify_source
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "docs/research/shot_pattern_analysis/phase2/validation"

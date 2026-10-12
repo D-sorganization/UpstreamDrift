@@ -11,7 +11,10 @@ from types import ModuleType, SimpleNamespace
 
 import pytest
 
-from tests.research.historical_fixture_security import read_fixture
+from tests.research.test_historical_fixture_security import (
+    fixture_key_for_source,
+    read_fixture,
+)
 
 from docs.research.shot_pattern_analysis.phase2.validation import (
     independent_geometry_derivatives as current,
@@ -22,7 +25,7 @@ pytestmark = pytest.mark.unit
 
 def _archived_module(source):
     path = Path(source.__file__)
-    raw = read_fixture("geometry", archived=True)
+    raw = read_fixture(fixture_key_for_source(path), archived=True)
     module = ModuleType("archived_" + path.stem)
     # Both receipts intentionally report the current active filename/hash;
     # the archived implementation itself is verified independently above.

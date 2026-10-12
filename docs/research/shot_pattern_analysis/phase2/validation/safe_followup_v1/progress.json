@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Preceding complete canonical gate passed7483tests but Semgrep was unavailable. New CI security finding repaired with36focusedtests and scoped Semgrep205rules0findings. Complete canonical rerun on fixture-boundary repair pending.",
+  "current_validation": "Complete final-source gate pending fixture cohesion repair. All76historical consumers+2registry tests pass, fullCI scanner209rules271files passed before latestscopecheck. Broad scientific failures are preserved and tracked in12398; no fullresearchgreenclaim.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -764,6 +764,82 @@
         "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-refactor-release-integrity-corrected-green.txt.gz",
         "sha256": "72b20d3c40a0ef2646541dfb0efc1c12214d783d760d6b6503b9f78f4772f544",
         "uncompressed_sha256": "8cb5b3a2f555fa7443333651f0b047d5a02a3ab5a5fa3a7c15150f527a970c18"
+      }
+    ]
+  },
+  "fixture_consumer_scope": {
+    "organization": "Trusted fixture helper and its security cases share one dedicated test module; no test runner/configuration/marker/threshold changes. Seven source fixture keys and all seven historical consumer modules are explicitly covered.",
+    "review": "Astra reviewed organization as defensible only with all actual consumers tested and broad failures preserved/reported. No whole research suite pass claimed.",
+    "tests": "76 historical cases and2 registry cases PASS",
+    "regression": "Initial four-key loader missed three existing callers; all seven fixed reviewed source paths now resolve by exact source identity. Initial wrong-module failures are preserved.",
+    "broad_gate": "240548ac9c run selected entire research directory for standalone non-test helper; still completing. Original producer/fixture equality failures are unchanged baseline and remain open, not waived.",
+    "followup": "https://github.com/D-sorganization/UpstreamDrift/issues/12398",
+    "qualification": "No original scientific artifact rewritten; unknown producer environments not inferred from locks. Numerical equality and all acceptance limits unchanged.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-shared-loader-red.txt.gz",
+        "sha256": "20a71d88a94b7db5bf1c342f9f0ad58b9f48b06cbf76e064fefd38c16a962180",
+        "uncompressed_sha256": "ac7faba9410437b452fbcf3327deb7472b525514134143440c259a6e9b8f153b"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-all-callers-green.txt.gz",
+        "sha256": "985f827faaa5334991e42496e37e3981ad73e77358943fb3960681a186784ba2",
+        "uncompressed_sha256": "bf094de43321082ee236ae6ea243bfac0e52fa26128762cf5c3151bf57b8bdea"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-loader-mypy.txt.gz",
+        "sha256": "b1e8cc1d5424cb065ea6f9ece4e303d0192d317a5db044d5cde52d591d933a5c",
+        "uncompressed_sha256": "8228fcc5ce46d42d01caf3cd941f4e9c5f2bcc372bb5b147a2f0572d2dd675a8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-all-callers-semgrep-green.txt.gz",
+        "sha256": "6760dab79f145eb2295c88cb68b840d8976e7253fe11a0125fc9729092edbf08",
+        "uncompressed_sha256": "203ecd7726b7c9f336ac2b827360eda44ae1e0fdf80bf310436f4978403d80f3"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-cohesive-all-consumers-green.txt.gz",
+        "sha256": "7a0ab1eb366f9b29263257973769c292391d6d0d67a722ac345651465671592e",
+        "uncompressed_sha256": "f9879f5d1c2df073cc75e3730f32234fbf17825d80fd269addd912012dee8fa0"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-consumer-coverage.json.gz",
+        "sha256": "1a6a76382661b35166218daa9329d1f70c40dcb0d5a41d8713cc6a36cc51d573",
+        "uncompressed_sha256": "2e91d4864a2f1be240e36bdd581507aaae2e0248b3a6a2c7a27b38e562eb45e2"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-bounded_event_reachability-delta.json.gz",
+        "sha256": "60a306b37385f6700e2565e220f0eb0a252914ee998584db53692798576dc601",
+        "uncompressed_sha256": "56553ac606529e42ba35ec1dd119a00177c558e31bcb6866feca8c4e56aec4df"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-forward_two_arm_study-delta.json.gz",
+        "sha256": "e00227645ba151dcabb0283897cf5195779315102bafdb7a871b7b87dda76146",
+        "uncompressed_sha256": "15c9704e5ebf9e725c2d79d0c18e8a681394f6bb8f491510502ccaf7cb32fb88"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-baseline-static-diagnostics.txt.gz",
+        "sha256": "76db35d51e240b3874dad26e1c7a4ccdb066c4488e951dff7c216c6a14cafeb5",
+        "uncompressed_sha256": "b84c6f5581f5b56b8a4b41d30991e2ec255db684790d8d699cd1a6c1211f8ef9"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-registry-counter-baseline-comparison.json.gz",
+        "sha256": "e797ec4efe2ffbb8a929337cecf0d8131168b0508db5cfeff24088e212eb981b",
+        "uncompressed_sha256": "dc17fb9faa9181bc92c29dac48aa43c390db92f369ab85d485793a801ed63f4e"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-claim-registry-focused-red.txt.gz",
+        "sha256": "d992fa57579ab500ce3ceab6a182a1f2e0b81a5b5648ae8990a05b42412cfd74",
+        "uncompressed_sha256": "0d81ab4e6f3a5779dbdee8790a5b07f62a76f421409b8e22263ae310f2f4aca7"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-claim-registry-focused-green.txt.gz",
+        "sha256": "a49757f0f1a655587fbe8be4d04d1df93896d2939ee6678df1ae8320f7400b40",
+        "uncompressed_sha256": "bb9623fc057abb4ab26a6964572305929f9f7ea7c8d61ed1779baec7783a552f"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-unrelated-research-replay-followup.md.gz",
+        "sha256": "a87263d450d5877b5facc860cf375adef7f0487639e602cf94da9b3022883bad",
+        "uncompressed_sha256": "c5491f004cd3f8300ffbb723732b51d1e47a73220e57eefb54ec0a20f8cc50be"
       }
     ]
   }
