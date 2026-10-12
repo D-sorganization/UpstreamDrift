@@ -560,19 +560,11 @@ class C3DDataReader:
                 columns=self._force_plate_columns(include_time, compute_cop)
             )
 
-        # Filter to specific plate if requested
-        if plate_number is not None:
-            if plate_number not in plate_channels:
-                raise ValueError(
-                    f"Force plate {plate_number} not found. "
-                    f"Available plates: {list(plate_channels.keys())}"
-                )
-            plate_channels = {plate_number: plate_channels[plate_number]}
+        plate_channels = self._select_plate(plate_channels, plate_number)
 
         # Get analog data
         analog_df = self.analog_dataframe(include_time=False)
-        metadata = self.get_metadata()
-        analog_rate = metadata.analog_rate
+        analog_rate = self.get_metadata().analog_rate
 
         # Pivot to wide format
         analog_wide = analog_df.pivot(
@@ -613,6 +605,20 @@ class C3DDataReader:
         )
 
         return result
+
+    @staticmethod
+    def _select_plate(
+        plate_channels: dict[int, dict[str, str]], plate_number: int | None
+    ) -> dict[int, dict[str, str]]:
+        """Restrict *plate_channels* to *plate_number*; all plates when None."""
+        if plate_number is None:
+            return plate_channels
+        if plate_number not in plate_channels:
+            raise ValueError(
+                f"Force plate {plate_number} not found. "
+                f"Available plates: {list(plate_channels.keys())}"
+            )
+        return {plate_number: plate_channels[plate_number]}
 
     @staticmethod
     def _force_plate_columns(

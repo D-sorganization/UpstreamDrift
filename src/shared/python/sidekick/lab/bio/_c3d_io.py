@@ -191,6 +191,14 @@ def _scalar_int(value: Any, default: int = 0) -> int:
     return int(arr[0])
 
 
+def _optional_param_array(
+    group: dict[str, Any], key: str, dtype: type
+) -> np.ndarray | None:
+    """Return ``group[key]["value"]`` as an array of ``dtype``, or None if absent."""
+    value = group.get(key, {}).get("value")
+    return None if value is None else _as_array(value).astype(dtype)
+
+
 def get_force_platforms(
     c3d_data: C3DMapping, analog_label_count: int
 ) -> tuple[ForcePlateCalibration, ...]:
@@ -223,16 +231,8 @@ def get_force_platforms(
     types_arr = _as_array(type_value).ravel().astype(int)
     corners_arr = _as_array(corners_value).astype(float)
     origin_arr = _as_array(origin_value).astype(float)
-    cal_matrix_value = fp_params.get("CAL_MATRIX", {}).get("value")
-    cal_matrix_arr = (
-        _as_array(cal_matrix_value).astype(float)
-        if cal_matrix_value is not None
-        else None
-    )
-    channel_value = fp_params.get("CHANNEL", {}).get("value")
-    channel_arr = (
-        _as_array(channel_value).astype(int) if channel_value is not None else None
-    )
+    cal_matrix_arr = _optional_param_array(fp_params, "CAL_MATRIX", float)
+    channel_arr = _optional_param_array(fp_params, "CHANNEL", int)
 
     plates: list[ForcePlateCalibration] = []
     fallback_cursor = 0
