@@ -33,7 +33,7 @@ from typing import Any
 
 import numpy as np
 
-from src.bunkershot3d.provenance.hashing import canonical_json
+from bunkershot3d.provenance.hashing import canonical_json
 from src.tools.putting_green_gui._scene_builder import PuttScene
 
 logger = logging.getLogger(__name__)
