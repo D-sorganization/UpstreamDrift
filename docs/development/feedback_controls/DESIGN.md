@@ -223,6 +223,18 @@ the #12182 short replay diagnostic separate from physical admission. Chapter52
 and the public receipt bind source/runtime/adapter identities; source anatomy,
 passive forces, contact/grip and capture matching remain unqualified.
 
+## F08 Moco Startup and Solver Progress Evidence (#11898)
+
+The maintained native Moco runner preserves latest progress fields and adds
+an atomic ordered stage journal with monotonic, wall and CPU timing. It records
+the current-input audit duration separately and reads the actual study solver
+getters after the existing single-thread setting, immediately before solve().
+Getter failures stay explicit unknowns. This instrumentation changes no
+optimizer configuration or model physics. Reaching the optimizing API stage
+does not establish that an optimizer iteration occurred, that a solve
+converged, or that the model is qualified. See chapter 55 and
+F08_MOCO_PROGRESS_INSTRUMENTATION_TURNOVER.md.
+
 ## Native Moco Physical-Body Preflight (#12205)
 
 The maintained Moco preparation now binds the complete #12191 source/native
