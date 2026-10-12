@@ -206,3 +206,16 @@ This check classifies compiled actuator dynamics only. It does not validate
 muscle anatomy, force/length physiology, actuator-to-capture correspondence,
 excitation replay, or cross-engine parity. The engine's existing compatibility
 fallback behavior is unchanged.
+
+## Inventory Compile Probe Is Not Provider Evidence (#11945)
+
+The engine/model inventory's MyoSuite row compiles the committed golfer MJCF
+with bare MuJoCo and runs one forward pass. That result is labelled
+`mujoco_mjcf_compile` with `myosuite_gym_provider = False`. It shows the asset
+compiles; it does not show that a registered MyoSuite Gym environment exists or
+was exercised, and it grants no replay qualification. The inventory contract
+rejects such a result as provider evidence with a
+`ProviderEvidenceConflationError`. Driver/iron provider binding still requires a
+registered environment, declared model path, supported wrapper chain, native
+muscle mapping, normalization policy and complete captured state.
+

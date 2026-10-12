@@ -146,3 +146,10 @@ not a global optimizer bound. This admission check proves interval containment
 for declared state bounds only. It does not prove global path worklessness,
 intermediate transcription-domain behavior, physical qualification, or replay
 acceptance, and it does not alter any native path law.
+
+Before this inventory, preparation finalizes the loaded model connections once.
+This is required for the native moving-point coordinate associations to be
+available to the domain audit. If connection finalization fails, preparation
+returns the existing hard domain blocker immediately; component, state,
+passive-policy, and capability-probe audits do not continue. Finalization does
+not initialize or integrate the model.

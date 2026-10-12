@@ -149,6 +149,16 @@ Item 6 changed `tools.rate_of_closure` in the feature-parity registry from
 revision and the web mount serves verified artifacts, but no saved scenario
 has been compared numerically across the PyQt and web runtimes yet.
 
+## Scope Limitations
+
+Acceptance here is qualified to the tested central-contact model
+(`claim_scope` in `src/config/impact_acceptance.json`, issues #11846/#11847).
+Numerical consistency does not validate off-center club rotation, real shaft
+dynamics, or player populations; empirical validation against physical
+reference data is deferred (item 3). Preset club inputs in reports are
+illustrative, not measured player data or complete manufacturer
+specifications.
+
 ## Claim Boundary
 
 Synthetic fixtures and agreement with another implementation are code
