@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T11:10:41.109253+00:00",
-  "checkpoint": "2b67c1669d659f72053952f31947d131df4f5b4f",
+  "recorded_at_utc": "2026-10-12T11:31:57.307914+00:00",
+  "checkpoint": "36ab82a1be0e0967b8cd3045386adb25a92db34e",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "2b67c1669d659f72053952f31947d131df4f5b4f",
+  "source_commit": "36ab82a1be0e0967b8cd3045386adb25a92db34e",
   "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -615,29 +615,34 @@
     ]
   },
   "latest_combined_gate": {
-    "source": "2b67c1669d659f72053952f31947d131df4f5b4f",
+    "source": "36ab82a1be0e0967b8cd3045386adb25a92db34e",
     "status": "PASS all eight gates with Semgrep available",
     "passes": 7572,
     "skipped": 377,
     "deselected": 43,
     "xpassed": 1,
     "subtests": 21,
-    "selection": "Unmodified canonical automatic selector:590 targets, all eight actual historical fixture/consumer modules included, no whole research-folder fallback. Complete broader failed run remains separately preserved; no full research-suite acceptance claimed.",
+    "selection": "Unmodified canonical automatic selector; every actual historical fixture consumer remains included. Independent32-test exporter and generated-inventory checks pass. Complete broader failed run remains separately preserved; no full research-suite acceptance claimed.",
     "receipts": [
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-cohesive-source-canonical-prepr.txt.gz",
-        "sha256": "61ed010bf9b5cbeabdfd6efd652600497efa23ddad56ee9ffe90c8c0727d4052",
-        "uncompressed_sha256": "3c9fbc27740d8feefc7e845301366eec88a1c202ea06093ae68f562d9774716c"
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-main-reconciled-canonical-prepr.txt.gz",
+        "sha256": "bbf0608ad2a8f52ed4b3f8e5e2ed1719a55f8420340962093a71afb44cb3a8fe",
+        "uncompressed_sha256": "70a3f7398bf0cf04b2aaf9ddc0382560b34d84a617cca488c71270ff69523400"
       },
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-semgrep-final-rebased-delta-green.txt.gz",
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-semgrep-main-reconciled-delta-green.txt.gz",
         "sha256": "7a64de55216bcf27158aeeaaf626dacd52e23235a950a28e5b9bc2262b4288f1",
         "uncompressed_sha256": "57a2fda356ffd57af6f77121a5f3c7108528931583f7dcb1639baf7645304f34"
       },
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-rebased-cohesive-test-targets.json.gz",
-        "sha256": "3f27b90edf9f338e7d60bfeb40651b3f068599afe9983f33fbe5ac9efb833b36",
-        "uncompressed_sha256": "a729bbf79b4c2f9f54360c7d6609c2d5dfc09d2d508ac3e99bc609bda933e9e2"
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-swing-report-reconciliation-tests.txt.gz",
+        "sha256": "eb741315a8fac8124442da0a079393f4f83147f096923a0cb47833f3f1ea4155",
+        "uncompressed_sha256": "b3a72e1476c600d2b8ce45c40c756e70eca0dedf9e4a37beff9eedcd309f2aa2"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-divergence-reconciliation-check.txt.gz",
+        "sha256": "4413171d3e547ded45d170ecb80d1fd211ec53f995cc134601cef61acea01c00",
+        "uncompressed_sha256": "4866cb4fb7f3b42de5c944735af6d7d47e57ea8e844e3206afdd4af27a9f7da2"
       }
     ]
   },
@@ -1048,12 +1053,17 @@
       "47df000da3"
     ],
     "plan": "Rebase onto actual advanced PR head without force; preserve useful ADR index and blocked manual pointers, remove two unnecessary size-budget exceptions (766/46250 bytes vs51200), restore original reviewed canonical heading and its truthful provenance. Then run full canonical on stable committed source.",
-    "status": "Complete: ordinary rebase retains remote47df in ancestry; final source2b67c1669d passes complete canonical. No force push, size-budget waiver, or scientific acceptance change.",
+    "status": "Complete: ordinary rebase retains remote47df in ancestry; final combined source36ab82a1be passes complete canonical. No force push, size-budget waiver, or scientific acceptance change.",
     "rebased_source_before_final_metadata_commit": "7a1defd5e57e72e133f1637d206505c9a54d32ac",
     "result": "Useful ADR0014/15/16indexrows, manualblockers and officialmonolithinventory retained; redundant duplicatepointers removed; two unnecessarysizewaiversremoved with original51200-bytebudget PASS; Ifheading/provenancerestoredexacte0/7bb3560a hash; Astraapproved.",
     "budget_receipt": {
       "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-remote-reconciled-size-budget-green.txt.gz",
       "sha256": "7452830fe937955d9320e8ad96743b82a444759ae692b856c7385a21f13547b3"
     }
+  },
+  "main_reconciliation": {
+    "main_commit": "51f563776a",
+    "combined_source": "36ab82a1be0e0967b8cd3045386adb25a92db34e",
+    "scope": "Actual conflicts in two generated divergence inventories; official regeneration preserves all six incoming swing-report files, two tests and fragment byte-for-byte.32 exporter tests and inventory check pass. Astra approved combined resolution. Both main51f and remote47df retained in ancestry."
   }
 }
