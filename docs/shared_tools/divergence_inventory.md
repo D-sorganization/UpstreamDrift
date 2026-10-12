@@ -80,7 +80,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launch_monitor` | 0 | 0 | 0 | 0 | 30 | 0 |
 | `launcher_embed` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `lifting` | 0 | 0 | 0 | 31 | 0 | 0 |
+| `lifting` | 0 | 0 | 0 | 33 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 16 | 0 | 0 |
@@ -110,7 +110,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `qt_utils` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `realtime` | 0 | 2 | 0 | 4 | 0 | 2 |
-| `reporting` | 0 | 2 | 0 | 11 | 0 | 2 |
+| `reporting` | 0 | 2 | 0 | 13 | 0 | 2 |
 | `rotation_transforms` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `safe_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `safe_pandas_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
@@ -142,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **397** | **276** | **123** | **1668** | **808** | **673** |
+| **Total** | **397** | **276** | **123** | **1672** | **808** | **673** |
 
 ## Diverged Files by Package
 
