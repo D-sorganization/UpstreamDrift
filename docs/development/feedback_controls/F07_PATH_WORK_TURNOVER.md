@@ -120,3 +120,25 @@ invocation mapped no tests, so the dedicated SDK run supplies native evidence.
 The existing byte-bound closed-loop neck receipt is explicitly excluded from
 Prettier to preserve its provenance during normal hooks. PR #12239 remains
 a diagnostic audit and requires its parent integration before final merge.
+
+### Optimizer-Domain Enforcement (Issue #12233)
+
+Preparation now inspects every source `MovingPathPoint` under each loaded
+`GeometryPath` before it can run the native capability probe. For each attached
+coordinate, the allowed Moco state-value box must fit the intersection of the
+native coordinate range, the request's source-bound declared chart, and every
+attached reviewed function domain. The audit reuses the existing function-domain
+reader: SimmSpline knot limits and the reviewed LinearFunction/Constant rules;
+unknown functions, missing charts, incomplete point ownership, empty
+intersections, and optimizer boxes outside the result produce a typed hard
+execution blocker (`native_path_optimizer_domain_invalid`).
+
+A preceding `ConditionalPathPoint` active range remains a local route-regime
+switch and is not folded into a global optimizer box. This guard does not prove
+that every internal function evaluation stays within domain between sampled
+states, and it does not change guide-work qualification, physical qualification,
+or the supported source mechanics. Unit regressions cover chart/function
+intersection independently of CPP activity, unsupported/missing-domain refusal,
+and refusal before a capability probe. A small OpenSim fixture assertion checks
+the loaded GeometryPath/MovingPathPoint inventory when the optional SDK is
+available; it is not a full-model replay claim.
