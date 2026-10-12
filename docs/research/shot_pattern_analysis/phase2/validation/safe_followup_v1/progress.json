@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T08:19:44.545270+00:00",
+  "recorded_at_utc": "2026-10-12T08:37:36.835853+00:00",
   "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
@@ -402,24 +402,10 @@
     }
   },
   "latest_remote_reconciliation": {
-    "remote": "42ea5c93c3a5d9f0e792db09fe995bd74a4d0870",
-    "main": "d922b0bee9",
-    "local_parent": "f403ea4eaf",
-    "incoming_changes": "Already-merged barbell bushing/evidence PR12345 and swing-report plot registry/selection PR12366; source preserved. Only generated divergence inventories conflicted and were officially regenerated.",
-    "focused": "46 passed,2 engine-dependent skips,2 documented barbell standing-hold xfails; no physical acceptance asserted.",
-    "manual_governance": "PASS structurally:63QMD,0registeredcalculations,releaseblocked-inventory-required",
-    "receipts": {
-      "remote-42ea-focused": {
-        "receipt": "remote-42ea-focused.txt.gz",
-        "sha256": "2fc1e7ac5530f9a7fbb7c56c27d3f5cdb5c4ee61386c25bb63d9f954d78ecc10",
-        "raw_sha256": "8d6633fc8ebf9955b09796c074b9bb2011c7202427a4b6c1e043ee854d4e0265"
-      },
-      "remote-42ea-manual-governance": {
-        "receipt": "remote-42ea-manual-governance.txt.gz",
-        "sha256": "b676571e3fec9bed6e04a4c7a56fd2e48beba45e7d5e2ff114ca2c37cb800fde",
-        "raw_sha256": "631fbce346bd2d8e16b8fd430a959280d9c3c21c54f696f45eca1074dc2338fe"
-      }
-    }
+    "remote": "0252eb9671d4d446ca758595c51885a47deb2148",
+    "main": "8e9b4b974b98d0f1006514a121b3b0807ed42d9c",
+    "result": "Actual conflict reconciled; independently generated context/divergence/atlas match existing local bytes; no additional source changes; context check PASS",
+    "push": "not yet pushed"
   },
   "previously_failing_node_recheck": {
     "result": "33 passed together; three Signal optimized-mode nodes not part of this diagnostic because upstream provider fix has not merged. Not full acceptance.",
