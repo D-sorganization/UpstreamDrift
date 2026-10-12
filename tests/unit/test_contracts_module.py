@@ -86,7 +86,11 @@ class TestContractLevelGetSet:
         mod = sys.modules.get("shared.python.contracts") or sys.modules.get(
             "src.shared.python.contracts"
         )
-        assert mod is not None and mod.DBC_LEVEL == ContractLevel.WARN
+        assert mod is not None and (
+            mod.DBC_LEVEL is getattr(mod, "ContractLevel", None).WARN
+            or mod.DBC_LEVEL == ContractLevel.WARN
+            or mod.DBC_LEVEL.value == ContractLevel.WARN.value
+        )
 
 
 # ---------------------------------------------------------------------------

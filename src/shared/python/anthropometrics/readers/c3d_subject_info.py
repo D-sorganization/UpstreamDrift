@@ -33,6 +33,7 @@ from typing import Any
 
 import logging
 
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
 from .._types import Sex
 
 logger = logging.getLogger(__name__)
@@ -92,8 +93,8 @@ def read_c3d_subject_metadata(path: Path | str) -> C3DSubjectMetadata:
 def _load_parameters(file_path: Path) -> Mapping[str, Any]:
     """Open *file_path* via ``ezc3d`` and return the parameters mapping."""
     try:
-        import ezc3d  # local import: keep package importable without ezc3d
-    except ImportError as error:  # pragma: no cover - exercised via mocks
+        ezc3d = import_ezc3d()  # lazy: package stays importable without ezc3d
+    except ModuleNotFoundError as error:  # pragma: no cover - exercised via mocks
         raise ImportError(
             "ezc3d is required to read C3D subject metadata. "
             "Install it with: pip install ezc3d"
