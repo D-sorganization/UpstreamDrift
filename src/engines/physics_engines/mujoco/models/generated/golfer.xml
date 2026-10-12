@@ -15,7 +15,7 @@
     <light directional="true" pos="0 0 3" dir="0 0 -1"/>
     <camera name="side" pos="-5 -2 1.5" euler="0.15 0 0.35" mode="fixed"/>
     <camera name="front" pos="0 -5 1.5" euler="0.15 0 1.57" mode="fixed"/>
-    <body name="pelvis" pos="0 0 0.9" euler="0 0 0">
+    <body name="pelvis" pos="0 0 0.98" euler="0 0 0">
       <freejoint name="pelvis_free"/>
       <inertial pos="0 0 0" mass="11.7" diaginertia="0.1337 0.1337 0.1337"/>
       <geom name="pelvis_geom" type="capsule" size="0.15 0.2" rgba="0.8 0.6 0.4 1" contype="2" conaffinity="1"/>
