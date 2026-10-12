@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** `changes/12233-bound-moco-optimizer-states-to-source-mo.md`; `docs/agent_context/README.md`; `docs/agent_context/index.html`; `docs/development/feedback_controls/F07_PATH_WORK_TURNOVER.md`; `manuals/upstreamdrift/chapters/24-native-path-work.qmd`; `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py`; `tests/unit/engines/opensim/test_native_path_optimizer_domains.py`
 - **Summary:** This software/readiness work moves native connection finalization before optimizer-domain and passive audits. It does not claim a solve, optimum, learned replay, or physical qualification; all 17 registered model/variant rows remain unqualified.
 - **Next step:** Complete the combined no-probe preparation and physiological-policy/solver full-clock replay work under the existing acceptance gates.
-- **Last verified:** 2026-10-12 (`7987cdec`; 23 focused lifecycle tests passed, 2 warnings; no native calls).
+- **Last verified:** 2026-10-12 (merge commit `f637c179e1bac10b410882b6499050b27f7b1ddf`; pinned QA 3.12 pre_pr all gates passed; 23 focused lifecycle tests passed, 2 warnings; no native calls).
 
 ### DL-#11719 · GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export
 
