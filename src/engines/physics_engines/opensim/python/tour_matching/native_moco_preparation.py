@@ -478,6 +478,11 @@ def _native_preparation(
     blockers: list[str] = _declared_chart_blockers(request)
     loaded: str | None = None
     model = osim.Model(str(request.model_path))
+    try:
+        model.finalizeConnections()
+    except (OSError, ValueError, RuntimeError, TypeError, AttributeError):
+        blockers.append("native-moco-path-optimizer-domain-invalid")
+        return loaded, None, None, blockers, None, None, False, None, None, None
     blockers.extend(_native_path_optimizer_blockers(model, request, osim))
     runtime_sha = _native_runtime_identity(osim)
     probe_sha: str | None = None
