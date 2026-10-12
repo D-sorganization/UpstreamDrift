@@ -76,11 +76,12 @@ def _sync_contract_level_aliases(
 
 def install_contract_level_alias_sync() -> None:
     """Keep ``set_contract_level`` consistent across Tools and UD spellings (#12177)."""
+    from src.shared.python._contracts_level import _ContractState as primary_state
+
     contracts = importlib.import_module("src.shared.python.contracts")
     original: Callable[[Any], None] = contracts.set_contract_level
     if getattr(original, "_ud_contract_level_sync_installed", False):
         return
-    primary_state = contracts._ContractState
 
     def set_contract_level_with_sync(level: Any) -> None:
         original(level)
