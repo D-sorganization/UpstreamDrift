@@ -42,8 +42,6 @@ import os
 from collections.abc import Callable
 from typing import Any, TypeVar, cast
 
-from src.shared.python._contracts_level import _contract_level_value
-
 logger = logging.getLogger(__name__)
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -93,11 +91,10 @@ def _contracts_enabled() -> bool:
     return _current_contract_level() != ContractLevel.OFF
 
 
-def set_contract_level(level: enum.Enum) -> None:
-    """Set the global level from this or another compatible enum definition."""
+def set_contract_level(level: ContractLevel) -> None:
+    """Set the global contract enforcement level at runtime."""
     import sys
 
-    level = ContractLevel(_contract_level_value(level))
     _ContractState.level = level
     # Update module-level aliases so existing references see the new values
     current_module = sys.modules[__name__]

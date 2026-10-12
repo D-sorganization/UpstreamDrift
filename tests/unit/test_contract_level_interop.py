@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import enum
+import logging
 import sys
 import types
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -19,9 +20,14 @@ def test_public_setter_normalizes_core_enum(level_name: str) -> None:
     from src.shared.python import contracts as public_contracts
     from src.shared.python.core.contracts.level import ContractLevel as CoreLevel
 
+    from src.shared.python.ud_import_alias_policy import (
+        install_contract_level_alias_sync,
+    )
+
+    install_contract_level_alias_sync()
     original = public_contracts.get_contract_level()
     try:
-        public_contracts.set_contract_level(CoreLevel[level_name])
+        cast(Any, public_contracts.set_contract_level)(CoreLevel[level_name])
         level = public_contracts.get_contract_level()
         assert type(level) is public_contracts.ContractLevel
         assert level is public_contracts.ContractLevel[level_name]
@@ -103,12 +109,43 @@ def test_alias_sync_preserves_alias_enum_type(
         public_contracts.set_contract_level(original)
 
 
-@pytest.mark.parametrize("setter_name", ["public", "core"])
-def test_setters_reject_unsupported_levels_without_mutation(setter_name: str) -> None:
+def test_public_warn_logs_and_off_is_silent(caplog: pytest.LogCaptureFixture) -> None:
     from src.shared.python import contracts as public_contracts
+    from src.shared.python.ud_import_alias_policy import (
+        install_contract_level_alias_sync,
+    )
+
+    install_contract_level_alias_sync()
+    original = public_contracts.get_contract_level()
+    try:
+        with caplog.at_level(logging.WARNING, logger="src.shared.python.contracts"):
+            public_contracts.set_contract_level(public_contracts.ContractLevel.WARN)
+            public_contracts.require(False, "warn interop")
+            assert any("warn interop" in record.message for record in caplog.records)
+            caplog.clear()
+            public_contracts.set_contract_level(public_contracts.ContractLevel.OFF)
+            public_contracts.require(False, "off interop")
+            assert not caplog.records
+    finally:
+        public_contracts.set_contract_level(original)
+
+
+@pytest.mark.parametrize("setter_name", ["public", "core", "shared"])
+def test_setters_reject_unsupported_levels_without_mutation(setter_name: str) -> None:
+    from src.shared.python import _contracts_level, contracts as public_contracts
     from src.shared.python.core import contracts as core_contracts
 
-    module = public_contracts if setter_name == "public" else core_contracts
+    module: Any = {
+        "public": public_contracts,
+        "core": core_contracts,
+        "shared": _contracts_level,
+    }[setter_name]
+    if setter_name == "public":
+        from src.shared.python.ud_import_alias_policy import (
+            install_contract_level_alias_sync,
+        )
+
+        install_contract_level_alias_sync()
     original = module.get_contract_level()
     with pytest.raises(ValueError, match="contract level"):
         module.set_contract_level(UnsupportedLevel.STRICT)

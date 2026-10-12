@@ -30,6 +30,29 @@ def _contract_level_value(level: object) -> str:
     return value
 
 
+def _contract_level_for_module(
+    level: object, module: ModuleType
+) -> tuple[enum.Enum, bool, Any]:
+    """Prepare a module's normalized level without mutating its state."""
+    target_enum = getattr(module, "ContractLevel", None)
+    state = getattr(module, "_ContractState", None)
+    state_level = getattr(state, "level", None)
+    if not (isinstance(target_enum, type) and issubclass(target_enum, enum.Enum)):
+        target_enum = type(state_level) if isinstance(state_level, enum.Enum) else None
+    module_level = (
+        target_enum(_contract_level_value(level))
+        if target_enum is not None
+        else ContractLevel(_contract_level_value(level))
+    )
+    off_level = getattr(target_enum, "OFF", None)
+    enabled = (
+        module_level != off_level
+        if off_level is not None
+        else _contract_level_value(module_level) != "off"
+    )
+    return module_level, enabled, state
+
+
 def _resolve_contract_level() -> ContractLevel:
     env_val = os.environ.get("DBC_LEVEL", "").lower().strip()
     if env_val in ("off", "warn", "enforce"):
@@ -64,24 +87,7 @@ def set_contract_level(level: enum.Enum) -> None:
         mod = sys.modules.get(mod_name)
         if mod is None:
             continue
-        target_enum = getattr(mod, "ContractLevel", None)
-        state = getattr(mod, "_ContractState", None)
-        state_level = getattr(state, "level", None)
-        if not (isinstance(target_enum, type) and issubclass(target_enum, enum.Enum)):
-            target_enum = (
-                type(state_level) if isinstance(state_level, enum.Enum) else None
-            )
-        module_level = (
-            target_enum(_contract_level_value(level))
-            if target_enum is not None
-            else level
-        )
-        off_level = getattr(target_enum, "OFF", None)
-        enabled = (
-            module_level != off_level
-            if off_level is not None
-            else _contract_level_value(module_level) != "off"
-        )
+        module_level, enabled, state = _contract_level_for_module(level, mod)
         alias_updates.append((mod, module_level, enabled, state))
 
     _ContractState.level = level

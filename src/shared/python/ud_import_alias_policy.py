@@ -23,7 +23,10 @@ from src.shared.python.import_aliases import (
     _coalesce_loaded_aliases,
     _DOWNSTREAM_SRC_ALIAS_ROOTS,
 )
-from src.shared.python._contracts_level import _contract_level_value
+from src.shared.python._contracts_level import (
+    _contract_level_for_module,
+    _contract_level_value,
+)
 
 __all__ = [
     "UD_CANONICAL_SRC_ROOTS",
@@ -61,29 +64,17 @@ def _sync_contract_level_aliases(
     *,
     primary_state: Any,
 ) -> None:
-    """Mirror ``DBC_LEVEL`` onto every loaded contracts module spelling."""
+    """Mirror DBC_LEVEL onto every loaded contracts module spelling."""
+    updates: list[tuple[Any, enum.Enum, bool, Any]] = []
     for mod_name in _CONTRACT_MODULE_NAMES:
         module = sys.modules.get(mod_name)
         if module is None:
             continue
-        state = getattr(module, "_ContractState", None)
-        target_enum = getattr(module, "ContractLevel", None)
-        state_level = getattr(state, "level", None)
-        if not (isinstance(target_enum, type) and issubclass(target_enum, enum.Enum)):
-            target_enum = (
-                type(state_level) if isinstance(state_level, enum.Enum) else None
-            )
-        module_level = (
-            target_enum(_contract_level_value(level))
-            if target_enum is not None
-            else level
+        module_level, contracts_enabled, state = _contract_level_for_module(
+            level, module
         )
-        off_level = getattr(target_enum, "OFF", None)
-        contracts_enabled = (
-            module_level != off_level
-            if off_level is not None
-            else _contract_level_value(module_level) != "off"
-        )
+        updates.append((module, module_level, contracts_enabled, state))
+    for module, module_level, contracts_enabled, state in updates:
         module.DBC_LEVEL = module_level  # type: ignore[attr-defined]
         module.CONTRACTS_ENABLED = contracts_enabled  # type: ignore[attr-defined]
         if state is not None and state is not primary_state:
@@ -99,7 +90,8 @@ def install_contract_level_alias_sync() -> None:
     primary_state = contracts._ContractState
 
     def set_contract_level_with_sync(level: Any) -> None:
-        original(level)
+        normalized = contracts.ContractLevel(_contract_level_value(level))
+        original(normalized)
         _sync_contract_level_aliases(
             contracts.get_contract_level(),
             primary_state=primary_state,
