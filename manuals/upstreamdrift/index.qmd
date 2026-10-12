@@ -128,3 +128,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/58-native-contact-source-closure.qmd >}}
 
 {{< include chapters/59-native-structural-weld-admission.qmd >}}
+
+{{< include chapters/63-analytic-muscle-replay-input.qmd >}}
