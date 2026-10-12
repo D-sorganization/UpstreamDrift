@@ -426,7 +426,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/data_io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/data_processing/core.py` | -119 |  | Dieter Olson 2026-08-18 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/data_processing/io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
-| `sidekick/lab/bio/c3d_reader.py` | +0 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
+| `sidekick/lab/bio/c3d_reader.py` | +0 |  | Dieter Olson 2026-10-12 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/latex_renderer.py` | -79 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/notes_store.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |
 | `sidekick/notes_tab.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-10-11 |

@@ -33,6 +33,8 @@ FORBIDDEN_PREFIXES = (
 
 ALLOWED_FIRST_PARTY = (
     "src.shared.python.contracts",
+    # Single sanctioned ezc3d import route (#12065); no other data_io access.
+    "src.shared.python.data_io.native_dll_guard",
     "src.shared.python.motion_pipeline.contracts",
     "src.shared.python.motion_pipeline.sources",
 )

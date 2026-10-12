@@ -7,6 +7,7 @@ from pathlib import Path
 
 from dtack.utils.mat_dataset_parser import MatDatasetParser
 
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if typing.TYPE_CHECKING:
@@ -21,7 +22,7 @@ except ImportError:
     SCIPY_AVAILABLE = False
 
 try:
-    import ezc3d
+    ezc3d = import_ezc3d()
 
     EZC3D_AVAILABLE = True
 except ImportError:
