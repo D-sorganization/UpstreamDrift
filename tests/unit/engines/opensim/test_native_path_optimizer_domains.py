@@ -487,7 +487,7 @@ def _run_preparation_with_lifecycle_spies(
     use_declared_cold_start: bool = True,
     run_capability_probe: bool = True,
     through_model_wrapper: bool = False,
-) -> tuple[object, list[str], object]:
+) -> tuple[tuple[object, ...], list[str], object]:
     from contextlib import nullcontext
     from hashlib import sha256
     import sys
