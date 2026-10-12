@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T12:36:37.079522+00:00",
-  "checkpoint": "79ce24756f9b177e45b1f3c243a7393a8b7ec9ae",
+  "recorded_at_utc": "2026-10-12T13:54:33.915563+00:00",
+  "checkpoint": "4a238e8b249f58242a680ffaa1958c1562d50739",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "79ce24756f9b177e45b1f3c243a7393a8b7ec9ae",
+  "source_commit": "4a238e8b249f58242a680ffaa1958c1562d50739",
   "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately. Actual later main21b24c2f57 creates two generated context-map conflicts; exact pinned renderer resolves them without review renewal, all8 incoming non-conflicting files and single registry resolution retained,27 tests pass. Updated combined canonical/protected gate pending.",
+  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -615,7 +615,7 @@
     ]
   },
   "latest_combined_gate": {
-    "source": "79ce24756f9b177e45b1f3c243a7393a8b7ec9ae",
+    "source": "4a238e8b249f58242a680ffaa1958c1562d50739",
     "status": "PASS all eight canonical gates with Semgrep available",
     "passes": 7594,
     "skipped": 377,
@@ -630,12 +630,12 @@
     "selection": "Unmodified canonical affected-test selection; historical fixture consumers and new strict historical-path resolver tests included. Earlier whole-research failure remains preserved; no whole research-suite pass is claimed.",
     "receipts": [
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-capacity-portability-final-prepr.txt.gz",
-        "sha256": "89d343138a8c8adf55af1fbceb1e9d5bc6f0dd5333911bc6b8235050e9c6a105",
-        "uncompressed_sha256": "309a9379ea46946b2170f97ea8b421f1c9b5e4898113be318c0575492e7366aa"
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-final-prepr.txt.gz",
+        "sha256": "d051cf3501bb9c085b57c7d99dafbc6840ad470f791c19a9fd4ea043762ad7c0",
+        "uncompressed_sha256": "c211b571d9967a3aa9c5d8be364e358f90aa84fcf769791f7fa1c4487fd961fe"
       },
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-capacity-portability-semgrep.txt.gz",
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-semgrep.txt.gz",
         "sha256": "bc7ac8336308ff36765ffffbcfa5d2d0cd4169fe79fee45641c6de6e381b423c",
         "uncompressed_sha256": "b8c39973d45c5a45713c3042a98614b6ed295252b7fc1bb76cf65b963659f7f4"
       },
@@ -1141,6 +1141,7 @@
         "sha256": "b676571e3fec9bed6e04a4c7a56fd2e48beba45e7d5e2ff114ca2c37cb800fde"
       }
     ],
-    "gate": "Updated complete stable-source canonical and protected CI pending."
+    "gate": "Astra-preservation review and complete stable-source canonical pass; protected updated CI pending.",
+    "independent_review": "Astra independently verifies eight exact incoming files, both log hashes, single registry resolution and generated catalog preservation; no scientific feature qualification or boundary-review renewal."
   }
 }
