@@ -11,11 +11,11 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 399,
-    "diverged": 274,
-    "ud-only": 1618,
+    "identical": 397,
+    "diverged": 276,
+    "ud-only": 1619,
     "tools-only": 808,
-    "spelling-only": 121
+    "spelling-only": 123
   },
   "packages": {
     "README.md": {
@@ -509,11 +509,11 @@
       "spelling-only": 0
     },
     "model_generation": {
-      "identical": 27,
-      "diverged": 52,
+      "identical": 25,
+      "diverged": 54,
       "ud-only": 20,
       "tools-only": 1,
-      "spelling-only": 14
+      "spelling-only": 16
     },
     "motion_matching": {
       "identical": 0,
@@ -844,6 +844,13 @@
       "tools-only": 1,
       "spelling-only": 0
     },
+    "ud_import_alias_policy.py": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 1,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
     "ui": {
       "identical": 0,
       "diverged": 0,
@@ -938,9 +945,9 @@
       "classification": "diverged",
       "package": "__init__.py",
       "subpackage": "",
-      "ud_bytes": 2296,
+      "ud_bytes": 2304,
       "tools_bytes": 1588,
-      "byte_delta": 708,
+      "byte_delta": 716,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -4394,7 +4401,7 @@
       "classification": "ud-only",
       "package": "body_part_viz",
       "subpackage": "renderers",
-      "ud_bytes": 9274,
+      "ud_bytes": 9457,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10958,9 +10965,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "",
-      "ud_bytes": 2946,
+      "ud_bytes": 2974,
       "tools_bytes": 2916,
-      "byte_delta": 30,
+      "byte_delta": 58,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11126,9 +11133,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 20430,
+      "ud_bytes": 20438,
       "tools_bytes": 20417,
-      "byte_delta": 13,
+      "byte_delta": 21,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11186,9 +11193,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 4532,
+      "ud_bytes": 4544,
       "tools_bytes": 4519,
-      "byte_delta": 13,
+      "byte_delta": 25,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11198,9 +11205,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 13797,
+      "ud_bytes": 13809,
       "tools_bytes": 13469,
-      "byte_delta": 328,
+      "byte_delta": 340,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11282,9 +11289,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 7657,
+      "ud_bytes": 7669,
       "tools_bytes": 7653,
-      "byte_delta": 4,
+      "byte_delta": 16,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -11294,9 +11301,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 17451,
+      "ud_bytes": 17463,
       "tools_bytes": 17447,
-      "byte_delta": 4,
+      "byte_delta": 16,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -11378,9 +11385,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "interfaces",
-      "ud_bytes": 22312,
+      "ud_bytes": 22320,
       "tools_bytes": 22284,
-      "byte_delta": 28,
+      "byte_delta": 36,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -11558,9 +11565,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "mesh",
-      "ud_bytes": 15766,
+      "ud_bytes": 15784,
       "tools_bytes": 15676,
-      "byte_delta": 90,
+      "byte_delta": 108,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11678,9 +11685,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "presets",
-      "ud_bytes": 11927,
+      "ud_bytes": 11931,
       "tools_bytes": 9060,
-      "byte_delta": 2867,
+      "byte_delta": 2871,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11702,7 +11709,7 @@
       "classification": "ud-only",
       "package": "humanoid_character_builder",
       "subpackage": "",
-      "ud_bytes": 6225,
+      "ud_bytes": 6431,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12038,7 +12045,7 @@
       "classification": "ud-only",
       "package": "impact_parameters",
       "subpackage": "",
-      "ud_bytes": 12349,
+      "ud_bytes": 12392,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13190,9 +13197,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "",
-      "ud_bytes": 3337,
+      "ud_bytes": 3345,
       "tools_bytes": 3333,
-      "byte_delta": 4,
+      "byte_delta": 12,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13214,9 +13221,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 1539,
+      "ud_bytes": 1543,
       "tools_bytes": 1535,
-      "byte_delta": 4,
+      "byte_delta": 8,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13238,9 +13245,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 15287,
+      "ud_bytes": 15356,
       "tools_bytes": 15081,
-      "byte_delta": 206,
+      "byte_delta": 275,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13298,9 +13305,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 9160,
+      "ud_bytes": 9217,
       "tools_bytes": 8854,
-      "byte_delta": 306,
+      "byte_delta": 363,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13358,9 +13365,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 9372,
+      "ud_bytes": 9380,
       "tools_bytes": 7312,
-      "byte_delta": 2060,
+      "byte_delta": 2068,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13370,9 +13377,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 18466,
+      "ud_bytes": 18470,
       "tools_bytes": 18450,
-      "byte_delta": 16,
+      "byte_delta": 20,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13382,9 +13389,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 21897,
+      "ud_bytes": 21901,
       "tools_bytes": 21887,
-      "byte_delta": 10,
+      "byte_delta": 14,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13394,9 +13401,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 26699,
+      "ud_bytes": 26703,
       "tools_bytes": 25102,
-      "byte_delta": 1597,
+      "byte_delta": 1601,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13427,15 +13434,15 @@
     },
     {
       "path": "model_generation/cli/main.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "cli",
-      "ud_bytes": 28491,
+      "ud_bytes": 28543,
       "tools_bytes": 28491,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": 52,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "model_generation/converters/__init__.py",
@@ -13478,9 +13485,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 8073,
+      "ud_bytes": 8106,
       "tools_bytes": 8078,
-      "byte_delta": -5,
+      "byte_delta": 28,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13490,9 +13497,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 23452,
+      "ud_bytes": 23501,
       "tools_bytes": 21758,
-      "byte_delta": 1694,
+      "byte_delta": 1743,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13562,9 +13569,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 28850,
+      "ud_bytes": 28854,
       "tools_bytes": 28842,
-      "byte_delta": 8,
+      "byte_delta": 12,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -13574,9 +13581,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 29632,
+      "ud_bytes": 29636,
       "tools_bytes": 22419,
-      "byte_delta": 7213,
+      "byte_delta": 7217,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13631,15 +13638,15 @@
     },
     {
       "path": "model_generation/core/physics_validation.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "core",
-      "ud_bytes": 19697,
+      "ud_bytes": 19709,
       "tools_bytes": 19697,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": 12,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "model_generation/core/types.py",
@@ -13658,9 +13665,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "core",
-      "ud_bytes": 16171,
+      "ud_bytes": 16179,
       "tools_bytes": 16150,
-      "byte_delta": 21,
+      "byte_delta": 29,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13718,9 +13725,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 6322,
+      "ud_bytes": 6326,
       "tools_bytes": 6095,
-      "byte_delta": 227,
+      "byte_delta": 231,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13730,9 +13737,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 24993,
+      "ud_bytes": 25013,
       "tools_bytes": 22376,
-      "byte_delta": 2617,
+      "byte_delta": 2637,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13754,9 +13761,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 22074,
+      "ud_bytes": 22078,
       "tools_bytes": 21744,
-      "byte_delta": 330,
+      "byte_delta": 334,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13814,9 +13821,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "explorer",
-      "ud_bytes": 782,
+      "ud_bytes": 790,
       "tools_bytes": 817,
-      "byte_delta": -35,
+      "byte_delta": -27,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13910,9 +13917,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "inertia",
-      "ud_bytes": 15098,
+      "ud_bytes": 15118,
       "tools_bytes": 20962,
-      "byte_delta": -5864,
+      "byte_delta": -5844,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13934,7 +13941,7 @@
       "classification": "ud-only",
       "package": "model_generation",
       "subpackage": "inertia",
-      "ud_bytes": 5235,
+      "ud_bytes": 5243,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14150,9 +14157,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 30932,
+      "ud_bytes": 30936,
       "tools_bytes": 30690,
-      "byte_delta": 242,
+      "byte_delta": 246,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -15530,7 +15537,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "execution",
-      "ud_bytes": 30366,
+      "ud_bytes": 32799,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -21782,7 +21789,7 @@
       "classification": "ud-only",
       "package": "physics",
       "subpackage": "",
-      "ud_bytes": 9518,
+      "ud_bytes": 7910,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -21854,7 +21861,7 @@
       "classification": "ud-only",
       "package": "physics",
       "subpackage": "",
-      "ud_bytes": 11948,
+      "ud_bytes": 12425,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -36850,6 +36857,18 @@
       "spelling_only": false
     },
     {
+      "path": "ud_import_alias_policy.py",
+      "classification": "ud-only",
+      "package": "ud_import_alias_policy.py",
+      "subpackage": "",
+      "ud_bytes": 4111,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "ui/__init__.py",
       "classification": "tools-only",
       "package": "ui",
@@ -38098,5 +38117,3594 @@
       "spelling_only": false
     }
   ],
-  "authorship": []
+  "authorship": [
+    {
+      "path": "__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/_settings_model.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/access_policy.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/anthropic_adapter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/base.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-25",
+        "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/bitnet_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-26",
+        "commit": "535f093eaac7eab86ef173327127691e7182214b"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/claude_code_adapter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/cli_provider_setup.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/cline_adapter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/codex_cli_adapter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/factory.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/gemini_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-26",
+        "commit": "535f093eaac7eab86ef173327127691e7182214b"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/gemini_cli_adapter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/github_cli_provider.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/ollama_adapter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/openai_adapter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/adapters/rust_adapter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/auth/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/auth/authentication.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/config.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/education.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_adapter_lifecycle.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_api_keys.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_indexing.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_input_area.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_message_display.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_panel_header.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_panel_tools.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-25",
+        "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_provider_config_registry.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_provider_config_widgets.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_provider_registry_data.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_providers_tab.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/_rag_tab.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/assistant_panel.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/assistant_widgets.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/history_sidebar.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/gui/settings_dialog.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/integrations/affine.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/integrations/github_mcp/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/integrations/github_mcp/discovery.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/integrations/github_mcp/integration.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/integrations/github_mcp/server_config.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/integrations/linear.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/integrations/notion.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/integrations/obsidian.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/knowledge/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-25",
+        "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/knowledge/cli.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-25",
+        "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/knowledge/manifest.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-25",
+        "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/knowledge/pack.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-25",
+        "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/client.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/config_loader.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/config_writer.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/gui.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/pool.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/presets.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/widgets/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/widgets/integrations_health_dashboard_widget.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/mcp/widgets/mcp_servers_prefs_widget.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/memory_manager.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/peer_review/coordinator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/peer_review/gui.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/rag/context_provider.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-25",
+        "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/rag/indexer_worker.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/rag/simple_rag.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/sample_tools.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/system_prompts.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/thread_condensation.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/tool_registry.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/tools/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/tools/agent_control.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/tools/codemap_tools.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/tools/file_ops.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/tools/sidekick_analytics.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "ai/wizards.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-25",
+        "commit": "7ee2a787f8fbb49ce7784f880c97392ba562bff9"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/api/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/app.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/contracts/pressure_drop_v2.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/health.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/routers/flow_rate.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/routers/ode_solver.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/routers/pressure_drop.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/routers/pressure_drop_v2.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/routers/rotation_converter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/routers/symbolic_solver.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/routers/thermal_profile.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/tests/test_calc_backend.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/tests/test_calc_backend_gaps.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "calc_backend/tests/test_symbolic_solver.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/_chat_dock_widget_qt.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/chat_dock_widget.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/condensation/condenser.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/condensation/strategy.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/credentials.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/export/copy_clipboard.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/export/html_exporter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/export/markdown_exporter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/export/secret_redactor.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/export/text_exporter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/models.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/quick_bar.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/service_base.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/skills_manager.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/tests/test_chat_drift.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "chat/tests/test_workspace_bridge.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "config/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-20",
+        "commit": "9e8995763cf4cc685021d3ccac88b483e8450cc7"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "config/environment.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "contracts.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "gui_launcher/launcher.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "gui_launcher/launcher_web.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "gui_launcher/registry.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "gui_launcher/tools_sidebar_integration.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/contracts.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/core/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/core/anthropometry.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/core/body_parameters.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/core/model.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/_makehuman_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/_mesh_types.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/_primitive_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/_smplx_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/mesh_generator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/mesh_generator_primitive.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/mesh_generator_smplx.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/urdf_generator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/interfaces/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/interfaces/api.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/mesh/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/mesh/collision_generator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/mesh/inertia_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/mesh/primitive_inertia.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/presets/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-07",
+        "commit": "5b607519924a610ff6588749084c928e7051701e"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/presets/loader.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/tests/test_api.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/tests/test_inertia_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/tests/test_urdf_contracts_integration.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/validation/physics_validator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "import_aliases.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/_convenience.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/_lazy_map.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-19",
+        "commit": "2ad5bc7aabdfe0a7251a270a3d4df021e95f5269"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/api/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_assets.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_core.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_fastapi.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_flask.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_generation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_support.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/builders/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/builders/base_builder.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/builders/manual_builder.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/builders/parametric_builder.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/builders/urdf_writer.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/cli/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/cli/main.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/converters/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/converters/format_utils.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/converters/mjcf_converter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/converters/simscape/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/converters/simscape/mdl_parser.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/converters/simscape/simscape_converter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/converters/urdf_parser.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/core/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/core/contracts.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/core/physics_validation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/core/types.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/core/validation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/editor/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/editor/editor_clipboard.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/editor/editor_modifications.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/editor/editor_types.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/editor/frankenstein_editor.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/editor/text_editor_diff_mixin.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/explorer/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/explorer/model_explorer.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/export/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-19",
+        "commit": "2ad5bc7aabdfe0a7251a270a3d4df021e95f5269"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/humanoid/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-11",
+        "commit": "8e41f794c9e51319d6e53650a58d96462bb061bf"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/inertia/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/inertia/calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/inertia/primitives.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/library/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/library/_rate_limiter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/library/cache.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/library/github_importer.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/library/model_library.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-10-11",
+        "commit": "5bb9f6887e5b40f86dc810ed821c4e970f5a042c"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/library/repository.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/library/unified_loader.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/mesh/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-11",
+        "commit": "8e41f794c9e51319d6e53650a58d96462bb061bf"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/tests/test_contracts.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/tests/test_github_importer.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "model_generation/tests/test_physics_validation.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "plotting/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "plotting/export.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "plotting/identity.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "realtime/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "realtime/transport_file.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "reporting/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "reporting/generator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/agent/action_service.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/calculators/electrical/electrical_model.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/calculators/electrical/glass_interface.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/calculators/thermo/steam_engine.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/calculators/thermo/thermo_properties.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/data_io.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/data_processing/core.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/data_processing/io.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/lab/bio/c3d_reader.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/latex_renderer.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/notes_store.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/notes_tab.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/acid_gas_dewpoint_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/analysis_utils.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/baghouse_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/constants.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/electrode_advancement_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/financial_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/flare_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/optimization.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/_legacy.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/engine/_flow_calculations.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/engine/_friction_factors.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_results.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_units.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_validation.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/utils/flow_rate_converter.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/scrubber_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/syngas_water_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/thermal_profile_predictor.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/water_vapor_pressure.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/wgs_reactor_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/selected_tab_panel.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tab_context_menu.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/calculators/conversion/test_conversion_accuracy_3384_3388_3389.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/calculators/electrical/test_electrical_model.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/calculators/thermo/test_steam_engine.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/process_calculators/test_analysis_utils.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/process_calculators/test_multi_param_analysis.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/process_calculators/test_syngas_water_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/test_analysis_utils.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/test_baghouse_calculator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/test_calculator_state_mixin.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/tests/test_launcher_factory.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/catppuccin_theme.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/mixins/calculator_state_mixin.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/calculator_plotting.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/chat_tab.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/jupyter_tab/notebook_session.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/jupyter_tab/widget.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/notes_tab.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/os_terminal.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/sidebar.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/state_profile_actions.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/theme_settings.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/visibility_persistence.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/base_calculator_widget.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/data_processor_widget.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/mixins/data_processor_ops.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/unit_aware_input.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/unit_converter_widget.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/utils/json_io.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "sidekick/utils/state_manager.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "signal_toolkit/__init__.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "signal_toolkit/calculus.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "signal_toolkit/fitting.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "signal_toolkit/io.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "signal_toolkit/polynomial_generator.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    },
+    {
+      "path": "signal_toolkit/widget_processing.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "4ae01ad42651ea2e734a8e2d0170485015851ace"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-11",
+        "commit": "6b6e4be55e7086a33db43b36d2632765be619bde"
+      }
+    }
+  ]
 }

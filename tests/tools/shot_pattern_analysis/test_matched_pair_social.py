@@ -5,9 +5,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.tools.shot_pattern_analysis import matched_pair_social as social
-
 pytestmark = pytest.mark.unit
+
+from src.tools.shot_pattern_analysis import matched_pair_social as social
 
 
 def _points():

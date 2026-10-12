@@ -63,11 +63,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1089 | `src/tools/shot_pattern_analysis/matched_lean_control.py` |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py` |
 | 1072 | `src/tools/bunker_shot_gui/model.py` |
-| 1072 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
 | 1068 | `src/shared/python/swing_comparison/metrics.py` |
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py` |
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |
 | 1063 | `src/bunkershot3d/metrics/divot.py` |
+| 1062 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
 | 1046 | `src/shared/python/motion_matching/pinocchio_g2_g3.py` |
 | 1042 | `src/shared/python/physics/flight_models.py` |
@@ -103,9 +103,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 967 | `src/shared/python/motion_matching/club_only/matrix_qualification.py` |
 | 966 | `src/launchers/launcher_process_manager.py` |
 | 965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` |
-| 963 | `src/tools/shot_pattern_analysis/matched_gui.py` |
 | 962 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m` |
 | 960 | `src/shared/python/signal_toolkit/widget_ui.py` |
+| 960 | `src/tools/shot_pattern_analysis/matched_gui.py` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
 | 955 | `src/shared/python/force_overlay/glyphs.py` |
 | 955 | `src/shared/python/pendulum_simulator/gui/simulation_panel.py` |
@@ -147,6 +147,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 885 | `src/shared/python/estimation/dime_report_integration.py` |
 | 884 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/grip_modelling_tab.py` |
 | 884 | `src/shared/python/estimation/dime_learned_initializers.py` |
+| 884 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m` |
 | 878 | `src/launchers/launcher_layout_manager.py` |
 | 877 | `src/bunkershot3d/io/schema.py` |
@@ -185,7 +186,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py` |
 | 829 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 828 | `src/bunkershot3d/solvers/envelope.py` |
-| 826 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
 | 819 | `src/shared/python/motion_matching/club_only/ui_integration.py` |

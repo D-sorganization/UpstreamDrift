@@ -671,6 +671,12 @@ def pytest_configure(config: pytest.Config) -> None:
         for alias in contract_aliases:
             sys.modules[alias] = canonical_mod
 
+        from src.shared.python.ud_import_alias_policy import (
+            install_contract_level_alias_sync,
+        )
+
+        install_contract_level_alias_sync()
+
         # Alias training and all of its submodules recursively
         training_dir = root_dir / "src/shared/python/training"
         if training_dir.exists():

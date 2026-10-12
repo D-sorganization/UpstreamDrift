@@ -65,14 +65,14 @@ including `average` (1.75 m, 75.0 kg), `athletic` (1.80 m, 80.0 kg),
 
 ### Spec-Native Builder (Desktop Tool and API)
 
-| Input                                        | Unit / type                                                                                               | Notes                                                                                                                                                            |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Preset                                       | `tour_average_male`, `tour_average_female`, `junior`, `senior`, `anthro_driver`, `anthro_iron7` or Custom | JSON files in `humanoid_character_builder/presets/data`, validated by `character_preset.schema.json`. Editing any value switches to Custom.                      |
-| `stature_m`                                  | m, 1.20 to 2.30                                                                                           | Scales De Leva segment lengths.                                                                                                                                  |
-| `mass_kg`                                    | kg, 30 to 200                                                                                             | Distributed by De Leva mass fractions over the upper body. The lower limbs do not yet scale with it, so the compiled total is below the requested mass (#12199). |
-| `trunk_scale`, `arm_scale`, `shoulder_scale` | dimensionless, 0.7 to 1.4                                                                                 | Trunk length, arm lengths, biacromial breadth.                                                                                                                   |
-| `grip_roll_deg`                              | deg, -180 to 180                                                                                          | Hand roll about the shaft.                                                                                                                                       |
-| `club`                                       | `driver` or `iron7`                                                                                       | Copied into the spec with its mass properties.                                                                                                                   |
+| Input                                        | Unit / type                                                                                               | Notes                                                                                                                                       |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Preset                                       | `tour_average_male`, `tour_average_female`, `junior`, `senior`, `anthro_driver`, `anthro_iron7` or Custom | JSON files in `humanoid_character_builder/presets/data`, validated by `character_preset.schema.json`. Editing any value switches to Custom. |
+| `stature_m`                                  | m, 1.20 to 2.30                                                                                           | Scales De Leva segment lengths.                                                                                                             |
+| `mass_kg`                                    | kg, 30 to 200                                                                                             | Body mass without the club. De Leva fractions set the upper body; the Rajagopal legs, scaled uniformly, carry the rest (#12199).            |
+| `trunk_scale`, `arm_scale`, `shoulder_scale` | dimensionless, 0.7 to 1.4                                                                                 | Trunk length, arm lengths, biacromial breadth.                                                                                              |
+| `grip_roll_deg`                              | deg, -180 to 180                                                                                          | Hand roll about the shaft.                                                                                                                  |
+| `club`                                       | `driver` or `iron7`                                                                                       | Copied into the spec with its mass properties.                                                                                              |
 
 Outputs: the specification (sorted-key JSON, byte-identical for equal inputs,
 SHA-256 shown in the summary), a URDF, an MJCF, an OpenSim model and a glTF
@@ -181,8 +181,15 @@ The spec-native path compiles through `compose_anthropometric_document`
 (`motion_matching/execution/spec_builder.py`): the De Leva 1996 male table
 sets segment masses, centres of mass and inertias, the native upper body is
 rebuilt for the subject and the Rajagopal lower limbs are attached at the
-subject hip width. The desktop tool and the API share
-`humanoid_character_builder/spec_export.py`.
+subject hip width. The character builder then scales the legs so that the
+body mass without the club equals `mass_kg` (#12199). Every leg body's mass
+and inertia take one factor, so the Rajagopal mass distribution and centres
+of mass are kept, and the legs carry whatever the upper body does not: the
+De Leva upper-body segments plus the fixed native hands and L5/S1 joint
+solid (1.42 kg). That leg share is 0.35 of body mass at 30 kg, 0.38 at
+84 kg and 0.39 at 200 kg, against De Leva's 0.40. The reference capture builds
+(`build_anthropometric_spec`) keep the unscaled Rajagopal legs. The desktop
+tool and the API share `humanoid_character_builder/spec_export.py`.
 
 The URDF command-line path works as follows.
 
