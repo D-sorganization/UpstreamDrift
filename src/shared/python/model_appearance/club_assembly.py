@@ -42,7 +42,15 @@ DRIVER_MIN_LENGTH_M = 1.05  # longer than this and the head is a driver
 #: re-seats the head and the ``Clubface Vector`` for every engine. Solved from
 #: forward kinematics (OSV-8, #11755); see test_clubface_square_at_address.
 ADDRESS_SQUARE_FACE_ROLL_DEG = {"driver": -37.92, "iron7": -48.99}
-PART_MATERIALS = {"shaft": None, "grip": "grip_rubber", "head": None}  # None: finish
+#: Material per drawn part; ``None`` takes the club finish. The two grip hands
+#: (``grip_hands``, OSV-2) wear the library's golf glove.
+PART_MATERIALS = {
+    "shaft": None,
+    "grip": "grip_rubber",
+    "head": None,
+    "lead_hand": "glove_white",
+    "trail_hand": "glove_white",
+}
 
 
 @dataclass(frozen=True)

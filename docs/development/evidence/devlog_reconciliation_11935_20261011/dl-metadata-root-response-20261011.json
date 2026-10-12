@@ -1,0 +1,353 @@
+{
+  "data": {
+    "repository": {
+      "n11175": {
+        "__typename": "PullRequest",
+        "number": 11175,
+        "title": "Fix the PreconditionError exception-identity split at the shared contracts seam",
+        "state": "MERGED",
+        "url": "https://github.com/D-sorganization/UpstreamDrift/pull/11175",
+        "body": "## Summary\n- `src/shared/python/_contracts_exceptions.py` redefined `PreconditionError`/`PostconditionError`/`InvariantError`/`ContractViolationError` in parallel with the public `src.shared.python.contracts` module.\n- Decorators that raise (`@precondition`/`@postcondition`) resolve classes from `contracts`, so callsites importing the shard class (`from src.shared.python._contracts_exceptions import PreconditionError`) caught NOTHING: `tests/unit/motion_matching/test_stability_matrix.py::TestStabilityMatrix::test_get_canonical_test_invalid` has stayed red on main since the #11171 restore.\n- Fix: the shard now re-exports the SAME class objects (`ContractEvaluationError` remains shard-local with its message validation). Both import paths remain usable and referentially identical.\n- TDD: the test now asserts `contracts.PreconditionError is _contracts_exceptions.PreconditionError` and that the invalid invocation raises THAT class. Red on main HEAD (27632bd195), green after fix.\n\n## Verification\n- `pytest tests/unit/motion_matching/test_stability_matrix.py` — 27 passed (was red on main).\n- Shard contract suites (`tests/shared/wave10_remaining/test_contracts_exceptions.py`, wave10_contracts exceptions/decorators/validators/invariant-mixin) — 95 passed.\n- ruff check + format clean on changed files.\n- Pre-existing main failures left untouched: `test_contracts_module.py::test_all_exports_exist`, two `test_level.py` -O subprocess cases (reproduce red on unmodified main).\n\nRefs the main CI red noted after #11171 (27632bd195).",
+        "mergedAt": "2026-09-30T09:31:37Z",
+        "mergeCommit": { "oid": "0446a2b5e46a1192ff58c84f614975bd0be2b2a4" },
+        "author": { "login": "dieterolson" },
+        "files": {
+          "nodes": [
+            { "path": "AGENT_HANDOFF.md" },
+            { "path": "SPEC.md" },
+            { "path": "docs/development/DEVELOPMENT_LOG.md" },
+            { "path": "src/shared/python/_contracts_exceptions.py" },
+            { "path": "tests/unit/motion_matching/test_stability_matrix.py" }
+          ]
+        },
+        "closingIssuesReferences": { "nodes": [] }
+      },
+      "n11171": {
+        "number": 11171,
+        "title": "Fix the c2a102a1b9 rewrite regression: datasets deleted from main, 8 tests red",
+        "state": "MERGED",
+        "mergedAt": "2026-09-30T08:39:39Z",
+        "mergeCommit": { "oid": "27632bd19517bc623161ec9a3b3624e918529c85" },
+        "files": {
+          "nodes": [
+            { "path": "data/Club_Data.xlsx" },
+            { "path": "docs/development/monolith_refactor_register.md" },
+            { "path": "docs/shared_tools/divergence_inventory.md" },
+            { "path": "docs/shared_tools/divergence_inventory.v1.json" },
+            { "path": "reports/matched_swing_ledger.json" },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/C3DExport Tour average.c3d"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/C3DExport tour average iron.c3d"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/.MATLABDriveTag"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/.MATLABDriveTag"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/1 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/1 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/10 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/10 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/11 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/11 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/12 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/12 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/13 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/13 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/2 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/2 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/3 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/3 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/4 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/4 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/5 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/5 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/6 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/6 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/7 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/7 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/8 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/8 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/9 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/2019-03-14/9 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/.MATLABDriveTag"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/.MATLABDriveTag"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/1 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/1 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/10 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/10 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/11 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/11 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/12 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/12 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/13 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/13 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/2 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/2 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/3 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/3 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/4 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/4 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/5 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/5 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/6 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/6 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/7 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/7 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/8 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/8 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/9 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/2019-03-14/9 Capture.info"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Dieter Olson/PlayerInfo.bin"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/PlayerInfo.bin"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/Gears Capture Files/Swing Data from Scott Beaumont/.MATLABDriveTag"
+            },
+            {
+              "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/C3DExport Tour average.c3d"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/C3DExport tour average iron.c3d"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/.MATLABDriveTag"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/.MATLABDriveTag"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/1 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/1 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/10 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/10 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/11 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/11 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/12 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/12 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/13 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/13 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/2 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/2 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/3 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/3 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/4 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/4 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/5 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/5 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/6 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/6 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/7 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/7 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/8 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/8 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/9 Capture.gpcap"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/2019-03-14/9 Capture.info"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/Dieter Olson/.MATLABDriveTag"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/Dieter Olson/2019-03-14/.MATLABDriveTag"
+            },
+            {
+              "path": "src/engines/physics_engines/pinocchio/data/tour_average_mocap/Gears Capture Files/Dieter Olson/2019-03-14/1 Capture.gpcap"
+            }
+          ]
+        }
+      },
+      "n11397": {
+        "number": 11397,
+        "title": "feat(force_overlay): [FTO-30] force overlay gallery, golden tests, user guide, and parity ledger (#11315)",
+        "state": "MERGED",
+        "mergedAt": "2026-10-03T17:23:36Z",
+        "mergeCommit": { "oid": "b2ea876766e65a5cfa86eabf14fef172f18932be" },
+        "closingIssuesReferences": { "nodes": [{ "number": 11315 }] }
+      },
+      "n10841": {
+        "number": 10841,
+        "title": "fix(tour_baselines): enforce fail-closed legacy qualification and hash dynamics inertia parameters (#10799, #10800)",
+        "state": "MERGED",
+        "mergedAt": "2026-09-24T11:13:11Z",
+        "mergeCommit": { "oid": "6ad8b9877f1c6280f7d424c5b890ab576eb8a4ad" },
+        "closingIssuesReferences": {
+          "nodes": [{ "number": 10799 }, { "number": 10800 }]
+        }
+      },
+      "n10800": {
+        "__typename": "Issue",
+        "number": 10800,
+        "title": "[review] [Reviewer (chatgpt-codex-connector[bot])] Feedback on src/engines/physics_engines/pendul...",
+        "state": "CLOSED",
+        "body": "## Review Comment from Reviewer (chatgpt-codex-connector[bot])\n\n**Source PR:** #10798 - fix(tour_baselines): reconstruct presets from verified arrays and keep pendulum packages qualifiable\n**File:** `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py` (line 307)\n**Original Comment:** https://github.com/D-sorganization/UpstreamDrift/pull/10798#discussion_r4090113714\n\n---\n\n### Feedback\n\n**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Hash the actual pendulum inertia parameters**\n\nThe baseline contract defines `fixed_inertia_hash` as the digest of segment masses and rotational inertias, but this value contains only the model label and link lengths—the same geometric inputs already covered by `fixed_geometry_hash`. If the default arm/shaft/club masses, center-of-mass ratios, or inertias used by `create_calibrated_double_pendulum_dynamics()` change, the hash remains identical and a replay can be treated as using the recorded physics when it does not. Build this digest from the actual dynamics parameters used for the rollout.\n\nUseful? React with 👍 / 👎.\n\n---\n\n### Context\n\n- **PR Author:** @dieterolson\n- **Branch:** `fix/review-feedback-10794-10795`\n- **Reviewed by:** chatgpt-codex-connector[bot]\n- **Date:** 2026-09-24T05:03:50Z\n\n---\n\n*This issue was auto-generated from a PR review comment.*"
+      }
+    }
+  }
+}
