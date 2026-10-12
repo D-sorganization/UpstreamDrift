@@ -4359,8 +4359,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md": {
-      "sha256": "e1601a7329c88a936519ceaec81e887635322517c41de21c11360455942209cf",
-      "bytes": 2897,
+      "sha256": "25edce92370a58c052f38dd46d574e872b1a43ee82e541df07efef9a39a63df4",
+      "bytes": 3263,
       "referenced_by": [
         "PD-CLAIM-324",
         "PD-CLAIM-325",
@@ -6413,8 +6413,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "f03c49652638a939e2388d42cd5ae1fe17e309434dc72a3610a26f1c6ff2ca9c",
-      "bytes": 165205,
+      "sha256": "113dd47f86e1f4699370bed700db62c210cece043cb18e1a1bcaae7f81fc2298",
+      "bytes": 165665,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -6688,8 +6688,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py": {
-      "sha256": "dd0ff9e3f3ae2c0f2b6c57d040fb57ea689fa1c195afaab1571b3cf637d5628f",
-      "bytes": 4960,
+      "sha256": "c601c15dc98a13cdef6648ef4708fe4bbc80eb32781ef30c0f1ed16a1d370bc4",
+      "bytes": 6825,
       "referenced_by": [
         "PD-CLAIM-215",
         "PD-CLAIM-216",
@@ -7240,8 +7240,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/nonlinear_controller_registration.py": {
-      "sha256": "c60c4b37d6d72358e3347f2d756192323f1fb00940411165672643c3bc90f364",
-      "bytes": 15759,
+      "sha256": "f0e1d9cd5c94a0ad106497f7c396dc87f3d05cb3f84b001cdebd887d3bcf53f0",
+      "bytes": 15776,
       "referenced_by": [
         "PD-CLAIM-324",
         "PD-CLAIM-325",
@@ -8902,8 +8902,8 @@
       ]
     },
     "tests/research/test_nonlinear_controller_plant_transport.py": {
-      "sha256": "663dd0cb660e6c95d1f466c1a1a8672a5aed29a42b39d9326cd5d81ddda46c50",
-      "bytes": 3216,
+      "sha256": "70aebd6a4b7dc45d0f2e5849f2dc85328cb72ea4689b427f806bfb5e21068907",
+      "bytes": 3433,
       "referenced_by": [
         "PD-CLAIM-324",
         "PD-CLAIM-325",
@@ -8911,8 +8911,8 @@
       ]
     },
     "tests/research/test_nonlinear_controller_solver_qualification.py": {
-      "sha256": "95dcda629c0dece1379e41f23965668638de2fc93a6107780d94220dbb906a4a",
-      "bytes": 4137,
+      "sha256": "39fbe1a5da3269886d79c9c98d68cc6c18883391b6e593b40c6202cca4711cf2",
+      "bytes": 4602,
       "referenced_by": [
         "PD-CLAIM-324",
         "PD-CLAIM-325",
@@ -9236,8 +9236,8 @@
       ]
     },
     "tests/research/test_uncertainty_stability_audit.py": {
-      "sha256": "845ebd01d25850d7baf0c8d5f4b8cc7a3babcac2b6044a43696be4b607f7dd6a",
-      "bytes": 1219,
+      "sha256": "d7c28fa90ec529ab0892fa4c5d628c3a9d35a72560bc1f7e8675a4c72035042b",
+      "bytes": 4285,
       "referenced_by": [
         "PD-CLAIM-215",
         "PD-CLAIM-216",

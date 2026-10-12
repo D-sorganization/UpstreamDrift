@@ -25,8 +25,14 @@ The primary JSON and NPZ array artifact are immutable inputs to this audit.
 Before computation, their canonical SHA-256 digests and byte lengths must equal
 their entries in \texttt{release\_manifest.json}. The manifest's canonical text
 hashing normalizes CRLF to LF, while NPZ bytes are hashed without conversion.
-This binding rejects any change to the underlying sensitivity matrix even when
-the effective ranks happen to be unchanged. The primary JSON contains the six
+The audit separately pins the published primary JSON to SHA-256
+\texttt{101b9be2bccf705af9e856364312f797f0c725fab521b0c7357830e9e778715b}
+and 18,917 canonical bytes, and the NPZ to SHA-256
+\texttt{b051d567fcf7d0c03060f058887b2342ca46a85e78a3f1e5108d1c469ed6be9d}
+and 16,911 bytes. These fixed identities remain authoritative if a later
+release-inventory refresh changes manifest entries. The binding rejects any
+change to the underlying sensitivity matrix even when the effective ranks
+happen to be unchanged. The primary JSON contains the six
 singular values saved by the original study producer. The committed stability
 JSON is historical output and is never regenerated solely to accommodate a
 different linear-algebra runtime.

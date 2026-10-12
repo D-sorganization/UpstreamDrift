@@ -12,6 +12,10 @@ from scripts.research.proximal_distal_energy import audit_uncertainty_stability
 from scripts.research.proximal_distal_energy.audit_uncertainty_stability import (
     build_audit,
 )
+from scripts.research.proximal_distal_energy.release_bundle import (
+    artifact_sha256,
+    artifact_size,
+)
 
 pytestmark = pytest.mark.scientific
 ROOT = Path(__file__).resolve().parents[2]
@@ -55,9 +59,36 @@ def test_stability_audit_rejects_changed_study_array_with_unchanged_rank(
         arrays["standardized_sensitivity"][0, 0], np.inf
     )
     np.savez_compressed(array_path, **arrays)
+    manifest = json.loads(
+        (audit_uncertainty_stability.ARTICLE / "release_manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    relative = "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz"
+    manifest["artifacts"][relative] = {
+        "sha256": artifact_sha256(array_path),
+        "bytes": artifact_size(array_path),
+    }
+    (tmp_path / "release_manifest.json").write_text(
+        json.dumps(manifest), encoding="utf-8"
+    )
     monkeypatch.setattr(audit_uncertainty_stability, "DATA", tmp_path)
+    monkeypatch.setattr(audit_uncertainty_stability, "ARTICLE", tmp_path)
 
     with pytest.raises(ValueError, match="input.*(identity|hash)|hash.*mismatch"):
+        build_audit()
+
+
+def test_stability_audit_rejects_independent_rank_disagreement(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def changed_singular_values(*_args: object, **_kwargs: object) -> np.ndarray:
+        return np.array([1.0, 0.8, 0.7, 0.6, 0.5, 0.3])
+
+    monkeypatch.setattr(
+        audit_uncertainty_stability.np.linalg, "svd", changed_singular_values
+    )
+    with pytest.raises(ValueError, match="singular values disagree"):
         build_audit()
 
 

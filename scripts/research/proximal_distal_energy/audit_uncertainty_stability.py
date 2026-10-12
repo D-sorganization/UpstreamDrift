@@ -14,6 +14,16 @@ ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 OUTPUT = DATA / "uncertainty_control_stability_audit.json"
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
+PUBLISHED_STUDY_INPUTS = {
+    "uncertainty_control_study.json": (
+        "101b9be2bccf705af9e856364312f797f0c725fab521b0c7357830e9e778715b",
+        18917,
+    ),
+    "uncertainty_control_study.npz": (
+        "b051d567fcf7d0c03060f058887b2342ca46a85e78a3f1e5108d1c469ed6be9d",
+        16911,
+    ),
+}
 
 
 def _verify_study_inputs() -> None:
@@ -22,14 +32,16 @@ def _verify_study_inputs() -> None:
         (ARTICLE / "release_manifest.json").read_text(encoding="utf-8")
     )
     artifacts = manifest["artifacts"]
-    for name in ("uncertainty_control_study.json", "uncertainty_control_study.npz"):
+    for name, (published_sha, published_size) in PUBLISHED_STUDY_INPUTS.items():
         path = DATA / name
         relative = f"docs/research/proximal_distal_energy_transfer/data/{name}"
         expected = artifacts.get(relative)
         if (
             not isinstance(expected, dict)
-            or artifact_sha256(path) != expected.get("sha256")
-            or artifact_size(path) != expected.get("bytes")
+            or expected.get("sha256") != published_sha
+            or expected.get("bytes") != published_size
+            or artifact_sha256(path) != published_sha
+            or artifact_size(path) != published_size
         ):
             raise ValueError(f"study input identity hash mismatch: {relative}")
 
