@@ -115,7 +115,10 @@ def github_download(repo: str) -> Downloader:
         url = f"https://github.com/{repo}/releases/download/{tag}/{asset}"
         if not url.startswith("https://github.com/"):
             raise ValueError("release downloads must use https://github.com")
-        with urllib.request.urlopen(url, timeout=300) as response:  # noqa: S310  # nosec B310 - fixed https host checked above
+        # Fixed https://github.com host, checked above; tag and asset come
+        # from the validated index.
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+        with urllib.request.urlopen(url, timeout=300) as response:  # nosec B310 # noqa: S310
             return response.read()
 
     return download
