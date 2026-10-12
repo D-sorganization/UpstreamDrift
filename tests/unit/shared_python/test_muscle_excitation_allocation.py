@@ -46,6 +46,118 @@ def _path(
     )
 
 
+def test_floor_plateau_seed_finds_feasible_above_floor_candidate() -> None:
+    dt = 0.01
+    paths = (
+        replace(
+            _path("flexor", {"hip": 0.05}, prior=0.0, rate=100.0),
+            activation=0.1,
+        ),
+        replace(
+            _path("extensor", {"hip": -0.05}, prior=0.0, rate=100.0),
+            activation=0.1,
+        ),
+    )
+    witness = (0.15, 0.05)
+    target = 0.0
+    for path, raw in zip(paths, witness, strict=True):
+        activation = path.activation_dynamics.update(raw, path.activation, dt)
+        fiber = EquilibriumSolver(path.muscle).solve_fiber_length(
+            path.muscle_tendon_length_m, activation
+        )
+        tendon_length = path.muscle_tendon_length_m - fiber
+        force = path.muscle.params.F_max * path.muscle.tendon_force(
+            tendon_length / path.muscle.params.l_slack
+        )
+        target += path.moment_arms_m_or_rad["hip"] * force
+
+    assert target > 0.0
+    assert all(
+        raw > path.activation_dynamics.min_activation
+        for path, raw in zip(paths, witness, strict=True)
+    )
+    result = allocate_muscle_excitations(
+        paths,
+        ("hip",),
+        (target,),
+        coordinate_effort_units=("N*m",),
+        dt_s=dt,
+        effort_tolerances=(1e-6,),
+        force_equilibrium_tolerance_n=1e-4,
+        max_nfev=80,
+    )
+
+    assert result.feasible
+    assert result.status == "feasible"
+    assert result.generalized_effort["hip"] == pytest.approx(target, abs=1e-6)
+    for path in paths:
+        raw = result.excitations[path.name]
+        assert (
+            result.effective_bounds[path.name][0]
+            <= raw
+            <= result.effective_bounds[path.name][1]
+        )
+        assert result.effective_excitations[path.name] == pytest.approx(
+            max(raw, path.activation_dynamics.min_activation)
+        )
+    assert result.nfev > 1
+    assert result.nfev <= 80
+    assert any(
+        result.excitations[path.name] > path.activation_dynamics.min_activation
+        for path in paths
+    )
+
+
+def test_floor_seed_respects_slew_upper_bound_below_floor() -> None:
+    path = replace(
+        _path("slew-limited", {"hip": 0.05}, prior=0.0, rate=0.5),
+        activation=0.1,
+        activation_dynamics=ActivationDynamics(
+            tau_act=0.015, tau_deact=0.06, min_activation=0.01
+        ),
+    )
+    result = allocate_muscle_excitations(
+        (path,),
+        ("hip",),
+        (1.0,),
+        coordinate_effort_units=("N*m",),
+        dt_s=0.01,
+        effort_tolerances=(1e-6,),
+        max_nfev=12,
+    )
+
+    assert result.status == "infeasible"
+    assert not result.feasible
+    assert result.effective_bounds["slew-limited"] == pytest.approx((0.0, 0.005))
+    assert result.excitations["slew-limited"] == pytest.approx(0.0)
+    assert result.nfev <= 12
+
+
+def test_fixed_floor_control_preserves_raw_excitation() -> None:
+    path = replace(
+        _path("fixed-floor", {"hip": 0.05}, prior=0.005, rate=0.0),
+        activation=0.1,
+        activation_dynamics=ActivationDynamics(
+            tau_act=0.015, tau_deact=0.06, min_activation=0.01
+        ),
+    )
+    result = allocate_muscle_excitations(
+        (path,),
+        ("hip",),
+        (0.0,),
+        coordinate_effort_units=("N*m",),
+        dt_s=0.01,
+        effort_tolerances=(1.0,),
+        force_equilibrium_tolerance_n=1.0,
+        max_nfev=5,
+    )
+
+    assert result.excitations["fixed-floor"] == pytest.approx(0.005)
+    assert result.effective_bounds["fixed-floor"] == pytest.approx((0.005, 0.005))
+    assert result.effective_excitations["fixed-floor"] == pytest.approx(0.01)
+    assert result.nfev == 1
+
+
 def test_effort_units_and_order_must_match_every_coordinate() -> None:
     with pytest.raises(ValueError, match="match coordinate order"):
         allocate_muscle_excitations(

@@ -260,6 +260,23 @@ def _validate_recruitment_paths(
             raise ValueError(f"empty excitation/rate intersection for {path.name}")
 
 
+def _seed_floor_plateaus(
+    candidate: np.ndarray,
+    free: Sequence[int],
+    boxes: Sequence[tuple[float, float]],
+    paths: Sequence[MuscleRecruitmentPath],
+) -> np.ndarray:
+    """Seed free controls above a flat activation-floor start when possible."""
+    seeded = candidate.copy()
+    for index in free:
+        lower, upper = boxes[index]
+        floor = float(paths[index].activation_dynamics.min_activation)
+        if candidate[index] <= floor < upper:
+            active_lower = max(lower, floor)
+            seeded[index] = active_lower + 0.5 * (upper - active_lower)
+    return seeded
+
+
 class _ExcitationSearcher:
     """Bounded least-squares search over free excitation channels."""
 
@@ -336,6 +353,9 @@ class _ExcitationSearcher:
         evaluation_error: str | None = None
         try:
             self._evaluate(self._candidate0)
+            optimizer_start = _seed_floor_plateaus(
+                self._candidate0, self._free, self._boxes, self._paths
+            )
             if self._free:
 
                 def objective(values: np.ndarray) -> np.ndarray:
@@ -355,7 +375,7 @@ class _ExcitationSearcher:
 
                 result = cast(Callable[..., OptimizeResult], least_squares)(
                     objective,
-                    np.asarray([self._candidate0[i] for i in self._free]),
+                    np.asarray([optimizer_start[i] for i in self._free]),
                     bounds=(
                         np.asarray([self._boxes[i][0] for i in self._free]),
                         np.asarray([self._boxes[i][1] for i in self._free]),
