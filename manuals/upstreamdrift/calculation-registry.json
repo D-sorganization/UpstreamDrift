@@ -409,6 +409,16 @@
       "id": "UP-D1-native-contact-source-closure-inventory",
       "owner": "UpstreamDrift issue #12244",
       "resolution": "Inventory provisional chapter58 and native_contact_policy.py: exact source-bound HuntCrossleyForce/SmoothSphereHalfSpaceForce and ContactSphere/ContactHalfSpace closures, shared native wrench sampler implementation identity including opensim_force_torque.py, constrained replay policy binding, default rejection and native source/component mutation checks. A defused namespace-disabled XML parser accepts OpenSim C++-qualified names without rewriting source bytes while retaining DTD, entity, external-resource and prefixed-resource rejection. OpenSim 4.6 synthetic fixtures exercise both declared force types and finite native wrench replay for both constrained contact laws; legacy fixtures exercise both laws through the shared sampler. This does not authorize capture contact, establish calibrated support/grip, qualify either contact law physiologically, prove a full-body Moco solve or full-horizon replay, or establish all-model parity. Strict NativeMocoRequest JSON parsing, preparation closure, export identity, and fresh-replay declaration matching are integrated; an actual HuntCrossley request audit blocks on a mutated declaration; keep calculation inventory empty and publication blocked."
+    },
+    {
+      "id": "UP-D1-frozen-training-registration-inventory",
+      "owner": "UpstreamDrift issue #11912",
+      "resolution": "Inventory frozen training-only rigid registration, immutable transform ownership, explicit frame/anchor provenance and the authored pelvis coordinate gauge in chapter64. Reused Kabsch/native geometry tests and the unchanged candidate three-pose fit do not establish anatomical correspondence, ground registration, independent prediction or muscle replay. Preserve missing-correspondence admission, unchanged source bounds, private receipt lineage and all full-state dynamics gates; no manual coverage or release approval is inferred."
+    },
+    {
+      "id": "UP-D1-analytic-muscle-replay-input-contract-inventory",
+      "owner": "UpstreamDrift issue #12392",
+      "resolution": "Inventory provisional chapter63 and src/shared/python/motion_matching/analytic_muscle_replay_spec.py: the strict standard-library decoder, exact schema/profile, SI unit labels, bounded record sizes, exact clock grid and raw excitation slew bounds, initial constant-moment-arm length-domain check, immutable decoded records, and syntactic-only producer metadata. Decoding proves only input conformance; there is no execution worker, force or activation evaluation, plant integration, native replay, implementation/runtime receipt, or qualification evidence. Keep calculations empty and publication blocked until the worker, complete state/output contract, independent runtime provenance, validation, and review are inventoried separately."
     }
   ],
   "calculations": []

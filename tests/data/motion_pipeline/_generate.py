@@ -381,9 +381,14 @@ def write_mediapipe(path: Path) -> None:
 # ---------------------------------------------------------------------------
 def write_c3d(path: Path) -> bool:
     """Write a minimal C3D using ezc3d if available. Returns True if written."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    from src.shared.python.data_io.native_dll_guard import import_ezc3d
+
     try:
-        import ezc3d  # type: ignore  # noqa: F401
-    except ImportError:
+        ezc3d = import_ezc3d()
+    except ModuleNotFoundError:
         return False
 
     c3d = ezc3d.c3d()

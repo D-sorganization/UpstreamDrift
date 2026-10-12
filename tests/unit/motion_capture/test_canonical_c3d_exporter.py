@@ -15,8 +15,9 @@ import numpy as np
 import pytest
 
 from src.motion_capture.canonical_c3d_exporter import export_markers_to_c3d
+from tests.helpers.ezc3d_support import ezc3d_installed, require_ezc3d
 
-_ezc3d_available = importlib.util.find_spec("ezc3d") is not None
+_ezc3d_available = ezc3d_installed()
 
 
 # ---------------------------------------------------------------------------
@@ -101,7 +102,7 @@ class TestExportRoundTrip:
         assert out.is_absolute()
 
     def test_marker_labels_preserved(self, tmp_path: Path) -> None:
-        import ezc3d  # noqa: PLC0415
+        ezc3d = require_ezc3d()
 
         markers = np.zeros((5, 2, 3))
         out = export_markers_to_c3d(
@@ -111,7 +112,7 @@ class TestExportRoundTrip:
         assert c["parameters"]["POINT"]["LABELS"]["value"] == ["LHEE", "RHEE"]
 
     def test_round_trip_marker_data(self, tmp_path: Path) -> None:
-        import ezc3d  # noqa: PLC0415
+        ezc3d = require_ezc3d()
 
         rng = np.random.default_rng(42)
         markers = rng.uniform(-1.0, 1.0, (10, 3, 3))
@@ -125,7 +126,7 @@ class TestExportRoundTrip:
         np.testing.assert_allclose(recovered, markers, rtol=1e-5)
 
     def test_units_written_as_metres(self, tmp_path: Path) -> None:
-        import ezc3d  # noqa: PLC0415
+        ezc3d = require_ezc3d()
 
         markers = np.ones((3, 1, 3))
         out = export_markers_to_c3d(markers, ["X"], 100.0, tmp_path / "out.c3d")
@@ -133,7 +134,7 @@ class TestExportRoundTrip:
         assert c["parameters"]["POINT"]["UNITS"]["value"] == ["m"]
 
     def test_sample_rate_written(self, tmp_path: Path) -> None:
-        import ezc3d  # noqa: PLC0415
+        ezc3d = require_ezc3d()
 
         markers = np.zeros((4, 1, 3))
         out = export_markers_to_c3d(markers, ["X"], 250.0, tmp_path / "out.c3d")

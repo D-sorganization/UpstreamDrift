@@ -18,6 +18,7 @@ from pathlib import Path
 import pytest
 
 from src.shared.python.data_io import native_dll_guard as guard
+from tests.helpers.ezc3d_support import require_ezc3d
 
 pytestmark = pytest.mark.unit
 
@@ -99,10 +100,7 @@ def test_native_first_then_ezc3d_in_fresh_process_is_explicit() -> None:
     dll = _opensim_ezc3d_dll()
     if dll is None:
         pytest.skip("no OpenSim install with bundled ezc3d.dll")
-    try:
-        import ezc3d  # noqa: F401
-    except ImportError:
-        pytest.skip("ezc3d not installed in this environment")
+    require_ezc3d()
     script = textwrap.dedent(
         """
         import ctypes, os, sys
@@ -134,10 +132,7 @@ def test_native_first_then_ezc3d_in_fresh_process_is_explicit() -> None:
 @pytest.mark.skipif(sys.platform != "win32", reason="Windows DLL loader behaviour")
 def test_ezc3d_first_then_native_dll_never_raises_in_fresh_process() -> None:
     """The opposite order must be diagnosable too (no uncaught ImportError)."""
-    try:
-        import ezc3d  # noqa: F401
-    except ImportError:
-        pytest.skip("ezc3d not installed in this environment")
+    require_ezc3d()
     script = (
         "from src.shared.python.data_io import native_dll_guard as g;"
         "g.import_ezc3d(); print(bool(g.loaded_dll_path('ezc3d.dll')))"
