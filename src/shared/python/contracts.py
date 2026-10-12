@@ -34,20 +34,13 @@ Usage (decorator style)::
 
 from __future__ import annotations
 
+import enum
 import functools
 import inspect
 import logging
+import os
 from collections.abc import Callable
 from typing import Any, TypeVar, cast
-
-from src.shared.python._contracts_level import (
-    DBC_LEVEL,
-    CONTRACTS_ENABLED,
-    ContractLevel,
-    _ContractState,
-    get_contract_level,
-    set_contract_level,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -55,18 +48,64 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 # ─── Contract Enforcement Level ────────────────────────────────
-# Single enum/state lives in ``_contracts_level`` so core.contracts,
-# wave-10 tests, and this module share one ``ContractLevel`` identity.
+
+
+class ContractLevel(enum.Enum):
+    """Tri-state enforcement level for Design by Contract checks."""
+
+    OFF = "off"
+    WARN = "warn"
+    ENFORCE = "enforce"
+
+
+def _resolve_contract_level() -> ContractLevel:
+    """Determine the contract level from environment."""
+    env_val = os.environ.get("DBC_LEVEL", "").lower().strip()
+    if env_val in ("off", "warn", "enforce"):
+        return ContractLevel(env_val)
+    return ContractLevel.ENFORCE if __debug__ else ContractLevel.OFF
+
+
+# Contract state holder (avoids mutable globals + global keyword)
+class _ContractState:
+    level: ContractLevel = _resolve_contract_level()
+
+    @classmethod
+    def enabled(cls) -> bool:
+        return cls.level != ContractLevel.OFF
+
+
+# Module-level aliases for backward compatibility. Runtime checks must read
+# _ContractState directly so stale imported aliases cannot affect enforcement.
+DBC_LEVEL: ContractLevel = _ContractState.level
+CONTRACTS_ENABLED: bool = _ContractState.level != ContractLevel.OFF
 
 
 def _current_contract_level() -> ContractLevel:
     """Return the canonical runtime contract level."""
-    return get_contract_level()
+    return _ContractState.level
 
 
 def _contracts_enabled() -> bool:
     """Return whether contract checks are currently enabled."""
     return _current_contract_level() != ContractLevel.OFF
+
+
+def set_contract_level(level: ContractLevel) -> None:
+    """Set the global contract enforcement level at runtime."""
+    import sys
+
+    _ContractState.level = level
+    # Update module-level aliases so existing references see the new values
+    current_module = sys.modules[__name__]
+    current_module.DBC_LEVEL = level  # type: ignore[attr-defined]
+    current_module.CONTRACTS_ENABLED = level != ContractLevel.OFF  # type: ignore[attr-defined]
+    logger.info("Contract enforcement level set to %s", level.value)
+
+
+def get_contract_level() -> ContractLevel:
+    """Return the current global contract enforcement level."""
+    return _current_contract_level()
 
 
 # ─── Exception Hierarchy ───────────────────────────────────────
