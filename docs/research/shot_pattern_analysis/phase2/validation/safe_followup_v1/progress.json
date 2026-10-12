@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T00:48:55.708108+00:00",
+  "recorded_at_utc": "2026-10-12T00:50:28.035619+00:00",
   "checkpoint": "adc1fb0627",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "0800153985",
+  "source_commit": "bbd33905253340d24945c939a0a04e7cd0b251f9",
   "integration": "Incoming 9c9000 reconciled at cb4948eb1b; writer API repair committed at 17ad207777. Frozen rows and approved DRY baseline unchanged. No force push.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -181,7 +181,7 @@
       "generator_check": "PASS",
       "focused_tests": "3 PASS"
     },
-    "next": "After issue #11935 development-log validator is repaired by its owner, rerun complete canonical pre-PR unchanged, then follow protected integration workflow. No push from this local checkpoint.",
+    "next": "Fetch and reconcile independently advanced PR head 3a23fa0e9679023b96328bfc98b96528e5b265b2; after separately owned issue #11935 is repaired, rerun complete canonical pre-PR on reconciled source, then follow protected integration. No push from this local checkpoint.",
     "root_clutter_repair": {
       "commit": "5fab697b635d0fded7805880796a2cc6284dc4e4",
       "action": "Relocated eight byte-identical handoff sidecars from repository root to archive, updated manifest and link contracts",
@@ -203,5 +203,10 @@
       "receipt": "clean-ci-focused-final-green.txt.gz",
       "receipt_sha256": "2387095391254f803f1819811995c5a7f3def2ded96bb18661be1d2065365acc"
     }
+  },
+  "remote_pr_head_observed": {
+    "commit": "3a23fa0e9679023b96328bfc98b96528e5b265b2",
+    "observation": "Parent observed via REST that the existing PR branch advanced independently (fix(security): nosec review artifacts); local successor reconciled only through 9c9000. No fetch, merge, or push performed in this checkpoint.",
+    "required_before_push": "Fetch and reconcile the advanced PR branch in the owned worktree; after separately owned issue #11935 is repaired, rerun complete canonical pre-PR on the reconciled source before any push."
   }
 }
