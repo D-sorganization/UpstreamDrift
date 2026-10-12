@@ -71,13 +71,21 @@ def test_current_handoff_is_a_short_index_and_local_links_resolve() -> None:
     assert b"does not independently validate" in handoff_bytes
 
     markdown_paths = [handoff, *(ROOT / p for p in manifest["navigation_documents"])]
+    historical_link_bases = {
+        ROOT / chunk: ROOT / split["historical_link_base"]
+        for split in manifest["splits"]
+        if "historical_link_base" in split
+        for chunk in split["chunks"]
+    }
     for markdown_path in markdown_paths:
         contents = markdown_path.read_text(encoding="utf-8")
         for match in LINK_RE.finditer(contents):
             target = urlsplit(match.group(1).strip("<>"))
             if target.scheme or target.netloc or not target.path:
                 continue
-            local_path = (markdown_path.parent / unquote(target.path)).resolve()
+            # Archived chunks retain original bytes, including root-relative links.
+            link_base = historical_link_bases.get(markdown_path, markdown_path.parent)
+            local_path = (link_base / unquote(target.path)).resolve()
             assert local_path.is_relative_to(ROOT.resolve()), (
                 f"link escapes repository: {match.group(1)}"
             )

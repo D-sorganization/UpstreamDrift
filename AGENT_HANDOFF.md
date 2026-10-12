@@ -49,15 +49,15 @@
 
 The linked records preserve peer-reported status and provenance; this index does not independently validate those reports.
 
-- [Handoff peer records, part 1](./AGENT_HANDOFF_PEER_RECORDS-01.md)
-- [Handoff peer records, part 2](./AGENT_HANDOFF_PEER_RECORDS-02.md)
-- [Handoff peer records, part 3](./AGENT_HANDOFF_PEER_RECORDS-03.md)
-- [Handoff peer records, part 4](./AGENT_HANDOFF_PEER_RECORDS-04.md)
+- [Handoff peer records, part 1](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_PEER_RECORDS-01.md)
+- [Handoff peer records, part 2](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_PEER_RECORDS-02.md)
+- [Handoff peer records, part 3](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_PEER_RECORDS-03.md)
+- [Handoff peer records, part 4](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_PEER_RECORDS-04.md)
 - [Imported integration peer-record index](docs/agents/handoffs/shot-pattern-integration-peer-records.md)
 - [Snapshot integrity manifest](docs/agents/handoffs/shot-pattern-handoff-archive-manifest.json)
 
 - [Exact Incoming Main Handoff Snapshot](docs/agents/handoffs/archive/shot-pattern-integration-20261011/AGENT_HANDOFF.incoming-9c9000.md.archive)
-- [Incoming Main Peer Records, Part 1](./AGENT_HANDOFF_INCOMING_RECORDS-01.md)
-- [Incoming Main Peer Records, Part 2](./AGENT_HANDOFF_INCOMING_RECORDS-02.md)
-- [Incoming Main Peer Records, Part 3](./AGENT_HANDOFF_INCOMING_RECORDS-03.md)
-- [Incoming Main Peer Records, Part 4](./AGENT_HANDOFF_INCOMING_RECORDS-04.md)
+- [Incoming Main Peer Records, Part 1](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_INCOMING_RECORDS-01.md)
+- [Incoming Main Peer Records, Part 2](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_INCOMING_RECORDS-02.md)
+- [Incoming Main Peer Records, Part 3](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_INCOMING_RECORDS-03.md)
+- [Incoming Main Peer Records, Part 4](docs/agents/handoffs/archive/shot-pattern-integration-20261011/chunks/AGENT_HANDOFF_INCOMING_RECORDS-04.md)
