@@ -788,7 +788,7 @@
 - **Summary:** Drake full-body fit scores forward kinematics of the Drake rollout instead of the warm-start candidate's markers
 - **Next step:** Shipped in PR #11568.
 
-### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo If: Exemption and Sink-Based Head-Checkout Analysis.
+### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo `if:` Exemption and Sink-Based Head-Checkout Analysis.
 
 - **State:** shipped
 - **Owner:** unassigned
