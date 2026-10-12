@@ -249,10 +249,10 @@ def _replace_files_atomically(contents: dict[Path, bytes]) -> None:
     staged: list[tuple[Path, Path]] = []
     try:
         for destination, data in contents.items():
-            handle, temporary = tempfile.mkstemp(
+            handle, staging_name = tempfile.mkstemp(
                 prefix=f".{destination.name}.", dir=destination.parent
             )
-            staged.append((Path(temporary), destination))
+            staged.append((Path(staging_name), destination))
             with os.fdopen(handle, "wb") as stream:
                 stream.write(data)
         for temporary, destination in staged:
