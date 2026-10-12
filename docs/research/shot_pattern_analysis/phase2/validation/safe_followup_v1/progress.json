@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T05:35:54.456382+00:00",
+  "recorded_at_utc": "2026-10-12T05:39:50.824026+00:00",
   "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
@@ -319,7 +319,29 @@
   },
   "adapter_golden_repair": {
     "commit": "e76404f611",
-    "status": "Astra approved; historical fixture unchanged; exact full historical-source receipts qualify Python 3.11/3.12 with NumPy 2.2.6 and explicit SciPy versions. 11 tests pass in each of three qualified environments; unknown combinations fail closed."
+    "status": "Astra approved; historical fixture unchanged; exact full historical-source receipts qualify Python 3.11/3.12 with NumPy 2.2.6 and explicit SciPy versions. 11 tests pass in each of three qualified environments; unknown combinations fail closed.",
+    "receipts": {
+      "adapter-python311-green": {
+        "receipt": "adapter-python311-green.txt.gz",
+        "sha256": "2725bf6ffee4200dabadbbd00e12963ccd59a4cc3edf81733d2895ef937704f0",
+        "raw_sha256": "43b93840e91a81820c61f22165ee4223839f01ad620d16c6c9ae67a84f5482fe"
+      },
+      "adapter-python312-ci-green": {
+        "receipt": "adapter-python312-ci-green.txt.gz",
+        "sha256": "ea217a72d472f3b0d1f4b2209b7759df5cbc1dae220db97ce1d73f6336ff6f7e",
+        "raw_sha256": "86bbaddf173e6a7d687389030c72badce2692cc814b6f505f43f19eb73171e03"
+      },
+      "adapter-python312-scipy118-green": {
+        "receipt": "adapter-python312-scipy118-green.txt.gz",
+        "sha256": "fcd2441a7c5c4578f856f1546d6fb7fbf454780cc640240afe74cfa0f2550367",
+        "raw_sha256": "783ae0a5df834a12df5e3ee683e38705dcef5a52b31dd253e995fb626c9a6745"
+      },
+      "adapter-python311-red": {
+        "receipt": "adapter-python311-red.txt.gz",
+        "sha256": "9e132fd1dcf9032648f19b01263888a086afa8c94b95737695b56118c7bc73a8",
+        "raw_sha256": "12d48196f129fc57b857cce335efb529006e1fc0fb919706479580e0c4d22122"
+      }
+    }
   },
   "gravity_literal_repair": {
     "commit": "05745b52cc",
@@ -347,6 +369,35 @@
       "receipt": "document-title-case-changed-pass.txt.gz",
       "receipt_sha256": "fbdf80306895b54d9f7a961472199056681020ea087bb67822ede9c79e2fae15",
       "source_sha256": "b23a75bb07a83220f85f78fd0bef51601bbd496c48cf7b4576148112eb617cb2"
+    }
+  },
+  "data_processing_bridge": {
+    "commit": "cdc8b8b708600d2a484af7d9768b9db1ddbfd672",
+    "review": "Astra approved; duplicate retired via whole-module aliases to pinned Tools; no vendor implementation change. All three legacy import spellings retain class/exception identity. Provider sum-of-squares R\u00b2, rejected-query rollback, source provenance, exports, warnings and missing vendor failure covered.",
+    "focused": "99 passed",
+    "ruff": "PASS",
+    "mypy": "PASS 5 files",
+    "receipts": {
+      "data-provider-red": {
+        "receipt": "data-provider-red.txt.gz",
+        "sha256": "812f8057c9559fd28e62bf212f7bf71056f1b8b1d32bf2e6410fa59e185b6406",
+        "raw_sha256": "f220e56e578bcdd9448c5dfc560290807310ce6c35076b8ef38e1a1050bbeab4"
+      },
+      "data-provider-green": {
+        "receipt": "data-provider-green.txt.gz",
+        "sha256": "8e5bad9ade7c823f7d7c6db70a782a0c8b0710835f60cd548defb78053f628ee",
+        "raw_sha256": "dea8d28e8fd7861118173c2cba1f4b946a6b1d3701ab932e2c63a81a0c3ffd09"
+      },
+      "data-provider-ruff": {
+        "receipt": "data-provider-ruff.txt.gz",
+        "sha256": "8b7ab2b7741b4ed1d9cee58681afcf3cb8d2d0e572db5c358d0d5c18e259de78",
+        "raw_sha256": "cd7f41cf1ad5ba8b6263217889865f18d2b85df5ad631a05d6d321f51fd1b7b2"
+      },
+      "data-provider-mypy": {
+        "receipt": "data-provider-mypy.txt.gz",
+        "sha256": "4337d733a8d4c92559eda908b8795345f5d98ec33cdc7e0cd36f0723daefa27b",
+        "raw_sha256": "e317872697c2cbfdefa321527a6efe73290dff3a390b0fa8723b87092eccba6a"
+      }
     }
   }
 }
