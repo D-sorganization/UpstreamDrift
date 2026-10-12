@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T11:31:57.307914+00:00",
-  "checkpoint": "36ab82a1be0e0967b8cd3045386adb25a92db34e",
+  "recorded_at_utc": "2026-10-12T12:03:53.973423+00:00",
+  "checkpoint": "0e078eacc4490a8c4b227136e8c78a10b9387f0b",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "36ab82a1be0e0967b8cd3045386adb25a92db34e",
+  "source_commit": "0e078eacc4490a8c4b227136e8c78a10b9387f0b",
   "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete stable-source canonical RM-6 passes all eight gates with Semgrep available: 7572 affected tests passed, 377 skipped, 43 deselected, 1 known expected pass, 21 passing subtests. Separate exact CI scan runs 209 rules on 277 files with zero findings. Actual remote47df is retained in ancestry. Protected integration CI/merge and final mobile deployment remain pending.",
+  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7588 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge and final deployed mobile acceptance remain pending.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -615,34 +615,29 @@
     ]
   },
   "latest_combined_gate": {
-    "source": "36ab82a1be0e0967b8cd3045386adb25a92db34e",
-    "status": "PASS all eight gates with Semgrep available",
-    "passes": 7572,
+    "source": "0e078eacc4490a8c4b227136e8c78a10b9387f0b",
+    "status": "PASS all eight canonical gates with Semgrep available",
+    "passes": 7588,
     "skipped": 377,
     "deselected": 43,
     "xpassed": 1,
     "subtests": 21,
-    "selection": "Unmodified canonical automatic selector; every actual historical fixture consumer remains included. Independent32-test exporter and generated-inventory checks pass. Complete broader failed run remains separately preserved; no full research-suite acceptance claimed.",
+    "exact_ci_scan": {
+      "rules": 209,
+      "files": 278,
+      "findings": 0
+    },
+    "selection": "Unmodified canonical affected-test selection; historical fixture consumers and new strict historical-path resolver tests included. Earlier whole-research failure remains preserved; no whole research-suite pass is claimed.",
     "receipts": [
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-main-reconciled-canonical-prepr.txt.gz",
-        "sha256": "bbf0608ad2a8f52ed4b3f8e5e2ed1719a55f8420340962093a71afb44cb3a8fe",
-        "uncompressed_sha256": "70a3f7398bf0cf04b2aaf9ddc0382560b34d84a617cca488c71270ff69523400"
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-integrity-followup-canonical-prepr.txt.gz",
+        "sha256": "f1ceb265d10725ce754ef9f1ebd0fc7c2d605f9b4a79ed0be6bba715afc33699",
+        "uncompressed_sha256": "8f165a704a5a8499bd9f0a43ac2039c7081501eaf4297c5885fe3be8c69380ea"
       },
       {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-semgrep-main-reconciled-delta-green.txt.gz",
-        "sha256": "7a64de55216bcf27158aeeaaf626dacd52e23235a950a28e5b9bc2262b4288f1",
-        "uncompressed_sha256": "57a2fda356ffd57af6f77121a5f3c7108528931583f7dcb1639baf7645304f34"
-      },
-      {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-swing-report-reconciliation-tests.txt.gz",
-        "sha256": "eb741315a8fac8124442da0a079393f4f83147f096923a0cb47833f3f1ea4155",
-        "uncompressed_sha256": "b3a72e1476c600d2b8ce45c40c756e70eca0dedf9e4a37beff9eedcd309f2aa2"
-      },
-      {
-        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-divergence-reconciliation-check.txt.gz",
-        "sha256": "4413171d3e547ded45d170ecb80d1fd211ec53f995cc134601cef61acea01c00",
-        "uncompressed_sha256": "4866cb4fb7f3b42de5c944735af6d7d47e57ea8e844e3206afdd4af27a9f7da2"
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-semgrep-integrity-followup-delta.txt.gz",
+        "sha256": "bc7ac8336308ff36765ffffbcfa5d2d0cd4169fe79fee45641c6de6e381b423c",
+        "uncompressed_sha256": "b8c39973d45c5a45713c3042a98614b6ed295252b7fc1bb76cf65b963659f7f4"
       }
     ]
   },
@@ -1068,7 +1063,7 @@
   },
   "protected_ci_integrity_followup": {
     "source_commit": "0e525333207a3c1ecb64c5932c1dd487519a92c0",
-    "status": "Three protected CI metadata/path failures reproduced and repaired locally; full updated gate and protected CI pending.",
+    "status": "Astra-reviewed repairs pass focused checks and complete stable-source canonical. Updated protected CI/merge pending; predecessor red logs preserved.",
     "claim_manifest": "Only three reviewed artifact entries/five SHA-or-size leaves refreshed via official content-integrity builder; original gzip and field delta retained. Claims/references/counts/scientific scope unchanged. Complete computational publication qualification command passes with PDF inspection.",
     "archive_title": "Inline code workflow if: key satisfies repo title checker; former archive gzip preserved, prior capitalization receipt retained historically. No original raw evidence or record fields changed.",
     "spec_paths": "Current OpenSim reference corrected; exact immutable historical fitting row resolves only with original Git identity and independently pinned published provider identity.16TDD cases pass; no blanket historical exemption or implementation equivalence claim.",
