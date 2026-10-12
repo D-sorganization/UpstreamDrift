@@ -20,7 +20,7 @@ def sha(path):
 mfile = FIG / "figure_manifest.json"
 initial = sha(mfile)
 m = json.loads(mfile.read_text())
-exit_path = Path("/tmp/p2-v2-final_figures_v1-exit.json")
+exit_path = Path("/tmp/p2-v2-final_figures_v1-exit.json")  # nosec B108
 exit_record = json.loads(exit_path.read_text())
 assert exit_record["exit_code"] == 0, exit_record
 for relative, expected in m["outputs"].items():

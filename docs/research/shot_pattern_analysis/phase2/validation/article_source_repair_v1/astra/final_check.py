@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import re
 
-D = Path("/tmp/p2-article-astra-review")
+D = Path("/tmp/p2-article-astra-review")  # nosec B108
 R = Path("/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
 P = R / "docs/research/shot_pattern_analysis/phase2"
 A = P.parent / "shot_pattern_analysis.tex"

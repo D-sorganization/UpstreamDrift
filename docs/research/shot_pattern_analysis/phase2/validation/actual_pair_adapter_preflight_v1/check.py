@@ -27,7 +27,7 @@ P = Path(
     "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift"
     "/docs/research/shot_pattern_analysis/phase2"
 )
-OUT = Path("/tmp/shot-pattern-actual-pair-adapter-review")
+OUT = Path("/tmp/shot-pattern-actual-pair-adapter-review")  # nosec B108
 files = [
     P / "supplement_report_v1" / n
     for n in ["REPORT_SUPPLEMENT.json", "REPORT_SUPPLEMENT_COMPARISONS.json"]

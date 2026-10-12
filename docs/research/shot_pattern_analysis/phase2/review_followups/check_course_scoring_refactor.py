@@ -15,7 +15,7 @@ old = subprocess.check_output(
 )
 module = types.ModuleType("src.tools.shot_pattern_analysis._independent_old_scenario")
 module.__package__ = "src.tools.shot_pattern_analysis"
-exec(compile(old, "git:6cea552a^:scenario_scoring.py", "exec"), module.__dict__)
+exec(compile(old, "git:6cea552a^:scenario_scoring.py", "exec"), module.__dict__)  # nosec B102
 fixture = json.loads(
     Path(
         "tests/tools/shot_pattern_analysis/data/legacy_course_reports.json"

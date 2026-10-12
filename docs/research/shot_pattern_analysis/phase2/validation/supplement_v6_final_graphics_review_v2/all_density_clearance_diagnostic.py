@@ -64,7 +64,7 @@ def main():
     result = {
         "schema": "supplement-all-density-clearance/1",
         "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python "
+        "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python "  # nosec B108
         + str(pathlib.Path(__file__).resolve()),
         "threshold_pt": 2.0,
         "svg_count": len(files),

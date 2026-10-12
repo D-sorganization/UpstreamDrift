@@ -84,7 +84,7 @@ def main():
     result = {
         "schema": "supplement-all-density-svg-title-legend-clearance/1",
         "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python "
+        "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python "  # nosec B108
         + str(pathlib.Path(__file__).resolve()),
         "method": "All 384 saved density SVGs; exact saved text anchors with Matplotlib DejaVu Sans 10 pt TextPath outline-intersection calculation.",
         "svg_count": len(files),

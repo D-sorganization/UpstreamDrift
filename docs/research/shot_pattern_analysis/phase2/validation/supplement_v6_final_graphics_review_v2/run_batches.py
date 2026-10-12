@@ -12,7 +12,7 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-python = "/tmp/shot-pattern-validation-venv-20261009/bin/python"
+python = "/tmp/shot-pattern-validation-venv-20261009/bin/python"  # nosec B108
 main = Path("/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift")
 producer = Path(
     "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift"

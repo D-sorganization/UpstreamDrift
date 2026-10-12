@@ -4,7 +4,7 @@ import hashlib
 import json
 import re
 
-P = Path("/tmp/p2-article-astra-review")
+P = Path("/tmp/p2-article-astra-review")  # nosec B108
 d = json.loads((P / "verified_data.json").read_text())
 s = (P / "repaired_article.tex").read_text()
 old = (P / "rejected_article.tex").read_text()

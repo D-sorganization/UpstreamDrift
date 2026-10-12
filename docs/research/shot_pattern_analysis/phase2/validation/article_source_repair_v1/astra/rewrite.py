@@ -3,7 +3,7 @@ from pathlib import Path
 import hashlib
 import json
 
-P = Path("/tmp/p2-article-astra-review")
+P = Path("/tmp/p2-article-astra-review")  # nosec B108
 d = json.loads((P / "verified_data.json").read_text())
 cells = d["cells"]
 effects = d["effects"]

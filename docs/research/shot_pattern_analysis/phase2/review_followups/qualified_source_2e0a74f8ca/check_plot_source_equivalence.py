@@ -42,7 +42,7 @@ class _ExplicitFloat64(ast.NodeTransformer):
 def _module(name: str, source: bytes) -> types.ModuleType:
     module = types.ModuleType(name)
     sys.modules[name] = module
-    exec(compile(source, name, "exec"), module.__dict__)
+    exec(compile(source, name, "exec"), module.__dict__)  # nosec B102
     return module
 
 
