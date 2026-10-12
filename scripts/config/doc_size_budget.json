@@ -114,6 +114,18 @@
       "owner": "@maintainers",
       "reason": "Necromatcher native fit turnover log for issue #11235; staged for archival or section decomposition.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "docs/agents/handoffs/shot-pattern-integration-peer-records.md",
+      "owner": "@docs-team",
+      "reason": "Imported upstream peer handoff records for shot-pattern main integration (PR #12278); staged for archival or section split.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/REPORT.md",
+      "owner": "@physics-team",
+      "reason": "Phase-two matched shot-pattern scientific report exceeds the doc budget until decomposed into governed sections post-integration.",
+      "expires_on": "2026-12-31"
     }
   ]
 }
