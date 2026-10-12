@@ -17,13 +17,15 @@ The canonical log was 224,549 bytes with 76 active entries, exceeding the 200,00
 python -m shared_scripts.development_log --repo-root . --archive --archive-days 0 --today 2026-10-12
 ```
 
-After the source-backed DL-#10783 update, the official day-zero routine moved 68 already-terminal entries, leaving 75 active entries plus the updated DL-#10783 row. No status or field was changed for those archived entries.
+After the source-backed DL-#10783 update, the official day-zero routine moved 68 already-terminal entries, leaving 75 active entries plus the updated DL-#10783 row. No status or metadata field was changed for those archived entries.
 
 ## Conservation and Idempotence
 
-The exact pre-maintenance canonical log and pre-existing 2026 archive are retained as byte snapshots. The combined current-log/archive entry-ID multiset and all non-target semantic records match the before state. The pre-existing duplicate DL-#10336 occurrence count remains two; no duplicate multiplicity was added. The previous archive body remains an exact suffix of the updated archive. A second official archive invocation returned 0 and “Nothing to archive.”
+The exact pre-maintenance canonical log and pre-existing 2026 archive are retained as byte snapshots. The archive operation preserved the combined current-log/archive entry-ID multiset and all semantic records at that point; it moved 68 terminal rows and preserved the prior archive body as an exact suffix. The prior archive contained no DL-#11556; that entry came from the live-log snapshot.
 
-See `pre_mutation_preview.json`, `post_archive_conservation.json`, and the two `archive_cli_*.json` command receipts for byte hashes, counts, and process results.
+The first full pre-PR gate found one title-case violation on that newly moved historical heading. The approved normalizer changed only `Same-Repo if:` to `Same-Repo If:` on archived DL-#11556. All other archive bytes and all Development Log metadata fields remain unchanged. The original heading bytes and pre-normalization archive are retained in the snapshots and receipts. The pre-existing duplicate DL-#10336 occurrence count remains two; no duplicate multiplicity was added. The second official archive invocation, and a further post-normalization invocation, each returned 0 and “Nothing to archive.”
+
+See `post_archive_conservation.json`, `post_archive_conservation_before_titlecase_normalization.json`, `heading11556_title_normalization.json`, and the two `archive_cli_*.json` command receipts for byte hashes, counts, and process results.
 
 ## Reproduction and Limits
 
