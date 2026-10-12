@@ -30,9 +30,17 @@ change is part of this correction.
 
 ## Reproduction
 
-Run from the bounds worktree using the qualified environment:
+The historical 84-comparison proof can be reproduced from the exact baseline
+and post-typing Git commits below. Both commits and all three post-typing source
+digests are fixed in the verifier before it executes density code. Without
+`--candidate`, the verifier checks working-tree source freshness and currently
+fails closed: later density refactoring changed the AST beyond this narrow
+float64 spelling proof. A historical pass does not renew current-source or
+scientific qualification, and the original machine receipt remains unchanged.
+
+Run from the repository root using the qualified environment:
 
 ```bash
-OPENBLAS_NUM_THREADS=1 /tmp/shot-pattern-validation-venv-20261009/bin/python docs/research/shot_pattern_analysis/phase2/review_followups/check_plot_source_equivalence.py --baseline 4fc22c694404217208534b78308d31ea8985e7d3 --output /tmp/plot-source-equivalence.json
+OPENBLAS_NUM_THREADS=1 /tmp/shot-pattern-validation-venv-20261009/bin/python docs/research/shot_pattern_analysis/phase2/review_followups/check_plot_source_equivalence.py --baseline 4fc22c694404217208534b78308d31ea8985e7d3 --candidate ecc82796cec7e9119e2dd2fb0e8bb2582851761f --output /tmp/plot-source-equivalence-historical.json
 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg OPENBLAS_NUM_THREADS=1 /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest tests/tools/shot_pattern_analysis/test_academic_plots.py tests/tools/shot_pattern_analysis/test_matched_report_plots.py -o addopts='' -q
 ```

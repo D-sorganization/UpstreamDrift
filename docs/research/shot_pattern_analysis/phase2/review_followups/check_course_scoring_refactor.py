@@ -10,18 +10,35 @@ from typing import Any
 import numpy as np
 from src.tools.shot_pattern_analysis.scenario_scoring import score_course_endpoints
 
+root = Path(__file__).resolve().parents[5]
+historical_commit = "9d7035968d5639bfaf32054c39e30f49f13d3c0f"
+historical_sha256 = "63b0a5ade8531e136b94ab7a2af2ec7fd166d3e419b26cc77d1cdea9a0dffe8d"
 old = subprocess.check_output(
-    ["git", "show", "6cea552a^:src/tools/shot_pattern_analysis/scenario_scoring.py"]
+    [
+        "git",
+        "show",
+        f"{historical_commit}:src/tools/shot_pattern_analysis/scenario_scoring.py",
+    ],
+    cwd=root,
 )
-module = types.ModuleType("src.tools.shot_pattern_analysis._independent_old_scenario")
-module.__package__ = "src.tools.shot_pattern_analysis"
-exec(compile(old, "git:6cea552a^:scenario_scoring.py", "exec"), module.__dict__)  # nosec B102
+if hashlib.sha256(old).hexdigest() != historical_sha256:
+    raise ValueError("Unapproved historical source digest")
 fixture = json.loads(
-    Path(
-        "tests/tools/shot_pattern_analysis/data/legacy_course_reports.json"
+    (
+        root / "tests/tools/shot_pattern_analysis/data/legacy_course_reports.json"
     ).read_text()
 )
-assert hashlib.sha256(old).hexdigest() == fixture["pre_refactor_source_sha256"]
+if fixture["pre_refactor_source_sha256"] != historical_sha256:
+    raise ValueError(
+        "Fixture historical source digest differs from the approved Git source"
+    )
+module = types.ModuleType("src.tools.shot_pattern_analysis._independent_old_scenario")
+module.__package__ = "src.tools.shot_pattern_analysis"
+# nosemgrep: python.lang.security.audit.exec-detected.exec-detected
+exec(
+    compile(old, f"git:{historical_commit}:scenario_scoring.py", "exec"),
+    module.__dict__,
+)  # nosec B102
 for case in fixture["cases"]:
     a = module.score_course_endpoints(case["endpoints"], **case["options"])
     assert (
@@ -74,7 +91,7 @@ sys.stdout.write(
             "status": "exact_saved_and_randomized_report_parity_pass",
             "old_source_sha256": hashlib.sha256(old).hexdigest(),
             "current_sha256": {
-                p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in paths
+                p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in paths
             },
             "saved_reports": 6,
             "randomized_reports": 30,

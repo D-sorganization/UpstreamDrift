@@ -13,9 +13,9 @@
     {
       "original_relative_path": "docs/research/shot_pattern_analysis/phase2/review_followups/check_plot_source_equivalence.py",
       "original_sha256": "dfcf5bb441911dcb854f84a360ff5f3c78348f56aad2d9c00b51c5973c730c62",
-      "stored_file": "check_plot_source_equivalence.py",
-      "stored_sha256": "dfcf5bb441911dcb854f84a360ff5f3c78348f56aad2d9c00b51c5973c730c62",
-      "encoding": "identity"
+      "stored_file": "check_plot_source_equivalence.py.gz",
+      "stored_sha256": "e6ad5dd697391b1a5e4afb715e45cd20bd38f5e6f4940db6fc44df6540d344b6",
+      "encoding": "gzip-lossless"
     },
     {
       "original_relative_path": "docs/research/shot_pattern_analysis/phase2/review_followups/LEGACY_GEAR_SIGN_VALIDATION.json",

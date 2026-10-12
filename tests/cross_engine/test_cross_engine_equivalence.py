@@ -155,6 +155,8 @@ class EngineSimResult:
 
 def _engine_available(engine: str) -> bool:
     """Lazy availability probe matching ``engine_availability.py`` semantics."""
+    if engine not in _ENGINE_MODULE_PATHS:
+        return False
     try:
         from src.shared.python.engine_core.engine_availability import (
             is_engine_available,
@@ -170,6 +172,8 @@ def _engine_available(engine: str) -> bool:
             "opensim": "opensim",
         }.get(engine, engine)
         try:
+            # Target comes only from the registered engine set and fixed map above.
+            # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
             importlib.import_module(module)
             return True
         except ImportError:
@@ -184,7 +188,11 @@ def _simulator_attr(
     Returns None if the module isn't importable yet (the per-engine simulator
     PRs may not have landed) or if it doesn't export ``simulate_with_coefficients``.
     """
+    if module_path not in _ENGINE_MODULE_PATHS.values():
+        raise ValueError("unregistered simulator module")
     try:
+        # Only the exact registered simulator paths above reach this import.
+        # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
         module = importlib.import_module(module_path)
     except (ImportError, ModuleNotFoundError, AttributeError, OSError) as exc:
         logger.debug("simulator module %s unavailable: %s", module_path, exc)
@@ -535,3 +543,13 @@ def test_rmse_position_matches_norm_for_single_sample() -> None:
     a = np.array([0.0, 0.0, 0.0])
     b = np.array([0.003, 0.004, 0.0])  # 5 mm
     assert abs(_rmse_position(a, b) - 0.005) < 1e-12
+
+
+@pytest.mark.unit
+def test_simulator_lookup_rejects_unregistered_import(monkeypatch):
+    def unexpected_import(_):
+        pytest.fail("Unregistered simulator must not be imported")
+
+    monkeypatch.setattr(importlib, "import_module", unexpected_import)
+    with pytest.raises(ValueError, match="unregistered simulator module"):
+        _simulator_attr("untrusted.module")

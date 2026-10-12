@@ -17,4 +17,8 @@ def load_provider_module(name: str) -> ModuleType:
     if name not in {"core", "exceptions"}:
         raise ValueError(f"unsupported data processing provider module: {name}")
     provider = load_pinned_tools_package("sidekick")
-    return import_module(f"{provider.__name__}.data_processing.{name}")
+    if provider.__name__ != "_pinned_tools__sidekick":
+        raise ValueError("unexpected pinned provider identity")
+    if name == "core":
+        return import_module("_pinned_tools__sidekick.data_processing.core")
+    return import_module("_pinned_tools__sidekick.data_processing.exceptions")

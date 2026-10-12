@@ -17,9 +17,23 @@ def test_legacy_core_and_exceptions_are_pinned_provider_modules():
 
     core = load_provider_module("core")
     errors = load_provider_module("exceptions")
-    for prefix in ("src.shared.python.sidekick", "shared.python.sidekick", "sidekick"):
-        assert importlib.import_module(prefix + ".data_processing.core") is core
-        assert importlib.import_module(prefix + ".data_processing.exceptions") is errors
+    assert (
+        importlib.import_module("src.shared.python.sidekick.data_processing.core")
+        is core
+    )
+    assert (
+        importlib.import_module("src.shared.python.sidekick.data_processing.exceptions")
+        is errors
+    )
+    assert (
+        importlib.import_module("shared.python.sidekick.data_processing.core") is core
+    )
+    assert (
+        importlib.import_module("shared.python.sidekick.data_processing.exceptions")
+        is errors
+    )
+    assert importlib.import_module("sidekick.data_processing.core") is core
+    assert importlib.import_module("sidekick.data_processing.exceptions") is errors
     assert core.FileIOError is errors.FileIOError
     helper_path = Path(inspect.getfile(core.validate_pandas_formula)).resolve()
     assert "vendor/ud-tools/src/shared/python/safe_pandas_eval.py" in str(helper_path)
@@ -97,3 +111,17 @@ def test_bridge_rejects_unknown_module_and_missing_vendor(monkeypatch, tmp_path)
     monkeypatch.delitem(sys.modules, "_pinned_tools__sidekick", raising=False)
     with pytest.raises(SeamResolutionError, match="not in the pinned Tools tree"):
         load_provider_module("core")
+
+
+def test_bridge_rejects_unexpected_provider_identity(monkeypatch):
+    from types import SimpleNamespace
+
+    from src.shared.python import sidekick_data_processing_bridge as bridge
+
+    monkeypatch.setattr(
+        bridge,
+        "load_pinned_tools_package",
+        lambda _: SimpleNamespace(__name__="untrusted"),
+    )
+    with pytest.raises(ValueError, match="unexpected pinned provider identity"):
+        bridge.load_provider_module("core")
