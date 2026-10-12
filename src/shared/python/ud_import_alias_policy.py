@@ -15,6 +15,7 @@ import importlib
 import enum
 import sys
 from collections.abc import Callable
+from types import ModuleType
 from typing import Any
 
 from src.shared.python.import_aliases import (
@@ -65,7 +66,7 @@ def _sync_contract_level_aliases(
     primary_state: Any,
 ) -> None:
     """Mirror DBC_LEVEL onto every loaded contracts module spelling."""
-    updates: list[tuple[Any, enum.Enum, bool, Any]] = []
+    updates: list[tuple[ModuleType, enum.Enum, bool, Any]] = []
     for mod_name in _CONTRACT_MODULE_NAMES:
         module = sys.modules.get(mod_name)
         if module is None:
@@ -74,9 +75,9 @@ def _sync_contract_level_aliases(
             level, module
         )
         updates.append((module, module_level, contracts_enabled, state))
-    for module, module_level, contracts_enabled, state in updates:
-        module.DBC_LEVEL = module_level  # type: ignore[attr-defined]
-        module.CONTRACTS_ENABLED = contracts_enabled  # type: ignore[attr-defined]
+    for target_module, module_level, contracts_enabled, state in updates:
+        target_module.DBC_LEVEL = module_level  # type: ignore[attr-defined]
+        target_module.CONTRACTS_ENABLED = contracts_enabled  # type: ignore[attr-defined]
         if state is not None and state is not primary_state:
             state.level = module_level
 
