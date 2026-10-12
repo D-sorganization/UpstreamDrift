@@ -60,7 +60,7 @@ def _sync_contract_level_aliases(
     primary_state: Any,
 ) -> None:
     """Mirror ``DBC_LEVEL`` onto every loaded contracts module spelling."""
-    from src.shared.python.contracts import ContractLevel
+    from src.shared.python._contracts_level import ContractLevel
 
     contracts_enabled = level != ContractLevel.OFF
     for mod_name in _CONTRACT_MODULE_NAMES:
@@ -74,21 +74,34 @@ def _sync_contract_level_aliases(
             state.level = level
 
 
-def install_contract_level_alias_sync() -> None:
-    """Keep ``set_contract_level`` consistent across Tools and UD spellings (#12177)."""
-    from src.shared.python._contracts_level import _ContractState as primary_state
+def _unify_contracts_module_level_state() -> None:
+    """Bind the Tools child-copy ``contracts`` exports to UD canonical level state."""
+    from src.shared.python import _contracts_level as canonical
 
     contracts = importlib.import_module("src.shared.python.contracts")
-    original: Callable[[Any], None] = contracts.set_contract_level
-    if getattr(original, "_ud_contract_level_sync_installed", False):
+    if getattr(contracts, "_ud_contract_level_unified", False):
         return
 
-    def set_contract_level_with_sync(level: Any) -> None:
-        original(level)
-        _sync_contract_level_aliases(level, primary_state=primary_state)
+    contracts.ContractLevel = canonical.ContractLevel  # type: ignore[attr-defined]
+    contracts._ContractState = canonical._ContractState  # type: ignore[attr-defined]
+    contracts.DBC_LEVEL = canonical.DBC_LEVEL  # type: ignore[attr-defined]
+    contracts.CONTRACTS_ENABLED = canonical.CONTRACTS_ENABLED  # type: ignore[attr-defined]
+    contracts.get_contract_level = canonical.get_contract_level  # type: ignore[attr-defined]
 
-    set_contract_level_with_sync._ud_contract_level_sync_installed = True  # type: ignore[attr-defined]
-    contracts.set_contract_level = set_contract_level_with_sync  # type: ignore[attr-defined]
+    original_set = canonical.set_contract_level
+
+    def set_contract_level_unified(level: Any) -> None:
+        original_set(level)
+        _sync_contract_level_aliases(level, primary_state=canonical._ContractState)
+
+    set_contract_level_unified._ud_contract_level_sync_installed = True  # type: ignore[attr-defined]
+    contracts.set_contract_level = set_contract_level_unified  # type: ignore[attr-defined]
+    contracts._ud_contract_level_unified = True  # type: ignore[attr-defined]
+
+
+def install_contract_level_alias_sync() -> None:
+    """Keep ``set_contract_level`` consistent across Tools and UD spellings (#12177)."""
+    _unify_contracts_module_level_state()
 
 
 def install_ud_canonical_shared_import_aliases() -> None:
