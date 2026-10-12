@@ -65,6 +65,7 @@ SUPPORTED_SCHEMAS: Final[frozenset[str]] = frozenset(
         EFFORT_PROFILE_SCHEMA,
         "necromatcher/image-capture/1",
         "necromatcher/kinematic-fit/1",
+        "necromatcher/source-fit-scope-review/1",
     }
 )
 

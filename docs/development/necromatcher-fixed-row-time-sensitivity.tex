@@ -1,0 +1,168 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=0.85in,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\usepackage{amsmath,booktabs,array,graphicx,xcolor,xurl,hyperref,fancyhdr}
+\definecolor{ink}{HTML}{17334A}\definecolor{accent}{HTML}{187E91}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,pdftitle={Necromatcher: Fixed Row-Time Sensitivity},pdfauthor={UpstreamDrift Development}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\textcolor{ink}{\textbf{NECROMATCHER} / ROW-TIME SENSITIVITY}}
+\fancyhead[R]{\small Technical Supplement}\fancyfoot[L]{\small Fixed-Motion Diagnostic / Physical Timing Unknown}\fancyfoot[R]{\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}\setlength{\emergencystretch}{2em}\renewcommand{\arraystretch}{1.15}
+\newcommand{\code}[1]{\nolinkurl{#1}}\newcommand{\hash}[1]{{\footnotesize\nolinkurl{#1}}}
+\begin{document}
+{\small\textcolor{accent}{UPSTREAMDRIFT / REPEATABLE RESEARCH METHODS}}\par
+{\LARGE\bfseries\textcolor{ink}{Fixed Row-Time Sensitivity}}\par
+{\large Tiger V17 and Hogan V14 / Actual Read-Only Diagnostic}\par
+\section{Executed Scope and Fixed State}
+The diagnostic assessed 56 preregistered cases on four saved forearm motions:
+44 supported cases and 12 complete-role support rejections. It changed only an
+explicit encoded-raster row-time assumption. Saved camera, native geometry,
+body observations, authored shaft evidence and spline coefficients remained fixed.
+No optimizer, new fit, library write, registration or readout estimator ran.
+
+Tiger uses 1280-by-720 images and Hogan 320-by-240 images; their pixel errors must
+be interpreted separately. Training fragments and previously seen evaluation
+fragments retain their existing roles. This is not untouched validation, physical
+sensor calibration or a test of every possible shutter model.
+
+\section{Authored Row-Time Equation}
+For endpoint $k$ of source fragment $i$, the diagnostic uses
+\begin{equation}
+t_{ik}=t_i^{\mathrm{PTS}}+d f\Delta_{\mathrm{enc}}
+\left(\frac{y_{ik}}{H-1}-\frac12\right),
+\qquad f\in\{0,\tfrac14,\tfrac12,1\},\quad d\in\{-1,+1\}.
+\end{equation}
+$H$ is the full encoded raster height. $\Delta_{\mathrm{enc}}$ is the uniform
+source PTS frame interval, approximately 33.367 ms for Tiger and 33.333 ms for
+Hogan. The nonnegative readout assumption is $f\Delta_{\mathrm{enc}}$; $d$ gives
+scan direction. These units refer to the container clock, not verified physical
+sensor time. The centered reference row and full-raster mapping are authored,
+with no crop, field, stabilization, exposure or sensor-height mapping inferred.
+
+Each endpoint is evaluated against the projected native infinite shaft axis at
+its own time. For $M$ observed fragments, the raw diagnostic is
+\begin{equation}
+R(f,d)=\sqrt{\frac{1}{2M}\sum_{i=1}^{M}\sum_{k=1}^{2}e_{ik}(t_{ik})^2},
+\qquad \Delta R=R(f,d)-R(0,+1).
+\end{equation}
+Here $e$ is signed perpendicular image distance in pixels. It is unweighted and
+separate from body RMS or an optimization objective. Authored fragment endpoints
+are not physical club endpoints. Nonzero row timing has no common straight
+bearing angle because the two endpoint comparisons use different times; angle
+diagnostics remain null for every nonzero supported case.
+
+\textbf{Grid accounting:} one zero case with direction $+1$, plus both directions
+at three nonzero fractions, gives seven cases per fit/role. Four fits and two roles
+give 56 unique cases. No duplicate zero directions or missing values are counted
+as additional evidence.
+\newpage
+\section{Seen Evaluation Sensitivity}
+\begin{center}\includegraphics[width=.94\linewidth]{assets/seen-delta-rms.pdf}\end{center}
+{\small\textbf{Figure 1.} Separate pixel scales for Tiger and Hogan. Markers are the
+actual supported grid points; connecting segments aid reading and are not a fitted
+readout curve. The two arms share neither a measured sensor readout nor a new camera.
+Tiger training is omitted from the plot because every nonzero case is unsupported.}
+
+\begin{center}\small\begin{tabular}{@{}llrrr@{}}\toprule
+Evidence Role & Arm & Baseline RMS & Minimum $\Delta R$ & Maximum $\Delta R$\\\midrule
+Tiger Seen & Control & 151.999 & -2.2256 & +2.0917 \\
+Tiger Seen & Variant & 149.966 & -2.0679 & +1.9255 \\
+Hogan Seen & Control & 30.976 & -0.0131 & +0.0136 \\
+Hogan Seen & Variant & 30.930 & -0.0204 & +0.0209 \\
+Hogan Training & Control & 28.187 & -0.0269 & +0.0269 \\
+Hogan Training & Variant & 28.174 & -0.0251 & +0.0251 \\
+\bottomrule\end{tabular}\end{center}
+{\small Values are in pixels; displayed values are rounded. Complete precision,
+endpoint times, errors, status and rejection reasons accompany all 56 JSON/CSV rows.}
+
+Tiger seen errors change by at most about 2.23 pixels around roughly 150 pixels
+of mismatch. Hogan training changes by less than 0.027 pixels; seen evaluation by
+less than 0.021 pixels. This fixed scan does not resolve the historical club-axis
+mismatch. It neither calibrates shutter timing nor rules out arbitrary physical
+shutter, exposure, flexure or camera models outside these explicit assumptions.
+\newpage
+\section{Whole-Role Support and Exact Baselines}
+Before any shifted motion evaluation, every observed endpoint time must lie inside
+the saved spline interval. If one endpoint is outside, the entire evidence role
+is rejected. No clamp, extrapolation, dropped endpoint, narrowed role or invented
+zero error is allowed. Authored abstentions remain absent observations.
+
+\begin{center}\begin{tabular}{@{}lrr>{\raggedright\arraybackslash}p{.39\linewidth}@{}}\toprule
+Player / Role & Supported & Rejected & Reason or Scope\\\midrule
+Tiger Training & 2 & 12 & Both arms' six nonzero scans cross boundary support.\\
+Tiger Seen & 14 & 0 & Two arms, seven supported grid points each.\\
+Hogan Training & 14 & 0 & Original interior training fragment remains supported.\\
+Hogan Seen & 14 & 0 & Two arms, seven supported grid points each.\\\midrule
+Total & 44 & 12 & 56 unique whole-role cases.\\\bottomrule
+\end{tabular}\end{center}
+
+All twelve rejection records retain the reason: ``Complete evidence role requires
+all endpoint times inside spline support.'' Tiger training fragments lie at source
+indices 0 and 209, the saved interval boundaries. Opposite scan signs shift an
+endpoint beyond opposite support ends. Two zero training cases are supported;
+this does not justify a nonzero Tiger training curve or a conclusion of zero sensitivity.
+Interior source evidence is needed before testing those roles under signed shifts.
+
+All eight zero cases reproduce unchanged legacy raw RMS and endpoint errors exactly.
+The four training baselines also reproduce saved canonical shaft assessments.
+The legacy zero angular errors are retained; all supported nonzero angular entries
+remain null. Only the evidence actually observed contributes to the unweighted RMS.
+
+\section{Strict Saved-Final Reconstruction}
+Canonical preserved-spline loading and the public strict trajectory initializer
+reconstruct each saved final motion without optimization or new feasible projection.
+Knot times, free order and physical coefficient identities are checked exactly.
+All dense source positions match saved samples at absolute tolerance $10^{-12}$,
+with zero relative tolerance. Recomputed body RMS matches the saved value at absolute
+tolerance $10^{-10}$, with zero relative tolerance; it is not a relative 25-pixel guard.
+
+The read-only initializer's reference $q_0$ is a reconstruction input from the
+saved motion. It is explicitly not claimed to be the original job's soft prior.
+Body RMS, camera, geometry and coefficient identity are controls, not optimized
+results of this scan. Canonical library binding rechecks actual capture, source
+PNG/BGR identity, camera, evidence and full source-clock hashes before numerical use.
+\newpage
+\section{Provenance and Independent Preservation}
+Execution producer is \hash{e0042ba61870f88543cb1305e3f6d21903c97fb8}.
+The existing four saved motions remain the earlier 30-budget Tiger V17/Hogan V14
+forearm candidates, not the partial 120-budget Tiger V18 results. All candidates
+remain nonconverged and rejected; this diagnostic changes no stored scientific status.
+
+\begin{tabular}{@{}p{.23\linewidth}p{.70\linewidth}@{}}\toprule
+Record & SHA-256\\\midrule
+Actual Assessment & \hash{750453ad2e2d9e02c0ada9eafcc9a18db3628aef9aa72e2fc9e794856d5dbe2f}\\
+Independent Review & \hash{f3481f936e4ba619aa06ff0beee579eb3cd179e60b7c67b4595add8f5b59114c}\\
+Finally Preservation & \hash{20ef0fdf8fc303cfcb1b7ca85aafb6dd5c918b3ccc5872961add8676088ab4c9}\\\bottomrule
+\end{tabular}\par\smallskip
+The independent review rehashed 14,767 source files and all 347 current library
+files. Before/after source, runtime, whole-library, protocol and input identities
+match exactly. No original bytes, index records or source images changed, and
+there is no permitted library growth. The independent verifier reread saved results
+and checked endpoint RMS/support records without repeating native execution.
+
+\code{evidence/} preserves the exact assessment and both independent/finally receipts;
+\code{input-pins.json} records their original paths, copy sizes and SHA-256.
+\code{all-56-raw-rows.json} preserves complete case assessments, including unsupported
+null entries. The CSV has one row per case with serialized endpoint arrays and blank
+unsupported metrics; it does not silently substitute zeros. The vector scientific
+plot and a rendered PNG are in \code{assets/}.
+
+\section{What This Does Not Establish}
+No readout parameter was fitted, no rolling-shutter cause identified, and no
+physical sensor/exposure clock qualified. Full encoded raster is not known to
+represent the sensor readout geometry. Video playback scale, sensor crop/field
+mapping, motion blur, exposure integration, flexible shaft behavior, camera motion
+and anatomical morphology remain uncertain. The scan does not measure club heads,
+physical shaft endpoints, validated anatomy, clinical ROM or dynamics.
+
+A source-only dense review now preserves 52 equally spaced images and root's visual
+review, but no new points, phase/contact events or training/held-out roles have been
+admitted. Tiger's broad moving fans and Hogan's raster scratch require abstention
+and source-supported interpretation, not retrospective model-based labels. Future
+timing evidence must preregister interior coverage and valid support margins.
+
+The three-page partial solver-budget checkpoint and the earlier twelve-page
+forearm report remain preserved. This report is a distinct actual fixed-motion
+sensitivity record; it asserts no public deployment, issue closure, calibrated
+capture or completed reconstruction. Numerical reproducibility and visual software
+checks are separate from historical-motion qualification.
+\end{document}

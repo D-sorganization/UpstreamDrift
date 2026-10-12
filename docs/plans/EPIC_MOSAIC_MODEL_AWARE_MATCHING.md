@@ -27,7 +27,7 @@ core with a method that exploits two exact structural facts:
 
 1. **Inverse dynamics is linear in the inertial parameters**:
    `Y(q,v,a) π = B u + J_cᵀ λ`. With a kinematic spline, the inner block
-   (inputs, torque template, wrenches) is a sparse *linear* least-squares
+   (inputs, torque template, wrenches) is a sparse _linear_ least-squares
    problem solved exactly — variable projection (Golub–Pereyra/Kaufman) — and
    the outer Gauss–Newton step over kinematics, geometry and inertia uses the
    exact Schur-reduced Hessian. No forward integration inside the optimiser:
@@ -80,22 +80,22 @@ IK+smoothing baseline — all measured, never estimated.
 
 ## Child Issues and Dependency Order
 
-| Task | Title | Depends on |
-|---|---|---|
-| MOSAIC-01 | Freeze benchmark protocol, tolerances and promotion metrics; wire the planar fixture as the conformance oracle | Ready |
-| MOSAIC-02 | `RegressorModel` provider for Pinocchio (`computeJointTorqueRegressor`, batched) with conformance against the planar oracle | 01 |
-| MOSAIC-03 | MuJoCo/MJX regressor provider (autodiff over body inertias, `vmap` batching) | 01 |
-| MOSAIC-04 | Floating-base manifold spline: local-coordinate B-spline with retraction; outer solve on the manifold | 02 |
-| MOSAIC-05 | Contact wrenches in the inner solve: unilateral/friction-cone SOCP, measured GRF as observations | 04 |
-| MOSAIC-06 | Observation factors: 2-D keypoint projection, robust kernels, marker attachment offsets as geometry | 02 |
-| MOSAIC-07 | Kinematic jerk prior and whiteness gate; declared-discrepancy calculator | 01 |
-| MOSAIC-08 | Analytic dynamics derivatives (Singh–Russell–Wensing) replacing vectorised finite differences | 02 |
-| MOSAIC-09 | Capture-A / capture-O fits through all gates; leave-one-trial-out study | 04, 05, 06, 07 |
-| MOSAIC-10 | Multi-swing acquisition and registration (phase alignment, event anchoring) — the repository has one trial per capture | 01 |
-| MOSAIC-11 | Actuation layer: declared joint-level activation model with bounds and first-order dynamics | 09 |
-| MOSAIC-12 | Humanoid/manipulation transfer: known-payload anchor, reference-plus-gains export to WBC format | 04, 08 |
-| MOSAIC-13 | Remediate DIME defects (list in reference §12); retire or re-scope stub modules; unify ZVCF semantics | Ready |
-| MOSAIC-14 | Vectorised multi-trial batching over trials (block-arrow Schur, time-parallel Riccati) and runtime receipts | 08 |
+| Task      | Title                                                                                                                       | Depends on     |
+| --------- | --------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| MOSAIC-01 | Freeze benchmark protocol, tolerances and promotion metrics; wire the planar fixture as the conformance oracle              | Ready          |
+| MOSAIC-02 | `RegressorModel` provider for Pinocchio (`computeJointTorqueRegressor`, batched) with conformance against the planar oracle | 01             |
+| MOSAIC-03 | MuJoCo/MJX regressor provider (autodiff over body inertias, `vmap` batching)                                                | 01             |
+| MOSAIC-04 | Floating-base manifold spline: local-coordinate B-spline with retraction; outer solve on the manifold                       | 02             |
+| MOSAIC-05 | Contact wrenches in the inner solve: unilateral/friction-cone SOCP, measured GRF as observations                            | 04             |
+| MOSAIC-06 | Observation factors: 2-D keypoint projection, robust kernels, marker attachment offsets as geometry                         | 02             |
+| MOSAIC-07 | Kinematic jerk prior and whiteness gate; declared-discrepancy calculator                                                    | 01             |
+| MOSAIC-08 | Analytic dynamics derivatives (Singh–Russell–Wensing) replacing vectorised finite differences                               | 02             |
+| MOSAIC-09 | Capture-A / capture-O fits through all gates; leave-one-trial-out study                                                     | 04, 05, 06, 07 |
+| MOSAIC-10 | Multi-swing acquisition and registration (phase alignment, event anchoring) — the repository has one trial per capture      | 01             |
+| MOSAIC-11 | Actuation layer: declared joint-level activation model with bounds and first-order dynamics                                 | 09             |
+| MOSAIC-12 | Humanoid/manipulation transfer: known-payload anchor, reference-plus-gains export to WBC format                             | 04, 08         |
+| MOSAIC-13 | Remediate DIME defects (list in reference §12); retire or re-scope stub modules; unify ZVCF semantics                       | Ready          |
+| MOSAIC-14 | Vectorised multi-trial batching over trials (block-arrow Schur, time-parallel Riccati) and runtime receipts                 | 08             |
 
 ## Non-Goals
 

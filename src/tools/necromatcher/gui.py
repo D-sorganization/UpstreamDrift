@@ -38,6 +38,7 @@ from src.shared.python.workspace import (
 from .image_review import landmark_overlay
 from .refit_dialog import ResearchRefitDialog
 from .video_dialog import VideoExportDialog
+from .replay_impact_dialog import ReplayImpactDialog
 
 
 class NecromatcherWidget(QWidget):
@@ -56,8 +57,10 @@ class NecromatcherWidget(QWidget):
         self._refit_dialogs: list[ResearchRefitDialog] = []
         self._video_session: Any = None
         self._video_dialogs: list[VideoExportDialog] = []
+        self._impact_dialogs: list[ReplayImpactDialog] = []
         self._review: CaptureReview | None = None
         self._fit_id: str | None = None
+        self._frame_indices: tuple[int, ...] = ()
         self._pending_projection: int | None = None
         self._pending_review = False
         self._worker: BackgroundWorker | None = None
@@ -87,6 +90,7 @@ class NecromatcherWidget(QWidget):
             ("Export Swing", self._export),
             ("Refit Selected Version", self._refit),
             ("Export Fitted Overlay", self._video_export),
+            ("Preview Replay Impact", self._replay_impact),
         ):
             button = QPushButton(name)
             button.clicked.connect(callback)
@@ -155,6 +159,7 @@ class NecromatcherWidget(QWidget):
     def _assets_changed(self) -> None:
         self._generation += 1
         self._fit_id = None
+        self._frame_indices = ()
         self._pending_projection = None
         self._pending_review = False
         self.slider.setEnabled(False)
@@ -180,27 +185,39 @@ class NecromatcherWidget(QWidget):
             self._fit_id = identity
         fit_id = self._fit_id
 
-        def target() -> CaptureReview:
-            capture_id = (
-                self.library.load_fit(fit_id)["capture_id"] if fit_id else identity
+        def target() -> tuple[CaptureReview, tuple[int, ...]]:
+            fit = self.library.load_fit(fit_id) if fit_id else None
+            review = CaptureReview(self.library, fit["capture_id"] if fit else identity)
+            indices = (
+                tuple(fit["frame_indices"]) if fit else tuple(range(review.frame_count))
             )
-            return CaptureReview(self.library, capture_id)
+            return review, indices
 
         self._run(
             target,
-            lambda review: self._capture_loaded(review, generation),
+            lambda value: self._capture_loaded(value[0], generation, value[1]),
         )
 
-    def _capture_loaded(self, review: CaptureReview, generation: int) -> None:
+    def _capture_loaded(
+        self,
+        review: CaptureReview,
+        generation: int,
+        frame_indices: tuple[int, ...] | None = None,
+    ) -> None:
         if generation != self._generation or self._closed:
             review.close()
             if not self._closed:
                 self._assets_changed()
             return
         self._review = review
+        self._frame_indices = (
+            frame_indices
+            if frame_indices is not None
+            else tuple(range(review.frame_count))
+        )
         blocked = self.slider.blockSignals(True)
         try:
-            self.slider.setRange(0, review.frame_count - 1)
+            self.slider.setRange(0, len(self._frame_indices) - 1)
             self.slider.setValue(0)
         finally:
             self.slider.blockSignals(blocked)
@@ -210,6 +227,8 @@ class NecromatcherWidget(QWidget):
     def _show_frame(self, index: int) -> None:
         if not self._review:
             return
+        if self._frame_indices:
+            index = self._frame_indices[index]
         if self._fit_id:
             self.image.clear()
             self._request_projection(index)
@@ -234,7 +253,12 @@ class NecromatcherWidget(QWidget):
         if generation != self._generation or self._closed:
             return
         index = projection["frame_index"]
-        if projection["fit_id"] == self._fit_id and index == self.slider.value():
+        selected = (
+            self._frame_indices[self.slider.value()]
+            if self._frame_indices
+            else self.slider.value()
+        )
+        if projection["fit_id"] == self._fit_id and index == selected:
             self._paint_frame(index, projection)
 
     def _paint_frame(
@@ -372,6 +396,7 @@ class NecromatcherWidget(QWidget):
                 "Native Model",
                 "Torque Profile",
                 "Kinematic Research Fit",
+                "Authored Replay HDF5",
             ],
             0,
             False,
@@ -396,6 +421,8 @@ class NecromatcherWidget(QWidget):
             target = partial(self.library.add_profile, identity, swing, Path(source))
         elif kind == "Kinematic Research Fit":
             target = partial(self.library.add_fit, identity, swing, Path(source))
+        elif kind == "Authored Replay HDF5":
+            target = partial(self.library.add_replay, identity, swing, Path(source))
         else:
             engine, accepted = QInputDialog.getItem(
                 self,
@@ -454,6 +481,36 @@ class NecromatcherWidget(QWidget):
         self._video_dialogs.append(dialog)
         dialog.show()
 
+    def _replay_impact(self) -> None:
+        identity, swing = self._id(self.asset_list), self._id(self.swing_list)
+        asset = (
+            next(
+                (
+                    item
+                    for item in self.library.assets(swing)
+                    if item.dataset_id == identity
+                ),
+                None,
+            )
+            if swing
+            else None
+        )
+        if asset is None or asset.kind != "authored_replay":
+            self.status.setText(
+                "Select a registered authored replay; kinematic fits are not replays."
+            )
+            return
+        from src.shared.python.workspace import NativeImpactSession
+
+        dialog = ReplayImpactDialog(
+            asset.dataset_id,
+            NativeImpactSession(self.library),
+            self,
+            library_root=self.library.root,
+        )
+        self._impact_dialogs.append(dialog)
+        dialog.show()
+
     def cleanup(self) -> None:
         """Drain owned I/O before releasing archive and worker handles."""
         self._closed = True
@@ -475,3 +532,5 @@ class NecromatcherWidget(QWidget):
             self._video_session.close()
         for video_dialog in self._video_dialogs:
             video_dialog.cleanup()
+        for impact_dialog in self._impact_dialogs:
+            impact_dialog.cleanup()

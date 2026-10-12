@@ -1,0 +1,62 @@
+{
+  "schema": "necromatcher/fragment-methods-report-review/1",
+  "compiled": true,
+  "pages": 3,
+  "all_pages_visually_reviewed": true,
+  "compiler": "Installed MiKTeX pdflatex; installer disabled",
+  "builtin_compiler_available": false,
+  "scientific_qualified": false,
+  "files": [
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Shaft Fragment Derivative Supplement 2026-10-03 V1\\phase-shaft-fragment-methods.tex",
+      "bytes": 8430,
+      "sha256": "47fb7b2710aaefc5da951ec0a103066804e8b98ddddeabbaf0c05bfb835e994d"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Shaft Fragment Derivative Supplement 2026-10-03 V1\\phase-shaft-fragment-methods.pdf",
+      "bytes": 248262,
+      "sha256": "53f2ae51b2043c7c57b55aadc50531a7a37d910cb785ed3c2db36e8845e1b40c"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Shaft Fragment Derivative Supplement 2026-10-03 V1\\report-data.json",
+      "bytes": 13318,
+      "sha256": "2a1b046df1d98e12dd0d7e168ec0d2d56901617a706f34314148ca9091882b2f"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Shaft Fragment Derivative Supplement 2026-10-03 V1\\REPEATABILITY.md",
+      "bytes": 1838,
+      "sha256": "ff328262fd155029ad331dcc4153a73c88d2c0940963eef9c9c9d3eaf6edac8a"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Shaft Fragment Derivative Supplement 2026-10-03 V1\\compiler-diagnostics.json",
+      "bytes": 214,
+      "sha256": "9f5021a546722297ae280c9058293e56364a4330881e07d4dee391b3ff2c1942"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Shaft Fragment Derivative Supplement 2026-10-03 V1\\render-review-final\\page-1.png",
+      "bytes": 213500,
+      "sha256": "b139ce2be33ed7277775d179ef2ed0266db2510580625bc4e9578ce43545e2c0"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Shaft Fragment Derivative Supplement 2026-10-03 V1\\render-review-final\\page-2.png",
+      "bytes": 181338,
+      "sha256": "5140ded3d6393e9aab7892b83317e577dee567a97afeae2ff501ca6050aa736b"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Shaft Fragment Derivative Supplement 2026-10-03 V1\\render-review-final\\page-3.png",
+      "bytes": 157686,
+      "sha256": "7d9fc875dac0c50628576af24caeb7ca690524100af80adcea2d324228fae815"
+    }
+  ],
+  "preparation_freeze": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\phase-shaft-fragment-methods-report-preparation-v1\\freeze.json",
+    "bytes": 3835,
+    "sha256": "1302a0d6a5fad9b1d9c851e2e0621ae21283de9aa9da885a85f81dc1d4d4f287"
+  },
+  "compile_log": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-fragment-report-latex-final.log",
+    "bytes": 7573,
+    "sha256": "ce5e7977dc1fe3a1f44b608ff76a8103b0ecf02b1e9ff36391b2ff6ed44e00f9"
+  },
+  "transfer_performed": false
+}
