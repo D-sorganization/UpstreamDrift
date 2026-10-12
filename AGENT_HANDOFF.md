@@ -25,6 +25,7 @@
 - [Architecture Map](docs/architecture/C4.md) and [Shared Infrastructure](docs/agents/shared-infrastructure.md).
 - [Resume Handoff](docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md), [Turnover](docs/research/shot_pattern_analysis/phase2/TURNOVER.md), and [Artifact Delivery Plan](docs/research/shot_pattern_analysis/phase2/review_followups/ARTIFACT_DELIVERY_PLAN.md).
 - [CLAUDE.md](CLAUDE.md) and [AGENTS.md](AGENTS.md) govern integration, issue closure, and PR delivery.
+- Manual governance: UP-D0 (#9066) and UP-D1 (#9067) remain release blockers. Edit only the `manuals/upstreamdrift` QMD source and run `python3 -m scripts.check_design_manual_governance` for governed changes.
 
 ## Verification Gates and Commands
 
@@ -43,7 +44,6 @@
 - Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful compilation in the built-in LaTeX editor.
 - PR #12278 remains unmerged. The successor branch has reconciled its advanced head and the actual `main` conflict locally. Do not push, re-arm, or claim acceptance until the final provider repairs, reviewed integrity refresh, and complete canonical gate pass. Keep empirical validation #11984 deferred and compiler blocker #12120 open; do not rerun frozen simulations.
 - Keep empirical validation #11984 deferred and compiler blocker #12120 open; close implementation issues only with qualifying merged evidence.
-
 
 ## Peer Record Index
 
