@@ -1,0 +1,204 @@
+{
+  "schema_version": "1.0.0",
+  "report_id": "swing-report-fixture-full",
+  "generated_utc": "2026-10-11T12:00:00Z",
+  "scope": "full",
+  "provenance": {
+    "timestamp_utc": "2026-10-11T12:00:00Z",
+    "software_name": "UpstreamDrift",
+    "software_version": "0.0.0-fixture",
+    "git_commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "git_is_dirty": false,
+    "capture": {
+      "capture_id": "cap-anon-0001",
+      "visibility": "public",
+      "capture_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "runs": [
+    {
+      "run_id": "run-mujoco",
+      "engine": "mujoco",
+      "engine_version": "3.2.0",
+      "model_file_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "run_class": "forward_dynamics",
+      "force_provenance": "unavailable"
+    },
+    {
+      "run_id": "run-drake",
+      "engine": "drake",
+      "engine_version": "1.30.0",
+      "model_file_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "run_class": "forward_dynamics"
+    }
+  ],
+  "quantities": [
+    {
+      "quantity_id": "clubhead_speed",
+      "status": "advertised_with_uncertainty",
+      "series": [
+        {
+          "engine": "mujoco",
+          "run_id": "run-mujoco",
+          "units": "m/s",
+          "frame": "world_Zup",
+          "time_s": [0.0, 0.01, 0.02],
+          "values": [10.0, 20.0, null]
+        },
+        {
+          "engine": "drake",
+          "run_id": "run-drake",
+          "units": "m/s",
+          "frame": "world_Zup",
+          "time_s": [0.0, 0.01, 0.02],
+          "values": [10.5, 19.5, 30.0]
+        }
+      ],
+      "uncertainty": {
+        "kind": "engine_spread",
+        "budget_source": "provisional_cross_engine_spread",
+        "units": "m/s",
+        "lower": [0.0, 0.0, 0.0],
+        "upper": [0.5, 0.5, 0.5]
+      }
+    },
+    {
+      "quantity_id": "clubhead_position",
+      "status": "advertised_with_uncertainty",
+      "series": [
+        {
+          "engine": "mujoco",
+          "run_id": "run-mujoco",
+          "units": "m",
+          "frame": "world_Zup",
+          "time_s": [0.0, 0.01, 0.02],
+          "values": [0.0, 0.1, 0.2],
+          "channel": "x"
+        }
+      ],
+      "uncertainty": {
+        "kind": "engine_spread",
+        "budget_source": "provisional_cross_engine_spread",
+        "units": "m",
+        "lower": [0.0, 0.0, 0.0],
+        "upper": [0.01, 0.01, 0.01]
+      }
+    },
+    {
+      "quantity_id": "face_angle",
+      "status": "withheld",
+      "label": "not validated",
+      "reason": "Fail-closed output policy (#10382): no validation evidence.",
+      "evidence_ref": "DV-10382"
+    },
+    {
+      "quantity_id": "joint_load",
+      "status": "withheld",
+      "label": "not validated",
+      "reason": "Fail-closed output policy (#10382): no validation evidence.",
+      "evidence_ref": "DV-10382"
+    },
+    {
+      "quantity_id": "joint_torque",
+      "status": "withheld",
+      "label": "not validated",
+      "reason": "Fail-closed output policy (#10382): no validation evidence.",
+      "evidence_ref": "DV-10382"
+    },
+    {
+      "quantity_id": "ground_reaction_force",
+      "status": "withheld",
+      "label": "not validated",
+      "reason": "Fail-closed output policy (#10382): no validation evidence.",
+      "evidence_ref": "DV-10382"
+    },
+    {
+      "quantity_id": "impact_state",
+      "status": "withheld",
+      "label": "not validated",
+      "reason": "Fail-closed output policy (#10382): no validation evidence.",
+      "evidence_ref": "DV-10382"
+    },
+    {
+      "quantity_id": "ball_flight",
+      "status": "withheld",
+      "label": "not validated",
+      "reason": "Fail-closed output policy (#10382): no validation evidence.",
+      "evidence_ref": "DV-10382"
+    },
+    {
+      "quantity_id": "joint_angle",
+      "status": "withheld",
+      "label": "not validated",
+      "reason": "Fail-closed output policy (#10382): no validation evidence.",
+      "evidence_ref": "DV-10382"
+    },
+    {
+      "quantity_id": "segment_angular_velocity",
+      "status": "withheld",
+      "label": "not validated",
+      "reason": "Fail-closed output policy (#10382): no validation evidence.",
+      "evidence_ref": "DV-10382"
+    }
+  ],
+  "plots": [
+    {
+      "plot_id": "clubhead_speed_ts",
+      "title": "Clubhead Speed",
+      "quantity_id": "clubhead_speed",
+      "kind": "time_series",
+      "units": "m/s",
+      "frame": "world_Zup",
+      "engines": ["mujoco", "drake"],
+      "uncertainty_fields": ["lower", "upper"],
+      "selectable": true,
+      "default_selected": true,
+      "render": "values"
+    },
+    {
+      "plot_id": "clubhead_path",
+      "title": "Clubhead Path",
+      "quantity_id": "clubhead_position",
+      "kind": "scatter",
+      "units": "m",
+      "frame": "world_Zup",
+      "engines": ["mujoco"],
+      "selectable": true,
+      "render": "values"
+    },
+    {
+      "plot_id": "face_angle_ts",
+      "title": "Face Angle Ts",
+      "quantity_id": "face_angle",
+      "kind": "time_series",
+      "engines": ["mujoco"],
+      "selectable": true,
+      "default_selected": false,
+      "render": "unavailable",
+      "unavailable_reason": "Not validated (#10382)."
+    },
+    {
+      "plot_id": "joint_load_ts",
+      "title": "Joint Load Ts",
+      "quantity_id": "joint_load",
+      "kind": "time_series",
+      "engines": ["mujoco"],
+      "selectable": true,
+      "default_selected": false,
+      "render": "unavailable",
+      "unavailable_reason": "Not validated (#10382)."
+    }
+  ],
+  "sections": [
+    {
+      "section_id": "overview",
+      "title": "Overview",
+      "plot_ids": ["clubhead_speed_ts", "clubhead_path"]
+    },
+    {
+      "section_id": "not_validated",
+      "title": "Not Validated",
+      "plot_ids": ["face_angle_ts", "joint_load_ts"]
+    }
+  ]
+}
