@@ -22,7 +22,13 @@ def test_club_parts_are_shaft_grip_head_in_the_club_body() -> None:
     assert result is not None
     body, parts = result
     assert body.endswith("Clubface Vector")
-    assert [p.name for p in parts] == ["club_shaft", "club_grip", "club_head"]
+    assert [p.name for p in parts] == [
+        "club_shaft",
+        "club_grip",
+        "club_head",
+        "club_lead_hand",
+        "club_trail_hand",
+    ]
     for part in parts:
         assert part.mesh.volume() > 0.0  # closed, outward wound
         assert len(part.rgba) == 4
@@ -48,7 +54,7 @@ def test_unknown_finish_is_rejected() -> None:
 
 def test_write_obj_round_trips_vertex_and_face_counts(tmp_path: Path) -> None:
     _, parts = club_parts(_spec())  # type: ignore[misc]
-    head = parts[-1].mesh
+    head = next(p.mesh for p in parts if p.name == "club_head")
     path = Path(write_obj(head, str(tmp_path), "head"))
     lines = path.read_text(encoding="utf-8").splitlines()
     assert sum(line.startswith("v ") for line in lines) == len(head.vertices)
@@ -62,6 +68,22 @@ def test_pinocchio_triangle_mesh_matches_the_head() -> None:
     from src.tools.native_viewer_export.backends.pinocchio_meshcat import _bvh_mesh
 
     _, parts = club_parts(_spec())  # type: ignore[misc]
-    head = parts[-1].mesh
+    head = next(p.mesh for p in parts if p.name == "club_head")
     bvh = _bvh_mesh(coal, head)
     assert bvh.num_tris == len(head.faces)
+
+
+def test_club_parts_carry_both_grip_hands_for_drake_and_pinocchio() -> None:
+    """The MeshCat backends draw every part, so the hands wrap the grip there too."""
+    _, parts = club_parts(_spec())  # type: ignore[misc]
+    by_name = {p.name: p for p in parts}
+    assert {"club_lead_hand", "club_trail_hand"} <= set(by_name)
+    grip = by_name["club_grip"].mesh.vertices
+    axis_x, axis_z = float(np.median(grip[:, 0])), float(np.median(grip[:, 2]))
+    for name in ("club_lead_hand", "club_trail_hand"):
+        hand = by_name[name]
+        assert hand.mesh.volume() > 0.0
+        centroid = hand.mesh.vertices.mean(axis=0)
+        assert np.hypot(centroid[0] - axis_x, centroid[2] - axis_z) < 0.01
+        assert grip[:, 1].min() <= centroid[1] <= grip[:, 1].max()
+        assert hand.rgba != by_name["club_grip"].rgba

@@ -128,3 +128,21 @@ The audit reuses the finite-difference implementation above and returns a
 sampled-domain disposition only. It does not make a global error bound, admit
 SimmSpline paths to production replay, or close any physiological, wrap,
 full-source, or capture gate.
+
+
+## Source-Bound MPP Optimizer Domains (F07 Child #12233)
+
+Native Moco preparation now checks source `MovingPathPoint` function domains
+before the short native capability probe. For each attached coordinate, the
+requested state-value interval must fit the intersection of its native
+Coordinate range, the exact request's declared chart, and all attached
+reviewed function domains. The check uses the same SimmSpline knot-domain and
+LinearFunction/Constant rules as the sampled path identity audit; unsupported
+functions, missing declarations, incomplete point ownership, disjoint domains,
+and oversized optimizer intervals block execution.
+
+A `ConditionalPathPoint` active interval remains a route-regime switch; it is
+not a global optimizer bound. This admission check proves interval containment
+for declared state bounds only. It does not prove global path worklessness,
+intermediate transcription-domain behavior, physical qualification, or replay
+acceptance, and it does not alter any native path law.

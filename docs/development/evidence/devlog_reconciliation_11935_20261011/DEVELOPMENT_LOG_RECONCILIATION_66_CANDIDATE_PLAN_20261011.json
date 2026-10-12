@@ -1,0 +1,2569 @@
+{
+  "title": "Read-only transition review plan for 66 direct-merged candidate rows",
+  "as_of": "2026-10-11",
+  "repo_head": "944d798ed3748fc09e115825cf9db30b65d1f232",
+  "source_log_git_blob": "cfa0c48e1a47a620228bebfa326c4138d7e5912a",
+  "source_log_sha256": "d9268879c0527199ae588dcf91a93a50556d1f29dac28924a658a2a43bca4bdb",
+  "closure_audit_path": "dl-github-closure-audit.json",
+  "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+  "source_snapshot_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+  "source_snapshot_sha256": "8d49d012e39a4bedf7f0ac5aeb27e1ac7a9165f688effecd8768b26a9fc8789a",
+  "candidate_issue_ids": [
+    11589, 11513, 11190, 11233, 11184, 11124, 11107, 11098, 11097, 11102, 11071,
+    11008, 10946, 9191, 10921, 10883, 10849, 10597, 10751, 10743, 8883, 9479,
+    10344, 10376, 10436, 8930, 10359, 10348, 10361, 10366, 10434, 10589, 10433,
+    10440, 8684, 10439, 10623, 10622, 10432, 10533, 10532, 10530, 10528, 10525,
+    10524, 10523, 10522, 10531, 10353, 10358, 10529, 10520, 10519, 10518, 10517,
+    10514, 10482, 10460, 10233, 10403, 10401, 10397, 10395, 10323, 10334, 8766
+  ],
+  "candidate_rows_found": 66,
+  "missing_source_blocks": [],
+  "closure_not_qualified": [],
+  "records": [
+    {
+      "issue": 11589,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "ef8d2b66b9f9c85bad0f637eb256ada34a3854a0704f862a68f81b8c081e8636"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "claude",
+          "issue_field": "#11589",
+          "pr_field": "#11590",
+          "branch": "chore/retire-unflagged-header-test-11589",
+          "paths": "see #11590",
+          "last_verified": "2026-10-06 (`a4031aa0`; collated from changes/11589-chore-tests-retire-stale-test-no-unflagg.md)",
+          "summary": "chore(tests): retire stale test_no_unflagged_shared_code header test and its unit-gate quarantine entry",
+          "next_step": "Merge the PR; child-copy enforcement remains in test_tools_child_copy_contract.py."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-10-06T21:20:36Z",
+      "cited_pr_numbers": [11590],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11590,
+          "mergedAt": "2026-10-06T21:20:35Z",
+          "merge_commit": "a4031aa02ccb410936de6976090dc63abe2d7887",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11513,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "3c9fcc73a9ecd93e704cd09ff3cce9f72fe74be9aa594ef2a8ee23ee4f287bb7"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "unassigned",
+          "issue_field": "#11513",
+          "pr_field": "#11519",
+          "branch": "fix/11513-post-spec-reminder-fragments",
+          "paths": "see #11519",
+          "last_verified": "2026-10-05 (`739df607`; collated from changes/11513-point-contributors-at-change-fragments-i.md)",
+          "summary": "Point contributors at change fragments in post_spec_reminder",
+          "next_step": "Merge the PR."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-10-05T03:08:45Z",
+      "cited_pr_numbers": [11519],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11519,
+          "mergedAt": "2026-10-05T03:08:44Z",
+          "merge_commit": "739df607f6e658ff966f33010f67d5fb6cc1e3c3",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11190,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "bfbbd2e1501e26b756e46bea07f2cc9acdc6a3297a5001152afab9475bd2c669"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "unassigned",
+          "issue_field": "#11190",
+          "pr_field": "#11518",
+          "branch": "fix/11190-motion-matching-fast-restart",
+          "paths": "see #11518",
+          "last_verified": "2026-10-05 (`d816c998`; collated from changes/11190-disable-fastrestart-for-solve-starting-p.md)",
+          "summary": "Disable FastRestart for solve_starting_pose and resolve model path in run_leaderboard",
+          "next_step": "Merge the PR."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-10-05T02:37:38Z",
+      "cited_pr_numbers": [11518],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11518,
+          "mergedAt": "2026-10-05T02:37:36Z",
+          "merge_commit": "d816c9985835ba78f275ee4f6ae5efc7c6ae152c",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11233,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "f7e549d9289658339ee268e122f5f36ed8029aa9628ba8bfb8702d8e9ef72383"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "codex",
+          "issue_field": "#11233; parent #11232; player epics #11226 and #11229",
+          "pr_field": "[#11237](https://github.com/D-sorganization/UpstreamDrift/pull/11237)",
+          "branch": "`feat/necromatcher-library-11233`",
+          "paths": "`src/shared/python/workspace/necromatcher.py`, `src/shared/python/workspace/necromatcher_capture.py`, `src/api/routes/necromatcher.py`",
+          "last_verified": "2026-10-01 — 43 workspace/API tests passed; scoped library mypy passed; four real captures imported and recalled. Final rerun passed.",
+          "summary": "Reuse project/session spine, artifact hashes and canonical torque evaluation for immutable historical-player library; captures remain image observations and model bytes remain unqualified candidates. [Turnover](necromatcher-turnover.md).",
+          "next_step": null
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-10-02T08:34:30Z",
+      "cited_pr_numbers": [11237],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11237,
+          "mergedAt": "2026-10-02T08:34:28Z",
+          "merge_commit": "93b5aa1a5a2bd0d6ce4beceaf57904fc903780fc",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": "Model status remains unqualified; preserve that state and all downstream blockers.",
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11184,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "7244c13b3195523bf0ba5044f4dbbcafd7275275fc86ef52d28ce062362d7013"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "codex",
+          "issue_field": "#11184",
+          "pr_field": null,
+          "branch": "`fix/main-npm-audit-11184`",
+          "paths": "`ui/package-lock.json`, `ui/src/test/dependencySecurityContract.test.ts`, `SPEC.md`",
+          "last_verified": "2026-09-30 at `d3b3a27bea` — baseline audit reproduced two HIGH and two MODERATE advisories; after the lock-only patch `npm ci` passed, `npm audit --audit-level=high` passed with two MODERATE findings remaining, contract 2 passed, lint/type-check passed, UI tests 936 passed, and production build passed. Normal commit and push hooks passed.",
+          "summary": "Raised only the compatible transitive resolutions for `brace-expansion` (5.0.9 → 5.0.12) and `undici` (8.10.0 → 8.11.2); added a lockfile security contract. Manifest dependencies, overrides, audit threshold, and the two moderate findings are unchanged.",
+          "next_step": "Root reviews draft PR #11187 and decides whether it is ready for merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-30T13:38:59Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11187,
+          "mergedAt": "2026-09-30T11:31:47Z",
+          "merge_commit": "1a7f7f5e8fdbd3f82b69b0f8bb0fc43df7557791",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11124,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "290e5b39823a285b816cb4a449734a9a7a0d00830ac4ef95dd1323eecb075d36"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#11124",
+          "pr_field": null,
+          "branch": "`fix/phantom-guard-scripts-paths-11124`",
+          "paths": "`scripts/ci/check_phantom_guard_paths.py`, `tests/scripts/test_check_phantom_guard_paths.py`",
+          "last_verified": "2026-09-29 — 27 focused unit tests pass in `test_check_phantom_guard_paths.py`; ruff, black, architecture budget, and LOD clean.",
+          "summary": "Fixes false positive in anti-phantom-merge Rule 3 by expanding `ISSUE_PATH_PATTERN` to recognize `scripts/` and `.github/workflows/` (and `.github/`) paths, adding `(?<![\\w/.-])` boundary protection to reject non-path prefix substrings (e.g. `engines/api`), stripping trailing punctuation from extracted paths, and dropping parenthetical prose fragments lacking valid file extensions.",
+          "next_step": "Submit PR for review and release lease."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-29T21:12:53Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11131,
+          "mergedAt": "2026-09-29T21:12:51Z",
+          "merge_commit": "657d95287e7848dfc568ca4e70236bd5e982393a",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11107,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "76fc963eea0fdd743ccdad89f1b1e0354e1537f21411d95922a7b463b73381d4"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#11107",
+          "pr_field": null,
+          "branch": "`feat/mmr-07-simscape-continuous-replay-11107`",
+          "paths": "`src/shared/python/motion_matching/simscape_replay_harness.py`, `tests/unit/motion_matching/test_simscape_continuous_replay_harness.py`, `scripts/matlab/run_simscape_candidate.ps1`, `docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/simscape_replay_qualification.json`, `SPEC.md`",
+          "last_verified": "2026-09-29 at 27c0d34967 — 22 focused harness tests passed (11 review-fix regressions demonstrated red pre-fix, green post-fix); `tests/unit/motion_matching` 1901 passed, 11 failed all pre-existing (`c3d_reader.load_c3d`, `bunkershot3d`, stability-matrix precondition — verified identical on a pristine baseline checkout); ruff check/format and mypy clean on touched modules.",
+          "summary": "Added Simscape continuous-replay qualification harness with full-rate continuous trajectory validation, fail-closed contracts for missing samples, non-finite states, timestamp monotonicity, non-R2025b releases, motion prescription, and candidate hash mismatches. Structured qualification receipt schema records per-marker/phase channels, provenance, and evaluates against frozen G1 acceptance gates. Native candidate run-102 honestly rejected at terminal phase (40.3 mm vs 35 mm G1 ceiling). Review fixes (PR #11126 Codex P1/P2): metrics derive from the canonical `compute_replay_five_metrics()` (0.60 s early window, canonical club labels), pelvis yaw measured, unmeasured contact quantities disclosed as unavailable, elapsed-span/start validation, receipt loader null preservation, and `load_replay_evidence_inputs()` deriving digest/initial conditions/control identity from native evidence (run-102 receipt extended additively with `control_identity`, no measured value changed).",
+          "next_step": "CI green, PR review."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-10-01T04:48:08Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11198,
+          "mergedAt": "2026-10-01T04:48:07Z",
+          "merge_commit": "ee806b50cb7db3e7001ce25b94c536895712625a",
+          "state": "MERGED"
+        },
+        {
+          "number": 11387,
+          "mergedAt": "2026-10-03T09:41:25Z",
+          "merge_commit": "b6d62f0e66755299ce119e363f011bdf81658737",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": "Run 102 was rejected; keep rejection visible and do not claim physical acceptance.",
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11098,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "9e1759341da782ab32edf8097d37f6c04f54d4ab45f2e2798a4ca4df544eaaf5"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#11098",
+          "pr_field": null,
+          "branch": "`feat/mmr-12-historical-video-review-11098`",
+          "paths": "`src/shared/python/shadow_tracker/service.py`, `src/tools/shadow_tracker/gui.py`, `tests/unit/shadow_tracker/test_service.py`, `tests/tools/shadow_tracker/test_shadow_tracker_gui.py`",
+          "last_verified": "2026-09-29 at 0c31f341a7 — 330 tests collected across `tests/unit/shadow_tracker/` and `tests/tools/shadow_tracker/`, all passing (review-fix regressions demonstrated red pre-fix, green post-fix); ruff check/format and mypy clean on touched modules.",
+          "summary": "Preserves multi-shot frame isolation and revision lineage in `DefaultShadowTrackerService`, implements video ingestion with container PTS and slow-motion affine timing mappings, bounded decode limits with prompt cancellation, recoverable session state on corrupt media, and keyboard review scrubbing with honest automated fit refusal in `ShadowTrackerWidget`. Review fixes (PR #11127 Codex P1s): repeat video imports stage and validate scope/revision/asset ownership before any session mutation (atomic failure), no-mapping imports keep `physical_time_s=None` with the canonical unknown-time reason (PTS authority stays in `timing_mode`/`clock_evidence`), and the viewport renders unknown physical time safely instead of formatting `None`.",
+          "next_step": "Commit and submit PR; release agent lease."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-10-01T04:04:12Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11197,
+          "mergedAt": "2026-10-01T04:04:11Z",
+          "merge_commit": "add9a1bd59ba21d99e6c65d04058b6db8a870d91",
+          "state": "MERGED"
+        },
+        {
+          "number": 11387,
+          "mergedAt": "2026-10-03T09:41:25Z",
+          "merge_commit": "b6d62f0e66755299ce119e363f011bdf81658737",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11097,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "af7f6e049eb8d0e148b81ecaca1862383e65a11c787671278361604fb28dbcf7"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#11097",
+          "pr_field": null,
+          "branch": "`feat/mmr-11-reduced-model-claims-11097`",
+          "paths": "`src/shared/python/tour_baselines/coverage.py`, `src/shared/python/tour_baselines/baseline_package.py`, `src/shared/python/tour_baselines/qualification.py`, `src/shared/python/motion_matching/provider.py`, `src/engines/physics_engines/pendulum/python/motion_matching/provider.py`, `src/shared/python/motion_matching/club_only/ui_integration.py`, `src/shared/python/motion_matching/club_only/matrix_qualification.py`, `tests/unit/motion_matching/test_fit_options_dbc.py`",
+          "last_verified": "2026-09-29 at `46b804bc69` — scoped runs: `pytest tests/unit/motion_matching/test_fit_options_dbc.py tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py` (18 passed), and `pytest tests/unit/tour_baselines/test_coverage_matrix.py tests/unit/tour_baselines/test_qualification.py tests/unit/tour_baselines/test_baseline_packages.py tests/unit/motion_matching/test_club_matrix_qualification.py tests/unit/motion_matching/test_club_ui_integration.py` (86 passed). New TDD tests observed RED pre-fix (planar-floor gate used the calibrated plane's stale residual; missing `max_marker_rmse_m` DbC validation, NaN ceiling silently disabled the gate) and GREEN post-fix; `ruff check` clean on changed files. Not run / not available: full project suite, mypy, CI gates, raw-to-package regeneration, native runs.",
+          "summary": "Added code-level, fail-closed claims gates: four driven-triple pendulum receipts (`driver_amateur`, `driver_elite`, `iron_amateur`, `iron_elite`) disqualified at projection time (evidence files on disk unchanged); promoted-package hash and out-of-plane-residual integrity checks; club-only fresh continuous replay + labeled inferred posture; matrix all-complete claims fail closed on unresolved cells; pendulum planar-floor early rejection now driven by the CURRENT target's plane distances with a DbC-validated `max_marker_rmse_m`.",
+          "next_step": null
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-10-01T07:17:46Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11202,
+          "mergedAt": "2026-10-01T07:17:45Z",
+          "merge_commit": "2cb3d58cfe3b181c12c26015d236dcdb234cf574",
+          "state": "MERGED"
+        },
+        {
+          "number": 11387,
+          "mergedAt": "2026-10-03T09:41:25Z",
+          "merge_commit": "b6d62f0e66755299ce119e363f011bdf81658737",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11102,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "becbdd3af10698975f3eac3d5504a02603983014392b068723fa50a443c597f3"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review (review fixes for Codex findings on PR #11132)",
+          "owner": "local",
+          "issue_field": "#11102",
+          "pr_field": null,
+          "branch": "`feat/mmr-16-best-candidate-viewer-11102`",
+          "paths": "`src/tools/tour_matching_viewer/core.py`, `src/tools/tour_matching_viewer/gui.py`, `src/tools/matched_swing_browser/model.py`, `src/tools/matched_swing_browser/gui.py`, `tests/unit/tools/test_tour_matching_viewer_residuals.py`, `tests/unit/tools/test_matched_swing_browser_best_candidate.py`, `tests/unit/tools/test_tour_matching_viewer_combo.py`",
+          "last_verified": "e86a4d4f1c — scoped pytest with `/tmp/ud-venv-11132` (PyQt6 + mujoco, offscreen): red outcomes recorded pre-fix for every review finding, then `tests/unit/tools/test_matched_swing_browser_best_candidate.py tests/unit/tools/test_tour_matching_viewer_residuals.py` 21 passed, targeted viewer suites (core, playback, combo, forces, native_button, adapter) 29 passed; `ruff check` and `ruff format --check` clean on changed files. Project-wide suites, web/API surfaces and mypy were not run in this slice.",
+          "summary": "Published best-candidate viewer with honest residuals (MMR-16): enforced raw observation immutability on ReplayData, added residual vector computation, board-ready export stills with complete metadata banners, drive mode filtering, comparable candidate ranking in ascending RMS error preserving rejected verdicts, worst-residual jump navigation, camera and appearance presets preserving invariant physics scores, and graceful missing-engine recovery. Review fixes: wired `rank_candidates` into the browser's real list-build path (best comparable candidate first, rejected rows preserved), pooled per-marker 3D distances for the receipt-convention RMS in the residual summary, rendered-frame and multi-candidate captions, excluded zero-valid-marker frames from global-worst selection and mean statistics, and forwarded the selected row's provenance and verdict into the viewer load path.",
+          "next_step": "main-lane rebase/CI and frontier review of PR #11132."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-10-01T05:49:30Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11200,
+          "mergedAt": "2026-10-01T05:49:29Z",
+          "merge_commit": "9c23f1a2efcbc722de1bd86299b8351c5e96c41e",
+          "state": "MERGED"
+        },
+        {
+          "number": 11387,
+          "mergedAt": "2026-10-03T09:41:25Z",
+          "merge_commit": "b6d62f0e66755299ce119e363f011bdf81658737",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11071,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "74e8282885a1369c1f147fd548ea496e9f0b08d0fff11682d21d97cdf401a9fc"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "claude",
+          "issue_field": "#11071",
+          "pr_field": "#11075",
+          "branch": "`claude/ud-11071-lbfgs-converge`",
+          "paths": "`scripts/benchmark_mjx_knot_solvers.py`, `docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/`",
+          "last_verified": "2026-09-28 — 60-iteration L-BFGS runs (rc 0) committed; report regenerated from receipts.",
+          "summary": "Re-runs only `mjx-lbfgs` at 60 iterations against the #11058 incumbents. Replay RMS falls to 40.8 / 42.6 mm (driver / iron) and the iron downswing weight fraction rises to 0.29, but neither capture converges, so `none` stays the default.",
+          "next_step": "CI green, then ready and arm the #11071 PR."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-28T12:49:04Z",
+      "cited_pr_numbers": [11075],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11075,
+          "mergedAt": "2026-09-28T12:49:02Z",
+          "merge_commit": "0206717f70a654744165990fe4b229fcdd4f3dd7",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": "Both captures did not converge; the no-MJX default decision is not an accepted physical result.",
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 11008,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "78bc52ea761b2001a1b96b6e34214e0320422c2cf05c737cfbf3319b9e757754"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "claude",
+          "issue_field": "#11008",
+          "pr_field": "#11012 (ready; auto-merge armed)",
+          "branch": "`fix/ball-flight-parity-fixture-opt-in`",
+          "paths": "`tests/parity/test_ball_flight_parity.py`",
+          "last_verified": "2026-09-27 at f1625998c (main through #11045) — `tests/parity/test_ball_flight_parity.py`: 19 passed, 1 skipped (opt-in regen); committed fixture unchanged after the run.",
+          "summary": "The export test writes to `tmp_path` and asserts the vector schema. It rewrites the committed golden only when `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A new test checks read-only that the committed fixture has the schema and the path pinned in `src/config/capability_migration.json`.",
+          "next_step": "Let the armed auto-merge land #11012, then mark this entry shipped."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-27T18:54:54Z",
+      "cited_pr_numbers": [11012],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11012,
+          "mergedAt": "2026-09-27T18:54:52Z",
+          "merge_commit": "0aa8bb660d138c9255a4f224902dd6133f21a3c0",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10946,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "cdca6271f9a3ab4e93bd39bd7810e3b2250199aa099835e81335cc7530356cc8"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "claude",
+          "issue_field": "#10946",
+          "pr_field": "draft PR from `agy/ud-10946-rust-muscle-parity`",
+          "branch": "`agy/ud-10946-rust-muscle-parity`",
+          "paths": "`src/shared/python/biomechanics/multi_muscle.py`, `tests/unit/biomechanics/test_multi_muscle_rust_parity.py`",
+          "last_verified": "2026-09-26 — 85/85 multi-muscle + DbC + parity tests with the `upstream_muscle` wheel; 26 pass + parity module skipped with it hidden; `cargo test` 32/32.",
+          "summary": "Python `HillMuscleModel`s were never forwarded to the Rust `MuscleGroup` (it summed zero muscles, so net torque was always 0.0) and the Rust path skipped the activation precondition. Muscles are now converted to their Rust equivalent (or the group drops to pure Python when a muscle has custom physics), activations are validated once before backend choice, the antagonist pair is rebuilt from the groups' current backends, and a parity test pins Rust == Python.",
+          "next_step": "CI green, review, merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-26T09:34:01Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10976,
+          "mergedAt": "2026-09-26T09:34:00Z",
+          "merge_commit": "fee5b214ec81674e8626049ac9ff47907f567f3a",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 9191,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "691190638b19f6006bf4edbf2ef9a0d4e03696f0a64baa83891f9d079fb2e23d"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#9191",
+          "pr_field": null,
+          "branch": "`feat/comp-b3-screenshot-governance-9191`",
+          "paths": "`docs/api/contracts/upstreamdrift-companion-screenshots-v1.schema.json`, `docs/api/contracts/upstreamdrift-companion-v1.schema.json`, `scripts/companion_screenshots.py`, `scripts/companion_catalog.py`, `scripts/config/companion_screenshots.v1.json`, `docs/screenshots/`, `tests/companion/test_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `tests/companion/test_companion_publication.py`, `tests/fixtures/companion/current-v1.0.0.json`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`",
+          "last_verified": "2026-09-29 — 165/165 pass across tests/companion and screenshot verification suites; ruff check clean; ruff format clean; prettier clean; architecture budget OK; DRY duplication gate OK; hardcoded style ratchet OK.",
+          "summary": "Complete implementation of COMP-B3 screenshot governance (#9191): updated schemas with exact capture metadata (`capture_environment`, `source_commit`, pixels/viewport, and summary screenshot counts); implemented `scripts/companion_screenshots.py` with standard library PNG IHDR byte parsing, SHA-256 computation, registry loading/validation, and headless deterministic asset generation; generated 6 representative visual assets in `docs/screenshots/` (pendulum simulator desktop light/dark + mobile dark, project map, rate of closure, tour matching viewer); registered 74 visible programs in `scripts/config/companion_screenshots.v1.json` (6 captured, 70 pending with explicit reasons); wired screenshot registry and inventory into `scripts/companion_catalog.py` and publication bundle.",
+          "next_step": "Create PR and release lease."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-30T00:52:42Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 11140,
+          "mergedAt": "2026-09-30T00:52:41Z",
+          "merge_commit": "27af7ffe41f1fa8e26c367f27f9cdd0fe79da866",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": "Only 6 of 74 screenshots exist; documentation completion cannot imply full visual inventory.",
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10921,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "691ff1fa5924af0d7f33a6248404c0ad4bc9589341e51c1d07eb1c45aa8aa259"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10921 (companion #10918, #10919, #10920, #10924, #10925)",
+          "pr_field": "#10923",
+          "branch": "`fix/10921-shortcuts-feedback`",
+          "paths": "`src/launchers/desktop_shortcuts.py`, `tests/unit/launchers/test_desktop_shortcuts.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`",
+          "last_verified": "2026-09-24 — unit tests pass in test_desktop_shortcuts.py verifying partial installation failure",
+          "summary": "Enforce that shortcut installation requires both Desktop and Start Menu destinations to succeed, and synchronize canonical handoff documentation and SPEC change log (#10918, #10919, #10920, #10921, #10924, #10925).",
+          "next_step": "Land PR and close review feedback issues."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-25T02:02:09Z",
+      "cited_pr_numbers": [10923],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10923,
+          "mergedAt": "2026-09-25T02:02:08Z",
+          "merge_commit": "d8f5b0a39aef2823dac6520f1d11b8988f1b778c",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10883,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "b49e98cdf841cdacc69463623984ce7e88ebf48e79259b80b7239f2558484579"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10883",
+          "pr_field": "#10884",
+          "branch": "`fix/10883-docs-governance-title-case`",
+          "paths": "`.jules/bolt.md`, `tests/scripts/test_document_title_case.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`",
+          "last_verified": "2026-09-24 — verified Title Case check passes across diff, unit tests in test_document_title_case.py pass (5/5)",
+          "summary": "Backticked code tokens (`np.linalg.norm`) in .jules/bolt.md heading to restore green main against required docs-governance-gates and added unit regression test (#10883).",
+          "next_step": "Create PR, enable auto-merge, verify CI green on main."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-24T16:14:25Z",
+      "cited_pr_numbers": [10884],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10884,
+          "mergedAt": "2026-09-24T16:14:23Z",
+          "merge_commit": "b15558ec3cb230e0fa90efc3a702dbb7f15d4313",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10849,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "9b408fdbcee208ea369f2021bd4afc8825de7af788877e63ea0bdffc302a5fbb"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "antigravity",
+          "issue_field": "#10849, #10850, #10851",
+          "pr_field": "#10860",
+          "branch": "`fix/10849-10850-inertia-hash-and-spec-keys`",
+          "paths": "`src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py`, `src/engines/physics_engines/pendulum/python/motion_matching/adapters.py`, `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`, `tests/unit/tour_baselines/test_qualification.py`, `SPEC.md`, `AGENT_HANDOFF.md`, `docs/development/HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`",
+          "last_verified": "2026-09-24 — verified calibrated length initialization before caching, refresh_cache() synchronization, and derivation of inertia digest from cached integration parameters",
+          "summary": "Updated DoublePendulumDynamics and qualification routines to derive the inertia digest directly from the cached properties consumed by simulation integration, initialize calibrated segment lengths before parameter caching, and key SPEC.md change log rows accurately (#10849, #10850, #10851).",
+          "next_step": "Open PR with auto-merge enabled, monitor CI, and close issues #10849, #10850, #10851 upon merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-24T13:01:47Z",
+      "cited_pr_numbers": [10860],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10860,
+          "mergedAt": "2026-09-24T13:01:46Z",
+          "merge_commit": "15ca47c2ebfc7731972ff6a98f58ceb7074b9553",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10597,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "fe3c4832f5433ef8733170d73fdc73a55bdfdedb027def1403bfa083cde14de9"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "antigravity",
+          "issue_field": "#10597 (TB-12, parent #10584, program #10363)",
+          "pr_field": null,
+          "branch": "`feat/tb12-baseline-guide-acceptance-10597`",
+          "paths": "`docs/plans/tour_baselines/baseline_guide.md`; `docs/plans/tour_baselines/agent_runbook.md`; `docs/plans/tour_baselines/final_acceptance_report.md`; `tests/acceptance/test_tour_baselines_journey.py`; `docs/plans/tour_baselines/README.md`; `docs/development/matched_swing_program/README.md`; `docs/development/DEVELOPMENT_LOG.md`; `SPEC.md`",
+          "last_verified": "2026-09-24 — 8 passed in `tests/acceptance/test_tour_baselines_journey.py` (100% pass). Documentation links and runbook instructions verified.",
+          "summary": "Published concise Operator User Guide covering launcher navigation, driver vs. iron capture, complexity tradeoffs, loading/cloning, and physical error formulas; Agent Runbook with copyable clean-environment reproduction commands, hash verification, MATLAB R2025b requirements, and tamper detection; and Final Acceptance Report recording the completed two-capture coverage matrix, software integration sign-off, and governing issue links for outstanding full-body models. Authored comprehensive end-to-end acceptance test suite verifying the full user journey.",
+          "next_step": "Run CI pre-commit checks, open PR, auto-merge, and close Epic #10584."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-24T07:40:33Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10814,
+          "mergedAt": "2026-09-24T07:40:32Z",
+          "merge_commit": "fbebf5c4785bfffa83b1e3890c8ee07217e09698",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10751,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "86c4e8cdb344576b8fe7d09fcdbc5f75e24457ce379a11e903703115fa08436a"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "antigravity",
+          "issue_field": "#10751",
+          "pr_field": "#10762",
+          "branch": "fix/10751-deleted-tests-shallow-checkout",
+          "paths": "scripts/ci/check_deleted_test_files.py; tests/scripts/test_check_deleted_test_files.py; .github/workflows/ci-standard.yml; tests/ci/test_ci_infrastructure.py",
+          "last_verified": "2026-09-23 (`008487870` + c31f26e; 10 passed in test_check_deleted_test_files.py, 85 passed in test_ci_infrastructure.py)",
+          "summary": "Compute deleted tests diff against merge-base instead of base ref tip to prevent tests added on main from being falsely reported as deleted in PRs; set fetch-depth: 0 on checkout in tests job; invoke standalone check_deleted_test_files.py with unit and regression test coverage and fallback-to-base support directly from the CI workflow.",
+          "next_step": "Await owner workflow approval for #10762."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-23T12:43:32Z",
+      "cited_pr_numbers": [10762],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10762,
+          "mergedAt": "2026-09-23T12:43:31Z",
+          "merge_commit": "e1192b7c550cb4974570ba3a2b66d4c520b5a032",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10743,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "e0178581dadecb565bd3bd95230657caeb27c9a2e9f6624632c6f1b15e523d1f"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "claude (session `fleet-remediation-k`)",
+          "issue_field": "#10743",
+          "pr_field": "#10744",
+          "branch": "`fix/10743-docs-consistency-cross-repo`",
+          "paths": "`scripts/check_agent_docs_consistency.py`, `tests/architecture/test_check_agent_docs_consistency.py`",
+          "last_verified": "2026-09-22 (checker passes on main CLAUDE.md; 33 focused tests pass)",
+          "summary": "Exempt sibling-repo-qualified backticked paths (possessive or not) from the local-existence check so the fleet-managed deferred-validation block no longer fails `repo-structure-gates`; bare local paths stay strict.",
+          "next_step": null
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-23T06:43:16Z",
+      "cited_pr_numbers": [10744],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10752,
+          "mergedAt": "2026-09-23T06:43:15Z",
+          "merge_commit": "2a9e7a4d30bf169cc666eb81093f2ebe770f8678",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 8883,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "0fe958c7cfd831ddec16195aa377fba992dd7f36ce1816d97c29c631748051a8"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#8883 (related #8854, #10512)",
+          "pr_field": "#10651",
+          "branch": "fix/8883-video-analyzer-gui",
+          "paths": "src/tools/video_analyzer/analyzer.py; src/tools/video_analyzer/gui.py; src/launchers/external_tools_adapter.py; src/launchers/task_launch_truthfulness.py; tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py",
+          "last_verified": "2026-09-21 at HEAD (ruff check/format clean; mypy clean on the four changed src files; pytest green on tests/unit/test_video_analyzer_pipeline.py, tests/unit/test_video_analyzer_math.py, tests/ui/tools/video_analyzer, tests/launchers/test_simulation_guis.py, tests/launchers/test_task_launch_truthfulness.py, tests/config/feature_parity).",
+          "summary": "Replaced the static `QLabel(\"Video Analyzer (GUI placeholder)\")` with a real `MainWidget` (choose video, Analyze, report pane) wired to a new `SwingAnalyzer.analyze_video()` that runs MediaPipe pose estimation (via the existing `pose_estimation` registry) and feeds the already-tested head-stability math. Removed the launcher's dead sibling-repo import fallback (`video_analyzer.launch_pyqt6`, confirmed nonexistent by #8854) so the tile no longer depends on an external Tools provider; updated `task_launch_truthfulness`'s audit entry from `PROVIDER_REQUIRED` to `PRODUCTION_SOLVER` accordingly.",
+          "next_step": "Open PR `Closes #8883`, push, and drive CI to green."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-23T01:45:21Z",
+      "cited_pr_numbers": [10651],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10739,
+          "mergedAt": "2026-09-23T01:45:20Z",
+          "merge_commit": "5dd695f89774a615af59ebc0e89b4f0a631049bf",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 9479,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "25fd209235a43c529280002f6269a7d247a290639c26646a9e053582e06afba6"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "claude",
+          "issue_field": "#9479, #9480 (parent #9412; cluster #9410 Cluster B)",
+          "pr_field": "#10653",
+          "branch": "fix/9479-9480-launcher-tiles",
+          "paths": "src/config/launcher_manifest.json; src/config/models.yaml; src/launchers/workspace_navigation.py; scripts/check_launcher_logo_families.py; tests/config/launcher_manifest/test_engine_hub_consolidation_9479.py; tests/config/launcher_manifest/test_tile_name_clarity_9480.py; tests/launchers/test_workspace_navigation.py",
+          "last_verified": "2026-09-22 at SELF — rebased onto origin/main; agent-context/capability atlas/MODEL_IMAGES fixes; suite markers on new tests.",
+          "summary": "Hide duplicate per-engine dashboards with documented reasons; reclassify three specialized tools from `physics_engine` to `simulation`; clarify confusable data/video tile pairs; move non-golf utilities to `dev_research`.",
+          "next_step": "Squash merge PR #10653 after CI green."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-22T09:09:49Z",
+      "cited_pr_numbers": [10653],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10653,
+          "mergedAt": "2026-09-22T09:09:48Z",
+          "merge_commit": "c70555a5e1aed74c01ce1001dd2e28265fdcc0b7",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10344,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "c8cbc2e65ae25a97f3173e048c88ab185731b03dffa9a93d186f327dd6e04021"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10344 (MS-51, epic #10363)",
+          "pr_field": "#10685",
+          "branch": "fix/10344-ms51-myosuite-repair",
+          "paths": "src/engines/physics_engines/myosuite/python/golfer_scene.py; coordinate_map_anthro.json; shared/models/myosuite/golf/body/; scripts/setup_myosuite_models.{ps1,sh}; src/engines/model_inventory.py; src/config/engine_model_inventory.json; docs/engines/myosuite.md; tests/unit/engines/myosuite/test_golfer_scene.py; tests/myosuite/test_golfer_scene_native.py",
+          "last_verified": "2026-09-21 at SELF — CI gate fixes: LoD basename helper, generate_golfer_scene under function-line budget, defusedxml in unit XML tests; scoped pytest green locally.",
+          "summary": "Pinned myo_sim gitlink documented; bootstrap scripts; generated driver/iron golfer MJCF on myobody_simpleupper with dual-grip site welds and four foot contact markers; diagnostic 40-of-44 coordinate map; MS-102 inventory left repair after real probes.",
+          "next_step": "Push CI repair commit and confirm #10685 quality-gate green before squash merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-22T06:42:29Z",
+      "cited_pr_numbers": [10685],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10685,
+          "mergedAt": "2026-09-22T06:42:28Z",
+          "merge_commit": "cfe7217bf41ab59f546624e22df4712f1e75bb87",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": "Map coverage is 40/44; preserve the four missing mappings as follow-up.",
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10376,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "c35134c6fedaa4a4fc749ac55330ef47023b25942dac5c66631fe1ebf123a720"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10376 (MS-102, epic #10363)",
+          "pr_field": "#10677",
+          "branch": "feat/ms102-engine-model-inventory",
+          "paths": "src/engines/model_inventory.py; src/config/engine_model_inventory.json; tests/unit/engines/test_model_inventory.py; docs/development/matched_swing_program/evidence/ms102/",
+          "last_verified": "2026-09-22 at 84e2c5a45373b3864a7479b4e5f52cbb6376425d — retargeted onto origin/main; `_run_native_pipeline` split under architecture budget; real vendor pin a9ed0e7c5; `pytest tests/unit/engines/test_model_inventory.py -q -n 0 --no-cov` green; agent-context check clean.",
+          "summary": "Authority-derived engine/model inventory (models.yaml + capability matrix + ENGINE_TIERS) with dual-club flagship packages, immutable hashes, qualification harness (resolve/hash/load/FK/dynamics/viewer/save), and named repair blockers. Not a competing catalog. Simscape entries require MATLAB R2025b.",
+          "next_step": "Confirm CI green and squash merge of PR #10677."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-22T01:49:22Z",
+      "cited_pr_numbers": [10677],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10677,
+          "mergedAt": "2026-09-22T01:49:21Z",
+          "merge_commit": "00e32b5646df5bd6506606886d9c0aa045857681",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10436,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "6236ba9857b7df3a9c8bbe86f63417a3d31c75369a8340ca2a766f2c20a2492d"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10436 (PF-06, epic #10430)",
+          "pr_field": "#10504",
+          "branch": "feat/issue-10436-pf06-feasible-force-nullspace",
+          "paths": "src/shared/python/motion_matching/force_nullspace.py; tests/unit/motion_matching/test_force_nullspace.py; tests/unit/motion_matching/test_force_nullspace_pf06.py",
+          "last_verified": "2026-09-21 at SELF — rebased onto origin/main (MS-62); SPEC §12 `#10504` present; focused PF-06 suites 29 passed; architecture budget OK; DRY duplication gate OK.",
+          "summary": "Extended force null space representation to support scaled SVD and column-pivoted QR decomposition with dynamic rank and contact mode reporting. Added `NullSpaceAnalysis` reporting condition number and machine-precision residuals (A N = 0, A x_p = b). Implemented `redistribute_trajectory` with physical rate penalties strictly invariant to basis sign changes. Implemented `explore_torque_tradeoffs` generating Pareto tradeoff alternatives across baseline minimum effort, conservative default, trail arm reduction sweeps (50%, 80%), hard-zero trail feasibility checks, relaxed minimum trail alternatives, grip squeeze minimization, and ground reaction regularization. Detailed diagnostics report per-joint torque, power, lead/trail effort, ground COP, grip wrench, and explicit SI units. Exported reproducible Pareto tradeoff tables to JSON and CSV. Selected conservative default with mechanical rationale without unfounded metabolic or injury claims.",
+          "next_step": "Confirm PR #10504 CI is green after force-with-lease push, then merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T19:17:25Z",
+      "cited_pr_numbers": [10504],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10504,
+          "mergedAt": "2026-09-21T19:17:24Z",
+          "merge_commit": "a5cec3063e050da0f6b153381ac04d453ffcdad0",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 8930,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "3602d46c5da6c0e2a083117da888cb7b7bba2a7f393e080497c2c9581464fa08"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "claude",
+          "issue_field": "#8930",
+          "pr_field": "#10648 (open)",
+          "branch": "fix/8930-ball-flight-vectorized-rk4",
+          "paths": "src/shared/python/physics/ball_simulator.py; tests/unit/physics/test_ball_simulator_post_process_vectorized_8930.py",
+          "last_verified": "2026-09-21 (`98abb965f1`) — RED shown for the batching regression test (25 calls before the fix), then GREEN; numerical-equivalence and empty-trajectory tests pass; `tests/unit/physics/` shows no new failures versus unmodified main (three pre-existing rust-engine/tolerance failures reproduced identically via `git stash`); ruff check/format clean.",
+          "summary": "`BallFlightSimulator._post_process_rust` called the scalar `_calculate_forces_single` path once per trajectory point instead of the existing vectorized `_calculate_forces_batch` path; now builds the `(3, N)` batch once and calls force calculation a single time per trajectory.",
+          "next_step": "Land the vectorization PR (#10648) if not already merged."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T13:06:12Z",
+      "cited_pr_numbers": [10648],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10648,
+          "mergedAt": "2026-09-21T13:06:11Z",
+          "merge_commit": "f80c6193316231adefa5bdc7a560ba10abb3635c",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10359,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "c7b6a96d87ddb993fdb7b9f973d4fc2469c30577acfccde577a345bd2e7eb760"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "claude",
+          "issue_field": "#10359 (MS-86, epic #10363)",
+          "pr_field": "#10632",
+          "branch": "feat/10359-export-video-report",
+          "paths": "src/shared/python/motion_matching/export.py; src/shared/python/motion_matching/**main**.py; src/tools/matched_swing_browser/gui.py; src/config/launcher_manifest.json; src/config/models.yaml; tests/unit/motion_matching/test_export.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; docs/development/matched_swing_program/evidence/reports/sample_fit_report.md",
+          "last_verified": "2026-09-20 at HEAD (11 unit tests in test_export.py pass; 9 GUI tests in test_matched_swing_browser_gui.py pass; ruff clean; black clean; architecture budget passed).",
+          "summary": "Implemented `export_video` and `export_report` with fail-closed DbC contracts, standardized metrics, acceptance gate verdicts, physical constraints, and full cryptographic provenance (#8820 / U3). Added CLI subcommands `export-video` and `export-report` to motion_matching module. Added \"Export Video...\" and \"Export Report...\" buttons to Results Browser GUI Actions card with file dialogs. Registered `video_export` and `report_export` capabilities in launcher manifest and models config. Emitted sample Markdown fit report in matched swing program evidence directory.",
+          "next_step": "Open PR referencing #10359, await green CI, merge and release lease."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T07:00:24Z",
+      "cited_pr_numbers": [10632],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10632,
+          "mergedAt": "2026-09-21T07:00:23Z",
+          "merge_commit": "79ab1757c867d64419044468a607502c5bce6a56",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10348,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "fb2dcde2da418402bb8391e60bef104021346a76aab76b4fdf85cd34cf0d40ee"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10348 (MS-61, epic #10363)",
+          "pr_field": "#10676",
+          "branch": "feat/issue-10348-ms61-simscape-topology",
+          "paths": "src/shared/python/motion_matching/{simscape_topology.py,full_marker_terminal.py,tour_metrics.py,acceptance.py}; scripts/matlab/{materialize_ms61_topology_receipts.py,run_simscape_candidate.ps1}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/; docs/development/matched_swing_program/{GATES.md,README.md,WAVES.md}; docs/development/simscape_tour_matching/CHECKPOINTS.md",
+          "last_verified": "2026-09-22 at 84e2c5a45373b3864a7479b4e5f52cbb6376425d — regenerated matched_swing_program README status from ledger (103 receipts); freshness test GREEN; fail-closed blocked native_gate + reduced_27_no_neck retained.",
+          "summary": "Fail-closed 27-DOF topology classification (no independent neck), dual terminal disclosure (full + head cluster; body-excluding-head diagnostic only), acceptance/tour_metrics dual-terminal contracts, and run-103 scaffolding derived from run-102 without inventing native G1 success; repair linked to MS-104 (#10378).",
+          "next_step": "Confirm CI green and squash auto-merge of PR #10676."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-22T03:09:33Z",
+      "cited_pr_numbers": [10676],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10676,
+          "mergedAt": "2026-09-22T03:09:32Z",
+          "merge_commit": "bc5a7ff90cfb0da3ed49a3ac3d20d1967ba267df",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": "Scaffold only; do not represent scaffold as completed production behavior.",
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10361,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "df36bdd131ab155817d25fec65125cd105ae0e93f020dc87297fc09841b22284"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10361 (MS-90, epic #10363)",
+          "pr_field": "#10633",
+          "branch": "feat/10361-generic-capture-contract",
+          "paths": "src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/identifiability.py; tests/unit/motion_matching/test_capture_contract_generic.py; tests/unit/motion_matching/test_identifiability.py; evidence/anthropometry/identifiability_driver.json; docs/user_guide/motion_matching/loading_targets.md",
+          "last_verified": "2026-09-20 at HEAD (12 unit tests pass in test_capture_contract_generic.py and test_identifiability.py covering: frozen tour capture backwards compatibility, CMU locomotion C3D rejection with named diagnostic reasons, custom label mapping and mm->m unit scaling, gap fraction limits, synthetic chain planted null direction detection and resolution via prior/off-axis marker, 44-DOF uncalibrated leg DOF unobservability, calibrated leg observability, and full rank 44/44 recovery via anthropometric prior; check_architecture_budget, ruff check, ruff format, and mypy clean).",
+          "summary": "Implemented `CaptureContract` and `CaptureValidationReport` enabling validation and loading of arbitrary C3D captures without editing codebase source. Retained frozen tour captures as named instances of `CaptureContract`. Implemented `probe_spec_identifiability` and `probe_synthetic_chain_identifiability` performing linearised SVD identifiability analysis, detecting planted null directions and unobservable lower-body DOFs on the 44-DOF model, and demonstrating resolution to full rank via anthropometric prior regularization. Generated and committed `evidence/anthropometry/identifiability_driver.json`.",
+          "next_step": "Push branch, open PR with auto-merge, complete lease on #10361."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T06:32:20Z",
+      "cited_pr_numbers": [10633],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10633,
+          "mergedAt": "2026-09-21T06:32:18Z",
+          "merge_commit": "b68ed246cc78e63c118c2d8aebebd3ec9d226b2a",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10366,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "6697ea071c9cba0ef1b12d1f884a008c7e6ee0c73ab15986ccc35af602994afa"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10366 (MS-16, epic #10363)",
+          "pr_field": "#10660",
+          "branch": "fix/issue-10366-ms-16-mujoco-native-tools-marker-ik-on-m-cursor-composer-local",
+          "paths": "src/engines/physics_engines/mujoco/python/ik_minimize.py; src/engines/physics_engines/mujoco/python/inverse_dynamics.py; src/shared/python/motion_matching/pipeline/reference.py; src/shared/python/motion_matching/pipeline/dynamics.py; src/shared/python/motion_matching/pipeline/cli.py; src/tools/motion_matching/pipeline.py; tests/unit/motion_matching/test_mujoco_ik_minimize.py; tests/unit/motion_matching/test_mujoco_mj_inverse.py; docs/development/matched_swing_program/README.md; tests/tools/matched_swing_browser/test_model.py",
+          "last_verified": "2026-09-21 at HEAD (SELF; refreshed matched_swing ledger to 101 receipts; architecture budget via ShootingFitConfig retained)",
+          "summary": "Added selectable `--ik-backend mujoco-minimize` (MuJoCo `minimize.least_squares` with LM warm start) and `--tracking mj-inverse` (plant KKT torques with native `mj_inverse` audit). Wired backends through pipeline plant, dynamics replay, CLI, Motion Matching tile, and receipt fields with DbC validation at API boundaries.",
+          "next_step": "Confirm unit-test-gate and quality-gate green on PR #10660 so squash auto-merge can land."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T21:51:11Z",
+      "cited_pr_numbers": [10660],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10660,
+          "mergedAt": "2026-09-21T21:51:09Z",
+          "merge_commit": "8e4ecee277d25cc305fcf8f4e37d333260e83a15",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10434,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "678033166336ea83ce0ff87da7952744fa5b054bfff07b2a15db7f9f87098ffb"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10434 (epic #10363, PF-04)",
+          "pr_field": "#10499 (auto-merge enabled)",
+          "branch": "feat/issue-10434-pf04-qualify-contact-modes-pinocchio-forces",
+          "paths": "src/shared/python/motion_matching/contact_mode_qualifier.py; tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py",
+          "last_verified": "2026-09-19 at HEAD (SELF; 10 unit tests pass in test_contact_mode_qualifier_pf04.py covering support mode hysteresis, ambiguity scoring, ground support geometry / COP / convex hull containment, slip speed and friction saturation, compliant vs allocated force consistency via Hunt-Crossley model, separate linear force and moment residual budgets, unphysical mega-Newton load and kNm torque rejection, and mass/geometry/friction sensitivity reporting; ruff, ruff format, black, mypy, bandit, and pre-push hooks all clean)",
+          "summary": "Implemented ContactModeQualifier evaluating multi-sphere heel/toe support modes with clearance and velocity hysteresis, computing center of pressure (COP) and convex hull containment under arbitrary normal directions, evaluating slip velocity and friction saturation, and cross-checking allocated contact forces against constitutive Hunt-Crossley compliant models. Enforces separate linear force and moment residual budgets, rejects unphysical loads (> 5000 N or > 300 Nm), and generates parameter sensitivity reports.",
+          "next_step": "Land PR #10499 via CI and proceed to PF-05."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T02:00:59Z",
+      "cited_pr_numbers": [10499],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10499,
+          "mergedAt": "2026-09-21T05:03:27Z",
+          "merge_commit": "9cb9b951622f0bd8ddcb1c12eb224ad6822e1579",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10589,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "c9c59f68746dbddbd2d313cd56b9d85a0150adc5426ef91982d6cf71d8e4d89f"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10589 (TB-04, parent #10584, program #10363)",
+          "pr_field": "#10638",
+          "branch": "feat/tb04-double-pendulum-fit-10589",
+          "paths": "src/engines/physics_engines/pendulum/python/motion_matching/adapters.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/provider.py; src/engines/physics_engines/pendulum/python/motion_matching/qualification.py; src/engines/physics_engines/pendulum/python/motion_matching/**init**.py; tests/unit/engines/physics_engines/pendulum/test_double_pendulum_fit.py; tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py; docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz; docs/plans/tour_baselines/evidence/tb04_iron_baseline_package.npz; docs/plans/tour_baselines/coverage_matrix.md",
+          "last_verified": "2026-09-20 (15/15 unit tests pass in 6.5s across test_double_pendulum_fit.py and test_motion_matching_provider.py; ruff check clean; ruff format clean; black clean; mypy 0 errors across 4 source and 2 test files; check_architecture_budget passes; check_file_size_budget passes; check_dry_duplication_gate passes).",
+          "summary": "Built bidirectional mapping and verified mathematical & numerical acceleration parity (< 1e-14) between DoublePendulumDynamics and Tools physics.py. Formulated continuous smooth bounded joint torques via degree-6 Bernstein polynomials strictly bounded in [tau_min, tau_max] with curvature and effort regularization. Fixed frame-0 off-by-one initial state evaluation bug, implemented non-uniform timestep integration, and added independent 4x tighter substep replay verification. Produced authoritative qualification receipts and baseline packages for Driver and 7-Iron.",
+          "next_step": "Land PR via normal squash merge and proceed to TB-05 (#10590)."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T07:39:08Z",
+      "cited_pr_numbers": [10638],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10638,
+          "mergedAt": "2026-09-21T07:39:07Z",
+          "merge_commit": "c04a22e0e0435583d31ea56f4c3167dc79b1f5fa",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": "Only the small baseline is evidenced; avoid a broader production claim.",
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10433,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "b9e6906cfa45811ce48740c8ca67ad0f56354b3a9102ef8fe28a91bce55e7448"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10433 (PF-03, epic #10430)",
+          "pr_field": "#10498 (auto-merge enabled)",
+          "branch": "feat/issue-10433-pf03-contact-actuator-root-constraints",
+          "paths": "src/shared/python/motion_matching/contact_force_allocator.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_contact_force_allocator_pf03.py",
+          "last_verified": "2026-09-19 at HEAD (12 unit tests pass across contact_force_allocator and test_contact_force_allocator_pf03; ruff clean; black clean; mypy strict clean; bandit clean).",
+          "summary": "Upgrades ContactForceAllocator with constrained QP inverse dynamics. Enforces 8-faceted polyhedral friction pyramid, non-negative normal ground forces along arbitrary terrain normals, exact contact separation masks, and strict actuator bounds without post-projection. Separates diagnostic root slack so ungrounded reactions never create false physical success. Introduces FeasibilityStatus, HARD_ZERO_TRAIL mode, and verify_torque_and_rate_bounds.",
+          "next_step": "Land PR #10498 via CI and proceed to PF-04."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T06:03:20Z",
+      "cited_pr_numbers": [10498],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10498,
+          "mergedAt": "2026-09-21T06:03:19Z",
+          "merge_commit": "7e6b39893674af3de31fb79efc6a2710f30c36de",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10440,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "79d05f57cd392e449af164d688ec66c406b772f95189c5d0203d1ae1e938ab0c"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10440 (PF-10, epic #10430, program #10363)",
+          "pr_field": "#10509",
+          "branch": "feat/issue-10440-pf10-matching-strategies-contracts",
+          "paths": "src/shared/python/motion_matching/matching_strategy.py; src/shared/python/motion_matching/**init**.py; tests/unit/motion_matching/test_matching_strategy.py",
+          "last_verified": "2026-09-19 at HEAD (30 unit tests pass across test_matching_strategy, test_candidate, and test_candidate_session; ruff clean; black clean; mypy 0 errors; full 6-engine and dual-club contract validation passed).",
+          "summary": "Implemented versioned matching strategy schema (`STRATEGY_SCHEMA_VERSION = \"matched-strategy-v1\"`), stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`), strategy presets, controller specifications, and contact reaction history containers. Created `CandidateStrategyPackage` supporting lossless .npz serialization without pickle, and fail-closed name-permuted coordinate remapping. Implemented `StrategyComparisonService` exposing cross-strategy torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs. Provided sample package generator for concrete handoff to MV-03 #10479 without modifying viewer files.",
+          "next_step": "PR creation, auto-merge, complete lease on #10440 and report back."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T04:34:27Z",
+      "cited_pr_numbers": [10509],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10509,
+          "mergedAt": "2026-09-21T04:34:26Z",
+          "merge_commit": "b633007c6ab323d71529ffc1109fca1c02218bc1",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 8684,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "048693d8c2c2809f628d0cbd945438d4e41db379ef19c41b3656ce8a93684730"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "claude",
+          "issue_field": "#8684",
+          "pr_field": "#10668",
+          "branch": "conductor/issue-8684",
+          "paths": "docs/research/proximal_distal_energy_transfer/COMPREHENSIVE_RESEARCH_PROGRAM.md, MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+          "last_verified": "2026-09-11 (`SELF`)",
+          "summary": "Parent rollup of child tiers #8685/#8797/#8715/#8723 answering the four #8684 questions; manifests re-pinned.",
+          "next_step": "Open the PR with `Closes #8684`; confirm claim-evidence and release-bundle tests pass in CI."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-19T17:34:40Z",
+      "cited_pr_numbers": [10668],
+      "verified_closing_merged_prs": [
+        {
+          "number": 9998,
+          "mergedAt": "2026-09-21T03:00:16Z",
+          "merge_commit": "705606076622b0f886952401e15de6c8692999af",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10439,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "e33612e064415f6263e89bd3853a3083d080ec76d2777c4ce1add028a75d6929"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10439 (PF-09, epic #10430, program #10363)",
+          "pr_field": "#10507",
+          "branch": "feat/issue-10439-pf09-native-force-bridges",
+          "paths": "scripts/allocate_swing_torques.py; src/engines/physics_engines/pinocchio/python/force_adapter.py; src/engines/physics_engines/pinocchio/python/native_model.py; src/shared/python/motion_matching/multi_engine_torque_allocator.py; tests/integration/engines/pinocchio/test_force_adapter.py; tests/integration/engines/pinocchio/test_force_mapping.py; tests/unit/motion_matching/test_force_bridges_pf09.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_native_force_equations.py",
+          "last_verified": "2026-09-19 at HEAD (17 unit tests pass across test_native_force_equations, test_multi_engine_torque_allocator, and test_force_bridges_pf09; Pinocchio integration tests collect/skip cleanly when Pinocchio not installed; ruff clean; black clean; mypy 0 errors across 7 source files).",
+          "summary": "Quarantined `_AnalyticalMultibodyBase` production routes as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`, failing closed with `RuntimeError` on unbridged engines (Drake, OpenSim, Simscape). Extended `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`. Corrected `MujocoForceAdapter` to compute raw unconstrained generalized dynamic forces M a + bias eliminating `qfrc_inverse` passive/constraint force double counting, added input validation and state refresh before mutation, and verified exact acceleration parity. Implemented `PinocchioForceAdapter` with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`). Updated `allocate_swing_torques.py` CLI to support Pinocchio and enforce `--allow-synthetic` gate.",
+          "next_step": "Auto-merge PR, release lease on #10439 and claim #10440 (PF-10)."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T02:36:01Z",
+      "cited_pr_numbers": [10507],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10507,
+          "mergedAt": "2026-09-21T02:36:00Z",
+          "merge_commit": "20036a7c5fd7e9a38a342bb1c1a0c5b968cc8223",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10623,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "c8fcda1cabbf5fab450e4fc02de35fb8bccac7d10d665861e69d40db05ac1717"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10623 (epic #10603)",
+          "pr_field": "#10770",
+          "branch": "feat/nm08-native-verification-10623",
+          "paths": "src/shared/python/neural_motion/inference/; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_verified_inference_nm08.py; tests/unit/motion_matching/test_verified_inference_nm08.py; docs/plans/neural_motion_matching/native_verification.md; docs/plans/neural_motion_matching/evidence/nm08_native_verification_receipt.json",
+          "last_verified": "2026-09-23 — 16 unit and behavioral tests pass across neural_motion and motion_matching; architecture budgets and ruff clean.",
+          "summary": "Added VerifiedInferenceOrchestrator, DistributionBounds, and check_target_distribution under neural_motion/inference/ (schema neural-verified-inference/1.0.0). Enforces fail-closed validation of non-finite inputs, geometry/engine/control dimension mismatch, and incompatible checkpoint contracts. Validates empirical coverage (durations, peak velocities, contact regimes) with confidence scoring recorded as domain metrics, not golfer truth probability. Enforces mandatory independent replay before dynamic acceptance; on failed proposal or missing checkpoint, falls back to classical/retrieval solver with shared remaining wall-clock budget and retains all attempts with auditable statuses (NEURAL_ACCEPTED, CLASSICAL_FALLBACK, REJECTED). Integrated fit_swing_verified_inference into hybrid.py facade.",
+          "next_step": "Enable auto-merge, verify CI passes, and hand off to NM-09 (#10624)."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-23T18:29:29Z",
+      "cited_pr_numbers": [10770],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10770,
+          "mergedAt": "2026-09-23T18:29:28Z",
+          "merge_commit": "a0beddd8ecc8d53976a49179785712b3636a7ec7",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10622,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "abb9c4274f39469057af5e312a2f499416f6d00a6863115f19b1c9864bb918cd"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10622 (epic #10603)",
+          "pr_field": "#10768",
+          "branch": "feat/nm07-forward-surrogates-10622",
+          "paths": "src/shared/python/motion_matching/surrogate/validate.py; src/shared/python/motion_matching/surrogate/nm07_comparison.py; src/shared/python/neural_motion/surrogates/; tests/unit/motion_matching/test_forward_surrogates_nm07.py; tests/unit/neural_motion/test_forward_surrogates_nm07.py; tests/unit/neural_motion/test_surrogate_nm07_discovery.py; docs/plans/neural_motion_matching/forward_surrogates.md; docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json",
+          "last_verified": "2026-09-23 — 24 focused tests pass across motion_matching and neural_motion; architecture budgets and ruff pass.",
+          "summary": "Compare forward surrogate inversion, hybrid polish, physics-structured residual dynamics, and diffusion fallback under schema neural-surrogate-comparison/1.0.0. Added real-clock timegrid resampling, antipodal quaternion geodesic distance, trust-region validation, directional derivative gradient fidelity check, and contact-boundary failure rejection to validate.py. Documented adversarial exploitation risk of unconstrained forward surrogate inversion and high latency/sample inefficiency of diffusion fallback.",
+          "next_step": "PR #10768 merged into main; proceed with NM-08 (#10623)."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-23T17:01:53Z",
+      "cited_pr_numbers": [10768],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10768,
+          "mergedAt": "2026-09-23T17:01:51Z",
+          "merge_commit": "c79f97724445d24a403d932bbd8bd8919cf81bac",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10432,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "191163750dd6f5ddb884866a5f794c49a54a34ee4e0c2d6a2fef69e0d477bc6c"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10432 (PF-02, epic #10427)",
+          "pr_field": "#10497 (auto-merge enabled)",
+          "branch": "feat/issue-10432-pf02-pinocchio-kinematics-grip-calibration",
+          "paths": "src/engines/physics_engines/pinocchio/python/marker_kinematics.py; src/shared/python/motion_matching/kinematic_smoothing.py; tests/unit/motion_matching/test_pinocchio_kinematics_calibration.py",
+          "last_verified": "2026-09-19 at HEAD (10 unit tests in test_pinocchio_kinematics_calibration.py pass 100%; 41 related motion-matching tests pass; 979 pre-push tests pass; ruff check, ruff format, bandit, and mypy clean).",
+          "summary": "Implemented SolveDiagnostics for Pinocchio MarkerIkSolver capturing convergence, projected gradient norm, cost decrease, and active bound counts. Added multi-start resolution solve_frame_multi_start evaluating geometric tracking floors with and without weld closure. Added refine_overlapping_window with bounded temporal regularization. Implemented kinematic_smoothing module providing joint trajectory smoothing with analytical/numerical derivative compatibility (q_dot ≈ v, v_dot ≈ a), boundary spike auditing, and cutoff frequency sensitivity analysis. Verified human range of motion wrist compliance (MM-2, #10104) and address left elbow pit up-and-inward alignment (MM-5, #10107).",
+          "next_step": "Land PR #10497 via CI and proceed to PF-03."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T23:56:38Z",
+      "cited_pr_numbers": [10497],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10497,
+          "mergedAt": "2026-09-20T23:56:37Z",
+          "merge_commit": "a80290b4d458159d1587eb354aa12de0b9adf652",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10533,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "8c6709daaf7f49d15fb4a019988d58666180d50d5d20d6a786407e1183927f7e"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10533 (ORG-24, epic #10508)",
+          "pr_field": "- **Paths:** src/shared/python/workspace/feature_preservation_audit.py; src/shared/python/workspace/**init**.py; tests/integration/test_feature_preservation_audit.py; docs/development/ORG24_FEATURE_PRESERVATION_AUDIT.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md",
+          "branch": "feat/issue-10533-org24-feature-preservation-audit",
+          "paths": null,
+          "last_verified": "2026-09-20 at HEAD (11 integration tests pass in tests/integration/test_feature_preservation_audit.py covering all RED and GREEN criteria: missing baseline entries fail closed, corrupted fixture hashes fail closed, alias cycles fail closed, unknown workspace domains fail closed, all 159 baseline capabilities reconciled, 13 golden fixtures verified byte-for-byte, acyclic alias resolution, 5 core workspaces verified, external dependencies/engine qualification verified, saved layouts compatible, full audit report generated and published; ruff check, ruff format, mypy, check_file_size_budget all pass cleanly).",
+          "summary": "Implemented `FeaturePreservationAuditor` providing comprehensive reconciliation, integrity auditing, and disposition freezing for Epic #10508 closeout per issue #10533. Validated that all 159 capabilities from the ORG-01 baseline are preserved without silent removals. Verified byte-exact SHA-256 and file size integrity across all supported preservation fixtures. Confirmed acyclic transitive resolution of legacy aliases (`starting_pose_matcher` -> `motion_target_preview`, `putting_green_gui` -> `putting_green`). Audited 5 core workspaces and confirmed honest physics engine qualifications (#10351, #10353). Generated and published frozen audit disposition report at `docs/development/ORG24_FEATURE_PRESERVATION_AUDIT.md`.",
+          "next_step": "Push branch, open PR with auto-merge, release lease on #10533."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T22:32:42Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10581,
+          "mergedAt": "2026-09-20T22:32:41Z",
+          "merge_commit": "5d73e45545c9498e1904eab8d7355cce7ef353c3",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10532,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "723e07243a11960913395ccc2c7c53866c2278a7426cac9b79c14080ddd17f0a"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10532 (ORG-23, epic #10508)",
+          "pr_field": "#10580",
+          "branch": "feat/issue-10532-org23-installed-workspace-journeys",
+          "paths": "src/shared/python/workspace/installed_journeys.py; src/shared/python/workspace/**init**.py; tests/integration/test_installed_workspace_journeys.py; src/tools/capture_rig/gui.py",
+          "last_verified": "2026-09-20 at HEAD (9 integration tests pass in tests/integration/test_installed_workspace_journeys.py covering all 6 recommended task journeys across shipped surfaces plus cancellation recovery, dependency failure, and schema corruption rejection; ruff check, ruff format, mypy, bandit, unit tests pass cleanly).",
+          "summary": "Implemented `InstalledWorkspaceJourneysCoordinator` validating and accepting all enabled recommended task journeys across shipped surfaces per ADR-0047 and issue #10532. Covered optical/video import to inspection, model/pose to supported fit, shot to named flight comparison, optimization/training to result, bounded estimation to cross-engine comparison, and global utilities navigation. Enforced failure recovery preserving source media, actionable dependency diagnostics, and rejection of corrupted artifact schemas. Decoupled `CaptureRigWidget.open_in_inspect_targets()` from StepRail action set to preserve contract and fix test suites.",
+          "next_step": "Auto-merge PR #10580, release lease on #10532."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T21:39:51Z",
+      "cited_pr_numbers": [10580],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10580,
+          "mergedAt": "2026-09-20T21:39:50Z",
+          "merge_commit": "70378c9602c68080efe942ad3f2affaae7d770e8",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10530,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "bc42227e8d1ad7bf09583f3d1120075fac2a15ff48acdf1f77ccccf4861bd742"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10530 (ORG-22, epic #10508)",
+          "pr_field": "- **Paths:** src/config/research_capability_lifecycle.py; src/config/**init**.py; src/config/capability_migration.py; src/tools/model_converter/**main**.py; tests/config/test_research_capability_lifecycle.py; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md",
+          "branch": "feat/issue-10530-org22-research-lifecycle",
+          "paths": null,
+          "last_verified": "2026-09-20 at HEAD (8 unit tests pass in tests/config/test_research_capability_lifecycle.py covering all RED and GREEN acceptance criteria: untiled nonexcluded package fails coverage, undocumented headless service fails coverage, CLI-only action cannot be represented as GUI-ready tile, retained headless tools have runnable entrypoints, hidden aliases resolve acyclic, catalog links have owners and next actions, SG optimizer Phase 3 UI follow-up is accurately recorded, research headless documentation links exist; 18/18 config suite tests pass; ruff check and ruff format clean).",
+          "summary": "Implemented `ResearchCapabilityLifecycleManager` and `IncompleteCapabilityRecord` reconciling intentionally excluded, research-only, and incomplete workflows per ADR-0047 and issue #10530. Audited every excluded package under `src/tools/` against launcher tiles and `src/config/registry_exclusions.yaml`. Enforced fail-closed prevention of adapting CLI-only tools as GUI tiles via `CLINotInteractiveGUIError`. Verified and standardized CLI entry points for retained tools (`contraction`, `drift_control`, `model_converter`, `sg_optimizer`). Disclosed structured owner/issue/next-action metadata for incomplete capabilities, honestly documenting the SG optimizer Phase 3 PyQt6 UI follow-up tied to #6272 without fake GUIs or premature claims of completion.",
+          "next_step": "Push branch, open PR with auto-merge, complete lease on #10530."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T21:20:23Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10579,
+          "mergedAt": "2026-09-20T21:20:21Z",
+          "merge_commit": "f55cdd752f72992d0714294580a743eda659bc64",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10528,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "1f3e81ab3d39061b4087b8de50188314c37208663f750b94507d3084f8a55085"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10528 (ORG-19, epic #10508)",
+          "pr_field": "#10578",
+          "branch": "feat/issue-10528-org19-global-utilities",
+          "paths": "src/shared/python/workspace/global_utilities.py; src/shared/python/workspace/**init**.py; tests/launchers/test_global_workspace_utilities.py; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md",
+          "last_verified": "2026-09-20 at HEAD (7 unit tests pass in tests/launchers/test_global_workspace_utilities.py covering all RED and GREEN criteria: switching workspaces updates assistant context without duplicate sessions or stale run references; canonical alias resolution for old assistant/library/setup IDs; dismissed onboarding persistence across session migration; keyboard open/close restores focus to prior widget; browser platform environment refuses native-only controls fail-closed; assistant conversation history persists across workspace navigation without deletion; divergence inventory updated; architecture budget and DRY duplication gate clean).",
+          "summary": "Implemented `GlobalWorkspaceUtilitiesCoordinator` unifying Sidekick, Setup, Help, and Library utilities into global, workspace-agnostic overlays per ADR-0047 and issue #10528. Enforced canonical alias resolution mapping legacy utility IDs (`legacy_assistant`, `setup_wizard`, `library_browser`, `help_center`) to canonical names. Preserved conversation history across workspace transitions while synchronizing run and project context. Maintained sticky onboarding dismissal across session reload and migration. Enforced fail-closed native action behavior in browser environments.",
+          "next_step": "Push branch, open PR with auto-merge, release lease on #10528."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T20:40:51Z",
+      "cited_pr_numbers": [10578],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10578,
+          "mergedAt": "2026-09-20T20:40:50Z",
+          "merge_commit": "e60d09274f77e86c9bfb1beb3afe5e0e3a4324b5",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10525,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "7ee7401cc8ae3fcc7bd007804565368314462693d8e0bee1da55d7b915917950"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10525 (ORG-16, epic #10508)",
+          "pr_field": "#10563",
+          "branch": "feat/issue-10525-org16-optimization-training",
+          "paths": "src/shared/python/workspace/optimization_training_workspace.py; src/shared/python/workspace/**init**.py; tests/integration/test_optimization_training_workspace.py; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md",
+          "last_verified": "2026-09-20 at HEAD (9 integration tests pass in test_optimization_training_workspace.py covering all RED and GREEN acceptance criteria: invalid objectives/constraints/model compatibility prevent start, cancel/pause/resume and dependency failure maintain state integrity, duplicate submissions do not duplicate jobs, small deterministic optimization changes output for changed input, controller publishes metrics and registers result, and dataset selection with provenance survives reopen; check_file_size_budget, ruff check, ruff format all pass).",
+          "summary": "Implemented `OptimizationTrainingWorkspaceCoordinator` consolidating optimization and training under shared workspace and scheduler authority. Bounded job form over the public optimizer and training controller authority, validating objectives, constraints, and model compatibility prior to dispatch. Enforced fail-closed handling for unsupported/uninstalled backends. Enforced cancel/pause/resume lifecycle invariants and deduplication of active submissions. Connected dataset selection with provenance directly to durable project sessions in `SessionProjectStore`.",
+          "next_step": "Push branch, open PR with auto-merge, complete lease on #10525."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T20:25:56Z",
+      "cited_pr_numbers": [10563],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10563,
+          "mergedAt": "2026-09-20T20:25:55Z",
+          "merge_commit": "5b1e57578886f5dd52875786209b1f811b1d3c53",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10524,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "8970b5a5d2235dd633eb1ff6ad11bc38d84766e0a7a410bfb766ca5c8faa59d0"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10524 (ORG-15, epic #10508)",
+          "pr_field": "#10561",
+          "branch": "feat/issue-10524-org15-scene-delivery-modes",
+          "paths": "src/shared/python/workspace/shot_course_workspace.py; src/shared/python/workspace/**init**.py; tests/integration/test_shot_course_workspace.py",
+          "last_verified": "2026-09-20 at HEAD (7 integration tests pass in tests/integration/test_shot_course_workspace.py covering all RED and GREEN acceptance criteria: incompatible ground/flight record rejected, terrain edit invalidates dependent run rather than silently mutating history, scene-only view fails closed with SceneNonPhysicsError, unsupported simulator destination disabled, putting fixture save/reopen round-trip, bunker multi-fidelity export round-trip, simulator network failure and cancellation flows; ruff check, ruff format, and check_file_size_budget pass cleanly).",
+          "summary": "Implemented `ShotCourseWorkspaceCoordinator` composing Terrain, Putting, Scene, Bunker, and Simulator Delivery modes per ADR-0047 and issue #10524. Enforced explicit model boundaries: scene view is visual inspection only; bunker preserves F0-F3 fidelity tiers; putting conforms to rolling/ground contracts; terrain mutation increments revision and invalidates prior runs; simulator delivery verifies destination capabilities and produces explicit submission receipts.",
+          "next_step": "Push branch, verify CI, enable auto-merge, release lease on #10524."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T20:06:14Z",
+      "cited_pr_numbers": [10561],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10561,
+          "mergedAt": "2026-09-20T20:06:13Z",
+          "merge_commit": "41618f3a41c78f58b111c64e57efdfe20c64813e",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10523,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "c74d51155ab953ae745a010b04d70646d4f04249ef2f3e44c267486aa08dfc30"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10523 (ORG-14, epic #10508)",
+          "pr_field": "#10560",
+          "branch": "feat/issue-10523-org14-trajectory-viewers",
+          "paths": "`src/shared/python/workspace/trajectory_handoff.py`; `src/shared/python/workspace/results_workspace.py`; `src/shared/python/workspace/__init__.py`; `src/shared/python/physics/flight_trajectory_export.py`; `src/shared/python/physics/swing_state_providers.py`; `tests/integration/test_shot_trajectory_handoff.py`",
+          "last_verified": "2026-09-19 at HEAD (All 3 integration tests pass in test_shot_trajectory_handoff.py; 65 regression tests pass; ruff clean; DRY duplication clean).",
+          "summary": "Implemented `ShotTrajectoryHandoffCoordinator` connecting swing-state providers, impact solvers, and aerodynamic ball flight simulation with specialized viewers per ADR-0047. Preserves viewer identities (Shot Tracer Qt, web BallFlight, and Impact Explorer ROC) without retiring viewers or merging distinct flight model families (`ud.flight_models` vs `swing_sim.flight`). Bridges `PipelineResult` to `swing_sim.ball_flight_trajectory/1` wire contract with immutable SI sample positions and timestamps. Enforces honest engine sourcing with fail-closed diagnostics (`UnsupportedEngineSourceError`, `ExtractionAdapterError`, `FrameUnitMismatchError`, `InvalidTrajectoryHashError`). Extends ResultsWorkspace with `COMPARE_FLIGHT_MODELS` and `OPEN_IN_IMPACT_EXPLORER` actions and provides atomic transaction staging/rollback.",
+          "next_step": "Push branch, verify CI, enable auto-merge, release lease."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T19:52:09Z",
+      "cited_pr_numbers": [10560],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10560,
+          "mergedAt": "2026-09-20T19:52:08Z",
+          "merge_commit": "2da04559b07b87c73c2a46e41d4134fe12e9088a",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10522,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "98508fd7c04daddae29c6491f0ffdf9246a4b195af5ef483a71146d5acf671ed"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10522 (ORG-12, epic #10508)",
+          "pr_field": "#10547",
+          "branch": "feat/issue-10522-org12-model-match-handoff",
+          "paths": "src/shared/python/workspace/**init**.py; src/shared/python/workspace/model_match_handoff.py; tests/integration/test_model_match_handoff.py",
+          "last_verified": "2026-09-19 at HEAD (All 3 integration tests in test_model_match_handoff.py pass, 37 workspace regression tests pass; ruff check and format clean; check_file_size_budget clean).",
+          "summary": "Implemented task adapters over existing public APIs for model selection/generation, subject parameters, club snapshot, and initial canonical pose bound to active project/session (`SessionProjectStore`). Separated general-input motion pipeline and tour driver/7-iron matching routes with explicit routing refusing unsupported arbitrary video observations. Passed validated target/model/pose references into fit jobs and recorded outputs/receipts in `SessionProjectStore`. Exposed Fit Kinematics and Run Dynamics as distinct steps with explicit backend choices across all 6 engines (`mujoco`, `drake`, `pinocchio`, `opensim`, `myosuite`, `simscape`) without silent substitutions. Enforced that kinematic outputs cannot be marked as dynamic qualified. Implemented downstream state invalidation on model change, failed-fit diagnostics, cancellation preserving prior runs, and reopen descriptor linking to Results/Replay seam.",
+          "next_step": "Push branch, open PR, enable auto-merge, release lease on #10522, and notify parent orchestrator."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T18:42:38Z",
+      "cited_pr_numbers": [10547],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10547,
+          "mergedAt": "2026-09-20T18:42:37Z",
+          "merge_commit": "81d32c3057c6ad8c4977e803df389031d9a789fb",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10531,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "86f58b7702b4990ab736a7b03310f502659c0ac7b374e1903e828fe1abb2e51d"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10531 (ORG-21, epic #10508)",
+          "pr_field": "#10576",
+          "branch": "`feat/issue-10531-org21-accurate-atlas-parity`",
+          "paths": "`tests/scripts/test_workspace_documentation_freshness.py`, `src/config/industrial_readiness.json`, `docs/operations/industrial-readiness-index.md`, `src/tools/training_controller/README.md`",
+          "last_verified": "2026-09-20 (`2c9f9fcd3`; all 8 tests pass in `test_workspace_documentation_freshness.py`; all 11 tests pass in `test_capability_atlas.py`; all 25 tests pass in `tests/config/industrial_readiness/`; ruff check and format clean; file size budget passed).",
+          "summary": "Implemented comprehensive regression tests in `test_workspace_documentation_freshness.py` covering workspace membership drift, undocumented/dangling aliases, broken source/help links, stale generated views, shell-only parity vs compute-complete separation, deterministic generators, training controller README accuracy, and reconciled industrial readiness item U3 (#8820 / PR #9995) with merge SHA and verified implementation/test paths.",
+          "next_step": "Await CI completion and auto-merge on PR #10576."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T15:57:32Z",
+      "cited_pr_numbers": [10576],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10576,
+          "mergedAt": "2026-09-20T15:57:31Z",
+          "merge_commit": "777033b5ef335c6c8b27ce568018b06de5a17860",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10353,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "9b94f5ce90c197b68b162b783ffaca10c0396d7da525436f3454a539936f780c"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "claude",
+          "issue_field": "#10353 (MS-80, epic #10363)",
+          "pr_field": "#10543",
+          "branch": "feat/10353-results-browser",
+          "paths": "src/tools/matched_swing_browser/**init**.py; src/tools/matched_swing_browser/**main**.py; src/tools/matched_swing_browser/gui.py; src/tools/matched_swing_browser/model.py; src/tools/matched_swing_browser/\\_embed_adapter.py; src/config/models.yaml; src/config/launcher_manifest.json; src/config/feature_parity.json; src/launchers/embedded_tool_bootstrap.py; pyproject.toml; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; tests/tools/matched_swing_browser/test_model.py; docs/development/matched_swing_program/evidence/browser/screenshot.png",
+          "last_verified": "2026-09-20 at HEAD (21 unit and GUI tests pass; 10 registry and feature parity tests pass; architecture and file size budgets pass; DRY duplication gate clean; ruff and mypy clean; screenshot evidence recorded).",
+          "summary": "Implemented `matched_swing_browser` embeddable PyQt6 desktop tool and data model. Left pane provides filterable table over 98 ledger receipts (by engine, capture, lane, verdict, search text). Right pane displays receipt summary, acceptance badge, five standardized metrics with units, physical gates breakdown, and lazy-loaded animated QMovie playback for rows with visual GIF artifacts. Provides action buttons to launch Tour Matching Viewer, Native Viewer (MS-83), and parity reports. Reuses `ResultFilter` lineage resolving #8824 and establishing contract for #10521 (ORG-13). Registered across all 5 canonical surfaces (`models.yaml`, `launcher_manifest.json`, `pyproject.toml`, `embedded_tool_bootstrap.py`, `feature_parity.json`).",
+          "next_step": "Update PR #10543, enable auto-merge, monitor remote CI to green merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T16:23:25Z",
+      "cited_pr_numbers": [10543],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10543,
+          "mergedAt": "2026-09-20T16:23:24Z",
+          "merge_commit": "a1c13ed0d56fd622f138961477651310ea254b13",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10358,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "25ef07be312fa94437eac3459286d3b7c3819f128bad3d891ee8478eac7651fa"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10358 (MS-85, epic #10363)",
+          "pr_field": null,
+          "branch": "fix/issue-10358-ms-85-local",
+          "paths": "src/api/routes/matched_swings.py; src/api/services/matched_swings_service.py; tests/api/test_matched_swings.py; ui/src/pages/MatchedSwings.tsx; ui/src/api/matchedSwings.ts; ui/src/App.tsx; src/config/launcher_manifest.json; src/api/route_registry.py",
+          "last_verified": "2026-09-21 at HEAD (8 API tests pass; 4 MatchedSwings vitest tests pass; ruff and architecture budget clean).",
+          "summary": "Added local-only read-only `/api/matched-swings` routes (ledger, receipt, candidate NPZ/preview, parity, GIF) keyed by receipt SHA-256 without leaking absolute paths. Web Results page at `/tools/matched-swings` lists runs with verdict badges, GIF playback, and MocapSkeleton3D marker preview; mounted CrossEngineDashboard at `/tools/cross-engine` with launcher manifest web routes for both tiles.",
+          "next_step": "Open PR, drive CI green, merge, release lease."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-21T17:32:05Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10664,
+          "mergedAt": "2026-09-21T17:32:04Z",
+          "merge_commit": "e60228fadfda763f10c5f4e095172bbca8f777e8",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10529,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "e01aa7d033f36c552f6b1f8a187e13121f0118db12348d9e239680272e0b91ba"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10529 (ORG-20, epic #10508)",
+          "pr_field": null,
+          "branch": "feat/issue-10529-org20-provider-ownership",
+          "paths": "src/shared/python/config/tools_vendor_authority.py; tests/integration/test_installed_provider_authority.py",
+          "last_verified": "2026-09-20 at HEAD (8 integration tests pass in test_installed_provider_authority.py; 221 launcher/manifest tests pass with zero regressions; ruff check & format clean; file line budget passed).",
+          "summary": "Consumed provider ownership decisions and implemented runtime import authority and provenance verification across repository, installed, and packaged execution environments. Added `assert_runtime_provenance_parity` failing closed upon root divergence between pytest and packaged app contexts. Added `verify_provider_provenance` asserting module paths resolve within canonical provider roots. Implemented `inspect_provider_authority` handling pinned gitlinks, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback. Verified public seams for Sidekick, Movement Optimizer (`tools_movement_optimizer` via `ALIAS_MAP`), Pendulum (`swing_objective_lab`), and backward compatibility import delegation (`upstream_drift_tools` -> `sidekick`).",
+          "next_step": "Push branch, open PR with auto-merge, update issue."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T14:20:37Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10572,
+          "mergedAt": "2026-09-20T14:20:36Z",
+          "merge_commit": "57ed7523df51627b2c66b9e89c502a97efe44d3b",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10520,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "68fe6d5a2b84eb4f9ddad774f41a7c2fa6011cbeeb66dd0665b19da44910408e"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10520 (ORG-11, epic #10508)",
+          "pr_field": "#10546",
+          "branch": "feat/issue-10520-org11-motion-matching-packaging",
+          "paths": "src/shared/python/motion_matching/execution/**init**.py; src/shared/python/motion_matching/execution/assets.py; src/shared/python/motion_matching/execution/spec_builder.py; src/shared/python/motion_matching/execution/downswing.py; src/shared/python/motion_matching/execution/mjx_export.py; src/shared/python/motion_matching/execution/driver.py; src/tools/motion_matching/pipeline.py; docs/development/full_body_models/build_anthropometric_spec.py; docs/development/full_body_models/evidence/ground_support/run_ground_support.py; docs/development/full_body_models/evidence/ground_support/downswing_experiment.py; docs/development/full_body_models/evidence/ground_support/export_mjx_package.py; tests/integration/test_installed_motion_matching.py",
+          "last_verified": "2026-09-19 at HEAD (17 tests pass across tests/integration/test_installed_motion_matching.py, tests/tools/motion_matching/test_pipeline.py, tests/tools/motion_matching/test_motion_matching_gui.py; pre-commit checks pass; ruff format clean; file size budget clean).",
+          "summary": "Extracted reusable execution out of documentation into `src/shared/python/motion_matching/execution/` (`spec_builder.py`, `downswing.py`, `mjx_export.py`, `driver.py`, `assets.py`). Preserved algorithms, numerical precision, parameters, coordinate frames, and output schemas. Resolved reference assets through standard resource resolution functions (`get_native_geometry_spec`, `get_opensim_model`, `get_candidate_geometry_spec`, `get_capture_c3d`, `resolve_output_root`) with environment variable overrides and clear error explanations for unavailable assets. Kept legacy script paths in `docs/development/full_body_models/` as thin compatibility wrappers issuing `DeprecationWarning` while delegating to packaged entry points and preserving CLI schemas and exit codes. Updated `pipeline.py` command constants (`BUILDER`, `DRIVER_SCRIPT`, `DOWNSWING_SCRIPT`, `EXPORT_MJX_SCRIPT`) to point to packaged entry points and write outputs outside docs/package.",
+          "next_step": "Push branch, open PR, enable auto-merge, release lease on #10520, and notify parent orchestrator."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T18:18:50Z",
+      "cited_pr_numbers": [10546],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10546,
+          "mergedAt": "2026-09-20T18:18:49Z",
+          "merge_commit": "2715f5c87834c8efec84795e149cc69525cee489",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10519,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "51c6819f2ab28271d494b0b9ec20aee4c18d0ca0725e7aa1f58bc6ee9e1e9432"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10519 (ORG-10, epic #10508)",
+          "pr_field": "#10545",
+          "branch": "feat/issue-10519-org10-capture-inspection-handoff",
+          "paths": "src/shared/python/workspace/**init**.py; src/shared/python/workspace/capture_inspection_handoff.py; src/tools/capture_rig/gui.py; src/tools/capture_rig/journey_actions.py; tests/integration/test_capture_target_handoff.py",
+          "last_verified": "2026-09-19 at HEAD (32 tests pass across workspace unit suite and integration test_capture_target_handoff.py; ruff check and format clean; mypy pre-push clean; file size budget clean).",
+          "summary": "Implemented `CaptureInspectionHandoff` and `FreeMoCapJobAdapter` bridging Capture Rig to Inspect Targets and Model Calibration. Enforced that trim, crop, and time offsets survive handoffs with explicit clock calculations; maintained MediaPipe and OpenPose as explicit estimator choices with separate observation sets, confidence scores, and source pixels; provided FreeMoCap CLI input/output validation before process spawn and cancellation leaving sources untouched with preserved HMR2/AGPL license isolation; opened C3D and optical imports keeping missing samples masked (NaN) and rejecting incompatible units and frames; rejected pretending 2-D coordinates are metric 3-D; and registered targets into `SessionProjectStore` automatically preserving annotations, calibration, and club metadata. Added \"Open in Inspect Targets\" action to Capture Rig GUI and JourneyActions.",
+          "next_step": "Push branch, open PR, enable auto-merge, release lease on #10519, and notify parent orchestrator."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T16:53:38Z",
+      "cited_pr_numbers": [10545],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10545,
+          "mergedAt": "2026-09-20T16:53:37Z",
+          "merge_commit": "15bce2283fb6954b2b285585d370b0b7d03ed545",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10518,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "8ad1b6c63b6a051d58f40aa8869681a0634d4b152eac5b14e067831bcb2ee65c"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10518 (ORG-09, epic #10508)",
+          "pr_field": "#10544",
+          "branch": "feat/issue-10518-org09-workflow-transitions",
+          "paths": "src/shared/python/workspace/**init**.py; src/shared/python/workspace/workflow_coordinator.py; tests/unit/workspace/test_workflow_transitions.py",
+          "last_verified": "2026-09-19 at HEAD (26 unit tests pass across test_workflow_transitions.py, test_artifact_handoff.py, test_project_store.py, test_results_browser.py; ruff check and format clean; pre-commit mypy passed; check_file_size_budget clean).",
+          "summary": "Implemented WorkflowCoordinator coordinating the 7-stage workflow pipeline (`Capture/Import -> Inspect Targets -> Configure Model -> Fit -> Dynamics -> Compare -> Export`) over typed ArtifactReference inputs and outputs. Evaluates live step readiness and diagnostics directly from cryptographic sha256 hashes and on-disk artifact existence rather than superficial flags. Added support for single-view coaching mode skipping 3-D dynamics when physics engines are unavailable, enforced contract distinction preventing dynamics from inheriting purely kinematic passes, tracked cancellation reasons and retry attempts, supported later-stage entry from imported artifacts, and exposed a pure state projection with to_dict() for Qt and React/Tauri parity.",
+          "next_step": "Push branch, open PR, enable auto-merge, release lease on #10518, and notify parent orchestrator."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T14:48:27Z",
+      "cited_pr_numbers": [10544],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10544,
+          "mergedAt": "2026-09-20T14:48:25Z",
+          "merge_commit": "39092e54caccd83edc00e514cade2014f25c866c",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10517,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "98a843c04c728213b1eaa5c3e7365b622cc3ed7f7fdd50c524bbf8900502fd28"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10517 (ORG-08, epic #10508)",
+          "pr_field": "#10542",
+          "branch": "feat/issue-10517-org08-workspace-handoff",
+          "paths": "src/shared/python/workspace/**init**.py; src/shared/python/workspace/artifact_handoff.py; src/shared/python/workspace/project_store.py; tests/unit/workspace/test_artifact_handoff.py",
+          "last_verified": "2026-09-19 at HEAD (18 unit tests pass across test_artifact_handoff.py, test_project_store.py, test_results_browser.py; ruff check and format clean; check_file_size_budget clean).",
+          "summary": "Extended SessionProjectStore and ProjectMetadata with typed, versioned artifact handoffs (WorkspaceHandoff, ArtifactReference, ArtifactKind, RunMetadata). Enforced Design-by-Contract boundary preconditions (cross-session subject mismatch rejection, frame and schema validation, artifact existence and cryptographic sha256 hash checks before disk write, canceled/failed job qualification invariant). Added migration handling preserving unknown supported fields in older project.json files, atomic durability under interrupted writes, active context selection, and non-destructive run cloning without falsified output evidence. Implemented registered named artifact adapter conversion preserving provenance.",
+          "next_step": "Push branch, open PR, enable auto-merge, release lease on #10517, and notify parent orchestrator."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T13:57:11Z",
+      "cited_pr_numbers": [10542],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10542,
+          "mergedAt": "2026-09-20T13:57:10Z",
+          "merge_commit": "2a854627054fb272167d8de67504c4fe25ebf71f",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10514,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "b5107a6c361dbc9c731e05b57aa32e9097e7e128e1fa04d33e2aaaaaea83f3b7"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10514 (ORG-07, epic #10508)",
+          "pr_field": "#10541",
+          "branch": "feat/issue-10514-org07-model-variant-grouping",
+          "paths": "src/config/models.yaml; src/launchers/exercise_dashboard.py; src/launchers/launcher_model_handlers.py; src/shared/python/config/**init**.py; src/shared/python/config/model_pack_manifest.py; src/shared/python/config/model_registry.py; src/shared/python/config/model_variant_grouping.py; tests/config/test_model_variant_grouping.py",
+          "last_verified": "2026-09-19 at HEAD (6 unit tests pass in test_model_variant_grouping.py, 183 tests pass across adjacent suites; ruff check clean; ruff format clean; line budget check clean).",
+          "summary": "Implemented `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection` in `src/shared/python/config/model_variant_grouping.py` to project 28 exercise variants across 4 providers (`MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`) into 7 logical choices without dropping any provider assets underneath. Preserved strict DbC on engine selection (never silently substitutes another engine). Added name collision protection across distinct canonical identities. Implemented `resolve_shortcut` mapping `biomech_sit_to_stand` (never falls back to gait) and `biomech_gait` to `biomech_exercise`, engine dashboards (`drake_dashboard`, `mujoco_dashboard`, `pinocchio_dashboard`) to engine advanced modes, and `movement_optimizer` / `tools_movement_optimizer` to unified task with #9406 authority resolution. Updated `SharedRepoHandler` with `get_missing_checkout_diagnostic` to emit actionable diagnostics when sibling repos are missing. Dynamicized exercise names in `exercise_dashboard.py`.",
+          "next_step": "Commit with conventional commit, push branch, open PR, and arm auto-merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T13:37:29Z",
+      "cited_pr_numbers": [10541],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10541,
+          "mergedAt": "2026-09-20T13:37:28Z",
+          "merge_commit": "3ef6f91c33057fb1e6dd4817996e82bc834d8299",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10482,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "3beb56c56451029b3db0e4fdf7db85ca323179e71b0db7db7488d48651402425"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10482 (MV-06, epic #10476)",
+          "pr_field": "#10504",
+          "branch": "feat/10482-forces-torques-counterfactual",
+          "paths": "src/api/models/requests.py; src/api/routes/analysis.py; src/api/services/simulation_service.py; src/shared/python/motion_matching/candidate_session.py; src/shared/python/motion_matching/counterfactual.py; src/shared/python/motion_matching/force_torque.py; src/tools/tour_matching_viewer/force_inspection.py; src/tools/tour_matching_viewer/gui.py; tests/unit/api/test_candidate_session_analysis_routes.py; tests/unit/motion_matching/test_candidate_session_forces.py; tests/unit/motion_matching/test_counterfactual.py; tests/unit/motion_matching/test_force_torque.py; tests/unit/tools/test_tour_matching_viewer_forces.py",
+          "last_verified": "2026-09-19 at HEAD (30 unit tests pass across force_torque, counterfactual, candidate_session_forces, candidate_session_analysis_routes, and tour_matching_viewer_forces; ruff clean; mypy 0 errors; Law of Demeter zero-growth clean; DRY gate clean; divergence inventory updated).",
+          "summary": "Implemented `SpatialWrench` and rigid-body `transform_wrench` with rotational mapping and cross-product moment arm calculation ($\\tau_B = R \\tau_A + r \\times (R F_A)$). Implemented `compute_center_of_pressure` with strict threshold semantics ($F_z \\le 5.0$ N returns `None` rather than fabricated zeros). Implemented `AccelerationDecomposition` (gravity, drift, control, ZTCF, ZVCF) and `create_counterfactual_rollout` with cryptographic baseline immutability assertion (SHA-256 byte check before and after execution). Enhanced `CandidateSession` with `get_wrench_at`, `get_center_of_pressure`, `get_joint_torques_at`, `get_closure_residual_at`, and `create_counterfactual_fork`. Added API endpoints `GET /analysis/candidate/forces` and `POST /analysis/candidate/counterfactual` (failing closed with 409 Conflict when session is absent or kinematic-only). Integrated `ForceInspectionWidget` into Tour Matching Viewer GUI synchronized with physical playback time.",
+          "next_step": "Create PR #10504, enable auto-merge, and monitor until merged into main."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-20T02:13:10Z",
+      "cited_pr_numbers": [10504],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10505,
+          "mergedAt": "2026-09-20T02:13:09Z",
+          "merge_commit": "4cfdba7ce448ee0d236c1d8082052c10f4f3ad07",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10460,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "ba862f215d903dd002d677642ddb49a74a97b0e7688a8085454f59fdc7416731"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10460",
+          "pr_field": "#10668",
+          "branch": "feat/10460-consume-tools-gspro-codec",
+          "paths": "src/shared/python/golf_simulator/adapters/gspro/codec.py; tests/unit/golf_simulator/test_gspro_codec.py; vendor/ud-tools; Cargo.toml; requirements-tools.txt; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md",
+          "last_verified": "2026-09-18 at HEAD (SELF; TDD RED captured then green verified; 106 golf simulator unit and integration tests pass; ruff, black, mypy clean with 0 errors).",
+          "summary": "Upgraded vendor/ud-tools pin to Tools commit a9ed0e7c5c6905b1164082659051d6381068052d carrying shared GSPro Open Connect v1 codec (Tools#5228). Refactored UpstreamDrift's gspro adapter codec to retain ShotEnvelope canonical SI/radian unit conversion and profile handling, but delegate wire payload encoding and response decoding to shared.python.launch_monitor.gspro_connect.",
+          "next_step": "Commit, push, open PR referencing Closes #10460, and arm auto-merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-19T03:45:54Z",
+      "cited_pr_numbers": [10668],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10463,
+          "mergedAt": "2026-09-19T03:45:53Z",
+          "merge_commit": "db31d1f364903c4bb0451b049f3e9e98a3246b1f",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10233,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "2e80288491d39f38e7d68dcf8b76bfa4f358a56f4222ede7482ae8ab00b6faf1"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "codex",
+          "issue_field": "#10233 (ST-04 / epic #10122)",
+          "pr_field": "#10450 (https://github.com/D-sorganization/UpstreamDrift/pull/10450)",
+          "branch": "fix/shadow-tracker-10233-pr",
+          "paths": "src/shared/python/shadow_tracker/segmentation.py; tests/unit/shadow_tracker/test_revision_persistence.py; docs/plans/shadow_tracker/",
+          "last_verified": "2026-09-18 on c76d6f02c (remote-main base); 306 tests pass; CI run 35376242857 identifies AnyIO 4.12.1 vulnerabilities; SELF upgrades both locks to 4.14.2; scoped Ruff, file-size and context checks pass.",
+          "summary": "Complete-record idempotence, same-observation parents, current selection and strict atomic provider snapshots with legacy reading. Renderer preserved.",
+          "next_step": "Validate PR #10450 CI and merge through branch protection."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-17T02:37:11Z",
+      "cited_pr_numbers": [10450],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10283,
+          "mergedAt": "2026-09-17T02:37:10Z",
+          "merge_commit": "dd243d392232003b15db389d54d962cffe6fad14",
+          "state": "MERGED"
+        },
+        {
+          "number": 10450,
+          "mergedAt": "2026-09-18T18:20:04Z",
+          "merge_commit": "b455aa4fd8d2a8aa094af92d505f6b7bdb700805",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10403,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "3ce646494ee192155a4c8a8afaad6b748aec5d9b5b4e310b3cc0c45a9547d570"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10403 (epic #10394 / #10363, OG-09)",
+          "pr_field": "#10668",
+          "branch": "feat/og09-golf-native-viewer-package-10403",
+          "paths": "src/engines/physics_engines/opensim/python/tour_matching/view_package.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_view_package.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md",
+          "last_verified": "2026-09-18 at HEAD (SELF; TDD RED fixtures established; blank motion name raises InvalidMotionSpecificationError; invalid/inverted frame range raises InvalidMotionSpecificationError; missing club asset raises MissingClubAssetError; model/motion hash mismatch raises ModelMotionHashMismatchError; torque baseline truthfully sets muscles_available=False; muscle variant sets muscles_available=True; reset to address verifies bilateral grip closure <= 5 mm and canonical face-on viewpoint; scrub to time linearly interpolates coordinates across swing horizon; motion status explicitly distinguishes IK_PLAYBACK, REJECTED_REPLAY, and ACCEPTED_DYNAMIC; 4 canonical milestone stills generated [address, top, impact, finish]; reproducible video exported; deterministic SHA-256 package digest; all 12 view package tests pass; all 139 opensim unit tests pass; ruff, mypy, lod clean)",
+          "summary": "Packaged native viewer artifacts and release evidence (`view_package.py`) for the OpenSim golf humanoid. Provides visual layer options, truth-in-advertising muscle toggles, swing milestone stills, reproducible video animation export, reset-to-address with grip closure verification, continuous scrubbing, launcher entry generation, and deterministic package hashing. Completes all 9 child issues of OpenSim epic #10394.",
+          "next_step": "Commit, push, open PR referencing Closes #10403, release lease, conclude OpenSim epic #10394."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-18T05:56:02Z",
+      "cited_pr_numbers": [10668],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10414,
+          "mergedAt": "2026-09-18T05:55:59Z",
+          "merge_commit": "9091b3deebd90df90f400e089c32bd29d2100016",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": "Viewer completion does not establish muscle qualification.",
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10401,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "35cf9e6c9fbc1e2f32e44ab029eade6f2d62aadf8992bcf8ba8d1520c924742c"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10401 (epic #10394 / #10363, OG-07)",
+          "pr_field": "#10412",
+          "branch": "feat/og07-versioned-model-variants-10401",
+          "paths": "src/engines/physics_engines/opensim/python/tour_matching/model_variants.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_model_variants.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md",
+          "last_verified": "2026-09-18 at HEAD (SELF; TDD RED fixtures established; loading torque controls into muscle variant raises IncompatibleActuationError; querying unknown state raises UnknownStateError; missing geometry mesh raises MissingGeometryAssetError; stale/mismatched model hash raises StaleModelHashError; unsupported capability raises UnsupportedCapabilityError; identity variant preserves forward kinematics; torque and muscle variants share identical GolfModelAdapter API; adapter shields callers from OpenSim C++ SDK objects; 8 variant tests pass; all 114 opensim unit tests pass; ruff, mypy, lod, file-budget clean)",
+          "summary": "Implemented versioned OpenSim model variants and explicit actuation capabilities (`model_variants.py`) via composition: AnatomicalSkeletonSpec + GolfEquipmentSpec + Calibration + ActuationProfile (torque vs. muscle/tendon). Provides typed error boundaries and a clean adapter API without SDK leakage.",
+          "next_step": "Land PR #10412 referencing Closes #10401."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-18T05:56:02Z",
+      "cited_pr_numbers": [10412],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10414,
+          "mergedAt": "2026-09-18T05:55:59Z",
+          "merge_commit": "9091b3deebd90df90f400e089c32bd29d2100016",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10397,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "b175e50569b7f914feeca8e7f9ac7a59a5975833a2b54d26a5e38733bd2b3b0a"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10397 (epic #10394 / #10363, OG-03)",
+          "pr_field": "#10405",
+          "branch": "feat/og03-visible-golf-club-10397",
+          "paths": "src/engines/physics_engines/opensim/python/tour_matching/club_geometry.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_club_geometry.py; SPEC.md",
+          "last_verified": "2026-09-18 at HEAD (SELF; TDD RED fixtures established; parameterized club visual geometry generator implemented; shaft and head mesh elements attached with ClubSpec scaling; mass, com, and inertia preserved; grip and clubhead offset frames aligned with OpenSim conventions; 13 pure unit tests passed; ruff, mypy, lod, file-budget clean)",
+          "summary": "Added parameterized visual geometry attachment (`attach_visual_club`) and frame calculation (`get_club_frame_offsets`) for the OpenSim Club body according to shared ClubSpec (Driver and 7-iron). Solves the missing visual club defect while strictly preserving physical mass properties (0.320 kg, COM, inertia). Fully verified against anatomical baseline fixtures and qualification gates.",
+          "next_step": "Land PR #10405 referencing Closes #10397."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-18T05:56:01Z",
+      "cited_pr_numbers": [10405],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10414,
+          "mergedAt": "2026-09-18T05:55:59Z",
+          "merge_commit": "9091b3deebd90df90f400e089c32bd29d2100016",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10395,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "a09356f133ec2671e2bc59f6517de37024d8bbabe2293ec3d96d2e312cedd0e4"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_review",
+          "owner": "local",
+          "issue_field": "#10395 (epic #10394 / #10363, OG-01)",
+          "pr_field": "#10404",
+          "branch": "feat/og01-freeze-anatomical-baseline-10395",
+          "paths": "src/engines/physics_engines/opensim/python/tour_matching/model_audit.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; src/engines/physics_engines/opensim/python/tour_matching/cli.py; tests/opensim/test_anatomical_baseline_fixtures.py; tests/opensim/test_opensim_os0_qualification.py",
+          "last_verified": "2026-09-18 at 94d593cf1 (SELF; pure model audit implemented test-first; baseline SHA-256 digests and structural counts verified; missing club and unscaled mesh defects reproduced with RED fixtures; fail-closed qualification gates verified; 22 pure tests passed; ruff, mypy, lod, file-budget clean)",
+          "summary": "Delivered pure-Python OpenSim model geometry and structural qualification audit under OG-01. Verifies SHA-256 digests against pinned baseline models, audits body/coordinate/actuator counts (23/39/39/0), detects empty attached_geometry on equipment bodies (Club body) and unscaled arm meshes (scale factors 1 1 1 on humerus). Implements fail-closed `verify_model_qualification` gate with DbC assertions and structured receipts via `cli.py qualify`.",
+          "next_step": "Land PR #10404 referencing Closes #10395."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-18T05:16:19Z",
+      "cited_pr_numbers": [10404],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10404,
+          "mergedAt": "2026-09-18T05:16:18Z",
+          "merge_commit": "1d302ba81e5f63dbc88112e2e80c088f09adcdfc",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10323,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "5e97f308b1bb77f959372c505d24748d12fb34eb802458805880deeb91ecc8a7"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "local",
+          "issue_field": "#10323 (epic #10363 MS-02)",
+          "pr_field": "open",
+          "branch": "feat/ms02-matched-swing-run-ledger-10323",
+          "paths": "src/shared/python/motion_matching/ledger.py; src/shared/python/motion_matching/ledger_schema.py; src/shared/python/motion_matching/**main**.py; src/shared/python/motion_matching/leaderboard.py; src/tools/motion_matching/pipeline.py; reports/matched_swing_ledger.json; tests/unit/motion_matching/test_ledger.py",
+          "last_verified": "2026-09-17 at HEAD (SELF; scan discovers and classifies all 85 committed receipts across evidence roots; tests/unit/motion_matching/test_ledger.py 7 passed; architecture budget OK, ruff and ruff format clean)",
+          "summary": "Added matched-swing run ledger discovering, classifying, and indexing execution receipts across ground-support, native Simscape, OpenSim, calibration, and parity evidence trees. Deterministic serialization into reports/matched_swing_ledger.json, CLI subcommand `ledger --write`, and `list_runs()` API for tools.",
+          "next_step": "Open PR referencing Closes #10323, enable auto-merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-17T23:55:10Z",
+      "cited_pr_numbers": [],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10387,
+          "mergedAt": "2026-09-17T23:55:09Z",
+          "merge_commit": "94d593cf119ffeceaad7658ef0502c9c22e6ea89",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 10334,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "313df7cd0e18309ea9ac7336752ea6048dc9f5093702093c9bbf9c53c657e5be"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "claude",
+          "issue_field": "#10334 (MS-15, epic #10363)",
+          "pr_field": "#10668",
+          "branch": "feat/10334-matched-swing-candidate",
+          "paths": "src/shared/python/motion_matching/candidate.py; src/shared/python/motion_matching/candidate_io.py; src/shared/python/motion_matching/candidate_convert.py; src/tools/tour_matching_viewer/core.py; src/shared/python/motion_matching/cross_engine_replay.py; docs/development/full_body_models/CANDIDATES.md; tests/unit/motion_matching/test_candidate.py",
+          "last_verified": "2026-09-19 at HEAD (SELF; candidate package defined with kinematic and dynamic profiles, immutable arrays, and SHA-256 tamper-proof checksumming; lossless converters for returned81 replays, OpenSim MOT files, and ground-support IK/dynamics; 24 candidate and viewer unit tests pass 100%; architecture budget, ruff, mypy clean)",
+          "summary": "Implemented unified MatchedSwingCandidate versioned package (matched-swing-candidate-v1) supporting distinct kinematic and dynamic profiles, full-body generalized coordinates and tangent velocities (nq != nv), virtual work power consistency verification, immutable arrays, and SHA-256 array tamper detection. Implemented converters for legacy returned81 replays and OpenSim MOT files, updated viewer loader, and authored complete CANDIDATES.md schema document.",
+          "next_step": "Run CI checks, commit, push, open PR referencing Closes #10334, enable auto-merge, release lease."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-09-19T17:02:01Z",
+      "cited_pr_numbers": [10668],
+      "verified_closing_merged_prs": [
+        {
+          "number": 10475,
+          "mergedAt": "2026-09-19T17:02:00Z",
+          "merge_commit": "8d452e09f8443b540c0de8fe9cd324f99e76381c",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    },
+    {
+      "issue": 8766,
+      "source_occurrences": 1,
+      "source_blocks_sha256": [
+        "3964a0f102260fe59f98f18a61284db82bd14d2c1b983d375cb885859dd55938"
+      ],
+      "source_blocks_path": "DEVELOPMENT_LOG_RECONCILIATION_CANDIDATES_SOURCE_20261011.md",
+      "source_fields": [
+        {
+          "state": "in_progress",
+          "owner": "antigravity",
+          "issue_field": "#8766",
+          "pr_field": "#10035",
+          "branch": "fix/8766-burndown-launcher-67",
+          "paths": "scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md, tests/launchers/test_golf_launcher.py, docs/agent_context/",
+          "last_verified": "2026-09-12 (`f712806df`)",
+          "summary": "Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), 29 shared Python / physics tests (#10015), 16 AI adapter / launcher tests (#10026), 20 safe launcher / pipeline / model sources tests (#10031), 13 CORS tests (#10033), and 32 security and module docstring tests (#10034). This tranche burns down 67 quarantined tests across tests/launchers/test_golf_launcher.py (25), tests/launchers/test_launcher_ui_setup.py (21), tests/launchers/test_launcher_process_manager.py (17), and tests/launchers/test_library_widget.py (4), ratcheting debt down from 298 to 231.",
+          "next_step": "Open PR, monitor CI checks, and merge."
+        }
+      ],
+      "github_reason": "completed_issue_linked_merged_pr_no_open_cited_pr",
+      "issue_state": "CLOSED",
+      "issue_closedAt": "2026-08-23T02:10:33Z",
+      "cited_pr_numbers": [10035],
+      "verified_closing_merged_prs": [
+        {
+          "number": 8997,
+          "mergedAt": "2026-08-23T02:10:32Z",
+          "merge_commit": "fe411260cab577dd197b54ad3eab4d9d9ffa4213",
+          "state": "MERGED"
+        }
+      ],
+      "closure_audit_sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb",
+      "proposed_disposition": "candidate for narrow metadata-only shipped transition after root review",
+      "evidence_gate": "Only the specific software/documentation delivery represented by this entry may be marked shipped; any unresolved physical, scientific, downstream, or follow-up scope remains explicit and active. Do not replace owner or next-step text with a generic value.",
+      "risk_note": null,
+      "transition_plan": "No edit yet. For an approved transition, preserve owner and scope, cite exact merged PR/date/SHA, retain any unresolved follow-up in an active record, and archive only via the standard helper."
+    }
+  ],
+  "guardrails": [
+    "Planning only; no canonical log mutation.",
+    "Closed issue and merged PR prove delivery/closure only, not scientific or physical qualification.",
+    "Do not auto-ship parent epics, duplicate scopes, or entries with unresolved follow-up.",
+    "Keep source owner, exact summary/scope, and unresolved next steps; split residual follow-up only with explicit evidence.",
+    "Do not alter WIP/size limits or checker behavior."
+  ]
+}

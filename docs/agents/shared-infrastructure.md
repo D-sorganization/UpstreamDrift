@@ -322,6 +322,12 @@ forward-dynamics matching. Design reference:
   `classify_body` (body name to anatomical part).
 - `geometry` — `lofted_segment` / `ellipsoid_mesh` smooth meshes.
 - `grip_pose` — the one two-hand grip definition (`DEFAULT_GRIP_POSE`, lead above trail, positions mirroring the spec `GripInterface`, spacing, V angles, overlap/interlock/ten-finger, `HAND_GRIP_ANCHOR_IN_HAND_M`). Engines import it; never keep per-engine hand offsets. Residual series: `grip_contact.closure_series` (`GripClosureSeries`, unavailable is `None`, never zero); report: `python3 -m scripts.grip_closure_report`.
+- `grip_hand_mesh` / `grip_hands` — curled-finger hand meshes wrapped on the grip
+  (`build_grip_hand_mesh`, hand-grip frame) and their placement on a `ClubAssembly`
+  grip in the club-body frame (`grip_hand_frame`, `grip_hand_meshes`,
+  `assembly_meshes_with_hands`). Draw the hands on the club body with the club;
+  MuJoCo (`appearance_layer`), MyoSuite and the Drake/Pinocchio MeshCat
+  backends (`native_viewer_export.backends._club`) already do.
 - `head` — parametric visible head (skull, eyes, brows, nose, mouth, ears, neck,
   optional hair or cap), `build_head_parts`, `resolve_head_anchor` (the spec
   `Head` body on the neck at the cervicale; head length from de Leva), and

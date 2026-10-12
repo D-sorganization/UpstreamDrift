@@ -68,3 +68,6 @@ docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_
 docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/drake-zero-effort.log -text
 docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/drake-zero-effort.meta.txt -text
 docs/development/feedback_controls/experiments/drake_candidate_lift_zero_effort_20261012_root_attempt1/observers/*.snapshot -text
+
+# Preserve byte-exact reconciliation evidence and source snapshots.
+docs/development/evidence/devlog_reconciliation_11935_20261011/** -text

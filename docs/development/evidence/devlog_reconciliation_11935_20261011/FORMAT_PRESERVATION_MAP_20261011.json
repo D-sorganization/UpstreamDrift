@@ -1,0 +1,137 @@
+{
+  "title": "Development Log formatter preservation map",
+  "date": "2026-10-11",
+  "json_pairs": [
+    {
+      "raw": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_10943_MANUAL_MERGE_ASSOCIATION_20261011.json.raw.snapshot",
+        "bytes": 1094,
+        "sha256": "b5abd7bee31e9aaa944acc038bde9110cf988e3c75bd7490990618599fb15bee"
+      },
+      "presentation": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_10943_MANUAL_MERGE_ASSOCIATION_20261011.json",
+        "bytes": 1086,
+        "sha256": "0ccfddc74e3bf539017fc27f32876933d14cf85a6f5ba3b4ac89a7995a10ff39"
+      },
+      "semantic_json_equal": true
+    },
+    {
+      "raw": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/GITHUB_METADATA_11175_10799_11285_20261011.json.raw.snapshot",
+        "bytes": 17764,
+        "sha256": "733201266d9800ea6b057dd401f03c782964862448c705836554bed614886ced"
+      },
+      "presentation": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/GITHUB_METADATA_11175_10799_11285_20261011.json",
+        "bytes": 22465,
+        "sha256": "aae6da997619068af2c1998b3bb40b8f458c34897ed25a9d4a9b5fb53d54caa4"
+      },
+      "semantic_json_equal": true
+    },
+    {
+      "raw": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/dl-full-source-validator-audit.json.raw.snapshot",
+        "bytes": 342983,
+        "sha256": "4a05c0365f69b6efd97d500a36bc4520984fd48ef0e183b59eadf6ce0c901ab6"
+      },
+      "presentation": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/dl-full-source-validator-audit.json",
+        "bytes": 338156,
+        "sha256": "a6ee001db1a9f6c94afa78d6429b4858ae15974ddaed608311277215484b2df7"
+      },
+      "semantic_json_equal": true
+    },
+    {
+      "raw": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_66_CANDIDATE_PLAN_20261011.json.raw.snapshot",
+        "bytes": 195941,
+        "sha256": "013a8dbcc9cae87f67be896c8ae6b1075c56e531b2ceb92b1d4208545ff14b4c"
+      },
+      "presentation": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_66_CANDIDATE_PLAN_20261011.json",
+        "bytes": 194869,
+        "sha256": "20919d178c6137be0e59f39cfb85a817a5346561fab944f96c5a185b70023307"
+      },
+      "semantic_json_equal": true
+    },
+    {
+      "raw": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/dl-metadata-root-response-20261011.json.raw.snapshot",
+        "bytes": 17764,
+        "sha256": "733201266d9800ea6b057dd401f03c782964862448c705836554bed614886ced"
+      },
+      "presentation": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/dl-metadata-root-response-20261011.json",
+        "bytes": 22465,
+        "sha256": "aae6da997619068af2c1998b3bb40b8f458c34897ed25a9d4a9b5fb53d54caa4"
+      },
+      "semantic_json_equal": true
+    },
+    {
+      "raw": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/dl-10943-11719-response.json.raw.snapshot",
+        "bytes": 1213,
+        "sha256": "b496bd3dfe669b242b6ce2ff3dcd71887ef8be248114399d4ce4549d7ac4e396"
+      },
+      "presentation": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/dl-10943-11719-response.json",
+        "bytes": 1704,
+        "sha256": "f9c0d44a0a186fbb63f253c4c76866423d7c625b2f0fcd26bdc36ec189c54cdf"
+      },
+      "semantic_json_equal": true
+    },
+    {
+      "raw": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_66_APPLIED_20261011.json.raw.snapshot",
+        "bytes": 40071,
+        "sha256": "917383c07be4eeeeb73a792682cd512a6e7e25195414e0f154205e21656cb1c7"
+      },
+      "presentation": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_66_APPLIED_20261011.json",
+        "bytes": 40063,
+        "sha256": "42e247006cb9d86e037092e51c202ad8c3a4d9ac73148a5f406fc6c925e3e65a"
+      },
+      "semantic_json_equal": true
+    },
+    {
+      "raw": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/dl-github-closure-audit.json.raw.snapshot",
+        "bytes": 118358,
+        "sha256": "c0e349d78ce4d26287ef124287fc932337b625a21c3ace7c87deb4cce3fb44eb"
+      },
+      "presentation": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/dl-github-closure-audit.json",
+        "bytes": 111753,
+        "sha256": "aec0ec9ff45f8ad497925d41d201e080ffa2e927e96acbfa5473074259128f60"
+      },
+      "semantic_json_equal": true
+    },
+    {
+      "raw": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json.raw.snapshot",
+        "bytes": 7306,
+        "sha256": "65c3e0a973e25e77583720f0a1e9abb70501d39b8ccaa44823f4861acda82800"
+      },
+      "presentation": {
+        "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json",
+        "bytes": 7216,
+        "sha256": "e28f864d6cfaea7137bd16cdc9fde02825e69a7acc5b25e5f737598bc6e8b98a"
+      },
+      "semantic_json_equal": true
+    }
+  ],
+  "archive_pair": {
+    "raw": {
+      "path": "evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_ARCHIVE_2026_PRE_FORMAT_20261011.md.snapshot",
+      "bytes": 218447,
+      "sha256": "7a8fadb4f0bcf3b01f132d9ee7eb67e111291c86c27e63d1284874090fd200ae"
+    },
+    "presentation": {
+      "path": "DEVELOPMENT_LOG_ARCHIVE_2026.md",
+      "bytes": 218446,
+      "sha256": "ff19451640b913ad056967f9a6c9e5cb5af813c9b7ba90262709aa677307ddf8"
+    },
+    "semantic_markdown_equal": null,
+    "note": "Prettier-formatted presentation; exact pre-format bytes retained separately."
+  }
+}

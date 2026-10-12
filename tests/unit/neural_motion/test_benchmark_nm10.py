@@ -342,6 +342,102 @@ def test_performance_baseline_integration() -> None:
     assert record["status"] == "PROMOTED"
 
 
+_GOOD_LAT = LatencySummary(0.400, 0.800, 0.2, 1.2, 0.45, 0.1, 50)
+_FAST_LAT = LatencySummary(0.100, 0.400, 0.05, 0.6, 0.12, 0.05, 50)
+_GOOD_MET = AcceptedMatchMetrics(80, 20, 0.001, 0.002, 0.95, 5.0, 100.0)
+
+
+def _gate(**overrides: object):  # type: ignore[no-untyped-def]
+    kwargs: dict[str, object] = {
+        "baseline_latency": _GOOD_LAT,
+        "candidate_latency": _FAST_LAT,
+        "baseline_metrics": _GOOD_MET,
+        "candidate_metrics": _GOOD_MET,
+    }
+    kwargs.update(overrides)
+    return evaluate_promotion_gate(**kwargs)  # type: ignore[arg-type]
+
+
+def _assert_refused(result: object, fragment: str) -> None:
+    assert result.decision == PromotionDecision.RESEARCH_ONLY  # type: ignore[attr-defined]
+    assert result.passed is False  # type: ignore[attr-defined]
+    assert any(fragment in r.lower() for r in result.failure_reasons)  # type: ignore[attr-defined]
+
+
+@pytest.mark.unit
+def test_gate_baseline_comparable_evidence_still_promotes() -> None:
+    """Positive control: comparable, non-zero evidence can promote (#12320)."""
+    assert _gate().decision == PromotionDecision.PROMOTED
+
+
+@pytest.mark.unit
+def test_gate_refuses_vacuous_one_sample_zero_attempt_evidence() -> None:
+    """RM#1840 repro: 1.0s vs 0.1s with all-zero metrics must not promote."""
+    zero = AcceptedMatchMetrics(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    result = _gate(
+        baseline_latency=LatencySummary.from_samples([1.0]),
+        candidate_latency=LatencySummary.from_samples([0.1]),
+        baseline_metrics=zero,
+        candidate_metrics=zero,
+    )
+    assert result.decision == PromotionDecision.RESEARCH_ONLY
+    assert result.passed is False
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "missing",
+    ["baseline_latency", "candidate_latency", "baseline_metrics", "candidate_metrics"],
+)
+def test_gate_refuses_missing_evidence(missing: str) -> None:
+    _assert_refused(_gate(**{missing: None}), "missing")
+
+
+@pytest.mark.unit
+def test_gate_refuses_zero_latency_samples() -> None:
+    empty = LatencySummary.from_samples([])
+    _assert_refused(_gate(candidate_latency=empty), "zero latency samples")
+    _assert_refused(_gate(baseline_latency=empty), "zero latency samples")
+
+
+@pytest.mark.unit
+def test_gate_refuses_zero_attempts() -> None:
+    zero = AcceptedMatchMetrics(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    _assert_refused(_gate(candidate_metrics=zero), "zero attempts")
+    _assert_refused(_gate(baseline_metrics=zero), "zero attempts")
+
+
+@pytest.mark.unit
+def test_gate_refuses_zero_accepted_examples() -> None:
+    none_accepted = AcceptedMatchMetrics(0, 100, 0.001, 0.002, 0.95, 5.0, 100.0)
+    _assert_refused(_gate(candidate_metrics=none_accepted), "zero accepted")
+    _assert_refused(_gate(baseline_metrics=none_accepted), "zero accepted")
+
+
+@pytest.mark.unit
+def test_gate_refuses_non_comparable_cohorts() -> None:
+    other_count = LatencySummary(0.100, 0.400, 0.05, 0.6, 0.12, 0.05, 49)
+    _assert_refused(_gate(candidate_latency=other_count), "non-comparable")
+    gpu = LatencySummary(0.100, 0.400, 0.05, 0.6, 0.12, 0.05, 50, is_gpu=True)
+    _assert_refused(_gate(candidate_latency=gpu), "non-comparable")
+    other_attempts = AcceptedMatchMetrics(90, 20, 0.001, 0.002, 0.95, 5.0, 100.0)
+    _assert_refused(_gate(candidate_metrics=other_attempts), "non-comparable")
+
+
+@pytest.mark.unit
+def test_runner_refuses_promotion_with_empty_candidate_samples() -> None:
+    timing = TimingBreakdown(0.001, 0.002, 0.003, 0.0, 0.004, 0.002, 0.001)
+    card = run_model_comparative_benchmark(
+        model_id="m",
+        method=BenchmarkMethod.LEARNED_PROPOSAL_POLISH,
+        interactive_samples_s=[],
+        timing_breakdown=timing,
+        metrics=_GOOD_MET,
+        baseline=MeasuredBaseline(_GOOD_LAT, _GOOD_MET, 1800.0, 10.0, 0.002, 0.0005),
+    )
+    assert card.promotion == PromotionDecision.RESEARCH_ONLY
+
+
 @pytest.mark.unit
 def test_runner_without_measured_baseline_or_costs_raises() -> None:
     """Runner must reject missing/derived baselines and unmeasured costs (#10960 P0-5)."""
@@ -382,7 +478,7 @@ def test_runner_without_measured_baseline_or_costs_raises() -> None:
 @pytest.mark.unit
 def test_runner_with_measured_baseline_and_costs_succeeds() -> None:
     """Runner constructs valid ModelBenchmarkCard with measured baseline and costs."""
-    samples = [0.05, 0.05, 0.05]
+    samples = [0.05] * 50
     timing = TimingBreakdown(0.001, 0.002, 0.003, 0.0, 0.004, 0.002, 0.001)
     metrics = AcceptedMatchMetrics(90, 10, 0.0005, 0.001, 0.98, 2.0, 100.0)
     base_lat = LatencySummary(0.20, 0.40, 0.10, 0.60, 0.22, 0.05, 50)

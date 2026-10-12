@@ -1,7 +1,7 @@
 """MuJoCo translation of an engine-agnostic appearance document.
 
 Emits ``<asset>`` textures/materials/meshes, smooth visual-only mesh geoms
-(skin, garments, shoes, club shaft, grip and mesh head), a skybox, a textured ground, shadowed
+(skin, garments, shoes, club shaft, grip, mesh head and grip hands), a skybox, a textured ground, shadowed
 studio lights and a 960x720 offscreen buffer. Every geom is class ``visual``
 (group 1, no contacts, zero mass), so inertias and dynamics are untouched.
 """
@@ -18,8 +18,8 @@ from src.shared.python.model_appearance import geometry, library
 from src.shared.python.model_appearance.club_assembly import (
     PART_MATERIALS,
     ClubAssembly,
-    assembly_meshes,
 )
+from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
 from src.shared.python.model_appearance.schema import (
     AppearanceDocument,
     Material,
@@ -161,10 +161,10 @@ def _mesh_to_mjcf(offset: np.ndarray, mesh: geometry.Mesh) -> geometry.Mesh:
 def _club_meshes(
     club: ClubAssembly, finish: str
 ) -> list[tuple[str, geometry.Mesh, str]]:
-    """Shaft, grip and mesh head (GCV-11) in the club-body frame."""
+    """Shaft, grip, mesh head (GCV-11) and both grip hands (OSV-2), club frame."""
     return [
         (label, mesh, PART_MATERIALS[label] or finish)
-        for label, mesh in assembly_meshes(club).items()
+        for label, mesh in assembly_meshes_with_hands(club).items()
     ]
 
 
@@ -353,10 +353,11 @@ def attach_club_meshes(
     club: ClubAssembly,
     finish: str = "satin_steel",
 ) -> int:
-    """Add only the shaft, grip and mesh head of ``club`` (plain visual layer).
+    """Add only the shaft, grip, mesh head and grip hands of ``club`` (plain layer).
 
     For the plain ``visual=True`` export, which keeps its capsule skeleton but
-    should still show the real head (GCV-11). Visual only, massless,
+    should still show the real head (GCV-11) and both hands wrapped on the
+    grip (OSV-2). Visual only, massless,
     non-colliding. Returns the number of meshes added.
     """
     doc = document_from_dict({"schema_version": "appearance-v1"})

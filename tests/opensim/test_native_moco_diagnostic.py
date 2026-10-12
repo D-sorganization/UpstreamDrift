@@ -85,6 +85,49 @@ def _request(
     )
 
 
+@pytest.mark.unit
+def test_legacy_request_without_finite_difference_uses_central_default(
+    muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
+) -> None:
+    """Legacy JSON omits the field but loads under the current typed identity."""
+    original = _request(muscle_fixture, tmp_path)
+    path = tmp_path / "legacy-request.json"
+    _write_request(original, path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["config"].pop("optim_finite_difference_scheme")
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    restored = load_native_moco_request(path)
+
+    assert restored.config.optim_finite_difference_scheme == "central"
+    assert restored.identity_sha256 == original.identity_sha256
+
+
+@pytest.mark.unit
+def test_finite_difference_config_changes_request_identity_and_json(
+    muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
+) -> None:
+    """The new typed setting is serialized and participates in request identity."""
+    original = _request(muscle_fixture, tmp_path)
+    forward = replace(
+        original,
+        config=replace(original.config, optim_finite_difference_scheme="forward"),
+    )
+    assert forward.identity_sha256 != original.identity_sha256
+
+    request_path = tmp_path / "forward-request.json"
+    _write_request(forward, request_path)
+    restored = load_native_moco_request(request_path)
+    assert restored.config.optim_finite_difference_scheme == "forward"
+    assert restored.identity_sha256 == forward.identity_sha256
+    payload = json.loads(request_path.read_text(encoding="utf-8"))
+    payload["config"]["optim_finite_difference_scheme"] = "__unsupported__"
+    invalid_path = tmp_path / "invalid-finite-difference-request.json"
+    invalid_path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="optim_finite_difference_scheme"):
+        load_native_moco_request(invalid_path)
+
+
 def test_opt_in_solves_and_replays_without_claiming_passive_admission(
     muscle_fixture: tuple[Path, dict[str, float]], tmp_path: Path
 ) -> None:
