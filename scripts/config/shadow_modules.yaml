@@ -81,9 +81,6 @@ shadows:
   sidekick:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  signal_toolkit:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   theme:
     tracking_issue: 5623
     sunset_date: "2026-12-31"

@@ -82,6 +82,13 @@ core and exception imports to the pinned Tools provider. Use the public
 `sidekick.data_processing` exports; the [boundary reference](../development/data_processing_provider_boundary.md)
 records class identity, calculation behavior, and reproduction checks.
 
+### Signal Provider Boundary
+
+Use the pinned Tools `signal_toolkit` public exports through the canonical
+shared namespace. UpstreamDrift's split seam retains its biomechanical
+`signal_processing.py` extension; the [boundary reference](../development/signal_provider_boundary.md)
+records import identity, fitting compatibility and reproduction checks.
+
 ### Motion Matching (The Big One)
 
 `src/shared/python/motion_matching/`

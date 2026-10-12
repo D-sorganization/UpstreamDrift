@@ -14,7 +14,7 @@
 ## In-Flight Branch Stacking and Dependencies
 
 - **Phase 1 PR #11941**: Previously armed on `codex/shot-pattern-analysis`; do not touch its state.
-- **Tools Pin**: Current integration gitlink is `6b6e4be55e7086a33db43b36d2632765be619bde`; exact submodule initialized for local tests. Historical evidence keeps its original pins.
+- **Tools Pin**: Paired local candidate is `0436d983018181efb235df52ba4a16f0406ef948`, unified with Cargo and Python dependency; it is not yet published. Final integration must pin protected merged Tools main and reinstall that exact runtime. Historical evidence keeps its original pins.
 - **Frozen Producer**: Presentation commit `4023111d2aaf8b20449a36f8691a295f4a94ceff` retains historical Tools pin `3678409`. Do not install, refresh receipts, or rerun it.
 - **Artifact Routing**: Package `supplement_report_v2_layout_repair` but restore it as `supplement_report_v1` in the reader publication tree, preserving accepted report links and keeping the original study baseline intact.
 
@@ -37,7 +37,7 @@
 
 ## Do-Not List and Next Steps
 
-- **Successor Integration**: Own branch `codex/shot-pattern-safe-followup` reconciles remote PR head `7375b888e2` (including its newer main merges) and the actual `main` conflict locally; no successor push has occurred. #11935 is resolved by merged #12337. The 28-file test-layout migration, immutable stability inputs, and separate nonlinear protocol amendment are implemented and reviewed. The latest complete canonical gate failed with 7,180 passes and 36 failures; subsequent test/API/gravity fixes and exact environment-bound adapter golden receipts are committed. The provider retirement is committed and reviewed; the upstream Tools signal fix passes source gates but remains blocked by its inherited development-log policy; rerun the complete canonical gate after those changes and reviewed inventory refreshes. All 126 development-lock pins match. See [Successor Progress](docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/progress.json).
+- **Successor Integration**: Own branch `codex/shot-pattern-safe-followup` reconciles remote PR head `7375b888e2` (including its newer main merges) and the actual `main` conflict locally; no successor push has occurred. #11935 is resolved by merged #12337. The 28-file test-layout migration, immutable stability inputs, and separate nonlinear protocol amendment are implemented and reviewed. The latest complete canonical gate failed with 7,180 passes and 36 failures; subsequent test/API/gravity fixes and exact environment-bound adapter golden receipts are committed. Data Processing retirement is committed; the Signal split-seam candidate is Astra-reviewed with 557 passes and 27 existing contract skips. RM migration PR #2082 is merged; Tools is applying its separately approved lossless log mapping before its gate/PR. Final published provider pin and complete canonical gate remain pending. All 126 development-lock pins match. See [Successor Progress](docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/progress.json).
 
 - Preserve frozen science, baseline graphics, peer records, and armed Phase 1 PR state.
 - Do not claim player calibration, isolated causal curvature benefit, per-round strokes gained, or successful compilation in the built-in LaTeX editor.

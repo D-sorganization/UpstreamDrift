@@ -77,6 +77,7 @@ REDIRECTED_ROOTS: dict[str, Path | None] = {
     "safe_eval": None,
     "safe_pandas_eval": None,
     "scripting": None,
+    "signal_toolkit": _UD_SHARED_ROOT / "signal_toolkit",
     "theme": _UD_SHARED_ROOT / "theme",
     "ui": _UD_SHARED_ROOT / "ui",
 }

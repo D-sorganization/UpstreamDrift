@@ -49,15 +49,15 @@ class TestApplySaturation:
         result = apply_saturation(sig, lower=-2.0, upper=2.0, mode=SaturationMode.CUBIC)
         assert isinstance(result, Signal)
 
-    def test_lower_gte_upper_raises(self) -> None:
+    def test_lower_greater_than_upper_raises(self) -> None:
         sig = _make_signal()
         with pytest.raises((ValueError, TypeError, AssertionError)):
             apply_saturation(sig, lower=1.0, upper=-1.0)
 
-    def test_lower_equals_upper_raises(self) -> None:
+    def test_equal_bounds_produce_constant_signal(self) -> None:
         sig = _make_signal()
-        with pytest.raises((ValueError, TypeError, AssertionError)):
-            apply_saturation(sig, lower=0.0, upper=0.0)
+        result = apply_saturation(sig, lower=2.0, upper=2.0)
+        np.testing.assert_array_equal(result.values, np.full_like(sig.values, 2.0))
 
     def test_limits_name_updated(self) -> None:
         sig = _make_signal()
@@ -106,10 +106,16 @@ class TestApplyRateLimiter:
         with pytest.raises((ValueError, TypeError, AssertionError)):
             apply_rate_limiter(sig, max_rate=-5.0)
 
-    def test_zero_max_rate_raises(self) -> None:
+    @pytest.mark.parametrize("smooth_transition", [False, True])
+    def test_zero_max_rate_holds_initial_value(self, smooth_transition: bool) -> None:
         sig = _make_signal()
-        with pytest.raises((ValueError, TypeError, AssertionError)):
-            apply_rate_limiter(sig, max_rate=0.0)
+        sig.values += 2.0
+        result = apply_rate_limiter(
+            sig, max_rate=0.0, smooth_transition=smooth_transition
+        )
+        np.testing.assert_array_equal(
+            result.values, np.full_like(sig.values, sig.values[0])
+        )
 
     def test_first_value_preserved(self) -> None:
         t = np.linspace(0.0, 1.0, 100)

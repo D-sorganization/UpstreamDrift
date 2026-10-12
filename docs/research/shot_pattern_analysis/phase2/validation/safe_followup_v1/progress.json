@@ -431,7 +431,7 @@
     "local_commit": "0c43d91539",
     "review": "Astra approved source/test fix",
     "local_gates": "339 affected tests pass; Ruff, mypy, consistency collection, fragment, import and workflow gates pass; nine manual gates pass with unapproved publication preserved. Canonical RM-6 EXIT1 only inherited 76 development-log findings identical on Tools main.",
-    "status": "No push; user scope clarification pending for separate governed migration. No tolerance waiver or direct shared-log edit.",
+    "status": "User authorized governed cross-repository repair. RM PR2082 merged db97f51573889f2a82b33562785735b3f801c24f with protected CI; Tools approved mapping is being applied through the official tool, no direct manual shared-log edit.",
     "receipt": {
       "receipt": "tools-signal-source-gates-green-log-policy-failed.txt.gz",
       "sha256": "ccb63bc6b778d8aa3184930b9a767e4778356829fa1e93c99504517d7f7864a0",
@@ -441,7 +441,8 @@
       "receipt": "tools-log-baseline-76-findings.txt.gz",
       "sha256": "278df3621cd2da8af9efc7f00b6b86ad4a7acc549e84052ca877ff5bee698f2e",
       "raw_sha256": "3f07ea9ec2202a482e5e77c3e83d84db713e183d29a041063f6572a8ae4999b8"
-    }
+    },
+    "candidate_commit": "0436d983018181efb235df52ba4a16f0406ef948"
   },
   "signal_provider_bridge_experiment": {
     "source_commit": "cf60b1738d",
@@ -455,5 +456,66 @@
     "agent_context": "PASS with documented pinned-provider PYTHONPATH; initial bare environment had no agent_context module and is not acceptance",
     "development_log": "PASS; 21-entry pre-existing portfolio WIP warning",
     "manual_governance": "PASS structurally:63 QMD,0 registered calculations, release blocked-inventory-required; no release approval"
+  },
+  "signal_provider_candidate": {
+    "pin": "0436d983018181efb235df52ba4a16f0406ef948",
+    "status": "Paired local candidate only; Tools provider is not yet merged/published. Unified gitlink, Cargo and Python dependency pins are staged. No successor push or final acceptance.",
+    "implementation": "Retired all27 overlapping files (26Python plus py.typed), retained UD-only signal_processing.py on canonical split seam. Eight deleted embedded test files preserved byte-identically in provider.",
+    "review": "Astra approved candidate seam, fitting compatibility, alias fix and test-contract corrections. No formula or tolerance change.",
+    "tests": "557 passed,27 existing vendor-contract skips; all3 fresh-process import orders and original3 optimized-mode regressions pass. Four stale solver_status tests use the existing success bool; equal saturation bounds/zero rates now assert exact constant outputs, retaining invalid negative cases.",
+    "runtime": "Initial optimized subprocesses loaded old shared files attributed to upstream-drift editable installation. Installed declared Tools candidate without dependency changes; installed core matches candidate source byte-for-byte. Final runtime must be reinstalled from protected published pin.",
+    "registered_boundary": "Read project-task-native-replay contract and native provider/admission/private loader; only Signal redirect changed.63 portable tests passed,122 SDK-dependent skips. Recorded specific code review; no native availability, physical qualification or reuse of old pin-specific acceptance claimed.",
+    "receipts": {
+      "signal-boundary-red": {
+        "receipt": "signal-boundary-red.txt.gz",
+        "sha256": "dcd73a720ead3f79977e25ccd8e2d6b82f510294d092b2f40bb2a2cf953f9cae",
+        "raw_sha256": "0f18ba33f332be868fe3d122e27215be5c4f7ff114e768a1985f20f3421d1c31"
+      },
+      "signal-boundary-old-pin": {
+        "receipt": "signal-boundary-old-pin.txt.gz",
+        "sha256": "9c872f528a67a17c53715110a9eed13b464281cf166b09a0477ed5e87a82698a",
+        "raw_sha256": "70f59dfeb86524ecfe7f27bba2bc763bd1ac9c0de58ecec53d93fc6fa8673628"
+      },
+      "signal-boundary-candidate-green": {
+        "receipt": "signal-boundary-candidate-green.txt.gz",
+        "sha256": "99e2386825b7875c5aa6f6e2c7119ed3e6b0567e200d22cad7124e0fab9863a4",
+        "raw_sha256": "9accec04b7a501d91a4ad5eceed71cec28a3ea16ec3d8c1350df20f6b9b5e06f"
+      },
+      "signal-consumers-stale-runtime-and-api-failed": {
+        "receipt": "signal-consumers-stale-runtime-and-api-failed.txt.gz",
+        "sha256": "19e77b9a0be7ae4cf87dcfa600e43b294f079613cbd13e53a63553756dcab001",
+        "raw_sha256": "87e6f78cd8e55b6a9ab6a7e810857256330df652fe96aa3ae2704b197be3addc"
+      },
+      "signal-consumers-candidate-green": {
+        "receipt": "signal-consumers-candidate-green.txt.gz",
+        "sha256": "c5958af56b2acf85f6d2fbb9319949ec7292d090d3c4203d01be8f0f4e2ee2e1",
+        "raw_sha256": "59ce6cba0d6c19649ea245e7cd95e941ffa7332007454ecd87e502d41191d77b"
+      },
+      "signal-wide-contract-tests-failed": {
+        "receipt": "signal-wide-contract-tests-failed.txt.gz",
+        "sha256": "376c2a9aa695bb53b770c37a9982bc345527c9c4f2707537a6dc7f0eb6ea5ef7",
+        "raw_sha256": "e3967e093e8a699d73f414c813f25f417858643d68870339c14797556ce8e8a7"
+      },
+      "signal-wide-candidate-green": {
+        "receipt": "signal-wide-candidate-green.txt.gz",
+        "sha256": "c00884ce6bf24b251082cfe9fbccbdefb5d479af11f64a10408ce07b07635d66",
+        "raw_sha256": "9b49991754d6bfe3131a0fc4f9a92e8030218a62057922c3b22f9f3793733456"
+      },
+      "signal-candidate-runtime-install": {
+        "receipt": "signal-candidate-runtime-install.txt.gz",
+        "sha256": "98eed1643e4775141ecaa8eb56e2701838ea31f638ed82146f64b91f2cfecc06",
+        "raw_sha256": "f317eda0eeb7f4209e7ada9bc8894dfd5f36fc3dc0ec962a5b96f9431aba91c2"
+      },
+      "signal-registered-boundary": {
+        "receipt": "signal-registered-boundary.txt.gz",
+        "sha256": "012d6f29864f7a20978f7b5612d05928fed47e44728864083351d9186b39a298",
+        "raw_sha256": "96a55b3c5bd193c6fe3455dd0aa90d025952802468fb3e8e0e7a2bd8e3ff254c"
+      },
+      "signal-context-check-green": {
+        "receipt": "signal-context-check-green.txt.gz",
+        "sha256": "cc0a7147cfa2fe8bb1ea7d77d7996bc107d0d9d2ebfbc71796c709540d0d2976",
+        "raw_sha256": "9bf5d597ef1cce6c355e1727229cc29f9433e59b89ec5ce3fdd64387b7217581"
+      }
+    }
   }
 }
