@@ -126,6 +126,7 @@ penalty hold in all eight conditions under both statements.
 \centering
 \includegraphics[width=0.96\linewidth,height=0.86\textheight,keepaspectratio]{\detokenize{phase2/presentation_v2/summary.pdf}}
 \caption{Graphical Summary of Conditional Findings}
+\begin{minipage}{0.97\linewidth}\small Ranges are the minimum and maximum relative SG estimate across each club's eight selected conditions, plotted per modeled shot; multiply by 100 for the per-100-shot units of the tables (for example, 0.0078 per shot is +0.780 per 100 shots).\end{minipage}
 \end{figure}
 
 \subsection{How to Read the Figures}
@@ -643,8 +644,9 @@ Changing support can change the conditional population as well as the response;
 these estimands do not recover the unknown scores of unsupported outcomes.
 Failure probabilities remain separately reported, and unconditional expected
 scoring is unavailable without defensible terminal states for those failures.
-The saved mean-difference intervals use 500 paired bootstrap resamples of the
-appropriate common index set and empirical 2.5th/97.5th percentiles. Differences
+The headline mean-difference intervals use 2,000 paired bootstrap resamples of
+the appropriate common index set and empirical 2.5th/97.5th percentiles
+(Section~\ref{sec:head-band}); the frozen phase-two record used 500. Differences
 are formed before resampling. These pointwise intervals have finite bootstrap
 endpoint precision; a borderline zero crossing is not strong evidence of a
 stable sign. No multiplicity-adjusted discovery claim is made.
@@ -919,11 +921,22 @@ does not act and the two restitution laws give the same rebound.
 
 The selected analysis contains 24 zero-lean conditions and 72 pattern rows: three clubs, two curve scales, two shaft-twist SDs, and two noise profiles. Each pattern attempts 10,000 shared-seed deliveries. These are selected strata of the full matrix, not independent player trials.
 
-Protocol keys identify distinct source records: P = \path{original_primary/1}; OC = \path{original_control/1}; WP = \path{pw-primary-face-bounds/1}; WC = \path{pw-control-face-bounds/1}; DC = \path{driver-control-speed-bounds/1}.
+Protocol keys identify distinct source records:
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+P & \texttt{original\_primary/1} \\
+OC & \texttt{original\_control/1} \\
+WP & \texttt{pw-primary-face-bounds/1} \\
+WC & \texttt{pw-control-face-bounds/1} \\
+DC & \texttt{driver-control-speed-bounds/1} \\
+\end{tabular}
+\end{center}
 
 The four PW curve-$2$ headline conditions use WP. Original bounded-search unavailable records remain preserved. Original matching searches reference face $\pm3^\circ$; WP and WC use absolute face bounds $[-6,6]^\circ$ with speed factors $[0.75,1.25]$. These supplemental bounds were declared after feasibility review, before supplemental sampling; they are not the original protocol.
 
-Keys identify the cell names \texttt{\detokenize{<club>_lean0_curve<C>_rotation<SD>_<profile>}}. Club identifiers are \texttt{driver}, \texttt{seven\_iron}, and \texttt{pitching\_wedge}. The Shaft Only profile is \texttt{shaft\_only}; Combined is \texttt{combined2}. Combined adds path SD $0.5^\circ$, speed SD $2$ mph ($0.89408$ m/s), and horizontal and vertical strike SD $0.25$ in ($0.00635$ m) each, with independent primitive errors. Shaft Only holds the other primitive errors at zero. Neither profile makes delivered face SD equal to shaft-twist SD.
+Keys identify cell names of the form
+\begin{center}\texttt{\detokenize{<club>_lean0_curve<C>_rotation<SD>_<profile>}}.\end{center}
+\noindent Club identifiers are \texttt{driver}, \texttt{seven\_iron}, and \texttt{pitching\_wedge}. The Shaft Only profile is \texttt{shaft\_only}; Combined is \texttt{combined2}. Combined adds path SD $0.5^\circ$, speed SD $2$ mph ($0.89408$ m/s), and horizontal and vertical strike SD $0.25$ in ($0.00635$ m) each, with independent primitive errors. Shaft Only holds the other primitive errors at zero. Neither profile makes delivered face SD equal to shaft-twist SD.
 
 \input{generated/conditions}
 
