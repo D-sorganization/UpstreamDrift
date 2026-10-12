@@ -15,6 +15,7 @@ from src.shared.python.swing_comparison.motion import (
     SwingMotion,
     swing_motion_from_markers,
 )
+from tests.helpers.ezc3d_support import require_ezc3d
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 C3D_TA_DRIVER_PATH = REPO_ROOT / "data" / "C3D_TA_Driver.c3d"
@@ -25,10 +26,7 @@ def _load_capture_a_swing_motion() -> SwingMotion:
     if not C3D_TA_DRIVER_PATH.exists():
         pytest.skip(f"capture-A file not found at {C3D_TA_DRIVER_PATH}")
 
-    try:
-        import ezc3d
-    except ImportError:
-        pytest.skip("ezc3d not available for loading C3D capture")
+    ezc3d = require_ezc3d()
 
     c3d = ezc3d.c3d(str(C3D_TA_DRIVER_PATH))
     points = c3d["data"]["points"]  # (4, markers, frames)
