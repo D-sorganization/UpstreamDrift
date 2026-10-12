@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T08:44:56.859628+00:00",
+  "recorded_at_utc": "2026-10-12T08:48:32.897149+00:00",
   "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
@@ -624,6 +624,18 @@
     "served_assets": 76,
     "javascript_assets": 5,
     "served_bytes": 2801426,
-    "acceptance_metadata": "Pending capability recheck; unchanged historical record retained"
+    "acceptance_metadata": "Pending capability recheck; unchanged historical record retained",
+    "impact_reconciliation": {
+      "source": "53b10400b2",
+      "before_metadata": {
+        "passed": 28,
+        "deselected": 1
+      },
+      "after_metadata": {
+        "passed": 29
+      },
+      "review": "Astra approved three metadata fields, exact published pins, served receipt, historical evidence preservation and unchanged claim boundaries",
+      "runtime_install": "Still fetching exact Git requirement; installed identity not yet accepted"
+    }
   }
 }

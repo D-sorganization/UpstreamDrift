@@ -7,13 +7,36 @@ This page restates it for review; the JSON is authoritative.
 | Field                                               | Value                                                                                                                               |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | Audit snapshot (UpstreamDrift / Tools)              | `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04)                                |
-| Reconciled against (UpstreamDrift base / Tools pin) | `cdb3c84e8abf3b3fab6adb54ebcfbadd8b12a193` / `6b6e4be55e7086a33db43b36d2632765be619bde` (2026-10-11 UTC; provider follow-up #12246) |
+| Reconciled against (UpstreamDrift base / Tools pin) | `53b10400b2f4ecbdd464ea5ddfc33a41ce73f28c` / `8a11691b4e9aee7d04dfc39628a8269ca561b07d` (2026-10-12 UTC; protected provider PR #5573) |
 | Release claim                                       | `code_verified_only`; no predictive-accuracy claim                                                                                  |
 | Supported Python matrix                             | 3.11 and 3.12 (CI Standard); 3.12 for the lock and Docker image                                                                     |
 
 ## Model-Capability Matrix
 
 ### Current Provider Pin Reconciliation
+
+The protected Tools merge #5573 publishes `8a11691b4e9aee7d04dfc39628a8269ca561b07d`. From UpstreamDrift `53b10400b2f4ecbdd464ea5ddfc33a41ce73f28c`, all 28 applicable matrix/capability probes passed before advancing the reconciliation metadata; the exact-pin probe was excluded until that advance. The exact published checkout was built with Node 22.23.2/npm 10.9.8, then served and verified with Python 3.11.15, FastAPI 0.136.3 and httpx 0.28.1, matching the declared CI major/runtime dependency authority.
+
+Verification covered 76 assets, five JavaScript assets, 2,801,426 bytes, exact revision/mount/digests and the missing-file 404. The served receipt is [`SHOT_PATTERN_PUBLISHED_TOOLS_IMPACT_SERVED_RECEIPT.json`](feedback_controls/SHOT_PATTERN_PUBLISHED_TOOLS_IMPACT_SERVED_RECEIPT.json). An initial artifact-generator invocation omitted the revision environment and was correctly rejected as `development`; the corrected invocation supplied the revision to the generator and passed. Both attempts are retained in the integration validation receipts. No asset-count or byte-count measurement is copied from the historical receipts below.
+
+Reproduce from the published pin:
+
+```bash
+cd vendor/ud-tools/src/rate_of_closure/web
+npm ci --no-audit --no-fund
+export ROC_RELEASE_REVISION=8a11691b4e9aee7d04dfc39628a8269ca561b07d
+npm run build -- --base=/impact-explorer-app/
+node release/generateReleaseArtifacts.mjs
+cd ../../../../..
+python scripts/ci/verify_impact_explorer_bundle.py \
+  --dist vendor/ud-tools/src/rate_of_closure/web/dist \
+  --expected-revision 8a11691b4e9aee7d04dfc39628a8269ca561b07d
+python -m pytest tests/config/impact_acceptance/test_impact_acceptance_matrix.py
+```
+
+Use a clean build directory: the release producer fails closed if descriptors already exist. This software recheck does not advance predictive accuracy, physical qualification, packaging installation, restart or offline acceptance. Historical evidence and claim scope remain unchanged.
+
+### Historical F07 Provider Pin Reconciliation
 
 The provider follow-up #12246 advances the Tools dependency to the merged
 triangle-lamina provider revision. The existing exact-pin test first failed
@@ -32,7 +55,7 @@ the transferred bundle archive SHA-256 is
 `24343fc598c573ca4c899559000a9cb47d9a94ca1b00d3211c545e66d52bd91f`.
 This exact-pin software recheck does not advance physical qualification or
 predictive accuracy. Historical receipts below retain their original pins.
-Reproduce using the build/serve commands below with the current pin
+Reproduce this historical check using the build/serve commands below with the historical pin
 `6b6e4be55e7086a33db43b36d2632765be619bde` in both revision arguments.
 
 ### Previous F09o Pin Reconciliation
