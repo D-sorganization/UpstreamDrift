@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 import textwrap
@@ -28,7 +27,7 @@ from .matched_matrix import PROFILES
 from .matched_pair_social import PairSocialContext, write_pair_social_density
 from .matched_report import load_individually_supported_endpoints
 from .matched_sensitivity import _supported_endpoints
-from .provenance import manifest_files_match
+from .provenance import manifest_files_match, sha256_file
 from .noise import NOISE_DISPLAY_LABELS, NoiseSpec
 
 CLOSED_SELECTED_FIGURE_KINDS: frozenset[str] = frozenset(
@@ -54,14 +53,6 @@ __all__ = [
 
 _PATTERNS = ("Straight", "Draw", "Fade")
 _StyledCondition = tuple[str, dict[str, Any], Literal["solid", "dashed"]]
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def _profile(cell_name: str) -> str:
@@ -270,7 +261,7 @@ def _cell_figure_ledger(
                         else None
                     ),
                     "relative_path": path.relative_to(output_dir).as_posix(),
-                    "sha256": _sha256(path),
+                    "sha256": sha256_file(path),
                 }
             )
     return ledger
@@ -970,7 +961,7 @@ def _pair_density_ledger(
                 "conditioning": "same shot indices supported in all six populations",
                 "target_x_m": context.target_x,
                 "relative_path": path.relative_to(request.output_dir).as_posix(),
-                "sha256": _sha256(path),
+                "sha256": sha256_file(path),
             }
         )
     return ledger
@@ -1096,7 +1087,7 @@ def _pair_overhead_ledger(
                     key: len(samples) for key, samples in trajectory_sets.items()
                 },
                 "relative_path": path.relative_to(request.output_dir).as_posix(),
-                "sha256": _sha256(path),
+                "sha256": sha256_file(path),
             }
         )
     return ledger

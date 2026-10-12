@@ -760,7 +760,9 @@ def test_pipeline_writes_separate_tables_figures_and_aliases(tmp_path, monkeypat
         output.mkdir(parents=True, exist_ok=True)
         path = output / filename
         path.write_bytes(b"fixture image")
-        return [{**metadata, "relative_path": filename, "sha256": module._sha256(path)}]
+        return [
+            {**metadata, "relative_path": filename, "sha256": module.sha256_file(path)}
+        ]
 
     monkeypatch.setattr(
         module,
@@ -778,7 +780,7 @@ def test_pipeline_writes_separate_tables_figures_and_aliases(tmp_path, monkeypat
             {"figure_kind": "paired-density", "first_cell": pair["first"]["cell"]},
         ),
     )
-    monkeypatch.setattr(module, "_sha256", lambda path: "receipt-hash")
+    monkeypatch.setattr(module, "sha256_file", lambda path: "receipt-hash")
     monkeypatch.setattr(
         module,
         "_recheck_source_inputs",

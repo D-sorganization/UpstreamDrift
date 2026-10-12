@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import csv
-import hashlib
 import io
 import json
 import math
@@ -13,7 +12,7 @@ from typing import Any
 from .matched_config import matched_preset
 from .matched_matrix import PROFILES, noise_profile
 from .matched_report import load_matrix_report, verify_nominal_deliveries_hit_target
-from .provenance import manifest_files_match
+from .provenance import manifest_files_match, sha256_file
 
 _PROTOCOLS = {
     "pw_within_lean_face": "pw-primary-face-bounds/1",
@@ -25,14 +24,6 @@ _PATTERNS = ("Straight", "Draw", "Fade")
 _EXPECTED_ALIAS_COUNT = 4
 _EXPECTED_CELL_COUNT = 26
 _NUMERIC_TOLERANCE = 1e-12
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def _close(actual: Any, expected: float, *, label: str) -> None:
@@ -263,11 +254,11 @@ def _cell_reference(
         "source_plan_sha256": report["plan_sha256"],
         "source_cell_manifest_sha256": report["cell_manifest_sha256"].get(name),
         "source_summary_sha256": (
-            _sha256(cell_root / "summary.json")
+            sha256_file(cell_root / "summary.json")
             if (cell_root / "summary.json").is_file()
             else None
         ),
-        "source_csv_sha256": _sha256(csv_path) if csv_path.is_file() else None,
+        "source_csv_sha256": sha256_file(csv_path) if csv_path.is_file() else None,
     }
 
 
@@ -388,7 +379,7 @@ def _recheck_supplement_sources(
     # while the report is being assembled.
     for protocol_id, report in reports.items():
         root = Path(report["source_root"])
-        if _sha256(root / "matrix_plan.json") != report["plan_sha256"]:
+        if sha256_file(root / "matrix_plan.json") != report["plan_sha256"]:
             raise ValueError(
                 f"supplement plan changed during aggregation: {protocol_id}"
             )
@@ -396,14 +387,14 @@ def _recheck_supplement_sources(
         cell_root = Path(ref["source_root"]) / ref["cell"]
         if (
             not manifest_files_match(cell_root / "manifest.json")
-            or _sha256(cell_root / "manifest.json")
+            or sha256_file(cell_root / "manifest.json")
             != ref["source_cell_manifest_sha256"]
-            or _sha256(cell_root / "shots.csv.gz") != ref["source_csv_sha256"]
+            or sha256_file(cell_root / "shots.csv.gz") != ref["source_csv_sha256"]
         ):
             raise ValueError(
                 f"supplement source changed during aggregation: {ref['cell']}"
             )
-    if _sha256(inventory_path) != inventory_hash:
+    if sha256_file(inventory_path) != inventory_hash:
         raise ValueError("supplement inventory changed during aggregation")
 
 
@@ -413,7 +404,7 @@ def _validated_supplement_inventory(
     """Bind inventory and predeclarations before opening protocol results."""
     if stage not in {"pilot", "final"}:
         raise ValueError("supplement stage must be pilot or final")
-    inventory_hash = _sha256(inventory_path)
+    inventory_hash = sha256_file(inventory_path)
     inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
     expected_by_cell, aliases = _inventory_entries(inventory)
     expected_plan_hashes = inventory.get("protocol_plan_sha256")
@@ -421,7 +412,7 @@ def _validated_supplement_inventory(
         raise ValueError("supplement inventory lacks predeclaration plan hashes")
     for relative, expected_hash in expected_plan_hashes.items():
         path = inventory_path.parent / relative
-        if not path.is_file() or _sha256(path) != expected_hash:
+        if not path.is_file() or sha256_file(path) != expected_hash:
             raise ValueError(
                 f"supplement predeclaration source hash mismatch: {relative}"
             )
@@ -467,7 +458,7 @@ def load_supplement_sources(
             shared_execution = report["execution"]
         elif report["execution"] != shared_execution:
             raise ValueError("supplement protocols do not share one execution snapshot")
-        if report["plan_sha256"] != _sha256(plan_path):
+        if report["plan_sha256"] != sha256_file(plan_path):
             raise ValueError(f"supplement report plan hash mismatch: {protocol_id}")
         report_cells = {cell["cell"]: cell for cell in report["cells"]}
         if set(report_cells) != expected_names:

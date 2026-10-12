@@ -24,7 +24,7 @@ def reference(tmp_path):
     for name in NAMES:
         (output / name).write_text(name)
     path = tmp_path / "expected.json"
-    path.write_text(json.dumps({n: module._sha256(output / n) for n in NAMES}))
+    path.write_text(json.dumps({n: module.sha256_file(output / n) for n in NAMES}))
     return path, output
 
 
@@ -69,7 +69,7 @@ def test_duplicate_figure_paths_are_rejected_even_with_same_hash(tmp_path):
     directory.mkdir()
     p = directory / "one.png"
     p.write_bytes(b"image")
-    row = {"relative_path": "one.png", "sha256": module._sha256(p)}
+    row = {"relative_path": "one.png", "sha256": module.sha256_file(p)}
     with pytest.raises(ValueError, match="duplicate"):
         module._verify_figure_assets(tmp_path, {"figures": [row, dict(row)]})
 
@@ -135,7 +135,7 @@ def small_pipeline(tmp_path, monkeypatch):
         "protocol_roots": {},
         "inventory_path": tmp_path / "inventory",
         "transition_receipt_path": transition,
-        "transition_receipt_sha256": module._sha256(transition),
+        "transition_receipt_sha256": module.sha256_file(transition),
     }
     return args, calls
 
@@ -162,7 +162,7 @@ def test_valid_parity_is_bound_and_late_reference_mutation_blocks_receipt(
     )
     path = tmp_path / "expected.json"
     path.write_text(
-        json.dumps({n: module._sha256(tmp_path / "first" / n) for n in NAMES})
+        json.dumps({n: module.sha256_file(tmp_path / "first" / n) for n in NAMES})
     )
     module.build_final_supplement_report(
         **args, output_dir=tmp_path / "second", expected_numeric_hashes_path=path
@@ -170,7 +170,7 @@ def test_valid_parity_is_bound_and_late_reference_mutation_blocks_receipt(
     receipt = json.loads(
         (tmp_path / "second/REPORT_SUPPLEMENT_PIPELINE.json").read_text()
     )
-    assert receipt["numeric_parity_reference"]["sha256"] == module._sha256(path)
+    assert receipt["numeric_parity_reference"]["sha256"] == module.sha256_file(path)
 
     def mutate(*a):
         path.write_text(path.read_text() + " ")
@@ -195,7 +195,7 @@ def test_public_loader_rechecks_reference_after_asset_validation(tmp_path, monke
     )
     reference_path = tmp_path / "reference.json"
     reference_path.write_text(
-        json.dumps({name: module._sha256(output / name) for name in NAMES})
+        json.dumps({name: module.sha256_file(output / name) for name in NAMES})
     )
     keys = (
         "report",
@@ -212,7 +212,7 @@ def test_public_loader_rechecks_reference_after_asset_validation(tmp_path, monke
         "schema": "matched-supplement-pipeline-receipt/1",
         "stage": "final",
         "artifact_sha256": {
-            key: module._sha256(output / name) for key, name in paths.items()
+            key: module.sha256_file(output / name) for key, name in paths.items()
         },
         "postprocessing_source_sha256": {},
         "numeric_parity_reference": module._load_numeric_parity_reference(
@@ -245,7 +245,7 @@ def test_duplicate_resolved_paths_are_rejected(tmp_path):
     path = directory / "one.png"
     path.write_bytes(b"image")
     rows = [
-        {"relative_path": name, "sha256": module._sha256(path)}
+        {"relative_path": name, "sha256": module.sha256_file(path)}
         for name in ("one.png", "./one.png")
     ]
     with pytest.raises(ValueError, match="duplicate"):
@@ -322,7 +322,7 @@ def test_builder_rejects_invalid_completed_figure_ledger(
         figure_dir.mkdir(parents=True, exist_ok=True)
         image = figure_dir / "one.png"
         image.write_bytes(b"image")
-        row = {"relative_path": "one.png", "sha256": module._sha256(image)}
+        row = {"relative_path": "one.png", "sha256": module.sha256_file(image)}
         if defect == "duplicate":
             return [row, {**row, "relative_path": "./one.png"}]
         return [{**row, "sha256": "0" * 64}]

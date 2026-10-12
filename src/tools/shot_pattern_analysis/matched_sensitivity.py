@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import csv
 import gzip
-import hashlib
 import json
 import math
 import os
@@ -13,12 +12,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 from .matched_report import load_validated_cell
-from .provenance import manifest_files_match
+from .provenance import manifest_files_match, sha256_file
 from .scenario_scoring import score_course_endpoints
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _source_hashes() -> dict[str, str]:
@@ -37,7 +32,7 @@ def _source_hashes() -> dict[str, str]:
     }
     provider = "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py"
     files[provider] = root / provider
-    return {name: _sha256(path) for name, path in files.items()}
+    return {name: sha256_file(path) for name, path in files.items()}
 
 
 def _supported_endpoints(
@@ -101,7 +96,8 @@ def _recheck_sensitivity_inputs(
     if _source_hashes() != provenance["source_sha256"]:
         raise RuntimeError("scoring source changed during sensitivity analysis")
     if not manifest_files_match(cell_dir / "manifest.json") or any(
-        _sha256(plan_path if name == "matrix_plan.json" else cell_dir / name) != digest
+        sha256_file(plan_path if name == "matrix_plan.json" else cell_dir / name)
+        != digest
         for name, digest in provenance["input_sha256"].items()
     ):
         raise RuntimeError("saved input changed during sensitivity analysis")
@@ -131,8 +127,8 @@ def analyze_saved_sensitivity(cell_dir: Path, plan_path: Path) -> dict:
         "schema": "matched-course-sensitivity/1",
         "cell": cell_dir.name,
         "input_sha256": {
-            "matrix_plan.json": _sha256(plan_path),
-            **{name: _sha256(cell_dir / name) for name in input_files},
+            "matrix_plan.json": sha256_file(plan_path),
+            **{name: sha256_file(cell_dir / name) for name in input_files},
         },
         "execution": plan["execution"],
         "source_sha256": _source_hashes(),

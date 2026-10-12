@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import csv
 import gzip
 import json
@@ -18,17 +17,13 @@ import numpy as np
 from .matched_matrix import PROFILES
 from .matched_report import load_validated_cell, verify_nominal_deliveries_hit_target
 from .matched_sensitivity import _source_hashes, _supported_endpoints
-from .provenance import manifest_files_match
+from .provenance import manifest_files_match, sha256_file
 from .scenario_scoring import score_course_endpoints
 from .course_score_vectors import score_course_endpoint_vectors
 from .uncertainty import paired_mean_difference
 
 PATTERNS = ("Straight", "Draw", "Fade")
 LEANS = (0.0, 5.0, 10.0)
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _profile(name: str) -> str:
@@ -262,7 +257,7 @@ def _execution_transition(
             "cross-snapshot comparison requires an accepted source-transition receipt"
         )
     receipt_path = Path(receipt_path).resolve()
-    if not receipt_path.is_file() or _sha256(receipt_path) != expected_sha256:
+    if not receipt_path.is_file() or sha256_file(receipt_path) != expected_sha256:
         raise ValueError("source-transition receipt hash mismatch")
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     if (
@@ -340,7 +335,7 @@ def _execution_transition(
             raise ValueError(
                 "source-transition evidence file is missing or escapes its directory"
             )
-        if _sha256(evidence_path) != expected_hash:
+        if sha256_file(evidence_path) != expected_hash:
             raise ValueError("source-transition evidence file hash mismatch")
     return expected_sha256
 
@@ -349,7 +344,7 @@ def _reload_explicit_source(reference: dict) -> tuple[Path, dict, dict, dict]:
     """Revalidate one unique source or a no-execution alias reference."""
     root = Path(reference["source_root"]).resolve()
     plan_path = root / "matrix_plan.json"
-    if not plan_path.is_file() or _sha256(plan_path) != reference.get(
+    if not plan_path.is_file() or sha256_file(plan_path) != reference.get(
         "source_plan_sha256"
     ):
         raise ValueError("explicit comparison source plan hash changed")
@@ -377,9 +372,9 @@ def _reload_explicit_source(reference: dict) -> tuple[Path, dict, dict, dict]:
     csv_path = directory / "shots.csv.gz"
     if (
         not manifest.is_file()
-        or _sha256(manifest) != reference.get("source_cell_manifest_sha256")
+        or sha256_file(manifest) != reference.get("source_cell_manifest_sha256")
         or not csv_path.is_file()
-        or _sha256(csv_path) != reference.get("source_csv_sha256")
+        or sha256_file(csv_path) != reference.get("source_csv_sha256")
     ):
         raise ValueError("explicit comparison source artifact hash changed")
     summary = load_validated_cell(directory, config, plan["execution"])
@@ -398,13 +393,13 @@ def _reload_explicit_source(reference: dict) -> tuple[Path, dict, dict, dict]:
 
 def _recheck_explicit_source(reference: dict, directory: Path) -> None:
     root = Path(reference["source_root"]).resolve()
-    if _sha256(root / "matrix_plan.json") != reference["source_plan_sha256"]:
+    if sha256_file(root / "matrix_plan.json") != reference["source_plan_sha256"]:
         raise ValueError("explicit comparison source plan changed during analysis")
     manifest = directory / "manifest.json"
     if (
         not manifest_files_match(manifest)
-        or _sha256(manifest) != reference["source_cell_manifest_sha256"]
-        or _sha256(directory / "shots.csv.gz") != reference["source_csv_sha256"]
+        or sha256_file(manifest) != reference["source_cell_manifest_sha256"]
+        or sha256_file(directory / "shots.csv.gz") != reference["source_csv_sha256"]
     ):
         raise ValueError("explicit comparison source changed during analysis")
 
@@ -527,8 +522,8 @@ def _paired_scoring_source_hashes() -> dict[str, str]:
     """Bind the scoring adapters and uncertainty helper across pair analysis."""
     package = Path(__file__).parent
     hashes = _source_hashes()
-    hashes["matched_lean_control.py"] = _sha256(Path(__file__))
-    hashes["course_score_vectors.py"] = _sha256(package / "course_score_vectors.py")
+    hashes["matched_lean_control.py"] = sha256_file(Path(__file__))
+    hashes["course_score_vectors.py"] = sha256_file(package / "course_score_vectors.py")
     return hashes
 
 
@@ -1092,7 +1087,7 @@ def analyze_across_lean(matrix_root: Path) -> dict:
     matrix_root = Path(matrix_root)
     plan_path = matrix_root / "matrix_plan.json"
     plan = json.loads(plan_path.read_text())
-    plan_hash = _sha256(plan_path)
+    plan_hash = sha256_file(plan_path)
     cells = plan.get("cells")
     if not isinstance(cells, dict) or not cells:
         raise ValueError("saved matrix plan must contain cells")
@@ -1114,12 +1109,12 @@ def analyze_across_lean(matrix_root: Path) -> dict:
         directory = matrix_root / name
         if directory.exists():
             loaded[name] = load_validated_cell(directory, config, plan["execution"])
-            manifest_hashes[name] = _sha256(directory / "manifest.json")
+            manifest_hashes[name] = sha256_file(directory / "manifest.json")
         else:
             loaded[name] = {"status": "not_run"}
     source_hashes = {
         **_source_hashes(),
-        "matched_lean_control.py": _sha256(Path(__file__)),
+        "matched_lean_control.py": sha256_file(Path(__file__)),
     }
     pairs = []
     for key, members in groups.items():
@@ -1145,15 +1140,15 @@ def analyze_across_lean(matrix_root: Path) -> dict:
             pairs.append(
                 _analyze_lean_pair(matrix_root, descriptor, members, loaded, seed)
             )
-    if _sha256(plan_path) != plan_hash or any(
+    if sha256_file(plan_path) != plan_hash or any(
         not manifest_files_match(matrix_root / name / "manifest.json")
-        or _sha256(matrix_root / name / "manifest.json") != digest
+        or sha256_file(matrix_root / name / "manifest.json") != digest
         for name, digest in manifest_hashes.items()
     ):
         raise RuntimeError("saved matrix inputs changed during lean comparison")
     if {
         **_source_hashes(),
-        "matched_lean_control.py": _sha256(Path(__file__)),
+        "matched_lean_control.py": sha256_file(Path(__file__)),
     } != source_hashes:
         raise RuntimeError("scoring source changed during lean comparison")
     return {

@@ -71,7 +71,7 @@ def _pipeline_fixture(root, monkeypatch):
     paths = module.build_final_supplement_report(**args, output_dir=output)
     receipt = json.loads(paths["pipeline_receipt"].read_text())
     for key, digest in receipt["artifact_sha256"].items():
-        assert module._sha256(output / receipt["artifact_paths"][key]) == digest
+        assert module.sha256_file(output / receipt["artifact_paths"][key]) == digest
     # File locations are fixture-specific; bind hashes to normalized bytes solely
     # for comparison. Production receipt hashes were checked against real bytes above.
     files = {

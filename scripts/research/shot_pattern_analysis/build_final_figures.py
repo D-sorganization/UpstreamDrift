@@ -38,6 +38,7 @@ from scripts.research.shot_pattern_analysis.final_figure_ledgers import (
     _write_facebook_pattern_density_ledger,
 )
 
+from src.tools.shot_pattern_analysis.provenance import sha256_file
 from src.tools.shot_pattern_analysis.matched_report import (
     load_individually_supported_endpoints,
 )
@@ -127,14 +128,6 @@ def _facebook_selection(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 note = "lean 0° unavailable; showing lean 5°"
         selected.append({**choice, "selection_note": note})
     return sorted(selected, key=lambda cell: cell["cell"])
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def _json_hash(value: Any) -> str:
@@ -877,17 +870,17 @@ def _plot_source_hashes() -> dict[str, str]:
     """Bind the figure manifest to the exact producer source bytes."""
     root = _repository_root()
     return {
-        "matched_report.py": _sha256(
+        "matched_report.py": sha256_file(
             root / "src/tools/shot_pattern_analysis/matched_report.py"
         ),
-        "academic_plots.py": _sha256(
+        "academic_plots.py": sha256_file(
             root / "src/tools/shot_pattern_analysis/academic_plots.py"
         ),
-        "matched_report_plots.py": _sha256(
+        "matched_report_plots.py": sha256_file(
             root / "src/tools/shot_pattern_analysis/matched_report_plots.py"
         ),
-        "build_final_figures.py": _sha256(Path(__file__)),
-        "final_figure_ledgers.py": _sha256(
+        "build_final_figures.py": sha256_file(Path(__file__)),
+        "final_figure_ledgers.py": sha256_file(
             Path(__file__).with_name("final_figure_ledgers.py")
         ),
     }
@@ -974,7 +967,7 @@ def build_final_figures(
         ).as_posix(),
         "facebook_pattern_density_image_count": social_pattern_density_count,
         "outputs": {
-            path.relative_to(output_root).as_posix(): _sha256(path)
+            path.relative_to(output_root).as_posix(): sha256_file(path)
             for path in output_files
         },
         "interpretation": (
