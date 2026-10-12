@@ -28,6 +28,7 @@ __all__ = [
     "UdSharedImportAliasFinder",
     "install_contract_level_alias_sync",
     "install_ud_canonical_shared_import_aliases",
+    "sync_contract_level_aliases",
 ]
 
 _CONTRACT_MODULE_NAMES = frozenset(
@@ -54,7 +55,7 @@ class UdSharedImportAliasFinder(SharedImportAliasFinder):
         return super()._parse(fullname)
 
 
-def _sync_contract_level_aliases(
+def sync_contract_level_aliases(
     level: Any,
     *,
     primary_state: Any,
@@ -87,6 +88,9 @@ def install_contract_level_alias_sync() -> None:
     original: Callable[[Any], None] = contracts.set_contract_level
     if getattr(original, "_ud_contract_level_sync_installed", False):
         return
+    if getattr(original, "_ud_includes_peer_sync", False):
+        original._ud_contract_level_sync_installed = True  # type: ignore[attr-defined]
+        return
     primary_state = contracts._ContractState
 
     def set_contract_level_with_sync(level: Any) -> None:
@@ -96,7 +100,7 @@ def install_contract_level_alias_sync() -> None:
             else contracts.ContractLevel(level.value)
         )
         original(local_level)
-        _sync_contract_level_aliases(local_level, primary_state=primary_state)
+        sync_contract_level_aliases(local_level, primary_state=primary_state)
 
     set_contract_level_with_sync._ud_contract_level_sync_installed = True  # type: ignore[attr-defined]
     contracts.set_contract_level = set_contract_level_with_sync  # type: ignore[attr-defined]

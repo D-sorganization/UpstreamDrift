@@ -101,6 +101,16 @@ def set_contract_level(level: ContractLevel) -> None:
     current_module.DBC_LEVEL = level  # type: ignore[attr-defined]
     current_module.CONTRACTS_ENABLED = level != ContractLevel.OFF  # type: ignore[attr-defined]
     logger.info("Contract enforcement level set to %s", level.value)
+    try:
+        from src.shared.python.ud_import_alias_policy import (
+            sync_contract_level_aliases,
+        )
+    except ImportError:
+        return
+    sync_contract_level_aliases(level, primary_state=_ContractState)
+
+
+set_contract_level._ud_includes_peer_sync = True  # type: ignore[attr-defined]
 
 
 def get_contract_level() -> ContractLevel:
