@@ -275,3 +275,29 @@ def test_bar_start_rejects_an_empty_name(bar) -> None:  # noqa: ANN001
 def test_bar_shutdown_is_safe_when_idle(bar) -> None:  # noqa: ANN001
     assert bar.shutdown() is True
     assert bar.is_running is False
+
+
+def test_bar_reports_a_presenter_failure_instead_of_raising(bar) -> None:  # noqa: ANN001
+    """A crash while presenting a result must not escape into the Qt loop.
+
+    It is reported through the failure path, so the caller's ``on_failed`` and
+    the ``failed`` signal (which idle and clean-up handlers listen to) both run.
+    """
+    failures: list[str] = []
+    signalled: list[str] = []
+    finished: list[object] = []
+    bar.failed.connect(signalled.append)
+    bar.finished.connect(finished.append)
+
+    def _present(_result):  # noqa: ANN001, ANN202
+        raise KeyError("nominals")
+
+    bar.start(
+        "Study", lambda ctx: "done", on_finished=_present, on_failed=failures.append
+    )
+    assert _pump_until(lambda: bool(signalled))
+    assert failures == signalled
+    assert "nominals" in failures[0]
+    assert finished == []
+    assert bar.is_running is False
+    assert "failed" in bar.status_label.text()

@@ -13,7 +13,7 @@ from scipy.stats import binomtest
 
 from .core import AnalysisCancelled, PATTERNS
 from .dispersion_stats import landing_dispersion
-from .matched_config import MatchedConfig
+from .matched_config import MAX_CLUB_SPEED_MPS, MatchedConfig
 from .matched_diagnostics import joint_diagnostics
 from .matched_physics import MatchedDeliveryOutcome, MatchedShotPhysics, UnsupportedShot
 from .noise import NOISE_FIELDS, NoiseSpec, sample_paired_noise
@@ -39,6 +39,10 @@ class ExperimentConfig:
     match_speed_factors: tuple[float, float] = (0.75, 1.25)
 
     def __post_init__(self) -> None:
+        if not isinstance(self.club, MatchedConfig):
+            raise TypeError("club must be a MatchedConfig")
+        if not isinstance(self.noise, NoiseSpec):
+            raise TypeError("noise must be a NoiseSpec")
         if (
             isinstance(self.n_shots, bool)
             or not isinstance(self.n_shots, int)
@@ -76,6 +80,8 @@ class ExperimentConfig:
             raise ValueError(
                 "match speed bounds require finite ordered positive factors"
             )
+        if factors[1] * self.club.club_speed_mps >= MAX_CLUB_SPEED_MPS:
+            raise ValueError("match speed bounds must stay below 100 m/s club speed")
 
     def bounds_for(self, reference_face_deg: float) -> MatchBounds:
         """Resolve the recorded request into an absolute physical search box."""

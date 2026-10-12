@@ -6,6 +6,9 @@ import math
 from dataclasses import dataclass, replace
 
 
+MAX_CLUB_SPEED_MPS = 100.0
+
+
 @dataclass(frozen=True)
 class MatchedConfig:
     """Static geometry and delivery; SI units except explicitly named degrees.
@@ -46,7 +49,7 @@ class MatchedConfig:
                 raise ValueError(f"{name} must be finite")
         if not self.club_id or not self.loft_source:
             raise ValueError("club identity and geometry source are required")
-        if not 0 < self.club_speed_mps < 100:
+        if not 0 < self.club_speed_mps < MAX_CLUB_SPEED_MPS:
             raise ValueError("club speed must be in (0,100) m/s")
         if not 0 < self.loft_deg < 80 or not 0 < self.lie_deg < 90:
             raise ValueError("static loft must be in (0,80), lie in (0,90) degrees")

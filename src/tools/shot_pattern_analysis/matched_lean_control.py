@@ -18,7 +18,7 @@ from .core import PATTERN_NAMES
 from .matched_matrix import PROFILES
 from .matched_report import load_validated_cell, verify_nominal_deliveries_hit_target
 from .matched_sensitivity import _source_hashes, _supported_endpoints
-from .provenance import manifest_files_match, sha256_file
+from .provenance import manifest_files_match, publish_new_text, sha256_file
 from .scenario_scoring import score_course_endpoints
 from .course_score_vectors import score_course_endpoint_vectors
 from .uncertainty import paired_mean_difference
@@ -1182,15 +1182,6 @@ def write_across_lean_report(matrix_root: Path, destination: Path) -> Path:
     if destination.exists():
         raise FileExistsError("lean report already exists")
     result = analyze_across_lean(matrix_root)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    with NamedTemporaryFile(
-        "w", encoding="utf-8", dir=destination.parent, delete=False
-    ) as handle:
-        temporary = Path(handle.name)
-        json.dump(result, handle, indent=2, allow_nan=False)
-        handle.write("\n")
-    try:
-        os.replace(temporary, destination)
-    finally:
-        temporary.unlink(missing_ok=True)
-    return destination
+    return publish_new_text(
+        destination, json.dumps(result, indent=2, allow_nan=False) + "\n"
+    )

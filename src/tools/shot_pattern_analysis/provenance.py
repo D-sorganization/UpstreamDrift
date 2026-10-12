@@ -6,6 +6,8 @@ import hashlib
 import importlib.machinery
 import importlib.util
 import json
+import os
+import tempfile
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -35,6 +37,28 @@ def relative_file_hashes(paths: Iterable[Path], root: Path) -> dict[str, str]:
             raise ValueError(f"{path} lies outside provenance root {root}") from exc
         hashes[key] = sha256_file(path)
     return hashes
+
+
+def publish_new_text(destination: Path, text: str) -> Path:
+    """Publish ``text`` as a new file, never replacing an existing one.
+
+    The bytes are written to a sibling temporary file and hard-linked into
+    place, so readers never see a partial file and a file that appears
+    between any earlier check and the publish is kept. Line endings are LF on
+    every platform. Raises FileExistsError when ``destination`` exists.
+    """
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    handle, temporary = tempfile.mkstemp(
+        prefix=f".{destination.name}.", dir=destination.parent
+    )
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8", newline="\n") as stream:
+            stream.write(text)
+        os.link(temporary, destination)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+    return destination
 
 
 def resolve_native_binary(origin: Path) -> Path:

@@ -13,7 +13,7 @@ from tempfile import NamedTemporaryFile
 
 from .core import PATTERN_NAMES
 from .matched_report import load_validated_cell
-from .provenance import manifest_files_match, sha256_file
+from .provenance import manifest_files_match, publish_new_text, sha256_file
 from .scenario_scoring import score_course_endpoints
 
 
@@ -198,18 +198,7 @@ def write_saved_sensitivity(cell_dir: Path, plan_path: Path, output_dir: Path) -
     ):
         raise ValueError("sensitivity output must be outside the frozen cell")
     report = analyze_saved_sensitivity(cell_dir, plan_path)
-    output_dir.mkdir(parents=True, exist_ok=True)
     destination = output_dir / f"{cell_dir.name}.course_sensitivity.json"
-    if destination.exists():
-        raise FileExistsError("sensitivity result already exists")
-    with NamedTemporaryFile(
-        "w", encoding="utf-8", dir=output_dir, delete=False
-    ) as handle:
-        temporary = Path(handle.name)
-        json.dump(report, handle, indent=2, allow_nan=False)
-        handle.write("\n")
-    try:
-        os.replace(temporary, destination)
-    finally:
-        temporary.unlink(missing_ok=True)
-    return destination
+    return publish_new_text(
+        destination, json.dumps(report, indent=2, allow_nan=False) + "\n"
+    )

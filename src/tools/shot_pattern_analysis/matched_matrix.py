@@ -18,6 +18,7 @@ from .noise import NoiseSpec
 from .provenance import (
     assert_source_unchanged,
     manifest_files_match,
+    publish_new_text,
     sha256_file,
 )
 
@@ -268,11 +269,15 @@ def _publish_matrix_plan(
         plan["selected_cell_names"] = [name for name, _ in cells]
     plan = json.loads(json.dumps(plan))
     plan_path = output_root / "matrix_plan.json"
-    if plan_path.exists():
+    # Shards started together race here: exactly one publish wins and every
+    # other shard verifies the complete plan it finds.
+    try:
+        publish_new_text(plan_path, json.dumps(plan, indent=2) + "\n")
+    except FileExistsError:
         if json.loads(plan_path.read_text()) != plan:
-            raise RuntimeError("existing matrix plan differs; use a new output root")
-    else:
-        plan_path.write_text(json.dumps(plan, indent=2) + "\n")
+            raise RuntimeError(
+                "existing matrix plan differs; use a new output root"
+            ) from None
 
 
 def run_matched_matrix(

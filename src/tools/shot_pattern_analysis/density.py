@@ -9,6 +9,7 @@ achieved mass exceed the requested mass.
 from __future__ import annotations
 
 import math
+import numbers
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
@@ -98,6 +99,11 @@ class _DensityInputs:
     masses: tuple[float, ...]
 
 
+def _is_count(value: object) -> bool:
+    """Integral and not bool: numpy integers count, True does not."""
+    return isinstance(value, numbers.Integral) and not isinstance(value, bool)
+
+
 def _validated_density_inputs(
     points_by_pattern: Mapping[str, object],
     target_point_m: tuple[float, float],
@@ -126,14 +132,15 @@ def _validated_density_inputs(
         raise ValueError("padding_fraction must be finite and non-negative")
     if not math.isfinite(constant_axis_half_width_m) or constant_axis_half_width_m <= 0:
         raise ValueError("constant_axis_half_width_m must be finite and positive")
-    if isinstance(bins, int):
+    if isinstance(bins, numbers.Integral):
         shape = (bins, bins)
     elif isinstance(bins, tuple) and len(bins) == 2:
         shape = bins
     else:
         raise ValueError("bins must be an integer or a pair of integers")
-    if any(not isinstance(value, int) or value < 4 for value in shape):
+    if any(not _is_count(value) or value < 4 for value in shape):
         raise ValueError("each bin count must be an integer >= 4")
+    shape = (int(shape[0]), int(shape[1]))
     try:
         masses = tuple(float(value) for value in region_masses)
     except (TypeError, ValueError) as exc:
