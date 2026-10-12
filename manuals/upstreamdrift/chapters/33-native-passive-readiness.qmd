@@ -62,10 +62,23 @@ $$\ell_{min}\leq\ell_f/\ell_{opt}\leq\ell_{max},\qquad
 
 Missing policy, foreign model identity, incomplete or extra muscle coverage,
 disabled/overridden muscles, changed runtime flags and violated limits block
-`require_native_passive_readiness`. It obtains fresh native evidence instead of
-accepting a caller-written receipt. Native option changes can leave the model
-XML hash unchanged; they are checked independently. Nonfinite observations and
-unsupported concrete laws cannot produce accepted evidence.
+`require_native_passive_readiness`. That public gate obtains fresh native evidence
+instead of accepting a caller-written receipt. Native option changes can leave
+the model XML hash unchanged; they are checked independently. Nonfinite
+observations and unsupported concrete laws cannot produce accepted evidence.
+
+Native preparation also persists the exact passive audit object it already
+observed. The receipt is written atomically and binds the request, source model,
+loaded model, runtime, prepared-state observation digest, observer implementation,
+optional policy identity (explicitly null when absent), and complete muscle
+coverage. Before a solve, the runner rechecks the receipt bytes and those identities
+against the current prepared report and provider. This prevents a missing, stale,
+or edited receipt from being treated as the preparation's observation; it does
+not make the audit a complete restart-state artifact or grant physical
+qualification. This source-specific OpenSim receipt changes no qualification
+status in the 17-row model inventory and makes no implementation or parity claim
+for other engines. Receipt serialization failure blocks software-solve
+readiness.
 
 `within_declared_limits` describes only this necessary gate. The immutable
 qualification field always reads `not-qualified-for-muscle-matching`, including

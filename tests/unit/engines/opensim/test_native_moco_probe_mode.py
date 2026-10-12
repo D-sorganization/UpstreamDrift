@@ -81,7 +81,14 @@ def test_skip_probe_report_and_gate_are_explicit(tmp_path: Path, monkeypatch) ->
     )
 
     def prepare_model(
-        request, actual, blockers, auditor, probe_callable, *, run_capability_probe
+        request,
+        actual,
+        blockers,
+        auditor,
+        probe_callable,
+        *,
+        run_capability_probe,
+        passive_audit_sink=None,
     ):
         received.append(run_capability_probe)
         return native_moco_preparation._NativeModelPreparation(

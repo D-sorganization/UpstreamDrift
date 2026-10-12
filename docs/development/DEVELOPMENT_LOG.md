@@ -23,13 +23,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** codex
 - **Issue:** #11792 (parent #11784; implementation children #12342, #12343 and #12353)
-- **PR:** #12355 (draft passive-readiness work; related readiness work in #12344; #12353 publication pending)
+- **PR:** #12355 (draft passive-readiness work; #12353 no-probe publication pending; related readiness work in #12344)
 - **Branch:** `feat/native-passive-observation-receipt-12342`; `feat/native-no-probe-12353-20261012`
 - **Paths:** `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py`, `src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py`, `src/engines/physics_engines/opensim/python/tour_matching/native_passive_receipt.py`, `tests/opensim/test_native_passive_receipt.py`, `tests/unit/engines/opensim/test_native_path_optimizer_domains.py`, `tests/unit/engines/opensim/test_native_moco_probe_mode.py`, `manuals/upstreamdrift/chapters/24-native-path-work.qmd`, `manuals/upstreamdrift/chapters/33-native-passive-readiness.qmd`, `manuals/upstreamdrift/chapters/56-native-diagnostic-execution-contract.qmd`, `docs/development/feedback_controls/F07_PASSIVE_READINESS_TURNOVER.md`, `docs/development/feedback_controls/F07_NATIVE_NO_PROBE_PREPARATION_TURNOVER.md`
 - **Started:** 2026-10-11
-- **Last verified:** 2026-10-12 at `e8655bd8f88ab34a2afddce10902b0968d7e136b`; focused SDK-free no-probe API/CLI tests passed (31 passed, one existing warning); Ruff, design-manual governance, and agent-context checks passed. No SDK or native execution was performed for this change.
+- **Last verified:** 2026-10-12; the focused SDK-free no-probe API/CLI suite passed (31 passed, one existing warning) on `e8655bd8f88ab34a2afddce10902b0968d7e136b`. The passive-observation branch merged from `1c9457c0ec02e7c946699b32ce52976a61daebcb`; combined changes await focused validation. No SDK or native execution was performed for the no-probe change.
 - **Summary:** Software work adds source-bound optimizer-domain checks and persists passive-readiness observations without changing their scientific digest or qualification meaning. The no-probe preparation option skips forward integration only when explicitly requested for prepare-only; the default remains probe-enabled. The current diagnostic requests forward finite differences; no native solve, optimum, learned replay, or physical qualification is established. All 17 registered model/variant rows remain unqualified.
-- **Next step:** Integrate the published passive-observation receipt work with the no-probe preparation path, then assess physiological policy and require solver readback plus a full-clock replay before any qualification claim.
+- **Next step:** Run focused validation of the combined passive-observation and no-probe preparation changes, then assess physiological policy and require solver readback plus a full-clock replay before any qualification claim.
 
 ### DL-#11719 · GCV-13 Slice 3: Decorative Address Ball in the MuJoCo, OpenSim and MyoSuite Native Export
 
