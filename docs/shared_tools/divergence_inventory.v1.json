@@ -266,7 +266,7 @@
     "data_io": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 30,
+      "ud-only": 31,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -7301,6 +7301,18 @@
       "spelling_only": false
     },
     {
+      "path": "data_io/native_dll_guard.py",
+      "classification": "ud-only",
+      "package": "data_io",
+      "subpackage": "",
+      "ud_bytes": 3963,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "data_io/output_manager.py",
       "classification": "ud-only",
       "package": "data_io",
@@ -7353,7 +7365,7 @@
       "classification": "ud-only",
       "package": "data_io",
       "subpackage": "",
-      "ud_bytes": 24950,
+      "ud_bytes": 25036,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17829,7 +17841,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 25305,
+      "ud_bytes": 25393,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

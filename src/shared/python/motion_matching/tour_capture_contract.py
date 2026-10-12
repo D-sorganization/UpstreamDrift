@@ -22,6 +22,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.data_io.native_dll_guard import import_ezc3d
 
 Array: TypeAlias = NDArray[np.float64]
 BoolArray: TypeAlias = NDArray[np.bool_]
@@ -397,7 +398,7 @@ def load_tour_capture(path: Path) -> TourCapture:
     Points with negative residuals or nonfinite coordinates are marked invalid.
     Rejects any file whose hash, rate, units, frame count or labels differ.
     """
-    import ezc3d  # local import: optional dependency, heavy to load
+    ezc3d = import_ezc3d()  # optional dependency; diagnoses OpenSim DLL clash
 
     raw = Path(path).read_bytes()
     digest = hashlib.sha256(raw).hexdigest()
@@ -581,7 +582,7 @@ def verify_capture_content(
 
 
 def _extract_c3d_metadata(path: Path) -> dict[str, Any]:
-    import ezc3d
+    ezc3d = import_ezc3d()
 
     raw = Path(path).read_bytes()
     digest = hashlib.sha256(raw).hexdigest()
