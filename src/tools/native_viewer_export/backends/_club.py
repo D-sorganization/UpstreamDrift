@@ -2,8 +2,9 @@
 
 Both backends draw the spec robot with the shared visual skeleton, whose club
 head is an ellipsoid hint. When the spec describes a club, these helpers give
-the shaft, grip and parametric head meshes in the club-body frame instead, so
-the exported view shows the same head as the MuJoCo and OpenSim layers.
+the shaft, grip, parametric head and both grip-hand meshes in the club-body
+frame instead, so the exported view shows the same head and hands as the
+MuJoCo layer.
 """
 
 from __future__ import annotations
@@ -16,9 +17,9 @@ from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.club_assembly import (
     PART_MATERIALS,
     assembly_from_spec,
-    assembly_meshes,
     club_body_name,
 )
+from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
 from src.shared.python.model_appearance.geometry import Mesh
 
 DEFAULT_FINISH = "satin_steel"
@@ -36,7 +37,10 @@ class ClubPart:
 def club_parts(
     spec: Mapping[str, Any], finish: str = DEFAULT_FINISH
 ) -> tuple[str, list[ClubPart]] | None:
-    """``(club body name, [shaft, grip, head])`` for ``spec``, or ``None``.
+    """``(club body, [shaft, grip, head, lead_hand, trail_hand])`` or ``None``.
+
+    The two curled-finger hands are wrapped on the grip (OSV-2,
+    ``model_appearance.grip_hands``) and ride the club body like the rest.
 
     Postcondition: ``None`` exactly when the spec has no club assembly.
     """
@@ -47,7 +51,7 @@ def club_parts(
     if club is None or body is None:
         return None
     parts = []
-    for name, mesh in assembly_meshes(club).items():
+    for name, mesh in assembly_meshes_with_hands(club).items():
         rgba = library.MATERIALS[PART_MATERIALS[name] or finish].rgba
         parts.append(ClubPart(f"club_{name}", mesh, tuple(float(c) for c in rgba)))  # type: ignore[arg-type]
     return body, parts

@@ -34,3 +34,18 @@ loaded-model hash; have F09 produce independent full-horizon replay receipts
 with contact/force evidence; only then compare numerical match and runtime
 against the four equal-budget baselines. The manual calculation registry
 remains blocked pending full inventory and qualification.
+
+## Replay Full-Horizon and Observation-Clock Repair (#11828)
+
+PR #12141 (commit ec109fa1aa) made `_admit_replay_evidence` raise
+`replay must cover the full horizon` when `full_horizon` is False at the
+within-engine-replay and same-input levels, and made observation accuracy
+require its own `observation_time_grid_sha256` field for the output/capture clock,
+separate from the T01 input-grid hash field and never inferred from actuator
+sampling (the registry requires the digest to be present; it does not compare
+its value with the input-grid hash). Tests:
+`test_truncated_replay_cannot_pass_full_horizon_levels` and
+`test_observation_score_requires_separate_output_clock_digest` in
+`tests/unit/engines/test_feedback_comparison.py`. This is a contract repair,
+not a numerical qualification; canonical manual chapter 13
+(`manuals/upstreamdrift/chapters/13-feedback-comparison.qmd`) and SPEC state it.
