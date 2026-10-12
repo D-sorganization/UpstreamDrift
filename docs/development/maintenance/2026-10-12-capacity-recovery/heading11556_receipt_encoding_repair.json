@@ -1,0 +1,12 @@
+{
+  "observed_at_utc": "2026-10-12T09:42:46.965391+00:00",
+  "reason": "Derived receipt strings had an encoding mismatch with the exact line-byte hex fields; production archive/source bytes were already correct and were not changed.",
+  "before_receipt_sha256": "f0714858929ab8c5935327a119abcf65047c2c7cb0c1c9065132b11a761e4193",
+  "after_receipt_sha256": "eafe1cc1a2ccf724bb61a796498cec1877a8818fe9b32decb022e2faddbc1be4",
+  "preserved_pre_repair_receipt_path": "docs/development/maintenance/2026-10-12-capacity-recovery/heading11556_title_normalization_before_encoding_repair.json",
+  "preserved_pre_repair_receipt_sha256": "f0714858929ab8c5935327a119abcf65047c2c7cb0c1c9065132b11a761e4193",
+  "normalizer_path_is_normalized_windows_path": "C:\\Users\\diete\\Repositories\\Repository_Management\\shared_scripts\\document_title_case.py",
+  "line_utf8_strings_round_trip_to_hex_and_sha": true,
+  "nested_receipt_matches_standalone": true,
+  "archive_bytes_changed_by_receipt_repair": false
+}
