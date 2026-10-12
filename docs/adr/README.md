@@ -24,7 +24,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0013](0013-launcher-composability.md)                                  | Launcher Composability — Embeddable-tool contract and IPC layer                   | Accepted | 2026-05-09 |
 | [0014](0014-shared-biomech-models.md)                                   | Shared Biomech Model-Pack Convention                                              | Accepted | 2026-05-11 |
 | [0015](0015-rust-python-callback-pattern.md)                            | Rust Outer-Loop Driver with Python Callbacks                                      | Accepted | 2026-05-12 |
-| [0016](0016-error-handling-discipline.md)                               | Error-handling discipline and the ratchet pattern                                 | Accepted | 2026-05-21 |
+| [0016](0016-error-handling-discipline.md)                               | Error-Handling Discipline and the Ratchet Pattern                                 | Accepted | 2026-05-21 |
 | [0017](0017-sidekick-agentic-action-layer.md)                           | Sidekick agentic action layer                                                     | Accepted | 2026-05-22 |
 | [0018](0018-standalone-sidekick.md)                                     | Standalone Sidekick Application                                                   | Accepted | 2026-05-23 |
 | [0019](0019-mission-drift-calculators.md)                               | Mission-Drift Calculators                                                         | Accepted | 2026-04-25 |

@@ -1,9 +1,9 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T10:51:32.900437+00:00",
-  "checkpoint": "4317a39b461db30d59c7062d4b9cd0334ec37956",
+  "recorded_at_utc": "2026-10-12T11:10:41.109253+00:00",
+  "checkpoint": "2b67c1669d659f72053952f31947d131df4f5b4f",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "4317a39b461db30d59c7062d4b9cd0334ec37956",
+  "source_commit": "2b67c1669d659f72053952f31947d131df4f5b4f",
   "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "All7originalprotected-CIunit failure nodes pass;51strict ownership/provider guardcases,40otherstructuralcases,14release/reference/auditcases pass. Eight auto-configfindings have reviewed bounded repairs. Actualadvancedremote47df reconciled; fresh stable-source completecanonical gate is next, notyetclaimed.",
+  "current_validation": "Complete stable-source canonical RM-6 passes all eight gates with Semgrep available: 7572 affected tests passed, 377 skipped, 43 deselected, 1 known expected pass, 21 passing subtests. Separate exact CI scan runs 209 rules on 277 files with zero findings. Actual remote47df is retained in ancestry. Protected integration CI/merge and final mobile deployment remain pending.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -615,18 +615,31 @@
     ]
   },
   "latest_combined_gate": {
-    "test_source": "81ec4e1c84",
-    "policy_checkpoint": "64f31f9f749735ddb00054b70a0715f4b31a485a",
-    "status": "PASS all eight canonical gates",
-    "passes": 7483,
-    "failures": 0,
+    "source": "2b67c1669d659f72053952f31947d131df4f5b4f",
+    "status": "PASS all eight gates with Semgrep available",
+    "passes": 7572,
     "skipped": 377,
     "deselected": 43,
     "xpassed": 1,
     "subtests": 21,
-    "receipt": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/published-provider-canonical-green.txt.gz",
-    "receipt_sha256": "6edfefedcaa139f22a4ebc1986e4ffed1f2f842d2ed2a87d0e4129c859cbbde8",
-    "uncompressed_sha256": "71333bb621d6527258a005ce3946a63c8109446fe0e4d9254b96224fb80113da"
+    "selection": "Unmodified canonical automatic selector:590 targets, all eight actual historical fixture/consumer modules included, no whole research-folder fallback. Complete broader failed run remains separately preserved; no full research-suite acceptance claimed.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-cohesive-source-canonical-prepr.txt.gz",
+        "sha256": "61ed010bf9b5cbeabdfd6efd652600497efa23ddad56ee9ffe90c8c0727d4052",
+        "uncompressed_sha256": "3c9fbc27740d8feefc7e845301366eec88a1c202ea06093ae68f562d9774716c"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-semgrep-final-rebased-delta-green.txt.gz",
+        "sha256": "7a64de55216bcf27158aeeaaf626dacd52e23235a950a28e5b9bc2262b4288f1",
+        "uncompressed_sha256": "57a2fda356ffd57af6f77121a5f3c7108528931583f7dcb1639baf7645304f34"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-rebased-cohesive-test-targets.json.gz",
+        "sha256": "3f27b90edf9f338e7d60bfeb40651b3f068599afe9983f33fbe5ac9efb833b36",
+        "uncompressed_sha256": "a729bbf79b4c2f9f54360c7d6609c2d5dfc09d2d508ac3e99bc609bda933e9e2"
+      }
+    ]
   },
   "development_log_reconciliation": {
     "review": "Astra approved exact public-API candidate and byte preservation",
@@ -663,7 +676,7 @@
     "new_boundary_cases": 12,
     "existing_parity_cases": 24,
     "semgrep": "1.180.0; CI p/python,p/security-audit,p/owasp-top-ten configs;205 rules across six repaired files:0 findings",
-    "full_gate": "Pending complete rerun with isolated Semgrep available",
+    "full_gate": "Complete stable-source canonical passes with Semgrep available; separate CI209-rule/277-file scan has zero findings.",
     "receipts": [
       {
         "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-security-red.txt.gz",
@@ -765,7 +778,8 @@
         "sha256": "72b20d3c40a0ef2646541dfb0efc1c12214d783d760d6b6503b9f78f4772f544",
         "uncompressed_sha256": "8cb5b3a2f555fa7443333651f0b047d5a02a3ab5a5fa3a7c15150f527a970c18"
       }
-    ]
+    ],
+    "final_gate": "Complete stable-source canonical passes. Original failed and interrupted evidence remains preserved."
   },
   "fixture_consumer_scope": {
     "organization": "Trusted fixture helper and its security cases share one dedicated test module; no test runner/configuration/marker/threshold changes. Seven source fixture keys and all seven historical consumer modules are explicitly covered.",
@@ -884,7 +898,7 @@
     "security": "Available auto-config Semgrep found eight further findings; repairs are in progress, original scan output retained"
   },
   "postpush_unit_and_auto_scan_repairs": {
-    "status": "Reviewed focused repairs pass; stable-source canonical gate and protected CI pending",
+    "status": "Astra-reviewed focused repairs and complete stable-source canonical pass; protected CI/merge remains pending.",
     "auto_scan": "Eight findings repaired through fixed reviewed source trust and registered literal imports/whitelists; immutable copied verifier restored to original declared bytes in deterministic gzip; original altered preimage preserved",
     "historical_verifier_scope": "Explicit historical candidate reproduces84comparisons; current-source freshness fails closed, no current science qualification renewed",
     "focused": "13provider/import tests,8figure-state/shotassertions,40structuraltests,14release/reference/audittests pass",
@@ -1034,7 +1048,7 @@
       "47df000da3"
     ],
     "plan": "Rebase onto actual advanced PR head without force; preserve useful ADR index and blocked manual pointers, remove two unnecessary size-budget exceptions (766/46250 bytes vs51200), restore original reviewed canonical heading and its truthful provenance. Then run full canonical on stable committed source.",
-    "status": "Completed by ordinary rebase onto47df000da3; originalremotecommits retained in ancestry; no forcepush",
+    "status": "Complete: ordinary rebase retains remote47df in ancestry; final source2b67c1669d passes complete canonical. No force push, size-budget waiver, or scientific acceptance change.",
     "rebased_source_before_final_metadata_commit": "7a1defd5e57e72e133f1637d206505c9a54d32ac",
     "result": "Useful ADR0014/15/16indexrows, manualblockers and officialmonolithinventory retained; redundant duplicatepointers removed; two unnecessarysizewaiversremoved with original51200-bytebudget PASS; Ifheading/provenancerestoredexacte0/7bb3560a hash; Astraapproved.",
     "budget_receipt": {
