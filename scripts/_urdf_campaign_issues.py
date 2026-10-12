@@ -576,7 +576,7 @@ ISSUES.append(
         """## Failing test
 
 ```
-tests/test_build_humanoid_models.py::test_opensim_check_handles_missing_submodule
+tests/scripts/test_build_humanoid_models.py::test_opensim_check_handles_missing_submodule
 ```
 
 ## Likely cause

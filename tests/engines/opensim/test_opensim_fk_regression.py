@@ -38,7 +38,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[3]
 MODEL_PATH = (
     REPO_ROOT
     / "src"

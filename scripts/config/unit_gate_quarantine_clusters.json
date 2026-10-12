@@ -72,8 +72,8 @@
         "tests/unit/config/",
         "tests/unit/ui/",
         "tests/unit/test_sim_gui_honest_messaging_6641.py",
-        "tests/test_model_source_providers.py",
-        "tests/test_setup_biomech_workspace.py"
+        "tests/unit/config/test_model_source_providers.py",
+        "tests/scripts/test_setup_biomech_workspace.py"
       ],
       "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster motion_modeling_and_scientific_ui --run",
       "exit_criteria": "Selected tests pass with canonical pose/source contracts, deterministic persistence, and headless-safe UI imports.",
@@ -96,8 +96,8 @@
         "tests/unit/test_aerodynamics.py",
         "tests/unit/test_pendulum_simulator_physics.py",
         "tests/unit/test_physics_validation_extended.py",
-        "tests/test_build_humanoid_models.py",
-        "tests/test_pinocchio_viz_leaderboard.py"
+        "tests/scripts/test_build_humanoid_models.py",
+        "tests/engines/pinocchio/test_pinocchio_viz_leaderboard.py"
       ],
       "reproduction_command": "python3 scripts/ci/check_unit_gate_quarantine.py --cluster physics_engines_and_model_validation --run",
       "exit_criteria": "Selected tests pass with source-backed constants, cross-engine tolerances, and no weakened scientific gate.",

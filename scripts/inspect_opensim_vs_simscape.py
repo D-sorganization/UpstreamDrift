@@ -2,7 +2,7 @@
 
 Prints a per-pose comparison table of grip and clubhead positions /
 orientations between the OpenSim engine and the Simscape ground-truth
-fixture used by ``tests/test_opensim_simscape_equivalence.py``.
+fixture used by ``tests/engines/opensim/test_opensim_simscape_equivalence.py``.
 
 Run from repo root::
 

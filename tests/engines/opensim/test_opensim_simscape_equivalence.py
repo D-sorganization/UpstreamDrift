@@ -66,7 +66,8 @@ ORIENTATION_TOL_RAD = math.radians(1.0)  # 1 deg geodesic
 
 
 FIXTURE_PATH = (
-    Path(__file__).parent
+    Path(__file__).resolve().parents[3]
+    / "tests"
     / "fixtures"
     / "opensim_simscape_equivalence"
     / "simscape_reference.npz"

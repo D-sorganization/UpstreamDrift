@@ -1,6 +1,6 @@
 """Pretty-print Drake vs Simscape grip-trajectory residuals (issue #4123).
 
-Companion debug tool for ``tests/test_drake_simscape_equivalence.py``.
+Companion debug tool for ``tests/engines/drake/test_drake_simscape_equivalence.py``.
 Runs the same Drake float-pathway forward-sim (theta=0 + default initial
 pose) used by the test and prints per-pose, per-axis residuals against
 the Simscape reference CSV. Useful when the equivalence test fails and
@@ -14,7 +14,7 @@ Usage:
 
 The script exits 0 even on residual gate violations — its purpose is to
 *report* the divergence, not enforce it. The test in
-``tests/test_drake_simscape_equivalence.py`` is the enforcement gate.
+``tests/engines/drake/test_drake_simscape_equivalence.py`` is the enforcement gate.
 """
 
 from __future__ import annotations
@@ -178,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
     if any_fail:
         print(
             "[divergence] At least one pose failed the equivalence gate. "
-            "See tests/test_drake_simscape_equivalence.py for the enforcement test "
+            "See tests/engines/drake/test_drake_simscape_equivalence.py for the enforcement test "
             "and the PR body / linked issues for tracked follow-ups."
         )
     else:

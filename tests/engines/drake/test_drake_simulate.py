@@ -527,7 +527,7 @@ def test_live_simulate_zero_theta_falls_under_gravity() -> None:
     plant = MultibodyPlant(0.001)
     Parser(plant).AddModels(
         str(
-            Path(__file__).resolve().parents[1]
+            Path(__file__).resolve().parents[3]
             / "src"
             / "engines"
             / "physics_engines"

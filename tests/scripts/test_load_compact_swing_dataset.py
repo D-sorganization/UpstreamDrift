@@ -10,7 +10,7 @@ import pytest
 
 pytest.importorskip("pyarrow")
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -22,7 +22,7 @@ from src.shared.python.dataset_tools import (  # noqa: E402
     load_compact_swing_dataset,
 )
 
-from tests.test_compact_swing_dataset_compactor import (  # noqa: E402
+from tests.scripts.test_compact_swing_dataset_compactor import (  # noqa: E402
     _build_synthetic_raw,
 )
 

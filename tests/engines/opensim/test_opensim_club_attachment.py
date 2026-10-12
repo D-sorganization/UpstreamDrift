@@ -18,7 +18,7 @@ import pytest
 
 from src.engines.physics_engines.opensim.python import msk_club as mc
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[3]
 BUILDER_PATH = REPO_ROOT / "scripts" / "build_humanoid_osim.py"
 
 

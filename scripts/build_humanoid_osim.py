@@ -55,7 +55,7 @@ Notes
   XML is already a valid ``OpenSimDocument Version="40000"`` document; pure-XML
   manipulation keeps the builder runnable in any environment that has Python
   3.10+. The committed model is then validated by
-  ``tests/test_opensim_model_loads.py`` whenever the OpenSim Python bindings
+  ``tests/engines/opensim/test_opensim_model_loads.py`` whenever the OpenSim Python bindings
   are available.
 - The Simscape body-chain coordinate naming alignment (cross-engine spec §2.6)
   is documented in ``models/README.md`` — the OpenSim coordinate names used

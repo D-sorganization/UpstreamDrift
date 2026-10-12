@@ -35,7 +35,7 @@ import pytest
 pytestmark = [pytest.mark.unit, pytest.mark.smoke, pytest.mark.headless_safe]
 
 # Repo-root anchored path so the test runs from any CWD.
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[3]
 MODEL_PATH = (
     REPO_ROOT
     / "src"

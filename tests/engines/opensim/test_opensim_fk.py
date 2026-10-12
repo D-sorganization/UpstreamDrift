@@ -209,7 +209,7 @@ class TestExtractWithMockModel:
 
 
 _MODEL_PATH = (
-    Path(__file__).resolve().parent.parent
+    Path(__file__).resolve().parents[3]
     / "src"
     / "engines"
     / "physics_engines"

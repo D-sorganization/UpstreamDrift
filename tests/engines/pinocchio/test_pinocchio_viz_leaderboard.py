@@ -17,7 +17,7 @@ import pytest
 # Ensure the engine python tree is importable as a top-level package; the
 # repo's primary ``src`` package layout otherwise hides it from collection.
 _PIN_PY = (
-    Path(__file__).resolve().parent.parent
+    Path(__file__).resolve().parents[3]
     / "src"
     / "engines"
     / "physics_engines"

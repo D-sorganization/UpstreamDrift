@@ -55,7 +55,7 @@ if TYPE_CHECKING:  # pragma: no cover - type hints only
 # Fixture data — Simscape ground truth CSV
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SIMSCAPE_CSV: Path = (
     REPO_ROOT
     / "src"

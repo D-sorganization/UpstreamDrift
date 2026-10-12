@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 SCRIPT_PATH = (
-    Path(__file__).resolve().parent.parent / "scripts" / "setup_biomech_workspace.sh"
+    Path(__file__).resolve().parents[2] / "scripts" / "setup_biomech_workspace.sh"
 )
 
 SIBLINGS = (

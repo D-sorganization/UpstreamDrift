@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 MODELS_DIR = REPO_ROOT / "shared" / "models"
 
 DIMENSIONS_PATH = MODELS_DIR / "golf_humanoid_dimensions.yaml"

@@ -26,7 +26,7 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_humanoid_models.py"
 CANONICAL_URDF = (
     REPO_ROOT
