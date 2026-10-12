@@ -13,6 +13,7 @@ uses, ``|dX| <= ATOL + RTOL * max|X|``, plus a CoP bound derived from it
 
 from __future__ import annotations
 
+import importlib
 import json
 from pathlib import Path
 
@@ -45,6 +46,33 @@ _MODULE = {
     "pinocchio": "pinocchio",
     "opensim": "opensim",
 }
+
+
+def _real_package(engine: str) -> bool:
+    try:
+        module = importlib.import_module(_MODULE[engine])
+    except (ImportError, OSError):
+        return False
+    if type(module).__module__ == "unittest.mock":
+        return False
+    if not getattr(module, "__file__", None):
+        return False
+    if engine == "pinocchio":
+        return all(hasattr(module, n) for n in ("rnea", "buildModelFromXML", "Model"))
+    if engine == "drake":
+        import pydrake.all as drake_all
+
+        return type(drake_all).__module__ != "unittest.mock" and hasattr(
+            drake_all, "MultibodyPlant"
+        )
+    return True
+
+
+def _require_real_engine(engine: str) -> None:
+    if not _real_package(engine):
+        pytest.skip(
+            f"{_MODULE[engine]} is not installed (or is a test double)",
+        )
 
 
 @pytest.fixture(scope="module")
@@ -119,7 +147,7 @@ def test_mujoco_feet_carry_the_lifter(mujoco_samples, bundle) -> None:
 @pytest.mark.integration
 @pytest.mark.parametrize("engine", ENGINES)
 def test_ground_reaction_matches_mujoco(mujoco_samples, bundle, engine) -> None:
-    pytest.importorskip(_MODULE[engine])
+    _require_real_engine(engine)
     for ref, other in zip(
         mujoco_samples, bundle_kinetics(engine, bundle, FRAMES), strict=True
     ):
@@ -135,7 +163,7 @@ def test_ground_reaction_matches_mujoco(mujoco_samples, bundle, engine) -> None:
 @pytest.mark.integration
 @pytest.mark.requires_drake
 def test_drake_hand_wrench_matches_mujoco(mujoco_samples, bundle) -> None:
-    pytest.importorskip("pydrake")
+    _require_real_engine("drake")
     for ref, other in zip(
         mujoco_samples, bundle_kinetics("drake", bundle, FRAMES), strict=True
     ):
@@ -150,7 +178,7 @@ def test_drake_hand_wrench_matches_mujoco(mujoco_samples, bundle) -> None:
 @pytest.mark.integration
 @pytest.mark.requires_pinocchio
 def test_pinocchio_hand_wrench_is_unavailable_with_a_reason(bundle) -> None:
-    pytest.importorskip("pinocchio")
+    _require_real_engine("pinocchio")
     (sample,) = bundle_kinetics("pinocchio", bundle, (0,))
     assert sample.grip.split_method == "unavailable"
     assert sample.grip.net_force_n is None

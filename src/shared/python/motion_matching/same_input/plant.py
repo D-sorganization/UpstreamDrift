@@ -159,7 +159,7 @@ class VectorPlant:
         """
         extract = getattr(self._adapter, "grip_analysis", None)
         if extract is None:
-            raise NotImplementedError(
+            raise NotImplementedError(  # tracked: #11747
                 f"{self.engine} adapter has no closure-multiplier grip analysis"
             )
         return extract(self._named(q), self._named(v), self._named(tau))
