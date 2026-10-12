@@ -16,9 +16,13 @@ LIFT-4 (#11744) on the LIFT-5 back-squat same-input bundle (#11745).  Uses
   reference states, the per-hand bushing wrenches and the coupled
   accelerations of each engine against MuJoCo.
 
-The controller compensates the measured hand load (it subtracts the bushing
-generalized force on the actuated coordinates, the computed-torque law with
-a known interaction wrench); the unactuated root is left to the contact.
+The controller adds a feedforward of the bar's static weight hung from the
+hands (:meth:`BarbellBushingPlant.weight_generalized_force`, a function of the
+pose only) to the pipeline computed-torque law; the bar's dynamic load is
+left to feedback and the unactuated root to the contact.  Feeding the
+measured bushing force back instead (held over each 1 ms step) diverged in
+the 1.5 s hold; the stiff hand-bushing mode seen through that one-step delay
+is the suspected cause, not a demonstrated one.
 """
 
 from __future__ import annotations
@@ -39,6 +43,7 @@ from src.shared.python.lifting.barbell_bushing import (
 from src.shared.python.motion_matching.same_input import (
     InputBundle,
     Rollout,
+    StepPolicy,
     VectorPlant,
     integrate,
     project_to_closure,
@@ -62,13 +67,13 @@ __all__ = [
 def loaded_effort_source(
     plant: BarbellBushingPlant, controller: Controller
 ) -> Callable[[int, float, Array, Array], Array]:
-    """Effort source: body controller minus the measured hand load; bar zero."""
+    """Effort source: body controller plus bar-weight feedforward; bar zero."""
     nv = plant.nv_body
 
     def source(_k: int, t: float, q: Array, v: Array) -> Array:
         tau = np.zeros(nv + len(BAR_COORDINATES))
         tau[:nv] = np.asarray(controller(t, q[:nv], v[:nv]), dtype=float)
-        tau[:nv] -= plant.hand_generalized_force(q, v)
+        tau[:nv] -= plant.weight_generalized_force(q[:nv])
         return tau
 
     return source
@@ -179,6 +184,7 @@ def quasi_static_hold(
         loaded_effort_source(loaded, controller),
         steps=steps,
         dt_s=float(duration_s) / steps,
+        policy=StepPolicy(stop_on_failure=True),
     )
     rows = range(0, rollout.q.shape[0], SAMPLE_EVERY)
     nv, names = loaded.nv_body, loaded.body_order
@@ -231,7 +237,7 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
         "attach_q": q_aug[:nv].tolist(),
         "reference_bar_q": rollout.q[:, nv:].tolist(),
         "reference_bar_v": rollout.v[:, nv:].tolist(),
-        "controller": "pipeline computed-torque (kkt) minus measured hand load",
+        "controller": "pipeline computed-torque (kkt) plus bar-weight feedforward",
     }
     provenance = {
         **source.provenance,

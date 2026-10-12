@@ -216,6 +216,15 @@ def test_bar_load_reaches_the_root(
     assert np.abs(actual - expected).max() <= THIRD_LAW_N
 
 
+def test_weight_feedforward_equals_the_static_hand_load(
+    loaded: BarbellBushingPlant, bundle: InputBundle
+) -> None:
+    q, v = _static_state(loaded, bundle)
+    feedforward = loaded.weight_generalized_force(q[: loaded.nv_body])
+    measured = loaded.hand_generalized_force(q, v)
+    assert np.abs(feedforward - measured).max() <= THIRD_LAW_N
+
+
 def test_hand_jacobian_matches_mujoco_analytic(
     loaded: BarbellBushingPlant, bundle: InputBundle
 ) -> None:

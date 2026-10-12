@@ -443,6 +443,19 @@ class BarbellBushingPlant:
         v_body, v_bar = self._split(v)
         return self._hand_load(*self._sample(q_body, v_body, q_bar, v_bar))
 
+    def weight_generalized_force(self, q_body: Array) -> Array:
+        """Generalized force of the bar's weight hung rigidly from the hands.
+
+        The static load a lifter anticipates: ``m g`` at the bar centre of
+        mass carried by the hand body, mapped with the hand Jacobian.  A
+        function of the body pose only (no bushing dynamics).
+        """
+        q_b = self._body(q_body)
+        hand, jac = self._hand_state(q_b, np.zeros(self.nv_body))
+        arm = hand.rotation @ np.asarray(self.dynamics.com_m, dtype=float)
+        weight = self.dynamics.mass_kg * self.gravity
+        return jac[:3].T @ weight + jac[3:].T @ cross3(arm, weight)
+
     def acceleration(self, q: Array, v: Array, tau: Array) -> Array:
         """Coupled body and bar accelerations; ``tau`` bar entries must be zero."""
         q_body, q_bar = self._split(q)
