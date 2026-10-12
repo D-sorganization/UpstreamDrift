@@ -67,11 +67,18 @@ def _sync_contract_level_aliases(
         module = sys.modules.get(mod_name)
         if module is None:
             continue
-        module.DBC_LEVEL = level  # type: ignore[attr-defined]
+        module_level_type = getattr(module, "ContractLevel", None)
+        module_level = (
+            module_level_type(level.value)
+            if module_level_type is not None
+            and not isinstance(level, module_level_type)
+            else level
+        )
+        module.DBC_LEVEL = module_level  # type: ignore[attr-defined]
         module.CONTRACTS_ENABLED = contracts_enabled  # type: ignore[attr-defined]
         state = getattr(module, "_ContractState", None)
         if state is not None and state is not primary_state:
-            state.level = level
+            state.level = module_level
 
 
 def install_contract_level_alias_sync() -> None:
@@ -83,8 +90,13 @@ def install_contract_level_alias_sync() -> None:
     primary_state = contracts._ContractState
 
     def set_contract_level_with_sync(level: Any) -> None:
-        original(level)
-        _sync_contract_level_aliases(level, primary_state=primary_state)
+        local_level = (
+            level
+            if isinstance(level, contracts.ContractLevel)
+            else contracts.ContractLevel(level.value)
+        )
+        original(local_level)
+        _sync_contract_level_aliases(local_level, primary_state=primary_state)
 
     set_contract_level_with_sync._ud_contract_level_sync_installed = True  # type: ignore[attr-defined]
     contracts.set_contract_level = set_contract_level_with_sync  # type: ignore[attr-defined]
