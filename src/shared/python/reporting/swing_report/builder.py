@@ -146,7 +146,7 @@ def _spread(
     values: list[list[float | None]] = [list(c) for c in columns]
     lower, upper = [0.0] * n, [0.0] * n
     for i in range(n):
-        finite = [c[i] for c in columns if c[i] is not None]
+        finite = [x for x in (c[i] for c in columns) if x is not None]
         if len(finite) < MIN_ENGINES_FOR_SPREAD:
             for col in values:
                 col[i] = None
