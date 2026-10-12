@@ -19,6 +19,8 @@ import pytest
 
 from src.shared.python.data_io import native_dll_guard as guard
 
+pytestmark = pytest.mark.unit
+
 DLL_MSG = "DLL load failed while importing _ezc3d: The specified procedure could not be found."
 
 
