@@ -1,7 +1,7 @@
 ---
 issue: 12353
 summary: "Allow native Moco preparation to skip only the short capability probe while recording runtime as not attempted and keeping solve readiness false"
-dl_state: "in_review"
+dl_state: "in_progress"
 next_step: "Root review of implementation, focused tests, and manual-governance updates."
 branch: "feat/native-no-probe-12353-20261012"
 paths: "src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py,src/engines/physics_engines/opensim/python/tour_matching/native_body_inertia.py,src/engines/physics_engines/opensim/python/tour_matching/native_passive_receipt.py,src/engines/physics_engines/opensim/python/tour_matching/cli.py,tests/opensim/test_native_passive_receipt.py,tests/opensim/test_native_moco_inertia_preflight.py,tests/unit/engines/opensim/test_native_moco_probe_mode.py,tests/unit/engines/opensim/test_native_path_optimizer_domains.py,manuals/upstreamdrift/chapters/56-native-diagnostic-execution-contract.qmd,manuals/upstreamdrift/calculation-registry.json,SPEC.md,AGENT_HANDOFF.md,docs/development/feedback_controls/F07_NATIVE_NO_PROBE_PREPARATION_TURNOVER.md,docs/agent_context/README.md,docs/agent_context/index.html"

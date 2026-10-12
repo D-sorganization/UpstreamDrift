@@ -13,7 +13,7 @@
   "totals": {
     "identical": 397,
     "diverged": 276,
-    "ud-only": 1672,
+    "ud-only": 1678,
     "tools-only": 808,
     "spelling-only": 123
   },
@@ -693,7 +693,7 @@
     "reporting": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 13,
+      "ud-only": 19,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -24557,6 +24557,18 @@
       "spelling_only": false
     },
     {
+      "path": "reporting/swing_report/__main__.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 203,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "reporting/swing_report/adapters_base.py",
       "classification": "ud-only",
       "package": "reporting",
@@ -24581,11 +24593,47 @@
       "spelling_only": false
     },
     {
+      "path": "reporting/swing_report/cli.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 4923,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "reporting/swing_report/contract.py",
       "classification": "ud-only",
       "package": "reporting",
       "subpackage": "swing_report",
       "ud_bytes": 9179,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/exporter.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 6896,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/plot_render.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 2974,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24622,6 +24670,30 @@
       "package": "reporting",
       "subpackage": "swing_report",
       "ud_bytes": 4673,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/series_csv.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 6334,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/summary_md.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 3582,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
