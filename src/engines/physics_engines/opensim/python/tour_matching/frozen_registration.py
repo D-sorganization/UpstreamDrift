@@ -266,7 +266,10 @@ def pelvis_coordinate_gauge(
         source_frame=source_frame,
         target_frame=target_frame,
     )
-    targets = dict(zip(labels, register_points(points, gauge), strict=True))
+    targets = {
+        label: [float(v) for v in row]
+        for label, row in zip(labels, register_points(points, gauge), strict=True)
+    }
     basis = "Training-only centroid/Y-up/left-axis coordinate gauge; no donor landmark equivalence"
     return fit_training_registration(
         capture,
