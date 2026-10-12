@@ -188,7 +188,9 @@ def quasi_static_hold(
     )
     rows = range(0, rollout.q.shape[0], SAMPLE_EVERY)
     nv, names = loaded.nv_body, loaded.body_order
-    grf, forces, deflection = [], {s: [] for s in SIDES}, []
+    grf: list[Array] = []
+    forces: dict[str, list[Array]] = {s: [] for s in SIDES}
+    deflection: list[float] = []
     for k in rows:
         q, v = rollout.q[k], rollout.v[k]
         grf.append(_contact_force(simulator.adapter, names, q[:nv], v[:nv]))
@@ -256,10 +258,13 @@ def build_barbell_bundle(source: InputBundle, barbell: Barbell) -> InputBundle:
     bushing parameters and the attachment pose are under
     ``provenance["barbell"]``.  Replay it with :func:`barbell_plant`.
     """
-    times = np.arange(source.reference_q.shape[0]) * source.dt_s
+    times = np.arange(source.reference_q.shape[0], dtype=float) * source.dt_s
     duration = source.steps * source.dt_s
     controller, q0, v0, steps, simulator = _tracking(
-        source.spec_bytes, times, source.reference_q, duration
+        source.spec_bytes,
+        times,
+        np.asarray(source.reference_q, dtype=float),
+        duration,
     )
     q0 = _preload_bar(simulator, q0, barbell.load_kg)
     loaded, q_aug, v_aug = _attached_start(source.spec_bytes, q0, v0, barbell)

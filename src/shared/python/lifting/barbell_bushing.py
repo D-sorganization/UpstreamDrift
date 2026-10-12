@@ -47,6 +47,7 @@ from numpy.typing import NDArray
 from src.shared.python.biomechanics.grip_wrench import (
     GripAnalysis,
     HandWrench,
+    SplitMethod,
     analyze_grip,
 )
 from src.shared.python.grip_contact import (
@@ -82,7 +83,7 @@ SIDES = ("L", "R")
 _FD_STEP = 1e-3
 #: Fourth-order central-difference stencil ``(offset, weight / 12)``.
 _STENCIL = ((-2.0, 1.0), (-1.0, -8.0), (1.0, 8.0), (2.0, -1.0))
-_SPLIT = "bushing"
+_SPLIT: SplitMethod = "bushing"
 
 __all__ = [
     "BAR_COORDINATES",
@@ -206,15 +207,19 @@ class BushingSample:
 
     def grip_analysis(self, metadata: Mapping[str, Any] | None = None) -> GripAnalysis:
         """GCV-7 reduction (midpoint net force, couple), ``split_method='bushing'``."""
-        hands = [
-            HandWrench(
-                side,
-                self.bar_grip_m[side],
-                self.wrench[side].force_n,
-                self.wrench[side].moment_nm,
+        hands: list[HandWrench] = []
+        for side in SIDES:
+            p = self.bar_grip_m[side]
+            f = self.wrench[side].force_n
+            m = self.wrench[side].moment_nm
+            hands.append(
+                HandWrench(
+                    side,
+                    (float(p[0]), float(p[1]), float(p[2])),
+                    (float(f[0]), float(f[1]), float(f[2])),
+                    (float(m[0]), float(m[1]), float(m[2])),
+                )
             )
-            for side in SIDES
-        ]
         return analyze_grip(
             hands[0],
             hands[1],
@@ -307,9 +312,9 @@ class BarbellBushingPlant:
             offset[:3, 3] -= com
             self._grip_offsets[side] = offset
         q_attach = self._body(np.asarray(attach_q, dtype=float))
-        self._columns = np.arange(self.nv_body)
+        self._columns: list[int] = list(range(self.nv_body))
         hand_jac = self._hand_jacobian(q_attach)
-        self._columns = np.flatnonzero(np.abs(hand_jac).max(axis=0) > 0.0)
+        self._columns = np.flatnonzero(np.abs(hand_jac).max(axis=0) > 0.0).tolist()
         pose = self._hand_pose(q_attach)
         self.reference_rotation = pose[:3, :3].copy()
         position = pose[:3, :3] @ com + pose[:3, 3]
@@ -356,7 +361,8 @@ class BarbellBushingPlant:
 
     def _static_deflection(self, hand_rotation: Array) -> Array:
         """World offset ``K^-1 m g`` of the bar on both translational springs."""
-        local = np.diag(self.interface.bushing.translational_stiffness_n_m)
+        bushing = self.interface.bushing
+        local = np.diag(bushing.translational_stiffness_n_m)
         stiffness = np.zeros((3, 3))
         for side in SIDES:
             axes = hand_rotation @ np.asarray(self.interface.frame(side).rotation)
@@ -380,10 +386,14 @@ class BarbellBushingPlant:
         for k in self._columns:
             step = np.zeros(self.nv_body)
             step[k] = _FD_STEP
-            rate = sum(
-                weight * self._hand_pose(q_body + scale * step)
-                for scale, weight in _STENCIL
-            ) / (12.0 * _FD_STEP)
+            pose_rate = sum(
+                (
+                    weight * self._hand_pose(q_body + scale * step)
+                    for scale, weight in _STENCIL
+                ),
+                start=np.zeros((4, 4), dtype=float),
+            )
+            rate = np.asarray(pose_rate / (12.0 * _FD_STEP), dtype=float)
             jac[:3, k] = rate[:3, 3]
             jac[3:, k] = _vee_skew(rate[:3, :3] @ rotation_t)
         return jac
