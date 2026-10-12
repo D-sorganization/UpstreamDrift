@@ -27,9 +27,9 @@ def test_set_contract_level_syncs_pinned_tools_contracts_module(
 
     src_mod = importlib.import_module("src.shared.python.contracts")
     tools_mod = types.ModuleType("shared.python.contracts")
-    tools_mod.DBC_LEVEL = ContractLevel.ENFORCE
-    tools_mod.CONTRACTS_ENABLED = True
-    tools_mod._ContractState = types.SimpleNamespace(level=ContractLevel.ENFORCE)
+    tools_mod.DBC_LEVEL = ContractLevel.ENFORCE  # type: ignore[attr-defined]
+    tools_mod.CONTRACTS_ENABLED = True  # type: ignore[attr-defined]
+    tools_mod._ContractState = types.SimpleNamespace(level=ContractLevel.ENFORCE)  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "shared.python.contracts", tools_mod)
 
     original = get_contract_level()
