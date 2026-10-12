@@ -695,8 +695,6 @@ testpaths = [
 ]
 pythonpath = [
     "vendor/ud-tools/src/shared/python",
-    "vendor/ud-tools/src/python/src",
-    "vendor/ud-tools/src",
     ".",
     "src",
     "src/shared/python",
