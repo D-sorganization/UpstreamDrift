@@ -1,0 +1,111 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=.85in,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\usepackage{amsmath,booktabs,array,xcolor,xurl,hyperref,fancyhdr}
+\definecolor{ink}{HTML}{17334A}\definecolor{accent}{HTML}{187E91}
+\hypersetup{colorlinks=true,urlcolor=accent,pdftitle={Necromatcher: Original-Start Analytic Marker Budget Results}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\textcolor{ink}{\textbf{NECROMATCHER} / SOLVER EVIDENCE}}
+\fancyhead[R]{\small Results Supplement}\fancyfoot[L]{\small Unaccepted Monocular Research Hypotheses}\fancyfoot[R]{\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}\setlength{\emergencystretch}{2em}\renewcommand{\arraystretch}{1.15}
+\newcommand{\code}[1]{\nolinkurl{#1}}\newcommand{\hash}[1]{{\footnotesize\nolinkurl{#1}}}
+\begin{document}
+{\large\textcolor{accent}{UPSTREAMDRIFT / REPEATABLE RESEARCH METHODS}}\par
+{\LARGE\bfseries\textcolor{ink}{Original-Start Analytic Marker Budget Results}}\par
+Tiger Woods V20 and Ben Hogan V17 / Closed Four-Arm Study
+\section{Design and Computational Outcome}
+Four sequential canonical jobs reused the exact initializers of the original jobs with a requested budget of 30 evaluations, rather than their optimized final motions. Controls retain 31 free coordinates; variants retain 33, adding the two authored forearm coordinates. All have 44 native coordinates. The full initial spline coefficients, positions, velocities and accelerations, camera, model, observations, priors, constraints, bounds, confidence rules and shaft recipes were preserved. Each new job requested 120 backend function evaluations with the same 300-second worker wall cap.
+
+The new producer is \hash{6fe04eac5b05e3914e85aaefac853415a7b9d958}; the original comparison producer was \hash{00b7d9846bd2fb2572b7c84f03cfc6c9699323cb}. The new analytic marker and fixed-camera derivative chain feeds the existing dense TRF solve; generic shaft differencing remains. This is a new study at a new producer. It does not resurrect the unpublished failed Tiger V19 run or warm-start from the earlier partial budget study.
+
+All four jobs completed and published rejected research candidates. Every optimizer stopped at the function-evaluation limit and remained nonconverged. The authenticated child measurements are:
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Arm & $n_{fev}$ & $n_{jev}$ & Solver (s) & Worker (s)\\\midrule
+Tiger Control & 120 & 120 & 90.560 & 93.562\\
+Tiger Variant & 120 & 120 & 92.757 & 95.965\\
+Hogan Control & 120 & 89 & 193.956 & 197.131\\
+Hogan Variant & 120 & 88 & 181.684 & 187.450\\
+\bottomrule\end{tabular}
+\end{center}
+
+\textbf{Measurement Scopes.} SciPy 1.16.0 reports \code{nfev} and \code{njev}; these are backend counters, not a count of every internal finite-difference residual call. Solver time covers the backend invocation. Worker time covers child entry through computed payload or caught failure, excluding imports, telemetry publication and final transport serialization. Neither is parent polling time. Earlier records lack comparable authenticated timings, so no measured speedup is claimed.
+\clearpage
+\section{Body Projection and Sample Membership}
+The table compares the original jobs with a requested budget of 30 evaluations against these new jobs with a requested budget of 120. All values are pixels; the machine data retain full precision.
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Arm & Budget & Training & Dense & Seen Evaluation\\\midrule
+Tiger Control & 30 & 22.300413 & 24.749160 & 25.019052\\
+Tiger Control & 120 & 21.928418 & 24.248537 & 24.504735\\
+Tiger Variant & 30 & 21.825821 & 24.197894 & 24.459473\\
+Tiger Variant & 120 & 21.313559 & 23.582686 & 23.833174\\
+Hogan Control & 30 & 7.152497 & 10.262214 & 10.342984\\
+Hogan Control & 120 & 6.814959 & 10.130077 & 10.214931\\
+Hogan Variant & 30 & 7.218843 & 10.284241 & 10.364096\\
+Hogan Variant & 120 & 6.856656 & 10.136351 & 10.220486\\
+\bottomrule\end{tabular}
+\end{center}
+
+Training RMS is the stored objective's source-sample summary. Dense RMS evaluates all original source frames. The stored \code{held_out_rms_pixels} field is described here as \emph{seen evaluation}: the images and labels have already been inspected and reused in prior work. It is not an untouched generalization set. Pixel RMS must be interpreted separately for Tiger's 1280-by-720 and Hogan's 320-by-240 source images.
+
+The new jobs preserve the original objective and constraints. A larger evaluation budget and the derivative implementation change together across editions; this comparison does not isolate a causal derivative effect. Lower image error does not calibrate camera, anthropometry, anatomy or the physical motion.
+\section{Source and Lifecycle Preservation}
+The SDK-free independent closure authenticated the closed-process proof, the canonical request and child telemetry bindings, saved fits and audit pins. All 14,793 tracked source files were preserved. The library grew from 363 to 383 files: four owned fit assets and sixteen owned run files; the existing project index was updated only for those declared assets. All old nonindex bytes remained exact. The checker verified serialized telemetry and persistence; it did not independently rerun native kinematics.
+\clearpage
+\section{Raw Shaft Diagnostics}
+The following distance metric is the unweighted RMS perpendicular distance from authored fragment points to the projected infinite native shaft axis. It is separate from body RMS and from the weighted shaft objective. Training uses V1 fragments; V2 evidence is evaluation only, with explicit ambiguous abstentions preserved.
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Arm & Budget & Training (px) & Seen (px) & Seen Angle (deg)\\\midrule
+Tiger Control & 30 & 126.145190 & 151.998988 & 28.992\\
+Tiger Control & 120 & 110.540744 & 139.672736 & 23.060\\
+Tiger Variant & 30 & 111.454011 & 149.966002 & 28.614\\
+Tiger Variant & 120 & 99.162976 & 145.903631 & 26.372\\
+Hogan Control & 30 & 28.186982 & 30.975508 & 85.408/28.810\\
+Hogan Control & 120 & 19.559742 & 25.784740 & 83.257/22.234\\
+Hogan Variant & 30 & 28.173896 & 30.929644 & 85.659/28.629\\
+Hogan Variant & 120 & 16.997736 & 23.037825 & 81.731/17.366\\
+\bottomrule\end{tabular}
+\end{center}
+
+\smallskip
+\begin{center}\small
+\begin{tabular}{@{}lrr@{}}\toprule
+Arm & Budget & Training Angles (deg)\\\midrule
+Tiger Control & 30 & 35.558/70.403\\
+Tiger Control & 120 & 30.240/62.312\\
+Tiger Variant & 30 & 33.953/60.376\\
+Tiger Variant & 120 & 28.301/54.766\\
+Hogan Control & 30 & 11.197\\
+Hogan Control & 120 & 3.296\\
+Hogan Variant & 30 & 10.911\\
+Hogan Variant & 120 & 0.302\\
+\bottomrule\end{tabular}
+\end{center}
+
+Angles follow the observed-record order in \code{results-data.json}; null abstentions are excluded from displayed lists, not replaced by zeros. Tiger training observes frames 0 and 209; evaluation has an abstention at 60 and an observed fragment at 150. Hogan training observes 375; evaluation observes 200 and 550. These sparse roles do not establish whole-swing shaft reconstruction. Authored fragment confidence and sigma remain uncalibrated. The infinite-axis diagnostic does not measure clubhead motion, physical shaft endpoints, flexure or scene occlusion.
+\clearpage
+\section{Constraints, Certificates and Interpretation}
+The scaled maximum is the saved optimizer-probe residual, including authored weight/scale normalization. The other columns are physical-unit maxima from the canonical full native audit's finite sample union; they are different measurements.
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Arm & Scaled Max. & Gap (mm) & Angle (deg) & Depth (mm)\\\midrule
+Tiger Control & 16.089205 & 1.702893 & 1.199057 & 1.142053\\
+Tiger Variant & 17.023156 & 2.145782 & 0.824811 & 1.206331\\
+Hogan Control & 3.943627 & 0.623256 & 0.144781 & 1.321407\\
+Hogan Variant & 2.201541 & 0.733037 & 0.119861 & 0.164881\\
+\bottomrule\end{tabular}
+\end{center}
+
+The native audits include Tiger's 210 source frames and 209 midpoints, and Hogan's 750 source frames and 749 midpoints, with coordinate-extremum and phase-boundary probes. Exact scalar spline range certificates cover the 32 authored bounded coordinates; twelve coordinates remain explicitly unbounded. These authored scalar limits are not individualized or clinically validated coupled human ROM. Both the saved constraint report and full nonlinear audit retain continuous certification false. Finite contact/grip tests are not all-time nonlinear certificates or confirmed hand/contact states.
+
+\textbf{Qualification.} Computational success and valid persistence do not promote scientific status. All four outputs remain nonconverged, rejected monocular research hypotheses. Physical playback time, anatomy, camera calibration, club geometry, uncertainty and dynamics remain unqualified. No new video or selected-still validation is claimed by this supplement.
+\section{Repeatability and Evidence Authority}
+The exclusive preparation contains \code{results-data.json} with unrounded values and \code{input-pins.json} with raw SHA-256/byte counts for the original requests, parent starts, old and new fits, full native/shaft audits, completion, closure and acceptance. To reproduce the tables, verify these pins, read the immutable records, and format only the displayed decimal precision. No solver dispatch is required to reproduce this report.
+
+Independent serialized closure:\par
+\hash{2a0031c94d7325d853270d6afe0937fe6abf07d2d6339741fd045fae309b247f}.\par
+Root acceptance:\par
+\hash{94f4a7b6178cd94b1811a991093398ac717bdeb4da9d9ad95b317f35c7071ecf}.\par
+This four-page results supplement was compiled with the installed LaTeX compiler and every page visually reviewed. The built-in compiler was unavailable; its platform-directory diagnostic is preserved alongside the source. The preparation uses standard-library JSON and hashing only; it does not recompute native diagnostics, mutate the library or dispatch jobs.
+\end{document}

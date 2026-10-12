@@ -42,18 +42,73 @@ from .model_match_handoff import (
     list_available_backends,
     resolve_matching_route,
 )
+from .historical_research import (
+    ResearchAuditPin,
+    build_historical_research_package,
+    export_historical_research_package,
+    historical_research_schema_bytes,
+)
 from .necromatcher import NecromatcherLibrary, default_necromatcher_library
+from .necromatcher_authenticated_read import AuthenticatedRead, authenticated_read
 from .necromatcher_efforts import AuthoredEffortProfile, EFFORT_SCHEMA
-from .necromatcher_native import NativeFitBinding, load_native_fit_binding
+from .necromatcher_native import (
+    NativeFitBinding,
+    NativeModelBinding,
+    load_native_fit_binding,
+    load_native_model_binding,
+)
+from .necromatcher_hypothesis_contracts import (
+    NativeHypothesisRequest,
+    HypothesisParents,
+    HypothesisModel,
+    HypothesisCoordinateMap,
+    HypothesisGauge,
+)
+from .necromatcher_hypothesis import (
+    BoundNativeHypothesis,
+    bind_native_hypothesis,
+    author_native_hypothesis,
+)
 from .necromatcher_constraints import repair_native_motion
-from .necromatcher_video import export_fit_video
+from .necromatcher_video import export_fit_stills, export_fit_video
+from .necromatcher_caption import CaptionOverlayOptions
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from .necromatcher_shape_overlay import shape_overlay_provenance
 from .necromatcher_video_jobs import NativeVideoSession
 from .necromatcher_placement import author_ground_placement
 from .necromatcher_replay import ReplayOptions, replay_authored_profile
+from .necromatcher_impact import (
+    ReplayImpactGeometry,
+    ReplayImpactSelection,
+    extract_replay_impact_state,
+)
+from .necromatcher_impact_receipt import (
+    export_replay_impact_receipt,
+    load_replay_impact_receipt,
+)
+from .necromatcher_impact_execution import impact_execution_stamp
+from .necromatcher_impact_jobs import NativeImpactSession
 from .necromatcher_review import CaptureReview
+from .necromatcher_shaft_evidence import (
+    BoundShaftEvidence,
+    bind_shaft_axis_evidence,
+    bind_fit_shaft_evidence,
+    load_shaft_image_residuals,
+)
 from .necromatcher_projection import project_fit_frame
 from .necromatcher_projection_process import NativeFitProjectionProcess
 from .necromatcher_fit_jobs import NativeRefitOptions, start_native_refit
+from .necromatcher_scope_import import import_fit_source_scope_review
+from .necromatcher_source_scope import (
+    SourceScopeReview,
+    SourceFitScope,
+    BoundSourceFitScope,
+    SourceSelectedDomain,
+    bind_source_fit_scope,
+    validate_scope_selection,
+    validate_scope_descendant,
+    resolve_source_fit_scope,
+)
 from .necromatcher_refits import NativeRefitSession, refit_plan
 from .project_store import (
     DatasetMetadata,
@@ -63,6 +118,7 @@ from .project_store import (
     SessionProjectStore,
     SubjectMetadata,
 )
+from .necromatcher_golf import ResearchImpactShot, load_research_impact_shot
 from .results_browser import ResultArtifact, ResultFilter, ResultsBrowser
 from .estimation_workspace import (
     EstimationJobResult,
@@ -174,18 +230,48 @@ from .feature_preservation_audit import (
     FeaturePreservationAuditor,
 )
 
+from .necromatcher_fit_records import build_native_fit_payload
+
 __all__ = [
+    "BoundShaftEvidence",
+    "bind_shaft_axis_evidence",
+    "bind_fit_shaft_evidence",
+    "load_shaft_image_residuals",
+    "build_native_fit_payload",
     "NativeFitBinding",
+    "NativeModelBinding",
+    "NativeHypothesisRequest",
+    "HypothesisParents",
+    "HypothesisModel",
+    "HypothesisCoordinateMap",
+    "HypothesisGauge",
+    "BoundNativeHypothesis",
+    "bind_native_hypothesis",
+    "author_native_hypothesis",
     "author_ground_placement",
     "repair_native_motion",
     "export_fit_video",
+    "export_fit_stills",
+    "ShapeOverlayOptions",
+    "CaptionOverlayOptions",
+    "shape_overlay_provenance",
     "NativeVideoSession",
     "ReplayOptions",
     "replay_authored_profile",
+    "ReplayImpactGeometry",
+    "ReplayImpactSelection",
+    "extract_replay_impact_state",
+    "export_replay_impact_receipt",
+    "load_replay_impact_receipt",
+    "impact_execution_stamp",
+    "NativeImpactSession",
     "load_native_fit_binding",
+    "load_native_model_binding",
     "AuthoredEffortProfile",
     "EFFORT_SCHEMA",
     "NecromatcherLibrary",
+    "AuthenticatedRead",
+    "authenticated_read",
     "CaptureReview",
     "default_necromatcher_library",
     "ActionAvailability",
@@ -312,6 +398,10 @@ __all__ = [
     "WorkspaceJob",
     "WorkspaceJobKind",
     "WorkspaceJobState",
+    "ResearchAuditPin",
+    "build_historical_research_package",
+    "export_historical_research_package",
+    "historical_research_schema_bytes",
     "compute_file_sha256",
     "convert_artifact",
     "get_engine_qualification",
@@ -321,9 +411,20 @@ __all__ = [
     "project_fit_frame",
     "NativeFitProjectionProcess",
     "NativeRefitOptions",
+    "SourceScopeReview",
+    "SourceFitScope",
+    "import_fit_source_scope_review",
+    "BoundSourceFitScope",
+    "SourceSelectedDomain",
+    "bind_source_fit_scope",
+    "validate_scope_selection",
+    "validate_scope_descendant",
+    "resolve_source_fit_scope",
     "NativeRefitSession",
     "refit_plan",
     "resolve_matching_route",
     "start_native_refit",
+    "ResearchImpactShot",
+    "load_research_impact_shot",
     "validate_run_compatibility",
 ]

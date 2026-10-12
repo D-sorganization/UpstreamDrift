@@ -234,3 +234,118 @@ def test_native_frame_query_rejects_unknown_frame(native_fit_case):
         binding.plant.frame_poses(
             {"hand": ("missing-frame", [0, 0, 0])}, payload["q"][0]
         )
+
+
+def test_authored_coordinate_ranges_are_bound_immutable_radians(native_fit_case):
+    from src.shared.python.workspace.necromatcher_native import load_native_fit_binding
+
+    library, source, payload = native_fit_case
+    library.add_fit("ranges", "practice", source)
+    bound = load_native_fit_binding(library, "ranges")
+    definition = payload["provenance"]["native_definition"]
+    ranges = bound.authored_coordinate_bounds()
+    authored = definition["coordinate_ranges_deg"]
+    expected = tuple(name for name in bound.plant.coordinate_order if name in authored)
+    assert tuple(ranges.named_bounds) == expected
+    for name in expected:
+        np.testing.assert_allclose(
+            ranges.named_bounds[name], np.deg2rad(authored[name])
+        )
+    assert ranges.unbounded_names == tuple(
+        name for name in bound.plant.coordinate_order if name not in authored
+    )
+    assert ranges.xml_sha256 == bound.model_hash
+    assert ranges.definition_sha256.startswith("sha256:")
+    assert ranges.range_source == "bound_native_definition.coordinate_ranges_deg"
+    assert ranges.compiled_limits_enforced is False
+    with pytest.raises(TypeError):
+        ranges.named_bounds[expected[0]] = (0, 1)
+    receipt = ranges.to_record()
+    receipt["named_bounds"][expected[0]][0] = 999
+    assert ranges.named_bounds[expected[0]][0] != 999
+    bound.fit["provenance"]["native_definition"]["coordinate_ranges_deg"] = {}
+    assert bound.authored_coordinate_bounds().to_record() == ranges.to_record()
+
+
+@pytest.mark.parametrize(
+    "invalid",
+    ["unknown", "translation", "reversed", "nan", "string", "bool", "mapping"],
+)
+def test_authored_ranges_reject_invalid_definition_declarations(
+    native_fit_case, invalid
+):
+    from src.shared.python.workspace.necromatcher_native import load_native_fit_binding
+
+    library, source, payload = native_fit_case
+    definition = payload["provenance"]["native_definition"]
+    ranges = definition["coordinate_ranges_deg"]
+    if invalid == "unknown":
+        ranges["unknown"] = [-10, 10]
+    elif invalid == "translation":
+        ranges[definition["coordinate_order"][0]] = [-10, 10]
+    elif invalid == "mapping":
+        definition["coordinate_ranges_deg"] = []
+    else:
+        ranges[next(iter(ranges))] = {
+            "reversed": [10, -10],
+            "nan": [float("nan"), 10],
+            "string": ["-10", 10],
+            "bool": [False, 10],
+        }[invalid]
+    if invalid == "nan":
+        from dataclasses import replace
+
+        # Stored fits already reject NaN; also validate the public extraction seam.
+        library.add_fit("ranges", "practice", source)
+        bound = load_native_fit_binding(library, "ranges")
+        bound = replace(bound, definition_bytes=json.dumps(definition).encode())
+        with pytest.raises(ValueError):
+            bound.authored_coordinate_bounds()
+        return
+    source.write_text(json.dumps(payload))
+    library.add_fit("ranges", "practice", source)
+    bound = load_native_fit_binding(library, "ranges")
+    with pytest.raises(ValueError):
+        bound.authored_coordinate_bounds()
+
+
+def test_missing_authored_ranges_are_explicitly_unbounded(native_fit_case):
+    from src.shared.python.workspace.necromatcher_native import load_native_fit_binding
+
+    library, source, payload = native_fit_case
+    payload["provenance"]["native_definition"].pop("coordinate_ranges_deg")
+    source.write_text(json.dumps(payload))
+    library.add_fit("ranges", "practice", source)
+    bound = load_native_fit_binding(library, "ranges")
+    ranges = bound.authored_coordinate_bounds()
+    assert not ranges.named_bounds
+    assert ranges.unbounded_names == bound.plant.coordinate_order
+
+
+@pytest.mark.parametrize("invalid", ["xml", "units", "order", "missing_bytes"])
+def test_authored_range_boundary_rejects_binding_identity_mismatch(
+    native_fit_case, invalid
+):
+    from dataclasses import replace
+    from types import SimpleNamespace
+    from src.shared.python.workspace.necromatcher_native import load_native_fit_binding
+
+    library, source, _ = native_fit_case
+    library.add_fit("ranges", "practice", source)
+    bound = load_native_fit_binding(library, "ranges")
+    if invalid == "xml":
+        bound = replace(bound, model_hash="sha256:" + "0" * 64)
+    elif invalid == "units":
+        bound = replace(bound, coordinate_units=("m",) * 44)
+    elif invalid == "missing_bytes":
+        bound = replace(bound, definition_bytes=b"")
+    else:
+        bound = replace(
+            bound,
+            plant=SimpleNamespace(
+                coordinate_order=tuple(reversed(bound.plant.coordinate_order)),
+                coordinate_units=bound.coordinate_units,
+            ),
+        )
+    with pytest.raises(ValueError):
+        bound.authored_coordinate_bounds()

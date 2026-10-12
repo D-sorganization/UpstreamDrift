@@ -1,14 +1,62 @@
-import { apiFetch } from './fetch';
+import { apiFetch, apiFetchForm } from './fetch';
 import { getApiBase } from './backend';
-import type { AssetRequest, ForceLayerRequest, IdentityRequest, ModelRequest, SwingRequest, RefitRequest, VideoExportRequest } from './generated/types';
+import type { AssetRequest, ForceLayerRequest, IdentityRequest, ModelRequest, SwingRequest, VideoExportRequest } from './generated/types';
 
 const root = '/api/v1/necromatcher';
-export type RefitOptions = Required<Omit<RefitRequest, 'new_fit_id'>>;
+export interface SourceFitScope {
+  schema: 'necromatcher/source-fit-scope/1';
+  capture_id: string; capture_hash: string; source_clock_sha256: string;
+  first_frame: number; end_exclusive_frame: number; purpose: 'both_hands_on_club';
+  review: {
+    artifact: {artifact_id: string; path: string; hash: string; schema: string; kind: string};
+    receipt_bytes: number; first_identity: Record<string, unknown>;
+    excluded_identity: Record<string, unknown> | null;
+    reason: string; uncertainty_policy: string; contact_calibrated: false;
+  };
+}
+export interface SourceFitScopeBinding {
+  frame_indices: number[]; first_pts: [number, number]; last_pts: [number, number];
+  source_clock_sha256: string;
+}
+export interface FitConstraintRecipe {
+  ground: {normal: number[]; height_m: number};
+  position_weight: number; rotation_weight: number; ground_weight: number;
+  position_scale_m: number; rotation_scale_rad: number; ground_scale_m: number;
+  pinned_spheres?: string[];
+}
+export interface ContactPinPhaseRecipe {
+  start_pts: [number, number]; end_pts: [number, number];
+  pinned_spheres: string[]; review_frame_sha256: string[];
+}
+export interface ContactPinScheduleRecipe {
+  capture_id: string; capture_sha256: string;
+  status: 'authored_contact_hypothesis'; phases: ContactPinPhaseRecipe[];
+}
+export interface ScheduledFitConstraintRecipe {
+  base: FitConstraintRecipe; schedule: ContactPinScheduleRecipe;
+}
+export interface ImageFitRecipe {
+  max_iterations: number; prior_weight: number; smoothness_weight: number; closure_weight: number;
+  constraint_options?: FitConstraintRecipe | ScheduledFitConstraintRecipe | null;
+  interior_fractions?: number[];
+  coordinate_bounds?: [string, number, number][];
+  initialization_policy?: 'strict' | 'authored_range_project_zero_slopes';
+}
+export interface RefitOptions {
+  frame_indices: number[]; knot_count: number; coordinate_scales: number[];
+  unknown_visibility_weight: number; budget_wall_s: number; config: ImageFitRecipe;
+  operation?: 'fit' | 'author_initialization' | 'restrict_initialization';
+  initialization_source?: 'sampled_parent' | 'preserved_spline' | 'restricted_spline';
+  shaft_evidence?: Record<string, unknown>;
+  source_scope?: SourceFitScope;
+}
 export interface RefitPlan {
   source_fit_id: string; frame_indices: number[]; coordinate_order: string[]; coordinate_units: string[];
-  recorded_options: (Omit<RefitOptions, 'max_iterations' | 'prior_weight' | 'smoothness_weight' | 'closure_weight'> & {
-    config: Pick<RefitOptions, 'max_iterations' | 'prior_weight' | 'smoothness_weight' | 'closure_weight'>;
-  }) | null;
+  recorded_options: RefitOptions | null;
+  baseline_config?: ImageFitRecipe;
+  source_scope?: SourceFitScope | null;
+  source_scope_binding?: SourceFitScopeBinding | null;
+  preserved_spline?: {available: boolean; knot_count: number | null; source_interval: [number, number] | null; reason: string};
 }
 export interface ResearchRun {
   run_id: string; source_fit_id: string;
@@ -16,26 +64,51 @@ export interface ResearchRun {
   acceptance: 'partial' | 'interrupted' | 'accepted' | 'rejected';
   blockers: string[]; message: string; fraction: number | null;
   control_available?: boolean;
+  source_fit_scope?: SourceFitScope | null;
+  source_fit_scope_binding?: SourceFitScopeBinding | null;
 }
 export interface RefitRun extends ResearchRun {new_fit_id: string}
 export interface VideoExportRun extends ResearchRun {
   qualification: 'monocular_research_hypothesis'; download_available: boolean;
   execution_started: boolean; execution_verified: boolean;
+  artifact_state?: 'verified_stat_baseline' | 'changed_or_unverified';
+  producer_source_commit?: string | null;
+  shape_overlay?: {opacity: number};
 }
 export type ForceLayer = Required<ForceLayerRequest>;
-export const submitVideoExport = (fit: string, forceLayer?: ForceLayer) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, forceLayer?.enabled ? {method: 'POST', body: JSON.stringify({force_layer: forceLayer} satisfies VideoExportRequest)} : {method: 'POST'});
+export type VideoOverlayOptions = {
+  shaft_evidence?: Record<string, unknown>;
+  shape_overlay?: { opacity: number };
+  force_layer?: ForceLayer;
+};
+export const submitVideoExport = (fit: string, optionsOrLayer?: VideoOverlayOptions | ForceLayer) => {
+  if (!optionsOrLayer) {
+    return apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, { method: 'POST' });
+  }
+  const body = 'enabled' in optionsOrLayer
+    ? (optionsOrLayer.enabled ? ({ force_layer: optionsOrLayer } satisfies VideoExportRequest) : undefined)
+    : optionsOrLayer;
+  return apiFetch<VideoExportRun>(
+    `${root}/fits/${encodeURIComponent(fit)}/video-exports`,
+    body ? { method: 'POST', body: JSON.stringify(body) } : { method: 'POST' }
+  );
+};
 export const fetchVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}`);
 export const cancelVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}/cancel`, {method: 'POST'});
 export const videoExportDownloadUrl = (run: string) => `${getApiBase()}${root}/video-exports/${encodeURIComponent(run)}/download`;
 export const fetchRefitPlan = (fit: string) => apiFetch<RefitPlan>(`${root}/fits/${encodeURIComponent(fit)}/refit-plan`);
+export function registerReviewedWindow(fit: string, file: File) {
+  const body = new FormData(); body.append('file', file);
+  return apiFetchForm<SourceFitScope>(`${root}/fits/${encodeURIComponent(fit)}/source-scope-reviews`, body, {timeoutMs: 300_000});
+}
 export const submitRefit = (fit: string, payload: RefitOptions & {new_fit_id: string}) => apiFetch<RefitRun>(`${root}/fits/${encodeURIComponent(fit)}/refits`, {method: 'POST', body: JSON.stringify(payload)});
 export const fetchRefit = (run: string) => apiFetch<RefitRun>(`${root}/refits/${encodeURIComponent(run)}`);
 export const cancelRefit = (run: string) => apiFetch<RefitRun>(`${root}/refits/${encodeURIComponent(run)}/cancel`, {method: 'POST'});
 export interface HistoricalPlayer { subject_id: string; display_name: string; metadata: Record<string, unknown> }
 export interface HistoricalSwing { session_id: string; subject_id: string; name: string; metadata: Record<string, unknown> }
 export interface HistoricalAsset {
-  dataset_id: string; session_id: string; kind: 'image_capture' | 'native_model' | 'torque_profile' | 'kinematic_fit';
-  metadata: { qualification: string; frame_count?: number; engine?: string; dofs?: string[]; model_id?: string; capture_id?: string; hash?: string };
+  dataset_id: string; session_id: string; kind: 'image_capture' | 'native_model' | 'torque_profile' | 'kinematic_fit' | 'authored_replay';
+  metadata: { qualification: string; frame_count?: number; engine?: string; dofs?: string[]; model_id?: string; capture_id?: string; fit_id?: string; profile_id?: string; hash?: string };
 }
 export interface CaptureFrame {
   capture_id: string; frame_index: number; frame_count: number; image_width: number; image_height: number;
@@ -46,6 +119,10 @@ export const fetchPlayers = () => apiFetch<{ players: HistoricalPlayer[] }>(`${r
 export const fetchSwings = (player: string) => apiFetch<{ swings: HistoricalSwing[] }>(`${root}/swings?player_id=${encodeURIComponent(player)}`);
 export const fetchAssets = (swing: string) => apiFetch<{ assets: HistoricalAsset[] }>(`${root}/swings/${encodeURIComponent(swing)}/assets`);
 export const fetchCaptureFrame = (capture: string, frame: number) => apiFetch<CaptureFrame>(`${root}/captures/${encodeURIComponent(capture)}/frames/${frame}`);
+export interface FitSummary {
+  fit_id: string; capture_id: string; frame_count: number; frame_indices: number[];
+}
+export const fetchFitSummary = (fit: string) => apiFetch<FitSummary>(`${root}/fits/${encodeURIComponent(fit)}`);
 export interface FitProjection {
   fit_id: string; capture_id: string; frame_index: number; frame: CaptureFrame['frame'];
   points: CaptureFrame['observation']['landmarks']; coordinates: 'image_pixels';
@@ -56,6 +133,35 @@ export const captureFrameImageUrl = (capture: string, frame: number) => `${getAp
 export const swingExportUrl = (swing: string) => `${getApiBase()}${root}/swings/${encodeURIComponent(swing)}/export`;
 export const createPlayer = (id: string, name: string) => apiFetch<HistoricalPlayer>(`${root}/players`, { method: 'POST', body: JSON.stringify({ id, name } satisfies IdentityRequest) });
 export const createSwing = (id: string, player_id: string, name: string) => apiFetch<HistoricalSwing>(`${root}/swings`, { method: 'POST', body: JSON.stringify({ id, player_id, name } satisfies SwingRequest) });
-export function importAsset(swing: string, kind: 'captures' | 'models' | 'profiles' | 'fits', payload: AssetRequest & Partial<Pick<ModelRequest, 'engine' | 'dofs'>>) {
+export function importAsset(swing: string, kind: 'captures' | 'models' | 'profiles' | 'fits' | 'replays', payload: AssetRequest & Partial<Pick<ModelRequest, 'engine' | 'dofs'>>) {
   return apiFetch<HistoricalAsset>(`${root}/swings/${encodeURIComponent(swing)}/${kind}`, { method: 'POST', body: JSON.stringify(payload), timeoutMs: 300_000 });
 }
+export interface ReplaySummary {
+  replay_id: string; sample_count: number; dt_s: number; backend: string;
+  metadata: Record<string, unknown>;
+}
+export const fetchReplaySummary = (replay: string) => apiFetch<ReplaySummary>(`${root}/replays/${encodeURIComponent(replay)}`);
+export const replayDataUrl = (replay: string) => `${getApiBase()}${root}/replays/${encodeURIComponent(replay)}/data`;
+export interface ReplayImpactGeometry {
+  body: string; local_head_point_m: number[]; local_face_normal: number[]; local_face_up: number[];
+  mass_kg: number; moi_kg_m2: number; assumption_description: string;
+}
+export interface ReplayImpactSelection {
+  recorded_sample_index: number; world_to_flight_rotation: number[][];
+  world_to_flight_translation_m: number[]; selection_description: string;
+}
+export interface ReplayImpactDeclaration {geometry: ReplayImpactGeometry; selection: ReplayImpactSelection}
+export interface ReplayImpactRun {
+  run_id: string; replay_id: string; status: ResearchRun['status']; acceptance: 'partial' | 'interrupted' | 'rejected';
+  message: string; blockers: string[]; fraction: null; control_available: boolean;
+  execution_verified: boolean; download_available: boolean;
+  scientific_qualified: false; physical_source_time_qualified: false;
+  artifactsummary: {
+    files: string[]; summary: {carry_m: number; max_height_m: number; flight_time_s: number; landing_angle_deg: number};
+    geometry: ReplayImpactGeometry; selection: ReplayImpactSelection; clockpolicy: 'authored_simulation_seconds';
+  } | null;
+}
+export const submitReplayImpact = (replay: string, payload: ReplayImpactDeclaration & {budget_wall_s: number}) => apiFetch<ReplayImpactRun>(`${root}/replays/${encodeURIComponent(replay)}/impact-runs`, {method:'POST',body:JSON.stringify(payload)});
+export const fetchReplayImpact = (replay: string, run: string) => apiFetch<ReplayImpactRun>(`${root}/replays/${encodeURIComponent(replay)}/impact-runs/${encodeURIComponent(run)}`);
+export const cancelReplayImpact = (replay: string, run: string) => apiFetch<ReplayImpactRun>(`${root}/replays/${encodeURIComponent(replay)}/impact-runs/${encodeURIComponent(run)}/cancel`, {method:'POST'});
+export const replayImpactDownloadUrl = (replay: string, run: string) => `${getApiBase()}${root}/replays/${encodeURIComponent(replay)}/impact-runs/${encodeURIComponent(run)}/download`;

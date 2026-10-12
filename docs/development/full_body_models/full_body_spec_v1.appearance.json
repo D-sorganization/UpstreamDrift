@@ -8,16 +8,8 @@
   "segments": [],
   "environment": {
     "ground_material": "turf",
-    "sky_top": [
-      0.3,
-      0.5,
-      0.78
-    ],
-    "sky_bottom": [
-      0.88,
-      0.92,
-      0.96
-    ],
+    "sky_top": [0.3, 0.5, 0.78],
+    "sky_bottom": [0.88, 0.92, 0.96],
     "lighting": "studio"
   },
   "spec_sha256": "06272a18eadda9fb89b2bca2c1948f7c57963ebb8e635193bf10947943c67a5f"
