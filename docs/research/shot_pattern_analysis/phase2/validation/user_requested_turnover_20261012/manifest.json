@@ -1,5 +1,5 @@
 {
-  "recorded_at_utc": "2026-10-12T16:22:53.532109+00:00",
+  "recorded_at_utc": "2026-10-12T16:24:06.781084+00:00",
   "files": {
     "latest-live-53-checks.json.gz": {
       "bytes": 3586,
@@ -41,9 +41,9 @@
       "bytes": 1248,
       "sha256": "6c32731d250c5be04dda8e4cbf7cfe0ca05d2165ba1ed526827f92a71e09605c"
     },
-    "uncommitted-standalone-bootstrap.patch": {
-      "bytes": 874,
-      "sha256": "78c22d9485180af2490c73048a722d492dc1aab8d8a46e0f8f3d77cedfd935d1"
+    "uncommitted-standalone-bootstrap.patch.gz": {
+      "bytes": 396,
+      "sha256": "59409e882dc12f31082ecbc0747fd5911c566c9e13ae23ccfc81351c95c4d788"
     }
   }
 }
