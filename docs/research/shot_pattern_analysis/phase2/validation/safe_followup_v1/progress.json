@@ -1,17 +1,17 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T09:02:01.152148+00:00",
-  "checkpoint": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
+  "recorded_at_utc": "2026-10-12T09:24:30.139246+00:00",
+  "checkpoint": "4317a39b461db30d59c7062d4b9cd0334ec37956",
   "branch": "codex/shot-pattern-safe-followup",
-  "source_commit": "e76404f61177f06b7ff00d379f9e5982a396a0e7",
-  "integration": "Remote PR 99f8d6f8816 and actual conflicting origin/main ba57e27033 reconciled locally; later fixes through 0504feab4c. No push; frozen rows and approved DRY baseline unchanged.",
+  "source_commit": "4317a39b461db30d59c7062d4b9cd0334ec37956",
+  "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
   "fixture_repair": {
     "commit": "ef0f14a36b",
     "change": "Include copied research scripts in frozen fixture source hashes",
     "verification": "Previously red origin/runtime test + four drift tests pass; both verifier modules subsequently exit0 with exact Tools pin initialized",
     "production_changes": false
   },
-  "dependency_pin": "6b6e4be55e7086a33db43b36d2632765be619bde",
+  "dependency_pin": "8a11691b4e9aee7d04dfc39628a8269ca561b07d",
   "preservation": {
     "simulation_rerun": false,
     "desktop_pdf_sha256": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Latest complete canonical gate at 0543d781e5 failed: 7180 passed, 36 failed, 365 skipped, 42 deselected, 1 xpassed; mypy and consistency passed. Repairs and corrected child-process PYTHONPATH are being verified; full final-source acceptance remains pending.",
+  "current_validation": "Canonical gate at4317a39b46:7483 passed,377 skipped,43 deselected,1 xpassed,21 passing subtests; all gates passed except one title-case finding in a newly archived historical heading. Formatting correction and complete rerun pending.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -41,8 +41,8 @@
     "pr": 5005,
     "source_review_commit": "6f0d81eb",
     "audit_commit": "f5ee7c1d",
-    "full_gates": "PR CI38203470000 PASS; protected merge queue CI38209044541 in progress",
-    "public_routes": "Deployment and live verification pending; local all nine assets frozen; verifier local HTTP fixture passed53 checks",
+    "full_gates": "Initial publication5005 protected merged ace2a1ac; mobile repair5016 armed after all eight local gates and independent review",
+    "public_routes": "Initial live53 checks PASS; all nine assets/PDF exact. Final mobile repair deployment verification pending.",
     "pushed_commit": "5b658b733c4591f318687540e0ca4e571ee25d8a",
     "canonical_pre_pr": "PASS after actual main conflict reconciliation",
     "ci_run": "https://github.com/D-sorganization/AffineDrift/actions/runs/38203470000",
@@ -56,6 +56,11 @@
       "axe_serious_critical": 0,
       "manual_visual": "Desktop coherent; mobile headline narrow/word-splitting FAIL, Sol repair in progress",
       "overall": "Publication visual acceptance pending mobile repair"
+    },
+    "mobile_repair": {
+      "pr": 5016,
+      "head": "3b318ae4be86778383e7ec258b3c9d933816a240",
+      "status": "Protected auto-merge armed; local regression Chromium and Mobile Chrome PASS; final live verification pending"
     }
   },
   "protected_merge": "pending",
@@ -610,15 +615,17 @@
     ]
   },
   "latest_combined_gate": {
-    "source": "0c612812cb22819c81a5cde57e2f915c380f97f0",
-    "passes": 7482,
-    "failures": 1,
+    "source": "4317a39b461db30d59c7062d4b9cd0334ec37956",
+    "passes": 7483,
+    "failures": 0,
     "skipped": 377,
     "deselected": 43,
     "xpassed": 1,
     "subtests": 21,
-    "remaining_test_failure": "Impact provider metadata awaits published Tools pin and served-bundle verification",
-    "policy_failure": "Imported development log exceeded active-count and byte limits; reviewed official reconciliation applied, content validator green, portfolio WIP warning retained"
+    "policy_failure": "One archived heading: Same-Repo if: must use If:. Original raw evidence remains preserved; formatting correction pending.",
+    "receipt": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/published-provider-canonical-title-red.txt.gz",
+    "receipt_sha256": "1bde4f2d24f8d61bbb81e26f185a127a29635c311cd8a09e93b1a4ac4c83b10f",
+    "uncompressed_sha256": "312ae1aab92fdeb0700721561c459cfb685d4dbff04032aaf02627fa4a3311bc"
   },
   "development_log_reconciliation": {
     "review": "Astra approved exact public-API candidate and byte preservation",
@@ -634,7 +641,7 @@
     "served_assets": 76,
     "javascript_assets": 5,
     "served_bytes": 2801426,
-    "acceptance_metadata": "Pending capability recheck; unchanged historical record retained",
+    "acceptance_metadata": "PASS29 tests after28 capability probes; exact protected published source bound to served receipt",
     "impact_reconciliation": {
       "source": "53b10400b2",
       "before_metadata": {
