@@ -10,9 +10,10 @@ from typing import TypedDict, Unpack
 
 import numpy as np
 
+from .core import PATTERN_NAMES
 from .academic_plots import FigureOptions, write_academic_dispersion_figure
 
-_PATTERNS = ("Straight", "Draw", "Fade")
+_PATTERNS = PATTERN_NAMES
 
 
 @dataclass(frozen=True)

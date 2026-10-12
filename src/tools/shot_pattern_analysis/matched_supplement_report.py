@@ -9,6 +9,7 @@ import math
 from pathlib import Path
 from typing import Any
 
+from .core import PATTERN_NAMES
 from .matched_config import matched_preset
 from .matched_matrix import PROFILES, noise_profile
 from .matched_report import load_matrix_report, verify_nominal_deliveries_hit_target
@@ -20,7 +21,7 @@ _PROTOCOLS = {
     "driver_fixed_target_speed": "driver-control-speed-bounds/1",
 }
 _PROTOCOL_BY_ID = {value: key for key, value in _PROTOCOLS.items()}
-_PATTERNS = ("Straight", "Draw", "Fade")
+_PATTERNS = PATTERN_NAMES
 _EXPECTED_ALIAS_COUNT = 4
 _EXPECTED_CELL_COUNT = 26
 _NUMERIC_TOLERANCE = 1e-12

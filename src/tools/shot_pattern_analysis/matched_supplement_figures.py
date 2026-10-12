@@ -11,6 +11,7 @@ from typing import Any, Literal, Mapping
 
 import numpy as np
 
+from .core import PATTERN_NAMES
 from .academic_plots import (
     FigureOptions,
     write_academic_dispersion_figure,
@@ -51,7 +52,7 @@ __all__ = [
     "validate_planned_figure_identities",
 ]
 
-_PATTERNS = ("Straight", "Draw", "Fade")
+_PATTERNS = PATTERN_NAMES
 _StyledCondition = tuple[str, dict[str, Any], Literal["solid", "dashed"]]
 
 

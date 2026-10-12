@@ -14,12 +14,13 @@ from pathlib import Path
 from statistics import fmean
 from typing import Any, Iterable, Mapping
 
+from .core import PATTERN_NAMES
 from .matched_formatting import format_sg_interval, format_sg_value
 from .matched_report import load_validated_cell
 from .provenance import manifest_files_match, sha256_file
 
 
-PATTERNS = ("Straight", "Draw", "Fade")
+PATTERNS = PATTERN_NAMES
 _QUADRANTS = ("left_long", "left_short", "right_long", "right_short")
 
 

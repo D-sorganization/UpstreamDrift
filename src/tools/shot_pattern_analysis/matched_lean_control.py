@@ -14,6 +14,7 @@ from tempfile import NamedTemporaryFile
 
 import numpy as np
 
+from .core import PATTERN_NAMES
 from .matched_matrix import PROFILES
 from .matched_report import load_validated_cell, verify_nominal_deliveries_hit_target
 from .matched_sensitivity import _source_hashes, _supported_endpoints
@@ -22,7 +23,7 @@ from .scenario_scoring import score_course_endpoints
 from .course_score_vectors import score_course_endpoint_vectors
 from .uncertainty import paired_mean_difference
 
-PATTERNS = ("Straight", "Draw", "Fade")
+PATTERNS = PATTERN_NAMES
 LEANS = (0.0, 5.0, 10.0)
 
 

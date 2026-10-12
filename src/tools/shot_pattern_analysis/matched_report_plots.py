@@ -17,9 +17,10 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from .core import PATTERN_NAMES
 from .noise import NOISE_DISPLAY_LABELS, NoiseSpec
 
-PATTERNS = ("Straight", "Draw", "Fade")
+PATTERNS = PATTERN_NAMES
 CLUBS = ("driver", "seven_iron", "pitching_wedge")
 _METRICS = {
     "target_rmse_m": ("Raw-Endpoint Target RMSE (m)", "viridis", "RMSE (m)"),

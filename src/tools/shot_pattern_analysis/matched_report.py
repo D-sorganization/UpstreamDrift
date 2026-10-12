@@ -11,9 +11,10 @@ import re
 from collections import Counter
 from pathlib import Path
 
+from .core import PATTERN_NAMES
 from .provenance import assert_source_unchanged, manifest_files_match, sha256_file
 
-_PATTERNS = ("Straight", "Draw", "Fade")
+_PATTERNS = PATTERN_NAMES
 
 
 def verify_nominal_deliveries_hit_target(

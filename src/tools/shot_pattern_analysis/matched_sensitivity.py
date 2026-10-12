@@ -11,6 +11,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+from .core import PATTERN_NAMES
 from .matched_report import load_validated_cell
 from .provenance import manifest_files_match, sha256_file
 from .scenario_scoring import score_course_endpoints
@@ -38,7 +39,7 @@ def _source_hashes() -> dict[str, str]:
 def _supported_endpoints(
     csv_path: Path, n_shots: int
 ) -> tuple[dict[str, list[tuple[int, float, float]]], dict[str, int]]:
-    names = ("Straight", "Draw", "Fade")
+    names = PATTERN_NAMES
     supported: dict[str, dict[int, tuple[float, float]]] = {name: {} for name in names}
     observed: dict[str, set[int]] = {name: set() for name in names}
     invalid = dict.fromkeys(names, 0)

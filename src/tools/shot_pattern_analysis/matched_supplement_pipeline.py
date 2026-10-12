@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .core import PATTERN_NAMES
 from .matched_lean_control import analyze_explicit_source_pair
 from .matched_report import (
     load_matrix_report,
@@ -36,7 +37,7 @@ from .matched_supplement_figures import (
     validate_planned_figure_identities,
 )
 
-_PATTERNS = ("Straight", "Draw", "Fade")
+_PATTERNS = PATTERN_NAMES
 _ROOT_REQUIREMENTS = {"original_primary": 324, "original_control": 72}
 
 

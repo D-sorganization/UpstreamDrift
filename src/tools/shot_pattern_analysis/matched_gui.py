@@ -10,6 +10,7 @@ from typing import Any, Mapping
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.tools.async_action import AsyncActionBar, WorkerContext
+from .core import PATTERN_NAMES
 from .preview import scale_previews
 from .matched_config import MatchedConfig, matched_preset
 from .noise import NOISE_FIELDS, NoiseSpec
@@ -146,7 +147,7 @@ def format_matched_course_scoring(
     patterns = scoring.get("patterns")
     mean_parts: list[str] = []
     if isinstance(patterns, Mapping):
-        for name in ("Straight", "Draw", "Fade"):
+        for name in PATTERN_NAMES:
             p_data = patterns.get(name)
             val = (
                 p_data.get("mean_strokes_gained")
