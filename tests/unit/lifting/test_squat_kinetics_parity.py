@@ -13,6 +13,9 @@ uses, ``|dX| <= ATOL + RTOL * max|X|``, plus a CoP bound derived from it
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -27,6 +30,10 @@ from src.shared.python.motion_matching.same_input import InputBundle
 
 pytestmark = pytest.mark.unit
 
+RECORD = (
+    Path(__file__).resolve().parents[3]
+    / "docs/development/lifting/evidence/back_squat/kinetics_parity.json"
+)
 ATOL = 1e-6  # N or N m
 RTOL = 1e-8
 COP_ATOL_M = 1e-8
@@ -49,6 +56,35 @@ def bundle() -> InputBundle:
 def mujoco_samples(bundle) -> list[KineticsSample]:
     pytest.importorskip("mujoco")
     return bundle_kinetics("mujoco", bundle, FRAMES)
+
+
+def test_committed_record_is_inside_the_tolerances(bundle) -> None:
+    """The full-window record (every 20th state, all engines) meets the bounds."""
+    record = json.loads(RECORD.read_text(encoding="utf-8"))
+    assert record["bundle_spec_sha256"] == bundle.spec_sha256
+    assert record["indices"] == list(range(0, bundle.steps + 1, 20))
+    assert len(record["source_commit"]) == 40
+    values = record["mujoco_values"]
+    grf_scale = max(np.abs(v["grf_net_n"]).max() for v in values)
+    grip_scale = max(np.abs(v["grip_net_force_n"]).max() for v in values)
+    engines = record["max_difference_from_mujoco"]
+    assert set(engines) == {"drake", "pinocchio", "opensim"}
+    for engine in ("drake", "pinocchio"):
+        assert not engines[engine].get("unavailable"), engine
+    for engine, diff in engines.items():
+        if diff.get("unavailable"):
+            assert diff["reason"], engine
+            continue
+        for key in ("left", "right", "net"):
+            assert diff[f"grf_force_{key}_n"] <= ATOL + RTOL * grf_scale, engine
+            assert diff[f"free_moment_{key}_nm"] <= ATOL + RTOL * grf_scale, engine
+            assert diff[f"cop_{key}_m"] <= COP_ATOL_M, engine
+        if engine in GRIP_ENGINES:
+            for key in ("hand_left_force_n", "hand_right_force_n", "grip_net_force_n"):
+                assert diff[key] <= ATOL + RTOL * grip_scale, (engine, key)
+        else:
+            assert diff["grip_net_force_n"] is None
+            assert diff["grip_unavailable_reason"], engine
 
 
 def test_grip_engines_are_the_kkt_engines() -> None:
