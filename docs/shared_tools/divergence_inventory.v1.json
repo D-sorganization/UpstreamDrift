@@ -13,7 +13,7 @@
   "totals": {
     "identical": 397,
     "diverged": 276,
-    "ud-only": 1680,
+    "ud-only": 1681,
     "tools-only": 808,
     "spelling-only": 123
   },
@@ -336,7 +336,7 @@
     "estimation": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 43,
+      "ud-only": 44,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -8254,6 +8254,18 @@
       "package": "estimation",
       "subpackage": "mosaic",
       "ud_bytes": 515,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/mosaic/activation_dynamics.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "mosaic",
+      "ud_bytes": 7131,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
