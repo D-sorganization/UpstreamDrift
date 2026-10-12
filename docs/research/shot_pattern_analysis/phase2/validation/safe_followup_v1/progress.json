@@ -1,6 +1,6 @@
 {
   "status": "active",
-  "recorded_at_utc": "2026-10-12T14:24:03.301550+00:00",
+  "recorded_at_utc": "2026-10-12T14:41:52.546354+00:00",
   "checkpoint": "3d6a415bf941d4063986607f8d97536a513a5a2b",
   "branch": "codex/shot-pattern-safe-followup",
   "source_commit": "3d6a415bf941d4063986607f8d97536a513a5a2b",
@@ -30,7 +30,7 @@
       "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
     }
   ],
-  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7594 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/278 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 has merged; exact deployed acceptance is recorded separately.",
+  "current_validation": "Marker-fix source3d6a passes all eight canonical gates and protected repository-structure/quality gates. Later complete full-unit lane surfaced enum-identity failure; scoped compatibility repair passes focused and independent review, with combined canonical/protected verification pending. Final live publication53checks/fourbrowsercells/exact39pagePDF pass.",
   "development_log_blocker": {
     "issue": 11935,
     "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
@@ -1173,5 +1173,65 @@
       }
     ],
     "status": "Ten new source-level test functions are correctly classified as unit tests; red/green drift gate and 22 unit cases pass, followed by all eight stable-source canonical gates. Updated protected CI remains pending."
+  },
+  "protected_ci_contract_enum_followup": {
+    "failed_source": "6bdfa8cea2a4a8967f5dbfba40d23511f221f84a",
+    "run": 38259075783,
+    "job": 114845096204,
+    "full_unit_summary": "1 failed,27427 passed,1163 skipped,8 xfailed; ContractLevel isinstance failed on foreign module enum. Earlier failures retained.",
+    "repair_source": "133a7ec5a2",
+    "scope": "UD-owned compatibility bridge normalizes incoming level into its local enum and mirrors into each receiving module own enum; no vendor/production contracts implementation, type assertions, numerical criteria or original evidence changed.",
+    "tdd": "Both directions reproduce foreign-enum identity failure before repair and pass afterward. Sol70 related cases on Python3.12 and30 onPython3.11; root focused run exits0.",
+    "independent_review": "Astra approves allthreelevels with correctOFF enablement, and invalidinputs rejectbeforestate mutation.",
+    "status": "Focused checks and current agent-context check pass; complete stable-source canonical and updated protected CI pending.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-full-unit-failed.log.gz",
+        "sha256": "24f57a4c46d5a579bd62bb377d13393761da1eeb189455c779ce82ad0426535d",
+        "uncompressed_sha256": "3e422c27ddf1365a2d9adbb6e2c7e2d5af3979ed24ad81457353f7719c12de0e"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-root-green.txt.gz",
+        "sha256": "e0ecaac061118c95ae9720b21cff9361d9b8c2a5bde3499ed132e5839ca0c444",
+        "uncompressed_sha256": "9752a1b6afee5cb51174e6ccb94daad76555e28e4438a98d22604a43a6580c67"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-baseline-red-reproduced.txt.gz",
+        "sha256": "e7ed6c6c0ff79d2361f4a45b55bbb318f3ef4c4bfab3244b31eff895170420d5",
+        "uncompressed_sha256": "efff407ecb1569cfb3a106c69a5e828a2627f2267e4370a2e6ea5a4e374984e8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-fixed-py312-green.txt.gz",
+        "sha256": "83e0205cfa2c61d85c2906901973c60f32d7942544b57da981edce3e8b5a8134",
+        "uncompressed_sha256": "7cba81462ca0fe6c2710626fcf958bb1ae686264135d2fa7d88562da43a4444e"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-fixed-py311-green.txt.gz",
+        "sha256": "71db7b096d88ac9716bba65ee16e2bab69ca2c5261082c6f92a89365c8312f04",
+        "uncompressed_sha256": "fc0530f227c37098b50a6b4888012137f15107117ad57cb3832617d3ee04dc8f"
+      }
+    ],
+    "tdd_provenance": "Baseline RED is a new explicit reproduction, not an original raw log: bb416 committed regression tests with only alias bridge byte-restored from a3a00181a21b4dc517607d3ec2d8acfd1021d5fb, two failures exit1. Fixed bb416 source70PASS Python3.12 and30PASS Python3.11. Original red was tool output only. Provider files and root worktree were not modified by the baseline reproduction."
+  },
+  "final_live_publication": {
+    "status": "PASS article-specific live acceptance; global whole-site post-deployment scan still in progress at checkpoint",
+    "revision": "9002c8a2f94050e013762c08de053abab48711ee",
+    "run": 38255088410,
+    "pages_step": "SUCCESS",
+    "http_checks": 53,
+    "viewport_theme_cells": 4,
+    "serious_critical_axe_violations": 0,
+    "root_agent_visual_review": "PASS allfourcells; desktopdark preview omission disproved by originalpixelcounts and readable directcrop; priorattempts andcorrection retained.",
+    "pdf_pages": 39,
+    "pdf_sha256": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+    "additional_verification_archive": {
+      "browser_download_url": "https://github.com/D-sorganization/UpstreamDrift/releases/download/shot-pattern-phase2-research-2026-10-10/shot-pattern-live-verification-20261012-9002c8a2f940.tar.gz",
+      "digest": "sha256:59b5c0d1fd9a2c0aa9b0a0c5a73f6f97055b770c8f1febca61c742a02ae3496d",
+      "name": "shot-pattern-live-verification-20261012-9002c8a2f940.tar.gz",
+      "size": 4805381
+    },
+    "original_payloads": "All21 frozenpayloads andtwoearlierverificationassets preserved; this is an additional24threleaseasset with owninventory.",
+    "affine_issue_5004": "Closed completed with merged5005/5016implementation andlinkedliveacceptance evidence.",
+    "remaining_scientific_gates": "Upstream11984,12120,12398 remainopen; no empirical/physical/scientificqualificationrenewal."
   }
 }
