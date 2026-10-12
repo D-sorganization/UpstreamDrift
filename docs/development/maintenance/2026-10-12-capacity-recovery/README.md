@@ -25,7 +25,7 @@ The exact pre-maintenance canonical log and pre-existing 2026 archive are retain
 
 The first full pre-PR gate found one title-case violation on that newly moved historical heading. The approved normalizer changed only `Same-Repo if:` to `Same-Repo If:` on archived DL-#11556. All other archive bytes and all Development Log metadata fields remain unchanged. The original heading bytes and pre-normalization archive are retained in the snapshots and receipts. The pre-existing duplicate DL-#10336 occurrence count remains two; no duplicate multiplicity was added. The second official archive invocation, and a further post-normalization invocation, each returned 0 and “Nothing to archive.”
 
-See `post_archive_conservation.json`, `post_archive_conservation_before_titlecase_normalization.json`, `heading11556_title_normalization.json`, and the two `archive_cli_*.json` command receipts for byte hashes, counts, and process results.
+See `post_archive_conservation.json`, `post_archive_conservation_before_titlecase_normalization.json`, `heading11556_title_normalization.json`, `heading11556_receipt_encoding_repair.json`, and the `archive_cli_*.json` command receipts for byte hashes, counts, and process results.
 
 ## Reproduction and Limits
 
