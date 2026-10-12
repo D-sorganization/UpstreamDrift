@@ -1291,3 +1291,7 @@ the generated ledger is refreshed from the restored immutable receipt bytes.
 ## Manufactured Native Diagnostics — #12275
 
 Exact synthetic MuJoCo geometry/zero-effort, short feedback replay, OpenSim property, Pinocchio and Drake observations are retained at `docs/development/feedback_controls/experiments/manufactured_native_diagnostics_20261011/`. See its README and SHA-bound manifest. Failed attempts are preserved. No capture, equilibrium, contact calibration, physiology, production replay or 17-row/six-ecosystem qualification is implied; all production variants remain unqualified.
+
+# Bounded One-Step Muscle Recruitment — #11792
+
+The new `biomechanics.muscle_allocation.allocate_muscle_excitations` prototype consumes desired generalized effort and returns a bounded raw excitation candidate plus a distinct activation-kernel-effective value. Its small analytic tests cover two muscles across three coordinates, rate/fixed channels, passive and pennation force decomposition, residuals, and a counted finite-difference evaluation budget. It does not apply the candidate, run an engine, or qualify physiology, a 557-muscle model, or cross-engine parity. See chapter39 and `docs/development/feedback_controls/F08_MUSCLE_RECRUITMENT_TURNOVER.md`; the next bounded step is a synthetic feedback-to-allocation fixture followed by feedback-disabled replay using the same declared kernel.
