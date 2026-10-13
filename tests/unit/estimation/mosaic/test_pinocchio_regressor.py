@@ -32,7 +32,7 @@ from src.shared.python.estimation.mosaic.planar_chain import (
     PlanarMarkerSet,
 )
 
-pytestmark = [pytest.mark.requires_pinocchio]
+pytestmark = [pytest.mark.unit, pytest.mark.requires_pinocchio]
 
 
 def _skip_if_no_pinocchio() -> None:
