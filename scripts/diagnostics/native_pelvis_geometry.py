@@ -11,7 +11,6 @@ import argparse
 import hashlib
 import importlib
 import json
-import os
 from pathlib import Path
 import platform
 import subprocess
@@ -22,6 +21,10 @@ import numpy as np
 
 from src.engines.physics_engines.opensim.python.tour_matching.native_marker_geometry import (
     NativeMarkerGeometry,
+)
+from scripts.diagnostics.frozen_capture_trc import (
+    load_transferred_capture,
+    prepare_capture_in_clean_process,
 )
 from src.shared.python.motion_matching.full_body_ik import (
     compute_marker_rms_trajectory,
@@ -239,7 +242,7 @@ def _shared_source_hashes() -> dict[str, str]:
         "src.shared.python.motion_matching.full_body_ik",
         "src.shared.python.motion_matching.marker_calibration",
         "src.shared.python.motion_matching.tour_capture_contract",
-        "src.engines.physics_engines.opensim.python.tour_matching.trc",
+        "src.shared.python.motion_matching.trc_io",
     )
     hashes = {}
     for name in names:
@@ -254,47 +257,21 @@ def load_isolated_capture(
     capture_path: Path, capture_python: Path
 ) -> tuple[TourCapture, dict[str, object]]:
     """Reuse TRC across DLL-incompatible SDK processes, retaining source clock."""
-    from src.engines.physics_engines.opensim.python.tour_matching.trc import read_trc
-
     source_hash = hashlib.sha256(capture_path.read_bytes()).hexdigest()
     spec = TOUR_CAPTURES[capture_kind(source_hash)]
-    environment = os.environ.copy()
-    root = Path(__file__).resolve().parents[2]
-    environment["PYTHONPATH"] = str(root)
     with tempfile.TemporaryDirectory(prefix="native-pelvis-capture-") as folder:
         trc = Path(folder) / "observations.trc"
-        result = subprocess.run(
-            [
-                str(capture_python),
-                "-m",
-                "scripts.diagnostics.frozen_capture_trc",
-                str(capture_path),
-                str(trc),
-            ],
-            cwd=root,
-            env=environment,
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=60,
+        metadata = prepare_capture_in_clean_process(
+            capture_path, trc, python=capture_python, timeout_s=60
         )
-        metadata = json.loads(result.stdout)
-        if (
-            metadata["capture_sha256"] != source_hash
-            or metadata["trc_sha256"] != hashlib.sha256(trc.read_bytes()).hexdigest()
-        ):
-            raise ValueError("Isolated capture/TRC identity mismatch")
-        decoded = read_trc(trc)
+        capture = load_transferred_capture(trc, metadata)
     original_time = np.arange(spec.frames) / spec.rate_hz
     if (
-        decoded.labels != spec.labels
-        or decoded.frames != spec.frames
-        or np.max(np.abs(decoded.time_s - original_time)) > 5.1e-10
+        capture.labels != spec.labels
+        or capture.frames != spec.frames
+        or capture.time_s.tobytes() != original_time.tobytes()
     ):
         raise ValueError("TRC differs from frozen capture specification")
-    capture = TourCapture(
-        original_time, decoded.labels, decoded.points_m, decoded.valid, source_hash
-    )
     return capture, metadata
 
 
