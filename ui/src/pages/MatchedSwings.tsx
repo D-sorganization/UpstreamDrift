@@ -31,6 +31,7 @@ import {
 import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPanel';
 import { GripWrenchCharts } from '@/components/analysis/GripWrenchCharts';
 import { MatchedSwingGifPlayer } from '@/components/analysis/MatchedSwingGifPlayer';
+import { OutputStatusBadges } from '@/components/analysis/outputPolicy/OutputStatusBadges';
 import type { MocapJoint } from '@/components/visualization/MocapSkeleton3D';
 
 const MocapSkeleton3D = lazy(
@@ -489,6 +490,9 @@ export function MatchedSwingsPage() {
           )}
         </div>
         {receiptError && <p className="text-xs text-red-300">{receiptError}</p>}
+        {receiptJson && (
+          <OutputStatusBadges payload={receiptJson.output_policy} receipt={receiptJson.receipt} />
+        )}
         {receiptJson && (
           <details className="text-xs">
             <summary className="cursor-pointer text-gray-300">Receipt JSON</summary>
