@@ -378,14 +378,11 @@ def test_outer_solve_manifold_recovers_synthetic_floating_base_trajectory() -> N
         0.0, marker_sigma, size=clean_markers.shape
     )
 
-    # Initial guess: perturbed from truth
-    perturbed_poses = true_poses.copy()
-    for i in range(times.size):
-        pert = rng.normal(scale=0.03, size=6)
-        perturbed_poses[i] = se3_retract(perturbed_poses[i], pert)
-
-    init_spline = SE3ManifoldSpline.from_poses(
-        times=times, poses=perturbed_poses, n_coefficients=15, degree=5
+    # Initial guess: perturbed candidate trajectory on SE(3)
+    pert_twist = twist + rng.normal(scale=0.03, size=6)
+    pert_T0 = se3_retract(T0, rng.normal(scale=0.03, size=6))
+    init_spline = SE3ManifoldSpline.from_screw_motion(
+        times=times, T0=pert_T0, twist=pert_twist, n_coefficients=15, degree=5
     )
 
     # Run outer solve on the manifold
