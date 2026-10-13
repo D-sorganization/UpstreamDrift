@@ -18,9 +18,12 @@ from src.shared.python.reporting.swing_report.adapters import (
     VELOCITY_TOLERANCE,
     DrakeAdapter,
     EngineResultAdapter,
+    Matlab3DAdapter,
     MujocoAdapter,
     NativeAdapter,
     NativeSwingRun,
+    OpensimAdapter,
+    PinocchioAdapter,
     build_parity_report,
     compare_clubhead_speed,
 )
@@ -41,7 +44,13 @@ INFO = ProvenanceInfo(
 TIMES = tuple(0.01 * i for i in range(6))
 # Constant-velocity (3, 4, 0) m/s -> exact speed 5 m/s for any differencing.
 POSITIONS = tuple((3.0 * t, 4.0 * t, 1.0) for t in TIMES)
-ADAPTER_CLASSES = [MujocoAdapter, DrakeAdapter]
+ADAPTER_CLASSES = [
+    MujocoAdapter,
+    DrakeAdapter,
+    PinocchioAdapter,
+    OpensimAdapter,
+    Matlab3DAdapter,
+]
 
 
 def _native(**overrides: object) -> NativeSwingRun:
@@ -188,6 +197,22 @@ def test_three_engine_pairs_are_all_compared() -> None:
     assert len(outcomes) == 3
 
 
+def test_all_five_engine_pairs_are_compared() -> None:
+    results = [
+        MujocoAdapter().adapt(_native(), "a"),
+        DrakeAdapter().adapt(_native(), "b"),
+        PinocchioAdapter().adapt(_native(), "c"),
+        OpensimAdapter().adapt(_native(), "d"),
+        Matlab3DAdapter().adapt(_native(), "e"),
+    ]
+    report, outcomes = build_parity_report(results, CAPTURE, provenance=INFO)
+    # 5 choose 2 = 10 pairs
+    assert len(outcomes) == 10
+    assert all(o.passed for o in outcomes)
+    doc = report.to_dict()
+    assert validate_swing_report(doc) is not None
+
+
 @pytest.mark.requires_mujoco
 def test_real_mujoco_run_flows_through_adapter() -> None:
     mujoco = pytest.importorskip("mujoco")
@@ -197,20 +222,47 @@ def test_real_mujoco_run_flows_through_adapter() -> None:
     )
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
-    times, positions = [], []
+    times: list[float] = []
+    positions: list[tuple[float, float, float]] = []
     for _ in range(5):
         mujoco.mj_step(model, data)
         times.append(float(data.time))
-        positions.append(tuple(float(x) for x in data.site_xpos[0]))
+        pos_xyz = data.site_xpos[0]
+        pos: tuple[float, float, float] = (
+            float(pos_xyz[0]),
+            float(pos_xyz[1]),
+            float(pos_xyz[2]),
+        )
+        positions.append(pos)
+    pos_tuple: tuple[tuple[float, float, float], ...] = tuple(positions)
     result = MujocoAdapter().adapt(
-        NativeSwingRun(tuple(times), tuple(positions), model_file_hash=HASH), "real"
+        NativeSwingRun(tuple(times), pos_tuple, model_file_hash=HASH), "real"
     )
     assert result.engine_version == mujoco.__version__
     assert all(v is not None for v in result.quantities["clubhead_speed"].values)
-    assert np.isfinite(result.quantities["clubhead_position"].values[0])
+    val = result.quantities["clubhead_position"].values[0]
+    assert val is not None and math.isfinite(val)
 
 
 @pytest.mark.requires_drake
 def test_real_drake_version_probe() -> None:
     pytest.importorskip("pydrake")
     assert DrakeAdapter().engine_version() != "unknown"
+
+
+@pytest.mark.requires_pinocchio
+def test_real_pinocchio_version_probe() -> None:
+    pytest.importorskip("pinocchio")
+    assert PinocchioAdapter().engine_version() != "unknown"
+
+
+@pytest.mark.requires_opensim
+def test_real_opensim_version_probe() -> None:
+    pytest.importorskip("opensim")
+    assert OpensimAdapter().engine_version() != "unknown"
+
+
+@pytest.mark.requires_matlab_engine
+def test_real_matlab_3d_version_probe() -> None:
+    pytest.importorskip("matlab.engine")
+    assert Matlab3DAdapter().engine_version() != "unknown"
