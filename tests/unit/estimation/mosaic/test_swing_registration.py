@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -193,31 +195,31 @@ def test_ingest_path_and_anonymisation() -> None:
 
 def test_ingest_rejects_missing_and_mislabelled_events() -> None:
     """Missing or non-chronological events produce explicit ContractViolationError."""
-    base_data = {
+    events_map: dict[str, float] = {
+        "address": 0.0,
+        "takeaway": 0.2,
+        "top": 0.6,
+        "impact": 0.8,
+        "finish": 1.2,
+    }
+    base_data: dict[str, Any] = {
         "trial_id": "trial_bad",
         "times": np.linspace(0.0, 1.2, 100),
         "trajectories": {"inputs": np.zeros((100, 2))},
-        "events": {
-            "address": 0.0,
-            "takeaway": 0.2,
-            "top": 0.6,
-            "impact": 0.8,
-            "finish": 1.2,
-        },
+        "events": events_map,
     }
 
     # Missing event 'impact'
     data_missing = dict(base_data)
-    data_missing["events"] = {
-        k: v for k, v in base_data["events"].items() if k != "impact"
-    }
+    data_missing["events"] = {k: v for k, v in events_map.items() if k != "impact"}
     with pytest.raises(PreconditionError):
         ingest_swing_trial(data_missing)
 
     # Mislabelled / non-chronological event (impact before top)
     data_misordered = dict(base_data)
-    data_misordered["events"] = dict(base_data["events"])
-    data_misordered["events"]["impact"] = 0.5  # before top at 0.6
+    bad_events = dict(events_map)
+    bad_events["impact"] = 0.5  # before top at 0.6
+    data_misordered["events"] = bad_events
     with pytest.raises(PreconditionError):
         ingest_swing_trial(data_misordered)
 
