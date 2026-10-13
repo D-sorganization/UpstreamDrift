@@ -60,6 +60,13 @@ MS_PER_SECOND = 1000
 
 LOGGER = get_logger(__name__)
 
+from .drake_gui_ui_helpers import (  # noqa: E402
+    INDUCED_SOURCE_PRESET_ITEMS,
+    install_force_torque_visibility_toggles,
+    repopulate_induced_source_combo,
+    set_drake_ui_initialized,
+)
+
 
 class DrakeUIMixin:
     """Mixin for Drake GUI UI construction and control handling.
@@ -73,6 +80,7 @@ class DrakeUIMixin:
 
     def _setup_ui(self: Any) -> None:
         """Build the PyQt Interface."""
+        set_drake_ui_initialized(self, False)
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
@@ -97,6 +105,7 @@ class DrakeUIMixin:
 
         # Populate Kinematic Sliders
         self._build_kinematic_controls()
+        set_drake_ui_initialized(self, True)
 
     def _setup_model_selector(self: Any, layout: Any) -> None:
         """Build the model selection group box."""
@@ -274,15 +283,11 @@ class DrakeUIMixin:
 
         # Force/Torque Toggles
         ft_grid = QtWidgets.QGridLayout()
-        self.chk_show_forces = QtWidgets.QCheckBox("Show Forces")
-        self.chk_show_forces.toggled.connect(self._on_visualization_changed)
-        self.chk_show_torques = QtWidgets.QCheckBox("Show Torques")
-        self.chk_show_torques.toggled.connect(self._on_visualization_changed)
-        self.chk_show_gravity = QtWidgets.QCheckBox("Show Gravity")
-        self.chk_show_gravity.toggled.connect(self._on_visualization_changed)
-        ft_grid.addWidget(self.chk_show_forces, 0, 0)
-        ft_grid.addWidget(self.chk_show_torques, 0, 1)
-        ft_grid.addWidget(self.chk_show_gravity, 0, 2)
+        install_force_torque_visibility_toggles(
+            self,
+            ft_grid,
+            self._on_visualization_changed,
+        )
         vis_layout.addLayout(ft_grid)
 
         # Ellipsoid Toggles
@@ -322,7 +327,7 @@ class DrakeUIMixin:
 
         self.combo_induced_source = QtWidgets.QComboBox()
         self.combo_induced_source.setEditable(True)
-        self.combo_induced_source.addItems(["gravity", "velocity", "total"])
+        self.combo_induced_source.addItems(list(INDUCED_SOURCE_PRESET_ITEMS))
         self.combo_induced_source.setToolTip(
             "Select source (e.g. gravity) or type specific actuator index"
         )
@@ -372,15 +377,11 @@ class DrakeUIMixin:
             self.live_plot.set_joint_names(self.get_joint_names())
 
         # Populate induced source combo with joint names
-        current_text = self.combo_induced_source.currentText()
-        self.combo_induced_source.clear()
-        self.combo_induced_source.addItems(["gravity", "velocity", "total"])
-        for i in range(plant.num_joints()):
-            joint = plant.get_joint(JointIndex(i))
-            if joint.num_velocities() == 1:
-                self.combo_induced_source.addItem(joint.name())
-        if current_text:
-            self.combo_induced_source.setCurrentText(current_text)
+        repopulate_induced_source_combo(
+            self.combo_induced_source,
+            plant,
+            JointIndex,
+        )
 
         # Iterate over joints
         for i in range(plant.num_joints()):

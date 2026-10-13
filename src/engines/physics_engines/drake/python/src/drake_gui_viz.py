@@ -47,10 +47,14 @@ class VisualizationMixin:
 
     def _on_visualization_changed(self) -> None:
         """Handle toggling of visualization options."""
+        if not getattr(self, "_drake_ui_initialized", True):
+            return
         self._update_visualization()
 
     def _update_visualization(self) -> None:
         """Update all visualizations (ellipsoids, vectors)."""
+        if not getattr(self, "_drake_ui_initialized", True):
+            return
         if not self.meshcat or not self.plant or not self.context:  # type: ignore[attr-defined]
             return
 
@@ -110,10 +114,13 @@ class VisualizationMixin:
         overlay = getattr(self, "_force_overlay", None)
         if overlay is None:
             return
+        chk_forces = getattr(self, "chk_show_forces", None)
+        chk_torques = getattr(self, "chk_show_torques", None)
+        chk_gravity = getattr(self, "chk_show_gravity", None)
         text = overlay.tick(
-            forces=bool(self.chk_show_forces.isChecked()),  # type: ignore[attr-defined]
-            torques=bool(self.chk_show_torques.isChecked()),  # type: ignore[attr-defined]
-            gravity=bool(self.chk_show_gravity.isChecked()),  # type: ignore[attr-defined]
+            forces=bool(chk_forces.isChecked()) if chk_forces is not None else False,
+            torques=bool(chk_torques.isChecked()) if chk_torques is not None else False,
+            gravity=bool(chk_gravity.isChecked()) if chk_gravity is not None else False,
         )
         if text:
             self._update_status(text)  # type: ignore[attr-defined]
@@ -122,6 +129,9 @@ class VisualizationMixin:
         if not (self.plant is not None):  # type: ignore[attr-defined]
             raise ValueError("DbC Blocked: Precondition failed.")
         accels = np.zeros(self.plant.num_velocities())  # type: ignore[attr-defined]
+
+        if not source or not source.strip():
+            return accels
 
         if source in ["gravity", "velocity", "total"]:
             res = analyzer.compute_components(self.eval_context)  # type: ignore[attr-defined]
@@ -163,6 +173,8 @@ class VisualizationMixin:
         if not (self.plant is not None):  # type: ignore[attr-defined]
             raise ValueError("DbC Blocked: Precondition failed.")
         cf_type = self.combo_cf_type.currentText()  # type: ignore[attr-defined]
+        if not cf_type:
+            return
         res = analyzer.compute_counterfactuals(self.eval_context)  # type: ignore[attr-defined]
 
         if cf_type == "ztcf_accel":
