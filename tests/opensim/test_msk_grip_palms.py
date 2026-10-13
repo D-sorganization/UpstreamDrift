@@ -141,3 +141,19 @@ def test_specified_grip_rotation_contracts() -> None:
         module.grip_hand_rotation("R", module.TARGET_DIRECTION)
     with pytest.raises(ValueError, match="finite"):
         module.grip_hand_rotation("R", np.array([np.nan, 0.0, 0.0]))
+
+
+@pytest.mark.parametrize("side", sorted(mc.HAND_BODIES))
+def test_opensim_hand_orientation_comes_from_the_shared_grip_pose(side: str) -> None:
+    """No OpenSim-only grip angle: the shaft diagonal and palm facing are the
+    shared :mod:`grip_pose` definition, in the Rajagopal hand-frame axes."""
+    from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE
+
+    module = _spec()
+    hand = module.SIDE_HANDS[side]
+    expected = DEFAULT_GRIP_POSE.shaft_direction_in_hand(
+        hand, module.RADIAL_AXIS[side], module.DISTAL_AXIS
+    )
+    np.testing.assert_allclose(module.THUMB_AXIS[side], expected, atol=1e-12)
+    assert module.PALM_FACING[side] == DEFAULT_GRIP_POSE.palm_target_sign(hand)
+    assert not hasattr(module, "GRIP_DIAGONAL_DEG")

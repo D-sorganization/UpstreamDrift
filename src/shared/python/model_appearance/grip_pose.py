@@ -25,8 +25,12 @@ data can constrain is fitted separately (``motion_matching.grip_fit``).
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
+
+import numpy as np
+from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
 
@@ -49,6 +53,19 @@ NATIVE_HAND_SPACING_M = 0.0762
 #: and engine-free; ``tests/opensim/test_grip_closure_both_hands.py`` fails if
 #: the two drift apart.
 LEAD_BELOW_BUTT_M = 0.032
+#: Angle of the shaft across the palm, from the hand's radial (thumb) axis
+#: toward the fingers: in a golf grip the shaft runs diagonally from the heel
+#: pad (ulnar, proximal) to the base of the index finger (radial, distal).
+#: Moved here from the OpenSim calibration (#12306) so every engine takes the
+#: same hand orientation on the grip (OSV-2 item 4, #11728).
+PALM_DIAGONAL_DEG = 40.0
+#: Tolerance (dimensionless) on the unit length and orthogonality of the
+#: hand-frame axes passed to :meth:`GripPose.shaft_direction_in_hand`.
+AXIS_TOLERANCE = 1e-9
+#: Side of the grip each palm faces, as a sign on the target direction: the
+#: trail palm faces the target, the lead palm faces away, so the palms are
+#: parallel and opposed across the grip.
+_PALM_TARGET_SIGN: dict[str, float] = {"lead": -1.0, "trail": 1.0}
 
 
 class Hand(str, Enum):
@@ -110,6 +127,8 @@ class GripPose:
     lead_thumb_offset_deg: float = 10.0
     #: Trail life line covers the lead thumb (true for all three styles).
     trail_lifeline_over_lead_thumb: bool = True
+    #: Shaft angle across the palm from the radial axis toward the fingers.
+    palm_diagonal_deg: float = PALM_DIAGONAL_DEG
 
     def __post_init__(self) -> None:
         require(
@@ -122,6 +141,7 @@ class GripPose:
             ("lead_v_azimuth_deg", 0.0, 90.0),
             ("trail_v_offset_deg", -30.0, 30.0),
             ("lead_thumb_offset_deg", 0.0, 45.0),
+            ("palm_diagonal_deg", 0.0, 90.0),
         ):
             value = getattr(self, name)
             require(
@@ -160,10 +180,58 @@ class GripPose:
         """The finger link between the hands, as a one-element tuple, or none."""
         return _FINGER_LINKS[self.style]
 
+    def palm_target_sign(self, hand: Hand) -> float:
+        """Sign on the target direction of the side ``hand``'s palm faces.
+
+        ``+1`` for the trail palm (toward the target), ``-1`` for the lead palm
+        (away from it). Raises ``ValueError`` for anything but a :class:`Hand`.
+        """
+        if not isinstance(hand, Hand):
+            raise ValueError(f"hand must be a Hand, got {hand!r}")
+        return _PALM_TARGET_SIGN[hand.value]
+
+    def shaft_direction_in_hand(
+        self,
+        hand: Hand,
+        radial_axis: Sequence[float] | NDArray[np.float64],
+        distal_axis: Sequence[float] | NDArray[np.float64],
+    ) -> NDArray[np.float64]:
+        """Head-end shaft direction in ``hand``'s own body frame.
+
+        ``radial_axis`` (toward the thumb) and ``distal_axis`` (toward the
+        fingertips) are the hand frame's anatomical axes, a fact of each
+        engine's hand body; the angle between them is the shared
+        :attr:`palm_diagonal_deg`. Preconditions: ``hand`` a :class:`Hand`;
+        both axes finite unit 3-vectors, mutually orthogonal, else
+        ``ValueError``. Postcondition: a unit vector at ``palm_diagonal_deg``
+        from ``radial_axis``, tilted toward ``distal_axis``.
+        """
+        self.palm_target_sign(hand)  # validates the hand
+        radial = _unit_axis(radial_axis, "radial_axis")
+        distal = _unit_axis(distal_axis, "distal_axis")
+        if abs(float(radial @ distal)) > AXIS_TOLERANCE:
+            raise ValueError("radial_axis and distal_axis must be orthogonal")
+        angle = math.radians(self.palm_diagonal_deg)
+        return math.cos(angle) * radial + math.sin(angle) * distal
+
     @property
     def interlocked(self) -> bool:
         """True when the little finger passes between the lead fingers."""
         return self.style is GripStyle.INTERLOCK
+
+
+def _unit_axis(
+    axis: Sequence[float] | NDArray[np.float64], name: str
+) -> NDArray[np.float64]:
+    """``axis`` as a float array, checked to be a finite unit 3-vector."""
+    vector = np.asarray(axis, dtype=float)
+    if vector.shape != (3,):
+        raise ValueError(f"{name} must be a 3-vector, got shape {vector.shape}")
+    if not np.isfinite(vector).all():
+        raise ValueError(f"{name} must be finite, got {vector}")
+    if abs(float(np.linalg.norm(vector)) - 1.0) > AXIS_TOLERANCE:
+        raise ValueError(f"{name} must be a unit vector, got {vector}")
+    return vector
 
 
 DEFAULT_GRIP_POSE = GripPose()

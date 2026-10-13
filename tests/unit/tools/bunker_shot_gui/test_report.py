@@ -224,7 +224,9 @@ class TestEvaluationAndComparisonReports:
             )
         text = comparison_report(comparison)
         assert "Leader" not in text
-        assert ("INDISTINGUISHABLE" in text) == (comparison.winner is None)
+        # #9239: an uncalibrated objective names no winner, so the tie is read
+        # off the exploratory leader, which is ``None`` exactly on overlap.
+        assert ("INDISTINGUISHABLE" in text) == (comparison.exploratory_leader is None)
 
     def test_the_comparison_reports_the_uncertainty_budget(
         self, model, firm_sand, tour_swing
@@ -286,7 +288,8 @@ class TestEvaluationAndComparisonReports:
                 "Banded comparison requires optional upstream_physics ball flight kernel"
             )
         text = comparison_report(comparison)
-        expected = "is better" if comparison.separated else "not ordered"
+        decided = "is better" if comparison.predictive else "EXPLORATORY ONLY"
+        expected = decided if comparison.separated else "not ordered"
         assert expected in text
 
     def test_an_unrankable_comparison_says_why(
