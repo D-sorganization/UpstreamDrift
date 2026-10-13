@@ -42,9 +42,14 @@ def _run(
     tmp_path: Path,
     spec_body: str,
     baseline: dict[str, object] | None,
+    archive: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Run the guard against a synthetic repo and return the completed process."""
     (tmp_path / "SPEC.md").write_text(spec_body, encoding="utf-8", newline="\n")
+    if archive is not None:
+        archive_path = tmp_path / "docs" / "spec" / "CHANGELOG_ARCHIVE.md"
+        archive_path.parent.mkdir(parents=True, exist_ok=True)
+        archive_path.write_text(archive, encoding="utf-8", newline="\n")
     config = tmp_path / "scripts" / "config"
     config.mkdir(parents=True, exist_ok=True)
     script_dir = tmp_path / "scripts" / "ci"
@@ -187,3 +192,39 @@ class TestTheRealSpecIsClean:
         )
         assert "duplicates" not in baseline
         assert "duplicate_text" in baseline
+
+
+_ARCHIVE_HEADER = (
+    "# Archive\n\n## Change Log Rows\n\n| Date | PR | Changes |\n| --- | --- | --- |\n"
+)
+
+
+class TestTheArchiveHoldsHistory:
+    """#9415: rows moved to docs/spec/CHANGELOG_ARCHIVE.md stay under the gate."""
+
+    def test_an_empty_live_table_passes_when_the_archive_has_rows(
+        self, tmp_path: Path
+    ) -> None:
+        archive = _ARCHIVE_HEADER + "| 2026-09-04 | #9500 | Old row. |\n"
+        assert _run(tmp_path, _HEADER, {}, archive).returncode == 0
+
+    def test_an_empty_live_table_without_an_archive_still_fails(
+        self, tmp_path: Path
+    ) -> None:
+        assert _run(tmp_path, _HEADER, {}).returncode == 1
+
+    def test_a_live_key_reused_from_the_archive_fails(self, tmp_path: Path) -> None:
+        archive = _ARCHIVE_HEADER + "| 2026-09-04 | #9500 | Old row. |\n"
+        live = _HEADER + "| 2026-10-12 | #9500 | New row. |\n"
+        result = _run(tmp_path, live, {}, archive)
+        assert result.returncode == 1
+        assert "duplicate change-log key #9500" in result.stderr
+
+    def test_a_live_row_copying_archived_prose_fails(self, tmp_path: Path) -> None:
+        archive = _ARCHIVE_HEADER + f"| 2026-06-01 | #7001 | {_LONG_BODY} |\n"
+        live = _HEADER + f"| 2026-10-12 | #12000 | {_LONG_BODY} |\n"
+        assert _run(tmp_path, live, {}, archive).returncode == 1
+
+    def test_a_malformed_archive_row_fails(self, tmp_path: Path) -> None:
+        archive = _ARCHIVE_HEADER + "| 2026-09-04 | 1.0.718 | Serial. |\n"
+        assert _run(tmp_path, _HEADER, {}, archive).returncode == 1
