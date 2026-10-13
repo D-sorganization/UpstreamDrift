@@ -391,15 +391,32 @@ class ControlStep:
     predicted_grip: Array | None
 
 
-class DistributedFeedbackController:
-    """Exact-state phase/task feedback; caller owns actual native stepping."""
+@dataclass(frozen=True)
+class FeedbackRequest:
+    """Immutable full-nv effort request and selected-channel provenance."""
+
+    time_s: float
+    dt_s: float
+    schedule_index: int
+    phase: str
+    active_tasks: tuple[str, ...]
+    nominal_feedforward: tuple[float, ...]
+    feedback_correction: tuple[float, ...]
+    total_requested: tuple[float, ...]
+    generalized_effort: tuple[float, ...]
+    channel_ids: tuple[str, ...]
+    generalized_indices: tuple[int, ...]
+    selected_coordinate_mask: tuple[bool, ...]
+
+
+class DistributedFeedbackPolicy:
+    """Stateless exact-state policy; it computes requests but allocates nothing."""
 
     def __init__(
         self,
         model: TangentModel,
         actuators: ActuatorMap,
         schedule: NominalTrajectory,
-        allocator: EffortAllocator,
         *,
         tasks: Sequence[ControlTask] = (),
         enabled: bool = True,
@@ -409,8 +426,7 @@ class DistributedFeedbackController:
             raise ValueError("only exact simulated-state feedback is implemented")
         if schedule.channel_ids != actuators.channel_ids:
             raise ValueError("nominal input channel order differs from actuator map")
-        if allocator.actuators != actuators:
-            raise ValueError("allocator actuator map differs from controller")
+
         if (
             schedule.q.shape != (schedule.steps, model.nq)
             or schedule.v.shape != (schedule.steps, model.nv)
@@ -421,11 +437,10 @@ class DistributedFeedbackController:
         self.model = model
         self.actuators = actuators
         self.schedule = schedule
-        self.allocator = allocator
         self.enabled = enabled
+        self.information_pattern = information_pattern
         self._selection = actuators.selection(model.nv)
-        self._previous: Array | None = None
-        self._next_time: float = float(schedule.times[0])
+
         self.tasks = tuple(sorted(tasks, key=lambda task: (task.priority, task.name)))
         if len({task.name for task in self.tasks}) != len(self.tasks):
             raise ValueError("task names must be unique")
@@ -493,10 +508,22 @@ class DistributedFeedbackController:
             )
         return total, projection, tuple(task.name for task in active)
 
-    def command_for_step(
-        self, time_s: float, q: Array, v: Array, dt: float
-    ) -> ControlStep:
-        """Sample once; total and applied channels remain separate evidence."""
+    def request_for_step(
+        self,
+        time_s: float,
+        q: Array,
+        v: Array,
+        dt: float,
+        *,
+        expected_time_s: float,
+    ) -> FeedbackRequest:
+        """Return one immutable request without advancing policy or plant state.
+
+        Model and task-provider callbacks are sampled read-only by contract;
+        arbitrary callback side effects cannot be rolled back if validation fails.
+        """
+        if not np.isfinite(expected_time_s):
+            raise ValueError("expected policy time must be finite")
         index = self.schedule.index_at(time_s)
         q = np.asarray(q, dtype=float)
         v = np.asarray(v, dtype=float)
@@ -509,58 +536,121 @@ class DistributedFeedbackController:
             or dt <= 0
         ):
             raise ValueError("controller requires finite full state and positive step")
-        if abs(time_s - self._next_time) > CONTROL_CLOCK_ATOL_S:
+        if abs(time_s - expected_time_s) > CONTROL_CLOCK_ATOL_S:
             raise ValueError("controller steps must be contiguous from nominal start")
         if time_s + dt > self.schedule.times[index + 1] + CONTROL_CLOCK_ATOL_S:
             raise ValueError("held control step crosses a nominal policy boundary")
-        if self.enabled:
-            q_error = np.asarray(
-                self.model.difference(q, self.schedule.q[index]), dtype=float
-            )
-            inverse_mass = np.asarray(self.model.mass_inverse(q), dtype=float)
-            if q_error.shape != (self.model.nv,) or not np.isfinite(q_error).all():
-                raise ValueError("manifold difference must be finite nv tangent")
-            if (
-                inverse_mass.shape != (self.model.nv, self.model.nv)
-                or not np.isfinite(inverse_mass).all()
-            ):
-                raise ValueError("inverse mass must be finite tangent matrix")
-            if not np.allclose(inverse_mass, inverse_mass.T, rtol=1e-8, atol=1e-10):
-                raise ValueError("inverse mass must be symmetric positive definite")
-            try:
-                np.linalg.cholesky(inverse_mass)
-            except np.linalg.LinAlgError as exc:
-                raise ValueError(
-                    "inverse mass must be symmetric positive definite"
-                ) from exc
-            state_error = np.concatenate((q_error, v - self.schedule.v[index]))
-            task_effort, projector, active = self._task_feedback(
-                index, q, v, inverse_mass
-            )
-            feedback = (
-                task_effort - projector @ self.schedule.gains[index] @ state_error
-            )
-        else:
-            feedback = np.zeros(self.actuators.nu)
-            active = ()
-        nominal = self.schedule.feedforward[index].copy()
-        total = nominal + feedback
-        generalized = self._selection.T @ total
-        allocation = self.allocator.allocate(generalized, self._previous, dt, q, v)
+        with np.errstate(over="ignore", invalid="ignore"):
+            if self.enabled:
+                q_error = np.asarray(
+                    self.model.difference(q, self.schedule.q[index]), dtype=float
+                )
+                inverse_mass = np.asarray(self.model.mass_inverse(q), dtype=float)
+                if q_error.shape != (self.model.nv,) or not np.isfinite(q_error).all():
+                    raise ValueError("manifold difference must be finite nv tangent")
+                if (
+                    inverse_mass.shape != (self.model.nv, self.model.nv)
+                    or not np.isfinite(inverse_mass).all()
+                ):
+                    raise ValueError("inverse mass must be finite tangent matrix")
+                if not np.allclose(inverse_mass, inverse_mass.T, rtol=1e-8, atol=1e-10):
+                    raise ValueError("inverse mass must be symmetric positive definite")
+                try:
+                    np.linalg.cholesky(inverse_mass)
+                except np.linalg.LinAlgError as exc:
+                    raise ValueError(
+                        "inverse mass must be symmetric positive definite"
+                    ) from exc
+                state_error = np.concatenate((q_error, v - self.schedule.v[index]))
+                task_effort, projector, active = self._task_feedback(
+                    index, q, v, inverse_mass
+                )
+                feedback = (
+                    task_effort - projector @ self.schedule.gains[index] @ state_error
+                )
+            else:
+                feedback = np.zeros(self.actuators.nu)
+                active = ()
+            nominal = self.schedule.feedforward[index].copy()
+            total = nominal + feedback
+            generalized = self._selection.T @ total
+        if not all(
+            np.isfinite(values).all() for values in (feedback, total, generalized)
+        ):
+            raise ValueError("feedback request must be finite")
+        return FeedbackRequest(
+            time_s=float(time_s),
+            dt_s=float(dt),
+            schedule_index=index,
+            phase=self.schedule.phase_names[index],
+            active_tasks=active,
+            nominal_feedforward=tuple(float(value) for value in nominal),
+            feedback_correction=tuple(float(value) for value in feedback),
+            total_requested=tuple(float(value) for value in total),
+            generalized_effort=tuple(float(value) for value in generalized),
+            channel_ids=self.actuators.channel_ids,
+            generalized_indices=self.actuators.generalized_indices,
+            selected_coordinate_mask=tuple(
+                bool(value) for value in np.any(self._selection != 0, axis=0)
+            ),
+        )
+
+
+class DistributedFeedbackController(DistributedFeedbackPolicy):
+    """Exact-state policy plus one stateful allocator boundary."""
+
+    def __init__(
+        self,
+        model: TangentModel,
+        actuators: ActuatorMap,
+        schedule: NominalTrajectory,
+        allocator: EffortAllocator,
+        *,
+        tasks: Sequence[ControlTask] = (),
+        enabled: bool = True,
+        information_pattern: str = "exact_simulated_state",
+    ) -> None:
+        super().__init__(
+            model,
+            actuators,
+            schedule,
+            tasks=tasks,
+            enabled=enabled,
+            information_pattern=information_pattern,
+        )
+        if allocator.actuators != actuators:
+            raise ValueError("allocator actuator map differs from controller")
+        self.allocator = allocator
+        self._previous: Array | None = None
+        self._next_time: float = float(schedule.times[0])
+
+    def command_for_step(
+        self, time_s: float, q: Array, v: Array, dt: float
+    ) -> ControlStep:
+        """Sample once; total and applied channels remain separate evidence."""
+        q_array = np.asarray(q, dtype=float)
+        v_array = np.asarray(v, dtype=float)
+        request = self.request_for_step(
+            time_s, q_array, v_array, dt, expected_time_s=self._next_time
+        )
+        generalized = np.asarray(request.generalized_effort, dtype=float)
+        allocation = self.allocator.allocate(
+            generalized, self._previous, dt, q_array, v_array
+        )
         applied = np.asarray(allocation.applied, dtype=float)
         if applied.shape != (self.actuators.nu,) or not np.isfinite(applied).all():
             raise ValueError("allocation produced invalid applied input")
         self._previous = applied.copy()
         self._next_time = float(time_s + dt)
         return ControlStep(
-            time_s=float(time_s),
-            phase=self.schedule.phase_names[index],
-            active_tasks=active,
-            nominal_feedforward=nominal,
-            feedback_correction=feedback.copy(),
-            total_requested=total,
+            time_s=request.time_s,
+            phase=request.phase,
+            active_tasks=request.active_tasks,
+            nominal_feedforward=np.asarray(request.nominal_feedforward, dtype=float),
+            feedback_correction=np.asarray(request.feedback_correction, dtype=float),
+            total_requested=np.asarray(request.total_requested, dtype=float),
             applied=applied.copy(),
-            information_pattern="exact_simulated_state",
+            information_pattern=self.information_pattern,
             input_boundary="actuator_torque",
             contact_mode=allocation.contact_mode,
             predicted_ground=allocation.predicted_ground,

@@ -19,7 +19,9 @@ Receipt contract (optional ``outputs`` mapping, absent means no claims):
 
 Postconditions: a withheld output without both ``calibration`` and ``evidence``
 never reports status ``validated``; withheld values are never returned to the
-caller for display.
+caller for display. When a face observability audit
+(:func:`club_observability.audit_face_observability`) finds the club face
+unobservable, ``face_angle`` is ``unavailable`` and cannot be validated.
 """
 
 from __future__ import annotations
@@ -27,7 +29,12 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.club_observability import (
+        FaceObservability,
+    )
 
 __all__ = [
     "ADVERTISED_OUTPUTS",
@@ -35,6 +42,9 @@ __all__ = [
     "OutputPolicyError",
     "OutputStatus",
     "evaluate_output_policy",
+    "face_observability_of_receipt",
+    "render_face_observability_markdown",
+    "render_output_policy_markdown",
 ]
 
 ADVERTISED_OUTPUTS: tuple[str, ...] = (
@@ -52,6 +62,8 @@ WITHHELD_OUTPUTS: tuple[str, ...] = (
 _STATUS_ADVERTISED = "advertised"
 _STATUS_WITHHELD = "withheld"
 _STATUS_VALIDATED = "validated"
+_STATUS_UNAVAILABLE = "unavailable"
+_FACE_ANGLE = "face_angle"
 
 
 class OutputPolicyError(ValueError):
@@ -117,12 +129,31 @@ def _evaluate_withheld(name: str, entry: Mapping[str, Any]) -> OutputStatus:
     return OutputStatus(name, _STATUS_VALIDATED, "calibration and evidence supplied")
 
 
-def evaluate_output_policy(receipt: Mapping[str, Any]) -> dict[str, OutputStatus]:
+def _evaluate_face_angle(
+    entry: Mapping[str, Any], observability: FaceObservability | None
+) -> OutputStatus:
+    if observability is None or observability.observable:
+        return _evaluate_withheld(_FACE_ANGLE, entry)
+    reason = f"not observable: {observability.reason}"
+    if entry.get("validated", False):
+        raise OutputPolicyError(
+            f"withheld output '{_FACE_ANGLE}' claims validated but is {reason}"
+        )
+    return OutputStatus(_FACE_ANGLE, _STATUS_UNAVAILABLE, reason)
+
+
+def evaluate_output_policy(
+    receipt: Mapping[str, Any],
+    *,
+    face_observability: FaceObservability | None = None,
+) -> dict[str, OutputStatus]:
     """Classify every golf output in the receipt under the fail-closed policy.
 
     Args:
         receipt: Parsed execution receipt. Its optional ``outputs`` key holds the
             claims described in the module docstring.
+        face_observability: Optional club face audit of the capture. When it is
+            unobservable, ``face_angle`` is ``unavailable``.
 
     Returns:
         Status per known output name. Advertised and withheld outputs always
@@ -131,7 +162,8 @@ def evaluate_output_policy(receipt: Mapping[str, Any]) -> dict[str, OutputStatus
     Raises:
         OutputPolicyError: On unknown output names, non-mapping claims, a
             withheld output validated without calibration and evidence, an
-            advertised value lacking uncertainty, or a non-finite value.
+            advertised value lacking uncertainty, a non-finite value, or a
+            validated ``face_angle`` claim the face audit finds unobservable.
     """
     claims = receipt.get("outputs", {})
     claims = _require_mapping(claims, "outputs")
@@ -147,8 +179,17 @@ def evaluate_output_policy(receipt: Mapping[str, Any]) -> dict[str, OutputStatus
         statuses[name] = _evaluate_advertised(name, entry)
     for name in WITHHELD_OUTPUTS:
         entry = _require_mapping(claims.get(name, {}), f"output '{name}'")
-        statuses[name] = _evaluate_withheld(name, entry)
+        if name == _FACE_ANGLE:
+            statuses[name] = _evaluate_face_angle(entry, face_observability)
+        else:
+            statuses[name] = _evaluate_withheld(name, entry)
     return statuses
+
+
+_DISPLAY_LABELS = {
+    _STATUS_WITHHELD: "NOT VALIDATED",
+    _STATUS_UNAVAILABLE: "UNAVAILABLE",
+}
 
 
 def render_output_policy_markdown(statuses: Mapping[str, OutputStatus]) -> str:
@@ -158,6 +199,39 @@ def render_output_policy_markdown(statuses: Mapping[str, OutputStatus]) -> str:
         "|---|---|---|",
     ]
     for name, status in statuses.items():
-        label = "NOT VALIDATED" if status.status == _STATUS_WITHHELD else status.status
+        label = _DISPLAY_LABELS.get(status.status, status.status)
         lines.append(f"| `{name}` | **{label}** | {status.reason} |")
     return "\n".join(lines) + "\n"
+
+
+def face_observability_of_receipt(
+    receipt: Mapping[str, Any],
+) -> FaceObservability | None:
+    """The receipt's ``ik.face_observability`` audit, or None when absent.
+
+    Raises:
+        ValueError: When the block is present but malformed (fail closed).
+    """
+    from src.shared.python.motion_matching.club_observability import (
+        face_observability_from_receipt,
+    )
+
+    ik = receipt.get("ik")
+    block = ik.get("face_observability") if isinstance(ik, Mapping) else None
+    return None if block is None else face_observability_from_receipt(block)
+
+
+def render_face_observability_markdown(
+    observability: FaceObservability | None,
+) -> str:
+    """Render the face-angle audit: coverage and gap runs, never an angle."""
+    if observability is None:
+        return "Face-angle observability: not audited for this receipt.\n"
+    gaps = ", ".join(f"[{a}, {b})" for a, b in observability.gaps) or "none"
+    verdict = "observable" if observability.observable else "unobservable"
+    return (
+        f"Face-angle observability: {verdict} ({observability.reason}).\n\n"
+        f"- Observed frames: {observability.observed_frames}/"
+        f"{observability.total_frames} ({observability.coverage:.1%})\n"
+        f"- Unobserved frame runs: {gaps}\n"
+    )
