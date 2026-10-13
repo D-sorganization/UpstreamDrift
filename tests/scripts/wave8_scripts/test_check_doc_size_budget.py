@@ -184,6 +184,7 @@ def test_main_exempts_handoff_and_devlog_archives(
     big = "x" * (mod.MAX_BYTES + 1)
     (dev / "archive" / "HANDOFF_ARCHIVE_2026.md").write_text(big)
     (dev / "DEVELOPMENT_LOG_ARCHIVE_2026.md").write_text(big)
+    (dev / "AGENT_HANDOFF_ARCHIVE.md").write_text(big)
     assert mod.main() == 0
 
 

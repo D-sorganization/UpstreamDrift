@@ -130,3 +130,68 @@ def test_fields_with_defaults_are_required(generator: ModuleType) -> None:
     assert "explicit: string;" in declaration
     assert "defaulted: boolean;" in declaration
     assert "optional?: string;" in declaration
+
+
+def _generate_in_subprocess(hash_seed: str, out_path: Path) -> str:
+    """Run the generator CLI in a fresh interpreter with a fixed hash seed."""
+    import os
+    import subprocess
+
+    env = {**os.environ, "PYTHONHASHSEED": hash_seed}
+    result = subprocess.run(
+        [sys.executable, str(GENERATOR_PATH), "--out", str(out_path)],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=600,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    return out_path.read_text(encoding="utf-8")
+
+
+@pytest.mark.timeout(300)
+def test_generation_is_independent_of_hash_seed(
+    generator: ModuleType, openapi_schema: dict, tmp_path: Path
+) -> None:
+    """Literal/enum member order must not depend on PYTHONHASHSEED (#12422)."""
+    del openapi_schema  # skip this test when the app cannot be imported
+    outputs = {
+        seed: _generate_in_subprocess(seed, tmp_path / f"types_{seed}.ts")
+        for seed in ("1", "2")
+    }
+    baseline = outputs["1"]
+    for seed, text in outputs.items():
+        assert text == baseline, f"types.ts differs under PYTHONHASHSEED={seed}"
+    assert baseline == GENERATED_PATH.read_text(encoding="utf-8")
+
+
+def _collect_enums(node: object, found: list[list[object]]) -> None:
+    """Gather every ``enum`` member list found anywhere in a schema tree."""
+    if isinstance(node, dict):
+        members = node.get("enum")
+        if isinstance(members, list):
+            found.append(members)
+        for value in node.values():
+            _collect_enums(value, found)
+    elif isinstance(node, list):
+        for value in node:
+            _collect_enums(value, found)
+
+
+def test_equal_member_enums_share_one_order(openapi_schema: dict) -> None:
+    """Enums with the same members must list them in one order (#12422).
+
+    ``typing.Literal`` equality ignores member order, so two Literal
+    declarations with the same members in different orders collapse to
+    whichever was created first - an import-order dependent result.
+    """
+    enums: list[list[object]] = []
+    _collect_enums(openapi_schema, enums)
+    orders: dict[frozenset[str], set[tuple[str, ...]]] = {}
+    for members in enums:
+        key = frozenset(str(m) for m in members)
+        orders.setdefault(key, set()).add(tuple(str(m) for m in members))
+    conflicts = {tuple(sorted(k)): v for k, v in orders.items() if len(v) > 1}
+    assert not conflicts, f"enum member order is ambiguous: {conflicts}"
