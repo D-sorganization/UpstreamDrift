@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "21c83f86350af7ba613937e9653a9eda0fb713b2",
+  "tools_pin": "bdc3eed0e934ec84d94f5f74ef4b2b7745c1a545",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -42597,9 +42597,9 @@
     {
       "path": "sidekick/utils/native_dll_guard.py",
       "ud": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-10-13",
+        "commit": "0fbd1298aface5d21035d803d2b1c5447a64d910"
       },
       "tools": {
         "author": "d-sorgclaudeagent[bot]",
