@@ -800,6 +800,7 @@ def comparison_report(comparison: WorkbenchComparison) -> str:
             "",
         )
     )
+    lines.extend(_objective_lines(comparison))
     lines.extend(_uncertainty_lines(comparison))
     lines.extend(
         (
@@ -844,7 +845,33 @@ def _verdict_headline(comparison: WorkbenchComparison) -> str:
             "INDISTINGUISHABLE at this uncertainty - the bands overlap by "
             f"{-banded.separation:.3f} m, so these two soles are not ordered"
         )
-    return f"{banded.winner} is better, by a band gap of {banded.separation:.3f} m"
+    gap = f"a band gap of {banded.separation:.3f} m"
+    if comparison.predictive:
+        return f"{comparison.winner} is better, by {gap}"
+    return (
+        f"EXPLORATORY ONLY - {comparison.exploratory_leader} leads by {gap}, "
+        "which is not a predictive ranking (see Objective below)"
+    )
+
+
+def _objective_lines(comparison: WorkbenchComparison) -> tuple[str, ...]:
+    """Whether the carry objective may rank as predictive, and why not (#9239).
+
+    Args:
+        comparison: The comparison.
+
+    Returns:
+        The section: the disposition, then every reason it is not predictive.
+    """
+    objective = comparison.objective
+    return (
+        "Objective (absolute carry error)",
+        _THIN,
+        _line("Disposition", objective.disposition.value),
+        _line("Predictive ranking", "yes" if comparison.predictive else "NO"),
+        *(f"  not predictive: {reason}" for reason in objective.reasons),
+        "",
+    )
 
 
 def _uncertainty_lines(comparison: WorkbenchComparison) -> tuple[str, ...]:

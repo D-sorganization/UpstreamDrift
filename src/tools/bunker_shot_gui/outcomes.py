@@ -25,7 +25,7 @@ to print rather than a leader the model cannot support.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from bunkershot3d.geometry import DeliveredGeometry, StationCamber, WedgeGeometry
 from bunkershot3d.metrics import DigSkidResult, DivotMetrics, HeadLoadMetrics
@@ -43,6 +43,7 @@ from bunkershot3d.vandv.band import ConsistencyBand
 from .bridge import SoleLoadMap
 from .design import WedgeDesign
 from .field import ContactPatch, SoleLoadField
+from .objective import CarryObjectiveStanding, uncalibrated_standing
 from .shot3d import ShotScene
 from .traces import ShotTraces
 from .uncertainty import PlayabilityOutcome
@@ -258,6 +259,10 @@ class WorkbenchComparison:
             model form and numerics kept apart -- whose verdict is one of A
             better, B better, or **indistinguishable at this uncertainty**
             (issue #9243). ``None`` on the same condition as ``ranking``.
+        objective: What the carry objective is allowed to claim (#9239).
+            Defaults to the shipped, uncalibrated standing, so a comparison
+            built without one is fail-closed: it can name an exploratory
+            leader but never a predictive :attr:`winner`.
     """
 
     left: DesignEvaluation
@@ -266,6 +271,27 @@ class WorkbenchComparison:
     ranking_unavailable_reason: str = ""
     shared_points: int = 0
     banded: BandedRanking | None = None
+    objective: CarryObjectiveStanding = field(default_factory=uncalibrated_standing)
+
+    @property
+    def predictive(self) -> bool:
+        """True when the ranking may be read as a prediction.
+
+        Requires both a banded ranking and a qualified, informative carry
+        objective. Neither alone is enough: a tight band around a placeholder
+        quantity is still a placeholder (#9239).
+        """
+        return self.banded is not None and self.objective.predictive
+
+    @property
+    def exploratory_leader(self) -> str | None:
+        """The design the bands favour, read as exploration only.
+
+        ``None`` whenever the bands overlap. Present it only beside
+        :attr:`objective`'s reasons; it is not a recommendation unless
+        :attr:`predictive` is true, in which case it equals :attr:`winner`.
+        """
+        return None if self.banded is None else self.banded.winner
 
     @property
     def separated(self) -> bool:
@@ -282,13 +308,14 @@ class WorkbenchComparison:
 
     @property
     def winner(self) -> str | None:
-        """The better design, or ``None`` when the two cannot be told apart.
+        """The better design, or ``None`` when no prediction supports one.
 
         ``None`` is the point: a caller that reads a name off every comparison
-        cannot accidentally present a tie as a win. The bootstrap's own
-        ``best`` is never consulted here, because it always names somebody.
+        cannot accidentally present a tie -- or an uncalibrated objective's
+        lead (#9239) -- as a win. The bootstrap's own ``best`` is never
+        consulted here, because it always names somebody.
         """
-        return None if self.banded is None else self.banded.winner
+        return self.exploratory_leader if self.predictive else None
 
     @property
     def verdict_statement(self) -> str:
@@ -297,7 +324,14 @@ class WorkbenchComparison:
             return (
                 self.ranking_unavailable_reason or "the two designs were not compared"
             )
-        return self.banded.statement()
+        if self.predictive:
+            return self.banded.statement()
+        return (
+            "EXPLORATORY, not a predictive ranking ("
+            + "; ".join(self.objective.reasons)
+            + "). "
+            + self.banded.statement()
+        )
 
     @property
     def worst_status(self) -> EnvelopeStatus:

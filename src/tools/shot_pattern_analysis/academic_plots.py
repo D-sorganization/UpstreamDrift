@@ -971,6 +971,44 @@ def _draw_overhead_footer(figure, axes, names, path_counts, presentation):
     )
 
 
+def _draw_overhead_header(figure, metadata, scenario, captions, presentation):
+    """Draw the overhead title, scenario line and wrapped provenance caption."""
+    metadata_caption, population = captions
+    figure.suptitle(
+        (
+            f"{metadata.get('social_club', 'Shot')}: Sample Flight Paths"
+            if presentation == "social"
+            else "Raw Overhead Flight-Trajectory Comparison"
+        ),
+        x=0.06,
+        y=0.985,
+        ha="left",
+        fontsize=18,
+        fontweight="bold",
+    )
+    figure.text(
+        0.06,
+        0.925,
+        scenario,
+        fontsize=14 if presentation == "social" else 12,
+        ha="left",
+        va="top",
+    )
+    figure.text(
+        0.06,
+        0.89,
+        textwrap.fill(
+            f"{metadata_caption}  |  {population}" if metadata_caption else population,
+            width=145,
+            break_long_words=False,
+        ),
+        fontsize=10 if presentation == "social" else 9,
+        ha="left",
+        va="top",
+        color="#333333",
+    )
+
+
 def _trajectory_counts_and_caption(metadata, trajectories, presentation):
     names_tuple = tuple(trajectories)
     valid_counts = _count_map(metadata, "valid_shots_by_pattern", names_tuple)
@@ -998,7 +1036,8 @@ def write_overhead_trajectory_figure(
     scenario: str,
     metadata: Mapping[str, Any],
     trajectories_are_aimed: bool = False,
-    options: FigureOptions = FigureOptions(),
+    options: FigureOptions | None = None,
+    **legacy_options: Unpack[_LegacyFigureOptions],
 ) -> dict[str, Path]:
     """Export a shared-axis comparison of supplied raw overhead trajectories.
 
@@ -1008,7 +1047,10 @@ def write_overhead_trajectory_figure(
     this figure is explicitly for raw, un-aimed simulator trajectories.
     The displayed path count and calculated vertical display magnification are
     always disclosed. ``social`` changes only layout and caption density.
+    Frozen ``presentation``/``dpi`` keywords map onto ``options`` exactly as
+    for the density writer; combining both surfaces raises ``ValueError``.
     """
+    options = _resolve_figure_options(options, legacy_options)
     presentation = options.presentation
     dpi = options.dpi
     if trajectories_are_aimed:
@@ -1051,38 +1093,8 @@ def write_overhead_trajectory_figure(
         presentation,
     )
 
-    figure.suptitle(
-        (
-            f"{metadata.get('social_club', 'Shot')}: Sample Flight Paths"
-            if presentation == "social"
-            else "Raw Overhead Flight-Trajectory Comparison"
-        ),
-        x=0.06,
-        y=0.985,
-        ha="left",
-        fontsize=18,
-        fontweight="bold",
-    )
-    figure.text(
-        0.06,
-        0.925,
-        scenario,
-        fontsize=14 if presentation == "social" else 12,
-        ha="left",
-        va="top",
-    )
-    figure.text(
-        0.06,
-        0.89,
-        textwrap.fill(
-            f"{metadata_caption}  |  {population}" if metadata_caption else population,
-            width=145,
-            break_long_words=False,
-        ),
-        fontsize=10 if presentation == "social" else 9,
-        ha="left",
-        va="top",
-        color="#333333",
+    _draw_overhead_header(
+        figure, metadata, scenario, (metadata_caption, population), presentation
     )
     _draw_overhead_footer(figure, axes, names, path_counts, presentation)
 
