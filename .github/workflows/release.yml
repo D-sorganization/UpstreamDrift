@@ -202,7 +202,7 @@ jobs:
           python3 -m pip install build twine pip-audit jsonschema pyyaml
       # build_hooks.py refuses to package without ui/dist once CI is set, so the
       # UI bundle must be compiled here before `python -m build` (#9449).
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "24"
           cache: "npm"
@@ -309,7 +309,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Purge pip cache
         run: python -m pip cache purge || true
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: dist
           path: dist/
@@ -334,7 +334,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: dist
           path: dist/
@@ -358,7 +358,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: dist
           path: dist/
@@ -402,7 +402,7 @@ jobs:
           python-version: "3.11"
       - name: Install companion publication dependencies
         run: python3 -m pip install jsonschema==4.26.0 pyyaml==6.0.3
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: dist
           path: dist/
