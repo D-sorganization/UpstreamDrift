@@ -11,17 +11,19 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from tests.helpers.ezc3d_support import require_ezc3d
+
 
 class TestC3DDataHandling:
     """Contract: C3D data can be parsed and accessed via the model layer."""
 
     def test_ezc3d_importable(self) -> None:
         """ezc3d library is importable in the heavy Docker image."""
-        pytest.importorskip("ezc3d")
+        require_ezc3d()
 
     def test_ezc3d_creates_synthetic_c3d(self) -> None:
         """ezc3d can construct a minimal C3D object with marker data."""
-        ezc3d = pytest.importorskip("ezc3d")
+        ezc3d = require_ezc3d()
 
         # Build a minimal c3d object
         c3d = ezc3d.c3d()
@@ -41,7 +43,7 @@ class TestC3DDataHandling:
 
     def test_c3d_roundtrip(self, tmp_path) -> None:
         """A minimal C3D file survives a write→read cycle."""
-        ezc3d = pytest.importorskip("ezc3d")
+        ezc3d = require_ezc3d()
 
         c3d_out = ezc3d.c3d()
         c3d_out["parameters"]["POINT"]["RATE"]["value"] = [100]

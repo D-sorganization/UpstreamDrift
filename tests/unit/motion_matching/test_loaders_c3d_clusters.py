@@ -17,6 +17,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
 from src.shared.python.motion_matching.club_target import ClubTarget
 from src.shared.python.motion_matching.loaders._marker_clusters import (
     EXCLUDED_MARKERS,
@@ -26,9 +27,9 @@ from src.shared.python.motion_matching.loaders._marker_clusters import (
     y_up_to_z_up,
     y_up_to_z_up_rotation,
 )
+from tests.helpers.ezc3d_support import require_ezc3d
 
-ezc3d = pytest.importorskip("ezc3d")
-del ezc3d  # only needed for the import-or-skip guard
+require_ezc3d()  # skip only if absent; fail on a native DLL conflict
 
 
 from ._fixtures import repo_root  # noqa: E402

@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from tests.helpers.ezc3d_support import require_ezc3d
 from src.shared.python.motion_matching.capture_audit import audit_capture
 from src.shared.python.motion_matching import capture_audit
 
@@ -12,7 +13,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_audit_preserves_occlusion_and_source_units(tmp_path: Path) -> None:
-    ezc3d = pytest.importorskip("ezc3d")
+    ezc3d = require_ezc3d()
     capture = ezc3d.c3d()
     capture["parameters"]["POINT"]["RATE"]["value"] = [100.0]
     capture["parameters"]["POINT"]["UNITS"]["value"] = ["mm"]

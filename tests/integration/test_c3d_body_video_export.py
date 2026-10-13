@@ -6,8 +6,10 @@ from pathlib import Path
 
 import pytest
 
+from tests.helpers.ezc3d_support import require_ezc3d
+
 cv2 = pytest.importorskip("cv2")
-pytest.importorskip("ezc3d")
+require_ezc3d()
 
 from src.shared.python.motion_matching import AlignOptions
 from src.shared.python.motion_matching.body_skeleton import default_body_segments

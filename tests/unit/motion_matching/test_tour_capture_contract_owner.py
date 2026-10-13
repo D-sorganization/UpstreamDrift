@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 import numpy as np
 
+from tests.helpers.ezc3d_support import require_ezc3d
 from src.motion_capture.capture_registry import require_capture
 from src.shared.python.motion_matching import tour_capture_contract as module
 from src.shared.python.motion_matching.tour_capture_contract import (
@@ -74,7 +75,7 @@ def test_synthetic_owner_capture_validates_shapes() -> None:
 
 def test_real_owner_capture_matches_spec() -> None:
     """If private data is available, loads capture-O and checks exact properties."""
-    pytest.importorskip("ezc3d")
+    require_ezc3d()
     path = require_capture("capture-O")
 
     kind, spec = verify_capture_content(path, expected_kind="owner")
