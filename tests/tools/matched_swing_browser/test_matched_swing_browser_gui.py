@@ -230,3 +230,25 @@ class TestJourneyHeadless:
                 assert mock_tmv.called
         finally:
             window.close()
+
+
+class TestOutputPolicyPanel:
+    """Each displayed golf output carries its policy status (#10382, MS-108)."""
+
+    def test_panel_lists_every_output_with_a_badge(
+        self, widget: MatchedSwingBrowserWidget
+    ) -> None:
+        labels = widget.output_status_labels
+        assert {"face_angle", "clubhead_speed", "joint_loads"} <= set(labels)
+        for label in labels.values():
+            assert label.text()
+            assert label.toolTip()
+
+    def test_withheld_output_is_never_a_plain_number(
+        self, widget: MatchedSwingBrowserWidget
+    ) -> None:
+        widget.apply_output_policy({"outputs": []})
+        face = widget.output_status_labels["face_angle"]
+        assert "UNAVAILABLE" in face.text()
+        widget.apply_output_policy(None)
+        assert "UNAVAILABLE" in widget.output_status_labels["face_angle"].text()

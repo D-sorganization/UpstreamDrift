@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**68 launcher tiles · 61 feature contracts.**
+**68 launcher tiles · 62 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -224,6 +224,7 @@ flowchart LR
 | AI Protocol (AIP) structured method dispatch | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/aip.py) |
 | Golfer body appearance with a visible head, face and neck in every engine render | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/model_appearance/head.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/visualization/HeadModel.tsx) |
 | Realistic Club Head And Ball Rendering | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/model_appearance/club_head_mesh.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/visualization/ClubHead.tsx) |
+| Swing Report Full/Custom Plot Selection and Package Export | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/ui/swing_report_dialog.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/swing_report.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/analysis/swingReport/SwingReportDialog.tsx) |
 | Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/settings_dialog.py) |
 | Settings/preferences surface + persistence | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/settings_dialog.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/settings.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Settings.tsx) |
 | Sidekick OS terminal / REPL / Jupyter / skills | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/launcher_sidekick_sidebar.py) |

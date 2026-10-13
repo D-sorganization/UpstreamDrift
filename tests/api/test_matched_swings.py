@@ -297,6 +297,19 @@ def test_get_receipt(client: TestClient, ledger_fixture: tuple[Path, str]) -> No
     assert body["candidate_sha256"]
 
 
+def test_get_receipt_carries_output_policy(
+    client: TestClient, ledger_fixture: tuple[Path, str]
+) -> None:
+    _, run_id = ledger_fixture
+    body = client.get(f"/api/matched-swings/{run_id}").json()
+    policy = body["output_policy"]
+    rows = {row["name"]: row for row in policy["outputs"]}
+    assert rows["face_angle"]["status"] == "withheld"
+    assert rows["face_angle"]["label"] == "NOT VALIDATED"
+    assert rows["clubhead_speed"]["status"] == "advertised"
+    assert policy["face_observability"] is None
+
+
 def test_get_candidate_npz(
     client: TestClient, ledger_fixture: tuple[Path, str]
 ) -> None:

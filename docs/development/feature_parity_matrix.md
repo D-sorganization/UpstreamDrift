@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 38 parity · 7 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 39 parity · 7 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -43,6 +43,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `platform.aip_protocol`<br>AI Protocol (AIP) structured method dispatch | ✅ parity | — | `src/api/routes/aip.py` | — | — |
 | `render.body_appearance`<br>Golfer body appearance with a visible head, face and neck in every engine render | ✅ parity | `src/shared/python/model_appearance/head.py` | — | `ui/src/components/visualization/HeadModel.tsx` | — |
 | `render.club_head_and_ball`<br>Realistic Club Head And Ball Rendering | 🔴 gap | `src/shared/python/model_appearance/club_head_mesh.py` | — | `ui/src/components/visualization/ClubHead.tsx` | #11717 |
+| `reporting.swing_report_dialog`<br>Swing Report Full/Custom Plot Selection and Package Export | ✅ parity | `src/shared/python/ui/swing_report_dialog.py` | `src/api/routes/swing_report.py` | `ui/src/components/analysis/swingReport/SwingReportDialog.tsx` | — |
 | `settings.desktop_only_tabs`<br>Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | ⚪ exempt | `src/launchers/settings_dialog.py` | — | — | Desktop-process management (MCP server processes, Docker startup, window layout, app zoom of native widgets) has no browser equivalent; awaiting the desktop-only exemption decision in issue #7460. — **pending decision (#7460)** |
 | `settings.preferences`<br>Settings/preferences surface + persistence | ✅ parity | `src/launchers/settings_dialog.py` | `src/api/routes/settings.py` | `ui/src/pages/Settings.tsx` | — |
 | `sidekick.terminal_repl_jupyter_skills`<br>Sidekick OS terminal / REPL / Jupyter / skills | ⚪ exempt | `src/launchers/launcher_sidekick_sidebar.py` | — | — | Desktop-native OS integration (terminal/REPL/Jupyter/skills) per ADR-0028; final disposition pending #7460. — **pending decision (#7460)** |
