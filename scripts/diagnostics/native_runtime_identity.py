@@ -27,6 +27,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 # Stdlib-only Tools guard, loaded by path so the probe imports no repo package.
@@ -38,6 +39,7 @@ PROBE_ORDERS: tuple[tuple[str, ...], ...] = (
     ("ezc3d", "opensim"),
 )
 _RUNTIMES = {"ezc3d": "c3d-preparation", "opensim": "native-opensim"}
+Probe = Mapping[str, Any]
 _SCHEMA = "upstreamdrift.native_runtime_identity.v1"
 
 
@@ -112,7 +114,7 @@ def _run_probe(python: Path, order: Sequence[str]) -> dict[str, object]:
     return json.loads(result.stdout.strip().splitlines()[-1])
 
 
-def _alone(probes: Sequence[Mapping[str, object]], name: str) -> Mapping[str, object]:
+def _alone(probes: Sequence[Probe], name: str) -> Probe:
     for probe in probes:
         if probe["order"] == [name]:
             steps = probe["steps"]
@@ -130,7 +132,7 @@ def _runtime_identity(step: Mapping[str, object]) -> str:
     return f"broken: {step.get('error_type')}: {step.get('error', '')}".strip()
 
 
-def classify_runtimes(probes: Sequence[Mapping[str, object]]) -> dict[str, str]:
+def classify_runtimes(probes: Sequence[Probe]) -> dict[str, str]:
     """Return the explicit identity of each runtime and of a mixed process.
 
     Precondition: every probe started clean (neither runtime preloaded).
@@ -168,7 +170,7 @@ def classify_runtimes(probes: Sequence[Mapping[str, object]]) -> dict[str, str]:
     return identities
 
 
-def exit_status(probes: Sequence[Mapping[str, object]]) -> int:
+def exit_status(probes: Sequence[Probe]) -> int:
     """1 when a probe crashed or a runtime cannot be imported on its own."""
     if any(probe.get("crashed") for probe in probes):
         return 1
@@ -178,7 +180,7 @@ def exit_status(probes: Sequence[Mapping[str, object]]) -> int:
     return 1 if broken else 0
 
 
-def build_report(python: Path) -> dict[str, object]:
+def build_report(python: Path) -> dict[str, Any]:
     """Run every probe order in its own fresh ``python`` process."""
     probes = [_run_probe(python, order) for order in PROBE_ORDERS]
     interpreter = subprocess.run(
