@@ -67,6 +67,31 @@ an N=16 synthetic fixture, actual equilibrium solves dropped from 832 to 96
 not solve the dense Jacobian startup limit for large channel counts (>78 free
 channels), which remains bounded by explicit `max_nfev` budget exhaustion.
 
+## Lazy Biomechanics Facade (#12397)
+
+`src/shared/python/biomechanics/__init__.py` replaces eager package initialization
+with a backward-compatible lazy facade patterned after `src/shared/python/motion_matching`.
+
+Key properties:
+
+- Package and direct kernel submodule imports (`activation_dynamics`, `hill_muscle`,
+  `muscle_equilibrium`) isolate cleanly in fresh processes without importing unrelated
+  modules, analysis pipelines, GUI/viewer packages (PyQt6, Matplotlib), or optional
+  simulation backends (OpenSim, bunkershot3d).
+- Unconditional exports are loaded and cached on first access via `__getattr__`,
+  preserving exact canonical object identity.
+- Optional groups (`dynamic_com`, `humanoid_urdf_contracts`, `rust_muscle`,
+  `muscle_analysis`, `myoconverter_integration`, `myosuite_adapter`,
+  `swing_plane_visualization`, `grf_visualization`) resolve paired symbols on
+  demand, preserve legacy `ImportError -> None` semantics, and propagate non-`ImportError`
+  exceptions without swallowing.
+- `__dir__()` exposes all documented public symbols without triggering imports of optional modules.
+- Dynamic `__all__` property on `_BiomechanicsModule` preserves legacy ordered export sequence
+  and import-star compatibility (`_BASE_ALL` followed by optional groups whose sentinel is not None).
+- 12 focused facade tests in `tests/unit/biomechanics/test_biomechanics_facade.py` verify fresh-process
+  module isolation, object identity, error propagation, `dir()` introspection, and `import *` parity.
+  All 384 tests in `tests/unit/biomechanics/` pass.
+
 ## Limits and Next Step
 
 This finite-difference least-squares prototype evaluates per-path equilibrium at every candidate. The tests cover only the small analytic fixture; there is no 557-muscle throughput or scaling evidence. The default 80-evaluation budget counts the initial candidate, duplicate objective evaluations, and finite-difference probes; a problem with roughly 78 free channels can exhaust before a complete dense Jacobian. Cached/sparse Jacobians, solver/factorization warm-start reuse, measured cost, and a bounded closed-loop fixture are needed before full-body integration. The next fixture should feed the allocator desired effort from the existing controller seam, preserve separate desired effort, applied effort, raw commands, and effective excitations, and replay saved commands with feedback disabled under the same declared kernel. No change to qualification in the 17-row model inventory or cross-engine parity follows. Anatomy, sourced moment arms, physiological acceptance, passive-load policy, contact, full-clock replay, and all-model qualification remain open.
