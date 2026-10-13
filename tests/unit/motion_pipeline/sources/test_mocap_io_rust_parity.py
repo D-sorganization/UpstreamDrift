@@ -12,6 +12,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from tests.helpers.ezc3d_support import require_ezc3d
+
 pytestmark = pytest.mark.unit
 
 GOLDEN = Path(__file__).resolve().parents[3] / "data" / "motion_pipeline" / "golden"
@@ -84,7 +86,7 @@ def _marker_traj_to_array(traj) -> tuple[np.ndarray, list[str]]:
 
 def test_c3d_rust_matches_ezc3d() -> None:
     """Rust C3D parser produces the same MarkerTrajectory as the ezc3d path."""
-    ezc3d = pytest.importorskip("ezc3d")
+    ezc3d = require_ezc3d()
     assert ezc3d  # silence unused warning
 
     from src.shared.python.motion_pipeline.sources import c3d_adapter as mod

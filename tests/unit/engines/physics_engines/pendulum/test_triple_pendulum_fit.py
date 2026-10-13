@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from tests.helpers.ezc3d_support import require_ezc3d
 from src.engines.physics_engines.pendulum.python.motion_matching.adapters_triple import (
     MODEL_ID_TRIPLE_ANALYTICAL,
     MODEL_ID_TRIPLE_TOOLS,
@@ -193,7 +194,7 @@ def test_triple_driver_and_iron_qualification_receipts(tmp_path: Path) -> None:
     Receipts are written to ``tmp_path``: rewriting the committed evidence in
     place changed its sha256 mid-run and broke ``test_ledger_freshness``.
     """
-    pytest.importorskip("ezc3d")
+    require_ezc3d()
     from src.engines.physics_engines.pendulum.python.motion_matching.qualification_triple import (
         save_triple_qualification_receipts,
     )

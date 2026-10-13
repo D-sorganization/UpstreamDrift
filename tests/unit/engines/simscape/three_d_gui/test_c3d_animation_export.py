@@ -5,6 +5,7 @@ from pathlib import Path
 import threading
 import time
 
+from tests.helpers.ezc3d_support import require_ezc3d
 from src.apps.services.c3d_animation_export import export_animation
 from src.apps.core.models import C3DDataModel, MarkerData
 import numpy as np
@@ -62,7 +63,7 @@ def test_export_animation_no_markers(tmp_path: Path):
     reason="Missing driver test data",
 )
 def test_export_animation_real_data(tmp_path: Path, monkeypatch):
-    pytest.importorskip("ezc3d")
+    require_ezc3d()
     pytest.importorskip("cv2")
     c3d_path = Path(__file__).parents[5] / "data" / "C3D_TA_Driver.c3d"
     model = C3DDataModel(filepath=str(c3d_path))

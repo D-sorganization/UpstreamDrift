@@ -23,6 +23,8 @@ import pytest
 from anthropometrics import ADAPTER_REGISTRY, SubjectAnthropometrics
 from anthropometrics.pipeline import run_pipeline
 
+from tests.helpers.ezc3d_support import require_ezc3d
+
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _C3D_FIXTURE = _REPO_ROOT / "data" / "C3D_TA_Driver.c3d"
 
@@ -52,7 +54,7 @@ def pipeline_run(
     """
     if not _C3D_FIXTURE.exists():
         pytest.skip(f"C3D fixture not bundled: {_C3D_FIXTURE}")
-    pytest.importorskip("ezc3d", reason="run_pipeline needs ezc3d to read C3D")
+    require_ezc3d()
 
     output_dir = tmp_path_factory.mktemp("pipeline_e2e")
     record = run_pipeline(
