@@ -48,9 +48,11 @@ Pure stdlib so it can run before any project dependencies are installed.
 from __future__ import annotations
 
 import collections
+import dataclasses
 import hashlib
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -58,6 +60,12 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SPEC_PATH = REPO_ROOT / "SPEC.md"
+#: Change-log history moved out of SPEC.md by UpstreamDrift#9415. The live
+#: Section 12 table only carries rows added since; this archive holds the rest.
+ARCHIVE_PATH = REPO_ROOT / "docs" / "spec" / "CHANGELOG_ARCHIVE.md"
+_ARCHIVED_KEY_RE = re.compile(
+    r"^\| (?P<date>\d{4}-\d{2}-\d{2}) \| (?P<key>#\d+) \|", re.MULTILINE
+)
 BASELINE_PATH = (
     REPO_ROOT / "scripts" / "config" / "spec_changelog_duplicate_baseline.json"
 )
@@ -103,6 +111,36 @@ def _duplicate_bodies(rows: list[Any]) -> dict[str, list[str]]:
         digest = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
         groups[digest].append(str(getattr(row, "key", "")))
     return {digest: sorted(keys) for digest, keys in groups.items() if len(keys) > 1}
+
+
+def _load_archive_rows(module: ModuleType) -> list[Any]:
+    """Rows of the archive's change-log table, or none when it is absent."""
+    if not ARCHIVE_PATH.is_file():
+        return []
+    try:
+        parsed = module.parse_changelog(ARCHIVE_PATH.read_text(encoding="utf-8"))
+    except module.SpecChangelogError:
+        return []
+    return list(parsed.rows)
+
+
+def _reused_archive_keys(module: ModuleType, live_rows: list[Any]) -> list[str]:
+    """Live keys (dated after the cutover) that the archive already used.
+
+    The archive is scanned line by line rather than through its table parser, so
+    every archived row counts, not just the first contiguous block.
+    """
+    if not ARCHIVE_PATH.is_file():
+        return []
+    cutoff = module.PR_KEYED_SINCE
+    archived = {
+        match["key"]
+        for match in _ARCHIVED_KEY_RE.finditer(ARCHIVE_PATH.read_text(encoding="utf-8"))
+        if match["date"] >= cutoff
+    }
+    return sorted(
+        {row.key for row in live_rows if row.key in archived and row.date >= cutoff}
+    )
 
 
 def _advice(what: str) -> str:
@@ -162,14 +200,24 @@ def main() -> int:
         print(f"SPEC.md changelog: {exc}", file=sys.stderr)
         return 1
 
-    if not changelog.rows:
+    archive_rows = _load_archive_rows(changelog_module)
+    if not changelog.rows and not archive_rows:
         print(
             "No changelog rows matched; the table format may have changed.",
             file=sys.stderr,
         )
         return 1
 
-    failures = changelog_module.validate(changelog)
+    # History lives in the archive, so uniqueness and the duplicate-body ratchet
+    # run over live + archived rows together.
+    rows = [*changelog.rows, *archive_rows]
+    combined = dataclasses.replace(changelog, rows=rows)
+    failures = changelog_module.validate(combined)
+    failures.extend(
+        f"duplicate change-log key {key} (already used in the change-log archive)."
+        " One row per pull request."
+        for key in _reused_archive_keys(changelog_module, changelog.rows)
+    )
     if failures:
         _report_contract(failures)
         return 1
@@ -181,7 +229,7 @@ def main() -> int:
     }
     repeated = {
         digest: keys
-        for digest, keys in _duplicate_bodies(changelog.rows).items()
+        for digest, keys in _duplicate_bodies(rows).items()
         if keys != allowed_bodies.get(digest)
     }
     if repeated:
