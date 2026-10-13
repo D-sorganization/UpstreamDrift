@@ -2,7 +2,7 @@
 
 Generated from catalog.json and current source evidence. Edit the sources and regenerate.
 
-Source fingerprint: `945eb3525c6a89ac7cdbca05b05e9de5938b34ca47d012f310af4647a53b3c1f`.
+Source fingerprint: `2a4dfee39e2c6e291f044dd76d5803da9b3e0e6e2c825ef67782e38e7226bcce`.
 
 This map covers registered components. A source match is not scientific approval or proof that tests passed.
 
