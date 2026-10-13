@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Fail if the repo root contains files outside the allowlist."""
+"""Fail if the repo root contains files or directories outside the allowlists."""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-ALLOWLIST = frozenset(
+ALLOWLIST: frozenset[str] = frozenset(
     {
         "README.md",
         "LICENSE",
@@ -50,22 +50,74 @@ ALLOWLIST = frozenset(
     }
 )
 
+DIRECTORY_ALLOWLIST: frozenset[str] = frozenset(
+    {
+        "apps",
+        "assets",
+        "benchmarks",
+        "build",
+        "candidates",
+        "changes",
+        "data",
+        "deploy",
+        "dist",
+        "docker",
+        "docs",
+        "evidence",
+        "examples",
+        "htmlcov",
+        "installer",
+        "knowledge",
+        "logs",
+        "manuals",
+        "models",
+        "notebooks",
+        "output",
+        "reports",
+        "rust_core",
+        "saved_states",
+        "schemas",
+        "scripts",
+        "shared",
+        "shared_scripts",
+        "src",
+        "stubs",
+        "temp",
+        "tests",
+        "tools",
+        "ui",
+        "venv",
+        "vendor",
+        "__pycache__",
+    }
+)
 
-def main() -> int:
-    root = Path(__file__).resolve().parent.parent
-    bad = []
+
+def check_root_clutter(root: Path | None = None) -> list[str]:
+    """Return a sorted list of disallowed files or directories in the root directory."""
+    if root is None:
+        root = Path(__file__).resolve().parent.parent
+    bad: list[str] = []
     for entry in root.iterdir():
-        if entry.is_dir() or entry.name.startswith("."):
+        if entry.name.startswith("."):
             continue
-        if entry.name not in ALLOWLIST:
+        if entry.is_dir():
+            if entry.name not in DIRECTORY_ALLOWLIST:
+                bad.append(f"{entry.name}/")
+        elif entry.name not in ALLOWLIST:
             bad.append(entry.name)
+    return sorted(bad)
+
+
+def main(root: Path | None = None) -> int:
+    bad = check_root_clutter(root)
     if bad:
-        print("Disallowed files at repo root:", file=sys.stderr)
-        for name in sorted(bad):
+        print("Disallowed files or directories at repo root:", file=sys.stderr)
+        for name in bad:
             print(f"  {name}", file=sys.stderr)
         print(
-            "\nMove or delete them. Edit ALLOWLIST in this script if you "
-            "are adding a new top-level file (PR review required).",
+            "\nMove or delete them. Edit ALLOWLIST or DIRECTORY_ALLOWLIST in this script if you "
+            "are adding a new top-level entry (PR review required).",
             file=sys.stderr,
         )
         return 1

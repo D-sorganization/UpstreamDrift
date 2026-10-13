@@ -11,6 +11,11 @@
 # Codex agent worktrees (ephemeral, per-session)
 .codex-worktrees/
 
+# Ephemeral agent sessions and worktrees
+sessions/
+worktrees/
+UsersdieteRepositories*/
+
 # Codemap index (regenerated on every clone via `codemap rebuild`)
 .codemap/
 
