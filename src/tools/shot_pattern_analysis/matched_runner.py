@@ -420,6 +420,64 @@ def _supported_record(
     )
 
 
+def _simulate_noisy_shot(
+    engine: MatchedPhysicsProtocol,
+    request: ExperimentConfig,
+    name: str,
+    nominal: MatchedNominal,
+    nominal_club: MatchedConfig,
+    index: int,
+    error: np.ndarray,
+) -> tuple[MatchedShotRecord, tuple[tuple[float, float], ...] | None]:
+    """Simulate one perturbed delivery; return its record and sampled flight.
+
+    A delivery outside the club's valid range or an unsupported contact is
+    recorded with its reason, never dropped. The flight is returned only for
+    the first five supported shots of a pattern.
+    """
+    rotation, path, speed, horizontal, vertical, lean, attack = (
+        float(v) for v in error
+    )
+    inputs: _ShotInputs = {
+        "pattern": name,
+        "shot_index": index,
+        "status": "supported",
+        "shaft_rotation_deg": rotation,
+        "path_deg": nominal.path_deg + path,
+        "speed_mps": nominal.speed_mps + speed,
+        "contact_horizontal_m": horizontal,
+        "contact_vertical_m": vertical,
+        "shaft_lean_deg": request.club.shaft_lean_deg + lean,
+        "attack_angle_deg": request.club.attack_angle_deg + attack,
+    }
+    try:
+        club = replace(
+            nominal_club,
+            club_speed_mps=inputs["speed_mps"],
+            shaft_lean_deg=inputs["shaft_lean_deg"],
+            attack_angle_deg=inputs["attack_angle_deg"],
+        )
+    except ValueError:
+        inputs["status"] = "delivery_out_of_range"
+        return MatchedShotRecord(**inputs), None
+    sample = index < 5
+    try:
+        delivered = engine.simulate_delivery(
+            nominal_face_deg=nominal.face_deg,
+            path_deg=inputs["path_deg"],
+            config=club,
+            shaft_rotation_deg=rotation,
+            contact_horizontal_m=horizontal,
+            contact_vertical_m=vertical,
+            sample_trajectory=sample,
+        )
+    except UnsupportedShot as exc:
+        inputs["status"] = exc.reason
+        return MatchedShotRecord(**inputs), None
+    trajectory = delivered.outcome.trajectory_xy_m if sample else None
+    return _supported_record(inputs, delivered), trajectory
+
+
 def _input_diagnostics(request: ExperimentConfig, errors: np.ndarray) -> dict:
     """Summarize the original paired, untruncated input matrix in field order."""
     return {
@@ -466,49 +524,12 @@ def run_matched_analysis(
         for index, error in enumerate(errors):
             if cancelled is not None and cancelled():
                 raise AnalysisCancelled("matched shot analysis cancelled")
-            rotation, path, speed, horizontal, vertical, lean, attack = (
-                float(v) for v in error
+            record, trajectory = _simulate_noisy_shot(
+                engine, request, name, nominal, nominal_club, index, error
             )
-            inputs: _ShotInputs = {
-                "pattern": name,
-                "shot_index": index,
-                "status": "supported",
-                "shaft_rotation_deg": rotation,
-                "path_deg": nominal.path_deg + path,
-                "speed_mps": nominal.speed_mps + speed,
-                "contact_horizontal_m": horizontal,
-                "contact_vertical_m": vertical,
-                "shaft_lean_deg": request.club.shaft_lean_deg + lean,
-                "attack_angle_deg": request.club.attack_angle_deg + attack,
-            }
-            try:
-                club = replace(
-                    nominal_club,
-                    club_speed_mps=inputs["speed_mps"],
-                    shaft_lean_deg=inputs["shaft_lean_deg"],
-                    attack_angle_deg=inputs["attack_angle_deg"],
-                )
-            except ValueError:
-                inputs["status"] = "delivery_out_of_range"
-                rows.append(MatchedShotRecord(**inputs))
-            else:
-                try:
-                    delivered = engine.simulate_delivery(
-                        nominal_face_deg=nominal.face_deg,
-                        path_deg=inputs["path_deg"],
-                        config=club,
-                        shaft_rotation_deg=rotation,
-                        contact_horizontal_m=horizontal,
-                        contact_vertical_m=vertical,
-                        sample_trajectory=index < 5,
-                    )
-                except UnsupportedShot as exc:
-                    inputs["status"] = exc.reason
-                    rows.append(MatchedShotRecord(**inputs))
-                else:
-                    rows.append(_supported_record(inputs, delivered))
-                    if index < 5:
-                        paths.append(delivered.outcome.trajectory_xy_m)
+            rows.append(record)
+            if trajectory is not None:
+                paths.append(trajectory)
             if progress is not None and (
                 index % 100 == 0 or index == request.n_shots - 1
             ):

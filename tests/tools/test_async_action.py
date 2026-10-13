@@ -299,5 +299,6 @@ def test_bar_reports_a_presenter_failure_instead_of_raising(bar) -> None:  # noq
     assert failures == signalled
     assert "nominals" in failures[0]
     assert finished == []
-    assert bar.is_running is False
+    # The worker thread quits after the result slot runs, not before it.
+    assert _pump_until(lambda: not bar.is_running)
     assert "failed" in bar.status_label.text()
