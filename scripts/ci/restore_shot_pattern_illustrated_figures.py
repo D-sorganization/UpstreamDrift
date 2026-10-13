@@ -171,9 +171,11 @@ def _download_archive(dest: Path) -> None:
         # Unredirected: the token must not follow the redirect to the CDN host.
         request.add_unredirected_header("Authorization", f"Bearer {token}")
     received = 0
-    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
     with (
-        urllib.request.urlopen(request, timeout=DOWNLOAD_TIMEOUT_SECONDS) as response,  # nosec B310 # noqa: S310
+        urllib.request.urlopen(  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+            request,
+            timeout=DOWNLOAD_TIMEOUT_SECONDS,
+        ) as response,  # nosec B310 # noqa: S310
         dest.open("wb") as handle,
     ):
         while chunk := response.read(1 << 20):
