@@ -118,6 +118,10 @@ def test_agent_context_exposes_update_and_artifact_rules() -> None:
     agents = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
     claude = (REPO_ROOT / "CLAUDE.md").read_text(encoding="utf-8")
     spec = (REPO_ROOT / "SPEC.md").read_text(encoding="utf-8")
+    # Change-log history moved out of SPEC.md by UpstreamDrift#9415.
+    spec += (REPO_ROOT / "docs" / "spec" / "CHANGELOG_ARCHIVE.md").read_text(
+        encoding="utf-8"
+    )
     handoff = (REPO_ROOT / "AGENT_HANDOFF.md").read_text(encoding="utf-8")
 
     for text in (agents, claude):
