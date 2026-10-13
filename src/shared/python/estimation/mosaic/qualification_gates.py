@@ -78,6 +78,7 @@ def check_kinematic_whiteness(
             metric = 0.0
 
     require(metric is not None, "metric must be resolved")
+    assert metric is not None
     passed = metric <= threshold
     status = GateStatus.PASSED if passed else GateStatus.FAILED
     msg = (
@@ -418,21 +419,23 @@ def check_cross_trial_consistency(
 def evaluate_qualification_gates(
     report: Any | None = None,
     *,
-    residual_autocorr: np.ndarray | None = None,
-    whiteness_metric: float | None = None,
-    sigma_tau: float | None = None,
-    basis_accel_error: float | None = None,
-    mass_scale: float | None = None,
     parameters: np.ndarray | None = None,
     observability_report: Any | None = None,
     replays: list[Any] | None = None,
     template: Any | None = None,
     modes: Any | None = None,
+    **kwargs: Any,
 ) -> list[GateResult]:
     """Evaluate all seven qualification gates.
 
     Inputs may be passed explicitly or extracted from a SubjectFitReport.
     """
+    residual_autocorr: np.ndarray | None = kwargs.get("residual_autocorr")
+    whiteness_metric: float | None = kwargs.get("whiteness_metric")
+    sigma_tau: float | None = kwargs.get("sigma_tau")
+    basis_accel_error: float | None = kwargs.get("basis_accel_error")
+    mass_scale: float | None = kwargs.get("mass_scale")
+
     # Extract from report if provided
     if report is not None:
         if parameters is None and hasattr(report, "fit"):
