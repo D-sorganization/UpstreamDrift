@@ -13,11 +13,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -66,11 +77,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -119,11 +141,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -172,11 +205,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -225,11 +269,22 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -278,11 +333,22 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -331,11 +397,22 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -384,11 +461,22 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -437,11 +525,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -490,11 +589,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -543,11 +653,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -596,11 +717,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -649,11 +781,22 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -702,11 +845,22 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -755,11 +909,22 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -808,11 +973,22 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -861,11 +1037,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -914,11 +1101,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -967,11 +1165,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -1020,11 +1229,22 @@
           },
           "curve_scale": 1,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
           "match_face_bounds_deg": null,
-          "match_speed_factors": [0.75, 1.25]
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -1073,11 +1293,25 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
-          "match_face_bounds_deg": [-6.0, 6.0],
-          "match_speed_factors": [0.75, 1.25]
+          "match_face_bounds_deg": [
+            -6.0,
+            6.0
+          ],
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -1127,11 +1361,25 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
-          "match_face_bounds_deg": [-6.0, 6.0],
-          "match_speed_factors": [0.75, 1.25]
+          "match_face_bounds_deg": [
+            -6.0,
+            6.0
+          ],
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -1181,11 +1429,25 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
-          "match_face_bounds_deg": [-6.0, 6.0],
-          "match_speed_factors": [0.75, 1.25]
+          "match_face_bounds_deg": [
+            -6.0,
+            6.0
+          ],
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -1235,11 +1497,25 @@
           },
           "curve_scale": 2,
           "noise": {
-            "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
           },
           "n_shots": 10000,
-          "match_face_bounds_deg": [-6.0, 6.0],
-          "match_speed_factors": [0.75, 1.25]
+          "match_face_bounds_deg": [
+            -6.0,
+            6.0
+          ],
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
         },
         "summary": {
           "Straight": {
@@ -1337,11 +1613,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1390,11 +1677,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1443,11 +1741,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1496,11 +1805,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1549,11 +1869,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1602,11 +1933,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1655,11 +1997,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1708,11 +2061,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1761,11 +2125,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1814,11 +2189,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1867,11 +2253,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1920,11 +2317,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -1973,11 +2381,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2026,11 +2445,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2079,11 +2509,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2132,11 +2573,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2185,11 +2637,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2238,11 +2701,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2291,11 +2765,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2344,11 +2829,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2397,11 +2893,25 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
-              "match_face_bounds_deg": [-6.0, 6.0],
-              "match_speed_factors": [0.75, 1.25]
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2451,11 +2961,25 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
-              "match_face_bounds_deg": [-6.0, 6.0],
-              "match_speed_factors": [0.75, 1.25]
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2505,11 +3029,25 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
-              "match_face_bounds_deg": [-6.0, 6.0],
-              "match_speed_factors": [0.75, 1.25]
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2559,11 +3097,25 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
-              "match_face_bounds_deg": [-6.0, 6.0],
-              "match_speed_factors": [0.75, 1.25]
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2671,7 +3223,9 @@
               "effect": -0.25
             }
           ],
-          "unavailable": ["missing control"]
+          "unavailable": [
+            "missing control"
+          ]
         },
         "figure_links": [
           {
@@ -2684,7 +3238,10 @@
             "relative_path": "supplement.png"
           }
         ],
-        "figure_inventories": ["availability.csv", "availability.csv"],
+        "figure_inventories": [
+          "availability.csv",
+          "availability.csv"
+        ],
         "supplement": {
           "status": "qualified",
           "unique_executed_cells": 26,
@@ -2702,31 +3259,106 @@
       },
       "error": null,
       "events": [
-        ["describe", "driver_lean0_curve1_rotation2_combined2"],
-        ["describe", "driver_lean5_curve1_rotation2_combined2"],
-        ["describe", "driver_lean10_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["score", "driver_lean0_curve1_rotation2_combined2"],
-        ["score", "driver_lean5_curve1_rotation2_combined2"],
-        ["score", "driver_lean10_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["select_representative_interaction_pairs", null],
-        ["select_bounds_control_pairs", null],
-        ["verified_original_figure_links", "original_primary"],
-        ["verified_original_figure_links", "original_control"],
-        ["verified_original_figure_inventory", "original_primary"],
-        ["verified_original_figure_inventory", "original_control"],
-        ["supplement_figure_links", null]
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ],
+        [
+          "supplement_figure_links",
+          null
+        ]
       ]
     },
     "explicit_identity": {
@@ -2771,11 +3403,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2824,11 +3467,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2877,11 +3531,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2930,11 +3595,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -2983,11 +3659,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3036,11 +3723,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3089,11 +3787,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3142,11 +3851,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3195,11 +3915,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3248,11 +3979,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3301,11 +4043,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3354,11 +4107,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3407,11 +4171,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3460,11 +4235,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3513,11 +4299,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3566,11 +4363,22 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3619,11 +4427,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3672,11 +4491,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3725,11 +4555,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3778,11 +4619,22 @@
               },
               "curve_scale": 1,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
               "match_face_bounds_deg": null,
-              "match_speed_factors": [0.75, 1.25]
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3831,11 +4683,25 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
-              "match_face_bounds_deg": [-6.0, 6.0],
-              "match_speed_factors": [0.75, 1.25]
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3885,11 +4751,25 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [1, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
-              "match_face_bounds_deg": [-6.0, 6.0],
-              "match_speed_factors": [0.75, 1.25]
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3939,11 +4819,25 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
-              "match_face_bounds_deg": [-6.0, 6.0],
-              "match_speed_factors": [0.75, 1.25]
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -3993,11 +4887,25 @@
               },
               "curve_scale": 2,
               "noise": {
-                "standard_deviations": [2, 0, 0, 0, 0, 0, 0]
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               },
               "n_shots": 10000,
-              "match_face_bounds_deg": [-6.0, 6.0],
-              "match_speed_factors": [0.75, 1.25]
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
             },
             "summary": {
               "Straight": {
@@ -4105,7 +5013,9 @@
               "effect": -0.25
             }
           ],
-          "unavailable": ["missing control"]
+          "unavailable": [
+            "missing control"
+          ]
         },
         "figure_links": [
           {
@@ -4118,7 +5028,10 @@
             "relative_path": "supplement.png"
           }
         ],
-        "figure_inventories": ["availability.csv", "availability.csv"],
+        "figure_inventories": [
+          "availability.csv",
+          "availability.csv"
+        ],
         "supplement": {
           "status": "qualified",
           "unique_executed_cells": 26,
@@ -4136,62 +5049,212 @@
       },
       "error": null,
       "events": [
-        ["describe", "driver_lean0_curve1_rotation2_combined2"],
-        ["describe", "driver_lean5_curve1_rotation2_combined2"],
-        ["describe", "driver_lean10_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["score", "driver_lean0_curve1_rotation2_combined2"],
-        ["score", "driver_lean5_curve1_rotation2_combined2"],
-        ["score", "driver_lean10_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["select_representative_interaction_pairs", null],
-        ["select_bounds_control_pairs", null],
-        ["verified_original_figure_links", "original_primary"],
-        ["verified_original_figure_links", "original_control"],
-        ["verified_original_figure_inventory", "original_primary"],
-        ["verified_original_figure_inventory", "original_control"],
-        ["supplement_figure_links", null]
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ],
+        [
+          "supplement_figure_links",
+          null
+        ]
       ]
     },
     "identity_changed": {
       "result": null,
       "error": "supplement publication identity changed",
       "events": [
-        ["describe", "driver_lean0_curve1_rotation2_combined2"],
-        ["describe", "driver_lean5_curve1_rotation2_combined2"],
-        ["describe", "driver_lean10_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["score", "driver_lean0_curve1_rotation2_combined2"],
-        ["score", "driver_lean5_curve1_rotation2_combined2"],
-        ["score", "driver_lean10_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["select_representative_interaction_pairs", null],
-        ["select_bounds_control_pairs", null],
-        ["verified_original_figure_links", "original_primary"],
-        ["verified_original_figure_links", "original_control"],
-        ["verified_original_figure_inventory", "original_primary"],
-        ["verified_original_figure_inventory", "original_control"],
-        ["supplement_figure_links", null]
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ],
+        [
+          "supplement_figure_links",
+          null
+        ]
       ]
     },
     "missing_condition": {
@@ -4203,85 +5266,286 @@
       "result": null,
       "error": "qualified supplement comparison schema differs",
       "events": [
-        ["describe", "driver_lean0_curve1_rotation2_combined2"],
-        ["describe", "driver_lean5_curve1_rotation2_combined2"],
-        ["describe", "driver_lean10_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["score", "driver_lean0_curve1_rotation2_combined2"],
-        ["score", "driver_lean5_curve1_rotation2_combined2"],
-        ["score", "driver_lean10_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean10_curve1_rotation2_combined2"]
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ]
       ]
     },
     "ledger_schema": {
       "result": null,
       "error": "qualified supplement figure inventory differs",
       "events": [
-        ["describe", "driver_lean0_curve1_rotation2_combined2"],
-        ["describe", "driver_lean5_curve1_rotation2_combined2"],
-        ["describe", "driver_lean10_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["score", "driver_lean0_curve1_rotation2_combined2"],
-        ["score", "driver_lean5_curve1_rotation2_combined2"],
-        ["score", "driver_lean10_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["select_representative_interaction_pairs", null],
-        ["select_bounds_control_pairs", null],
-        ["verified_original_figure_links", "original_primary"],
-        ["verified_original_figure_links", "original_control"],
-        ["verified_original_figure_inventory", "original_primary"],
-        ["verified_original_figure_inventory", "original_control"]
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ]
       ]
     },
     "inventory_count": {
       "result": null,
       "error": "additive supplement inventory is incomplete",
       "events": [
-        ["describe", "driver_lean0_curve1_rotation2_combined2"],
-        ["describe", "driver_lean5_curve1_rotation2_combined2"],
-        ["describe", "driver_lean10_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["describe", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["describe", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["score", "driver_lean0_curve1_rotation2_combined2"],
-        ["score", "driver_lean5_curve1_rotation2_combined2"],
-        ["score", "driver_lean10_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean0_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean5_curve1_rotation2_combined2"],
-        ["score", "pitching_wedge_lean10_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean0_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean5_curve1_rotation2_combined2"],
-        ["score", "seven_iron_lean10_curve1_rotation2_combined2"],
-        ["select_representative_interaction_pairs", null],
-        ["select_bounds_control_pairs", null],
-        ["verified_original_figure_links", "original_primary"],
-        ["verified_original_figure_links", "original_control"],
-        ["verified_original_figure_inventory", "original_primary"],
-        ["verified_original_figure_inventory", "original_control"],
-        ["supplement_figure_links", null]
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ],
+        [
+          "supplement_figure_links",
+          null
+        ]
       ]
     }
   }

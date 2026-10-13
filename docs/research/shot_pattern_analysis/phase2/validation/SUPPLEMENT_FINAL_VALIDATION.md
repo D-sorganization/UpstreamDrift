@@ -2,11 +2,11 @@
 
 All six simulation commands exited successfully. Full independent saved-data audits pass all26predeclared unique cells and780,000attempted shot rows. Four fixed-target wedge views are verified references to primary data, not additional executions. Source/runtime/native snapshot equality with accepted execution was checked after all audits and before reporting integration.
 
-| Protocol                         | Cells | Saved Rows | Supported Rows |
-| -------------------------------- | ----: | ---------: | -------------: |
-| PW Within-Lean Face Bounds       |    18 |    540,000 |        539,976 |
-| PW Fixed-Target Face Bounds      |     4 |    120,000 |        119,994 |
-| Driver Fixed-Target Speed Bounds |     4 |    120,000 |        119,742 |
+| Protocol | Cells | Saved Rows | Supported Rows |
+| --- | ---: | ---: | ---: |
+| PW Within-Lean Face Bounds | 18 | 540,000 | 539,976 |
+| PW Fixed-Target Face Bounds | 4 | 120,000 | 119,994 |
+| Driver Fixed-Target Speed Bounds | 4 | 120,000 | 119,742 |
 
 The288unsupported rows remain in the exports. Supported counts are per physical pattern population; common-three and common-six scoring populations are separately computed and can be smaller. No attempts were resampled. The independent auditor recomputes all saved input/summary/covariance/paired scoring checks; direct public-API checks cover792rows and bootstrap regeneration covers four selected cells. These checks do not establish empirical player accuracy.
 

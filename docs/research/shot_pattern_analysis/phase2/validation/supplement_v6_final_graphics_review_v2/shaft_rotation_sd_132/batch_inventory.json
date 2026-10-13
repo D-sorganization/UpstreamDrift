@@ -77,7 +77,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -111,7 +114,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -373,7 +378,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -407,7 +415,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -669,7 +679,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -703,7 +716,9 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -965,7 +980,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -999,7 +1017,9 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1261,7 +1281,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1295,7 +1318,9 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1472,7 +1497,7 @@
           },
           "Fade": {
             "estimate": 0.0002576437647948183,
-            "lower_95": -5.851044058398758e-5,
+            "lower_95": -5.851044058398758e-05,
             "upper_95": 0.0005957342139685971
           }
         },
@@ -1557,7 +1582,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1591,7 +1619,9 @@
             "Fade": 3
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1762,7 +1792,7 @@
         "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
         "course_scoring_effect_modification": {
           "Draw": {
-            "estimate": -7.620142490450128e-5,
+            "estimate": -7.620142490450128e-05,
             "lower_95": -0.0004085393181350708,
             "upper_95": 0.00022380717614250392
           },
@@ -1853,7 +1883,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1887,7 +1920,9 @@
             "Fade": 2
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2060,7 +2095,7 @@
           "Draw": {
             "estimate": -0.00028095487299774645,
             "lower_95": -0.0005382361732131035,
-            "upper_95": -5.866224921750916e-5
+            "upper_95": -5.866224921750916e-05
           },
           "Fade": {
             "estimate": 0.0003932488759459735,
@@ -2149,7 +2184,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2183,7 +2221,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2354,12 +2394,12 @@
         "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
         "course_scoring_effect_modification": {
           "Draw": {
-            "estimate": 4.48551066210545e-5,
+            "estimate": 4.48551066210545e-05,
             "lower_95": -0.00011736513964810177,
             "upper_95": 0.0001763413900787582
           },
           "Fade": {
-            "estimate": 2.8315983223011064e-5,
+            "estimate": 2.8315983223011064e-05,
             "lower_95": -0.00012065321123649867,
             "upper_95": 0.00021838603626905158
           }
@@ -2445,7 +2485,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2479,7 +2522,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2650,13 +2695,13 @@
         "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
         "course_scoring_effect_modification": {
           "Draw": {
-            "estimate": 6.561469739190488e-5,
-            "lower_95": -7.308933725235567e-5,
+            "estimate": 6.561469739190488e-05,
+            "lower_95": -7.308933725235567e-05,
             "upper_95": 0.00020678831799196602
           },
           "Fade": {
             "estimate": 0.00014249513432567772,
-            "lower_95": -4.7819881107646565e-5,
+            "lower_95": -4.7819881107646565e-05,
             "upper_95": 0.00036057426004353245
           }
         },
@@ -2741,7 +2786,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2775,7 +2823,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2948,11 +2998,11 @@
           "Draw": {
             "estimate": -0.00012035514798288607,
             "lower_95": -0.0003099274884680627,
-            "upper_95": 5.426099718207016e-5
+            "upper_95": 5.426099718207016e-05
           },
           "Fade": {
             "estimate": 0.00018019923474640054,
-            "lower_95": 4.861341809556674e-5,
+            "lower_95": 4.861341809556674e-05,
             "upper_95": 0.00035976403403375145
           }
         },
@@ -3037,7 +3087,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -3071,7 +3124,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -3244,7 +3299,7 @@
           "Draw": {
             "estimate": -0.00026145696924747246,
             "lower_95": -0.0004416919965098248,
-            "upper_95": -9.941423866867648e-5
+            "upper_95": -9.941423866867648e-05
           },
           "Fade": {
             "estimate": 0.0004810454406174327,
@@ -3333,7 +3388,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -3367,7 +3425,9 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -3540,7 +3600,7 @@
           "Draw": {
             "estimate": -0.00024601288144446623,
             "lower_95": -0.0004714853900419142,
-            "upper_95": -3.9243802342323016e-5
+            "upper_95": -3.9243802342323016e-05
           },
           "Fade": {
             "estimate": 0.0003799912142809973,

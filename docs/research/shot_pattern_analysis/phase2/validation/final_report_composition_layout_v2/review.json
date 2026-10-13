@@ -22,7 +22,15 @@
   },
   "pages": 7,
   "visual_review": {
-    "all_pages_inspected": [1, 2, 3, 4, 5, 6, 7],
+    "all_pages_inspected": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
     "findings": [
       "Full condition and ordered A/B protocol/cell identities appear outside compact numerical tables.",
       "Every selected interval remains at shared formatter precision; numeric tokens are intact and readable.",

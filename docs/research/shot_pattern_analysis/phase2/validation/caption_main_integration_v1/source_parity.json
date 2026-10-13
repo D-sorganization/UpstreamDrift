@@ -17,6 +17,14 @@
     "matched_pair_social.py": "16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369"
   },
   "original_builder_sha256": "a3b6aa26c2fa5d6ad98a39e697f5d0a5ab75de9e3c4d537b5265f07996ccbfe3",
-  "integrated_commits": ["aa76fa2eb3", "9a1aabce5c", "3f34a6b247"],
-  "candidate_commits": ["c9c0fb194f", "b9f1ad05b4", "14f27706e4"]
+  "integrated_commits": [
+    "aa76fa2eb3",
+    "9a1aabce5c",
+    "3f34a6b247"
+  ],
+  "candidate_commits": [
+    "c9c0fb194f",
+    "b9f1ad05b4",
+    "14f27706e4"
+  ]
 }

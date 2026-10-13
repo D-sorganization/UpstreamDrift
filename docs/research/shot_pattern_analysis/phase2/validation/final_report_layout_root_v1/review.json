@@ -3,7 +3,10 @@
   "issue": 12129,
   "astra_review_sha256": "2040f1b4fb67a9d7a933242985b5c8f839c1233c405613466b6160ddbafd2ea8",
   "all_reviewed_artifact_hashes_verified": true,
-  "root_visually_inspected_pages": [3, 7],
+  "root_visually_inspected_pages": [
+    3,
+    7
+  ],
   "source_sha256": {
     "scripts/research/shot_pattern_analysis/build_final_report.py": "1cd9aa0a3019c2e525f2acc7b420c8b6c62e862dd76ef5be6beb4eb98a44540e",
     "scripts/research/shot_pattern_analysis/report_tables.py": "9d7d41f2a97e50a075a06c5d7780f9dffa4474669201bbf47da7674b1c8c0902",

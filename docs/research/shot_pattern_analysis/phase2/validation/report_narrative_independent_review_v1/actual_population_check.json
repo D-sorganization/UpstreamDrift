@@ -6,7 +6,10 @@
       "curve_scale": 2,
       "shaft_sd_deg": 2,
       "profile": "combined2",
-      "ordered_leans": [0, 5],
+      "ordered_leans": [
+        0,
+        5
+      ],
       "same_physical_target_m": 178.94875782337786,
       "common_six_n": 9940,
       "total_per_population": 10000,
@@ -48,7 +51,10 @@
       "curve_scale": 2,
       "shaft_sd_deg": 2,
       "profile": "combined2",
-      "ordered_leans": [0, 5],
+      "ordered_leans": [
+        0,
+        5
+      ],
       "same_physical_target_m": 77.40247724866299,
       "common_six_n": 9999,
       "total_per_population": 10000,

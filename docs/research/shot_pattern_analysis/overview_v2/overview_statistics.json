@@ -544,9 +544,9 @@
       "p95_radial_target_error_m": 7.717175408906194,
       "equal_range_lateral_sd_m": 3.9333962828647704,
       "mean_strokes_gained": 0.3395168987377209,
-      "paired_delta_sg_vs_straight": -2.8196259608201146e-5,
-      "paired_delta_sg_lower_95": -3.747206271902673e-5,
-      "paired_delta_sg_upper_95": -1.9026291251914903e-5
+      "paired_delta_sg_vs_straight": -2.8196259608201146e-05,
+      "paired_delta_sg_lower_95": -3.747206271902673e-05,
+      "paired_delta_sg_upper_95": -1.9026291251914903e-05
     },
     {
       "scenario": "pitching_wedge_fixed_loft_sd2_scale1",
@@ -565,9 +565,9 @@
       "p95_radial_target_error_m": 7.729850259899252,
       "equal_range_lateral_sd_m": 3.9331925809739685,
       "mean_strokes_gained": 0.3395249147294668,
-      "paired_delta_sg_vs_straight": -2.0180267862344657e-5,
-      "paired_delta_sg_lower_95": -2.952484538669945e-5,
-      "paired_delta_sg_upper_95": -1.1030642400940024e-5
+      "paired_delta_sg_vs_straight": -2.0180267862344657e-05,
+      "paired_delta_sg_lower_95": -2.952484538669945e-05,
+      "paired_delta_sg_upper_95": -1.1030642400940024e-05
     },
     {
       "scenario": "driver_shaft_rotation_sd2_scale1",

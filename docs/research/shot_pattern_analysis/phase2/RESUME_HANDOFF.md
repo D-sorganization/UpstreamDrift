@@ -40,12 +40,12 @@ tectonic --keep-logs --keep-intermediates \
 
 All checkouts are under `/home/dieterolson/.codex/worktrees/`:
 
-| Role                             | Checkout                                      | Branch / Checkpoint                                                                              |
-| -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Study, Data, and Review Receipts | `shot-pattern-analysis/UpstreamDrift`         | `codex/shot-pattern-matched-delivery`; after `242c9c7074`, Sol owns final evidence consolidation |
-| Delivery Integration             | `shot-pattern-main-integration/UpstreamDrift` | `codex/shot-pattern-main-integration`; `4efe168c3a` plus current delivery documentation          |
-| Frozen Producer                  | `shot-pattern-presentation/UpstreamDrift`     | `codex/shot-pattern-density-gutter`; `4023111d2aaf8b20449a36f8691a295f4a94ceff`                  |
-| Selective Layout Repair          | `shot-pattern-layout-gutter/UpstreamDrift`    | `codex/shot-pattern-layout-gutter`; `f7b3ade771`, source repair `5a1fdbfe51`                     |
+| Role | Checkout | Branch / Checkpoint |
+| --- | --- | --- |
+| Study, Data, and Review Receipts | `shot-pattern-analysis/UpstreamDrift` | `codex/shot-pattern-matched-delivery`; after `242c9c7074`, Sol owns final evidence consolidation |
+| Delivery Integration | `shot-pattern-main-integration/UpstreamDrift` | `codex/shot-pattern-main-integration`; `4efe168c3a` plus current delivery documentation |
+| Frozen Producer | `shot-pattern-presentation/UpstreamDrift` | `codex/shot-pattern-density-gutter`; `4023111d2aaf8b20449a36f8691a295f4a94ceff` |
+| Selective Layout Repair | `shot-pattern-layout-gutter/UpstreamDrift` | `codex/shot-pattern-layout-gutter`; `f7b3ade771`, source repair `5a1fdbfe51` |
 
 Luna owns native-format receipts, archive restoration, and delivery preparation.
 Root owns current handoff documentation and final coordination. Astra's scientific
@@ -76,7 +76,8 @@ Original native checks live in `validation/supplement_v6_vector_review_v2/`.
 All 2,024 PDFs and 2,024 SVGs rendered. The 1,122 PDF bounding-box warnings were
 checked using 10,842 painted-ink edge probes: minimum visible clearance 6.4952 pt,
 no ink in the outer 2 pt bands, and no render failures. The renderer completed
-all rows but exited 1 while serializing its summary; a separate finalizer exited 0. `bbox_painted_ink_boundary_review.json` preserves this distinction and hashes.
+all rows but exited 1 while serializing its summary; a separate finalizer exited
+0. `bbox_painted_ink_boundary_review.json` preserves this distinction and hashes.
 Do not infer acceptance from a successful render alone.
 
 ## Artifact Delivery

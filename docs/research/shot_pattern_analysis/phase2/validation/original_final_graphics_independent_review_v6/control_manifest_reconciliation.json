@@ -28,6 +28,8 @@
   "primary_independently_revalidated_against_accepted_receipt": true,
   "primary_outputs_verified": 689,
   "manifest_sha256": "47ea6e292883ea5958651e6786d5b73f2f463ebd004488d75c77f385036f34fd",
-  "source_changes": ["build_final_figures.py"],
+  "source_changes": [
+    "build_final_figures.py"
+  ],
   "terminal_receipt_sha256": "b0ee88faff927e1b7779356fbd81fbf569f1e50153039fb1e3cfb1e47867622c"
 }

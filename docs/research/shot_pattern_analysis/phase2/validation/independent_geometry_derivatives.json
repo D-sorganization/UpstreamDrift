@@ -1,7 +1,7 @@
 {
   "scope": "Local deterministic derivatives at zero twist; fixed nominal speed/path; no empirical uncertainty interpretation",
   "angle_units": "Public angle ratios deg/deg; carry derivatives m/degree of shaft twist",
-  "geometry_tolerance": 1e-8,
+  "geometry_tolerance": 1e-08,
   "geometry_max_error": 4.727921387726042e-10,
   "geometry_pass": true,
   "execution": {
@@ -110,7 +110,7 @@
           "loft_per_twist": -0.5224985647078739
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8526401643393909,
           "loft_per_twist": -0.5224985646812286
         }
@@ -130,7 +130,7 @@
           "loft_per_twist": -0.5224985647167557
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8526401643540946,
           "loft_per_twist": -0.5224985646812286
         }
@@ -150,7 +150,7 @@
           "loft_per_twist": -0.5224985647078739
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8526401643393909,
           "loft_per_twist": -0.5224985645924107
         }
@@ -170,7 +170,7 @@
           "loft_per_twist": -0.5224985647256375
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8428941109306364,
           "loft_per_twist": -0.5224985647700464
         }
@@ -190,7 +190,7 @@
           "loft_per_twist": -0.5224985647256375
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8428941109543869,
           "loft_per_twist": -0.5224985647700464
         }
@@ -210,7 +210,7 @@
           "loft_per_twist": -0.5224985647256375
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8428941109306364,
           "loft_per_twist": -0.5224985647700464
         }
@@ -230,7 +230,7 @@
           "loft_per_twist": -0.522498564714511
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8396866444160266,
           "loft_per_twist": -0.5224985646930135
         }
@@ -250,7 +250,7 @@
           "loft_per_twist": -0.522498564714511
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8396866443855154,
           "loft_per_twist": -0.5224985646930135
         }
@@ -270,7 +270,7 @@
           "loft_per_twist": -0.522498564714511
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8396866443716177,
           "loft_per_twist": -0.5224985646930135
         }
@@ -290,7 +290,7 @@
           "loft_per_twist": -0.45399049977135064
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8910065241618524,
           "loft_per_twist": -0.45399049994898627
         }
@@ -310,7 +310,7 @@
           "loft_per_twist": -0.4539904997358235
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.891006524188371,
           "loft_per_twist": -0.4539904995937149
         }
@@ -330,7 +330,7 @@
           "loft_per_twist": -0.4539904997358235
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8910065241840569,
           "loft_per_twist": -0.45399049994898627
         }
@@ -350,7 +350,7 @@
           "loft_per_twist": -0.45399049977135064
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8445703657766755,
           "loft_per_twist": -0.4539904995937149
         }
@@ -370,7 +370,7 @@
           "loft_per_twist": -0.4539904997535871
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8445703657419442,
           "loft_per_twist": -0.45399049994898627
         }
@@ -390,7 +390,7 @@
           "loft_per_twist": -0.4539904997358235
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8445703657544711,
           "loft_per_twist": -0.45399049994898627
         }
@@ -410,7 +410,7 @@
           "loft_per_twist": -0.45399049977135064
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8085836120663713,
           "loft_per_twist": -0.4539904997713506
         }
@@ -430,7 +430,7 @@
           "loft_per_twist": -0.4539904997535871
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8085836120842695,
           "loft_per_twist": -0.4539904995937149
         }
@@ -450,7 +450,7 @@
           "loft_per_twist": -0.4539904997358235
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8085836120663713,
           "loft_per_twist": -0.4539904995937149
         }
@@ -470,7 +470,7 @@
           "loft_per_twist": -0.438371146742611
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8987940463223153,
           "loft_per_twist": -0.4383711463162853
         }
@@ -490,7 +490,7 @@
           "loft_per_twist": -0.438371146742611
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8987940462991717,
           "loft_per_twist": -0.4383711466715567
         }
@@ -510,7 +510,7 @@
           "loft_per_twist": -0.43837114677813815
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8987940463223153,
           "loft_per_twist": -0.4383711466715567
         }
@@ -530,7 +530,7 @@
           "loft_per_twist": -0.4383711468136653
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8272782324958426,
           "loft_per_twist": -0.43837114702682806
         }
@@ -550,7 +550,7 @@
           "loft_per_twist": -0.43837114677813815
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8272782325038671,
           "loft_per_twist": -0.4383711463162853
         }
@@ -570,7 +570,7 @@
           "loft_per_twist": -0.4383711468136653
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.8272782325180471,
           "loft_per_twist": -0.43837114702682806
         }
@@ -590,7 +590,7 @@
           "loft_per_twist": -0.43837114677813815
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.7717449842736811,
           "loft_per_twist": -0.4383711466715567
         }
@@ -610,7 +610,7 @@
           "loft_per_twist": -0.43837114677813815
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.7717449842482126,
           "loft_per_twist": -0.4383711466715567
         }
@@ -630,7 +630,7 @@
           "loft_per_twist": -0.43837114677813815
         },
         {
-          "epsilon_deg": 1e-5,
+          "epsilon_deg": 1e-05,
           "face_per_twist": -0.7717449842736811,
           "loft_per_twist": -0.43837114702682806
         }

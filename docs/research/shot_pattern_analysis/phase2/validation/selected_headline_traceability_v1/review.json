@@ -72,7 +72,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -0.9,
           "clubhead_mass_kg": 0.2,
-          "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
+          "inertia_diagonal_kg_m2": [
+            0.00025,
+            0.0004,
+            0.00045
+          ],
           "cg_depth_m": 0.035,
           "face_half_width_m": 0.05,
           "face_half_height_m": 0.027,
@@ -88,7 +92,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/drivers/gt2"
         },
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -185,7 +197,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -0.9,
           "clubhead_mass_kg": 0.2,
-          "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
+          "inertia_diagonal_kg_m2": [
+            0.00025,
+            0.0004,
+            0.00045
+          ],
           "cg_depth_m": 0.035,
           "face_half_width_m": 0.05,
           "face_half_height_m": 0.027,
@@ -202,7 +218,13 @@
         },
         "noise": {
           "standard_deviations": [
-            1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -300,7 +322,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -0.9,
           "clubhead_mass_kg": 0.2,
-          "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
+          "inertia_diagonal_kg_m2": [
+            0.00025,
+            0.0004,
+            0.00045
+          ],
           "cg_depth_m": 0.035,
           "face_half_width_m": 0.05,
           "face_half_height_m": 0.027,
@@ -316,7 +342,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/drivers/gt2"
         },
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -413,7 +447,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -0.9,
           "clubhead_mass_kg": 0.2,
-          "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
+          "inertia_diagonal_kg_m2": [
+            0.00025,
+            0.0004,
+            0.00045
+          ],
           "cg_depth_m": 0.035,
           "face_half_width_m": 0.05,
           "face_half_height_m": 0.027,
@@ -430,7 +468,13 @@
         },
         "noise": {
           "standard_deviations": [
-            2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -528,7 +572,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -0.9,
           "clubhead_mass_kg": 0.2,
-          "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
+          "inertia_diagonal_kg_m2": [
+            0.00025,
+            0.0004,
+            0.00045
+          ],
           "cg_depth_m": 0.035,
           "face_half_width_m": 0.05,
           "face_half_height_m": 0.027,
@@ -544,7 +592,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/drivers/gt2"
         },
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -641,7 +697,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -0.9,
           "clubhead_mass_kg": 0.2,
-          "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
+          "inertia_diagonal_kg_m2": [
+            0.00025,
+            0.0004,
+            0.00045
+          ],
           "cg_depth_m": 0.035,
           "face_half_width_m": 0.05,
           "face_half_height_m": 0.027,
@@ -658,7 +718,13 @@
         },
         "noise": {
           "standard_deviations": [
-            1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -756,7 +822,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -0.9,
           "clubhead_mass_kg": 0.2,
-          "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
+          "inertia_diagonal_kg_m2": [
+            0.00025,
+            0.0004,
+            0.00045
+          ],
           "cg_depth_m": 0.035,
           "face_half_width_m": 0.05,
           "face_half_height_m": 0.027,
@@ -772,7 +842,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/drivers/gt2"
         },
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -869,7 +947,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -0.9,
           "clubhead_mass_kg": 0.2,
-          "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
+          "inertia_diagonal_kg_m2": [
+            0.00025,
+            0.0004,
+            0.00045
+          ],
           "cg_depth_m": 0.035,
           "face_half_width_m": 0.05,
           "face_half_height_m": 0.027,
@@ -886,7 +968,13 @@
         },
         "noise": {
           "standard_deviations": [
-            2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -984,7 +1072,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -4.0,
           "clubhead_mass_kg": 0.272,
-          "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
+          "inertia_diagonal_kg_m2": [
+            0.00012,
+            0.0002,
+            0.00025
+          ],
           "cg_depth_m": 0.01,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.023,
@@ -1000,7 +1092,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
         },
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -1097,7 +1197,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -4.0,
           "clubhead_mass_kg": 0.272,
-          "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
+          "inertia_diagonal_kg_m2": [
+            0.00012,
+            0.0002,
+            0.00025
+          ],
           "cg_depth_m": 0.01,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.023,
@@ -1114,7 +1218,13 @@
         },
         "noise": {
           "standard_deviations": [
-            1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -1212,7 +1322,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -4.0,
           "clubhead_mass_kg": 0.272,
-          "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
+          "inertia_diagonal_kg_m2": [
+            0.00012,
+            0.0002,
+            0.00025
+          ],
           "cg_depth_m": 0.01,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.023,
@@ -1228,7 +1342,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
         },
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -1325,7 +1447,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -4.0,
           "clubhead_mass_kg": 0.272,
-          "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
+          "inertia_diagonal_kg_m2": [
+            0.00012,
+            0.0002,
+            0.00025
+          ],
           "cg_depth_m": 0.01,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.023,
@@ -1342,7 +1468,13 @@
         },
         "noise": {
           "standard_deviations": [
-            2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -1440,7 +1572,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -4.0,
           "clubhead_mass_kg": 0.272,
-          "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
+          "inertia_diagonal_kg_m2": [
+            0.00012,
+            0.0002,
+            0.00025
+          ],
           "cg_depth_m": 0.01,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.023,
@@ -1456,7 +1592,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
         },
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -1553,7 +1697,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -4.0,
           "clubhead_mass_kg": 0.272,
-          "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
+          "inertia_diagonal_kg_m2": [
+            0.00012,
+            0.0002,
+            0.00025
+          ],
           "cg_depth_m": 0.01,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.023,
@@ -1570,7 +1718,13 @@
         },
         "noise": {
           "standard_deviations": [
-            1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -1668,7 +1822,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -4.0,
           "clubhead_mass_kg": 0.272,
-          "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
+          "inertia_diagonal_kg_m2": [
+            0.00012,
+            0.0002,
+            0.00025
+          ],
           "cg_depth_m": 0.01,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.023,
@@ -1684,7 +1842,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
         },
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -1781,7 +1947,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -4.0,
           "clubhead_mass_kg": 0.272,
-          "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
+          "inertia_diagonal_kg_m2": [
+            0.00012,
+            0.0002,
+            0.00025
+          ],
           "cg_depth_m": 0.01,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.023,
@@ -1798,7 +1968,13 @@
         },
         "noise": {
           "standard_deviations": [
-            2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -1896,7 +2072,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -5.0,
           "clubhead_mass_kg": 0.3,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "cg_depth_m": 0.008,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.025,
@@ -1912,7 +2092,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
         },
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -2009,7 +2197,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -5.0,
           "clubhead_mass_kg": 0.3,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "cg_depth_m": 0.008,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.025,
@@ -2026,7 +2218,13 @@
         },
         "noise": {
           "standard_deviations": [
-            1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -2124,7 +2322,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -5.0,
           "clubhead_mass_kg": 0.3,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "cg_depth_m": 0.008,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.025,
@@ -2140,7 +2342,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
         },
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -2237,7 +2447,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -5.0,
           "clubhead_mass_kg": 0.3,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "cg_depth_m": 0.008,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.025,
@@ -2254,7 +2468,13 @@
         },
         "noise": {
           "standard_deviations": [
-            2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -2352,7 +2572,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -5.0,
           "clubhead_mass_kg": 0.3,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "cg_depth_m": 0.008,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.025,
@@ -2368,7 +2592,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
         },
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -2377,8 +2609,14 @@
         "target_x_m": null,
         "match_tolerance_m": 0.05,
         "target_radius_m": 15.0,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25]
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
       },
       "nominals": {
         "Straight": {
@@ -2467,7 +2705,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -5.0,
           "clubhead_mass_kg": 0.3,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "cg_depth_m": 0.008,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.025,
@@ -2484,7 +2726,13 @@
         },
         "noise": {
           "standard_deviations": [
-            1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -2494,8 +2742,14 @@
         "target_x_m": null,
         "match_tolerance_m": 0.05,
         "target_radius_m": 15.0,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25]
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
       },
       "nominals": {
         "Straight": {
@@ -2584,7 +2838,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -5.0,
           "clubhead_mass_kg": 0.3,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "cg_depth_m": 0.008,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.025,
@@ -2600,7 +2858,15 @@
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
         },
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
           "correlation": null
         },
         "n_shots": 10000,
@@ -2609,8 +2875,14 @@
         "target_x_m": null,
         "match_tolerance_m": 0.05,
         "target_radius_m": 15.0,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25]
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
       },
       "nominals": {
         "Straight": {
@@ -2699,7 +2971,11 @@
           "shaft_lean_deg": 0.0,
           "attack_angle_deg": -5.0,
           "clubhead_mass_kg": 0.3,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "cg_depth_m": 0.008,
           "face_half_width_m": 0.035,
           "face_half_height_m": 0.025,
@@ -2716,7 +2992,13 @@
         },
         "noise": {
           "standard_deviations": [
-            2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
           ],
           "correlation": null
         },
@@ -2726,8 +3008,14 @@
         "target_x_m": null,
         "match_tolerance_m": 0.05,
         "target_radius_m": 15.0,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25]
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
       },
       "nominals": {
         "Straight": {
@@ -2862,8 +3150,8 @@
       "mean_sg_strokes": -0.39566243087251535,
       "scoring_paired_n": 10000,
       "paired_sg_vs_straight": {
-        "estimate": 7.461555935228152e-5,
-        "lower_95": -7.104046933162085e-5,
+        "estimate": 7.461555935228152e-05,
+        "lower_95": -7.104046933162085e-05,
         "upper_95": 0.00021896077539046698
       }
     },
@@ -2896,8 +3184,8 @@
       "mean_sg_strokes": -0.395668786899609,
       "scoring_paired_n": 10000,
       "paired_sg_vs_straight": {
-        "estimate": 6.825953225868763e-5,
-        "lower_95": -5.2277181705243884e-5,
+        "estimate": 6.825953225868763e-05,
+        "lower_95": -5.2277181705243884e-05,
         "upper_95": 0.00017049843183190757
       }
     },
@@ -2960,7 +3248,7 @@
       "mean_sg_strokes": -0.4125675679611443,
       "scoring_paired_n": 10000,
       "paired_sg_vs_straight": {
-        "estimate": 2.6911773453713884e-5,
+        "estimate": 2.6911773453713884e-05,
         "lower_95": -0.00016417507301096237,
         "upper_95": 0.00022037368523597208
       }
@@ -2994,7 +3282,7 @@
       "mean_sg_strokes": -0.4125523042814373,
       "scoring_paired_n": 10000,
       "paired_sg_vs_straight": {
-        "estimate": 4.2175453160651455e-5,
+        "estimate": 4.2175453160651455e-05,
         "lower_95": -0.00017391896152132183,
         "upper_95": 0.0002645740815497581
       }
@@ -3289,7 +3577,7 @@
       "scoring_paired_n": 10000,
       "paired_sg_vs_straight": {
         "estimate": 0.00023438701772961358,
-        "lower_95": 5.011171232938114e-5,
+        "lower_95": 5.011171232938114e-05,
         "upper_95": 0.0004289664606828679
       }
     },
@@ -3386,7 +3674,7 @@
       "mean_sg_strokes": -0.4124998637094484,
       "scoring_paired_n": 10000,
       "paired_sg_vs_straight": {
-        "estimate": 9.461602514953083e-5,
+        "estimate": 9.461602514953083e-05,
         "lower_95": -0.00022182231653632132,
         "upper_95": 0.000441863460349558
       }
@@ -4528,8 +4816,8 @@
       "mean_sg_strokes": 0.19128165780344816,
       "scoring_paired_n": 9999,
       "paired_sg_vs_straight": {
-        "estimate": 9.508286074337285e-5,
-        "lower_95": -6.220824133306044e-5,
+        "estimate": 9.508286074337285e-05,
+        "lower_95": -6.220824133306044e-05,
         "upper_95": 0.0002799945735120517
       }
     },
@@ -4562,8 +4850,8 @@
       "mean_sg_strokes": 0.19128047406514484,
       "scoring_paired_n": 9999,
       "paired_sg_vs_straight": {
-        "estimate": 9.389912244001297e-5,
-        "lower_95": -3.145027987597752e-5,
+        "estimate": 9.389912244001297e-05,
+        "lower_95": -3.145027987597752e-05,
         "upper_95": 0.0002411445166358826
       }
     },
@@ -4921,7 +5209,7 @@
       "scoring_paired_n": 9999,
       "paired_sg_vs_straight": {
         "estimate": 0.0002513049548654383,
-        "lower_95": -3.604852436822569e-5,
+        "lower_95": -3.604852436822569e-05,
         "upper_95": 0.0005325912067969175
       }
     },
@@ -4955,7 +5243,7 @@
       "scoring_paired_n": 9999,
       "paired_sg_vs_straight": {
         "estimate": 0.0002919227777893537,
-        "lower_95": 3.6197689663183434e-5,
+        "lower_95": 3.6197689663183434e-05,
         "upper_95": 0.0005921619032916435
       }
     },

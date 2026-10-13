@@ -7,7 +7,10 @@
   "dependency_sha256": {
     "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f"
   },
-  "changed_top_level_functions": ["_report_source_hashes", "_estimate_ci"],
+  "changed_top_level_functions": [
+    "_report_source_hashes",
+    "_estimate_ci"
+  ],
   "all_other_pipeline_function_ASTs_unchanged": true,
   "checks": {
     "red_tests": 2,

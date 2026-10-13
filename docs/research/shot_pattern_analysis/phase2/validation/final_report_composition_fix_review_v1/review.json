@@ -22,16 +22,34 @@
   },
   "actual_protocol_bounds": {
     "pw-primary-face-bounds/1": {
-      "face_bounds_deg": [-6.0, 6.0],
-      "speed_factors": [0.75, 1.25]
+      "face_bounds_deg": [
+        -6.0,
+        6.0
+      ],
+      "speed_factors": [
+        0.75,
+        1.25
+      ]
     },
     "pw-control-face-bounds/1": {
-      "face_bounds_deg": [-6.0, 6.0],
-      "speed_factors": [0.75, 1.25]
+      "face_bounds_deg": [
+        -6.0,
+        6.0
+      ],
+      "speed_factors": [
+        0.75,
+        1.25
+      ]
     },
     "driver-control-speed-bounds/1": {
-      "face_bounds_deg": [-6.0, 6.0],
-      "speed_factors": [0.75, 1.3]
+      "face_bounds_deg": [
+        -6.0,
+        6.0
+      ],
+      "speed_factors": [
+        0.75,
+        1.3
+      ]
     }
   },
   "tests": {

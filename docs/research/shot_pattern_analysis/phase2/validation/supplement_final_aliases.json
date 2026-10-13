@@ -20,7 +20,11 @@
           "face_half_height_m": 0.025,
           "face_half_width_m": 0.035,
           "friction_coefficient": 0.4,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "lie_deg": 64.0,
           "loft_deg": 46.0,
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100",
@@ -30,13 +34,27 @@
           "steps_per_compression": 128
         },
         "curve_scale": 2.0,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25],
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ],
         "match_tolerance_m": 0.05,
         "n_shots": 10000,
         "noise": {
           "correlation": null,
-          "standard_deviations": [1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "seed": 20261009,
         "target_radius_m": 15.0,
@@ -67,7 +85,11 @@
           "face_half_height_m": 0.025,
           "face_half_width_m": 0.035,
           "friction_coefficient": 0.4,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "lie_deg": 64.0,
           "loft_deg": 46.0,
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100",
@@ -77,13 +99,27 @@
           "steps_per_compression": 128
         },
         "curve_scale": 2.0,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25],
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ],
         "match_tolerance_m": 0.05,
         "n_shots": 10000,
         "noise": {
           "correlation": null,
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "seed": 20261009,
         "target_radius_m": 15.0,
@@ -114,7 +150,11 @@
           "face_half_height_m": 0.025,
           "face_half_width_m": 0.035,
           "friction_coefficient": 0.4,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "lie_deg": 64.0,
           "loft_deg": 46.0,
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100",
@@ -124,13 +164,27 @@
           "steps_per_compression": 128
         },
         "curve_scale": 2.0,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25],
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ],
         "match_tolerance_m": 0.05,
         "n_shots": 10000,
         "noise": {
           "correlation": null,
-          "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "seed": 20261009,
         "target_radius_m": 15.0,
@@ -161,7 +215,11 @@
           "face_half_height_m": 0.025,
           "face_half_width_m": 0.035,
           "friction_coefficient": 0.4,
-          "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
           "lie_deg": 64.0,
           "loft_deg": 46.0,
           "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100",
@@ -171,13 +229,27 @@
           "steps_per_compression": 128
         },
         "curve_scale": 2.0,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25],
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ],
         "match_tolerance_m": 0.05,
         "n_shots": 10000,
         "noise": {
           "correlation": null,
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "seed": 20261009,
         "target_radius_m": 15.0,

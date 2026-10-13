@@ -10,7 +10,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/00_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "23691324ad8512b5f727f788b7d17d13fbe406f6cdfd9524134580fa4acf079f",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 0,
       "reviewer": "root_curve"
     },
@@ -23,7 +25,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/01_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "dfd57b77e124a943f8637d4bf0105ec61d506897b51e719f79780a9313a0537c",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 1,
       "reviewer": "root_curve"
     },
@@ -36,7 +40,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/02_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "ef54040ef7de8471dcc37945322777dd251b1ffffd50368949dec15fad1142f0",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 2,
       "reviewer": "root_curve"
     },
@@ -49,7 +55,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/03_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "694043b22af9ed0e7ed777735bb379200c37d21acb95fbce15bdbff33e494e91",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 3,
       "reviewer": "root_curve"
     },
@@ -62,7 +70,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/04_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "9583ef310c17ae42bf8cec74e6ca7e3ffb2123d51c7b5567130bbbd9eb7657dc",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 4,
       "reviewer": "root_curve"
     },
@@ -75,7 +85,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/05_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "d84e60cc0fa74964c90354628cd89e90918270ddc89e9b55a2d163ed5056e5e5",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 5,
       "reviewer": "root_curve"
     },
@@ -88,7 +100,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/06_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "a7856e790b84609ba7229f70706439c22ddd32b624458dd4a24ad4a31462b561",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 6,
       "reviewer": "root_curve"
     },
@@ -101,7 +115,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/07_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "fa859e4d8cd1f87ac0e9ee3b6a48305006f0a6ac72c04f866248e83e2818c1c7",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 7,
       "reviewer": "root_curve"
     },
@@ -114,7 +130,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/08_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "5400b093fb58163b032409c7f9cb1fc0bb1ba6bf74adad0ff845f66804b76e04",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 8,
       "reviewer": "root_curve"
     },
@@ -127,7 +145,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/09_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "e9e752c96ae29006a7c7860b4c29b731accce8dbf1101ddc04c714d7176b7ea1",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 9,
       "reviewer": "root_curve"
     },
@@ -140,7 +160,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/10_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "3e9766b32a10a453cb73f5edcd1f5b269353f5b4901f1a2a47d7baf8613d0e93",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 10,
       "reviewer": "root_curve"
     },
@@ -153,7 +175,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/11_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "dc80df3170d767cae43cd969cf590babbf922d6f2d095e71105b2a641d837137",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 11,
       "reviewer": "root_curve"
     },
@@ -166,7 +190,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/12_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "6f4e86e303702b8fd0272c45d220eb0f69e312dea249f1e6a09f6dd5ac348dcd",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 12,
       "reviewer": "root_curve"
     },
@@ -179,7 +205,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/13_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "07ce648153bbf0e85ad1a175cd7b11db0a0282d7f8a467f1efe5ba53838cdb98",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 13,
       "reviewer": "root_curve"
     },
@@ -192,7 +220,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/14_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "f201baddd5964e548507db6fc098719ad73d2b0640ab9cbce1fa30142f91f00c",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 14,
       "reviewer": "root_curve"
     },
@@ -205,7 +235,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/15_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "ce5af8845b6ae05eb98b19d838ae7c54cc114535e26f5600c8a57d9d2a436a13",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 15,
       "reviewer": "root_curve"
     },
@@ -218,7 +250,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/16_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "c5f46fde3a41a164519f76c23db0f268866a9407eeac175d5bd31f47d8ea951c",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 16,
       "reviewer": "root_curve"
     },
@@ -231,7 +265,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/17_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "54924538d064c11ecd36375ceafcf635b4afab4023bb987b5f308d7dde7caca4",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 17,
       "reviewer": "root_curve"
     },
@@ -244,7 +280,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/18_root_curve.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "2371dda5a5c4f5ddb46d460fbeb6c918776a5ceeac36a36287e983393fd82317",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 18,
       "reviewer": "root_curve"
     },
@@ -257,7 +295,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/19_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "bf2c182afc06d8e31cf8a7460c211a13c73b9ec4816424eedf6a3503c15c7e38",
-      "failed_gates": ["all_density_colorbar_diagnostic.json"],
+      "failed_gates": [
+        "all_density_colorbar_diagnostic.json"
+      ],
       "index": 19,
       "reviewer": "astra_shaft"
     },
@@ -270,7 +310,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/20_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "510c571e08e39ee6dc3589a8c5b20fefdedd01668841e08eff363f5e792ef114",
-      "failed_gates": ["all_density_colorbar_diagnostic.json"],
+      "failed_gates": [
+        "all_density_colorbar_diagnostic.json"
+      ],
       "index": 20,
       "reviewer": "astra_shaft"
     },
@@ -283,7 +325,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/21_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "90681d6bc90bc8faeb76d51eb4401a4ae7aee97153fb7379606b023dd8e864dc",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 21,
       "reviewer": "astra_shaft"
     },
@@ -296,7 +340,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/22_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "597022a93f619200298cbf58ec609b7e1a9c49a0de667b7b43b86c34afa5ef6c",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 22,
       "reviewer": "astra_shaft"
     },
@@ -309,7 +355,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/23_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "2958f5d4849e44415bc3def94491e4795adb234c1ac9af3e61b3afb0a08d236c",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 23,
       "reviewer": "astra_shaft"
     },
@@ -322,7 +370,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/24_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "908d6ee9097e1776b3f4fbb321073cce57c58703278925a7b1f86a1b3a37fffe",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 24,
       "reviewer": "astra_shaft"
     },
@@ -335,7 +385,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/25_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "4b3755df5ed4907345029122136a50856ea2a3f8b404047b35eaf32ad362ba6b",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 25,
       "reviewer": "astra_shaft"
     },
@@ -348,7 +400,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/26_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "e7f6bc7931791cb94b71b4037f656cc48e0e9a180546f274027bf59804e4b232",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 26,
       "reviewer": "astra_shaft"
     },
@@ -361,7 +415,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/27_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "8843147242027aaafb7018405a6475092072f381e621a7beeebe38855f0f9c5e",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 27,
       "reviewer": "astra_shaft"
     },
@@ -374,7 +430,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/28_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "627e2db8de4c7f85549b8f38df6d250652774aa117b48fde63cb8a3cfb964985",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 28,
       "reviewer": "astra_shaft"
     },
@@ -387,7 +445,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/29_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "ad362b70fe67fc5cc06bf9cd40bbbaf2c5f74b442ae6d831e1ca0de6ba4ab4d2",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 29,
       "reviewer": "astra_shaft"
     },
@@ -400,7 +460,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/30_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "3458cb09bdf51c74a905e81c42cdcc8f9409a44e0e214a4f2300c689c9fc9377",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 30,
       "reviewer": "astra_shaft"
     },
@@ -413,7 +475,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/31_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "295bd8fefa52769c203359c388759306994d7e0c57de873eb5b7a75ead650a35",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 31,
       "reviewer": "astra_shaft"
     },
@@ -426,7 +490,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/32_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "edc5c59db9a750fe87f3ac0f78a4b2eb93dc801bb01c7e36a0912d0bfe2ce2c4",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 32,
       "reviewer": "astra_shaft"
     },
@@ -439,7 +505,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/33_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "6342e152fd113f1ed8530adfd29adba27e921a33130cb821709c38e51e9ba3d0",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 33,
       "reviewer": "astra_shaft"
     },
@@ -452,7 +520,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/34_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "ddb5adef380dfa5cccd9d417b8302fbfb1051c78877e24b0496ebb393c1fde7d",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 34,
       "reviewer": "sol_shaft"
     },
@@ -465,7 +535,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/35_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "d1d71a9c0119d5c091f03f0b0144c3428e0e5dbead55b910fc18b12de230ff46",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 35,
       "reviewer": "sol_shaft"
     },
@@ -478,7 +550,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/36_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "58f2339b97f9031916bcc61421234307b463c745d2eae32cc4fadeef7f53fd89",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 36,
       "reviewer": "sol_shaft"
     },
@@ -491,7 +565,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/37_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "2076320071b4fb4371048df98c502f0bebbd68d481415d43f70aa6f8421ad1c8",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 37,
       "reviewer": "sol_shaft"
     },
@@ -504,7 +580,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/38_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "7d09275e82ec157f0af4465123c56d3a6797b0d005166adaafb56af537ab6d43",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 38,
       "reviewer": "sol_shaft"
     },
@@ -517,7 +595,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/39_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "97485ab6c84504d9715444bb5d7ddb47d3b0ee4e3beb03e8a04dd4c74265ae38",
-      "failed_gates": ["all_density_colorbar_diagnostic.json"],
+      "failed_gates": [
+        "all_density_colorbar_diagnostic.json"
+      ],
       "index": 39,
       "reviewer": "sol_shaft"
     },
@@ -530,7 +610,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/40_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "9aabe943493fc00b29a584310cd44a2786c04466cbb68315612da231d522f83c",
-      "failed_gates": ["all_density_colorbar_diagnostic.json"],
+      "failed_gates": [
+        "all_density_colorbar_diagnostic.json"
+      ],
       "index": 40,
       "reviewer": "sol_shaft"
     },
@@ -543,7 +625,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/41_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "91d48beb0256bb5692e6d28daac34d0aafc19e507304f33e2a599b1470944958",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 41,
       "reviewer": "sol_shaft"
     },
@@ -556,7 +640,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/42_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "50661ef0843adf3f4359bd060550ce2ad4644631bc2c8b4ab772408e105ec195",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 42,
       "reviewer": "sol_shaft"
     },
@@ -569,7 +655,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/43_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "eb0700bd092ef85fa28612e2323048e1d83d42cf0cd4aa9b1c2654327e7f5cde",
-      "failed_gates": ["all_density_colorbar_diagnostic.json"],
+      "failed_gates": [
+        "all_density_colorbar_diagnostic.json"
+      ],
       "index": 43,
       "reviewer": "sol_shaft"
     },
@@ -582,7 +670,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/44_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "869314ea9019cc982f14e0d464fc643286365ecc177dbb13819c5f955bb4e6f6",
-      "failed_gates": ["all_density_colorbar_diagnostic.json"],
+      "failed_gates": [
+        "all_density_colorbar_diagnostic.json"
+      ],
       "index": 44,
       "reviewer": "sol_shaft"
     },
@@ -595,7 +685,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/45_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "b0492bf44488e79995a3c6ead314dc3a5973db0ff183c7e861356e560931f01a",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 45,
       "reviewer": "sol_shaft"
     },
@@ -608,7 +700,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/46_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "6a54c3cc892b9b009805c7a3874a3f4f79de930076c53685eacee387c68bedec",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 46,
       "reviewer": "sol_shaft"
     },
@@ -621,7 +715,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/47_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "c5b44e87670fe482c56f6b791e09002fd9e48b99e9d33a39224b0c6256ffcb58",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 47,
       "reviewer": "sol_shaft"
     },
@@ -634,7 +730,9 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/48_sol_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "324bd24c21cc3b7e5468b03c866b9d1783d949055a25e7dfcd92fce91c07ac69",
-      "failed_gates": ["all_density_clearance_diagnostic.json"],
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
       "index": 48,
       "reviewer": "sol_shaft"
     }

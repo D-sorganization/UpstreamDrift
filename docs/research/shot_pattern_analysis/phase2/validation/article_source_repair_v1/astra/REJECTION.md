@@ -3,7 +3,6 @@
 The preserved candidate is not accepted. Its 72 pattern rows pass 576 source-derived numeric/display-rounding checks; that does not qualify its prose or provenance. The initial audit harness failed because saved summaries do not carry the cell key; the corrected harness takes that identity from the hash-bound traceability record. Both logs are preserved.
 
 Confirmed corrections required:
-
 - Driver scoring starts 400 m from the hole, not 380 m. Approach green radius is 15 m, not 10 m.
 - Original face search bounds are nominal reference face ±3°, not absolute ±2°. Supplemental PW uses absolute ±6°. Driver control also widens the upper speed factor from 1.25 to 1.30; these are protocol changes, not pure lean interventions.
 - Maximum selected nominal residual is 1.9997332019487617e−13 m; the stated upper bound 1.6e−13 m is false.

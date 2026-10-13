@@ -9,8 +9,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -19,8 +25,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_path",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -29,8 +41,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -39,8 +57,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -49,8 +73,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -59,8 +89,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation1_combined1",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -69,8 +105,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -79,8 +121,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -89,8 +137,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -99,8 +153,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -109,8 +169,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_path",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -119,8 +185,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -129,8 +201,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -139,8 +217,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_strike",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -149,8 +233,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation2_combined1",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -159,8 +249,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -169,8 +265,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -179,8 +281,14 @@
       "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative",
       "protocol": "pw_within_lean_face",
       "target_x_m": null,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -189,8 +297,14 @@
       "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
       "protocol": "pw_fixed_target_face",
       "target_x_m": 77.40247724866299,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -199,8 +313,14 @@
       "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
       "protocol": "pw_fixed_target_face",
       "target_x_m": 77.40247724866299,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -209,8 +329,14 @@
       "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
       "protocol": "pw_fixed_target_face",
       "target_x_m": 77.40247724866299,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -219,8 +345,14 @@
       "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
       "protocol": "pw_fixed_target_face",
       "target_x_m": 77.40247724866299,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [24, 40],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        24,
+        40
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -229,8 +361,14 @@
       "cell": "driver_lean5_curve2_rotation1_shaft_only",
       "protocol": "driver_fixed_target_speed",
       "target_x_m": 178.94875782337786,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [33.75, 58.5],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        33.75,
+        58.5
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -239,8 +377,14 @@
       "cell": "driver_lean5_curve2_rotation1_combined2",
       "protocol": "driver_fixed_target_speed",
       "target_x_m": 178.94875782337786,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [33.75, 58.5],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        33.75,
+        58.5
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -249,8 +393,14 @@
       "cell": "driver_lean5_curve2_rotation2_shaft_only",
       "protocol": "driver_fixed_target_speed",
       "target_x_m": 178.94875782337786,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [33.75, 58.5],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        33.75,
+        58.5
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05
@@ -259,8 +409,14 @@
       "cell": "driver_lean5_curve2_rotation2_combined2",
       "protocol": "driver_fixed_target_speed",
       "target_x_m": 178.94875782337786,
-      "face_bounds_deg": [-6, 6],
-      "speed_bounds_mps": [33.75, 58.5],
+      "face_bounds_deg": [
+        -6,
+        6
+      ],
+      "speed_bounds_mps": [
+        33.75,
+        58.5
+      ],
       "n_shots": 10000,
       "seed": 20261009,
       "match_tolerance_m": 0.05

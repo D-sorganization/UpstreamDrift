@@ -1,7 +1,9 @@
 {
   "exact_inventory_paths": 54,
   "git_blobs_independently_rehashed": 108,
-  "new_upstream_paths": ["src/shared/python/physics/grip_contact_model.py"],
+  "new_upstream_paths": [
+    "src/shared/python/physics/grip_contact_model.py"
+  ],
   "evidence_sha256": "94265be65c7a79278a26321b1a3bc25564d97acc80daee15977cc2c663a64011",
   "runtime_acceptance": false,
   "resolved_merge_acceptance": false,

@@ -13,7 +13,11 @@
     "scripts/research/shot_pattern_analysis/report_tables.py": "9d7d41f2a97e50a075a06c5d7780f9dffa4474669201bbf47da7674b1c8c0902",
     "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80"
   },
-  "v7_evidence_files_present": ["start.json", "stderr.txt", "stdout.txt"],
+  "v7_evidence_files_present": [
+    "start.json",
+    "stderr.txt",
+    "stdout.txt"
+  ],
   "pandoc": "/home/dieterolson/.local/bin/pandoc",
   "findings": [
     {

@@ -23,19 +23,19 @@ Speed search bounds are fixed at 75–125% of the reference speed; nominal face 
 
 ## Equipment and Provenance
 
-| Club           | Static Loft | Lie at Zero Lean | Reference Speed | Attack Angle | Head Mass |
-| -------------- | ----------: | ---------------: | --------------: | -----------: | --------: |
-| Driver         |         10° |            58.5° |          45 m/s |        −0.9° |  0.200 kg |
-| 7-Iron         |         34° |              63° |          36 m/s |          −4° |  0.272 kg |
-| Pitching Wedge |         46° |              64° |          32 m/s |          −5° |  0.300 kg |
+| Club | Static Loft | Lie at Zero Lean | Reference Speed | Attack Angle | Head Mass |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Driver | 10° | 58.5° | 45 m/s | −0.9° | 0.200 kg |
+| 7-Iron | 34° | 63° | 36 m/s | −4° | 0.272 kg |
+| Pitching Wedge | 46° | 64° | 32 m/s | −5° | 0.300 kg |
 
 The [Titleist GT2 specification](https://www.titleist.com/golf-clubs/drivers/gt2) provides the selected driver loft/lie. The [historical T100 specification](https://www.titleist.com/golf-clubs/irons/720-t100) provides the iron/wedge lofts and lies. These references establish geometry only. Speed, attack, mass, CG, inertia, usable face dimensions, restitution, friction, and curvature are research assumptions. The hybrid presets are **not** reconstructions or performance predictions for GT2 or T100 clubs.
 
-| Club           | CG Depth | Principal Inertias: Normal, Heel, Up | Face Half-Width / Half-Height | Bulge / Roll Radius |
-| -------------- | -------: | ------------------------------------ | ----------------------------- | ------------------- |
-| Driver         |    35 mm | 0.00025, 0.00040, 0.00045 kg·m²      | 50 / 27 mm                    | 300 / 300 mm        |
-| 7-Iron         |    10 mm | 0.00012, 0.00020, 0.00025 kg·m²      | 35 / 23 mm                    | Flat / Flat         |
-| Pitching Wedge |     8 mm | 0.00010, 0.00020, 0.00022 kg·m²      | 35 / 25 mm                    | Flat / Flat         |
+| Club | CG Depth | Principal Inertias: Normal, Heel, Up | Face Half-Width / Half-Height | Bulge / Roll Radius |
+| --- | ---: | --- | --- | --- |
+| Driver | 35 mm | 0.00025, 0.00040, 0.00045 kg·m² | 50 / 27 mm | 300 / 300 mm |
+| 7-Iron | 10 mm | 0.00012, 0.00020, 0.00025 kg·m² | 35 / 23 mm | Flat / Flat |
+| Pitching Wedge | 8 mm | 0.00010, 0.00020, 0.00022 kg·m² | 35 / 25 mm | Flat / Flat |
 
 Restitution is 0.83 and friction coefficient 0.4 in the primary experiment. Inertia and CG sensitivity must accompany off-center conclusions. [McNally et al. (2016)](https://doi.org/10.1016/j.proeng.2016.06.329) establishes the importance of CG depth, inertia, and face geometry for off-center trajectory sensitivity; it does not validate these assumed parameter values. Manufacturer loft alone is insufficient to identify gear effect.
 
@@ -47,15 +47,11 @@ Starting with the static face normal and zero-lean shaft axis, apply a rigid rot
 
 With static loft L, lie β, lean ℓ, nominal right-positive face f, and shaft twist θ, the geometric construction is
 
-$$
-\mathbf n_0=(\cos L,0,\sin L)^T,\qquad
-\mathbf s_0=(0,\cos\beta,\sin\beta)^T,
-$$
+$$\mathbf n_0=(\cos L,0,\sin L)^T,\qquad
+\mathbf s_0=(0,\cos\beta,\sin\beta)^T,$$
 
-$$
-Q=R_z(-f)R_y(\ell),\quad \mathbf s=Q\mathbf s_0,\quad
-\mathbf n=R_{\mathbf s}(\theta)Q\mathbf n_0.
-$$
+$$Q=R_z(-f)R_y(\ell),\quad \mathbf s=Q\mathbf s_0,\quad
+\mathbf n=R_{\mathbf s}(\theta)Q\mathbf n_0.$$
 
 Rodrigues' rotation is $R_{\mathbf s}(\theta)=I\cos\theta+[\mathbf s]_\times\sin\theta+(1-\cos\theta)\mathbf s\mathbf s^T$.
 The reported face and loft are $\operatorname{atan2}(-n_y,n_x)$ and
@@ -64,11 +60,9 @@ This explicitly explains why shaft rotation can change both face and loft and wh
 
 At zero shaft twist, the first-order sensitivities follow directly from $d\mathbf n/d\theta=\mathbf s\times\mathbf n$:
 
-$$
-\frac{df}{d\theta}=-\frac{\sin\beta\cos L}{\cos(L-\ell)},\qquad
+$$\frac{df}{d\theta}=-\frac{\sin\beta\cos L}{\cos(L-\ell)},\qquad
 \frac{d\lambda}{d\theta}=-\cos\beta,\qquad
-\frac{d\lambda}{df}=\cot\beta\,\frac{\cos(L-\ell)}{\cos L}.
-$$
+\frac{d\lambda}{df}=\cot\beta\,\frac{\cos(L-\ell)}{\cos L}.$$
 
 Here λ is delivered loft. Ratios are unchanged when all angle increments use degrees. Consequently, fixed shaft-twist SD produces approximately the same first-order loft SD across lean settings, while face-angle SD changes. This does not mean carry must increase on every closed-face miss: launch height, spin, ball speed and flight response also change. Finite-angle results and actual landing slopes are computed by the full model; these derivatives describe local geometric sensitivity only. The [Independent Geometry and Carry Derivative Checks](validation/GEOMETRY_DERIVATIVES.md) provide the analytical derivation, finite-difference evidence and club-specific limitations.
 
@@ -84,31 +78,25 @@ $$\mathbf c=\mathbf v_c+\boldsymbol\omega_c\times\mathbf r_c-\mathbf v_b-\boldsy
 
 The delivery adapter assumes zero initial club angular velocity and a stationary, nonspinning ball. Shaft twist is an orientation error, not a closure angular speed. Contact-generated club rotation is retained after impact. For impulse J applied to the ball:
 
-$$
-K=\left(\frac{1}{m_c}+\frac{1}{m_b}\right)I
+$$K=\left(\frac{1}{m_c}+\frac{1}{m_b}\right)I
 -[\mathbf r_c]_\times I_c^{-1}[\mathbf r_c]_\times
 -[\mathbf r_b]_\times I_b^{-1}[\mathbf r_b]_\times,\qquad
-\mathbf c_{\rm after}=\mathbf c_{\rm before}-K\mathbf J.
-$$
+\mathbf c_{\rm after}=\mathbf c_{\rm before}-K\mathbf J.$$
 
 K has units kg⁻¹, impulse J has units N·s, and relative velocity c has units m/s. The ball is a solid sphere in this idealization. The full tensor is rotated from the specified principal frame into world coordinates before the impulse calculation.
 
-$$
-\Delta\mathbf v_b=\mathbf J/m_b,\quad
+$$\Delta\mathbf v_b=\mathbf J/m_b,\quad
 \Delta\boldsymbol\omega_b=I_b^{-1}(\mathbf r_b\times\mathbf J),\quad
 \Delta\mathbf v_c=-\mathbf J/m_c,\quad
-\Delta\boldsymbol\omega_c=-I_c^{-1}(\mathbf r_c\times\mathbf J).
-$$
+\Delta\boldsymbol\omega_c=-I_c^{-1}(\mathbf r_c\times\mathbf J).$$
 
 The primary law integrates Coulomb contact in normal-impulse coordinates. For each positive normal increment dP, solve the tangential maximum-dissipation disk problem using the current relative contact velocity and the full coupled K. Compression ends at zero normal approach velocity. Store compression work E_c = ∫ c_n dP; restitution returns e_energy² E_c through ∫ −c_n dP. The coefficient 0.83 is therefore **energetic restitution**, not a prescribed normal velocity ratio in coupled off-center contact. Resolution is explicit and must pass refinement checks. The optional Numba implementation uses no fast-math transformations and is checked against the Python reference.
 
 For an orthonormal tangent basis T and current relative velocity c, the incremental disk problem is
 
-$$
-\min_{\|\Delta\mathbf J_t\|\leq\mu\,dP}
+$$\min_{\|\Delta\mathbf J_t\|\leq\mu\,dP}
 \frac12\Delta\mathbf J_t^T(T^TKT)\Delta\mathbf J_t
--\left[T^T(\mathbf c-dP\,K\mathbf n)\right]^T\Delta\mathbf J_t.
-$$
+-\left[T^T(\mathbf c-dP\,K\mathbf n)\right]^T\Delta\mathbf J_t.$$
 
 The total increment is $dP\,\mathbf n+T\Delta\mathbf J_t$. Normal work uses trapezoidal integration, with bounded bisection at the compression and restitution endpoints. The primary resolution is 128 compression steps; source-bound refinement to 256/512 steps and flight dt 0.02/0.01/0.005 s is recorded in the [Independent Numerical Evidence](validation/independent_preflight_summary.json).
 
@@ -126,11 +114,11 @@ There are 268 valid and 32 unsupported deterministic variant evaluations. CG dep
 
 The table gives the largest Euclidean landing displacement among comparable supported variants and baseline deliveries for each club and parameter group. Each maximum can occur at a different delivery; values must not be added or interpreted as shot-dispersion SDs. Unsupported cases remain in the receipt and cannot contribute a finite displacement.
 
-| Club           | CG Depth ±20% (m) | Principal Inertias ±20% (m) | Face Radii ±20% (m) | Contact-Law Comparator (m) |
-| -------------- | ----------------: | --------------------------: | ------------------: | -------------------------: |
-| Driver         |              5.14 |                        7.10 |               22.63 |                      11.33 |
-| 7-Iron         |              0.54 |                        1.76 |          Not Varied |                       1.22 |
-| Pitching Wedge |              0.18 |                        1.40 |          Not Varied |                       0.33 |
+| Club | CG Depth ±20% (m) | Principal Inertias ±20% (m) | Face Radii ±20% (m) | Contact-Law Comparator (m) |
+| --- | ---: | ---: | ---: | ---: |
+| Driver | 5.14 | 7.10 | 22.63 | 11.33 |
+| 7-Iron | 0.54 | 1.76 | Not Varied | 1.22 |
+| Pitching Wedge | 0.18 | 1.40 | Not Varied | 0.33 |
 
 The driver is particularly sensitive in low-launch conditions: the 22.63 m face-radius maximum occurs at 5° lean with a low strike and radii scaled to 0.8. These checks support reporting strong dependence on assumed head properties; they do not establish off-center prediction accuracy. Small Monte Carlo confidence intervals cannot remove this model uncertainty. Empirical qualification remains deferred under #11984.
 
@@ -154,14 +142,14 @@ Report lateral and longitudinal SD, full covariance, mean bias, radial RMSE and 
 
 First run small deterministic and Monte Carlo pilots. The final 10,000-shot-per-pattern matrix begins only after software contracts, physical identities, matching residuals, numerical refinement, population accounting, plot review, and an independent Astra review pass. Save unavailable cells as explicit records rather than omitting them.
 
-| Requirement          | Executable Evidence                                  | Acceptance                                                                             |
-| -------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Static Loft and Lean | `test_club_geometry.py`, `test_matched_config.py`    | Rotation identities, physical ranges, sourced static values                            |
-| Correlated Noise     | `test_noise.py`                                      | PSD rejection, reproducibility, zero variance, empirical covariance                    |
-| Raw Nominal Matching | `test_nominal_matching.py` and Real Pilot Receipts   | Physical raw X/Y residual ≤0.05 m; fixed bounds; no aiming rotation                    |
-| Off-Center Contact   | Independent Rigid Contact Tests                      | Momentum, passive energy, restitution, frame covariance, central limit, gear direction |
-| Unsupported Samples  | Matched Runner Tests                                 | Every input retained; no resampling; explicit conditional estimands                    |
-| Density Figures      | Density/Plot Tests and Rendered Review               | Normalization, ties, degeneracy, common scale, readable exports                        |
-| Final Results        | Source-Bound Manifests and Independent Recalculation | Exact reproducibility, complete matrix accounting, no stale provenance                 |
+| Requirement | Executable Evidence | Acceptance |
+| --- | --- | --- |
+| Static Loft and Lean | `test_club_geometry.py`, `test_matched_config.py` | Rotation identities, physical ranges, sourced static values |
+| Correlated Noise | `test_noise.py` | PSD rejection, reproducibility, zero variance, empirical covariance |
+| Raw Nominal Matching | `test_nominal_matching.py` and Real Pilot Receipts | Physical raw X/Y residual ≤0.05 m; fixed bounds; no aiming rotation |
+| Off-Center Contact | Independent Rigid Contact Tests | Momentum, passive energy, restitution, frame covariance, central limit, gear direction |
+| Unsupported Samples | Matched Runner Tests | Every input retained; no resampling; explicit conditional estimands |
+| Density Figures | Density/Plot Tests and Rendered Review | Normalization, ties, degeneracy, common scale, readable exports |
+| Final Results | Source-Bound Manifests and Independent Recalculation | Exact reproducibility, complete matrix accounting, no stale provenance |
 
 Final reports must link exact source revisions, native binary identity, input specifications, seeds, solver bounds, numerical tolerances, result hashes, pilot evidence, and review dispositions. Historical phase-one outputs remain labelled with their original model and controls.

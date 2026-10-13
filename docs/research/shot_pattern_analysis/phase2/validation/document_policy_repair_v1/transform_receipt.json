@@ -62,7 +62,10 @@
       "old_sha256": "930f4f63e78925201888c323330b57d5368c1ca49b6efe3c24b9db8b41094402",
       "new_sha256": "925c8e45b3db449362b8a43126e0eb8a45fc5bbfc43b3a4dd14eccce97820c74",
       "heading_replacements": [
-        ["Primary v4 Driver Detail Review", "Primary V4 Driver Detail Review"]
+        [
+          "Primary v4 Driver Detail Review",
+          "Primary V4 Driver Detail Review"
+        ]
       ],
       "additional_change": null
     }

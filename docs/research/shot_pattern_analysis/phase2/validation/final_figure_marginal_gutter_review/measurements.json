@@ -4,199 +4,298 @@
     "tick_gaps": [
       {
         "axis": 1,
-        "labels": ["110", "120"],
+        "labels": [
+          "110",
+          "120"
+        ],
         "gap_points": 9.221603768218296,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 1,
-        "labels": ["120", "130"],
+        "labels": [
+          "120",
+          "130"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 1,
-        "labels": ["130", "140"],
+        "labels": [
+          "130",
+          "140"
+        ],
         "gap_points": 9.221603768218296,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 1,
-        "labels": ["140", "150"],
+        "labels": [
+          "140",
+          "150"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 1,
-        "labels": ["150", "160"],
+        "labels": [
+          "150",
+          "160"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 1,
-        "labels": ["160", "170"],
+        "labels": [
+          "160",
+          "170"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 1,
-        "labels": ["170", "180"],
+        "labels": [
+          "170",
+          "180"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 1,
-        "labels": ["180", "190"],
+        "labels": [
+          "180",
+          "190"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 1,
-        "labels": ["190", "200"],
+        "labels": [
+          "190",
+          "200"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 2,
-        "labels": ["0.025", "0.050"],
+        "labels": [
+          "0.025",
+          "0.050"
+        ],
         "gap_points": 1.9508401189788582,
         "axis_width_points": 55.38917228895837
       },
       {
         "axis": 2,
-        "labels": ["0.050", "0.075"],
+        "labels": [
+          "0.050",
+          "0.075"
+        ],
         "gap_points": 1.9508401189788993,
         "axis_width_points": 55.38917228895837
       },
       {
         "axis": 4,
-        "labels": ["110", "120"],
+        "labels": [
+          "110",
+          "120"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583357
       },
       {
         "axis": 4,
-        "labels": ["120", "130"],
+        "labels": [
+          "120",
+          "130"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583357
       },
       {
         "axis": 4,
-        "labels": ["130", "140"],
+        "labels": [
+          "130",
+          "140"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583357
       },
       {
         "axis": 4,
-        "labels": ["140", "150"],
+        "labels": [
+          "140",
+          "150"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583357
       },
       {
         "axis": 4,
-        "labels": ["150", "160"],
+        "labels": [
+          "150",
+          "160"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583357
       },
       {
         "axis": 4,
-        "labels": ["160", "170"],
+        "labels": [
+          "160",
+          "170"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583357
       },
       {
         "axis": 4,
-        "labels": ["170", "180"],
+        "labels": [
+          "170",
+          "180"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583357
       },
       {
         "axis": 4,
-        "labels": ["180", "190"],
+        "labels": [
+          "180",
+          "190"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583357
       },
       {
         "axis": 4,
-        "labels": ["190", "200"],
+        "labels": [
+          "190",
+          "200"
+        ],
         "gap_points": 9.221603768218255,
         "axis_width_points": 221.55668915583357
       },
       {
         "axis": 5,
-        "labels": ["0.025", "0.050"],
+        "labels": [
+          "0.025",
+          "0.050"
+        ],
         "gap_points": 1.9508401189788582,
         "axis_width_points": 55.38917228895837
       },
       {
         "axis": 5,
-        "labels": ["0.050", "0.075"],
+        "labels": [
+          "0.050",
+          "0.075"
+        ],
         "gap_points": 1.9508401189788582,
         "axis_width_points": 55.38917228895837
       },
       {
         "axis": 7,
-        "labels": ["110", "120"],
+        "labels": [
+          "110",
+          "120"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 7,
-        "labels": ["120", "130"],
+        "labels": [
+          "120",
+          "130"
+        ],
         "gap_points": 9.221603768218174,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 7,
-        "labels": ["130", "140"],
+        "labels": [
+          "130",
+          "140"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 7,
-        "labels": ["140", "150"],
+        "labels": [
+          "140",
+          "150"
+        ],
         "gap_points": 9.221603768218174,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 7,
-        "labels": ["150", "160"],
+        "labels": [
+          "150",
+          "160"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 7,
-        "labels": ["160", "170"],
+        "labels": [
+          "160",
+          "170"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 7,
-        "labels": ["170", "180"],
+        "labels": [
+          "170",
+          "180"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 7,
-        "labels": ["180", "190"],
+        "labels": [
+          "180",
+          "190"
+        ],
         "gap_points": 9.221603768218174,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 7,
-        "labels": ["190", "200"],
+        "labels": [
+          "190",
+          "200"
+        ],
         "gap_points": 9.221603768218337,
         "axis_width_points": 221.55668915583348
       },
       {
         "axis": 8,
-        "labels": ["0.025", "0.050"],
+        "labels": [
+          "0.025",
+          "0.050"
+        ],
         "gap_points": 1.9508401189789402,
         "axis_width_points": 55.38917228895829
       },
       {
         "axis": 8,
-        "labels": ["0.050", "0.075"],
+        "labels": [
+          "0.050",
+          "0.075"
+        ],
         "gap_points": 1.9508401189787765,
         "axis_width_points": 55.38917228895829
       }
@@ -207,199 +306,298 @@
     "tick_gaps": [
       {
         "axis": 1,
-        "labels": ["110", "120"],
+        "labels": [
+          "110",
+          "120"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 1,
-        "labels": ["120", "130"],
+        "labels": [
+          "120",
+          "130"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 1,
-        "labels": ["130", "140"],
+        "labels": [
+          "130",
+          "140"
+        ],
         "gap_points": 30.98976316595771,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 1,
-        "labels": ["140", "150"],
+        "labels": [
+          "140",
+          "150"
+        ],
         "gap_points": 30.989763165957548,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 1,
-        "labels": ["150", "160"],
+        "labels": [
+          "150",
+          "160"
+        ],
         "gap_points": 30.989763165957793,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 1,
-        "labels": ["160", "170"],
+        "labels": [
+          "160",
+          "170"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 1,
-        "labels": ["170", "180"],
+        "labels": [
+          "170",
+          "180"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 1,
-        "labels": ["180", "190"],
+        "labels": [
+          "180",
+          "190"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 1,
-        "labels": ["190", "200"],
+        "labels": [
+          "190",
+          "200"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 2,
-        "labels": ["0.025", "0.050"],
+        "labels": [
+          "0.025",
+          "0.050"
+        ],
         "gap_points": 18.39651305282623,
         "axis_width_points": 114.75262135922333
       },
       {
         "axis": 2,
-        "labels": ["0.050", "0.075"],
+        "labels": [
+          "0.050",
+          "0.075"
+        ],
         "gap_points": 18.39651305282623,
         "axis_width_points": 114.75262135922333
       },
       {
         "axis": 4,
-        "labels": ["110", "120"],
+        "labels": [
+          "110",
+          "120"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 4,
-        "labels": ["120", "130"],
+        "labels": [
+          "120",
+          "130"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 4,
-        "labels": ["130", "140"],
+        "labels": [
+          "130",
+          "140"
+        ],
         "gap_points": 30.98976316595771,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 4,
-        "labels": ["140", "150"],
+        "labels": [
+          "140",
+          "150"
+        ],
         "gap_points": 30.989763165957548,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 4,
-        "labels": ["150", "160"],
+        "labels": [
+          "150",
+          "160"
+        ],
         "gap_points": 30.989763165957793,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 4,
-        "labels": ["160", "170"],
+        "labels": [
+          "160",
+          "170"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 4,
-        "labels": ["170", "180"],
+        "labels": [
+          "170",
+          "180"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 4,
-        "labels": ["180", "190"],
+        "labels": [
+          "180",
+          "190"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 4,
-        "labels": ["190", "200"],
+        "labels": [
+          "190",
+          "200"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 5,
-        "labels": ["0.025", "0.050"],
+        "labels": [
+          "0.025",
+          "0.050"
+        ],
         "gap_points": 18.39651305282623,
         "axis_width_points": 114.75262135922333
       },
       {
         "axis": 5,
-        "labels": ["0.050", "0.075"],
+        "labels": [
+          "0.050",
+          "0.075"
+        ],
         "gap_points": 18.39651305282623,
         "axis_width_points": 114.75262135922333
       },
       {
         "axis": 7,
-        "labels": ["110", "120"],
+        "labels": [
+          "110",
+          "120"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 7,
-        "labels": ["120", "130"],
+        "labels": [
+          "120",
+          "130"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 7,
-        "labels": ["130", "140"],
+        "labels": [
+          "130",
+          "140"
+        ],
         "gap_points": 30.98976316595771,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 7,
-        "labels": ["140", "150"],
+        "labels": [
+          "140",
+          "150"
+        ],
         "gap_points": 30.989763165957548,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 7,
-        "labels": ["150", "160"],
+        "labels": [
+          "150",
+          "160"
+        ],
         "gap_points": 30.989763165957793,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 7,
-        "labels": ["160", "170"],
+        "labels": [
+          "160",
+          "170"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 7,
-        "labels": ["170", "180"],
+        "labels": [
+          "170",
+          "180"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 7,
-        "labels": ["180", "190"],
+        "labels": [
+          "180",
+          "190"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 7,
-        "labels": ["190", "200"],
+        "labels": [
+          "190",
+          "200"
+        ],
         "gap_points": 30.98976316595763,
         "axis_width_points": 459.0104854368932
       },
       {
         "axis": 8,
-        "labels": ["0.025", "0.050"],
+        "labels": [
+          "0.025",
+          "0.050"
+        ],
         "gap_points": 18.39651305282623,
         "axis_width_points": 114.75262135922333
       },
       {
         "axis": 8,
-        "labels": ["0.050", "0.075"],
+        "labels": [
+          "0.050",
+          "0.075"
+        ],
         "gap_points": 18.39651305282623,
         "axis_width_points": 114.75262135922333
       }

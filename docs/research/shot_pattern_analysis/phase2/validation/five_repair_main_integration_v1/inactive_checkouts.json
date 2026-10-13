@@ -6,7 +6,11 @@
       "restore": "git sparse-checkout disable",
       "ignored_noncache_files_preserved": {},
       "reason": "Inactive reporting branches already integrated. These tracked directories are recoverable via git sparse-checkout disable; no active source/data or ignored noncache file removed.",
-      "excluded_tracked_directories": ["docs", "src", "tests"]
+      "excluded_tracked_directories": [
+        "docs",
+        "src",
+        "tests"
+      ]
     },
     {
       "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
@@ -17,7 +21,11 @@
         "docs/research/shot_pattern_analysis/phase2/control_pilot_v1/matrix_plan.json": "491a37dd430b4de0946089b75db11db5fe17016df3b98ff32d6c819f664af073"
       },
       "reason": "Inactive reporting branches already integrated. These tracked directories are recoverable via git sparse-checkout disable; no active source/data or ignored noncache file removed.",
-      "excluded_tracked_directories": ["docs", "src", "tests"]
+      "excluded_tracked_directories": [
+        "docs",
+        "src",
+        "tests"
+      ]
     }
   ],
   "preflight_note": "Initial blanket noncache check stopped on second worktree; verified and retained its two ignored files before continuing."

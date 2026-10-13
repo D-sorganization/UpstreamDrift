@@ -1,11 +1,9 @@
 # Selected-Pair Renderer API Specification
 
 ## Module
-
 `src.tools.shot_pattern_analysis.matched_supplement_figures`
 
 ## Function Signature
-
 ```python
 def render_selected_pair_figures(
     pair: dict[str, Any],
@@ -16,9 +14,7 @@ def render_selected_pair_figures(
 ```
 
 ## Closed Figure Kinds
-
 The set of allowable figure kinds is strictly bounded to the following 7 kinds:
-
 - `density_png`
 - `density_pdf`
 - `density_svg`
@@ -28,7 +24,6 @@ The set of allowable figure kinds is strictly bounded to the following 7 kinds:
 - `overhead_social_png`
 
 ## Behavior & Invariants
-
 1. **Rejection of Invalid Kind Sets**:
    - `figure_kinds` must be an instance of `frozenset`.
    - `figure_kinds` must not be empty.

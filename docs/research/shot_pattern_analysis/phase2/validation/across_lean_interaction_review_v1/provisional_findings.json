@@ -445,9 +445,9 @@
       "pattern": "Draw",
       "metric": "course_sg_difference",
       "value": {
-        "estimate": 9.346886102743099e-5,
-        "lower_95": 8.747873384878533e-5,
-        "upper_95": 9.922430451414912e-5
+        "estimate": 9.346886102743099e-05,
+        "lower_95": 8.747873384878533e-05,
+        "upper_95": 9.922430451414912e-05
       },
       "nonzero_estimate_prints_zero": false,
       "nonzero_interval_prints_collapsed": true
@@ -541,7 +541,7 @@
       "pattern": "Draw",
       "metric": "course_sg_difference",
       "value": {
-        "estimate": -4.992703467619882e-5,
+        "estimate": -4.992703467619882e-05,
         "lower_95": -0.00020713409231600682,
         "upper_95": 0.00012289527698874052
       },
@@ -573,8 +573,8 @@
       "pattern": "Draw",
       "metric": "course_sg_difference",
       "value": {
-        "estimate": 2.364359967372998e-5,
-        "lower_95": -8.926994547227441e-5,
+        "estimate": 2.364359967372998e-05,
+        "lower_95": -8.926994547227441e-05,
         "upper_95": 0.0001479749986792417
       },
       "nonzero_estimate_prints_zero": true,
@@ -605,8 +605,8 @@
       "pattern": "Draw",
       "metric": "course_sg_difference",
       "value": {
-        "estimate": 2.5647246319769486e-5,
-        "lower_95": -7.313651540833751e-5,
+        "estimate": 2.5647246319769486e-05,
+        "lower_95": -7.313651540833751e-05,
         "upper_95": 0.00014787991396686908
       },
       "nonzero_estimate_prints_zero": true,
@@ -701,7 +701,7 @@
       "pattern": "Draw",
       "metric": "course_sg_difference",
       "value": {
-        "estimate": -1.5049279934324494e-5,
+        "estimate": -1.5049279934324494e-05,
         "lower_95": -0.00012838104340687868,
         "upper_95": 0.0001061760738399631
       },
@@ -765,7 +765,7 @@
       "pattern": "Draw",
       "metric": "course_sg_difference",
       "value": {
-        "estimate": 2.0190773853868743e-5,
+        "estimate": 2.0190773853868743e-05,
         "lower_95": -0.00013832558654184573,
         "upper_95": 0.00017954636032770866
       },
@@ -893,7 +893,7 @@
       "pattern": "Draw",
       "metric": "course_sg_difference",
       "value": {
-        "estimate": -3.791218730229399e-5,
+        "estimate": -3.791218730229399e-05,
         "lower_95": -0.00017501405787212647,
         "upper_95": 0.00011569912492518586
       },
@@ -1053,8 +1053,8 @@
       "pattern": "Fade",
       "metric": "course_sg_difference",
       "value": {
-        "estimate": 4.3502758741191896e-5,
-        "lower_95": -9.817879251242093e-5,
+        "estimate": 4.3502758741191896e-05,
+        "lower_95": -9.817879251242093e-05,
         "upper_95": 0.00019691237366637872
       },
       "nonzero_estimate_prints_zero": true,

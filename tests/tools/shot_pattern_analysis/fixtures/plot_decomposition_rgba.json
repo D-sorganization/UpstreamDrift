@@ -9,23 +9,38 @@
   "outputs": {
     "dispersion.png": {
       "rgba_sha256": "0b1350acf70ff9f9ba2197e9a09e5f0331db21427dceeac893abe164db22bf26",
-      "size": [1920, 1080]
+      "size": [
+        1920,
+        1080
+      ]
     },
     "dispersion_equal_range.png": {
       "rgba_sha256": "3dcf7d74f80809624fcc7ae2db7c22ff35f15b5f6870566ad2734c83e8b69e58",
-      "size": [1920, 1080]
+      "size": [
+        1920,
+        1080
+      ]
     },
     "fixed_loft_forest.png": {
       "rgba_sha256": "ee1923f11e7ea27f6c48f26cf16b2719631296e026a158920bcf9d75d643bf07",
-      "size": [1920, 1080]
+      "size": [
+        1920,
+        1080
+      ]
     },
     "sensitivity.png": {
       "rgba_sha256": "9b00afc271fe923457321ec7907fd1856430dd36489ecec148c8bef001e447a9",
-      "size": [1920, 1080]
+      "size": [
+        1920,
+        1080
+      ]
     },
     "shaft_rotation_forest.png": {
       "rgba_sha256": "b040a4766b762edd04e097e8e0b07ff24085f5d400e865a11b38a91a09031fd8",
-      "size": [1920, 1080]
+      "size": [
+        1920,
+        1080
+      ]
     }
   },
   "rendering": "MPLBACKEND=Agg; each PNG decoded to RGBA bytes",

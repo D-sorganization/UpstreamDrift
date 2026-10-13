@@ -6,11 +6,24 @@
   "lean_deg": 5,
   "curve_scale": 2,
   "n_shots_per_pattern": 10000,
-  "patterns": ["Straight", "Draw", "Fade"],
+  "patterns": [
+    "Straight",
+    "Draw",
+    "Fade"
+  ],
   "seed": 20261009,
-  "absolute_face_bounds_deg": [-6, 6],
-  "speed_bounds_mps": [33.75, 58.5],
-  "original_speed_bounds_mps": [33.75, 56.25],
+  "absolute_face_bounds_deg": [
+    -6,
+    6
+  ],
+  "speed_bounds_mps": [
+    33.75,
+    58.5
+  ],
+  "original_speed_bounds_mps": [
+    33.75,
+    56.25
+  ],
   "target_x_m": 178.94875782337786,
   "match_tolerance_m": 0.05,
   "new_control_cells": [

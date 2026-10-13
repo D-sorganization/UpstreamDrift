@@ -114,7 +114,9 @@
             "Fade": 1
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -413,7 +415,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -712,7 +716,9 @@
             "Fade": 1
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1011,7 +1017,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1310,7 +1318,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1609,7 +1619,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1908,7 +1920,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2207,7 +2221,9 @@
             "Fade": 1
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {

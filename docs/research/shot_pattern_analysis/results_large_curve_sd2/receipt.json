@@ -6,7 +6,10 @@
     "impact_model": "rigid_body",
     "flight_model": "BallFlightSimulator (upstream_physics Rust RK4)",
     "club_attack_deg": 0.0,
-    "contact_offset_m": [0.0, 0.0],
+    "contact_offset_m": [
+      0.0,
+      0.0
+    ],
     "environment": "Default EnvironmentalConditions, zero wind",
     "rust_package_version": "2.1.3",
     "rust_binary_sha256": "1c072beabaffc69231538e604acb9a5731144f74cf6feb658e553eeca2f7a759",
@@ -28,7 +31,11 @@
       "air_density_kg_m3": 1.225,
       "gravity_m_s2": 9.80665,
       "temperature_c": 15.0,
-      "wind_velocity_mps": [0.0, 0.0, 0.0]
+      "wind_velocity_mps": [
+        0.0,
+        0.0,
+        0.0
+      ]
     }
   },
   "runtime": {

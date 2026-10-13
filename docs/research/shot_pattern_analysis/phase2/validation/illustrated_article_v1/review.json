@@ -15,10 +15,28 @@
     "issue": 12120
   },
   "reviews": {
-    "root_direct_pages": [1, 2, 3, 17, 18, 19, 26, 27],
-    "astra_figures": [4, 16],
-    "sol_tables": [20, 25],
-    "sol_appendix": [28, 33],
+    "root_direct_pages": [
+      1,
+      2,
+      3,
+      17,
+      18,
+      19,
+      26,
+      27
+    ],
+    "astra_figures": [
+      4,
+      16
+    ],
+    "sol_tables": [
+      20,
+      25
+    ],
+    "sol_appendix": [
+      28,
+      33
+    ],
     "reconciliation": "Figure changes are only printed-page-number pixels; appendix pages are byte-identical to reviewed initial PDF renders. Final status revision changes only pages26/27, reviewed directly."
   },
   "rendered_pages": [

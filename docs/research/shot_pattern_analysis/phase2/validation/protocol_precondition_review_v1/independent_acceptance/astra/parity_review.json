@@ -1,7 +1,12 @@
 {
   "accepted_valid_input_parity": true,
   "publication_acceptance": false,
-  "pairs": ["pw_narrow", "iron_narrow", "pw_covariance", "driver_fixed"],
+  "pairs": [
+    "pw_narrow",
+    "iron_narrow",
+    "pw_covariance",
+    "driver_fixed"
+  ],
   "png_count": 12,
   "png_sha256": {
     "pw_narrow/comparisons/across_lean_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve1_rotation1_shaft_only_77p402m_f2b09c4013_overhead_social.png": "20127ddfae60f927472b7e633b22161af3530ef9c0a1c40ec741c8f5574188fa",

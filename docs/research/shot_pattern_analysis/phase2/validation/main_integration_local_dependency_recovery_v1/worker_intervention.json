@@ -1,7 +1,15 @@
 {
   "utc": "2026-10-10T19:03:57.404296+00:00",
   "intentionally_stopped_pids": [
-    708708, 708706, 708928, 708705, 708704, 671722, 671686, 671685, 671635,
+    708708,
+    708706,
+    708928,
+    708705,
+    708704,
+    671722,
+    671686,
+    671685,
+    671635,
     663960
   ],
   "reason": "Initial clone retried automatically after child termination. Stop owned worker before preparing exact local dependency; retain uncommitted merge and all receipts. This is explicit cancellation, not observation timeout."

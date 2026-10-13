@@ -7,7 +7,6 @@ This issue tracks the consolidated resolution of all six findings with minimal, 
 ## Definite Audit Findings and Acceptance Criteria
 
 ### 1. Resolved Zero-Lean Results in Main Selected Table (F1)
-
 - **Finding**: `build_final_report.py:332` reads only primary cells, leaving four PW curve-2 selections unavailable despite qualified supplemental outcomes. The resolved 24-cell/72-pattern view is not integrated.
 - **Acceptance Criteria**:
   - [ ] Preserve original primary table/accounting with original unavailable statuses intact.
@@ -15,7 +14,6 @@ This issue tracks the consolidated resolution of all six findings with minimal, 
   - [ ] Guard against missing or duplicate requested identities and assert separate individual endpoint and common-three scoring counts.
 
 ### 2. Displayed Interaction Selection Differs From Qualified Draft (F2)
-
 - **Finding**: `final_report_inputs.py:336–353` uses `next()` by input order, picking only 6 combined2 SD1 curve-strength contrasts, whereas the qualified draft specifies 12 contrasts (SD2 and both shaft_only and combined2 profiles).
 - **Acceptance Criteria**:
   - [ ] Replace implicit `next()` ordering with exact reviewed ordered protocol/cell identities for the intended 12 draft contrasts.
@@ -24,7 +22,6 @@ This issue tracks the consolidated resolution of all six findings with minimal, 
   - [ ] All 12 selected full-precision objects agree with final verified JSON and render via `render_effect_table`.
 
 ### 3. Substantive Conclusion and Mechanism Synthesis Integration (F3)
-
 - **Finding**: The production path displays tables and caveats but never synthesizes conclusions from the selected-72 evidence or conclusions draft.
 - **Acceptance Criteria**:
   - [ ] Add bounded prose after the direct interactions/fixed-target bounds section (`build_final_report.py:607` onward) using source-bound numbers from the selected inputs.
@@ -33,7 +30,6 @@ This issue tracks the consolidated resolution of all six findings with minimal, 
   - [ ] Bind successful V5 receipt provenance once available rather than historical draft provenance.
 
 ### 4. Nominal Speed Bound Qualification and Disclosure (F4)
-
 - **Finding**: `build_final_report.py:244` states 75–125% nominal speed search without protocol qualification, omitting the Driver control supplement's 75–130% exception and absolute face box.
 - **Acceptance Criteria**:
   - [ ] Scope the 75–125% speed search to original protocols with exact protocol ID.
@@ -41,14 +37,12 @@ This issue tracks the consolidated resolution of all six findings with minimal, 
   - [ ] Avoid claiming adapted bounds were preregistered or imply physical impossibility outside them.
 
 ### 5. Figure-Population Prose Scope Disambiguation (F5)
-
 - **Finding**: `build_final_report.py:620` claims "Density contours use all supported endpoints", which is overbroad since paired densities use the common-six intersection.
 - **Acceptance Criteria**:
   - [ ] Differentiate individual-cell densities (which use all individually supported endpoints) from paired densities (which use the shared six-population supported-index intersection).
   - [ ] Keep point and path trajectory subsampling distinct from density contour support.
 
 ### 6. Correct Stale Draft Revision Reference (F6)
-
 - **Finding**: `PHASE_TWO_CONCLUSIONS_DRAFT.md:52` refers to a completed v4 receipt, but v4 terminated without completion while line 45 correctly names V5 reconciliation and pending rendering.
 - **Acceptance Criteria**:
   - [ ] Correct the stale draft revision reference in `PHASE_TWO_CONCLUSIONS_DRAFT.md` to reference pending/successful V5 receipt upon integration.

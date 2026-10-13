@@ -42,8 +42,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "6f85d34a65f2ba501b6181292c744e0d77a4f26bc44360f967d330278d134caf",
         "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.pdf",
@@ -51,8 +57,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "2904c2fdeb99c79810d88a12a4926495ccd91d74da45d1cb649c4b58ddda5b21",
         "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.svg",
@@ -68,8 +80,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive__8ea5caf30c_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "2b6c2ac0538f6094f90b891090ecfdb642b5b5fb262b9c3256d377cf6aa8ea5b",
         "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive__8ea5caf30c_density.pdf",
@@ -77,8 +95,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "4f6933365fdb39ee55e8d8dbb6ae18dc9112b270cf0bdcaecf43b85248d21a66",
         "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive__8ea5caf30c_density.svg",
@@ -94,8 +118,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2100, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2100,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "bb5365812547fd2856aa2a2dcdf69d0aeb38b8207f965601e5a50352843a7996",
         "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.pdf",
@@ -103,8 +133,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2099, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2099,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "2b9b8ec8f59c96c461a201f69a85d5fa6b6b2d25399587bd19f79e7bdb74386c",
         "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.svg",
@@ -120,8 +156,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2100, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2100,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "621759e25a9b1444fbd772508955935825decb32ffc6742b54b4caedcb705967",
         "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.pdf",
@@ -129,8 +171,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2099, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2099,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "8b591bb764f3591abc017e848c20fd2db4f5840c07f6b8e373abd8c0e18a4553",
         "relative_path": "comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.svg",
@@ -146,8 +194,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2132, 1199],
-          "png": [4444, 2498]
+          "native": [
+            2132,
+            1199
+          ],
+          "png": [
+            4444,
+            2498
+          ]
         },
         "native_png_sha256": "df88b4dabd0f0c00b208428efa913cfb10ba3f4e0ecdcc75ff5f012204aedb0c",
         "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.pdf",
@@ -155,8 +209,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2132, 1199],
-          "png": [4444, 2498]
+          "native": [
+            2132,
+            1199
+          ],
+          "png": [
+            4444,
+            2498
+          ]
         },
         "native_png_sha256": "59c30cc33c68cadc1a5f51a0e43da4da2c8d1ff58f8b50aa3dd6f2e9b7347a2f",
         "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.svg",
@@ -172,8 +232,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2143, 1199],
-          "png": [4466, 2498]
+          "native": [
+            2143,
+            1199
+          ],
+          "png": [
+            4466,
+            2498
+          ]
         },
         "native_png_sha256": "02ac453d9ac89c09ca4881a818d7f8f4aa448d3318d267848248322462a8d1d7",
         "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.pdf",
@@ -181,8 +247,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2142, 1199],
-          "png": [4466, 2498]
+          "native": [
+            2142,
+            1199
+          ],
+          "png": [
+            4466,
+            2498
+          ]
         },
         "native_png_sha256": "03a3c0a68bf81ca127b8aabbd1ca03fea149297efd6976b326711c72544dadfa",
         "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.svg",
@@ -198,8 +270,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2171, 1197],
-          "png": [4525, 2492]
+          "native": [
+            2171,
+            1197
+          ],
+          "png": [
+            4525,
+            2492
+          ]
         },
         "native_png_sha256": "ddaea89bafa1da9f7f7efecb14b353e4bf2553d964464b64cc8b16d12e9fd659",
         "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.pdf",
@@ -207,8 +285,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2171, 1196],
-          "png": [4525, 2492]
+          "native": [
+            2171,
+            1196
+          ],
+          "png": [
+            4525,
+            2492
+          ]
         },
         "native_png_sha256": "d105644615d655251868bb656cf2a7935ae5493f9f58ce7233eb2481df3e6e8a",
         "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.svg",
@@ -224,8 +308,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2171, 1196],
-          "png": [4525, 2492]
+          "native": [
+            2171,
+            1196
+          ],
+          "png": [
+            4525,
+            2492
+          ]
         },
         "native_png_sha256": "606bd2c0bb631e207af34ca42da45224a1e655295669e3ecfbf7d2ba05838413",
         "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.pdf",
@@ -233,8 +323,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2171, 1196],
-          "png": [4525, 2492]
+          "native": [
+            2171,
+            1196
+          ],
+          "png": [
+            4525,
+            2492
+          ]
         },
         "native_png_sha256": "e8b6a41167b67651817b2cd37266fad1402547c6c588fb376e40cb1a8fc8a8ff",
         "relative_path": "comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.svg",
@@ -250,8 +346,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_n_5b82526b18_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2161, 1199],
-          "png": [4504, 2498]
+          "native": [
+            2161,
+            1199
+          ],
+          "png": [
+            4504,
+            2498
+          ]
         },
         "native_png_sha256": "571f641b24dc56688867896d1488a1a4b1271510e60835612d3723019cc06268",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_n_5b82526b18_density.pdf",
@@ -259,8 +361,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2161, 1199],
-          "png": [4504, 2498]
+          "native": [
+            2161,
+            1199
+          ],
+          "png": [
+            4504,
+            2498
+          ]
         },
         "native_png_sha256": "fd36f5f679be566a92c9591a298e0427dad8a41948bab05242e84253f0c119d6",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_n_5b82526b18_density.svg",
@@ -276,8 +384,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_n_f3698df9e4_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "d4c60d89c231222943b7ebd28ded1aef42a5fadd05702330f5d9a239e63eb23e",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_n_f3698df9e4_density.pdf",
@@ -285,8 +399,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "611ca1c70320e7afd47639a43067f098af13fb9fb78d796a4235ca57e944d7ca",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_n_f3698df9e4_density.svg",
@@ -302,8 +422,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_p_c779ac069a_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "ccb5ff009a3545f8fead2eaf62951ca0879faf6742e6933b204e11360f22e8c9",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_p_c779ac069a_density.pdf",
@@ -311,8 +437,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "9c6b690456b458948d8f06af0ceeb6ffb715831b5d02d16be83f6ed0f60ce29b",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_p_c779ac069a_density.svg",
@@ -328,8 +460,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "f7d56c947df960132e6699a43c24ce28bd628dd3b9f627ca725adc56165bea4e",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.pdf",
@@ -337,8 +475,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "57793cca442f54dd5651e85bf037ee3b8b035ad788695517d71bbaf1907a3c61",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.svg",
@@ -354,8 +498,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_5e6ca5fac4_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2139, 1199],
-          "png": [4459, 2498]
+          "native": [
+            2139,
+            1199
+          ],
+          "png": [
+            4459,
+            2498
+          ]
         },
         "native_png_sha256": "6d54eed094d304e713446e1b18610ed831ce16bb0d65ccee7519eec702dac283",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_5e6ca5fac4_density.pdf",
@@ -363,8 +513,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2139, 1199],
-          "png": [4459, 2498]
+          "native": [
+            2139,
+            1199
+          ],
+          "png": [
+            4459,
+            2498
+          ]
         },
         "native_png_sha256": "4e72b2414098a0d1aa2706032f962ea1ad7034deb0d6256f701d39f2abe31708",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_5e6ca5fac4_density.svg",
@@ -380,8 +536,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_f8e8b97766_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "a3fa4878aefcf35e2c8941cac76b4ec73801154ad5e6f0b07acf308047da2c52",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_f8e8b97766_density.pdf",
@@ -389,8 +551,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "83ff48aeaa2dbdc01dd50d6c1b441cd119bdd696940c4d7212026ef3527b4ca5",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_f8e8b97766_density.svg",
@@ -406,8 +574,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_c9441357f0_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "33cd4b9aea1f27e0ddde944c7f440db4ab3f296c8071924ca61602b23886a44f",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_c9441357f0_density.pdf",
@@ -415,8 +589,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "313b3e9034d249131cd7ac43bfa754b1df23f8c93a6d12f70790045e91a821ea",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_c9441357f0_density.svg",
@@ -432,8 +612,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_n_6b7044781d_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2118, 1199],
-          "png": [4416, 2498]
+          "native": [
+            2118,
+            1199
+          ],
+          "png": [
+            4416,
+            2498
+          ]
         },
         "native_png_sha256": "d631fa52d9845c4146541efafcb87988693da909f3b36e34d8bf7ea1039f4221",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_n_6b7044781d_density.pdf",
@@ -441,8 +627,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2118, 1199],
-          "png": [4416, 2498]
+          "native": [
+            2118,
+            1199
+          ],
+          "png": [
+            4416,
+            2498
+          ]
         },
         "native_png_sha256": "6d5860c2392fe69f34a917cb0c9367e4d440c167e4c949c8f43d1dacc7a36f5e",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_n_6b7044781d_density.svg",
@@ -458,8 +650,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2171, 1198],
-          "png": [4525, 2494]
+          "native": [
+            2171,
+            1198
+          ],
+          "png": [
+            4525,
+            2494
+          ]
         },
         "native_png_sha256": "e35806543be19b2270ce5676122b89da3a6a77f0c7eeeb17268a2424f87b0553",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.pdf",
@@ -467,8 +665,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2170, 1197],
-          "png": [4525, 2494]
+          "native": [
+            2170,
+            1197
+          ],
+          "png": [
+            4525,
+            2494
+          ]
         },
         "native_png_sha256": "e15e5c7c0bdc996ea5d37df2310ca709a459246af60f837e6374b0c2e9a067d7",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.svg",
@@ -484,8 +688,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_n_7ec9af0963_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "b17fadad1f6f08cbec8efca6bce0c7b85f110aa0dddbfc7166c4e4eac2c927aa",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_n_7ec9af0963_density.pdf",
@@ -493,8 +703,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "a80e9c7504dbf4effd0a8945d98e14be492b195a195013a65f81a605b1f5cfe3",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_n_7ec9af0963_density.svg",
@@ -510,8 +726,14 @@
       "identity_png_relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_p_d3fd9156d1_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "6693b90e93b3a3f7b6196a68fda6c727ac654a8bf373f1864413d3881a62c0aa",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_p_d3fd9156d1_density.pdf",
@@ -519,8 +741,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "9947a782e0499c49596cb88147b9e1e78054caf0bf2149e468fe29b7bdddcdce",
         "relative_path": "comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_p_d3fd9156d1_density.svg",
@@ -536,8 +764,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2061, 1199],
-          "png": [4294, 2498]
+          "native": [
+            2061,
+            1199
+          ],
+          "png": [
+            4294,
+            2498
+          ]
         },
         "native_png_sha256": "b8fa4b6bdff5ff04024d29809cdef6410f64a1def1f80254f3790b5e6b90927a",
         "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.pdf",
@@ -545,8 +779,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2061, 1199],
-          "png": [4294, 2498]
+          "native": [
+            2061,
+            1199
+          ],
+          "png": [
+            4294,
+            2498
+          ]
         },
         "native_png_sha256": "5ce6234d5548f096f1a55f99445e908ac6e6c6c53fb858cff3c7c49f0c44ee9b",
         "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.svg",
@@ -562,8 +802,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2061, 1199],
-          "png": [4294, 2498]
+          "native": [
+            2061,
+            1199
+          ],
+          "png": [
+            4294,
+            2498
+          ]
         },
         "native_png_sha256": "8b2e090f387e42bc0e5e27ecaf8f1c5241422eac80c70f21bb76d6ebe1c9d4a4",
         "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.pdf",
@@ -571,8 +817,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2061, 1199],
-          "png": [4294, 2498]
+          "native": [
+            2061,
+            1199
+          ],
+          "png": [
+            4294,
+            2498
+          ]
         },
         "native_png_sha256": "b7577e02d8d2b82d1999f387aa02e4b49b353149da467a8f3c8167a33b2fc2e4",
         "relative_path": "comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.svg",
@@ -588,8 +840,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "63251e067321001f51b6bda61e68551abb596a099e8845428419b56636b17ba2",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.pdf",
@@ -597,8 +855,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "d02fc819a2055b091adb321a3ec78055104bbb821fb57728f13075be8295553b",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negati_2860bba7ee_density.svg",
@@ -614,8 +878,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "0bd8fbefbbe002fadd4dbc2ac7796310161bbc27a8b795fb0294ee7bdc927bfb",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.pdf",
@@ -623,8 +893,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "532bc7155cb1391546439a166f303d7bab77a7c6d2aa9a375aac7a0eb8522906",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positi_cf238e5d47_density.svg",
@@ -640,8 +916,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "365b3a2d6dfa907c475d761728c5fb17bf45128a514c23c9892e64e2c01afbcb",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.pdf",
@@ -649,8 +931,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "34080342005c90306444246e186e059a7ea7c6005b7c4e16c0bd2c947146fd8d",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negati_b4e77fb525_density.svg",
@@ -666,8 +954,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "b4e257e5c05872d942edf338d2aad2ef1560147f855ea2149e0855ac4809d8a8",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.pdf",
@@ -675,8 +969,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "cd707c37c9a9d71e756da40cad9ab2410e86cd7c9694e57a3cb7e23f121db36f",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positi_2501f0c7fe_density.svg",
@@ -692,8 +992,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2140, 1199],
-          "png": [4460, 2498]
+          "native": [
+            2140,
+            1199
+          ],
+          "png": [
+            4460,
+            2498
+          ]
         },
         "native_png_sha256": "59f5a87de5805317b5ed61eb7e10ef45a4bcc24f5b12d5685ebb479b3ad74e9a",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.pdf",
@@ -701,8 +1007,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2139, 1199],
-          "png": [4460, 2498]
+          "native": [
+            2139,
+            1199
+          ],
+          "png": [
+            4460,
+            2498
+          ]
         },
         "native_png_sha256": "6d666b569f9e5934d4c3902aaa81b8bc09d2978faa9a38990b4ccdff241d829e",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_9e2108f574_density.svg",
@@ -718,8 +1030,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2145, 1199],
-          "png": [4470, 2498]
+          "native": [
+            2145,
+            1199
+          ],
+          "png": [
+            4470,
+            2498
+          ]
         },
         "native_png_sha256": "4bb9b9f05847389e3c47c2860801224b4995a1128120b2dfeada834798ebf694",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.pdf",
@@ -727,8 +1045,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2144, 1199],
-          "png": [4470, 2498]
+          "native": [
+            2144,
+            1199
+          ],
+          "png": [
+            4470,
+            2498
+          ]
         },
         "native_png_sha256": "6ada82de55f9de1c4172d914c7b8e2d743c7db5a9c8d0796a07a4407a82e5e4b",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve1_rotation2_c_336a6453c6_density.svg",
@@ -744,8 +1068,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2140, 1199],
-          "png": [4461, 2498]
+          "native": [
+            2140,
+            1199
+          ],
+          "png": [
+            4461,
+            2498
+          ]
         },
         "native_png_sha256": "b930b4b9c98ef1c91448f3c85ab0c820835f991e570adfb86724eb46c74197d0",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.pdf",
@@ -753,8 +1083,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2140, 1199],
-          "png": [4461, 2498]
+          "native": [
+            2140,
+            1199
+          ],
+          "png": [
+            4461,
+            2498
+          ]
         },
         "native_png_sha256": "617faa6af3079492e1b8359f53d0ee0c46e80c4efee23a98f0b07d9f75148f7e",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_c2e7fba271_density.svg",
@@ -770,8 +1106,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2130, 1199],
-          "png": [4439, 2498]
+          "native": [
+            2130,
+            1199
+          ],
+          "png": [
+            4439,
+            2498
+          ]
         },
         "native_png_sha256": "6056db3f84d073ed1c163983240a3f63925bea32b42efdf3d8f4c5fc4dda62f0",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.pdf",
@@ -779,8 +1121,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2129, 1199],
-          "png": [4439, 2498]
+          "native": [
+            2129,
+            1199
+          ],
+          "png": [
+            4439,
+            2498
+          ]
         },
         "native_png_sha256": "a29565ff8a0a052b5d570eda37658813ca265d38376b4b6b3029dc1c525cca4b",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_c_3d992c2368_density.svg",
@@ -796,8 +1144,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2158, 1195],
-          "png": [4498, 2489]
+          "native": [
+            2158,
+            1195
+          ],
+          "png": [
+            4498,
+            2489
+          ]
         },
         "native_png_sha256": "0562115362e7d8a6f8d7b948da4b661c1ee0edfe3b70f4702938f0c2dd614de3",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.pdf",
@@ -805,8 +1159,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2157, 1194],
-          "png": [4498, 2489]
+          "native": [
+            2157,
+            1194
+          ],
+          "png": [
+            4498,
+            2489
+          ]
         },
         "native_png_sha256": "3688b9d5a40848cefa8790f096502e1e6f2e39f587841e798cb056fce003d496",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.svg",
@@ -822,8 +1182,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2158, 1196],
-          "png": [4498, 2491]
+          "native": [
+            2158,
+            1196
+          ],
+          "png": [
+            4498,
+            2491
+          ]
         },
         "native_png_sha256": "514223cfbadfd87ca75d71bd1449b056ba0d1545623198a97df6e6c41845fd70",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.pdf",
@@ -831,8 +1197,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2158, 1196],
-          "png": [4498, 2491]
+          "native": [
+            2158,
+            1196
+          ],
+          "png": [
+            4498,
+            2491
+          ]
         },
         "native_png_sha256": "0e19ce728b33c167401a39273440f3c2823ccccb6a1e66ffc17f5ea3dfadba73",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.svg",
@@ -848,8 +1220,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2158, 1195],
-          "png": [4498, 2488]
+          "native": [
+            2158,
+            1195
+          ],
+          "png": [
+            4498,
+            2488
+          ]
         },
         "native_png_sha256": "78d84d606f5b1c6dfcfe7576486ad6e03fcb83eb1f77fa48f30cef0fb61fd9c2",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.pdf",
@@ -857,8 +1235,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2158, 1194],
-          "png": [4498, 2488]
+          "native": [
+            2158,
+            1194
+          ],
+          "png": [
+            4498,
+            2488
+          ]
         },
         "native_png_sha256": "cda70e5afddf8f7796d0e478a8a2d9049335aab3e99da84081053dac80e54dbb",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_041506eb4d_density.svg",
@@ -874,8 +1258,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2158, 1196],
-          "png": [4498, 2492]
+          "native": [
+            2158,
+            1196
+          ],
+          "png": [
+            4498,
+            2492
+          ]
         },
         "native_png_sha256": "2ffb674a26867de3f58d259794e01372e0122a1a93298ab8524f168dac586b3f",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.pdf",
@@ -883,8 +1273,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2158, 1196],
-          "png": [4498, 2492]
+          "native": [
+            2158,
+            1196
+          ],
+          "png": [
+            4498,
+            2492
+          ]
         },
         "native_png_sha256": "7c97422ab3441272c5afe563690f487953f34bc596f0ff4bf5deb6919f970dae",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.svg",
@@ -900,8 +1296,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "ac88fa19a9a407389cf5006a0859f7f941e0e600d17b09f1830e0d3dbd5bdacd",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.pdf",
@@ -909,8 +1311,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "0e396a7760ed4c5a8461737927c9895984d431aa85c078c4edfbe4e1b261d2b0",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.svg",
@@ -926,8 +1334,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_fad5a988c9_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "793e0d2d1e8ac3dcd954b6d99b153b26d082fa9aa93307a0fb3e62200ce843f7",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_fad5a988c9_density.pdf",
@@ -935,8 +1349,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "24cfd91e9d3a27962bb2d07afa82269497426e2d9b8d620d3e04594d51236965",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_fad5a988c9_density.svg",
@@ -952,8 +1372,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "63e3a887be2eb7cd8175c10a618b4bc69da9db9281d194e4d28ec96a6c2b291a",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.pdf",
@@ -961,8 +1387,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "c9a66466784a8f60a03d31ee8b90bcccf5931f439d18772d62295f91066efd3f",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.svg",
@@ -978,8 +1410,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "46c8b741fbb4f848ceab891967e5b817cf86755ddcecffedd0e5354242abc5e8",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.pdf",
@@ -987,8 +1425,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "26e606b6dc0ea5012db9159e4df942331c0e30dac52876dc6b6fad968ed09137",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.svg",
@@ -1004,8 +1448,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "a75152b37c409e65a64b48b99186700c2ab8e9ac1759c4795f5ec3482d2b3769",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.pdf",
@@ -1013,8 +1463,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "5d7a408ac414aeb6247f9f851fbd9864293de04ee4e79d836f1c130e380c44a0",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.svg",
@@ -1030,8 +1486,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_1c3b5350d4_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "32c213e9d4708bbe9c83c1cd0505df974a28c621f04d22595e882c3369f98e78",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_1c3b5350d4_density.pdf",
@@ -1039,8 +1501,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "d9530310ca0744dfedcb88d9e6319ac5bcf69fa7b3b71125bed06cffc286d90b",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_1c3b5350d4_density.svg",
@@ -1056,8 +1524,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_only_149p744m_4e13359e62_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2061, 1199],
-          "png": [4294, 2498]
+          "native": [
+            2061,
+            1199
+          ],
+          "png": [
+            4294,
+            2498
+          ]
         },
         "native_png_sha256": "9691f224999db94cfe96ed052028844644e737a3290a8269aaac360fcbd699b8",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_only_149p744m_4e13359e62_density.pdf",
@@ -1065,8 +1539,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2061, 1199],
-          "png": [4294, 2498]
+          "native": [
+            2061,
+            1199
+          ],
+          "png": [
+            4294,
+            2498
+          ]
         },
         "native_png_sha256": "7c8d37ff0b0141d34064a96c05928e1488f510ed120559df5fa8c8c713dd0ed8",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_only_149p744m_4e13359e62_density.svg",
@@ -1082,8 +1562,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_path_149p744m_ba17c43d4f_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2074, 1199],
-          "png": [4321, 2498]
+          "native": [
+            2074,
+            1199
+          ],
+          "png": [
+            4321,
+            2498
+          ]
         },
         "native_png_sha256": "ca421e759527a74ef026fb55c2bc41919420f6ab889b098a1ce37ef4c9ee2b0f",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_path_149p744m_ba17c43d4f_density.pdf",
@@ -1091,8 +1577,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2074, 1199],
-          "png": [4321, 2498]
+          "native": [
+            2074,
+            1199
+          ],
+          "png": [
+            4321,
+            2498
+          ]
         },
         "native_png_sha256": "4b9c51778fdfb4eb19ee15eadc129d2fbaa7dd8201dbfde9cdf31222839561bb",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_path_149p744m_ba17c43d4f_density.svg",
@@ -1108,8 +1600,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_f965fbec72_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "aeaf5666e0980b33a45f8efa4d8d4356a4eff83526e224d4592ce782457b2feb",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_f965fbec72_density.pdf",
@@ -1117,8 +1615,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "ff4ede8632f991dd5001ab29c459c63fc5b1bba61fc916b353c5e7cb5e20241f",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_f965fbec72_density.svg",
@@ -1134,8 +1638,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_47b0b2c54a_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "043be9cbc26af6d5906c1b8bb930da7587fb42060ad3e0104196def0d1f000b1",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_47b0b2c54a_density.pdf",
@@ -1143,8 +1653,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "afd73e5ed34f53a82c8123b8c82c0553b54d8dd18e24d95136a3a88ae692012f",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facep_47b0b2c54a_density.svg",
@@ -1160,8 +1676,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_only_149p744m_25f203b582_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2074, 1199],
-          "png": [4321, 2498]
+          "native": [
+            2074,
+            1199
+          ],
+          "png": [
+            4321,
+            2498
+          ]
         },
         "native_png_sha256": "647331026896412973e4f267627950ca06269d2572a3fecb01f9c9859d246301",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_only_149p744m_25f203b582_density.pdf",
@@ -1169,8 +1691,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2074, 1199],
-          "png": [4321, 2498]
+          "native": [
+            2074,
+            1199
+          ],
+          "png": [
+            4321,
+            2498
+          ]
         },
         "native_png_sha256": "31b44ca3c81c1d5afa65868d9eecae1b00c66067eacba7385d8b60527cadce17",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_only_149p744m_25f203b582_density.svg",
@@ -1186,8 +1714,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_path_149p744m_916881f3d2_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2074, 1199],
-          "png": [4321, 2498]
+          "native": [
+            2074,
+            1199
+          ],
+          "png": [
+            4321,
+            2498
+          ]
         },
         "native_png_sha256": "ab0eabdbfaa8448063693c2329f67784b804ca9697b3be99fba02496306fbe40",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_path_149p744m_916881f3d2_density.pdf",
@@ -1195,8 +1729,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2074, 1199],
-          "png": [4321, 2498]
+          "native": [
+            2074,
+            1199
+          ],
+          "png": [
+            4321,
+            2498
+          ]
         },
         "native_png_sha256": "7919c247914d37c309a43038721d09685ce0d7db787092311af269bbf0001488",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_path_149p744m_916881f3d2_density.svg",
@@ -1212,8 +1752,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_86bdaa18f7_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2100, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2100,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "3994d9635284aadb1b87c3b19e574e555c7046c382e2a29f33619dcd06fed7a7",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_86bdaa18f7_density.pdf",
@@ -1221,8 +1767,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2099, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2099,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "2a080d404260da22eb5009c601df24f8e2d3e1640c1dc6de6b960711377d6e00",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_86bdaa18f7_density.svg",
@@ -1238,8 +1790,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_737f7c1cd2_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2100, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2100,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "31f7d5fb1cd460420361b0fe47531f7e2721b4442674df94bf56d7639960f2e9",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_737f7c1cd2_density.pdf",
@@ -1247,8 +1805,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2099, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2099,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "0addd5b04528e548f022128d69408af069461e8ce182310eab81b2fa1e4a9d4d",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepat_737f7c1cd2_density.svg",
@@ -1264,8 +1828,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_085178bf8e_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2087, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2087,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "274a8426f47ff47be9a1b6e70dc95028d93560778724d878071ee562b324ca07",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_085178bf8e_density.pdf",
@@ -1273,8 +1843,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2086, 1199],
-          "png": [4348, 2498]
+          "native": [
+            2086,
+            1199
+          ],
+          "png": [
+            4348,
+            2498
+          ]
         },
         "native_png_sha256": "c8c592d8b9dd5d5ba9c046f73d482881c54da37073af5559d407a117685967a6",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_085178bf8e_density.svg",
@@ -1290,8 +1866,14 @@
       "identity_png_relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_97bd2be36f_density.png",
       "pdf": {
         "dimensions": {
-          "native": [2100, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2100,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "5d312148eb12e9e3e8f92c9c0ea353d62f7c86625786b3f6d3d68fa3362683d1",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_97bd2be36f_density.pdf",
@@ -1299,8 +1881,14 @@
       },
       "svg": {
         "dimensions": {
-          "native": [2099, 1199],
-          "png": [4375, 2498]
+          "native": [
+            2099,
+            1199
+          ],
+          "png": [
+            4375,
+            2498
+          ]
         },
         "native_png_sha256": "1100f88d12c6c3dbcf059007071fd9fa7061285ac3b5f20b2071e322f7a89523",
         "relative_path": "comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepat_97bd2be36f_density.svg",

@@ -11,9 +11,9 @@ then change shaft-twist SD from 1° to 2°. Each comparison independently assemb
 the sorted shot-index intersection across Straight, Draw and Fade at both SDs.
 
 | Shaft Lean | Supported n at SD 1° (Each Pattern) | Supported n at SD 2° (Each Pattern) | Six-Population Common n |
-| ---------- | ----------------------------------: | ----------------------------------: | ----------------------: |
-| 0°         |                              10,000 |                              10,000 |                  10,000 |
-| 5°         |                               9,974 |                               9,940 |                   9,939 |
+| --- | ---: | ---: | ---: |
+| 0° | 10,000 | 10,000 | 10,000 |
+| 5° | 9,974 | 9,940 | 9,939 |
 
 At 5° lean, using either condition's separate supported count would overstate
 the paired population. The common index set correctly excludes 61 of the

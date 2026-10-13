@@ -92,22 +92,22 @@
     {
       "field": "C01 Draw estimate",
       "display": "+7.462e-05",
-      "expected": 7.461555935228152e-5,
-      "rounding_tolerance": 5.000000074615559e-9,
+      "expected": 7.461555935228152e-05,
+      "rounding_tolerance": 5.000000074615559e-09,
       "matches_display_precision": true
     },
     {
       "field": "C01 Draw lower_95",
       "display": "-7.104e-05",
-      "expected": -7.104046933162085e-5,
-      "rounding_tolerance": 5.00000007104047e-9,
+      "expected": -7.104046933162085e-05,
+      "rounding_tolerance": 5.00000007104047e-09,
       "matches_display_precision": true
     },
     {
       "field": "C01 Draw upper_95",
       "display": "+2.190e-04",
       "expected": 0.00021896077539046698,
-      "rounding_tolerance": 5.0000000218960774e-8,
+      "rounding_tolerance": 5.0000000218960774e-08,
       "matches_display_precision": true
     },
     {
@@ -155,22 +155,22 @@
     {
       "field": "C01 Fade estimate",
       "display": "+6.826e-05",
-      "expected": 6.825953225868763e-5,
-      "rounding_tolerance": 5.000000068259532e-9,
+      "expected": 6.825953225868763e-05,
+      "rounding_tolerance": 5.000000068259532e-09,
       "matches_display_precision": true
     },
     {
       "field": "C01 Fade lower_95",
       "display": "-5.228e-05",
-      "expected": -5.2277181705243884e-5,
-      "rounding_tolerance": 5.000000052277182e-9,
+      "expected": -5.2277181705243884e-05,
+      "rounding_tolerance": 5.000000052277182e-09,
       "matches_display_precision": true
     },
     {
       "field": "C01 Fade upper_95",
       "display": "+1.705e-04",
       "expected": 0.00017049843183190757,
-      "rounding_tolerance": 5.000000017049843e-8,
+      "rounding_tolerance": 5.000000017049843e-08,
       "matches_display_precision": true
     },
     {
@@ -254,28 +254,28 @@
       "field": "C02 Draw absolute_sg",
       "display": "-0.4126",
       "expected": -0.4125675679611443,
-      "rounding_tolerance": 5.000000041256757e-5,
+      "rounding_tolerance": 5.000000041256757e-05,
       "matches_display_precision": true
     },
     {
       "field": "C02 Draw estimate",
       "display": "+2.691e-05",
-      "expected": 2.6911773453713884e-5,
-      "rounding_tolerance": 5.000000026911774e-9,
+      "expected": 2.6911773453713884e-05,
+      "rounding_tolerance": 5.000000026911774e-09,
       "matches_display_precision": true
     },
     {
       "field": "C02 Draw lower_95",
       "display": "-1.642e-04",
       "expected": -0.00016417507301096237,
-      "rounding_tolerance": 5.0000000164175073e-8,
+      "rounding_tolerance": 5.0000000164175073e-08,
       "matches_display_precision": true
     },
     {
       "field": "C02 Draw upper_95",
       "display": "+2.204e-04",
       "expected": 0.00022037368523597208,
-      "rounding_tolerance": 5.0000000220373685e-8,
+      "rounding_tolerance": 5.0000000220373685e-08,
       "matches_display_precision": true
     },
     {
@@ -317,28 +317,28 @@
       "field": "C02 Fade absolute_sg",
       "display": "-0.4126",
       "expected": -0.4125523042814373,
-      "rounding_tolerance": 5.0000000412552305e-5,
+      "rounding_tolerance": 5.0000000412552305e-05,
       "matches_display_precision": true
     },
     {
       "field": "C02 Fade estimate",
       "display": "+4.218e-05",
-      "expected": 4.2175453160651455e-5,
-      "rounding_tolerance": 5.000000042175453e-9,
+      "expected": 4.2175453160651455e-05,
+      "rounding_tolerance": 5.000000042175453e-09,
       "matches_display_precision": true
     },
     {
       "field": "C02 Fade lower_95",
       "display": "-1.739e-04",
       "expected": -0.00017391896152132183,
-      "rounding_tolerance": 5.000000017391896e-8,
+      "rounding_tolerance": 5.000000017391896e-08,
       "matches_display_precision": true
     },
     {
       "field": "C02 Fade upper_95",
       "display": "+2.646e-04",
       "expected": 0.0002645740815497581,
-      "rounding_tolerance": 5.000000026457408e-8,
+      "rounding_tolerance": 5.000000026457408e-08,
       "matches_display_precision": true
     },
     {
@@ -429,21 +429,21 @@
       "field": "C03 Draw estimate",
       "display": "+0.00289",
       "expected": 0.002892622455209583,
-      "rounding_tolerance": 5.000000002892623e-6,
+      "rounding_tolerance": 5.000000002892623e-06,
       "matches_display_precision": true
     },
     {
       "field": "C03 Draw lower_95",
       "display": "+0.00246",
       "expected": 0.002462300702968206,
-      "rounding_tolerance": 5.0000000024623015e-6,
+      "rounding_tolerance": 5.0000000024623015e-06,
       "matches_display_precision": true
     },
     {
       "field": "C03 Draw upper_95",
       "display": "+0.00338",
       "expected": 0.0033783187780881603,
-      "rounding_tolerance": 5.000000003378319e-6,
+      "rounding_tolerance": 5.000000003378319e-06,
       "matches_display_precision": true
     },
     {
@@ -492,21 +492,21 @@
       "field": "C03 Fade estimate",
       "display": "-0.001225",
       "expected": -0.0012251198782864715,
-      "rounding_tolerance": 5.000000012251198e-7,
+      "rounding_tolerance": 5.000000012251198e-07,
       "matches_display_precision": true
     },
     {
       "field": "C03 Fade lower_95",
       "display": "-0.00162",
       "expected": -0.001619667175215034,
-      "rounding_tolerance": 5.000000001619667e-6,
+      "rounding_tolerance": 5.000000001619667e-06,
       "matches_display_precision": true
     },
     {
       "field": "C03 Fade upper_95",
       "display": "-8.629e-04",
       "expected": -0.0008628541516474099,
-      "rounding_tolerance": 5.000000086285415e-8,
+      "rounding_tolerance": 5.000000086285415e-08,
       "matches_display_precision": true
     },
     {
@@ -590,28 +590,28 @@
       "field": "C04 Draw absolute_sg",
       "display": "-0.4555",
       "expected": -0.455511326715009,
-      "rounding_tolerance": 5.000000045551133e-5,
+      "rounding_tolerance": 5.000000045551133e-05,
       "matches_display_precision": true
     },
     {
       "field": "C04 Draw estimate",
       "display": "+0.002195",
       "expected": 0.002195160317973801,
-      "rounding_tolerance": 5.000000021951603e-7,
+      "rounding_tolerance": 5.000000021951603e-07,
       "matches_display_precision": true
     },
     {
       "field": "C04 Draw lower_95",
       "display": "+0.001695",
       "expected": 0.001694900809112219,
-      "rounding_tolerance": 5.000000016949008e-7,
+      "rounding_tolerance": 5.000000016949008e-07,
       "matches_display_precision": true
     },
     {
       "field": "C04 Draw upper_95",
       "display": "+0.002636",
       "expected": 0.00263646030502905,
-      "rounding_tolerance": 5.000000026364603e-7,
+      "rounding_tolerance": 5.000000026364603e-07,
       "matches_display_precision": true
     },
     {
@@ -660,21 +660,21 @@
       "field": "C04 Fade estimate",
       "display": "-9.277e-04",
       "expected": -0.0009276973154250246,
-      "rounding_tolerance": 5.0000000927697315e-8,
+      "rounding_tolerance": 5.0000000927697315e-08,
       "matches_display_precision": true
     },
     {
       "field": "C04 Fade lower_95",
       "display": "-0.001382",
       "expected": -0.001382424571512692,
-      "rounding_tolerance": 5.000000013824246e-7,
+      "rounding_tolerance": 5.000000013824246e-07,
       "matches_display_precision": true
     },
     {
       "field": "C04 Fade upper_95",
       "display": "-5.147e-04",
       "expected": -0.0005146905618213765,
-      "rounding_tolerance": 5.000000051469056e-8,
+      "rounding_tolerance": 5.000000051469056e-08,
       "matches_display_precision": true
     },
     {
@@ -758,28 +758,28 @@
       "field": "C05 Draw absolute_sg",
       "display": "-0.3954",
       "expected": -0.39541202937439573,
-      "rounding_tolerance": 5.000000039541203e-5,
+      "rounding_tolerance": 5.000000039541203e-05,
       "matches_display_precision": true
     },
     {
       "field": "C05 Draw estimate",
       "display": "+3.250e-04",
       "expected": 0.0003250170574719388,
-      "rounding_tolerance": 5.0000000325017055e-8,
+      "rounding_tolerance": 5.0000000325017055e-08,
       "matches_display_precision": true
     },
     {
       "field": "C05 Draw lower_95",
       "display": "+1.042e-04",
       "expected": 0.00010419990359491727,
-      "rounding_tolerance": 5.00000001041999e-8,
+      "rounding_tolerance": 5.00000001041999e-08,
       "matches_display_precision": true
     },
     {
       "field": "C05 Draw upper_95",
       "display": "+5.513e-04",
       "expected": 0.0005512859618879582,
-      "rounding_tolerance": 5.000000055128596e-8,
+      "rounding_tolerance": 5.000000055128596e-08,
       "matches_display_precision": true
     },
     {
@@ -821,28 +821,28 @@
       "field": "C05 Fade absolute_sg",
       "display": "-0.3955",
       "expected": -0.3955026594141381,
-      "rounding_tolerance": 5.0000000395502664e-5,
+      "rounding_tolerance": 5.0000000395502664e-05,
       "matches_display_precision": true
     },
     {
       "field": "C05 Fade estimate",
       "display": "+2.344e-04",
       "expected": 0.00023438701772961358,
-      "rounding_tolerance": 5.000000023438702e-8,
+      "rounding_tolerance": 5.000000023438702e-08,
       "matches_display_precision": true
     },
     {
       "field": "C05 Fade lower_95",
       "display": "+5.011e-05",
-      "expected": 5.011171232938114e-5,
-      "rounding_tolerance": 5.0000000501117125e-9,
+      "expected": 5.011171232938114e-05,
+      "rounding_tolerance": 5.0000000501117125e-09,
       "matches_display_precision": true
     },
     {
       "field": "C05 Fade upper_95",
       "display": "+4.290e-04",
       "expected": 0.0004289664606828679,
-      "rounding_tolerance": 5.000000042896646e-8,
+      "rounding_tolerance": 5.000000042896646e-08,
       "matches_display_precision": true
     },
     {
@@ -933,21 +933,21 @@
       "field": "C06 Draw estimate",
       "display": "+5.626e-04",
       "expected": 0.0005625981068929291,
-      "rounding_tolerance": 5.0000000562598103e-8,
+      "rounding_tolerance": 5.0000000562598103e-08,
       "matches_display_precision": true
     },
     {
       "field": "C06 Draw lower_95",
       "display": "+2.392e-04",
       "expected": 0.00023922180285302648,
-      "rounding_tolerance": 5.00000002392218e-8,
+      "rounding_tolerance": 5.00000002392218e-08,
       "matches_display_precision": true
     },
     {
       "field": "C06 Draw upper_95",
       "display": "+8.978e-04",
       "expected": 0.000897767091841708,
-      "rounding_tolerance": 5.000000089776709e-8,
+      "rounding_tolerance": 5.000000089776709e-08,
       "matches_display_precision": true
     },
     {
@@ -989,28 +989,28 @@
       "field": "C06 Fade absolute_sg",
       "display": "-0.4125",
       "expected": -0.4124998637094484,
-      "rounding_tolerance": 5.0000000412499864e-5,
+      "rounding_tolerance": 5.0000000412499864e-05,
       "matches_display_precision": true
     },
     {
       "field": "C06 Fade estimate",
       "display": "+9.462e-05",
-      "expected": 9.461602514953083e-5,
-      "rounding_tolerance": 5.0000000946160255e-9,
+      "expected": 9.461602514953083e-05,
+      "rounding_tolerance": 5.0000000946160255e-09,
       "matches_display_precision": true
     },
     {
       "field": "C06 Fade lower_95",
       "display": "-2.218e-04",
       "expected": -0.00022182231653632132,
-      "rounding_tolerance": 5.0000000221822316e-8,
+      "rounding_tolerance": 5.0000000221822316e-08,
       "matches_display_precision": true
     },
     {
       "field": "C06 Fade upper_95",
       "display": "+4.419e-04",
       "expected": 0.000441863460349558,
-      "rounding_tolerance": 5.0000000441863456e-8,
+      "rounding_tolerance": 5.0000000441863456e-08,
       "matches_display_precision": true
     },
     {
@@ -1101,21 +1101,21 @@
       "field": "C07 Draw estimate",
       "display": "+0.0078",
       "expected": 0.0077976550468906,
-      "rounding_tolerance": 5.000000000779766e-5,
+      "rounding_tolerance": 5.000000000779766e-05,
       "matches_display_precision": true
     },
     {
       "field": "C07 Draw lower_95",
       "display": "+0.00713",
       "expected": 0.007132512276517505,
-      "rounding_tolerance": 5.0000000071325125e-6,
+      "rounding_tolerance": 5.0000000071325125e-06,
       "matches_display_precision": true
     },
     {
       "field": "C07 Draw upper_95",
       "display": "+0.00852",
       "expected": 0.00851800983301036,
-      "rounding_tolerance": 5.00000000851801e-6,
+      "rounding_tolerance": 5.00000000851801e-06,
       "matches_display_precision": true
     },
     {
@@ -1164,21 +1164,21 @@
       "field": "C07 Fade estimate",
       "display": "-0.00146",
       "expected": -0.0014605392519033656,
-      "rounding_tolerance": 5.000000001460539e-6,
+      "rounding_tolerance": 5.000000001460539e-06,
       "matches_display_precision": true
     },
     {
       "field": "C07 Fade lower_95",
       "display": "-0.001974",
       "expected": -0.00197428365531585,
-      "rounding_tolerance": 5.000000019742836e-7,
+      "rounding_tolerance": 5.000000019742836e-07,
       "matches_display_precision": true
     },
     {
       "field": "C07 Fade upper_95",
       "display": "-9.630e-04",
       "expected": -0.0009630426997952468,
-      "rounding_tolerance": 5.0000000963042697e-8,
+      "rounding_tolerance": 5.0000000963042697e-08,
       "matches_display_precision": true
     },
     {
@@ -1269,21 +1269,21 @@
       "field": "C08 Draw estimate",
       "display": "+0.00668",
       "expected": 0.006682310193510924,
-      "rounding_tolerance": 5.00000000668231e-6,
+      "rounding_tolerance": 5.00000000668231e-06,
       "matches_display_precision": true
     },
     {
       "field": "C08 Draw lower_95",
       "display": "+0.00594",
       "expected": 0.00593805307697459,
-      "rounding_tolerance": 5.000000005938054e-6,
+      "rounding_tolerance": 5.000000005938054e-06,
       "matches_display_precision": true
     },
     {
       "field": "C08 Draw upper_95",
       "display": "+0.00744",
       "expected": 0.007437961717395396,
-      "rounding_tolerance": 5.000000007437962e-6,
+      "rounding_tolerance": 5.000000007437962e-06,
       "matches_display_precision": true
     },
     {
@@ -1325,28 +1325,28 @@
       "field": "C08 Fade absolute_sg",
       "display": "-0.4585",
       "expected": -0.45854119895517526,
-      "rounding_tolerance": 5.00000004585412e-5,
+      "rounding_tolerance": 5.00000004585412e-05,
       "matches_display_precision": true
     },
     {
       "field": "C08 Fade estimate",
       "display": "-8.347e-04",
       "expected": -0.0008347119221924334,
-      "rounding_tolerance": 5.000000083471192e-8,
+      "rounding_tolerance": 5.000000083471192e-08,
       "matches_display_precision": true
     },
     {
       "field": "C08 Fade lower_95",
       "display": "-0.001478",
       "expected": -0.0014784010680460502,
-      "rounding_tolerance": 5.00000001478401e-7,
+      "rounding_tolerance": 5.00000001478401e-07,
       "matches_display_precision": true
     },
     {
       "field": "C08 Fade upper_95",
       "display": "-2.621e-04",
       "expected": -0.0002621467109694824,
-      "rounding_tolerance": 5.000000026214671e-8,
+      "rounding_tolerance": 5.000000026214671e-08,
       "matches_display_precision": true
     },
     {
@@ -1437,21 +1437,21 @@
       "field": "C09 Draw estimate",
       "display": "-5.056e-04",
       "expected": -0.0005056061017231564,
-      "rounding_tolerance": 5.00000005056061e-8,
+      "rounding_tolerance": 5.00000005056061e-08,
       "matches_display_precision": true
     },
     {
       "field": "C09 Draw lower_95",
       "display": "-5.137e-04",
       "expected": -0.0005136910470865477,
-      "rounding_tolerance": 5.000000051369104e-8,
+      "rounding_tolerance": 5.000000051369104e-08,
       "matches_display_precision": true
     },
     {
       "field": "C09 Draw upper_95",
       "display": "-4.968e-04",
       "expected": -0.0004968345325920594,
-      "rounding_tolerance": 5.000000049683453e-8,
+      "rounding_tolerance": 5.000000049683453e-08,
       "matches_display_precision": true
     },
     {
@@ -1500,21 +1500,21 @@
       "field": "C09 Fade estimate",
       "display": "+0.001047",
       "expected": 0.0010469558147421583,
-      "rounding_tolerance": 5.000000010469558e-7,
+      "rounding_tolerance": 5.000000010469558e-07,
       "matches_display_precision": true
     },
     {
       "field": "C09 Fade lower_95",
       "display": "+0.0010332",
       "expected": 0.0010332127670539123,
-      "rounding_tolerance": 5.0000001033212765e-8,
+      "rounding_tolerance": 5.0000001033212765e-08,
       "matches_display_precision": true
     },
     {
       "field": "C09 Fade upper_95",
       "display": "+0.001059",
       "expected": 0.001059062684997039,
-      "rounding_tolerance": 5.000000010590626e-7,
+      "rounding_tolerance": 5.000000010590626e-07,
       "matches_display_precision": true
     },
     {
@@ -1605,21 +1605,21 @@
       "field": "C10 Draw estimate",
       "display": "-7.450e-04",
       "expected": -0.000744997384623318,
-      "rounding_tolerance": 5.0000000744997384e-8,
+      "rounding_tolerance": 5.0000000744997384e-08,
       "matches_display_precision": true
     },
     {
       "field": "C10 Draw lower_95",
       "display": "-8.996e-04",
       "expected": -0.0008996071841677639,
-      "rounding_tolerance": 5.000000089960718e-8,
+      "rounding_tolerance": 5.000000089960718e-08,
       "matches_display_precision": true
     },
     {
       "field": "C10 Draw upper_95",
       "display": "-5.795e-04",
       "expected": -0.0005794542262540843,
-      "rounding_tolerance": 5.0000000579454224e-8,
+      "rounding_tolerance": 5.0000000579454224e-08,
       "matches_display_precision": true
     },
     {
@@ -1661,28 +1661,28 @@
       "field": "C10 Fade absolute_sg",
       "display": "+0.1827",
       "expected": 0.1827357705298169,
-      "rounding_tolerance": 5.000000018273577e-5,
+      "rounding_tolerance": 5.000000018273577e-05,
       "matches_display_precision": true
     },
     {
       "field": "C10 Fade estimate",
       "display": "+8.934e-04",
       "expected": 0.0008933617862555983,
-      "rounding_tolerance": 5.000000089336178e-8,
+      "rounding_tolerance": 5.000000089336178e-08,
       "matches_display_precision": true
     },
     {
       "field": "C10 Fade lower_95",
       "display": "+7.090e-04",
       "expected": 0.0007089665616960485,
-      "rounding_tolerance": 5.000000070896656e-8,
+      "rounding_tolerance": 5.000000070896656e-08,
       "matches_display_precision": true
     },
     {
       "field": "C10 Fade upper_95",
       "display": "+0.001078",
       "expected": 0.001077775678132865,
-      "rounding_tolerance": 5.000000010777756e-7,
+      "rounding_tolerance": 5.000000010777756e-07,
       "matches_display_precision": true
     },
     {
@@ -1766,28 +1766,28 @@
       "field": "C11 Draw absolute_sg",
       "display": "+0.2946",
       "expected": 0.2945804420432429,
-      "rounding_tolerance": 5.000000029458044e-5,
+      "rounding_tolerance": 5.000000029458044e-05,
       "matches_display_precision": true
     },
     {
       "field": "C11 Draw estimate",
       "display": "-4.992e-04",
       "expected": -0.0004991575546013074,
-      "rounding_tolerance": 5.000000049915755e-8,
+      "rounding_tolerance": 5.000000049915755e-08,
       "matches_display_precision": true
     },
     {
       "field": "C11 Draw lower_95",
       "display": "-5.776e-04",
       "expected": -0.0005776302928350938,
-      "rounding_tolerance": 5.000000057763029e-8,
+      "rounding_tolerance": 5.000000057763029e-08,
       "matches_display_precision": true
     },
     {
       "field": "C11 Draw upper_95",
       "display": "-4.544e-04",
       "expected": -0.000454438117389022,
-      "rounding_tolerance": 5.000000045443812e-8,
+      "rounding_tolerance": 5.000000045443812e-08,
       "matches_display_precision": true
     },
     {
@@ -1836,21 +1836,21 @@
       "field": "C11 Fade estimate",
       "display": "+0.001067",
       "expected": 0.0010669555028524154,
-      "rounding_tolerance": 5.000000010669555e-7,
+      "rounding_tolerance": 5.000000010669555e-07,
       "matches_display_precision": true
     },
     {
       "field": "C11 Fade lower_95",
       "display": "+9.861e-04",
       "expected": 0.0009860655573140106,
-      "rounding_tolerance": 5.0000000986065555e-8,
+      "rounding_tolerance": 5.0000000986065555e-08,
       "matches_display_precision": true
     },
     {
       "field": "C11 Fade upper_95",
       "display": "+0.001182",
       "expected": 0.0011823456196609781,
-      "rounding_tolerance": 5.000000011823456e-7,
+      "rounding_tolerance": 5.000000011823456e-07,
       "matches_display_precision": true
     },
     {
@@ -1892,7 +1892,7 @@
       "field": "C12 Straight absolute_sg",
       "display": "+0.0722",
       "expected": 0.07221941702596886,
-      "rounding_tolerance": 5.000000007221942e-5,
+      "rounding_tolerance": 5.000000007221942e-05,
       "matches_display_precision": true
     },
     {
@@ -1934,28 +1934,28 @@
       "field": "C12 Draw absolute_sg",
       "display": "+0.0714",
       "expected": 0.07141414461952926,
-      "rounding_tolerance": 5.000000007141415e-5,
+      "rounding_tolerance": 5.000000007141415e-05,
       "matches_display_precision": true
     },
     {
       "field": "C12 Draw estimate",
       "display": "-8.053e-04",
       "expected": -0.000805272406439605,
-      "rounding_tolerance": 5.00000008052724e-8,
+      "rounding_tolerance": 5.00000008052724e-08,
       "matches_display_precision": true
     },
     {
       "field": "C12 Draw lower_95",
       "display": "-0.001038",
       "expected": -0.0010375654126761375,
-      "rounding_tolerance": 5.000000010375654e-7,
+      "rounding_tolerance": 5.000000010375654e-07,
       "matches_display_precision": true
     },
     {
       "field": "C12 Draw upper_95",
       "display": "-5.918e-04",
       "expected": -0.0005917861027988725,
-      "rounding_tolerance": 5.00000005917861e-8,
+      "rounding_tolerance": 5.00000005917861e-08,
       "matches_display_precision": true
     },
     {
@@ -1997,28 +1997,28 @@
       "field": "C12 Fade absolute_sg",
       "display": "+0.0733",
       "expected": 0.07333031849710539,
-      "rounding_tolerance": 5.000000007333032e-5,
+      "rounding_tolerance": 5.000000007333032e-05,
       "matches_display_precision": true
     },
     {
       "field": "C12 Fade estimate",
       "display": "+0.00111",
       "expected": 0.0011109014711365183,
-      "rounding_tolerance": 5.000000001110902e-6,
+      "rounding_tolerance": 5.000000001110902e-06,
       "matches_display_precision": true
     },
     {
       "field": "C12 Fade lower_95",
       "display": "+8.442e-04",
       "expected": 0.0008441733823956837,
-      "rounding_tolerance": 5.000000084417338e-8,
+      "rounding_tolerance": 5.000000084417338e-08,
       "matches_display_precision": true
     },
     {
       "field": "C12 Fade upper_95",
       "display": "+0.001355",
       "expected": 0.0013554839330177611,
-      "rounding_tolerance": 5.000000013554839e-7,
+      "rounding_tolerance": 5.000000013554839e-07,
       "matches_display_precision": true
     },
     {
@@ -2109,21 +2109,21 @@
       "field": "C13 Draw estimate",
       "display": "-3.978e-04",
       "expected": -0.00039781680835424563,
-      "rounding_tolerance": 5.0000000397816804e-8,
+      "rounding_tolerance": 5.0000000397816804e-08,
       "matches_display_precision": true
     },
     {
       "field": "C13 Draw lower_95",
       "display": "-4.106e-04",
       "expected": -0.0004105793744515264,
-      "rounding_tolerance": 5.000000041057937e-8,
+      "rounding_tolerance": 5.000000041057937e-08,
       "matches_display_precision": true
     },
     {
       "field": "C13 Draw upper_95",
       "display": "-3.851e-04",
       "expected": -0.0003851088886991594,
-      "rounding_tolerance": 5.000000038510889e-8,
+      "rounding_tolerance": 5.000000038510889e-08,
       "matches_display_precision": true
     },
     {
@@ -2172,21 +2172,21 @@
       "field": "C13 Fade estimate",
       "display": "+0.0025526",
       "expected": 0.00255256876498472,
-      "rounding_tolerance": 5.0000002552568764e-8,
+      "rounding_tolerance": 5.0000002552568764e-08,
       "matches_display_precision": true
     },
     {
       "field": "C13 Fade lower_95",
       "display": "+0.00252",
       "expected": 0.0025200337078003718,
-      "rounding_tolerance": 5.000000002520034e-6,
+      "rounding_tolerance": 5.000000002520034e-06,
       "matches_display_precision": true
     },
     {
       "field": "C13 Fade upper_95",
       "display": "+0.00258",
       "expected": 0.0025800222645107466,
-      "rounding_tolerance": 5.000000002580023e-6,
+      "rounding_tolerance": 5.000000002580023e-06,
       "matches_display_precision": true
     },
     {
@@ -2270,28 +2270,28 @@
       "field": "C14 Draw absolute_sg",
       "display": "+0.1805",
       "expected": 0.18048668882315286,
-      "rounding_tolerance": 5.000000018048669e-5,
+      "rounding_tolerance": 5.000000018048669e-05,
       "matches_display_precision": true
     },
     {
       "field": "C14 Draw estimate",
       "display": "-0.001356",
       "expected": -0.0013557199204084474,
-      "rounding_tolerance": 5.000000013557199e-7,
+      "rounding_tolerance": 5.000000013557199e-07,
       "matches_display_precision": true
     },
     {
       "field": "C14 Draw lower_95",
       "display": "-0.00165",
       "expected": -0.001651328160000656,
-      "rounding_tolerance": 5.000000001651328e-6,
+      "rounding_tolerance": 5.000000001651328e-06,
       "matches_display_precision": true
     },
     {
       "field": "C14 Draw upper_95",
       "display": "-0.001025",
       "expected": -0.0010252767808334937,
-      "rounding_tolerance": 5.000000010252767e-7,
+      "rounding_tolerance": 5.000000010252767e-07,
       "matches_display_precision": true
     },
     {
@@ -2340,21 +2340,21 @@
       "field": "C14 Fade estimate",
       "display": "+0.001975",
       "expected": 0.001974931464121476,
-      "rounding_tolerance": 5.000000019749314e-7,
+      "rounding_tolerance": 5.000000019749314e-07,
       "matches_display_precision": true
     },
     {
       "field": "C14 Fade lower_95",
       "display": "+0.001623",
       "expected": 0.001622698230536737,
-      "rounding_tolerance": 5.000000016226982e-7,
+      "rounding_tolerance": 5.000000016226982e-07,
       "matches_display_precision": true
     },
     {
       "field": "C14 Fade upper_95",
       "display": "+0.002286",
       "expected": 0.002286495553933502,
-      "rounding_tolerance": 5.000000022864955e-7,
+      "rounding_tolerance": 5.000000022864955e-07,
       "matches_display_precision": true
     },
     {
@@ -2445,21 +2445,21 @@
       "field": "C15 Draw estimate",
       "display": "-2.883e-04",
       "expected": -0.00028827142960523414,
-      "rounding_tolerance": 5.000000028827143e-8,
+      "rounding_tolerance": 5.000000028827143e-08,
       "matches_display_precision": true
     },
     {
       "field": "C15 Draw lower_95",
       "display": "-4.426e-04",
       "expected": -0.00044262025569419695,
-      "rounding_tolerance": 5.0000000442620254e-8,
+      "rounding_tolerance": 5.0000000442620254e-08,
       "matches_display_precision": true
     },
     {
       "field": "C15 Draw upper_95",
       "display": "-1.306e-04",
       "expected": -0.00013058616003233314,
-      "rounding_tolerance": 5.000000013058616e-8,
+      "rounding_tolerance": 5.000000013058616e-08,
       "matches_display_precision": true
     },
     {
@@ -2501,28 +2501,28 @@
       "field": "C15 Fade absolute_sg",
       "display": "+0.2977",
       "expected": 0.29766123362948876,
-      "rounding_tolerance": 5.000000029766124e-5,
+      "rounding_tolerance": 5.000000029766124e-05,
       "matches_display_precision": true
     },
     {
       "field": "C15 Fade estimate",
       "display": "+0.002582",
       "expected": 0.0025816340316445357,
-      "rounding_tolerance": 5.00000002581634e-7,
+      "rounding_tolerance": 5.00000002581634e-07,
       "matches_display_precision": true
     },
     {
       "field": "C15 Fade lower_95",
       "display": "+0.002453",
       "expected": 0.002452822708401985,
-      "rounding_tolerance": 5.000000024528226e-7,
+      "rounding_tolerance": 5.000000024528226e-07,
       "matches_display_precision": true
     },
     {
       "field": "C15 Fade upper_95",
       "display": "+0.002736",
       "expected": 0.0027363617926215254,
-      "rounding_tolerance": 5.000000027363617e-7,
+      "rounding_tolerance": 5.000000027363617e-07,
       "matches_display_precision": true
     },
     {
@@ -2564,7 +2564,7 @@
       "field": "C16 Straight absolute_sg",
       "display": "+0.0722",
       "expected": 0.07221941702596886,
-      "rounding_tolerance": 5.000000007221942e-5,
+      "rounding_tolerance": 5.000000007221942e-05,
       "matches_display_precision": true
     },
     {
@@ -2606,28 +2606,28 @@
       "field": "C16 Draw absolute_sg",
       "display": "+0.0712",
       "expected": 0.07116655271349691,
-      "rounding_tolerance": 5.000000007116655e-5,
+      "rounding_tolerance": 5.000000007116655e-05,
       "matches_display_precision": true
     },
     {
       "field": "C16 Draw estimate",
       "display": "-0.001053",
       "expected": -0.0010528643124719517,
-      "rounding_tolerance": 5.000000010528643e-7,
+      "rounding_tolerance": 5.000000010528643e-07,
       "matches_display_precision": true
     },
     {
       "field": "C16 Draw lower_95",
       "display": "-0.001428",
       "expected": -0.0014284417050673154,
-      "rounding_tolerance": 5.000000014284416e-7,
+      "rounding_tolerance": 5.000000014284416e-07,
       "matches_display_precision": true
     },
     {
       "field": "C16 Draw upper_95",
       "display": "-6.655e-04",
       "expected": -0.0006655062897350165,
-      "rounding_tolerance": 5.000000066550629e-8,
+      "rounding_tolerance": 5.000000066550629e-08,
       "matches_display_precision": true
     },
     {
@@ -2669,28 +2669,28 @@
       "field": "C16 Fade absolute_sg",
       "display": "+0.0745",
       "expected": 0.07451321929029243,
-      "rounding_tolerance": 5.000000007451322e-5,
+      "rounding_tolerance": 5.000000007451322e-05,
       "matches_display_precision": true
     },
     {
       "field": "C16 Fade estimate",
       "display": "+0.002294",
       "expected": 0.0022938022643235758,
-      "rounding_tolerance": 5.000000022938023e-7,
+      "rounding_tolerance": 5.000000022938023e-07,
       "matches_display_precision": true
     },
     {
       "field": "C16 Fade lower_95",
       "display": "+0.00193",
       "expected": 0.0019305516115089587,
-      "rounding_tolerance": 5.000000001930552e-6,
+      "rounding_tolerance": 5.000000001930552e-06,
       "matches_display_precision": true
     },
     {
       "field": "C16 Fade upper_95",
       "display": "+0.002645",
       "expected": 0.0026454744396299298,
-      "rounding_tolerance": 5.000000026454745e-7,
+      "rounding_tolerance": 5.000000026454745e-07,
       "matches_display_precision": true
     },
     {
@@ -2781,21 +2781,21 @@
       "field": "C17 Draw estimate",
       "display": "+0.004434",
       "expected": 0.004433925527972051,
-      "rounding_tolerance": 5.000000044339255e-7,
+      "rounding_tolerance": 5.000000044339255e-07,
       "matches_display_precision": true
     },
     {
       "field": "C17 Draw lower_95",
       "display": "+0.004363",
       "expected": 0.004363272128619715,
-      "rounding_tolerance": 5.000000043632721e-7,
+      "rounding_tolerance": 5.000000043632721e-07,
       "matches_display_precision": true
     },
     {
       "field": "C17 Draw upper_95",
       "display": "+0.004502",
       "expected": 0.004501976200912722,
-      "rounding_tolerance": 5.000000045019762e-7,
+      "rounding_tolerance": 5.000000045019762e-07,
       "matches_display_precision": true
     },
     {
@@ -2844,21 +2844,21 @@
       "field": "C17 Fade estimate",
       "display": "-0.00445",
       "expected": -0.004449851864739739,
-      "rounding_tolerance": 5.000000004449852e-6,
+      "rounding_tolerance": 5.000000004449852e-06,
       "matches_display_precision": true
     },
     {
       "field": "C17 Fade lower_95",
       "display": "-0.004517",
       "expected": -0.00451668884298232,
-      "rounding_tolerance": 5.000000045166888e-7,
+      "rounding_tolerance": 5.000000045166888e-07,
       "matches_display_precision": true
     },
     {
       "field": "C17 Fade upper_95",
       "display": "-0.00438",
       "expected": -0.004380068485324844,
-      "rounding_tolerance": 5.000000004380069e-6,
+      "rounding_tolerance": 5.000000004380069e-06,
       "matches_display_precision": true
     },
     {
@@ -2942,28 +2942,28 @@
       "field": "C18 Draw absolute_sg",
       "display": "+0.1913",
       "expected": 0.19128165780344816,
-      "rounding_tolerance": 5.000000019128166e-5,
+      "rounding_tolerance": 5.000000019128166e-05,
       "matches_display_precision": true
     },
     {
       "field": "C18 Draw estimate",
       "display": "+9.508e-05",
-      "expected": 9.508286074337285e-5,
-      "rounding_tolerance": 5.0000000950828606e-9,
+      "expected": 9.508286074337285e-05,
+      "rounding_tolerance": 5.0000000950828606e-09,
       "matches_display_precision": true
     },
     {
       "field": "C18 Draw lower_95",
       "display": "-6.221e-05",
-      "expected": -6.220824133306044e-5,
-      "rounding_tolerance": 5.000000062208241e-9,
+      "expected": -6.220824133306044e-05,
+      "rounding_tolerance": 5.000000062208241e-09,
       "matches_display_precision": true
     },
     {
       "field": "C18 Draw upper_95",
       "display": "+2.800e-04",
       "expected": 0.0002799945735120517,
-      "rounding_tolerance": 5.0000000279994574e-8,
+      "rounding_tolerance": 5.0000000279994574e-08,
       "matches_display_precision": true
     },
     {
@@ -3005,28 +3005,28 @@
       "field": "C18 Fade absolute_sg",
       "display": "+0.1913",
       "expected": 0.19128047406514484,
-      "rounding_tolerance": 5.000000019128048e-5,
+      "rounding_tolerance": 5.000000019128048e-05,
       "matches_display_precision": true
     },
     {
       "field": "C18 Fade estimate",
       "display": "+9.390e-05",
-      "expected": 9.389912244001297e-5,
-      "rounding_tolerance": 5.000000093899123e-9,
+      "expected": 9.389912244001297e-05,
+      "rounding_tolerance": 5.000000093899123e-09,
       "matches_display_precision": true
     },
     {
       "field": "C18 Fade lower_95",
       "display": "-3.145e-05",
-      "expected": -3.145027987597752e-5,
-      "rounding_tolerance": 5.00000003145028e-9,
+      "expected": -3.145027987597752e-05,
+      "rounding_tolerance": 5.00000003145028e-09,
       "matches_display_precision": true
     },
     {
       "field": "C18 Fade upper_95",
       "display": "+2.411e-04",
       "expected": 0.0002411445166358826,
-      "rounding_tolerance": 5.0000000241144514e-8,
+      "rounding_tolerance": 5.0000000241144514e-08,
       "matches_display_precision": true
     },
     {
@@ -3110,28 +3110,28 @@
       "field": "C19 Draw absolute_sg",
       "display": "+0.3495",
       "expected": 0.34952306835551655,
-      "rounding_tolerance": 5.000000034952307e-5,
+      "rounding_tolerance": 5.000000034952307e-05,
       "matches_display_precision": true
     },
     {
       "field": "C19 Draw estimate",
       "display": "+0.005527",
       "expected": 0.005526608720468065,
-      "rounding_tolerance": 5.000000055266087e-7,
+      "rounding_tolerance": 5.000000055266087e-07,
       "matches_display_precision": true
     },
     {
       "field": "C19 Draw lower_95",
       "display": "+0.005466",
       "expected": 0.0054655311492273605,
-      "rounding_tolerance": 5.000000054655311e-7,
+      "rounding_tolerance": 5.000000054655311e-07,
       "matches_display_precision": true
     },
     {
       "field": "C19 Draw upper_95",
       "display": "+0.005576",
       "expected": 0.005576311501475418,
-      "rounding_tolerance": 5.000000055763115e-7,
+      "rounding_tolerance": 5.000000055763115e-07,
       "matches_display_precision": true
     },
     {
@@ -3173,28 +3173,28 @@
       "field": "C19 Fade absolute_sg",
       "display": "+0.3385",
       "expected": 0.338509511481143,
-      "rounding_tolerance": 5.0000000338509517e-5,
+      "rounding_tolerance": 5.0000000338509517e-05,
       "matches_display_precision": true
     },
     {
       "field": "C19 Fade estimate",
       "display": "-0.005487",
       "expected": -0.005486948153905506,
-      "rounding_tolerance": 5.000000054869481e-7,
+      "rounding_tolerance": 5.000000054869481e-07,
       "matches_display_precision": true
     },
     {
       "field": "C19 Fade lower_95",
       "display": "-0.005537",
       "expected": -0.005537317455304703,
-      "rounding_tolerance": 5.000000055373175e-7,
+      "rounding_tolerance": 5.000000055373175e-07,
       "matches_display_precision": true
     },
     {
       "field": "C19 Fade upper_95",
       "display": "-0.005427",
       "expected": -0.0054266215216518575,
-      "rounding_tolerance": 5.000000054266215e-7,
+      "rounding_tolerance": 5.000000054266215e-07,
       "matches_display_precision": true
     },
     {
@@ -3236,7 +3236,7 @@
       "field": "C20 Straight absolute_sg",
       "display": "+0.1011",
       "expected": 0.10111118029419923,
-      "rounding_tolerance": 5.0000000101111186e-5,
+      "rounding_tolerance": 5.0000000101111186e-05,
       "matches_display_precision": true
     },
     {
@@ -3278,28 +3278,28 @@
       "field": "C20 Draw absolute_sg",
       "display": "+0.1016",
       "expected": 0.10159557845857033,
-      "rounding_tolerance": 5.000000010159558e-5,
+      "rounding_tolerance": 5.000000010159558e-05,
       "matches_display_precision": true
     },
     {
       "field": "C20 Draw estimate",
       "display": "+4.844e-04",
       "expected": 0.0004843981643710978,
-      "rounding_tolerance": 5.000000048439816e-8,
+      "rounding_tolerance": 5.000000048439816e-08,
       "matches_display_precision": true
     },
     {
       "field": "C20 Draw lower_95",
       "display": "+3.075e-04",
       "expected": 0.0003075226887943026,
-      "rounding_tolerance": 5.000000030752269e-8,
+      "rounding_tolerance": 5.000000030752269e-08,
       "matches_display_precision": true
     },
     {
       "field": "C20 Draw upper_95",
       "display": "+6.523e-04",
       "expected": 0.0006522765451755754,
-      "rounding_tolerance": 5.0000000652276545e-8,
+      "rounding_tolerance": 5.0000000652276545e-08,
       "matches_display_precision": true
     },
     {
@@ -3341,28 +3341,28 @@
       "field": "C20 Fade absolute_sg",
       "display": "+0.1008",
       "expected": 0.10077746892416772,
-      "rounding_tolerance": 5.000000010077747e-5,
+      "rounding_tolerance": 5.000000010077747e-05,
       "matches_display_precision": true
     },
     {
       "field": "C20 Fade estimate",
       "display": "-3.337e-04",
       "expected": -0.0003337113700315144,
-      "rounding_tolerance": 5.0000000333711365e-8,
+      "rounding_tolerance": 5.0000000333711365e-08,
       "matches_display_precision": true
     },
     {
       "field": "C20 Fade lower_95",
       "display": "-5.016e-04",
       "expected": -0.0005016453427555888,
-      "rounding_tolerance": 5.000000050164534e-8,
+      "rounding_tolerance": 5.000000050164534e-08,
       "matches_display_precision": true
     },
     {
       "field": "C20 Fade upper_95",
       "display": "-1.721e-04",
       "expected": -0.00017205136832585546,
-      "rounding_tolerance": 5.000000017205137e-8,
+      "rounding_tolerance": 5.000000017205137e-08,
       "matches_display_precision": true
     },
     {
@@ -3453,21 +3453,21 @@
       "field": "C21 Draw estimate",
       "display": "+0.008878",
       "expected": 0.008878062355143674,
-      "rounding_tolerance": 5.000000088780623e-7,
+      "rounding_tolerance": 5.000000088780623e-07,
       "matches_display_precision": true
     },
     {
       "field": "C21 Draw lower_95",
       "display": "+0.008738",
       "expected": 0.008737846175303628,
-      "rounding_tolerance": 5.000000087378462e-7,
+      "rounding_tolerance": 5.000000087378462e-07,
       "matches_display_precision": true
     },
     {
       "field": "C21 Draw upper_95",
       "display": "+0.009015",
       "expected": 0.009015448386456537,
-      "rounding_tolerance": 5.000000090154484e-7,
+      "rounding_tolerance": 5.000000090154484e-07,
       "matches_display_precision": true
     },
     {
@@ -3516,21 +3516,21 @@
       "field": "C21 Fade estimate",
       "display": "-0.008934",
       "expected": -0.00893432353376787,
-      "rounding_tolerance": 5.000000089343235e-7,
+      "rounding_tolerance": 5.000000089343235e-07,
       "matches_display_precision": true
     },
     {
       "field": "C21 Fade lower_95",
       "display": "-0.009068",
       "expected": -0.009067910113062906,
-      "rounding_tolerance": 5.000000090679101e-7,
+      "rounding_tolerance": 5.000000090679101e-07,
       "matches_display_precision": true
     },
     {
       "field": "C21 Fade upper_95",
       "display": "-0.008798",
       "expected": -0.008797751739735037,
-      "rounding_tolerance": 5.000000087977517e-7,
+      "rounding_tolerance": 5.000000087977517e-07,
       "matches_display_precision": true
     },
     {
@@ -3614,28 +3614,28 @@
       "field": "C22 Draw absolute_sg",
       "display": "+0.1914",
       "expected": 0.19143787989757027,
-      "rounding_tolerance": 5.0000000191437885e-5,
+      "rounding_tolerance": 5.0000000191437885e-05,
       "matches_display_precision": true
     },
     {
       "field": "C22 Draw estimate",
       "display": "+2.513e-04",
       "expected": 0.0002513049548654383,
-      "rounding_tolerance": 5.000000025130495e-8,
+      "rounding_tolerance": 5.000000025130495e-08,
       "matches_display_precision": true
     },
     {
       "field": "C22 Draw lower_95",
       "display": "-3.605e-05",
-      "expected": -3.604852436822569e-5,
-      "rounding_tolerance": 5.0000000360485246e-9,
+      "expected": -3.604852436822569e-05,
+      "rounding_tolerance": 5.0000000360485246e-09,
       "matches_display_precision": true
     },
     {
       "field": "C22 Draw upper_95",
       "display": "+5.326e-04",
       "expected": 0.0005325912067969175,
-      "rounding_tolerance": 5.000000053259121e-8,
+      "rounding_tolerance": 5.000000053259121e-08,
       "matches_display_precision": true
     },
     {
@@ -3677,28 +3677,28 @@
       "field": "C22 Fade absolute_sg",
       "display": "+0.1915",
       "expected": 0.19147849772049416,
-      "rounding_tolerance": 5.00000001914785e-5,
+      "rounding_tolerance": 5.00000001914785e-05,
       "matches_display_precision": true
     },
     {
       "field": "C22 Fade estimate",
       "display": "+2.919e-04",
       "expected": 0.0002919227777893537,
-      "rounding_tolerance": 5.0000000291922776e-8,
+      "rounding_tolerance": 5.0000000291922776e-08,
       "matches_display_precision": true
     },
     {
       "field": "C22 Fade lower_95",
       "display": "+3.620e-05",
-      "expected": 3.6197689663183434e-5,
-      "rounding_tolerance": 5.00000003619769e-9,
+      "expected": 3.6197689663183434e-05,
+      "rounding_tolerance": 5.00000003619769e-09,
       "matches_display_precision": true
     },
     {
       "field": "C22 Fade upper_95",
       "display": "+5.922e-04",
       "expected": 0.0005921619032916435,
-      "rounding_tolerance": 5.00000005921619e-8,
+      "rounding_tolerance": 5.00000005921619e-08,
       "matches_display_precision": true
     },
     {
@@ -3789,21 +3789,21 @@
       "field": "C23 Draw estimate",
       "display": "+0.011117",
       "expected": 0.011117100245477964,
-      "rounding_tolerance": 5.000000111171002e-7,
+      "rounding_tolerance": 5.000000111171002e-07,
       "matches_display_precision": true
     },
     {
       "field": "C23 Draw lower_95",
       "display": "+0.010994",
       "expected": 0.010993544758325062,
-      "rounding_tolerance": 5.000000109935448e-7,
+      "rounding_tolerance": 5.000000109935448e-07,
       "matches_display_precision": true
     },
     {
       "field": "C23 Draw upper_95",
       "display": "+0.01122",
       "expected": 0.011219336437250878,
-      "rounding_tolerance": 5.000000011219337e-6,
+      "rounding_tolerance": 5.000000011219337e-06,
       "matches_display_precision": true
     },
     {
@@ -3852,21 +3852,21 @@
       "field": "C23 Fade estimate",
       "display": "-0.010966",
       "expected": -0.010965967983168904,
-      "rounding_tolerance": 5.000000109659679e-7,
+      "rounding_tolerance": 5.000000109659679e-07,
       "matches_display_precision": true
     },
     {
       "field": "C23 Fade lower_95",
       "display": "-0.011068",
       "expected": -0.011068061975392694,
-      "rounding_tolerance": 5.00000011068062e-7,
+      "rounding_tolerance": 5.00000011068062e-07,
       "matches_display_precision": true
     },
     {
       "field": "C23 Fade upper_95",
       "display": "-0.010844",
       "expected": -0.010844315728321823,
-      "rounding_tolerance": 5.000000108443157e-7,
+      "rounding_tolerance": 5.000000108443157e-07,
       "matches_display_precision": true
     },
     {
@@ -3908,7 +3908,7 @@
       "field": "C24 Straight absolute_sg",
       "display": "+0.1011",
       "expected": 0.10111118029419923,
-      "rounding_tolerance": 5.0000000101111186e-5,
+      "rounding_tolerance": 5.0000000101111186e-05,
       "matches_display_precision": true
     },
     {
@@ -3950,28 +3950,28 @@
       "field": "C24 Draw absolute_sg",
       "display": "+0.1022",
       "expected": 0.10215766411041799,
-      "rounding_tolerance": 5.0000000102157665e-5,
+      "rounding_tolerance": 5.0000000102157665e-05,
       "matches_display_precision": true
     },
     {
       "field": "C24 Draw estimate",
       "display": "+0.001046",
       "expected": 0.0010464838162187527,
-      "rounding_tolerance": 5.000000010464838e-7,
+      "rounding_tolerance": 5.000000010464838e-07,
       "matches_display_precision": true
     },
     {
       "field": "C24 Draw lower_95",
       "display": "+7.406e-04",
       "expected": 0.0007406395903417094,
-      "rounding_tolerance": 5.0000000740639585e-8,
+      "rounding_tolerance": 5.0000000740639585e-08,
       "matches_display_precision": true
     },
     {
       "field": "C24 Draw upper_95",
       "display": "+0.001332",
       "expected": 0.0013323229558774572,
-      "rounding_tolerance": 5.00000001332323e-7,
+      "rounding_tolerance": 5.00000001332323e-07,
       "matches_display_precision": true
     },
     {
@@ -4013,28 +4013,28 @@
       "field": "C24 Fade absolute_sg",
       "display": "+0.1005",
       "expected": 0.10048400585001513,
-      "rounding_tolerance": 5.000000010048401e-5,
+      "rounding_tolerance": 5.000000010048401e-05,
       "matches_display_precision": true
     },
     {
       "field": "C24 Fade estimate",
       "display": "-6.272e-04",
       "expected": -0.0006271744441841137,
-      "rounding_tolerance": 5.000000062717444e-8,
+      "rounding_tolerance": 5.000000062717444e-08,
       "matches_display_precision": true
     },
     {
       "field": "C24 Fade lower_95",
       "display": "-9.681e-04",
       "expected": -0.0009681119547827299,
-      "rounding_tolerance": 5.000000096811195e-8,
+      "rounding_tolerance": 5.000000096811195e-08,
       "matches_display_precision": true
     },
     {
       "field": "C24 Fade upper_95",
       "display": "-2.936e-04",
       "expected": -0.00029360825221030255,
-      "rounding_tolerance": 5.000000029360825e-8,
+      "rounding_tolerance": 5.000000029360825e-08,
       "matches_display_precision": true
     }
   ],

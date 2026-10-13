@@ -6,14 +6,14 @@ All nominal patterns match the physical target within the unchanged 0.05 m crite
 
 ## Shaft-Only Straight Reference at Zero Lean
 
-| Club           | Shaft-Twist SD (°) | Target (m) | Mean Downrange (m) | Downrange SD (m) | Lateral SD (m) | Lateral–Downrange Correlation |
-| -------------- | -----------------: | ---------: | -----------------: | ---------------: | -------------: | ----------------------------: |
-| driver         |                  1 |    178.949 |            178.444 |            4.672 |          6.177 |                       +0.9788 |
-| driver         |                  2 |    178.949 |            176.943 |            9.781 |         12.011 |                       +0.9186 |
-| seven_iron     |                  1 |    127.882 |            127.827 |            1.164 |          2.559 |                       -0.9960 |
-| seven_iron     |                  2 |    127.882 |            127.662 |            2.330 |          5.104 |                       -0.9841 |
-| pitching_wedge |                  1 |     77.402 |             77.379 |            1.145 |          1.102 |                       -0.9982 |
-| pitching_wedge |                  2 |     77.402 |             77.308 |            2.286 |          2.201 |                       -0.9930 |
+| Club | Shaft-Twist SD (°) | Target (m) | Mean Downrange (m) | Downrange SD (m) | Lateral SD (m) | Lateral–Downrange Correlation |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| driver | 1 | 178.949 | 178.444 | 4.672 | 6.177 | +0.9788 |
+| driver | 2 | 178.949 | 176.943 | 9.781 | 12.011 | +0.9186 |
+| seven_iron | 1 | 127.882 | 127.827 | 1.164 | 2.559 | -0.9960 |
+| seven_iron | 2 | 127.882 | 127.662 | 2.330 | 5.104 | -0.9841 |
+| pitching_wedge | 1 | 77.402 | 77.379 | 1.145 | 1.102 | -0.9982 |
+| pitching_wedge | 2 | 77.402 | 77.308 | 2.286 | 2.201 | -0.9930 |
 
 ## Populations and Scoring
 

@@ -11,7 +11,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -25,13 +33,13 @@
         "paired_n": 10000,
         "paired_benefit_vs_straight": {
           "Draw": {
-            "estimate": 7.461555935228152e-5,
-            "lower_95": -7.104046933162085e-5,
+            "estimate": 7.461555935228152e-05,
+            "lower_95": -7.104046933162085e-05,
             "upper_95": 0.00021896077539046698
           },
           "Fade": {
-            "estimate": 6.825953225868763e-5,
-            "lower_95": -5.2277181705243884e-5,
+            "estimate": 6.825953225868763e-05,
+            "lower_95": -5.2277181705243884e-05,
             "upper_95": 0.00017049843183190757
           }
         }
@@ -74,7 +82,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -88,12 +104,12 @@
         "paired_n": 10000,
         "paired_benefit_vs_straight": {
           "Draw": {
-            "estimate": 2.6911773453713884e-5,
+            "estimate": 2.6911773453713884e-05,
             "lower_95": -0.00016417507301096237,
             "upper_95": 0.00022037368523597208
           },
           "Fade": {
-            "estimate": 4.2175453160651455e-5,
+            "estimate": 4.2175453160651455e-05,
             "lower_95": -0.00017391896152132183,
             "upper_95": 0.0002645740815497581
           }
@@ -137,7 +153,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -200,7 +224,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -263,7 +295,15 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -283,7 +323,7 @@
           },
           "Fade": {
             "estimate": 0.00023438701772961358,
-            "lower_95": 5.011171232938114e-5,
+            "lower_95": 5.011171232938114e-05,
             "upper_95": 0.0004289664606828679
           }
         }
@@ -326,7 +366,15 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -345,7 +393,7 @@
             "upper_95": 0.000897767091841708
           },
           "Fade": {
-            "estimate": 9.461602514953083e-5,
+            "estimate": 9.461602514953083e-05,
             "lower_95": -0.00022182231653632132,
             "upper_95": 0.000441863460349558
           }
@@ -389,7 +437,15 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -452,7 +508,15 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -515,7 +579,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -578,7 +650,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -641,7 +721,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -704,7 +792,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -767,7 +863,15 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -830,7 +934,15 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -893,7 +1005,15 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -956,7 +1076,15 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -1019,7 +1147,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -1082,7 +1218,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -1096,13 +1240,13 @@
         "paired_n": 9999,
         "paired_benefit_vs_straight": {
           "Draw": {
-            "estimate": 9.508286074337285e-5,
-            "lower_95": -6.220824133306044e-5,
+            "estimate": 9.508286074337285e-05,
+            "lower_95": -6.220824133306044e-05,
             "upper_95": 0.0002799945735120517
           },
           "Fade": {
-            "estimate": 9.389912244001297e-5,
-            "lower_95": -3.145027987597752e-5,
+            "estimate": 9.389912244001297e-05,
+            "lower_95": -3.145027987597752e-05,
             "upper_95": 0.0002411445166358826
           }
         }
@@ -1145,7 +1289,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -1208,7 +1360,15 @@
         },
         "curve_scale": 1.0,
         "noise": {
-          "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000
       },
@@ -1271,11 +1431,25 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25]
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
       },
       "status": "completed",
       "paired_comparisons": {
@@ -1336,11 +1510,25 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [1.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25]
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
       },
       "status": "completed",
       "paired_comparisons": {
@@ -1353,12 +1541,12 @@
         "paired_benefit_vs_straight": {
           "Draw": {
             "estimate": 0.0002513049548654383,
-            "lower_95": -3.604852436822569e-5,
+            "lower_95": -3.604852436822569e-05,
             "upper_95": 0.0005325912067969175
           },
           "Fade": {
             "estimate": 0.0002919227777893537,
-            "lower_95": 3.6197689663183434e-5,
+            "lower_95": 3.6197689663183434e-05,
             "upper_95": 0.0005921619032916435
           }
         }
@@ -1401,11 +1589,25 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25]
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
       },
       "status": "completed",
       "paired_comparisons": {
@@ -1466,11 +1668,25 @@
         },
         "curve_scale": 2.0,
         "noise": {
-          "standard_deviations": [2.0, 0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0]
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
         },
         "n_shots": 10000,
-        "match_face_bounds_deg": [-6.0, 6.0],
-        "match_speed_factors": [0.75, 1.25]
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
       },
       "status": "completed",
       "paired_comparisons": {

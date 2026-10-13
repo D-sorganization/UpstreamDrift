@@ -102,9 +102,9 @@
   "nominals": 9,
   "gate_m": 0.05,
   "comparison_maxima_m": {
-    "contact_coarse": 4.114658329484757e-5,
-    "contact_fine": 2.0553630084728876e-5,
-    "contact_primary_to_fine": 6.170021337957644e-5,
+    "contact_coarse": 4.114658329484757e-05,
+    "contact_fine": 2.0553630084728876e-05,
+    "contact_primary_to_fine": 6.170021337957644e-05,
     "flight_coarse": 0.00817370251964838,
     "flight_fine": 0.001981424345828702,
     "flight_primary_to_fine": 0.009001249870284642,

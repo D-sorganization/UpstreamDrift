@@ -77,7 +77,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -111,7 +114,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -283,13 +288,13 @@
         "course_scoring_effect_modification": {
           "Draw": {
             "estimate": 0.00015077825796680619,
-            "lower_95": 3.5436983388666306e-5,
+            "lower_95": 3.5436983388666306e-05,
             "upper_95": 0.00031263697888890676
           },
           "Fade": {
-            "estimate": -2.36528522526357e-5,
+            "estimate": -2.36528522526357e-05,
             "lower_95": -0.00011436852649673007,
-            "upper_95": 3.267015322101654e-5
+            "upper_95": 3.267015322101654e-05
           }
         },
         "course_scoring_effect_modification_scope": "(curve\u2212Straight) in the second condition minus (curve\u2212Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit",
@@ -373,7 +378,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -407,7 +415,9 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -579,11 +589,11 @@
         "course_scoring_effect_modification": {
           "Draw": {
             "estimate": 0.00010670815556271368,
-            "lower_95": -1.6121189550852286e-5,
+            "lower_95": -1.6121189550852286e-05,
             "upper_95": 0.00022649121235450027
           },
           "Fade": {
-            "estimate": 2.806586177385069e-5,
+            "estimate": 2.806586177385069e-05,
             "lower_95": -0.00010515453993184254,
             "upper_95": 0.00017994718875233054
           }
@@ -669,7 +679,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -703,7 +716,9 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -875,13 +890,13 @@
         "course_scoring_effect_modification": {
           "Draw": {
             "estimate": 0.00032383294537697833,
-            "lower_95": 7.480509485028655e-5,
+            "lower_95": 7.480509485028655e-05,
             "upper_95": 0.0005467899851784263
           },
           "Fade": {
             "estimate": -0.00017343624417017769,
             "lower_95": -0.0004305019954184072,
-            "upper_95": 6.316593829312296e-5
+            "upper_95": 6.316593829312296e-05
           }
         },
         "course_scoring_effect_modification_scope": "(curve\u2212Straight) in the second condition minus (curve\u2212Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit",
@@ -965,7 +980,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -999,7 +1017,9 @@
             "Fade": 3
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1171,11 +1191,11 @@
         "course_scoring_effect_modification": {
           "Draw": {
             "estimate": 0.0003907890786111297,
-            "lower_95": 4.2466281784549846e-5,
+            "lower_95": 4.2466281784549846e-05,
             "upper_95": 0.0007178166113190063
           },
           "Fade": {
-            "estimate": -8.457500492306297e-5,
+            "estimate": -8.457500492306297e-05,
             "lower_95": -0.00043092848602333135,
             "upper_95": 0.00023238855454897487
           }
@@ -1261,7 +1281,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1295,7 +1318,9 @@
             "Fade": 2
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1557,7 +1582,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1591,7 +1619,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1763,11 +1793,11 @@
         "course_scoring_effect_modification": {
           "Draw": {
             "estimate": 0.0001715881734611079,
-            "lower_95": -4.333760309095834e-5,
+            "lower_95": -4.333760309095834e-05,
             "upper_95": 0.00035994241961438483
           },
           "Fade": {
-            "estimate": 5.817585773205194e-5,
+            "estimate": 5.817585773205194e-05,
             "lower_95": -0.00012872404758685626,
             "upper_95": 0.00023767322868604808
           }
@@ -1853,7 +1883,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1887,7 +1920,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2065,7 +2100,7 @@
           "Fade": {
             "estimate": -0.00014252405265276354,
             "lower_95": -0.00025051255265521916,
-            "upper_95": -1.3317569493209565e-5
+            "upper_95": -1.3317569493209565e-05
           }
         },
         "course_scoring_effect_modification_scope": "(curve\u2212Straight) in the second condition minus (curve\u2212Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit",
@@ -2149,7 +2184,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2183,7 +2221,9 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2359,8 +2399,8 @@
             "upper_95": 0.0006031535052308711
           },
           "Fade": {
-            "estimate": 6.954001389504031e-5,
-            "lower_95": -5.121516323037278e-5,
+            "estimate": 6.954001389504031e-05,
+            "lower_95": -5.121516323037278e-05,
             "upper_95": 0.00019414329750467015
           }
         },
@@ -2445,7 +2485,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2479,7 +2522,9 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2741,7 +2786,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2775,7 +2823,9 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -3037,7 +3087,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -3071,7 +3124,9 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -3333,7 +3388,10 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": ["original_primary/1", "original_primary/1"],
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -3367,7 +3425,9 @@
             "Fade": 3
           }
         },
-        "allowed_config_differences": ["noise.standard_deviations[0]"],
+        "allowed_config_differences": [
+          "noise.standard_deviations[0]"
+        ],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {

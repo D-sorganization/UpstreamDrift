@@ -10,12 +10,18 @@
     {
       "prefix": "across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve1_rotation1_shaft_only_3acc690a50",
       "common_supported_n": 10000,
-      "source_protocols": ["original_control/1", "original_control/1"]
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ]
     },
     {
       "prefix": "across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve1_rotation2_combined2_eb6b85726e",
       "common_supported_n": 9999,
-      "source_protocols": ["original_control/1", "original_control/1"]
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ]
     }
   ],
   "asset_count": 32,

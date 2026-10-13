@@ -7,7 +7,7 @@ import json
 import math
 from dataclasses import replace
 from pathlib import Path
-from typing import Mapping, cast
+from typing import Mapping
 
 from .core import AnalysisConfig, PhysicsProtocol
 from .physics import ShotPhysics
@@ -66,8 +66,8 @@ def build_refinement(
                             "dt_010_vs_005_m": differences[1],
                         }
                     )
-    coarse = max(float(cast(float, row["dt_020_vs_010_m"])) for row in cases)
-    fine = max(float(cast(float, row["dt_010_vs_005_m"])) for row in cases)
+    coarse = max(float(row["dt_020_vs_010_m"]) for row in cases)
+    fine = max(float(row["dt_010_vs_005_m"]) for row in cases)
     return {
         "schema": "shot-pattern-timestep-refinement/1",
         "status": "passed"

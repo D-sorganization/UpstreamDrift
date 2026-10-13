@@ -1746,8 +1746,8 @@
       "target_rmse_m": 7.972825916781493,
       "mean_sg_strokes": -0.39566243087251535,
       "paired_sg_vs_straight": {
-        "estimate": 7.461555935228152e-5,
-        "lower_95": -7.104046933162085e-5,
+        "estimate": 7.461555935228152e-05,
+        "lower_95": -7.104046933162085e-05,
         "upper_95": 0.00021896077539046698
       }
     },
@@ -1764,8 +1764,8 @@
       "target_rmse_m": 7.549276425956231,
       "mean_sg_strokes": -0.395668786899609,
       "paired_sg_vs_straight": {
-        "estimate": 6.825953225868763e-5,
-        "lower_95": -5.2277181705243884e-5,
+        "estimate": 6.825953225868763e-05,
+        "lower_95": -5.2277181705243884e-05,
         "upper_95": 0.00017049843183190757
       }
     },
@@ -1796,7 +1796,7 @@
       "target_rmse_m": 11.336595648017727,
       "mean_sg_strokes": -0.4125675679611443,
       "paired_sg_vs_straight": {
-        "estimate": 2.6911773453713884e-5,
+        "estimate": 2.6911773453713884e-05,
         "lower_95": -0.00016417507301096237,
         "upper_95": 0.00022037368523597208
       }
@@ -1814,7 +1814,7 @@
       "target_rmse_m": 11.017547247533296,
       "mean_sg_strokes": -0.4125523042814373,
       "paired_sg_vs_straight": {
-        "estimate": 4.2175453160651455e-5,
+        "estimate": 4.2175453160651455e-05,
         "lower_95": -0.00017391896152132183,
         "upper_95": 0.0002645740815497581
       }
@@ -1965,7 +1965,7 @@
       "mean_sg_strokes": -0.3955026594141381,
       "paired_sg_vs_straight": {
         "estimate": 0.00023438701772961358,
-        "lower_95": 5.011171232938114e-5,
+        "lower_95": 5.011171232938114e-05,
         "upper_95": 0.0004289664606828679
       }
     },
@@ -2014,7 +2014,7 @@
       "target_rmse_m": 10.854134175877237,
       "mean_sg_strokes": -0.4124998637094484,
       "paired_sg_vs_straight": {
-        "estimate": 9.461602514953083e-5,
+        "estimate": 9.461602514953083e-05,
         "lower_95": -0.00022182231653632132,
         "upper_95": 0.000441863460349558
       }
@@ -2596,8 +2596,8 @@
       "target_rmse_m": 4.5041860060678225,
       "mean_sg_strokes": 0.19128165780344816,
       "paired_sg_vs_straight": {
-        "estimate": 9.508286074337285e-5,
-        "lower_95": -6.220824133306044e-5,
+        "estimate": 9.508286074337285e-05,
+        "lower_95": -6.220824133306044e-05,
         "upper_95": 0.0002799945735120517
       }
     },
@@ -2614,8 +2614,8 @@
       "target_rmse_m": 4.519717602497237,
       "mean_sg_strokes": 0.19128047406514484,
       "paired_sg_vs_straight": {
-        "estimate": 9.389912244001297e-5,
-        "lower_95": -3.145027987597752e-5,
+        "estimate": 9.389912244001297e-05,
+        "lower_95": -3.145027987597752e-05,
         "upper_95": 0.0002411445166358826
       }
     },
@@ -2797,7 +2797,7 @@
       "mean_sg_strokes": 0.19143787989757027,
       "paired_sg_vs_straight": {
         "estimate": 0.0002513049548654383,
-        "lower_95": -3.604852436822569e-5,
+        "lower_95": -3.604852436822569e-05,
         "upper_95": 0.0005325912067969175
       }
     },
@@ -2815,7 +2815,7 @@
       "mean_sg_strokes": 0.19147849772049416,
       "paired_sg_vs_straight": {
         "estimate": 0.0002919227777893537,
-        "lower_95": 3.6197689663183434e-5,
+        "lower_95": 3.6197689663183434e-05,
         "upper_95": 0.0005921619032916435
       }
     },
@@ -2928,8 +2928,14 @@
         "driver_lean0_curve1_rotation1_shaft_only",
         "driver_lean0_curve1_rotation2_shaft_only"
       ],
-      "condition_keys": ["C01", "C03"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C01",
+        "C03"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 10000,
       "total_n": 10000,
       "draw_minus_straight_change": {
@@ -2950,8 +2956,14 @@
         "driver_lean0_curve1_rotation2_shaft_only",
         "driver_lean0_curve2_rotation2_shaft_only"
       ],
-      "condition_keys": ["C03", "C07"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C03",
+        "C07"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 10000,
       "total_n": 10000,
       "draw_minus_straight_change": {
@@ -2972,8 +2984,14 @@
         "driver_lean0_curve1_rotation1_combined2",
         "driver_lean0_curve1_rotation2_combined2"
       ],
-      "condition_keys": ["C02", "C04"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C02",
+        "C04"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 10000,
       "total_n": 10000,
       "draw_minus_straight_change": {
@@ -2994,8 +3012,14 @@
         "driver_lean0_curve1_rotation2_combined2",
         "driver_lean0_curve2_rotation2_combined2"
       ],
-      "condition_keys": ["C04", "C08"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C04",
+        "C08"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 10000,
       "total_n": 10000,
       "draw_minus_straight_change": {
@@ -3004,7 +3028,7 @@
         "upper_95": 0.005066103581790338
       },
       "fade_minus_straight_change": {
-        "estimate": 9.298539323259105e-5,
+        "estimate": 9.298539323259105e-05,
         "lower_95": -0.0002735216135444836,
         "upper_95": 0.00046416317558076306
       }
@@ -3016,18 +3040,24 @@
         "seven_iron_lean0_curve1_rotation1_shaft_only",
         "seven_iron_lean0_curve1_rotation2_shaft_only"
       ],
-      "condition_keys": ["C09", "C11"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C09",
+        "C11"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 10000,
       "total_n": 10000,
       "draw_minus_straight_change": {
-        "estimate": 6.44854712184901e-6,
-        "lower_95": -7.089106865572494e-5,
-        "upper_95": 4.934200314962887e-5
+        "estimate": 6.44854712184901e-06,
+        "lower_95": -7.089106865572494e-05,
+        "upper_95": 4.934200314962887e-05
       },
       "fade_minus_straight_change": {
-        "estimate": 1.9999688110256854e-5,
-        "lower_95": -5.979478102884672e-5,
+        "estimate": 1.9999688110256854e-05,
+        "lower_95": -5.979478102884672e-05,
         "upper_95": 0.00013579489301935357
       }
     },
@@ -3038,13 +3068,19 @@
         "seven_iron_lean0_curve1_rotation2_shaft_only",
         "seven_iron_lean0_curve2_rotation2_shaft_only"
       ],
-      "condition_keys": ["C11", "C15"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C11",
+        "C15"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 10000,
       "total_n": 10000,
       "draw_minus_straight_change": {
         "estimate": 0.00021088612499607325,
-        "lower_95": 9.163611485094543e-5,
+        "lower_95": 9.163611485094543e-05,
         "upper_95": 0.00035779316349146827
       },
       "fade_minus_straight_change": {
@@ -3060,18 +3096,24 @@
         "seven_iron_lean0_curve1_rotation1_combined2",
         "seven_iron_lean0_curve1_rotation2_combined2"
       ],
-      "condition_keys": ["C10", "C12"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C10",
+        "C12"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 9996,
       "total_n": 10000,
       "draw_minus_straight_change": {
-        "estimate": -6.0275021816287154e-5,
+        "estimate": -6.0275021816287154e-05,
         "lower_95": -0.00029661332998222686,
         "upper_95": 0.00015399024325736624
       },
       "fade_minus_straight_change": {
         "estimate": 0.00021753968488091968,
-        "lower_95": -7.965288156183586e-5,
+        "lower_95": -7.965288156183586e-05,
         "upper_95": 0.0005113380529891381
       }
     },
@@ -3082,14 +3124,20 @@
         "seven_iron_lean0_curve1_rotation2_combined2",
         "seven_iron_lean0_curve2_rotation2_combined2"
       ],
-      "condition_keys": ["C12", "C16"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C12",
+        "C16"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 9996,
       "total_n": 10000,
       "draw_minus_straight_change": {
         "estimate": -0.00024759190603234645,
         "lower_95": -0.0004948097798874354,
-        "upper_95": 2.7803916800896178e-5
+        "upper_95": 2.7803916800896178e-05
       },
       "fade_minus_straight_change": {
         "estimate": 0.001182900793187058,
@@ -3104,8 +3152,14 @@
         "pitching_wedge_lean0_curve1_rotation1_shaft_only",
         "pitching_wedge_lean0_curve1_rotation2_shaft_only"
       ],
-      "condition_keys": ["C17", "C19"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C17",
+        "C19"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 10000,
       "total_n": 10000,
       "draw_minus_straight_change": {
@@ -3126,8 +3180,14 @@
         "pitching_wedge_lean0_curve1_rotation2_shaft_only",
         "pitching_wedge_lean0_curve2_rotation2_shaft_only"
       ],
-      "condition_keys": ["C19", "C23"],
-      "source_protocols": ["original_control/1", "pw-primary-face-bounds/1"],
+      "condition_keys": [
+        "C19",
+        "C23"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "pw-primary-face-bounds/1"
+      ],
       "common_six_n": 10000,
       "total_n": 10000,
       "draw_minus_straight_change": {
@@ -3148,8 +3208,14 @@
         "pitching_wedge_lean0_curve1_rotation1_combined2",
         "pitching_wedge_lean0_curve1_rotation2_combined2"
       ],
-      "condition_keys": ["C18", "C20"],
-      "source_protocols": ["original_control/1", "original_control/1"],
+      "condition_keys": [
+        "C18",
+        "C20"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
       "common_six_n": 9999,
       "total_n": 10000,
       "draw_minus_straight_change": {
@@ -3170,8 +3236,14 @@
         "pitching_wedge_lean0_curve1_rotation2_combined2",
         "pitching_wedge_lean0_curve2_rotation2_combined2"
       ],
-      "condition_keys": ["C20", "C24"],
-      "source_protocols": ["original_control/1", "pw-primary-face-bounds/1"],
+      "condition_keys": [
+        "C20",
+        "C24"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "pw-primary-face-bounds/1"
+      ],
       "common_six_n": 9999,
       "total_n": 10000,
       "draw_minus_straight_change": {
@@ -3182,7 +3254,7 @@
       "fade_minus_straight_change": {
         "estimate": -0.00029346307415259915,
         "lower_95": -0.0004910576535580905,
-        "upper_95": -8.723417604624049e-5
+        "upper_95": -8.723417604624049e-05
       }
     }
   ],
@@ -3235,12 +3307,15 @@
       "pitching_wedge_lean0_curve1_rotation2_combined2",
       "pitching_wedge_lean5_curve1_rotation2_combined2"
     ],
-    "source_protocols": ["original_control/1", "original_control/1"],
+    "source_protocols": [
+      "original_control/1",
+      "original_control/1"
+    ],
     "common_six_n": 9999,
     "draw_minus_straight_change": {
       "estimate": -0.00020010647628807918,
       "lower_95": -0.0003759085461043851,
-      "upper_95": -2.4921589629640036e-5
+      "upper_95": -2.4921589629640036e-05
     },
     "fade_minus_straight_change": {
       "estimate": 0.0003138913883129587,

@@ -1544,26 +1544,49 @@
   "figure_text_checks": [
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.png",
-      "figure_pixels": [1650.0, 980.0000000000001],
+      "figure_pixels": [
+        1650.0,
+        980.0000000000001
+      ],
       "texts": [
         {
           "text": "Shot-Endpoint Density Conditional on Supported Airborne Shots",
-          "bounds": [99.0, 920.694140625, 911.0, 25.005859375],
+          "bounds": [
+            99.0,
+            920.694140625,
+            911.0,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Cell: pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
-          "bounds": [99.0, 897.5960937500001, 584.640625, 17.00390625],
+          "bounds": [
+            99.0,
+            897.5960937500001,
+            584.640625,
+            17.00390625
+          ],
           "font_pt": 12.0
         },
         {
           "text": "source: pw-primary-face-bounds/1  |  cell: pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive  |  club: pitching_wedge  |  lean deg: 0.0\n|  curve scale: 2.0  |  shaft rotation sd deg: 2.0  |  figure scope: one-cell supported population  |  conditioning: individually supported\nendpoints by physical pattern  |  Valid/Total: Straight 9,999/10,000 valid; Draw 9,999/10,000 valid; Fade 9,999/10,000 valid",
-          "bounds": [99.0, 817.7838867187501, 949.21875, 49.51611328125],
+          "bounds": [
+            99.0,
+            817.7838867187501,
+            949.21875,
+            49.51611328125
+          ],
           "font_pt": 9.0
         },
         {
           "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. HDR mass is sample-derived from simulated endpoints. Colored Dots Shown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999; density, HDR,\nand marginals use every valid endpoint. Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. Bin resolution: 0.549 \u00d7 0.325 m. Achieved HDR Mass By Pattern (Discrete Ties May\nExceed Request): Straight 50.5%/80.8%/95.6%  |  Draw 50.5%/80.4%/95.0%  |  Fade 50.5%/80.2%/95.4%",
-          "bounds": [99.0, 20.318291558159725, 1299.109375, 46.09025065104167],
+          "bounds": [
+            99.0,
+            20.318291558159725,
+            1299.109375,
+            46.09025065104167
+          ],
           "font_pt": 8.5
         }
       ],
@@ -1571,26 +1594,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png",
-      "figure_pixels": [1080.0, 1800.0],
+      "figure_pixels": [
+        1080.0,
+        1800.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Shot Dispersion",
-          "bounds": [86.4, 1747.994140625, 467.109375, 25.005859375],
+          "bounds": [
+            86.4,
+            1747.994140625,
+            467.109375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Pitching Wedge \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0",
-          "bounds": [86.4, 1711.6565755208333, 561.375, 18.337565104166742],
+          "bounds": [
+            86.4,
+            1711.6565755208333,
+            561.375,
+            18.337565104166742
+          ],
           "font_pt": 13.0
         },
         {
           "text": "Protocol: pw-primary-face-bounds/1  |  Matched Target: 77.40 m downrange\n(Within-Lean Nominal Target)  |  Delivery Noise: Covariance Profile (Path SD\n0.5\u00b0, Speed SD 1 mph, Strike SD 0.25 in on Each Axis, Shaft Twist\u2013Path\nCorrelation r = -0.6, Shaft Twist\u2013Speed Correlation r = +0.2, Path\u2013Speed\nCorrelation r = -0.12, Path\u2013Horizontal Strike Correlation r = +0.24,\nSpeed\u2013Vertical Strike Correlation r = +0.244949)  |  Population: Individually\nSupported Endpoints by Physical Pattern  |  Valid/Total: Straight 9,999/10,000\nvalid; Draw 9,999/10,000 valid; Fade 9,999/10,000 valid",
-          "bounds": [86.4, 1555.2474609375, 591.484375, 142.00911458333326],
+          "bounds": [
+            86.4,
+            1555.2474609375,
+            591.484375,
+            142.00911458333326
+          ],
           "font_pt": 10.5
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999. Density, HDR, and marginals\nuse every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
-          "bounds": [86.4, 32.4, 617.53125, 50.433675130208336],
+          "bounds": [
+            86.4,
+            32.4,
+            617.53125,
+            50.433675130208336
+          ],
           "font_pt": 9.5
         }
       ],
@@ -1598,26 +1644,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.png",
-      "figure_pixels": [1800.0, 600.0],
+      "figure_pixels": [
+        1800.0,
+        600.0
+      ],
       "texts": [
         {
           "text": "Raw Overhead Flight-Trajectory Comparison",
-          "bounds": [108.0, 565.994140625, 619.578125, 25.005859375],
+          "bounds": [
+            108.0,
+            565.994140625,
+            619.578125,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Cell: pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive; Raw Simulator Flight Samples",
-          "bounds": [108.0, 537.99609375, 851.28125, 17.00390625],
+          "bounds": [
+            108.0,
+            537.99609375,
+            851.28125,
+            17.00390625
+          ],
           "font_pt": 12.0
         },
         {
           "text": "source: pw-primary-face-bounds/1  |  cell: pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive  |  club: pitching_wedge  |  lean deg: 0.0\n|  curve scale: 2.0  |  shaft rotation sd deg: 2.0  |  figure scope: Saved Raw Flight Samples  |  Population: Saved Raw Trajectories; Not Paired\nby Shot Index  |  Paths shown: Straight 6; Draw 6; Fade 6",
-          "bounds": [108.0, 484.48388671875, 949.21875, 49.51611328125],
+          "bounds": [
+            108.0,
+            484.48388671875,
+            949.21875,
+            49.51611328125
+          ],
           "font_pt": 9.0
         },
         {
           "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. Raw trajectories; no aim-line rotation. Vertical display magnification: 8.9\u00d7 versus downrange. Only the displayed\npaths are plotted; paths are sampled from supported airborne shots.",
-          "bounds": [108.0, 10.745849609375, 1153.96875, 33.0107421875],
+          "bounds": [
+            108.0,
+            10.745849609375,
+            1153.96875,
+            33.0107421875
+          ],
           "font_pt": 9.0
         }
       ],
@@ -1625,26 +1694,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.png",
-      "figure_pixels": [1600.0, 900.0],
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Sample Flight Paths",
-          "bounds": [96.0, 861.494140625, 527.4375, 25.005859375],
+          "bounds": [
+            96.0,
+            861.494140625,
+            527.4375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Pitching Wedge \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 Raw Flight Samples",
-          "bounds": [96.0, 813.0555555555555, 732.109375, 19.444444444444457],
+          "bounds": [
+            96.0,
+            813.0555555555555,
+            732.109375,
+            19.444444444444457
+          ],
           "font_pt": 14.0
         },
         {
           "text": "Protocol: pw-primary-face-bounds/1  |  Matched Target: 77.40 m downrange (Within-Lean Nominal Target)  |  Delivery Noise: Covariance Profile\n(Path SD 0.5\u00b0, Speed SD 1 mph, Strike SD 0.25 in on Each Axis, Shaft Twist\u2013Path Correlation r = -0.6, Shaft Twist\u2013Speed Correlation r = +0.2,\nPath\u2013Speed Correlation r = -0.12, Path\u2013Horizontal Strike Correlation r = +0.24, Speed\u2013Vertical Strike Correlation r = +0.244949)  |  Population:\nSaved Raw Trajectories; Not Paired by Shot Index  |  figure scope: Saved Raw Flight Samples  |  Paths shown: Straight 6; Draw 6; Fade 6",
-          "bounds": [96.0, 732.5316840277778, 1007.484375, 68.46831597222217],
+          "bounds": [
+            96.0,
+            732.5316840277778,
+            1007.484375,
+            68.46831597222217
+          ],
           "font_pt": 10.0
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Raw trajectories; no aim-line rotation. Vertical display magnification: 14.7\u00d7 versus downrange. Paths\nShown: Straight 6; Draw 6; Fade 6. Samples from supported airborne shots.",
-          "bounds": [96.0, 17.77316623263889, 1253.859375, 34.234157986111114],
+          "bounds": [
+            96.0,
+            17.77316623263889,
+            1253.859375,
+            34.234157986111114
+          ],
           "font_pt": 10.0
         }
       ],
@@ -1652,26 +1744,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png",
-      "figure_pixels": [1650.0, 980.0000000000001],
+      "figure_pixels": [
+        1650.0,
+        980.0000000000001
+      ],
       "texts": [
         {
           "text": "Shot-Endpoint Density Conditional on Supported Airborne Shots",
-          "bounds": [99.0, 920.694140625, 911.0, 25.005859375],
+          "bounds": [
+            99.0,
+            920.694140625,
+            911.0,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Cell: pitching_wedge_lean5_curve2_rotation2_combined2",
-          "bounds": [99.0, 897.5960937500001, 491.640625, 17.00390625],
+          "bounds": [
+            99.0,
+            897.5960937500001,
+            491.640625,
+            17.00390625
+          ],
           "font_pt": 12.0
         },
         {
           "text": "source: pw-control-face-bounds/1  |  cell: pitching_wedge_lean5_curve2_rotation2_combined2  |  club: pitching_wedge  |  lean deg: 5.0  |  curve\nscale: 2.0  |  shaft rotation sd deg: 2.0  |  figure scope: one-cell supported population  |  conditioning: individually supported endpoints by\nphysical pattern  |  Valid/Total: Straight 9,999/10,000 valid; Draw 9,999/10,000 valid; Fade 9,999/10,000 valid",
-          "bounds": [99.0, 817.7838867187501, 925.15625, 49.51611328125],
+          "bounds": [
+            99.0,
+            817.7838867187501,
+            925.15625,
+            49.51611328125
+          ],
           "font_pt": 9.0
         },
         {
           "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. HDR mass is sample-derived from simulated endpoints. Colored Dots Shown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999; density, HDR,\nand marginals use every valid endpoint. Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. Bin resolution: 0.696 \u00d7 0.318 m. Achieved HDR Mass By Pattern (Discrete Ties May\nExceed Request): Straight 51.4%/80.4%/95.6%  |  Draw 50.1%/80.4%/95.0%  |  Fade 51.3%/80.0%/95.7%",
-          "bounds": [99.0, 20.318291558159725, 1299.109375, 46.09025065104167],
+          "bounds": [
+            99.0,
+            20.318291558159725,
+            1299.109375,
+            46.09025065104167
+          ],
           "font_pt": 8.5
         }
       ],
@@ -1679,26 +1794,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png",
-      "figure_pixels": [1080.0, 1800.0],
+      "figure_pixels": [
+        1080.0,
+        1800.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Shot Dispersion",
-          "bounds": [86.4, 1747.994140625, 467.109375, 25.005859375],
+          "bounds": [
+            86.4,
+            1747.994140625,
+            467.109375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Pitching Wedge \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0",
-          "bounds": [86.4, 1711.6565755208333, 561.375, 18.337565104166742],
+          "bounds": [
+            86.4,
+            1711.6565755208333,
+            561.375,
+            18.337565104166742
+          ],
           "font_pt": 13.0
         },
         {
           "text": "Protocol: pw-control-face-bounds/1  |  Matched Target: 77.40 m downrange\n(Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD\n2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Individually Supported\nEndpoints by Physical Pattern  |  Valid/Total: Straight 9,999/10,000 valid;\nDraw 9,999/10,000 valid; Fade 9,999/10,000 valid",
-          "bounds": [86.4, 1607.756005859375, 589.5, 89.50056966145826],
+          "bounds": [
+            86.4,
+            1607.756005859375,
+            589.5,
+            89.50056966145826
+          ],
           "font_pt": 10.5
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999. Density, HDR, and marginals\nuse every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
-          "bounds": [86.4, 32.4, 617.53125, 50.433675130208336],
+          "bounds": [
+            86.4,
+            32.4,
+            617.53125,
+            50.433675130208336
+          ],
           "font_pt": 9.5
         }
       ],
@@ -1706,26 +1844,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png",
-      "figure_pixels": [1800.0, 600.0],
+      "figure_pixels": [
+        1800.0,
+        600.0
+      ],
       "texts": [
         {
           "text": "Raw Overhead Flight-Trajectory Comparison",
-          "bounds": [108.0, 565.994140625, 619.578125, 25.005859375],
+          "bounds": [
+            108.0,
+            565.994140625,
+            619.578125,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Cell: pitching_wedge_lean5_curve2_rotation2_combined2; Raw Simulator Flight Samples",
-          "bounds": [108.0, 537.99609375, 758.28125, 17.00390625],
+          "bounds": [
+            108.0,
+            537.99609375,
+            758.28125,
+            17.00390625
+          ],
           "font_pt": 12.0
         },
         {
           "text": "source: pw-control-face-bounds/1  |  cell: pitching_wedge_lean5_curve2_rotation2_combined2  |  club: pitching_wedge  |  lean deg: 5.0  |  curve\nscale: 2.0  |  shaft rotation sd deg: 2.0  |  figure scope: Saved Raw Flight Samples  |  Population: Saved Raw Trajectories; Not Paired by Shot\nIndex  |  Paths shown: Straight 6; Draw 6; Fade 6",
-          "bounds": [108.0, 484.48388671875, 925.15625, 49.51611328125],
+          "bounds": [
+            108.0,
+            484.48388671875,
+            925.15625,
+            49.51611328125
+          ],
           "font_pt": 9.0
         },
         {
           "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. Raw trajectories; no aim-line rotation. Vertical display magnification: 9.7\u00d7 versus downrange. Only the displayed\npaths are plotted; paths are sampled from supported airborne shots.",
-          "bounds": [108.0, 10.745849609375, 1153.96875, 33.0107421875],
+          "bounds": [
+            108.0,
+            10.745849609375,
+            1153.96875,
+            33.0107421875
+          ],
           "font_pt": 9.0
         }
       ],
@@ -1733,26 +1894,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png",
-      "figure_pixels": [1600.0, 900.0],
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Sample Flight Paths",
-          "bounds": [96.0, 861.494140625, 527.4375, 25.005859375],
+          "bounds": [
+            96.0,
+            861.494140625,
+            527.4375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Pitching Wedge \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 Raw Flight Samples",
-          "bounds": [96.0, 813.0555555555555, 732.109375, 19.444444444444457],
+          "bounds": [
+            96.0,
+            813.0555555555555,
+            732.109375,
+            19.444444444444457
+          ],
           "font_pt": 14.0
         },
         {
           "text": "Protocol: pw-control-face-bounds/1  |  Matched Target: 77.40 m downrange (Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0,\nSpeed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Saved Raw Trajectories; Not Paired by Shot Index  |  figure scope: Saved Raw\nFlight Samples  |  Paths shown: Straight 6; Draw 6; Fade 6",
-          "bounds": [96.0, 749.6487630208334, 1002.375, 51.35123697916663],
+          "bounds": [
+            96.0,
+            749.6487630208334,
+            1002.375,
+            51.35123697916663
+          ],
           "font_pt": 10.0
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Raw trajectories; no aim-line rotation. Vertical display magnification: 16.1\u00d7 versus downrange. Paths\nShown: Straight 6; Draw 6; Fade 6. Samples from supported airborne shots.",
-          "bounds": [96.0, 17.77316623263889, 1253.859375, 34.234157986111114],
+          "bounds": [
+            96.0,
+            17.77316623263889,
+            1253.859375,
+            34.234157986111114
+          ],
           "font_pt": 10.0
         }
       ],
@@ -1760,26 +1944,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png",
-      "figure_pixels": [1650.0, 980.0000000000001],
+      "figure_pixels": [
+        1650.0,
+        980.0000000000001
+      ],
       "texts": [
         {
           "text": "Shot-Endpoint Density Conditional on Supported Airborne Shots",
-          "bounds": [99.0, 920.694140625, 911.0, 25.005859375],
+          "bounds": [
+            99.0,
+            920.694140625,
+            911.0,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Cell: driver_lean5_curve2_rotation2_combined2",
-          "bounds": [99.0, 897.5960937500001, 406.640625, 17.00390625],
+          "bounds": [
+            99.0,
+            897.5960937500001,
+            406.640625,
+            17.00390625
+          ],
           "font_pt": 12.0
         },
         {
           "text": "source: driver-control-speed-bounds/1  |  cell: driver_lean5_curve2_rotation2_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 2.0 |\nshaft rotation sd deg: 2.0  |  figure scope: one-cell supported population  |  conditioning: individually supported endpoints by physical pattern\n|  Valid/Total: Straight 9,940/10,000 valid; Draw 9,940/10,000 valid; Fade 9,940/10,000 valid",
-          "bounds": [99.0, 817.7838867187501, 913.0, 49.51611328125],
+          "bounds": [
+            99.0,
+            817.7838867187501,
+            913.0,
+            49.51611328125
+          ],
           "font_pt": 9.0
         },
         {
           "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. HDR mass is sample-derived from simulated endpoints. Colored Dots Shown/Valid: Straight 600/9,940; Draw 600/9,940; Fade 600/9,940; density, HDR,\nand marginals use every valid endpoint. Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. Bin resolution: 3.98 \u00d7 1.93 m. Achieved HDR Mass By Pattern (Discrete Ties May\nExceed Request): Straight 50.7%/80.3%/95.3%  |  Draw 50.3%/80.1%/95.0%  |  Fade 50.8%/80.1%/95.1%",
-          "bounds": [99.0, 20.318291558159725, 1299.109375, 46.09025065104167],
+          "bounds": [
+            99.0,
+            20.318291558159725,
+            1299.109375,
+            46.09025065104167
+          ],
           "font_pt": 8.5
         }
       ],
@@ -1787,26 +1994,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png",
-      "figure_pixels": [1080.0, 1800.0],
+      "figure_pixels": [
+        1080.0,
+        1800.0
+      ],
       "texts": [
         {
           "text": "Driver: Shot Dispersion",
-          "bounds": [86.4, 1747.994140625, 331.0, 25.005859375],
+          "bounds": [
+            86.4,
+            1747.994140625,
+            331.0,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Driver \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0",
-          "bounds": [86.4, 1711.6565755208333, 465.015625, 18.337565104166742],
+          "bounds": [
+            86.4,
+            1711.6565755208333,
+            465.015625,
+            18.337565104166742
+          ],
           "font_pt": 13.0
         },
         {
           "text": "Protocol: driver-control-speed-bounds/1  |  Matched Target: 178.95 m downrange\n(Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD\n2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Individually Supported\nEndpoints by Physical Pattern  |  Valid/Total: Straight 9,940/10,000 valid;\nDraw 9,940/10,000 valid; Fade 9,940/10,000 valid",
-          "bounds": [86.4, 1607.756005859375, 613.5, 89.50056966145826],
+          "bounds": [
+            86.4,
+            1607.756005859375,
+            613.5,
+            89.50056966145826
+          ],
           "font_pt": 10.5
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Straight 600/9,940; Draw 600/9,940; Fade 600/9,940. Density, HDR, and marginals\nuse every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
-          "bounds": [86.4, 32.4, 617.53125, 50.433675130208336],
+          "bounds": [
+            86.4,
+            32.4,
+            617.53125,
+            50.433675130208336
+          ],
           "font_pt": 9.5
         }
       ],
@@ -1814,26 +2044,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png",
-      "figure_pixels": [1800.0, 600.0],
+      "figure_pixels": [
+        1800.0,
+        600.0
+      ],
       "texts": [
         {
           "text": "Raw Overhead Flight-Trajectory Comparison",
-          "bounds": [108.0, 565.994140625, 619.578125, 25.005859375],
+          "bounds": [
+            108.0,
+            565.994140625,
+            619.578125,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Cell: driver_lean5_curve2_rotation2_combined2; Raw Simulator Flight Samples",
-          "bounds": [108.0, 537.99609375, 673.28125, 17.00390625],
+          "bounds": [
+            108.0,
+            537.99609375,
+            673.28125,
+            17.00390625
+          ],
           "font_pt": 12.0
         },
         {
           "text": "source: driver-control-speed-bounds/1  |  cell: driver_lean5_curve2_rotation2_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 2.0 |\nshaft rotation sd deg: 2.0  |  figure scope: Saved Raw Flight Samples  |  Population: Saved Raw Trajectories; Not Paired by Shot Index  |  Paths\nshown: Straight 6; Draw 6; Fade 6",
-          "bounds": [108.0, 484.48388671875, 911.734375, 49.51611328125],
+          "bounds": [
+            108.0,
+            484.48388671875,
+            911.734375,
+            49.51611328125
+          ],
           "font_pt": 9.0
         },
         {
           "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. Raw trajectories; no aim-line rotation. Vertical display magnification: 4.1\u00d7 versus downrange. Only the displayed\npaths are plotted; paths are sampled from supported airborne shots.",
-          "bounds": [108.0, 10.745849609375, 1153.96875, 33.0107421875],
+          "bounds": [
+            108.0,
+            10.745849609375,
+            1153.96875,
+            33.0107421875
+          ],
           "font_pt": 9.0
         }
       ],
@@ -1841,26 +2094,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png",
-      "figure_pixels": [1600.0, 900.0],
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
       "texts": [
         {
           "text": "Driver: Sample Flight Paths",
-          "bounds": [96.0, 861.494140625, 391.328125, 25.005859375],
+          "bounds": [
+            96.0,
+            861.494140625,
+            391.328125,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Driver \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 Raw Flight Samples",
-          "bounds": [96.0, 813.0555555555555, 645.671875, 19.444444444444457],
+          "bounds": [
+            96.0,
+            813.0555555555555,
+            645.671875,
+            19.444444444444457
+          ],
           "font_pt": 14.0
         },
         {
           "text": "Protocol: driver-control-speed-bounds/1  |  Matched Target: 178.95 m downrange (Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD\n0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Saved Raw Trajectories; Not Paired by Shot Index  |  figure scope: Saved\nRaw Flight Samples  |  Paths shown: Straight 6; Draw 6; Fade 6",
-          "bounds": [96.0, 749.6487630208334, 1007.484375, 51.35123697916663],
+          "bounds": [
+            96.0,
+            749.6487630208334,
+            1007.484375,
+            51.35123697916663
+          ],
           "font_pt": 10.0
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Raw trajectories; no aim-line rotation. Vertical display magnification: 6.8\u00d7 versus downrange. Paths\nShown: Straight 6; Draw 6; Fade 6. Samples from supported airborne shots.",
-          "bounds": [96.0, 17.77316623263889, 1244.859375, 34.234157986111114],
+          "bounds": [
+            96.0,
+            17.77316623263889,
+            1244.859375,
+            34.234157986111114
+          ],
           "font_pt": 10.0
         }
       ],
@@ -1868,31 +2144,59 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.png",
-      "figure_pixels": [1600.0, 900.0],
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
       "texts": [
         {
           "text": "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
-          "bounds": [96.0, 850.6614583333334, 943.5625, 22.33854166666663],
+          "bounds": [
+            96.0,
+            850.6614583333334,
+            943.5625,
+            22.33854166666663
+          ],
           "font_pt": 16.0
         },
         {
           "text": "curve_strength \u00b7 Target 77.402 m \u00b7 Density uses all 9,999/10,000 shots common to six populations; 600 evenly spaced dots per panel",
-          "bounds": [96.0, 820.5, 813.578125, 13.0],
+          "bounds": [
+            96.0,
+            820.5,
+            813.578125,
+            13.0
+          ],
           "font_pt": 8.5
         },
         {
           "text": "Curve \u00d71: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 original_primary/1",
-          "bounds": [96.0, 802.5, 938.140625, 12.0],
+          "bounds": [
+            96.0,
+            802.5,
+            938.140625,
+            12.0
+          ],
           "font_pt": 7.7
         },
         {
           "text": "Curve \u00d72: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
-          "bounds": [96.0, 784.9308268229166, 982.953125, 11.569173177083371],
+          "bounds": [
+            96.0,
+            784.9308268229166,
+            982.953125,
+            11.569173177083371
+          ],
           "font_pt": 7.7
         },
         {
           "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching.",
-          "bounds": [96.0, 766.4970703125, 1026.0, 14.0029296875],
+          "bounds": [
+            96.0,
+            766.4970703125,
+            1026.0,
+            14.0029296875
+          ],
           "font_pt": 9.0
         }
       ],
@@ -1900,26 +2204,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.png",
-      "figure_pixels": [1080.0, 1350.0],
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Shot Dispersion",
-          "bounds": [86.4, 1304.744140625, 467.109375, 25.005859375],
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Straight: Varying Curve Strength in Panels \u00b7 Fixed: Lean 0\u00b0 \u00b7 Shaft\nTwist SD 2\u00b0",
-          "bounds": [86.4, 1247.3397352430557, 671.53125, 43.90440538194434],
+          "bounds": [
+            86.4,
+            1247.3397352430557,
+            671.53125,
+            43.90440538194434
+          ],
           "font_pt": 13.0
         },
         {
           "text": "Protocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: pw-primary-face-bounds/1  |\nMatched Target: 77.40 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Fixed-Target Control (Alias))  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid",
-          "bounds": [86.4, 1111.536886935764, 600.171875, 125.00284830729174],
+          "bounds": [
+            86.4,
+            1111.536886935764,
+            600.171875,
+            125.00284830729174
+          ],
           "font_pt": 10.5
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
-          "bounds": [86.4, 24.299999999999997, 616.734375, 50.43367513020833],
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            616.734375,
+            50.43367513020833
+          ],
           "font_pt": 9.5
         }
       ],
@@ -1927,26 +2254,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.png",
-      "figure_pixels": [1080.0, 1350.0],
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Shot Dispersion",
-          "bounds": [86.4, 1304.744140625, 467.109375, 25.005859375],
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Draw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 0\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0",
-          "bounds": [86.4, 1247.6217447916667, 699.546875, 43.62239583333326],
+          "bounds": [
+            86.4,
+            1247.6217447916667,
+            699.546875,
+            43.62239583333326
+          ],
           "font_pt": 13.0
         },
         {
           "text": "Protocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: pw-primary-face-bounds/1  |\nMatched Target: 77.40 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Fixed-Target Control (Alias))  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid",
-          "bounds": [86.4, 1111.818896484375, 600.171875, 125.00284830729174],
+          "bounds": [
+            86.4,
+            1111.818896484375,
+            600.171875,
+            125.00284830729174
+          ],
           "font_pt": 10.5
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
-          "bounds": [86.4, 24.299999999999997, 616.734375, 50.43367513020833],
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            616.734375,
+            50.43367513020833
+          ],
           "font_pt": 9.5
         }
       ],
@@ -1954,26 +2304,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.png",
-      "figure_pixels": [1080.0, 1350.0],
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Shot Dispersion",
-          "bounds": [86.4, 1304.744140625, 467.109375, 25.005859375],
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Fade: Varying Curve Strength in Panels \u00b7 Fixed: Lean 0\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0",
-          "bounds": [86.4, 1247.6217447916667, 694.484375, 43.62239583333326],
+          "bounds": [
+            86.4,
+            1247.6217447916667,
+            694.484375,
+            43.62239583333326
+          ],
           "font_pt": 13.0
         },
         {
           "text": "Protocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: pw-primary-face-bounds/1  |\nMatched Target: 77.40 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Fixed-Target Control (Alias))  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid",
-          "bounds": [86.4, 1111.818896484375, 600.171875, 125.00284830729174],
+          "bounds": [
+            86.4,
+            1111.818896484375,
+            600.171875,
+            125.00284830729174
+          ],
           "font_pt": 10.5
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
-          "bounds": [86.4, 24.299999999999997, 616.734375, 50.43367513020833],
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            616.734375,
+            50.43367513020833
+          ],
           "font_pt": 9.5
         }
       ],
@@ -1981,36 +2354,69 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.png",
-      "figure_pixels": [1600.0, 900.0],
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
       "texts": [
         {
           "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
-          "bounds": [96.0, 846.2815755208334, 736.84375, 22.21842447916663],
+          "bounds": [
+            96.0,
+            846.2815755208334,
+            736.84375,
+            22.21842447916663
+          ],
           "font_pt": 15.64
         },
         {
           "text": "Curve Strength \u00b7 Target 77.402 m",
-          "bounds": [96.0, 824.9303385416666, 213.390625, 14.069661458333371],
+          "bounds": [
+            96.0,
+            824.9303385416666,
+            213.390625,
+            14.069661458333371
+          ],
           "font_pt": 9.200000000000001
         },
         {
           "text": "Curve \u00d71: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 original_primary/1",
-          "bounds": [96.0, 802.5, 938.078125, 12.0],
+          "bounds": [
+            96.0,
+            802.5,
+            938.078125,
+            12.0
+          ],
           "font_pt": 7.82
         },
         {
           "text": "Curve \u00d72: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
-          "bounds": [96.0, 780.3907877604166, 982.890625, 11.609212239583371],
+          "bounds": [
+            96.0,
+            780.3907877604166,
+            982.890625,
+            11.609212239583371
+          ],
           "font_pt": 7.82
         },
         {
           "text": "Saved paths (not paired by shot index): Curve \u00d71 Straight 6, Draw 6, Fade 6 \u00b7 Curve \u00d72 Straight 6, Draw 6, Fade 6",
-          "bounds": [96.0, 753.3907877604166, 652.578125, 11.609212239583371],
+          "bounds": [
+            96.0,
+            753.3907877604166,
+            652.578125,
+            11.609212239583371
+          ],
           "font_pt": 7.82
         },
         {
           "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
-          "bounds": [96.0, 730.5, 713.921875, 12.0],
+          "bounds": [
+            96.0,
+            730.5,
+            713.921875,
+            12.0
+          ],
           "font_pt": 7.82
         }
       ],
@@ -2018,36 +2424,69 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead_social.png",
-      "figure_pixels": [1600.0, 900.0],
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
       "texts": [
         {
           "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
-          "bounds": [96.0, 844.8277994791666, 780.71875, 23.67220052083337],
+          "bounds": [
+            96.0,
+            844.8277994791666,
+            780.71875,
+            23.67220052083337
+          ],
           "font_pt": 17.0
         },
         {
           "text": "Curve Strength \u00b7 Target 77.402 m",
-          "bounds": [96.0, 824.6634114583334, 234.140625, 14.336588541666629],
+          "bounds": [
+            96.0,
+            824.6634114583334,
+            234.140625,
+            14.336588541666629
+          ],
           "font_pt": 10.0
         },
         {
           "text": "Curve \u00d71: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 original_primary/1",
-          "bounds": [96.0, 802.5, 1002.734375, 13.0],
+          "bounds": [
+            96.0,
+            802.5,
+            1002.734375,
+            13.0
+          ],
           "font_pt": 8.5
         },
         {
           "text": "Curve \u00d72: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
-          "bounds": [96.0, 780.0, 1052.53125, 13.0],
+          "bounds": [
+            96.0,
+            780.0,
+            1052.53125,
+            13.0
+          ],
           "font_pt": 8.5
         },
         {
           "text": "Saved paths (not paired by shot index): Curve \u00d71 Straight 6, Draw 6, Fade 6 \u00b7 Curve \u00d72 Straight 6, Draw 6, Fade 6",
-          "bounds": [96.0, 753.0, 698.375, 13.0],
+          "bounds": [
+            96.0,
+            753.0,
+            698.375,
+            13.0
+          ],
           "font_pt": 8.5
         },
         {
           "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
-          "bounds": [96.0, 730.5, 748.796875, 13.0],
+          "bounds": [
+            96.0,
+            730.5,
+            748.796875,
+            13.0
+          ],
           "font_pt": 8.5
         }
       ],
@@ -2055,31 +2494,59 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.png",
-      "figure_pixels": [1600.0, 900.0],
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
       "texts": [
         {
           "text": "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
-          "bounds": [96.0, 850.6614583333334, 943.5625, 22.33854166666663],
+          "bounds": [
+            96.0,
+            850.6614583333334,
+            943.5625,
+            22.33854166666663
+          ],
           "font_pt": 16.0
         },
         {
           "text": "across_lean \u00b7 Target 77.402 m \u00b7 Density uses all 9,999/10,000 shots common to six populations; 600 evenly spaced dots per panel",
-          "bounds": [96.0, 820.5, 790.578125, 13.0],
+          "bounds": [
+            96.0,
+            820.5,
+            790.578125,
+            13.0
+          ],
           "font_pt": 8.5
         },
         {
           "text": "Lean 0\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
-          "bounds": [96.0, 802.9308268229166, 972.765625, 11.569173177083371],
+          "bounds": [
+            96.0,
+            802.9308268229166,
+            972.765625,
+            11.569173177083371
+          ],
           "font_pt": 7.7
         },
         {
           "text": "Lean 5\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-control-face-bounds/1",
-          "bounds": [96.0, 784.9308268229166, 966.71875, 11.569173177083371],
+          "bounds": [
+            96.0,
+            784.9308268229166,
+            966.71875,
+            11.569173177083371
+          ],
           "font_pt": 7.7
         },
         {
           "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching.",
-          "bounds": [96.0, 766.4970703125, 1026.0, 14.0029296875],
+          "bounds": [
+            96.0,
+            766.4970703125,
+            1026.0,
+            14.0029296875
+          ],
           "font_pt": 9.0
         }
       ],
@@ -2087,26 +2554,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_straight_social.png",
-      "figure_pixels": [1080.0, 1350.0],
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Shot Dispersion",
-          "bounds": [86.4, 1304.744140625, 467.109375, 25.005859375],
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Straight: Varying Across Lean in Panels \u00b7 Fixed: Curve \u00d72 \u00b7 Shaft\nTwist SD 2\u00b0",
-          "bounds": [86.4, 1247.3397352430557, 654.53125, 43.90440538194434],
+          "bounds": [
+            86.4,
+            1247.3397352430557,
+            654.53125,
+            43.90440538194434
+          ],
           "font_pt": 13.0
         },
         {
           "text": "Protocol: Lean 0\u00b0: pw-primary-face-bounds/1 \u00b7 Lean 5\u00b0: pw-control-face-\nbounds/1  |  Matched Target: 77.40 m downrange (Lean 0\u00b0: Fixed-Target Control\n(Alias) \u00b7 Lean 5\u00b0: Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Lean 0\u00b0 9,999/10,000\nvalid; Lean 5\u00b0 9,999/10,000 valid",
-          "bounds": [86.4, 1111.536886935764, 606.25, 125.00284830729174],
+          "bounds": [
+            86.4,
+            1111.536886935764,
+            606.25,
+            125.00284830729174
+          ],
           "font_pt": 10.5
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Lean 0\u00b0 600/9,999; Lean 5\u00b0 600/9,999. Density, HDR, and marginals use every valid\nendpoint. Shared axes and density scale; contours are simulated-sample HDR.",
-          "bounds": [86.4, 24.299999999999997, 630.265625, 50.43367513020833],
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            630.265625,
+            50.43367513020833
+          ],
           "font_pt": 9.5
         }
       ],
@@ -2114,26 +2604,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.png",
-      "figure_pixels": [1080.0, 1350.0],
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Shot Dispersion",
-          "bounds": [86.4, 1304.744140625, 467.109375, 25.005859375],
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Draw: Varying Across Lean in Panels \u00b7 Fixed: Curve \u00d72 \u00b7 Shaft Twist SD\n2\u00b0",
-          "bounds": [86.4, 1247.6217447916667, 716.546875, 43.62239583333326],
+          "bounds": [
+            86.4,
+            1247.6217447916667,
+            716.546875,
+            43.62239583333326
+          ],
           "font_pt": 13.0
         },
         {
           "text": "Protocol: Lean 0\u00b0: pw-primary-face-bounds/1 \u00b7 Lean 5\u00b0: pw-control-face-\nbounds/1  |  Matched Target: 77.40 m downrange (Lean 0\u00b0: Fixed-Target Control\n(Alias) \u00b7 Lean 5\u00b0: Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Lean 0\u00b0 9,999/10,000\nvalid; Lean 5\u00b0 9,999/10,000 valid",
-          "bounds": [86.4, 1111.818896484375, 606.25, 125.00284830729174],
+          "bounds": [
+            86.4,
+            1111.818896484375,
+            606.25,
+            125.00284830729174
+          ],
           "font_pt": 10.5
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Lean 0\u00b0 600/9,999; Lean 5\u00b0 600/9,999. Density, HDR, and marginals use every valid\nendpoint. Shared axes and density scale; contours are simulated-sample HDR.",
-          "bounds": [86.4, 24.299999999999997, 630.265625, 50.43367513020833],
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            630.265625,
+            50.43367513020833
+          ],
           "font_pt": 9.5
         }
       ],
@@ -2141,26 +2654,49 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_fade_social.png",
-      "figure_pixels": [1080.0, 1350.0],
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
       "texts": [
         {
           "text": "Pitching Wedge: Shot Dispersion",
-          "bounds": [86.4, 1304.744140625, 467.109375, 25.005859375],
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
           "font_pt": 18.0
         },
         {
           "text": "Fade: Varying Across Lean in Panels \u00b7 Fixed: Curve \u00d72 \u00b7 Shaft Twist SD\n2\u00b0",
-          "bounds": [86.4, 1247.6217447916667, 711.484375, 43.62239583333326],
+          "bounds": [
+            86.4,
+            1247.6217447916667,
+            711.484375,
+            43.62239583333326
+          ],
           "font_pt": 13.0
         },
         {
           "text": "Protocol: Lean 0\u00b0: pw-primary-face-bounds/1 \u00b7 Lean 5\u00b0: pw-control-face-\nbounds/1  |  Matched Target: 77.40 m downrange (Lean 0\u00b0: Fixed-Target Control\n(Alias) \u00b7 Lean 5\u00b0: Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Lean 0\u00b0 9,999/10,000\nvalid; Lean 5\u00b0 9,999/10,000 valid",
-          "bounds": [86.4, 1111.818896484375, 606.25, 125.00284830729174],
+          "bounds": [
+            86.4,
+            1111.818896484375,
+            606.25,
+            125.00284830729174
+          ],
           "font_pt": 10.5
         },
         {
           "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Lean 0\u00b0 600/9,999; Lean 5\u00b0 600/9,999. Density, HDR, and marginals use every valid\nendpoint. Shared axes and density scale; contours are simulated-sample HDR.",
-          "bounds": [86.4, 24.299999999999997, 630.265625, 50.43367513020833],
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            630.265625,
+            50.43367513020833
+          ],
           "font_pt": 9.5
         }
       ],
@@ -2168,36 +2704,69 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.png",
-      "figure_pixels": [1600.0, 900.0],
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
       "texts": [
         {
           "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
-          "bounds": [96.0, 846.2815755208334, 736.84375, 22.21842447916663],
+          "bounds": [
+            96.0,
+            846.2815755208334,
+            736.84375,
+            22.21842447916663
+          ],
           "font_pt": 15.64
         },
         {
           "text": "Across Lean \u00b7 Target 77.402 m",
-          "bounds": [96.0, 824.9303385416666, 193.953125, 12.777777777777828],
+          "bounds": [
+            96.0,
+            824.9303385416666,
+            193.953125,
+            12.777777777777828
+          ],
           "font_pt": 9.200000000000001
         },
         {
           "text": "Lean 0\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
-          "bounds": [96.0, 802.8907877604166, 972.703125, 11.609212239583371],
+          "bounds": [
+            96.0,
+            802.8907877604166,
+            972.703125,
+            11.609212239583371
+          ],
           "font_pt": 7.82
         },
         {
           "text": "Lean 5\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-control-face-bounds/1",
-          "bounds": [96.0, 780.3907877604166, 966.65625, 11.609212239583371],
+          "bounds": [
+            96.0,
+            780.3907877604166,
+            966.65625,
+            11.609212239583371
+          ],
           "font_pt": 7.82
         },
         {
           "text": "Saved paths (not paired by shot index): Lean 0\u00b0 Straight 6, Draw 6, Fade 6 \u00b7 Lean 5\u00b0 Straight 6, Draw 6, Fade 6",
-          "bounds": [96.0, 753.3907877604166, 632.203125, 11.609212239583371],
+          "bounds": [
+            96.0,
+            753.3907877604166,
+            632.203125,
+            11.609212239583371
+          ],
           "font_pt": 7.82
         },
         {
           "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
-          "bounds": [96.0, 730.5, 713.921875, 12.0],
+          "bounds": [
+            96.0,
+            730.5,
+            713.921875,
+            12.0
+          ],
           "font_pt": 7.82
         }
       ],
@@ -2205,36 +2774,69 @@
     },
     {
       "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead_social.png",
-      "figure_pixels": [1600.0, 900.0],
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
       "texts": [
         {
           "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
-          "bounds": [96.0, 844.8277994791666, 780.71875, 23.67220052083337],
+          "bounds": [
+            96.0,
+            844.8277994791666,
+            780.71875,
+            23.67220052083337
+          ],
           "font_pt": 17.0
         },
         {
           "text": "Across Lean \u00b7 Target 77.402 m",
-          "bounds": [96.0, 824.6634114583334, 212.640625, 13.8888888888888],
+          "bounds": [
+            96.0,
+            824.6634114583334,
+            212.640625,
+            13.8888888888888
+          ],
           "font_pt": 10.0
         },
         {
           "text": "Lean 0\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
-          "bounds": [96.0, 802.5, 1042.328125, 13.0],
+          "bounds": [
+            96.0,
+            802.5,
+            1042.328125,
+            13.0
+          ],
           "font_pt": 8.5
         },
         {
           "text": "Lean 5\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-control-face-bounds/1",
-          "bounds": [96.0, 780.0, 1037.265625, 13.0],
+          "bounds": [
+            96.0,
+            780.0,
+            1037.265625,
+            13.0
+          ],
           "font_pt": 8.5
         },
         {
           "text": "Saved paths (not paired by shot index): Lean 0\u00b0 Straight 6, Draw 6, Fade 6 \u00b7 Lean 5\u00b0 Straight 6, Draw 6, Fade 6",
-          "bounds": [96.0, 753.0, 677.96875, 13.0],
+          "bounds": [
+            96.0,
+            753.0,
+            677.96875,
+            13.0
+          ],
           "font_pt": 8.5
         },
         {
           "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
-          "bounds": [96.0, 730.5, 748.796875, 13.0],
+          "bounds": [
+            96.0,
+            730.5,
+            748.796875,
+            13.0
+          ],
           "font_pt": 8.5
         }
       ],

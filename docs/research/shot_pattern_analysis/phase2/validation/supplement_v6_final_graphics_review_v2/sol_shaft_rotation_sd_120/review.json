@@ -40,7 +40,15 @@
   "findings": [
     {
       "kind": "known_density_layout_clearance",
-      "held_indices": [120, 121, 122, 128, 129, 130, 131],
+      "held_indices": [
+        120,
+        121,
+        122,
+        128,
+        129,
+        130,
+        131
+      ],
       "scope_sha256": "7599cc36a0008857c5579502512510f8521f8452f53b88b771e3d5db3462caba"
     }
   ],

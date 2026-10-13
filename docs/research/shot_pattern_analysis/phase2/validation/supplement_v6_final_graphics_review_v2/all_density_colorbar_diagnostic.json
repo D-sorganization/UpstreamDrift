@@ -14,7 +14,10 @@
       "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve1_rotation2_shaft_only_127p882m_76bc6350dd_density.pdf",
       "lower_fade_title": "Fade \u00b7 Rotation SD 2\u00b0",
       "title_glyph_bounds_pt": [
-        867.565911, 374.65851150000003, 972.2205985, 382.3991365
+        867.565911,
+        374.65851150000003,
+        972.2205985,
+        382.3991365
       ],
       "colorbar_patch_left_pt": 968.7744,
       "colorbar_patch_right_pt": 986.4,
@@ -27,7 +30,10 @@
       "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_control_1_seven_iron_lean10_curve2_rotation2_shaft_only_127p882m_5a3c726669_density.pdf",
       "lower_fade_title": "Fade \u00b7 Rotation SD 2\u00b0",
       "title_glyph_bounds_pt": [
-        865.2016460000001, 374.65851150000003, 969.8563335000001, 382.3991365
+        865.2016460000001,
+        374.65851150000003,
+        969.8563335000001,
+        382.3991365
       ],
       "colorbar_patch_left_pt": 968.7744,
       "colorbar_patch_right_pt": 986.4,
@@ -40,7 +46,10 @@
       "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_only_149p744m_4e13359e62_density.pdf",
       "lower_fade_title": "Fade \u00b7 Rotation SD 2\u00b0",
       "title_glyph_bounds_pt": [
-        868.7069610000001, 374.65851150000003, 973.3616485, 382.3991365
+        868.7069610000001,
+        374.65851150000003,
+        973.3616485,
+        382.3991365
       ],
       "colorbar_patch_left_pt": 968.7744,
       "colorbar_patch_right_pt": 986.4,
@@ -53,7 +62,10 @@
       "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_path_149p744m_ba17c43d4f_density.pdf",
       "lower_fade_title": "Fade \u00b7 Rotation SD 2\u00b0",
       "title_glyph_bounds_pt": [
-        867.334286, 374.65851150000003, 971.9889734999999, 382.3991365
+        867.334286,
+        374.65851150000003,
+        971.9889734999999,
+        382.3991365
       ],
       "colorbar_patch_left_pt": 968.7744,
       "colorbar_patch_right_pt": 986.4,
@@ -66,7 +78,10 @@
       "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_only_149p744m_25f203b582_density.pdf",
       "lower_fade_title": "Fade \u00b7 Rotation SD 2\u00b0",
       "title_glyph_bounds_pt": [
-        866.9303450000001, 374.65851150000003, 971.5850325000001, 382.3991365
+        866.9303450000001,
+        374.65851150000003,
+        971.5850325000001,
+        382.3991365
       ],
       "colorbar_patch_left_pt": 968.7744,
       "colorbar_patch_right_pt": 986.4,
@@ -79,7 +94,10 @@
       "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_path_149p744m_916881f3d2_density.pdf",
       "lower_fade_title": "Fade \u00b7 Rotation SD 2\u00b0",
       "title_glyph_bounds_pt": [
-        865.932975, 374.65851150000003, 970.5876625000001, 382.3991365
+        865.932975,
+        374.65851150000003,
+        970.5876625000001,
+        382.3991365
       ],
       "colorbar_patch_left_pt": 968.7744,
       "colorbar_patch_right_pt": 986.4,

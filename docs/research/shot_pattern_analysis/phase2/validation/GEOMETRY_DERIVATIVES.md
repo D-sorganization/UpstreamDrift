@@ -23,17 +23,17 @@ All 27 club/lean/nominal-face combinations (face −3/0/+3°), checked with cent
 differences ±0.0001° and ±0.00001°, agreed within 4.73e−10 deg/deg (declared tolerance
 1e−8). The yaw-invariant analytical values are:
 
-| Club           | Lean | Face / Twist | Loft / Twist | Loft / Face |
-| -------------- | ---: | -----------: | -----------: | ----------: |
-| driver         |   0° |    -0.852640 |    -0.522499 |    0.612801 |
-| driver         |   5° |    -0.842894 |    -0.522499 |    0.619886 |
-| driver         |  10° |    -0.839687 |    -0.522499 |    0.622254 |
-| seven_iron     |   0° |    -0.891007 |    -0.453990 |    0.509525 |
-| seven_iron     |   5° |    -0.844570 |    -0.453990 |    0.537540 |
-| seven_iron     |  10° |    -0.808584 |    -0.453990 |    0.561464 |
-| pitching_wedge |   0° |    -0.898794 |    -0.438371 |    0.487733 |
-| pitching_wedge |   5° |    -0.827278 |    -0.438371 |    0.529896 |
-| pitching_wedge |  10° |    -0.771745 |    -0.438371 |    0.568026 |
+| Club | Lean | Face / Twist | Loft / Twist | Loft / Face |
+| --- | ---: | ---: | ---: | ---: |
+| driver | 0° | -0.852640 | -0.522499 | 0.612801 |
+| driver | 5° | -0.842894 | -0.522499 | 0.619886 |
+| driver | 10° | -0.839687 | -0.522499 | 0.622254 |
+| seven_iron | 0° | -0.891007 | -0.453990 | 0.509525 |
+| seven_iron | 5° | -0.844570 | -0.453990 | 0.537540 |
+| seven_iron | 10° | -0.808584 | -0.453990 | 0.561464 |
+| pitching_wedge | 0° | -0.898794 | -0.438371 | 0.487733 |
+| pitching_wedge | 5° | -0.827278 | -0.438371 | 0.529896 |
+| pitching_wedge | 10° | -0.771745 | -0.438371 | 0.568026 |
 
 ## Local Carry Response
 
@@ -44,16 +44,16 @@ The table shows the straight-pattern response using the smaller twist and flight
 steps. X is downrange; Y is positive right. These are approximate local numerical
 slopes, not empirically calibrated player responses.
 
-| Club           | Lean | Downrange m / Twist Degree | Rightward m / Twist Degree |
-| -------------- | ---: | -------------------------: | -------------------------: |
-| driver         |   0° |                      -4.62 |                      -6.27 |
-| driver         |   5° |                     -10.52 |                      -2.98 |
-| seven_iron     |   0° |                       1.17 |                      -2.58 |
-| seven_iron     |   5° |                       1.00 |                      -2.98 |
-| seven_iron     |  10° |                       0.77 |                      -3.43 |
-| pitching_wedge |   0° |                       1.15 |                      -1.11 |
-| pitching_wedge |   5° |                       1.12 |                      -1.34 |
-| pitching_wedge |  10° |                       1.04 |                      -1.58 |
+| Club | Lean | Downrange m / Twist Degree | Rightward m / Twist Degree |
+| --- | ---: | ---: | ---: |
+| driver | 0° | -4.62 | -6.27 |
+| driver | 5° | -10.52 | -2.98 |
+| seven_iron | 0° | 1.17 | -2.58 |
+| seven_iron | 5° | 1.00 | -2.98 |
+| seven_iron | 10° | 0.77 | -3.43 |
+| pitching_wedge | 0° | 1.15 | -1.11 |
+| pitching_wedge | 5° | 1.12 | -1.34 |
+| pitching_wedge | 10° | 1.04 | -1.58 |
 
 Positive twist closes and delofts the face. In these straight presets it moves
 carry left, but driver carry shortens whereas iron/PW carry lengthens. Geometry

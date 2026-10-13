@@ -6,7 +6,13 @@
     "('control_final_figures_v1', '.svg')": 174
   },
   "nonempty_renderer_stderr": [],
-  "pixel_width_range": [1441, 2478],
-  "pixel_height_range": [864, 2536],
+  "pixel_width_range": [
+    1441,
+    2478
+  ],
+  "pixel_height_range": [
+    864,
+    2536
+  ],
   "visual_approval": false
 }

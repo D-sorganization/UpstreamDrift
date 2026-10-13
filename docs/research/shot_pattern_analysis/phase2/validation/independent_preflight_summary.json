@@ -8,7 +8,7 @@
         "same_unsupported_domain": 18
       },
       "failures": 0,
-      "maximum_change_m": 1.489169872337017e-5
+      "maximum_change_m": 1.489169872337017e-05
     },
     "contact_fine": {
       "counts": {
@@ -16,7 +16,7 @@
         "same_unsupported_domain": 18
       },
       "failures": 0,
-      "maximum_change_m": 6.700624896524442e-6
+      "maximum_change_m": 6.700624896524442e-06
     },
     "contact_primary_to_fine": {
       "counts": {
@@ -24,7 +24,7 @@
         "same_unsupported_domain": 18
       },
       "failures": 0,
-      "maximum_change_m": 2.0122741214080617e-5
+      "maximum_change_m": 2.0122741214080617e-05
     },
     "flight_coarse": {
       "counts": {

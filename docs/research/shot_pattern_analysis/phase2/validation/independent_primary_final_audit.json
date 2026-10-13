@@ -101,12 +101,12 @@
   "limits": {
     "input": 1e-12,
     "summary": 1e-10,
-    "covariance": 1e-8,
+    "covariance": 1e-08,
     "correlation": 1e-10,
-    "paired": 1e-9,
+    "paired": 1e-09,
     "scoring": 1e-12,
     "direct_api": 1e-12,
-    "bootstrap": 1e-8
+    "bootstrap": 1e-08
   },
   "failures": [],
   "cells": {
@@ -15236,7 +15236,7 @@
           "Draw": {
             "estimate": -0.0008705204695764605,
             "lower_95": -0.001844626428952313,
-            "upper_95": 8.635979809933757e-5
+            "upper_95": 8.635979809933757e-05
           },
           "Fade": {
             "estimate": 0.0006734141039704654,
@@ -15306,7 +15306,7 @@
           "Fade": {
             "estimate": -0.001020701181262632,
             "lower_95": -0.001995139152639908,
-            "upper_95": 5.66909931554271e-5
+            "upper_95": 5.66909931554271e-05
           }
         },
         "mean_squared_target_error_difference_m2": {
@@ -15885,7 +15885,7 @@
           "Fade": {
             "estimate": -0.00040004000400040005,
             "lower_95": -0.0009000900090009,
-            "upper_95": 5.2505250525050235e-5
+            "upper_95": 5.2505250525050235e-05
           }
         },
         "uncertainty_scope": "paired bootstrap; sampling only; excludes model and course uncertainty"
@@ -16474,14 +16474,14 @@
         "conditioning": "common_supported_indices_only",
         "mean_radial_error_difference_vs_straight": {
           "Draw": {
-            "estimate": 9.549394970907447e-5,
+            "estimate": 9.549394970907447e-05,
             "lower_95": -0.0011671105951977755,
             "upper_95": 0.0012869212451863288
           },
           "Fade": {
             "estimate": -0.0012284552623984674,
             "lower_95": -0.002415853766248688,
-            "upper_95": 7.35322137494237e-5
+            "upper_95": 7.35322137494237e-05
           }
         },
         "mean_squared_target_error_difference_m2": {

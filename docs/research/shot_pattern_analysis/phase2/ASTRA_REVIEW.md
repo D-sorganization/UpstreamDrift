@@ -104,12 +104,12 @@ the current `club_geometry`, `matched_config`, `matched_physics`,
 `nominal_matching`, and `noise` modules. This pass is **not yet accepted for the
 large matrix**. The blocking items below were sent to their implementation owners.
 
-| Finding                                       | Independent Evidence                                                                                                                                                                                                                 | Disposition                                                                                                                                          |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Finding | Independent Evidence | Disposition |
+| --- | --- | --- |
 | Stick-First Is Not Global Maximum Dissipation | With n=(1,0,0), r_c=(0.04,0.02,0.01) m, I_c=diag(0.00012,0.00018,0.00020) kg·m², m_c=0.2 kg, c=(45,3,1) m/s, e=0.78, μ=1, the returned sticking impulse has an energy objective 0.16905438 J above an admissible interior minimizer. | Choose a consistently declared law. The source currently claims maximum dissipation only for the sliding branch; an overall QP claim would be false. |
-| Valid Elastic Case Rejected by Stick-First    | The same geometry with e=1 and c=(45,−3,−1) m/s causes `contact passivity postcondition failed`.                                                                                                                                     | Do not weaken the energy guard. Correct the chosen law and add a regression before matrix acceptance.                                                |
-| Admissible Sliding Case Fails SLSQP           | One of 100 deterministic random 3D contact cases failed `sliding contact optimization did not converge`; exact state sent to the owner. It used e=0.83 and μ=0.02.                                                                   | Add the reproducer and improve numerical robustness; do not count optimizer failure as physical unsupported-shot probability.                        |
-| Local Impact Orientation Missing From Output  | The adapter returns center-face angles. Driver high-face offset 6.35 mm changes the local normal through roll, while reported center loft remains 10°.                                                                               | Add distinct local-contact face/loft fields for covariance, preserving center orientation as a separate quantity.                                    |
+| Valid Elastic Case Rejected by Stick-First | The same geometry with e=1 and c=(45,−3,−1) m/s causes `contact passivity postcondition failed`. | Do not weaken the energy guard. Correct the chosen law and add a regression before matrix acceptance. |
+| Admissible Sliding Case Fails SLSQP | One of 100 deterministic random 3D contact cases failed `sliding contact optimization did not converge`; exact state sent to the owner. It used e=0.83 and μ=0.02. | Add the reproducer and improve numerical robustness; do not count optimizer failure as physical unsupported-shot probability. |
+| Local Impact Orientation Missing From Output | The adapter returns center-face angles. Driver high-face offset 6.35 mm changes the local normal through roll, while reported center loft remains 10°. | Add distinct local-contact face/loft fields for covariance, preserving center orientation as a separate quantity. |
 
 For the equality-constrained energy objective, the unconstrained minimizer is
 `J* = K^-1 c + [e c_n / (n^T K n)] n`. If it lies in the friction cone, it is the
@@ -161,16 +161,16 @@ The Tools pin and runtime matched `3678409fc51024150ab28970b72e3b468935f345`.
 
 ## Blocking Findings and Acceptance Tests
 
-| ID     | Finding and Source                                                                                                                                                                                                                                                                                                                                   | Required Acceptance                                                                                                                                                                                                                                                                                          |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| P2-A01 | Existing off-center impact is a scalar effective-mass correction followed by additive spin. `impact_model/models.py`, `solver.py:solve_pre_impact_state`, and `utils.py:compute_gear_effect_spin` do not implement coupled rotational contact.                                                                                                       | Use the shared impact boundary for a declared two-body contact law. Update ball and club translation and rotation from the same impulse. Verify full momentum, contact restitution, passivity, and rotation covariance before strike Monte Carlo. Do not add the old gear term afterward.                    |
-| P2-A02 | Toe-positive helper spin has the wrong horizontal sign for the experiment's native Magnus convention. At +0.00635 m and 45 m/s, the helper gives world-z spin −50.00625 rad/s; its cross product with forward velocity points world-right. Existing `test_impact_physics_value_assertions.py` calls negative z “draw,” thereby preserving the error. | A flat-face, rearward-CG toe strike must produce the expected draw spin in the native frame, with heel mirrored. Test spin-to-aerodynamic-force and actual flight signs; do not use assertions that merely copy implementation signs. Distinguish initial launch direction from curvature.                   |
-| P2-A03 | Impact offset is inconsistently described as from face center and from CG; scalar MOI supplies no CG depth or tensor orientation.                                                                                                                                                                                                                    | Define a rigid club frame, face-center-to-CG vector, toe/high axes, full positive-definite inertia tensor in that frame, and transformations to world coordinates. Test rotations, depth-zero limit, high-inertia limit, and dimensions. Clearly identify assumed values.                                    |
-| P2-A04 | `delivery_from_face_angle` samples a requested face error and inversely solves twist. It is not Gaussian shaft twist.                                                                                                                                                                                                                                | For shaft-rotation SD, draw twist directly and compute face/loft from the rotated normal. Keep separate variable names, units, receipts, and plots for twist SD and resulting face SD. Test the zero-error limit and local Jacobian.                                                                         |
-| P2-A05 | Existing shaft-lean control holds nominal delivered loft fixed and changes only the assumed axis. It is not forward pitching a club of fixed static loft.                                                                                                                                                                                            | Rigidly rotate face, shaft, CG vector, inertia, and face tangent axes together for 0°/5°/10° lean. Then apply nominal yaw and stochastic twist in a documented order. Confirm zero-yaw, zero-twist delivered loft equals static loft minus forward pitch.                                                    |
-| P2-A06 | Current `core.py` rotates completed landings with `_rotate_to_aim`. That violates the new request for matched nominal delivery without post-flight adjustment.                                                                                                                                                                                       | Solve actual nominal delivery inputs against target x/y, then freeze them. Export and score raw simulated endpoints. Assert no per-pattern output rotation, translation, or rescaling is used in primary phase-two results. Keep any equal-range diagnostic separate.                                        |
-| P2-A07 | Low-loft/high-lean cases may have no airborne solution. Current configuration also rejects nominal loft ≥45°, excluding a 46° static PW before geometric pitching.                                                                                                                                                                                   | Add explicit static-versus-delivered input contracts, high-loft tests, bounded target feasibility, and nonairborne/timed-out statuses. Never silently widen bounds, alter attack, resample failed shots, or report an airborne final sample as a landing.                                                    |
-| P2-A08 | Face-only scatter is not a probability-density depiction; adding two strike inputs changes dimension but does not guarantee a Gaussian landing population.                                                                                                                                                                                           | Export empirical equal-area density or probability-per-bin with shared bounds and normalization, plus transparent sample scatter if useful. Retain every shot in accounting; disclose plotted clipping and invalid mass. Label covariance ellipses as descriptive, not calibrated player confidence regions. |
+| ID | Finding and Source | Required Acceptance |
+| --- | --- | --- |
+| P2-A01 | Existing off-center impact is a scalar effective-mass correction followed by additive spin. `impact_model/models.py`, `solver.py:solve_pre_impact_state`, and `utils.py:compute_gear_effect_spin` do not implement coupled rotational contact. | Use the shared impact boundary for a declared two-body contact law. Update ball and club translation and rotation from the same impulse. Verify full momentum, contact restitution, passivity, and rotation covariance before strike Monte Carlo. Do not add the old gear term afterward. |
+| P2-A02 | Toe-positive helper spin has the wrong horizontal sign for the experiment's native Magnus convention. At +0.00635 m and 45 m/s, the helper gives world-z spin −50.00625 rad/s; its cross product with forward velocity points world-right. Existing `test_impact_physics_value_assertions.py` calls negative z “draw,” thereby preserving the error. | A flat-face, rearward-CG toe strike must produce the expected draw spin in the native frame, with heel mirrored. Test spin-to-aerodynamic-force and actual flight signs; do not use assertions that merely copy implementation signs. Distinguish initial launch direction from curvature. |
+| P2-A03 | Impact offset is inconsistently described as from face center and from CG; scalar MOI supplies no CG depth or tensor orientation. | Define a rigid club frame, face-center-to-CG vector, toe/high axes, full positive-definite inertia tensor in that frame, and transformations to world coordinates. Test rotations, depth-zero limit, high-inertia limit, and dimensions. Clearly identify assumed values. |
+| P2-A04 | `delivery_from_face_angle` samples a requested face error and inversely solves twist. It is not Gaussian shaft twist. | For shaft-rotation SD, draw twist directly and compute face/loft from the rotated normal. Keep separate variable names, units, receipts, and plots for twist SD and resulting face SD. Test the zero-error limit and local Jacobian. |
+| P2-A05 | Existing shaft-lean control holds nominal delivered loft fixed and changes only the assumed axis. It is not forward pitching a club of fixed static loft. | Rigidly rotate face, shaft, CG vector, inertia, and face tangent axes together for 0°/5°/10° lean. Then apply nominal yaw and stochastic twist in a documented order. Confirm zero-yaw, zero-twist delivered loft equals static loft minus forward pitch. |
+| P2-A06 | Current `core.py` rotates completed landings with `_rotate_to_aim`. That violates the new request for matched nominal delivery without post-flight adjustment. | Solve actual nominal delivery inputs against target x/y, then freeze them. Export and score raw simulated endpoints. Assert no per-pattern output rotation, translation, or rescaling is used in primary phase-two results. Keep any equal-range diagnostic separate. |
+| P2-A07 | Low-loft/high-lean cases may have no airborne solution. Current configuration also rejects nominal loft ≥45°, excluding a 46° static PW before geometric pitching. | Add explicit static-versus-delivered input contracts, high-loft tests, bounded target feasibility, and nonairborne/timed-out statuses. Never silently widen bounds, alter attack, resample failed shots, or report an airborne final sample as a landing. |
+| P2-A08 | Face-only scatter is not a probability-density depiction; adding two strike inputs changes dimension but does not guarantee a Gaussian landing population. | Export empirical equal-area density or probability-per-bin with shared bounds and normalization, plus transparent sample scatter if useful. Retain every shot in accounting; disclose plotted clipping and invalid mass. Label covariance ellipses as descriptive, not calibrated player confidence regions. |
 
 ## Contact Mechanics Design
 
@@ -194,7 +194,7 @@ impulse first and independently clipping a tangential vector is not generally va
 A full sticking candidate solves `K J = c + e (c·n) n`. Accepting it requires
 nonnegative normal impulse, friction-cone admissibility, and energy consistency.
 Do not assume an arbitrary Newton-restition/friction combination is passive.
-One stable alternative is a _declared maximum-dissipation impulse approximation_:
+One stable alternative is a *declared maximum-dissipation impulse approximation*:
 minimize `0.5 J^T K J − c^T J`, subject to
 `n^T K J = (1+e) c_n`, `J_n >= 0`, and `||J_t|| <= mu J_n`.
 The pure-normal impulse is feasible and non-energy-producing for 0≤e≤1; the
@@ -362,14 +362,14 @@ receipts confirming unchanged scientific sources. The 243-delivery grid yielded
 There were no solver errors or support-status inconsistencies. Maximum Euclidean
 landing changes were:
 
-| Comparison             | Maximum Change | Predeclared Gate | Disposition |
-| ---------------------- | -------------: | ---------------: | ----------- |
-| Contact 128→256        |  0.000014892 m |           0.05 m | Pass        |
-| Contact 256→512        |  0.000006701 m |           0.05 m | Pass        |
-| Contact 128→512        |  0.000020123 m |           0.05 m | Pass        |
-| Flight dt 0.02→0.01 s  |     0.036837 m |           0.05 m | Pass        |
-| Flight dt 0.01→0.005 s |     0.010916 m |           0.05 m | Pass        |
-| Flight dt 0.02→0.005 s |     0.042923 m |           0.05 m | Pass        |
+| Comparison | Maximum Change | Predeclared Gate | Disposition |
+| --- | ---: | ---: | --- |
+| Contact 128→256 | 0.000014892 m | 0.05 m | Pass |
+| Contact 256→512 | 0.000006701 m | 0.05 m | Pass |
+| Contact 128→512 | 0.000020123 m | 0.05 m | Pass |
+| Flight dt 0.02→0.01 s | 0.036837 m | 0.05 m | Pass |
+| Flight dt 0.01→0.005 s | 0.010916 m | 0.05 m | Pass |
+| Flight dt 0.02→0.005 s | 0.042923 m | 0.05 m | Pass |
 
 The proposed 128 contact steps are accepted for this sampled geometric domain.
 The largest flight differences occur in very low driver launches at 10° lean.
@@ -412,11 +412,11 @@ with no numerical failure or support-status change between nominal and variant.
 Both contact and flight source hashes remained unchanged. The largest endpoint
 displacements over this deterministic grid were:
 
-| Club   | CG Depth ±20% | Principal Inertias ±20% | Driver Radii ±20% | Newton-QP Comparator |
-| ------ | ------------: | ----------------------: | ----------------: | -------------------: |
-| Driver |       5.144 m |                 7.105 m |          22.628 m |             11.331 m |
-| 7-Iron |       0.543 m |                 1.764 m |    Not Applicable |              1.224 m |
-| PW     |       0.184 m |                 1.402 m |    Not Applicable |              0.325 m |
+| Club | CG Depth ±20% | Principal Inertias ±20% | Driver Radii ±20% | Newton-QP Comparator |
+| --- | ---: | ---: | ---: | ---: |
+| Driver | 5.144 m | 7.105 m | 22.628 m | 11.331 m |
+| 7-Iron | 0.543 m | 1.764 m | Not Applicable | 1.224 m |
+| PW | 0.184 m | 1.402 m | Not Applicable | 0.325 m |
 
 The largest driver radius response occurs at 5° lean and a low strike, with both
 radii reduced by 20%. It reflects a low-launch sensitivity, not a population

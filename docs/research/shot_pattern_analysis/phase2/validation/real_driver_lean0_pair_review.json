@@ -26,7 +26,10 @@
       "matched_lean_control.py": "b97a6575ec5071c549d68ce52411ef5c32ce37c195384c5ab69806449b298fa1",
       "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
     },
-    "source_protocols": ["original_primary/1", "original_primary/1"],
+    "source_protocols": [
+      "original_primary/1",
+      "original_primary/1"
+    ],
     "source_transition_receipt_sha256": null,
     "sources": [
       {
@@ -60,7 +63,9 @@
         "Fade": 0
       }
     },
-    "allowed_config_differences": ["noise.standard_deviations[0]"],
+    "allowed_config_differences": [
+      "noise.standard_deviations[0]"
+    ],
     "patterns": {
       "Straight": {
         "radial_error_difference_m": {
