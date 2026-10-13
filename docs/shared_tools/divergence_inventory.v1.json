@@ -8436,6 +8436,18 @@
       "spelling_only": false
     },
     {
+      "path": "estimation/mosaic/swing_registration.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "mosaic",
+      "ud_bytes": 13925,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "estimation/mosaic/torque_template.py",
       "classification": "ud-only",
       "package": "estimation",
