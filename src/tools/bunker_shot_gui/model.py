@@ -125,6 +125,11 @@ from .design import (
 )
 from .field import ContactPatch, SoleLoadField, contact_patch
 from .shot3d import ShotScene, shot_scene
+from .objective import (
+    MIN_RANKABLE_CONDITIONS,
+    SHIPPED_CARRY_DISPOSITION,
+    carry_objective_standing,
+)
 from .outcomes import DesignEvaluation, ShotOutcome, WorkbenchComparison
 from .traces import ShotTraces, shot_traces
 from .uncertainty import (
@@ -984,7 +989,7 @@ class WorkbenchModel:
                 ),
             )
         shared = np.isfinite(errors[0]) & np.isfinite(errors[1])
-        if int(shared.sum()) < 2:
+        if int(shared.sum()) < MIN_RANKABLE_CONDITIONS:
             return WorkbenchComparison(
                 left=first,
                 right=second,
@@ -994,23 +999,55 @@ class WorkbenchModel:
                 ),
                 shared_points=int(shared.sum()),
             )
-        ranking = compare_designs(
-            (left.name, right.name),
-            np.vstack([errors[0][shared], errors[1][shared]]),
-            lower_is_better=True,
-            seed=COMPARISON_SEED,
+        return self._ranked_comparison(
+            first, second, np.vstack([errors[0][shared], errors[1][shared]]), shared
         )
+
+    def _ranked_comparison(
+        self,
+        first: DesignEvaluation,
+        second: DesignEvaluation,
+        shared_errors: NDArray[np.float64],
+        shared: NDArray[np.bool_],
+    ) -> WorkbenchComparison:
+        """Rank two evaluations on their shared carry errors.
+
+        The ranking is always built, as exploration; whether it may be read
+        as a prediction is the objective standing's decision (#9239), and
+        with no transfer qualification shipped it never is.
+
+        Args:
+            first: The first design's evaluation.
+            second: The second design's evaluation.
+            shared_errors: ``(2, n)`` finite carry errors at the shared points.
+            shared: Boolean mask over the flattened grid that selected them.
+
+        Returns:
+            The comparison, its standing attached.
+        """
+        names = (first.design.name, second.design.name)
+        ranking = compare_designs(
+            names, shared_errors, lower_is_better=True, seed=COMPARISON_SEED
+        )
+        settings = self._settings
         return WorkbenchComparison(
             left=first,
             right=second,
             ranking=ranking,
             shared_points=int(shared.sum()),
             banded=rank_with_bands(
-                left.name,
+                names[0],
                 self.objective_budget(first, shared, float(ranking.std_error[0])),
-                right.name,
+                names[1],
                 self.objective_budget(second, shared, float(ranking.std_error[1])),
                 lower_is_better=True,
+            ),
+            objective=carry_objective_standing(
+                shared_errors,
+                disposition=SHIPPED_CARRY_DISPOSITION,
+                window_half_width_m=(
+                    settings.carry_tolerance_fraction * settings.target_carry_m
+                ),
             ),
         )
 
