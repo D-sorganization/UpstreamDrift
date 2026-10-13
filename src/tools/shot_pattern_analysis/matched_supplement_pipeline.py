@@ -30,6 +30,7 @@ from .matched_supplement_report import (
 )
 from .matched_formatting import format_sg_interval_record
 from .provenance import manifest_files_match, sha256_file
+from .uncertainty import HISTORICAL_RESAMPLES
 from .matched_supplement_figures import (
     _condition,
     _render_cell_figures,
@@ -335,7 +336,10 @@ def _pair_spec(kind: str, first: dict, second: dict) -> dict[str, Any]:
 
 
 def _pair_result(
-    pair: dict[str, Any], transition_path: Path, transition_sha256: str
+    pair: dict[str, Any],
+    transition_path: Path,
+    transition_sha256: str,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> dict[str, Any]:
     first, second = pair["first"], pair["second"]
     same_execution = first["_execution"] == second["_execution"]
@@ -346,6 +350,7 @@ def _pair_result(
         target_x_m=pair["target_x_m"],
         transition_receipt_path=None if same_execution else transition_path,
         transition_receipt_sha256=None if same_execution else transition_sha256,
+        resamples=resamples,
     )
 
 
@@ -731,6 +736,45 @@ def _load_pipeline_sources(
     validate_planned_figure_identities(pair_specs, supplement["unique_cells"])
     return _PipelineSources(
         original_reports, original_cells, supplement, report_sources, pair_specs
+    )
+
+
+SUPPLEMENT_TRANSITION_SHA256 = (
+    "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981"
+)
+"""Accepted hash of ``source_transition_supplement.json`` (see REPRODUCING.md)."""
+
+
+def explicit_pair_specs(phase2_root: Path) -> list[dict[str, Any]]:
+    """Load and validate every explicit pair from a restored phase-two tree.
+
+    ``phase2_root`` uses the published layout: ``final_v1``,
+    ``control_final_v1``, ``supplement_final_v1/<protocol>`` and
+    ``review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json``.
+    """
+    root = Path(phase2_root)
+    supplement = root / "supplement_final_v1"
+    return _load_pipeline_sources(
+        root / "final_v1",
+        root / "control_final_v1",
+        {
+            "pw-primary-face-bounds/1": supplement / "pw_primary_face",
+            "pw-control-face-bounds/1": supplement / "pw_control_face",
+            "driver-control-speed-bounds/1": supplement / "driver_control_speed",
+        },
+        root / "review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json",
+    ).pair_specs
+
+
+def analyze_pair_spec(
+    pair: dict[str, Any], phase2_root: Path, *, resamples: int
+) -> dict[str, Any]:
+    """Analyze one explicit pair against the accepted source transition."""
+    return _pair_result(
+        pair,
+        Path(phase2_root) / "source_transition_supplement.json",
+        SUPPLEMENT_TRANSITION_SHA256,
+        resamples,
     )
 
 

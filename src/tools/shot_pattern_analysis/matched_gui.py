@@ -12,7 +12,12 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from src.tools.async_action import AsyncActionBar, WorkerContext
 from .core import PATTERN_NAMES
 from .preview import scale_previews
-from .matched_config import MatchedConfig, matched_preset
+from .matched_config import (
+    MatchedConfig,
+    delivery_warnings,
+    matched_preset,
+    preset_modifications,
+)
 from .noise import NOISE_FIELDS, NoiseSpec
 
 
@@ -549,26 +554,14 @@ class MatchedStudyWidget(QtWidgets.QWidget):
     def _update_assumption(self) -> None:
         club_id = self.club_config.club_id
         context = "Custom" if club_id == "custom" else club_id.replace("_", " ").title()
-        preset = (
-            matched_preset(club_id)
-            if club_id in {"driver", "seven_iron", "pitching_wedge"}
-            else None
-        )
-        modified = preset is not None and any(
-            getattr(self.club_config, key) != getattr(preset, key)
-            for key in (
-                "club_speed_mps",
-                "loft_deg",
-                "shaft_lean_deg",
-                "attack_angle_deg",
-                "clubhead_mass_kg",
-            )
-        )
-        if modified:
+        if preset_modifications(self.club_config):
             context += " (Modified)"
-        self.assumption_label.setText(
+        text = (
             f"{context} equipment settings are illustrative model assumptions, not measured player averages. "
             "Loft remains static and common across patterns; advanced equipment geometry is retained in the JSON configuration."
+        )
+        self.assumption_label.setText(
+            " ".join((text, *delivery_warnings(self.club_config)))
         )
 
     def _correlation_edited(self, item: QtWidgets.QTableWidgetItem) -> None:
@@ -674,26 +667,9 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         if payload.get("schema") != self.CONFIG_SCHEMA:
             raise ValueError("unsupported matched-study config schema")
         values = {key: value for key, value in payload.items() if key != "schema"}
-        club_values = dict(values["club"])
-        club_values["inertia_diagonal_kg_m2"] = tuple(
-            club_values["inertia_diagonal_kg_m2"]
-        )
-        club = MatchedConfig(**club_values)
-        noise_values = values["noise"]
-        noise = NoiseSpec(
-            tuple(noise_values["standard_deviations"]),
-            tuple(tuple(row) for row in noise_values["correlation"])
-            if noise_values.get("correlation") is not None
-            else None,
-        )
         from .matched_runner import ExperimentConfig
 
-        request = ExperimentConfig(
-            club=club,
-            noise=noise,
-            **{k: v for k, v in values.items() if k not in {"club", "noise"}},
-        )
-        self._apply_request(request)
+        self._apply_request(ExperimentConfig.from_dict(values))
 
     def _apply_request(self, request: Any) -> None:
         self._validate_import_display(request)

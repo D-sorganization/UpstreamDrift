@@ -1,0 +1,8 @@
+{
+  "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+  "variant": "nominal_reproduction",
+  "shots_compared": 30000,
+  "status_mismatches": 0,
+  "max_abs_endpoint_difference_m": 0.0,
+  "target_x_m": 77.40247724866299
+}

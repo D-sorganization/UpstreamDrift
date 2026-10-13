@@ -159,7 +159,9 @@ def test_plot_verifier_rejects_stale_current_density(
             str(output),
         ],
     )
-    with pytest.raises(ValueError, match="Unexpected semantic source change"):
+    # The bin-count validation hardened after review changes the digest, so the
+    # current tree is refused before any semantic comparison.
+    with pytest.raises(ValueError, match="Unapproved current density source digest"):
         _plot_verifier().main()
     assert not output.exists()
 

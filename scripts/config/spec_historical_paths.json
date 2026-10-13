@@ -7,9 +7,9 @@
       "row_sha256": "60faec5f57b37b67066d023c9fa577fd3cd82594791fe0707e8f5e141d071330",
       "historical_commit": "51f563776a4a31bd42b185e430e51e4dcdf3f453",
       "historical_sha256": "650b9e7e84c2a816af13d7b1aa48d83cdf4efb9b13041ffb6a5dd0524f4d65a1",
-      "provider_commit": "6b6e4be55e7086a33db43b36d2632765be619bde",
+      "provider_commit": "8a11691b4e9aee7d04dfc39628a8269ca561b07d",
       "provider_path": "src/shared/python/signal_toolkit/fitting.py",
-      "provider_sha256": "41f2f951a11e972e706844f7144be886ed52222807e0dd8a5c1d029d8f4d2ef2"
+      "provider_sha256": "27272e45bf96df2335dc041a4a3f5a82b1e8c21800785e3be3875bf0c1801071"
     }
   }
 }

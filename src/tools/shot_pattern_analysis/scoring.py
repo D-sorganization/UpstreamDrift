@@ -21,7 +21,7 @@ from src.tools.launch_monitor_model import (
 )
 
 from .core import PATTERNS
-from .uncertainty import paired_mean_difference
+from .uncertainty import HISTORICAL_RESAMPLES, paired_mean_difference
 
 SOURCE_URL = "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
 SOURCE_PDF_SHA256 = "f22c305ae47f3f2973882d16852b6f43dbde577c5e1c11b12bcb19d2956699e7"
@@ -348,6 +348,8 @@ def score_approach_endpoints(
             [scores[name][i] for i in paired_indices],
             [scores["Straight"][i] for i in paired_indices],
             seed=seed,
+            # Reproduces the frozen October 2026 approach records.
+            resamples=HISTORICAL_RESAMPLES,
         )
         for name in ("Draw", "Fade")
     }

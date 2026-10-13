@@ -122,3 +122,7 @@ docs/development/lifting/evidence/back_squat/*_parity.json
 
 # Preserve byte-exact, hash-bound maintenance evidence receipts.
 docs/development/maintenance/2026-10-12-capacity-recovery/*.json
+
+# Hash-bound shot-pattern statistics; headline_dataset.json records their SHA-256
+# and a repository test rejects any byte change, so Prettier must not reflow them.
+docs/research/shot_pattern_analysis/phase2/statistics_v2/

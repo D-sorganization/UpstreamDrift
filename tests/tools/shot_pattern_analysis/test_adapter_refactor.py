@@ -12,6 +12,8 @@ import numpy as np
 import pytest
 import scipy
 
+from src.tools.shot_pattern_analysis.uncertainty import HISTORICAL_RESAMPLES
+
 pytestmark = pytest.mark.unit
 
 _FIXTURE_DIR = Path(__file__).parent / "fixtures"
@@ -165,8 +167,14 @@ def _matched_receipt(monkeypatch):
         physics=engine,
         include_scoring=False,
         progress=lambda a, b: progress.append((a, b)),
+        # The golden receipt predates the 2,000-resample publication default.
+        resamples=HISTORICAL_RESAMPLES,
     )
-    return {"result": asdict(result), "calls": engine.calls, "progress": progress}
+    receipt = asdict(result)
+    for section in ("course_scoring", "paired_comparisons"):
+        # Recorded since #12409; the frozen receipt predates the field.
+        assert receipt[section].pop("bootstrap_resamples") == HISTORICAL_RESAMPLES
+    return {"result": receipt, "calls": engine.calls, "progress": progress}
 
 
 def _delivery_receipt(monkeypatch):

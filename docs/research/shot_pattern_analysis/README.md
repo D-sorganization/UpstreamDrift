@@ -39,7 +39,36 @@ control cases unavailable within their search bounds. The separately labelled
 rows that remain explicitly exported. Scientific narrative and assigned graphic
 reviews are complete, including selective density-layout repairs. Final repository
 gates and remote delivery are tracked in the [Current Resume Handoff](phase2/RESUME_HANDOFF.md).
-The [Illustrated Article](shot_pattern_analysis.tex) embeds 13 reviewed figure plates in a 33-page locally compiled report; its [Review Record](phase2/validation/illustrated_article_v1/README.md) gives reproduction and compiler limits.
+The [Illustrated Article](shot_pattern_analysis.tex) embeds 13 reviewed figure plates; its [Review Record](phase2/validation/illustrated_article_v1/README.md) gives the figure reproduction steps.
+
+### Revised Statistics and Head-Assumption Band
+
+The October 12, 2026 edition of the article reports strokes gained per 100
+shots and distances in metres with yards. Its headline intervals were
+recomputed from the saved shots with 2,000 paired bootstrap resamples (at 500
+they reproduce the frozen intervals), and each of the 24 headline conditions
+was re-run under seven one-factor clubhead variants (136 runs) to give a
+head-assumption band. A nominal-head re-run reproduced all 720,000 saved
+headline shots exactly. Every table and quoted number in the article is
+rendered from [`headline_dataset.json`](phase2/statistics_v2/headline_dataset.json),
+which records the SHA-256 of each input; `tests/tools/shot_pattern_analysis/test_report_tables.py`
+fails if a table or input drifts. [`phase2/REPORT.md`](phase2/REPORT.md) remains the
+frozen 500-resample record. The interactive tool, matched runs and the
+`--resamples` commands below default to 2,000; the saved-record analyses that
+regenerate `REPORT.md` (lean control, sensitivity and approach scoring) keep
+the historical 500 so they still reproduce it byte for byte.
+
+```bash
+# After restoring the phase-two archives (see phase2/REPRODUCING.md) to PHASE2:
+python3 -m src.tools.shot_pattern_analysis.rescored_statistics PHASE2/final_v1 final_v1.json --workers 8
+python3 -m src.tools.shot_pattern_analysis.rescored_statistics --contrasts PHASE2 contrasts.json
+python3 -m src.tools.shot_pattern_analysis.assumption_band --help  # band runs (native physics required)
+python3 -m src.tools.shot_pattern_analysis.headline_dataset PHASE2 headline_dataset.json
+python3 -m src.tools.shot_pattern_analysis.report_tables \
+  docs/research/shot_pattern_analysis/phase2/statistics_v2/headline_dataset.json \
+  docs/research/shot_pattern_analysis/generated --check
+```
+
 See the [Sharing Guide](phase2/SHARING_GUIDE.md) for the report and six selected Facebook images.
 
 The following sections preserve the separate **phase-one** experiment. Its
@@ -309,7 +338,6 @@ The [Editable LaTeX Experiment Reference](shot_pattern_analysis.tex) records
 equations and calculation assumptions. It is separate from the canonical
 engineering design manual in `manuals/upstreamdrift`; that manual's calculation
 inventory and scientific publication gates remain blocked. The illustrated
-article compiles locally with Tectonic 0.15.0 (33 pages, zero warnings). The
-built-in editor compiler still fails before parsing (#12120), so use a local
-Tectonic install to rebuild the PDF. The source remains editable in the native
-editor.
+article is compiled by the repository's LaTeX workflow with Tectonic 0.15.0 on
+every change to it; the PDF is the workflow's `latex-reference-pdfs` artifact.
+A local Tectonic 0.15.0 install rebuilds it from the article directory.
