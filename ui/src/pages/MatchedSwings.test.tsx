@@ -282,6 +282,30 @@ describe('MatchedSwingsPage', () => {
     });
   });
 
+  it('shows output-policy badges beside the receipt without withheld numbers (#10382)', async () => {
+    fetchMatchedSwingReceiptMock.mockResolvedValueOnce({
+      id: 'aaa111',
+      receipt: { outputs: { face_angle: { value: 7.77, uncertainty: 0.1 } } },
+      output_policy: {
+        schema_version: 'output-policy/1',
+        outputs: [
+          { name: 'face_angle', status: 'withheld', label: 'NOT VALIDATED', reason: 'not validated' },
+        ],
+        face_observability: null,
+      },
+    } as never);
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+    await screen.findByRole('button', { name: /drake/i });
+    await user.click(screen.getByRole('button', { name: /view receipt json/i }));
+    expect(await screen.findByTestId('output-status-face_angle')).toHaveTextContent('NOT VALIDATED');
+    expect(screen.queryByTestId('output-value-face_angle')).toBeNull();
+  });
+
   it('links the export report action to the selected run report URL', async () => {
     render(
       <MemoryRouter>

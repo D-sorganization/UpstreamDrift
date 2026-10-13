@@ -101,7 +101,7 @@ jobs:
           subject-path: "dist/companion/*"
       - name: Upload exact-commit companion artifact
         id: companion-upload
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: upstreamdrift-companion-${{ github.sha }}
           path: dist/companion/
@@ -124,7 +124,7 @@ jobs:
         with:
           subject-path: "dist/companion-evidence/*"
       - name: Upload Actions acquisition evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: upstreamdrift-companion-evidence-${{ github.sha }}
           path: dist/companion-evidence/
@@ -272,7 +272,7 @@ jobs:
         with:
           subject-path: "dist/companion/*"
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: dist
           path: dist/
