@@ -17,12 +17,15 @@ Unobservable reasons (``FaceObservability.reason``):
 * ``REASON_MARKERS_NOT_CAPTURED``: a head marker has no capture column.
 * ``REASON_NO_OBSERVED_FRAME``: no frame has the full triad valid and finite.
 * ``REASON_SHAPE_MISMATCH``: the offsets do not describe the captured triad.
+  ``observed_frames`` still counts the frames that saw the triad, so it stays
+  consistent with ``gaps``; ``observable`` is the verdict.
 """
 
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -38,6 +41,7 @@ __all__ = [
     "REASON_TOO_FEW_MARKERS",
     "FaceObservability",
     "audit_face_observability",
+    "face_observability_from_receipt",
 ]
 
 Array = NDArray[np.float64]
@@ -77,6 +81,17 @@ class FaceObservability:
         if self.total_frames == 0:
             return 0.0
         return self.observed_frames / self.total_frames
+
+    def to_receipt(self) -> dict[str, Any]:
+        """JSON-ready receipt block; inverse of :func:`face_observability_from_receipt`."""
+        return {
+            "observable": self.observable,
+            "reason": self.reason,
+            "observed_frames": self.observed_frames,
+            "total_frames": self.total_frames,
+            "gaps": [[start, stop] for start, stop in self.gaps],
+            "coverage": self.coverage,
+        }
 
 
 def _unobserved_runs(seen: NDArray[np.bool_]) -> tuple[tuple[int, int], ...]:
@@ -140,5 +155,52 @@ def audit_face_observability(
         return FaceObservability(False, REASON_NO_OBSERVED_FRAME, 0, total, gaps)
     residual = cft.triad_shape_residual_m(points, valid, names, offsets)
     if residual > cft.MAX_TRIAD_SHAPE_RESIDUAL_M:
-        return FaceObservability(False, REASON_SHAPE_MISMATCH, 0, total, gaps)
+        return FaceObservability(False, REASON_SHAPE_MISMATCH, observed, total, gaps)
     return FaceObservability(True, REASON_OBSERVABLE, observed, total, gaps)
+
+
+def _receipt_int(block: Mapping[str, Any], key: str) -> int:
+    value = block.get(key)
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"face_observability {key} must be an integer")
+    return value
+
+
+def _receipt_gaps(raw: Any, total: int) -> tuple[tuple[int, int], ...]:
+    if not isinstance(raw, Sequence) or isinstance(raw, str):
+        raise ValueError("face_observability gaps must be a list of [start, stop]")
+    gaps = []
+    for run in raw:
+        ok = isinstance(run, Sequence) and not isinstance(run, str) and len(run) == 2
+        if not ok or not all(type(i) is int for i in run):
+            raise ValueError("face_observability gaps must be [start, stop] integers")
+        start, stop = run
+        if not 0 <= start < stop <= total:
+            raise ValueError(f"face_observability gap [{start}, {stop}) out of range")
+        gaps.append((start, stop))
+    return tuple(gaps)
+
+
+def face_observability_from_receipt(block: Any) -> FaceObservability:
+    """Parse and validate a receipt's ``face_observability`` block.
+
+    Raises:
+        ValueError: When the block is not a mapping or any field is malformed.
+            Receipts are untrusted input, so a bad block never degrades to a
+            default verdict.
+    """
+    if not isinstance(block, Mapping):
+        raise ValueError("face_observability must be a mapping")
+    observable, reason = block.get("observable"), block.get("reason")
+    if not isinstance(observable, bool):
+        raise ValueError("face_observability observable must be a bool")
+    if not isinstance(reason, str) or not reason.strip():
+        raise ValueError("face_observability reason must be a non-empty string")
+    total = _receipt_int(block, "total_frames")
+    return FaceObservability(
+        observable,
+        reason,
+        _receipt_int(block, "observed_frames"),
+        total,
+        _receipt_gaps(block.get("gaps"), total),
+    )

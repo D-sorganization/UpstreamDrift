@@ -43,6 +43,11 @@ from .hill_muscle import HillMuscleModel, MuscleParameters, MuscleState
 from .kinematic_sequence import SegmentPeak, SegmentTimingResult
 from .multi_muscle import MuscleAttachment, MuscleGroup
 from .muscle_equilibrium import EquilibriumSolver
+from .muscle_allocation import (
+    MuscleAllocationResult,
+    MuscleRecruitmentPath,
+    allocate_muscle_excitations,
+)
 from .swing_comparison import ComparisonMetric, DTWResult, SwingComparator
 from .swing_plane_analysis import SwingPlaneAnalyzer, SwingPlaneMetrics
 from .ztcf import ZTCFResult
@@ -134,6 +139,10 @@ __all__: list[str] = [
     "HillMuscleModel",
     "MuscleParameters",
     "MuscleState",
+    # muscle_allocation
+    "MuscleAllocationResult",
+    "MuscleRecruitmentPath",
+    "allocate_muscle_excitations",
     # kinematic_sequence
     "SegmentPeak",
     "SegmentTimingResult",
