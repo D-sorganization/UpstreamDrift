@@ -294,7 +294,7 @@ jobs:
 
       - name: Upload equivalence report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: cross-engine-equivalence-report
           path: |
@@ -404,7 +404,7 @@ jobs:
 
       - name: Upload conformance report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: canonical-conformance-${{ matrix.engine }}-${{ matrix.python-version }}
           path: test-results/canonical-conformance-${{ matrix.engine }}-junit.xml
@@ -532,7 +532,7 @@ jobs:
 
       - name: Upload parity report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: force-overlay-parity-${{ matrix.engine }}
           path: test-results/force-overlay-parity-${{ matrix.engine }}-junit.xml

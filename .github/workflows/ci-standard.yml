@@ -637,7 +637,7 @@ jobs:
           cat matlab_quality_report.txt
 
       - name: Upload MATLAB Report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: always()
         with:
           name: matlab-quality-report
@@ -1383,7 +1383,7 @@ jobs:
           --repo-root . execute-all
           --report dist/companion-workflows/execution-report.v1.json
       - name: Upload exact-revision companion workflow evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: upstreamdrift-companion-workflows-${{ github.sha }}
           path: dist/companion-workflows/
@@ -2400,7 +2400,7 @@ jobs:
 
       - name: Upload JUnit Test Results
         if: always() && steps.core-test-changes.outputs.skip != 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: junit-tests-${{ matrix.python }}
           path: ${{ runner.temp }}/junit/*.xml
@@ -2493,7 +2493,7 @@ jobs:
 
       - name: Upload Benchmark Baseline Artifact
         if: matrix.python == '3.11' && steps.core-test-changes.outputs.skip != 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: performance-baseline
           path: tests/benchmarks/baseline.json
@@ -2887,7 +2887,7 @@ jobs:
             --expected-revision "${{ steps.tools.outputs.gitlink-sha }}" \
             --receipt "$RUNNER_TEMP/impact-explorer-bundle-receipt.json"
       - name: Upload served-bundle receipt
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: impact-explorer-bundle-receipt-${{ github.sha }}
           path: ${{ runner.temp }}/impact-explorer-bundle-receipt.json
