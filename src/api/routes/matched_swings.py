@@ -31,6 +31,7 @@ from src.api.services.matched_swings_service import (
     MatchedSwingsService,
 )
 from src.shared.python.contracts import precondition
+from src.shared.python.motion_matching.output_policy import output_policy_payload
 
 router = APIRouter(prefix="/matched-swings", tags=["matched-swings"])
 
@@ -145,6 +146,7 @@ async def get_matched_swing_receipt(
     return {
         "id": summary.id,
         "receipt": receipt,
+        "output_policy": output_policy_payload(receipt),
         "summary": summary.to_dict(),
         "candidate_sha256": summary.candidate_sha256,
         "capabilities": summary.capabilities.to_dict(),

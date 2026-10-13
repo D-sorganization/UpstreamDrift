@@ -246,6 +246,21 @@ class MatchedSwingBrowserModel:
         target = (self._repo_root / rel_str).resolve()
         return target if target.is_file() else None
 
+    def load_output_policy(self, row: LedgerRow) -> dict[str, Any] | None:
+        """Output policy payload from the row's receipt; None when unreadable."""
+        from src.shared.python.motion_matching.output_policy import (
+            output_policy_payload,
+        )
+
+        path = self.resolve_artifact_path(row, "receipt")
+        if path is None:
+            return None
+        try:
+            receipt = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        return output_policy_payload(receipt) if isinstance(receipt, dict) else None
+
     @staticmethod
     def get_unique_engines(rows: list[LedgerRow]) -> list[str]:
         """Extract sorted list of distinct engine names present in rows."""

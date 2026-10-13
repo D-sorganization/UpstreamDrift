@@ -41,6 +41,7 @@ from src.tools.matched_swing_browser.model import (
     MatchedSwingBrowserModel,
     MatchedSwingFilter,
 )
+from src.tools.matched_swing_browser.output_status import build_output_status_rows
 
 logger = get_logger(__name__)
 
@@ -98,6 +99,10 @@ class MatchedSwingBrowserWidget(QWidget):
     @property
     def whole_rmse_val(self) -> QLabel:
         return self._whole_rmse_lbl
+
+    @property
+    def output_status_labels(self) -> dict[str, QLabel]:
+        return self._output_status_lbls
 
     @property
     def movie(self) -> QtGui.QMovie | None:
@@ -231,6 +236,8 @@ class MatchedSwingBrowserWidget(QWidget):
         vbox.addWidget(self._create_header_card())
         # Standard Metrics
         vbox.addWidget(self._create_metrics_card())
+        # Output policy status (#10382)
+        vbox.addWidget(self._create_output_policy_card())
         # Physical Gates
         vbox.addWidget(self._create_gates_card())
         # Visual Playback
@@ -293,6 +300,27 @@ class MatchedSwingBrowserWidget(QWidget):
         self._yaw_rmse_lbl = QLabel("—", card)
         grid.addWidget(self._yaw_rmse_lbl, 2, 1)
         return card
+
+    def _create_output_policy_card(self) -> QGroupBox:
+        card = QGroupBox("Golf Output Status (policy)", self)
+        grid = QtWidgets.QGridLayout(card)
+        grid.setSpacing(4)
+        self._output_status_lbls: dict[str, QLabel] = {}
+        for idx, row in enumerate(build_output_status_rows(None)):
+            grid.addWidget(QLabel(f"{row.name}:"), idx, 0)
+            label = QLabel(row.badge, card)
+            label.setToolTip(row.tooltip)
+            grid.addWidget(label, idx, 1)
+            self._output_status_lbls[row.name] = label
+        return card
+
+    def apply_output_policy(self, payload: dict[str, Any] | None) -> None:
+        """Show each output's policy status; never a bare value (#10382)."""
+        for row in build_output_status_rows(payload):
+            label = self._output_status_lbls.get(row.name)
+            if label is not None:
+                label.setText(row.badge)
+                label.setToolTip(row.tooltip)
 
     def _create_gates_card(self) -> QGroupBox:
         card = QGroupBox("Physical Gates & Verdicts", self)
@@ -513,6 +541,7 @@ class MatchedSwingBrowserWidget(QWidget):
             self._model.format_metric(m.pelvis_yaw_rmse_rad, "deg")
         )
 
+        self.apply_output_policy(self._model.load_output_policy(row))
         self._populate_gates_info(row)
         self._load_gif_artifact(row)
         self._update_action_buttons(row)
@@ -629,6 +658,7 @@ class MatchedSwingBrowserWidget(QWidget):
             self._yaw_rmse_lbl,
         ):
             lbl.setText("—")
+        self.apply_output_policy(None)
         self._gates_text.clear()
         self._rejection_lbl.clear()
         self._stop_movie()
