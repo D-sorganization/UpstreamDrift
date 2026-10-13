@@ -1,0 +1,3587 @@
+{
+  "schema": "shot-pattern-headline-dataset/1",
+  "bootstrap_resamples": 2000,
+  "units": {
+    "distance": "metre",
+    "strokes_gained": "strokes per modeled opportunity"
+  },
+  "cells": [
+    {
+      "key": "C01",
+      "cell": "driver_lean0_curve1_rotation1_shaft_only",
+      "condition": "Driver, Curve \u00d71, 1\u00b0 Twist SD, Shaft Only",
+      "club_id": "driver",
+      "protocol": "original_primary/1",
+      "target_x_m": 178.94875782337786,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.176572604807982,
+          "downrange_sd_m": 4.671676588003134,
+          "mean_carry_m": 178.5512575306691,
+          "target_rmse_m": 7.763961079304683
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 5.996120650129013,
+          "downrange_sd_m": 5.2191965000034894,
+          "mean_carry_m": 178.51160973349639,
+          "target_rmse_m": 7.972825916781493
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.2655868454054415,
+          "downrange_sd_m": 4.1819165375706735,
+          "mean_carry_m": 178.59305929273754,
+          "target_rmse_m": 7.549276425956231
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": -0.39573704643186763,
+        "Draw": -0.39566243087251535,
+        "Fade": -0.395668786899609
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 7.461555935228144e-05,
+          "lower_95": -7.238072922554182e-05,
+          "upper_95": 0.00022504269561618776
+        },
+        "Fade": {
+          "estimate": 6.825953225868768e-05,
+          "lower_95": -5.8712051970253875e-05,
+          "upper_95": 0.0001849031205379826
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 7,
+        "variants_available": 7,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 7.461555935228144e-05,
+            "lower_95": -7.238072922554182e-05,
+            "upper_95": 0.00022504269561618776
+          },
+          "estimate_min": 3.85135722760053e-05,
+          "estimate_max": 0.00022227061998640352,
+          "band_lower_95": -9.703448082050228e-05,
+          "band_upper_95": 0.00040955813746751315,
+          "direction": "spans_zero",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.00022227061998640352,
+            "cg_depth_x1.2": 0.0001333066057072404,
+            "face_radii_x0.8": 7.461555935228152e-05,
+            "face_radii_x1.2": 7.461555935228152e-05,
+            "inertia_x0.8": 3.85135722760053e-05,
+            "inertia_x1.2": 0.0001545265953046342,
+            "newton_contact_law": 7.46155593519092e-05
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 6.825953225868768e-05,
+            "lower_95": -5.8712051970253875e-05,
+            "upper_95": 0.0001849031205379826
+          },
+          "estimate_min": 6.752023693944891e-05,
+          "estimate_max": 0.00012442088051639464,
+          "band_lower_95": -6.264914352089215e-05,
+          "band_upper_95": 0.00026444813198137415,
+          "direction": "spans_zero",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.00012442088051639464,
+            "cg_depth_x1.2": 9.588480681894091e-05,
+            "face_radii_x0.8": 6.825953225868763e-05,
+            "face_radii_x1.2": 6.825953225868763e-05,
+            "inertia_x0.8": 6.752023693944891e-05,
+            "inertia_x1.2": 8.300734287868378e-05,
+            "newton_contact_law": 6.825953225831538e-05
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "face_radii_x0.8": "available",
+        "face_radii_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 179.6243940957217,
+        "cg_depth_x1.2": 178.13812575432885,
+        "face_radii_x0.8": 178.94875782337786,
+        "face_radii_x1.2": 178.94875782337786,
+        "inertia_x0.8": 178.48629762140177,
+        "inertia_x1.2": 179.25984779127242,
+        "newton_contact_law": 178.9487578233779
+      }
+    },
+    {
+      "key": "C02",
+      "cell": "driver_lean0_curve1_rotation1_combined2",
+      "condition": "Driver, Curve \u00d71, 1\u00b0 Twist SD, Combined",
+      "club_id": "driver",
+      "protocol": "original_primary/1",
+      "target_x_m": 178.94875782337786,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.686240045688186,
+          "downrange_sd_m": 8.561098472397347,
+          "mean_carry_m": 176.4330587890528,
+          "target_rmse_m": 11.180931262816891
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.53382253721597,
+          "downrange_sd_m": 8.86317338677017,
+          "mean_carry_m": 176.39314039042475,
+          "target_rmse_m": 11.336595648017727
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.776975122432951,
+          "downrange_sd_m": 8.289745467620078,
+          "mean_carry_m": 176.48220788733937,
+          "target_rmse_m": 11.017547247533296
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": -0.412594479734598,
+        "Draw": -0.4125675679611443,
+        "Fade": -0.4125523042814373
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 2.6911773453713196e-05,
+          "lower_95": -0.00015935937549650092,
+          "upper_95": 0.00020969988138414073
+        },
+        "Fade": {
+          "estimate": 4.217545316065038e-05,
+          "lower_95": -0.00016528314247285454,
+          "upper_95": 0.00025585260050272214
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 7,
+        "variants_available": 7,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 2.6911773453713196e-05,
+            "lower_95": -0.00015935937549650092,
+            "upper_95": 0.00020969988138414073
+          },
+          "estimate_min": 2.6911773453713196e-05,
+          "estimate_max": 0.0005438778977135754,
+          "band_lower_95": -0.00015935937549650092,
+          "band_upper_95": 0.0008370485903783465,
+          "direction": "spans_zero",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.00024003733348743812,
+            "cg_depth_x1.2": 0.000166783135684534,
+            "face_radii_x0.8": 0.0004835029566269961,
+            "face_radii_x1.2": 0.0001667248581529159,
+            "inertia_x0.8": 0.00011540818175673029,
+            "inertia_x1.2": 0.00010278390639221319,
+            "newton_contact_law": 0.0005438778977135754
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 4.217545316065038e-05,
+            "lower_95": -0.00016528314247285454,
+            "upper_95": 0.00025585260050272214
+          },
+          "estimate_min": -0.00024204514571755383,
+          "estimate_max": 0.00028630362303732,
+          "band_lower_95": -0.0004915018161379639,
+          "band_upper_95": 0.0005189352066183857,
+          "direction": "spans_zero",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.00024204514571755383,
+            "cg_depth_x1.2": 0.0001839222102887666,
+            "face_radii_x0.8": -0.00014255395037226744,
+            "face_radii_x1.2": 0.00016921521748422254,
+            "inertia_x0.8": 0.00028630362303732,
+            "inertia_x1.2": -0.000197698169303529,
+            "newton_contact_law": -6.367504596496369e-05
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "face_radii_x0.8": "available",
+        "face_radii_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 179.6243940957217,
+        "cg_depth_x1.2": 178.13812575432885,
+        "face_radii_x0.8": 178.94875782337786,
+        "face_radii_x1.2": 178.94875782337786,
+        "inertia_x0.8": 178.48629762140177,
+        "inertia_x1.2": 179.25984779127242,
+        "newton_contact_law": 178.9487578233779
+      }
+    },
+    {
+      "key": "C03",
+      "cell": "driver_lean0_curve1_rotation2_shaft_only",
+      "condition": "Driver, Curve \u00d71, 2\u00b0 Twist SD, Shaft Only",
+      "club_id": "driver",
+      "protocol": "original_primary/1",
+      "target_x_m": 178.94875782337786,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 12.011096457705813,
+          "downrange_sd_m": 9.7808204779109,
+          "mean_carry_m": 177.3535918060281,
+          "target_rmse_m": 15.648356812869938
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 11.66031561273983,
+          "downrange_sd_m": 10.816896446993193,
+          "mean_carry_m": 177.2162019497735,
+          "target_rmse_m": 16.0898718704335
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 12.209993380222379,
+          "downrange_sd_m": 8.808344902273516,
+          "mean_carry_m": 177.505914624018,
+          "target_rmse_m": 15.189582774573323
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": -0.4428029451003738,
+        "Draw": -0.4399103226451643,
+        "Fade": -0.4440280649786602
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.002892622455209586,
+          "lower_95": 0.0024768671735503193,
+          "upper_95": 0.0033488737757477022
+        },
+        "Fade": {
+          "estimate": -0.0012251198782864713,
+          "lower_95": -0.0015786252191621326,
+          "upper_95": -0.0008756249690195449
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 7,
+        "variants_available": 7,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.002892622455209586,
+            "lower_95": 0.0024768671735503193,
+            "upper_95": 0.0033488737757477022
+          },
+          "estimate_min": 0.002740786749200492,
+          "estimate_max": 0.0029399079572415454,
+          "band_lower_95": 0.002308928542037798,
+          "band_upper_95": 0.0034142924293836053,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.002740786749200492,
+            "cg_depth_x1.2": 0.0029392101491705746,
+            "face_radii_x0.8": 0.002892622455209583,
+            "face_radii_x1.2": 0.002892622455209583,
+            "inertia_x0.8": 0.0029399079572415454,
+            "inertia_x1.2": 0.0027942929035255195,
+            "newton_contact_law": 0.002892622455209231
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.0012251198782864713,
+            "lower_95": -0.0015786252191621326,
+            "upper_95": -0.0008756249690195449
+          },
+          "estimate_min": -0.001450073692387269,
+          "estimate_max": -0.0012251198782864713,
+          "band_lower_95": -0.0018162582386773052,
+          "band_upper_95": -0.0008756249690195445,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.001450073692387269,
+            "cg_depth_x1.2": -0.001249901676770026,
+            "face_radii_x0.8": -0.0012251198782864715,
+            "face_radii_x1.2": -0.0012251198782864715,
+            "inertia_x0.8": -0.001253289375540801,
+            "inertia_x1.2": -0.0013914006154492865,
+            "newton_contact_law": -0.0012251198782868328
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "face_radii_x0.8": "available",
+        "face_radii_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 179.6243940957217,
+        "cg_depth_x1.2": 178.13812575432885,
+        "face_radii_x0.8": 178.94875782337786,
+        "face_radii_x1.2": 178.94875782337786,
+        "inertia_x0.8": 178.48629762140177,
+        "inertia_x1.2": 179.25984779127242,
+        "newton_contact_law": 178.9487578233779
+      }
+    },
+    {
+      "key": "C04",
+      "cell": "driver_lean0_curve1_rotation2_combined2",
+      "condition": "Driver, Curve \u00d71, 2\u00b0 Twist SD, Combined",
+      "club_id": "driver",
+      "protocol": "original_primary/1",
+      "target_x_m": 178.94875782337786,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 12.133243037945892,
+          "downrange_sd_m": 12.235794648954176,
+          "mean_carry_m": 175.2331146789344,
+          "target_rmse_m": 17.74611621717349
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 11.803807076631044,
+          "downrange_sd_m": 13.072287286144004,
+          "mean_carry_m": 175.0989992156097,
+          "target_rmse_m": 18.160426909185944
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 12.328406521358025,
+          "downrange_sd_m": 11.460933608817461,
+          "mean_carry_m": 175.38937588004052,
+          "target_rmse_m": 17.313026904710938
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": -0.45770648703298283,
+        "Draw": -0.455511326715009,
+        "Fade": -0.4586341843484078
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.0021951603179738016,
+          "lower_95": 0.001707110372693069,
+          "upper_95": 0.0026579925078404074
+        },
+        "Fade": {
+          "estimate": -0.0009276973154250253,
+          "lower_95": -0.0013514244912350881,
+          "upper_95": -0.000488969436151114
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 7,
+        "variants_available": 7,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.0021951603179738016,
+            "lower_95": 0.001707110372693069,
+            "upper_95": 0.0026579925078404074
+          },
+          "estimate_min": 0.0021951603179738016,
+          "estimate_max": 0.00300666344504457,
+          "band_lower_95": 0.001707110372693069,
+          "band_upper_95": 0.0035030266450046337,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.002594101012814744,
+            "cg_depth_x1.2": 0.0027153252092623243,
+            "face_radii_x0.8": 0.0024951975394585293,
+            "face_radii_x1.2": 0.00300666344504457,
+            "inertia_x0.8": 0.0028846114767781786,
+            "inertia_x1.2": 0.0024656934353087722,
+            "newton_contact_law": 0.002647708060226139
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.0009276973154250253,
+            "lower_95": -0.0013514244912350881,
+            "upper_95": -0.000488969436151114
+          },
+          "estimate_min": -0.0014801623575926915,
+          "estimate_max": -0.0008027460572173743,
+          "band_lower_95": -0.0018818675755916839,
+          "band_upper_95": -0.00035376161677126445,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.0008746266305761514,
+            "cg_depth_x1.2": -0.0014801623575926915,
+            "face_radii_x0.8": -0.0013341136004393073,
+            "face_radii_x1.2": -0.0010035924578126235,
+            "inertia_x0.8": -0.0012098456628370604,
+            "inertia_x1.2": -0.0008027460572173743,
+            "newton_contact_law": -0.001010816161475232
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "face_radii_x0.8": "available",
+        "face_radii_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 179.6243940957217,
+        "cg_depth_x1.2": 178.13812575432885,
+        "face_radii_x0.8": 178.94875782337786,
+        "face_radii_x1.2": 178.94875782337786,
+        "inertia_x0.8": 178.48629762140177,
+        "inertia_x1.2": 179.25984779127242,
+        "newton_contact_law": 178.9487578233779
+      }
+    },
+    {
+      "key": "C05",
+      "cell": "driver_lean0_curve2_rotation1_shaft_only",
+      "condition": "Driver, Curve \u00d72, 1\u00b0 Twist SD, Shaft Only",
+      "club_id": "driver",
+      "protocol": "original_primary/1",
+      "target_x_m": 178.94875782337786,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.176572604807982,
+          "downrange_sd_m": 4.671676588003134,
+          "mean_carry_m": 178.5512575306691,
+          "target_rmse_m": 7.763961079304683
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 5.712558401234075,
+          "downrange_sd_m": 5.799741094895614,
+          "mean_carry_m": 178.48159854871918,
+          "target_rmse_m": 8.167596397228294
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.28531663983826,
+          "downrange_sd_m": 3.7637652284664687,
+          "mean_carry_m": 178.62929429150375,
+          "target_rmse_m": 7.339791258680892
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": -0.39573704643186763,
+        "Draw": -0.39541202937439573,
+        "Fade": -0.3955026594141381
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.00032501705747193805,
+          "lower_95": 7.456434228212151e-05,
+          "upper_95": 0.0005826977443577484
+        },
+        "Fade": {
+          "estimate": 0.00023438701772961358,
+          "lower_95": 3.3015703546797855e-05,
+          "upper_95": 0.00043421351096278296
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 7,
+        "variants_available": 7,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.00032501705747193805,
+            "lower_95": 7.456434228212151e-05,
+            "upper_95": 0.0005826977443577484
+          },
+          "estimate_min": 0.000296413927357724,
+          "estimate_max": 0.0005263709515963153,
+          "band_lower_95": 5.2034239219477476e-05,
+          "band_upper_95": 0.0008153509383058848,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0005263709515963153,
+            "cg_depth_x1.2": 0.0003734060870925663,
+            "face_radii_x0.8": 0.0003250170574719388,
+            "face_radii_x1.2": 0.0003250170574719388,
+            "inertia_x0.8": 0.000296413927357724,
+            "inertia_x1.2": 0.0003987959271057938,
+            "newton_contact_law": 0.00032501705747414023
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.00023438701772961358,
+            "lower_95": 3.3015703546797855e-05,
+            "upper_95": 0.00043421351096278296
+          },
+          "estimate_min": 0.00023438701772961358,
+          "estimate_max": 0.0003983891519337404,
+          "band_lower_95": 3.3015703546797855e-05,
+          "band_upper_95": 0.0006062072220251182,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0003983891519337404,
+            "cg_depth_x1.2": 0.00035263295297024793,
+            "face_radii_x0.8": 0.00023438701772961358,
+            "face_radii_x1.2": 0.00023438701772961358,
+            "inertia_x0.8": 0.0003207951625467,
+            "inertia_x1.2": 0.00035679625942519,
+            "newton_contact_law": 0.00023438701773179833
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "face_radii_x0.8": "available",
+        "face_radii_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 179.6243940957217,
+        "cg_depth_x1.2": 178.13812575432885,
+        "face_radii_x0.8": 178.94875782337786,
+        "face_radii_x1.2": 178.94875782337786,
+        "inertia_x0.8": 178.48629762140177,
+        "inertia_x1.2": 179.25984779127242,
+        "newton_contact_law": 178.9487578233779
+      }
+    },
+    {
+      "key": "C06",
+      "cell": "driver_lean0_curve2_rotation1_combined2",
+      "condition": "Driver, Curve \u00d72, 1\u00b0 Twist SD, Combined",
+      "club_id": "driver",
+      "protocol": "original_primary/1",
+      "target_x_m": 178.94875782337786,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.686240045688186,
+          "downrange_sd_m": 8.561098472397347,
+          "mean_carry_m": 176.4330587890528,
+          "target_rmse_m": 11.180931262816891
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.311645417461133,
+          "downrange_sd_m": 9.186078527135207,
+          "mean_carry_m": 176.37010705813913,
+          "target_rmse_m": 11.47553453960882
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 6.823700727269076,
+          "downrange_sd_m": 8.047891414535528,
+          "mean_carry_m": 176.5328585022666,
+          "target_rmse_m": 10.854134175877237
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": -0.412594479734598,
+        "Draw": -0.4120318816277051,
+        "Fade": -0.4124998637094484
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.0005625981068929277,
+          "lower_95": 0.0002506190644348976,
+          "upper_95": 0.0008765933715184659
+        },
+        "Fade": {
+          "estimate": 9.461602514952952e-05,
+          "lower_95": -0.000222917785699981,
+          "upper_95": 0.00042039555304374513
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 7,
+        "variants_available": 7,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.0005625981068929277,
+            "lower_95": 0.0002506190644348976,
+            "upper_95": 0.0008765933715184659
+          },
+          "estimate_min": 0.0005625981068929277,
+          "estimate_max": 0.001702843052449069,
+          "band_lower_95": 0.00024436296901350824,
+          "band_upper_95": 0.002151577306338383,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0006198758361481444,
+            "cg_depth_x1.2": 0.0005645361194856299,
+            "face_radii_x0.8": 0.0014108606351783714,
+            "face_radii_x1.2": 0.0006399116170033527,
+            "inertia_x0.8": 0.00066868037026838,
+            "inertia_x1.2": 0.0006761871896793788,
+            "newton_contact_law": 0.001702843052449069
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 9.461602514952952e-05,
+            "lower_95": -0.000222917785699981,
+            "upper_95": 0.00042039555304374513
+          },
+          "estimate_min": -5.626699233097683e-05,
+          "estimate_max": 0.00052274861132185,
+          "band_lower_95": -0.0004192123291248916,
+          "band_upper_95": 0.0008274001500385155,
+          "direction": "spans_zero",
+          "variant_estimates": {
+            "cg_depth_x0.8": -3.868888628858038e-05,
+            "cg_depth_x1.2": 0.0003724608561773979,
+            "face_radii_x0.8": -3.630252764767583e-07,
+            "face_radii_x1.2": 0.00052274861132185,
+            "inertia_x0.8": 0.0005206150411723107,
+            "inertia_x1.2": -5.626699233097683e-05,
+            "newton_contact_law": 0.00032327404327404496
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "face_radii_x0.8": "available",
+        "face_radii_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 179.6243940957217,
+        "cg_depth_x1.2": 178.13812575432885,
+        "face_radii_x0.8": 178.94875782337786,
+        "face_radii_x1.2": 178.94875782337786,
+        "inertia_x0.8": 178.48629762140177,
+        "inertia_x1.2": 179.25984779127242,
+        "newton_contact_law": 178.9487578233779
+      }
+    },
+    {
+      "key": "C07",
+      "cell": "driver_lean0_curve2_rotation2_shaft_only",
+      "condition": "Driver, Curve \u00d72, 2\u00b0 Twist SD, Shaft Only",
+      "club_id": "driver",
+      "protocol": "original_primary/1",
+      "target_x_m": 178.94875782337786,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 12.011096457705813,
+          "downrange_sd_m": 9.7808204779109,
+          "mean_carry_m": 177.3535918060281,
+          "target_rmse_m": 15.648356812869938
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 11.152078487827708,
+          "downrange_sd_m": 11.86789759927028,
+          "mean_carry_m": 177.12180202015338,
+          "target_rmse_m": 16.49330461743
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 12.276440002086922,
+          "downrange_sd_m": 7.940087422632808,
+          "mean_carry_m": 177.6434092093313,
+          "target_rmse_m": 14.734709521994512
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": -0.4428029451003738,
+        "Draw": -0.43500529005348315,
+        "Fade": -0.4442634843522772
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.0077976550468906,
+          "lower_95": 0.007133692201063268,
+          "upper_95": 0.008504329128173062
+        },
+        "Fade": {
+          "estimate": -0.001460539251903364,
+          "lower_95": -0.0019360270714341697,
+          "upper_95": -0.0010023104173884586
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 7,
+        "variants_available": 7,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.0077976550468906,
+            "lower_95": 0.007133692201063268,
+            "upper_95": 0.008504329128173062
+          },
+          "estimate_min": 0.007779088685207952,
+          "estimate_max": 0.008071277522608968,
+          "band_lower_95": 0.007110205022177712,
+          "band_upper_95": 0.00876900529142336,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.007791670388768261,
+            "cg_depth_x1.2": 0.007969254523563136,
+            "face_radii_x0.8": 0.0077976550468906,
+            "face_radii_x1.2": 0.0077976550468906,
+            "inertia_x0.8": 0.008071277522608968,
+            "inertia_x1.2": 0.007779088685207952,
+            "newton_contact_law": 0.007797655046892666
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.001460539251903364,
+            "lower_95": -0.0019360270714341697,
+            "upper_95": -0.0010023104173884586
+          },
+          "estimate_min": -0.0015418747388853528,
+          "estimate_max": -0.0012989082552315814,
+          "band_lower_95": -0.002007055063747783,
+          "band_upper_95": -0.0008343669809260204,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.0014510503541454458,
+            "cg_depth_x1.2": -0.0012989082552315814,
+            "face_radii_x0.8": -0.0014605392519033656,
+            "face_radii_x1.2": -0.0014605392519033656,
+            "inertia_x0.8": -0.0013789745686335973,
+            "inertia_x1.2": -0.0015418747388853528,
+            "newton_contact_law": -0.0014605392519013013
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "face_radii_x0.8": "available",
+        "face_radii_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 179.6243940957217,
+        "cg_depth_x1.2": 178.13812575432885,
+        "face_radii_x0.8": 178.94875782337786,
+        "face_radii_x1.2": 178.94875782337786,
+        "inertia_x0.8": 178.48629762140177,
+        "inertia_x1.2": 179.25984779127242,
+        "newton_contact_law": 178.9487578233779
+      }
+    },
+    {
+      "key": "C08",
+      "cell": "driver_lean0_curve2_rotation2_combined2",
+      "condition": "Driver, Curve \u00d72, 2\u00b0 Twist SD, Combined",
+      "club_id": "driver",
+      "protocol": "original_primary/1",
+      "target_x_m": 178.94875782337786,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 12.133243037945892,
+          "downrange_sd_m": 12.235794648954176,
+          "mean_carry_m": 175.2331146789344,
+          "target_rmse_m": 17.74611621717349
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 11.335707195015662,
+          "downrange_sd_m": 13.93172338051918,
+          "mean_carry_m": 175.0146745999729,
+          "target_rmse_m": 18.53340515242226
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 12.406660225564066,
+          "downrange_sd_m": 10.773573077704155,
+          "mean_carry_m": 175.53817460085247,
+          "target_rmse_m": 16.882402021006754
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": -0.45770648703298283,
+        "Draw": -0.4510241768394719,
+        "Fade": -0.45854119895517526
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.006682310193510924,
+          "lower_95": 0.005983516190212191,
+          "upper_95": 0.007393003590121552
+        },
+        "Fade": {
+          "estimate": -0.0008347119221924332,
+          "lower_95": -0.0014164049116863534,
+          "upper_95": -0.00025926738004189746
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 7,
+        "variants_available": 7,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.006682310193510924,
+            "lower_95": 0.005983516190212191,
+            "upper_95": 0.007393003590121552
+          },
+          "estimate_min": 0.005938252748916558,
+          "estimate_max": 0.00752040584307477,
+          "band_lower_95": 0.005249916055943648,
+          "band_upper_95": 0.008207844418682539,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.006767315750540078,
+            "cg_depth_x1.2": 0.006704973113946809,
+            "face_radii_x0.8": 0.005938252748916558,
+            "face_radii_x1.2": 0.00752040584307477,
+            "inertia_x0.8": 0.007019043541478832,
+            "inertia_x1.2": 0.006759226796202461,
+            "newton_contact_law": 0.0066476088213825325
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.0008347119221924332,
+            "lower_95": -0.0014164049116863534,
+            "upper_95": -0.00025926738004189746
+          },
+          "estimate_min": -0.001337319443334558,
+          "estimate_max": -0.0008347119221924332,
+          "band_lower_95": -0.0018893113442328253,
+          "band_upper_95": -0.00025926738004189746,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.001126212738026276,
+            "cg_depth_x1.2": -0.001337319443334558,
+            "face_radii_x0.8": -0.0010582624921037721,
+            "face_radii_x1.2": -0.0010449308821623325,
+            "inertia_x0.8": -0.0012419424123469758,
+            "inertia_x1.2": -0.0011317069609229921,
+            "newton_contact_law": -0.0009301951679064473
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "face_radii_x0.8": "available",
+        "face_radii_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 179.6243940957217,
+        "cg_depth_x1.2": 178.13812575432885,
+        "face_radii_x0.8": 178.94875782337786,
+        "face_radii_x1.2": 178.94875782337786,
+        "inertia_x0.8": 178.48629762140177,
+        "inertia_x1.2": 179.25984779127242,
+        "newton_contact_law": 178.9487578233779
+      }
+    },
+    {
+      "key": "C09",
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "condition": "7-Iron, Curve \u00d71, 1\u00b0 Twist SD, Shaft Only",
+      "club_id": "seven_iron",
+      "protocol": "original_primary/1",
+      "target_x_m": 127.88194166336235,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.559371412944812,
+          "downrange_sd_m": 1.1643573695007479,
+          "mean_carry_m": 127.8528462950867,
+          "target_rmse_m": 2.812496828557215
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.597918240508229,
+          "downrange_sd_m": 1.0857871108112649,
+          "mean_carry_m": 127.85173667365272,
+          "target_rmse_m": 2.8163878863716283
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.5133009234993087,
+          "downrange_sd_m": 1.2420391766463097,
+          "mean_carry_m": 127.85372746811579,
+          "target_rmse_m": 2.804190603068028
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.5365351568180409,
+        "Draw": 0.5360295507163176,
+        "Fade": 0.537582112632783
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.0005056061017231567,
+          "lower_95": -0.0005138588630377818,
+          "upper_95": -0.0004975769072807257
+        },
+        "Fade": {
+          "estimate": 0.0010469558147421587,
+          "lower_95": 0.0010336496146419265,
+          "upper_95": 0.0010596421459065101
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": -0.0005056061017231567,
+            "lower_95": -0.0005138588630377818,
+            "upper_95": -0.0004975769072807257
+          },
+          "estimate_min": -0.0005062925941460302,
+          "estimate_max": -0.0005049942741222001,
+          "band_lower_95": -0.0005145998245611572,
+          "band_upper_95": -0.0004970086765801887,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.0005049942741222001,
+            "cg_depth_x1.2": -0.0005062925941460302,
+            "inertia_x0.8": -0.0005059919016408523,
+            "inertia_x1.2": -0.0005053228190910128,
+            "newton_contact_law": -0.0005056061017230756
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.0010469558147421587,
+            "lower_95": 0.0010336496146419265,
+            "upper_95": 0.0010596421459065101
+          },
+          "estimate_min": 0.0010448122592540945,
+          "estimate_max": 0.0010497077250668108,
+          "band_lower_95": 0.0010314840909865315,
+          "band_upper_95": 0.0010624624129274593,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0010448122592540945,
+            "cg_depth_x1.2": 0.0010497077250668108,
+            "inertia_x0.8": 0.001048487218233108,
+            "inertia_x1.2": 0.0010459605216100003,
+            "newton_contact_law": 0.0010469558147422572
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 127.89580648554846,
+        "cg_depth_x1.2": 127.86507119731523,
+        "inertia_x0.8": 127.87234602692536,
+        "inertia_x1.2": 127.88835363478425,
+        "newton_contact_law": 127.88194166336223
+      }
+    },
+    {
+      "key": "C10",
+      "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+      "condition": "7-Iron, Curve \u00d71, 1\u00b0 Twist SD, Combined",
+      "club_id": "seven_iron",
+      "protocol": "original_primary/1",
+      "target_x_m": 127.88194166336235,
+      "scoring_status": "conditional_only",
+      "paired_n": 9996,
+      "geometry": {
+        "Straight": {
+          "supported_n": 9996,
+          "lateral_sd_m": 2.5510394938758996,
+          "downrange_sd_m": 5.090247206765963,
+          "mean_carry_m": 125.4171881589707,
+          "target_rmse_m": 6.214551041298364
+        },
+        "Draw": {
+          "supported_n": 9996,
+          "lateral_sd_m": 2.5878543657888167,
+          "downrange_sd_m": 5.073755657494101,
+          "mean_carry_m": 125.41488750229315,
+          "target_rmse_m": 6.217336558925598
+        },
+        "Fade": {
+          "supported_n": 9996,
+          "lateral_sd_m": 2.5093950720708116,
+          "downrange_sd_m": 5.107223101205872,
+          "mean_carry_m": 125.41836258363244,
+          "target_rmse_m": 6.211295131663287
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.1818424087435613,
+        "Draw": 0.18109741135893803,
+        "Fade": 0.1827357705298169
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.0007449973846233175,
+          "lower_95": -0.0008954531256987603,
+          "upper_95": -0.0005890149086850539
+        },
+        "Fade": {
+          "estimate": 0.0008933617862555989,
+          "lower_95": 0.0006955728620226356,
+          "upper_95": 0.0010808758443960657
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": -0.0007449973846233175,
+            "lower_95": -0.0008954531256987603,
+            "upper_95": -0.0005890149086850539
+          },
+          "estimate_min": -0.0008399425895323779,
+          "estimate_max": -0.0006792212195365035,
+          "band_lower_95": -0.0010164764470844264,
+          "band_upper_95": -0.0004714543246975556,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.0007661188277742088,
+            "cg_depth_x1.2": -0.0006792212195365035,
+            "inertia_x0.8": -0.0008105767247690523,
+            "inertia_x1.2": -0.0008399425895323779,
+            "newton_contact_law": -0.0007139998712744529
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.0008933617862555989,
+            "lower_95": 0.0006955728620226356,
+            "upper_95": 0.0010808758443960657
+          },
+          "estimate_min": 0.0007814989310717111,
+          "estimate_max": 0.0010173954623977587,
+          "band_lower_95": 0.0005444474294990678,
+          "band_upper_95": 0.001202343885569564,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0008856389727790003,
+            "cg_depth_x1.2": 0.0009883177748950872,
+            "inertia_x0.8": 0.0007814989310717111,
+            "inertia_x1.2": 0.0010173954623977587,
+            "newton_contact_law": 0.0009139084221776128
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "conditional_only",
+        "cg_depth_x1.2": "conditional_only",
+        "inertia_x0.8": "conditional_only",
+        "inertia_x1.2": "conditional_only",
+        "newton_contact_law": "conditional_only"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 127.89580648554846,
+        "cg_depth_x1.2": 127.86507119731523,
+        "inertia_x0.8": 127.87234602692536,
+        "inertia_x1.2": 127.88835363478425,
+        "newton_contact_law": 127.88194166336223
+      }
+    },
+    {
+      "key": "C11",
+      "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+      "condition": "7-Iron, Curve \u00d71, 2\u00b0 Twist SD, Shaft Only",
+      "club_id": "seven_iron",
+      "protocol": "original_primary/1",
+      "target_x_m": 127.88194166336235,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 5.103730096978897,
+          "downrange_sd_m": 2.329545896846365,
+          "mean_carry_m": 127.76456175575191,
+          "target_rmse_m": 5.616764998139133
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 5.177839343469152,
+          "downrange_sd_m": 2.1747825494679485,
+          "mean_carry_m": 127.76021471530215,
+          "target_rmse_m": 5.622395134058794
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 5.014651587152055,
+          "downrange_sd_m": 2.4828871930008485,
+          "mean_carry_m": 127.76818600246844,
+          "target_rmse_m": 5.60235281437927
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.2950795995978442,
+        "Draw": 0.2945804420432429,
+        "Fade": 0.2961465551006967
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.0004991575546013078,
+          "lower_95": -0.0005799997808571838,
+          "upper_95": -0.00045453110048549676
+        },
+        "Fade": {
+          "estimate": 0.001066955502852415,
+          "lower_95": 0.0009861959992865377,
+          "upper_95": 0.0011804629675453374
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": -0.0004991575546013078,
+            "lower_95": -0.0005799997808571838,
+            "upper_95": -0.00045453110048549676
+          },
+          "estimate_min": -0.0005001862044735808,
+          "estimate_max": -0.0004984116426200878,
+          "band_lower_95": -0.0005811090453318033,
+          "band_upper_95": -0.00045381971016495874,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.0004984116426200878,
+            "cg_depth_x1.2": -0.0005001862044735808,
+            "inertia_x0.8": -0.0004997246517571214,
+            "inertia_x1.2": -0.000498801398858762,
+            "newton_contact_law": -0.0004991575546012575
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.001066955502852415,
+            "lower_95": 0.0009861959992865377,
+            "upper_95": 0.0011804629675453374
+          },
+          "estimate_min": 0.0010645198141373542,
+          "estimate_max": 0.0010698755559149949,
+          "band_lower_95": 0.0009837629035275807,
+          "band_upper_95": 0.0011833462397004303,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0010645198141373542,
+            "cg_depth_x1.2": 0.0010698755559149949,
+            "inertia_x0.8": 0.00106861098139932,
+            "inertia_x1.2": 0.0010658383438077196,
+            "newton_contact_law": 0.001066955502852467
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 127.89580648554846,
+        "cg_depth_x1.2": 127.86507119731523,
+        "inertia_x0.8": 127.87234602692536,
+        "inertia_x1.2": 127.88835363478425,
+        "newton_contact_law": 127.88194166336223
+      }
+    },
+    {
+      "key": "C12",
+      "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+      "condition": "7-Iron, Curve \u00d71, 2\u00b0 Twist SD, Combined",
+      "club_id": "seven_iron",
+      "protocol": "original_primary/1",
+      "target_x_m": 127.88194166336235,
+      "scoring_status": "conditional_only",
+      "paired_n": 9996,
+      "geometry": {
+        "Straight": {
+          "supported_n": 9996,
+          "lateral_sd_m": 4.9926311514380535,
+          "downrange_sd_m": 5.448351128297243,
+          "mean_carry_m": 125.32825249534478,
+          "target_rmse_m": 7.853130500425296
+        },
+        "Draw": {
+          "supported_n": 9996,
+          "lateral_sd_m": 5.063341708741055,
+          "downrange_sd_m": 5.386764964058746,
+          "mean_carry_m": 125.32266940971815,
+          "target_rmse_m": 7.857712012906325
+        },
+        "Fade": {
+          "supported_n": 9996,
+          "lateral_sd_m": 4.908739483756113,
+          "downrange_sd_m": 5.512515105681582,
+          "mean_carry_m": 125.33230056395408,
+          "target_rmse_m": 7.844029814145005
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.07221941702596887,
+        "Draw": 0.07141414461952926,
+        "Fade": 0.07333031849710539
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.0008052724064396055,
+          "lower_95": -0.0010352711399405539,
+          "upper_95": -0.0005848677642497402
+        },
+        "Fade": {
+          "estimate": 0.001110901471136518,
+          "lower_95": 0.0008575103571488011,
+          "upper_95": 0.001360852807560275
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": -0.0008052724064396055,
+            "lower_95": -0.0010352711399405539,
+            "upper_95": -0.0005848677642497402
+          },
+          "estimate_min": -0.00086826156314313,
+          "estimate_max": -0.0006439706413346536,
+          "band_lower_95": -0.0011218512399396095,
+          "band_upper_95": -0.0004356849336315452,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.00086826156314313,
+            "cg_depth_x1.2": -0.0007709303403850705,
+            "inertia_x0.8": -0.0007592239950633296,
+            "inertia_x1.2": -0.0006921973183513766,
+            "newton_contact_law": -0.0006439706413346536
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.001110901471136518,
+            "lower_95": 0.0008575103571488011,
+            "upper_95": 0.001360852807560275
+          },
+          "estimate_min": 0.0007831368855023756,
+          "estimate_max": 0.001110901471136518,
+          "band_lower_95": 0.0005320144418230618,
+          "band_upper_95": 0.001360852807560275,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0008077328710940908,
+            "cg_depth_x1.2": 0.0008961645735403095,
+            "inertia_x0.8": 0.0007831368855023756,
+            "inertia_x1.2": 0.0009488326506297731,
+            "newton_contact_law": 0.0009129446231857905
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "conditional_only",
+        "cg_depth_x1.2": "conditional_only",
+        "inertia_x0.8": "conditional_only",
+        "inertia_x1.2": "conditional_only",
+        "newton_contact_law": "conditional_only"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 127.89580648554846,
+        "cg_depth_x1.2": 127.86507119731523,
+        "inertia_x0.8": 127.87234602692536,
+        "inertia_x1.2": 127.88835363478425,
+        "newton_contact_law": 127.88194166336223
+      }
+    },
+    {
+      "key": "C13",
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "condition": "7-Iron, Curve \u00d72, 1\u00b0 Twist SD, Shaft Only",
+      "club_id": "seven_iron",
+      "protocol": "original_primary/1",
+      "target_x_m": 127.88194166336235,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.559371412944812,
+          "downrange_sd_m": 1.1643573695007479,
+          "mean_carry_m": 127.8528462950867,
+          "target_rmse_m": 2.812496828557215
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.628667038342244,
+          "downrange_sd_m": 1.0060550780177888,
+          "mean_carry_m": 127.85057976675462,
+          "target_rmse_m": 2.8152917520271976
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.4600953225618256,
+          "downrange_sd_m": 1.3191247103477812,
+          "mean_carry_m": 127.85459600677204,
+          "target_rmse_m": 2.7922027594238137
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.5365351568180409,
+        "Draw": 0.5361373400096867,
+        "Fade": 0.5390877255830256
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.00039781680835424503,
+          "lower_95": -0.00041105353908917183,
+          "upper_95": -0.00038488710102327995
+        },
+        "Fade": {
+          "estimate": 0.002552568764984721,
+          "lower_95": 0.0025212926188370966,
+          "upper_95": 0.0025821771793321574
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": -0.00039781680835424503,
+            "lower_95": -0.00041105353908917183,
+            "upper_95": -0.00038488710102327995
+          },
+          "estimate_min": -0.00040218365356922085,
+          "estimate_max": -0.00039408235924676474,
+          "band_lower_95": -0.0004155265398987011,
+          "band_upper_95": -0.00038118750848700506,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.00039408235924676474,
+            "cg_depth_x1.2": -0.00040218365356922085,
+            "inertia_x0.8": -0.00040033584410668633,
+            "inertia_x1.2": -0.00039610098066693175,
+            "newton_contact_law": -0.00039781680835417646
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.002552568764984721,
+            "lower_95": 0.0025212926188370966,
+            "upper_95": 0.0025821771793321574
+          },
+          "estimate_min": 0.0025468412607197537,
+          "estimate_max": 0.0025595696232434163,
+          "band_lower_95": 0.002515591232380975,
+          "band_upper_95": 0.0025892630818091017,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0025468412607197537,
+            "cg_depth_x1.2": 0.0025595696232434163,
+            "inertia_x0.8": 0.002556531595962386,
+            "inertia_x1.2": 0.002549929527793346,
+            "newton_contact_law": 0.002552568764984758
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 127.89580648554846,
+        "cg_depth_x1.2": 127.86507119731523,
+        "inertia_x0.8": 127.87234602692536,
+        "inertia_x1.2": 127.88835363478425,
+        "newton_contact_law": 127.88194166336223
+      }
+    },
+    {
+      "key": "C14",
+      "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+      "condition": "7-Iron, Curve \u00d72, 1\u00b0 Twist SD, Combined",
+      "club_id": "seven_iron",
+      "protocol": "original_primary/1",
+      "target_x_m": 127.88194166336235,
+      "scoring_status": "conditional_only",
+      "paired_n": 9996,
+      "geometry": {
+        "Straight": {
+          "supported_n": 9996,
+          "lateral_sd_m": 2.5510394938758996,
+          "downrange_sd_m": 5.090247206765963,
+          "mean_carry_m": 125.4171881589707,
+          "target_rmse_m": 6.214551041298364
+        },
+        "Draw": {
+          "supported_n": 9996,
+          "lateral_sd_m": 2.6194612986131744,
+          "downrange_sd_m": 5.05770690954295,
+          "mean_carry_m": 125.41169182694333,
+          "target_rmse_m": 6.219282461177282
+        },
+        "Fade": {
+          "supported_n": 9996,
+          "lateral_sd_m": 2.463403845347204,
+          "downrange_sd_m": 5.124679649311225,
+          "mean_carry_m": 125.41866280652243,
+          "target_rmse_m": 6.2077468761993755
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.1818424087435613,
+        "Draw": 0.18048668882315289,
+        "Fade": 0.18381734020768278
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.0013557199204084472,
+          "lower_95": -0.001673945966962153,
+          "upper_95": -0.0010249607564939442
+        },
+        "Fade": {
+          "estimate": 0.0019749314641214774,
+          "lower_95": 0.0016152479440614156,
+          "upper_95": 0.0023099783348053187
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": -0.0013557199204084472,
+            "lower_95": -0.001673945966962153,
+            "upper_95": -0.0010249607564939442
+          },
+          "estimate_min": -0.0014144977675672973,
+          "estimate_max": -0.0012326047386997982,
+          "band_lower_95": -0.001776036513024092,
+          "band_upper_95": -0.0008842696224172229,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.0012811639979535252,
+            "cg_depth_x1.2": -0.0012326047386997982,
+            "inertia_x0.8": -0.0014144977675672973,
+            "inertia_x1.2": -0.0014116895248778437,
+            "newton_contact_law": -0.0012511460017562881
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.0019749314641214774,
+            "lower_95": 0.0016152479440614156,
+            "upper_95": 0.0023099783348053187
+          },
+          "estimate_min": 0.0018549654775899674,
+          "estimate_max": 0.0021687488850591964,
+          "band_lower_95": 0.001488473928613486,
+          "band_upper_95": 0.0024549725571607357,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0019221575186025566,
+            "cg_depth_x1.2": 0.002087499955983277,
+            "inertia_x0.8": 0.0018549654775899674,
+            "inertia_x1.2": 0.0021687488850591964,
+            "newton_contact_law": 0.0019057838105670508
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "conditional_only",
+        "cg_depth_x1.2": "conditional_only",
+        "inertia_x0.8": "conditional_only",
+        "inertia_x1.2": "conditional_only",
+        "newton_contact_law": "conditional_only"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 127.89580648554846,
+        "cg_depth_x1.2": 127.86507119731523,
+        "inertia_x0.8": 127.87234602692536,
+        "inertia_x1.2": 127.88835363478425,
+        "newton_contact_law": 127.88194166336223
+      }
+    },
+    {
+      "key": "C15",
+      "cell": "seven_iron_lean0_curve2_rotation2_shaft_only",
+      "condition": "7-Iron, Curve \u00d72, 2\u00b0 Twist SD, Shaft Only",
+      "club_id": "seven_iron",
+      "protocol": "original_primary/1",
+      "target_x_m": 127.88194166336235,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 5.103730096978897,
+          "downrange_sd_m": 2.329545896846365,
+          "mean_carry_m": 127.76456175575191,
+          "target_rmse_m": 5.616764998139133
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 5.236491489112475,
+          "downrange_sd_m": 2.018161193234632,
+          "mean_carry_m": 127.75539132561929,
+          "target_rmse_m": 5.618187284976655
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 4.911326236285962,
+          "downrange_sd_m": 2.635411337785102,
+          "mean_carry_m": 127.77142104881439,
+          "target_rmse_m": 5.580586712186744
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.2950795995978442,
+        "Draw": 0.294791328168239,
+        "Fade": 0.2976612336294888
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.0002882714296052342,
+          "lower_95": -0.0004473062615143532,
+          "upper_95": -0.00012462686488432992
+        },
+        "Fade": {
+          "estimate": 0.002581634031644536,
+          "lower_95": 0.0024536101659919044,
+          "upper_95": 0.0027430265956313385
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": -0.0002882714296052342,
+            "lower_95": -0.0004473062615143532,
+            "upper_95": -0.00012462686488432992
+          },
+          "estimate_min": -0.0002918270194888394,
+          "estimate_max": -0.00028537868866240963,
+          "band_lower_95": -0.00045080922066580706,
+          "band_upper_95": -0.00012185666036084825,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.00028537868866240963,
+            "cg_depth_x1.2": -0.0002918270194888394,
+            "inertia_x0.8": -0.0002903039939675536,
+            "inertia_x1.2": -0.00028692651120216237,
+            "newton_contact_law": -0.0002882714296052012
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.002581634031644536,
+            "lower_95": 0.0024536101659919044,
+            "upper_95": 0.0027430265956313385
+          },
+          "estimate_min": 0.002575650559826255,
+          "estimate_max": 0.0025887584492240477,
+          "band_lower_95": 0.0024476847650588673,
+          "band_upper_95": 0.0027501542959179797,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.002575650559826255,
+            "cg_depth_x1.2": 0.0025887584492240477,
+            "inertia_x0.8": 0.002585696543399587,
+            "inertia_x1.2": 0.0025788820795743183,
+            "newton_contact_law": 0.0025816340316444806
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 127.89580648554846,
+        "cg_depth_x1.2": 127.86507119731523,
+        "inertia_x0.8": 127.87234602692536,
+        "inertia_x1.2": 127.88835363478425,
+        "newton_contact_law": 127.88194166336223
+      }
+    },
+    {
+      "key": "C16",
+      "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+      "condition": "7-Iron, Curve \u00d72, 2\u00b0 Twist SD, Combined",
+      "club_id": "seven_iron",
+      "protocol": "original_primary/1",
+      "target_x_m": 127.88194166336235,
+      "scoring_status": "conditional_only",
+      "paired_n": 9996,
+      "geometry": {
+        "Straight": {
+          "supported_n": 9996,
+          "lateral_sd_m": 4.9926311514380535,
+          "downrange_sd_m": 5.448351128297243,
+          "mean_carry_m": 125.32825249534478,
+          "target_rmse_m": 7.853130500425296
+        },
+        "Draw": {
+          "supported_n": 9996,
+          "lateral_sd_m": 5.1203401651420615,
+          "downrange_sd_m": 5.327758593716028,
+          "mean_carry_m": 125.3157658318384,
+          "target_rmse_m": 7.856973197837385
+        },
+        "Fade": {
+          "supported_n": 9996,
+          "lateral_sd_m": 4.812413043933132,
+          "downrange_sd_m": 5.579262975021733,
+          "mean_carry_m": 125.33510017278753,
+          "target_rmse_m": 7.831219847293977
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.07221941702596887,
+        "Draw": 0.07116655271349691,
+        "Fade": 0.07451321929029243
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.0010528643124719519,
+          "lower_95": -0.0014475943735973952,
+          "upper_95": -0.0006810638548707937
+        },
+        "Fade": {
+          "estimate": 0.0022938022643235753,
+          "lower_95": 0.0019439091466216488,
+          "upper_95": 0.0026539233989744484
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": -0.0010528643124719519,
+            "lower_95": -0.0014475943735973952,
+            "upper_95": -0.0006810638548707937
+          },
+          "estimate_min": -0.0012228348903110164,
+          "estimate_max": -0.0010528643124719519,
+          "band_lower_95": -0.0016567485859142637,
+          "band_upper_95": -0.0006810638548707937,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.0012228348903110164,
+            "cg_depth_x1.2": -0.0011814747189150202,
+            "inertia_x0.8": -0.0012204972823731636,
+            "inertia_x1.2": -0.0010778805642636525,
+            "newton_contact_law": -0.00114472325560744
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.0022938022643235753,
+            "lower_95": 0.0019439091466216488,
+            "upper_95": 0.0026539233989744484
+          },
+          "estimate_min": 0.0019401661457552795,
+          "estimate_max": 0.0022938022643235753,
+          "band_lower_95": 0.0015487132268839584,
+          "band_upper_95": 0.0026539233989744484,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0020522420743367574,
+            "cg_depth_x1.2": 0.0020829960352741986,
+            "inertia_x0.8": 0.0019401661457552795,
+            "inertia_x1.2": 0.0022501854181995896,
+            "newton_contact_law": 0.00218363827057445
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "conditional_only",
+        "cg_depth_x1.2": "conditional_only",
+        "inertia_x0.8": "conditional_only",
+        "inertia_x1.2": "conditional_only",
+        "newton_contact_law": "conditional_only"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 127.89580648554846,
+        "cg_depth_x1.2": 127.86507119731523,
+        "inertia_x0.8": 127.87234602692536,
+        "inertia_x1.2": 127.88835363478425,
+        "newton_contact_law": 127.88194166336223
+      }
+    },
+    {
+      "key": "C17",
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "condition": "Pitching Wedge, Curve \u00d71, 1\u00b0 Twist SD, Shaft Only",
+      "club_id": "pitching_wedge",
+      "protocol": "original_primary/1",
+      "target_x_m": 77.40247724866299,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 1.1019152415584275,
+          "downrange_sd_m": 1.1451148674494898,
+          "mean_carry_m": 77.38689737458496,
+          "target_rmse_m": 1.5894576612309668
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 1.1202677608246725,
+          "downrange_sd_m": 1.0916255530148038,
+          "mean_carry_m": 77.38625022466161,
+          "target_rmse_m": 1.5644527857295916
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 1.0816807701801636,
+          "downrange_sd_m": 1.1984535787262849,
+          "mean_carry_m": 77.38751639613503,
+          "target_rmse_m": 1.6146822787640756
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.5690509508919609,
+        "Draw": 0.573484876419933,
+        "Fade": 0.5646010990272211
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.004433925527972051,
+          "lower_95": 0.004362792580626332,
+          "upper_95": 0.004506100982340408
+        },
+        "Fade": {
+          "estimate": -0.004449851864739739,
+          "lower_95": -0.004521525031461071,
+          "upper_95": -0.004380005427157907
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.004433925527972051,
+            "lower_95": 0.004362792580626332,
+            "upper_95": 0.004506100982340408
+          },
+          "estimate_min": 0.004431230350270849,
+          "estimate_max": 0.004436089337327555,
+          "band_lower_95": 0.004360074644756024,
+          "band_upper_95": 0.004508397379831983,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.004436089337327555,
+            "cg_depth_x1.2": 0.004431230350270849,
+            "inertia_x0.8": 0.00443241673805262,
+            "inertia_x1.2": 0.004434926681054,
+            "newton_contact_law": 0.00443392552797214
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.004449851864739739,
+            "lower_95": -0.004521525031461071,
+            "upper_95": -0.004380005427157907
+          },
+          "estimate_min": -0.004452358425184044,
+          "estimate_max": -0.004446851702294117,
+          "band_lower_95": -0.004524098425811277,
+          "band_upper_95": -0.004376946327627934,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.004452358425184044,
+            "cg_depth_x1.2": -0.004446851702294117,
+            "inertia_x0.8": -0.004448121965655977,
+            "inertia_x1.2": -0.004451011117961339,
+            "newton_contact_law": -0.004449851864739813
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 77.41374343824137,
+        "cg_depth_x1.2": 77.3887481504536,
+        "inertia_x0.8": 77.39467114655437,
+        "inertia_x1.2": 77.40768934397566,
+        "newton_contact_law": 77.40247724866299
+      }
+    },
+    {
+      "key": "C18",
+      "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+      "condition": "Pitching Wedge, Curve \u00d71, 1\u00b0 Twist SD, Combined",
+      "club_id": "pitching_wedge",
+      "protocol": "original_primary/1",
+      "target_x_m": 77.40247724866299,
+      "scoring_status": "conditional_only",
+      "paired_n": 9999,
+      "geometry": {
+        "Straight": {
+          "supported_n": 9999,
+          "lateral_sd_m": 1.0742797900037906,
+          "downrange_sd_m": 4.00124809209157,
+          "mean_carry_m": 75.62162233388473,
+          "target_rmse_m": 4.5123581401248956
+        },
+        "Draw": {
+          "supported_n": 9999,
+          "lateral_sd_m": 1.091999697621707,
+          "downrange_sd_m": 3.986645994743399,
+          "mean_carry_m": 75.62047793338375,
+          "target_rmse_m": 4.5041860060678225
+        },
+        "Fade": {
+          "supported_n": 9999,
+          "lateral_sd_m": 1.05558936821086,
+          "downrange_sd_m": 4.014940551567068,
+          "mean_carry_m": 75.62263895055187,
+          "target_rmse_m": 4.519717602497237
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.19118657494270486,
+        "Draw": 0.19128165780344822,
+        "Fade": 0.19128047406514484
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 9.508286074337279e-05,
+          "lower_95": -6.740884235175359e-05,
+          "upper_95": 0.00027534162651518074
+        },
+        "Fade": {
+          "estimate": 9.389912244001256e-05,
+          "lower_95": -3.716499662472288e-05,
+          "upper_95": 0.00023672355033216001
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 9.508286074337279e-05,
+            "lower_95": -6.740884235175359e-05,
+            "upper_95": 0.00027534162651518074
+          },
+          "estimate_min": -1.0735754490663478e-05,
+          "estimate_max": 9.508286074337279e-05,
+          "band_lower_95": -0.00014888334904782896,
+          "band_upper_95": 0.00027534162651518074,
+          "direction": "spans_zero",
+          "variant_estimates": {
+            "cg_depth_x0.8": 3.1940828535693994e-05,
+            "cg_depth_x1.2": 4.88716032409961e-05,
+            "inertia_x0.8": -1.0735754490663478e-05,
+            "inertia_x1.2": 4.173434880387614e-05,
+            "newton_contact_law": 3.737131882245809e-05
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 9.389912244001256e-05,
+            "lower_95": -3.716499662472288e-05,
+            "upper_95": 0.00023672355033216001
+          },
+          "estimate_min": 7.657704866305935e-05,
+          "estimate_max": 9.950055293982024e-05,
+          "band_lower_95": -8.435899927943448e-05,
+          "band_upper_95": 0.00024227914002019978,
+          "direction": "spans_zero",
+          "variant_estimates": {
+            "cg_depth_x0.8": 8.56890867461716e-05,
+            "cg_depth_x1.2": 9.950055293982024e-05,
+            "inertia_x0.8": 7.657704866305935e-05,
+            "inertia_x1.2": 8.809766742266765e-05,
+            "newton_contact_law": 7.745978786835312e-05
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "conditional_only",
+        "cg_depth_x1.2": "conditional_only",
+        "inertia_x0.8": "conditional_only",
+        "inertia_x1.2": "conditional_only",
+        "newton_contact_law": "conditional_only"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 77.41374343824137,
+        "cg_depth_x1.2": 77.3887481504536,
+        "inertia_x0.8": 77.39467114655437,
+        "inertia_x1.2": 77.40768934397566,
+        "newton_contact_law": 77.40247724866299
+      }
+    },
+    {
+      "key": "C19",
+      "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+      "condition": "Pitching Wedge, Curve \u00d71, 2\u00b0 Twist SD, Shaft Only",
+      "club_id": "pitching_wedge",
+      "protocol": "original_primary/1",
+      "target_x_m": 77.40247724866299,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.20081277462137,
+          "downrange_sd_m": 2.286090666304557,
+          "mean_carry_m": 77.33908746507768,
+          "target_rmse_m": 3.1759588916680417
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.236550313838219,
+          "downrange_sd_m": 2.179685651111268,
+          "mean_carry_m": 77.3365635453117,
+          "target_rmse_m": 3.125692593719878
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.1613353795260735,
+          "downrange_sd_m": 2.3922501941339482,
+          "mean_carry_m": 77.34155650184451,
+          "target_rmse_m": 3.226656714517627
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.3439964596350485,
+        "Draw": 0.3495230683555166,
+        "Fade": 0.33850951148114306
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.005526608720468065,
+          "lower_95": 0.005467034565703379,
+          "upper_95": 0.005585979915873687
+        },
+        "Fade": {
+          "estimate": -0.005486948153905506,
+          "lower_95": -0.005544848674414284,
+          "upper_95": -0.00542829785763034
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.005526608720468065,
+            "lower_95": 0.005467034565703379,
+            "upper_95": 0.005585979915873687
+          },
+          "estimate_min": 0.005522248359648238,
+          "estimate_max": 0.005530139605945018,
+          "band_lower_95": 0.005462740385457159,
+          "band_upper_95": 0.005589568156332262,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.005530139605945018,
+            "cg_depth_x1.2": 0.005522248359648238,
+            "inertia_x0.8": 0.005524140735352247,
+            "inertia_x1.2": 0.005528248405945995,
+            "newton_contact_law": 0.005526608720468112
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.005486948153905506,
+            "lower_95": -0.005544848674414284,
+            "upper_95": -0.00542829785763034
+          },
+          "estimate_min": -0.005490658808866506,
+          "estimate_max": -0.00548246903916856,
+          "band_lower_95": -0.005548600022928403,
+          "band_upper_95": -0.005423775272639068,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.005490658808866506,
+            "cg_depth_x1.2": -0.00548246903916856,
+            "inertia_x0.8": -0.00548439586602624,
+            "inertia_x1.2": -0.005488657118592202,
+            "newton_contact_law": -0.005486948153905432
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 77.41374343824137,
+        "cg_depth_x1.2": 77.3887481504536,
+        "inertia_x0.8": 77.39467114655437,
+        "inertia_x1.2": 77.40768934397566,
+        "newton_contact_law": 77.40247724866299
+      }
+    },
+    {
+      "key": "C20",
+      "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "condition": "Pitching Wedge, Curve \u00d71, 2\u00b0 Twist SD, Combined",
+      "club_id": "pitching_wedge",
+      "protocol": "original_primary/1",
+      "target_x_m": 77.40247724866299,
+      "scoring_status": "conditional_only",
+      "paired_n": 9999,
+      "geometry": {
+        "Straight": {
+          "supported_n": 9999,
+          "lateral_sd_m": 2.1378682852990294,
+          "downrange_sd_m": 4.431038555936541,
+          "mean_carry_m": 75.57420447032331,
+          "target_rmse_m": 5.259624029187918
+        },
+        "Draw": {
+          "supported_n": 9999,
+          "lateral_sd_m": 2.1720528086541404,
+          "downrange_sd_m": 4.3795866596228565,
+          "mean_carry_m": 75.57118657728594,
+          "target_rmse_m": 5.231557311340193
+        },
+        "Fade": {
+          "supported_n": 9999,
+          "lateral_sd_m": 2.100519438533813,
+          "downrange_sd_m": 4.482867184635999,
+          "mean_carry_m": 75.57706543216872,
+          "target_rmse_m": 5.287439886745447
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.10111118029419924,
+        "Draw": 0.10159557845857034,
+        "Fade": 0.10077746892416774
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.00048439816437109755,
+          "lower_95": 0.00031545133545583153,
+          "upper_95": 0.0006494664423161261
+        },
+        "Fade": {
+          "estimate": -0.0003337113700315144,
+          "lower_95": -0.0004921473674576094,
+          "upper_95": -0.00018310418805300027
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.00048439816437109755,
+            "lower_95": 0.00031545133545583153,
+            "upper_95": 0.0006494664423161261
+          },
+          "estimate_min": 0.0004067101075355981,
+          "estimate_max": 0.0005466194560720088,
+          "band_lower_95": 0.0002747977719151606,
+          "band_upper_95": 0.0007888153733335096,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0004067101075355981,
+            "cg_depth_x1.2": 0.0005133313176796605,
+            "inertia_x0.8": 0.0005466194560720088,
+            "inertia_x1.2": 0.0005332790614453877,
+            "newton_contact_law": 0.0004847064757536782
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.0003337113700315144,
+            "lower_95": -0.0004921473674576094,
+            "upper_95": -0.00018310418805300027
+          },
+          "estimate_min": -0.00037314371415203356,
+          "estimate_max": -0.0003240254407048834,
+          "band_lower_95": -0.0005481219436604818,
+          "band_upper_95": -0.0001452392222799906,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.00032603558976604857,
+            "cg_depth_x1.2": -0.00036328498902637335,
+            "inertia_x0.8": -0.0003277359115278594,
+            "inertia_x1.2": -0.00037314371415203356,
+            "newton_contact_law": -0.0003240254407048834
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "conditional_only",
+        "cg_depth_x1.2": "conditional_only",
+        "inertia_x0.8": "conditional_only",
+        "inertia_x1.2": "conditional_only",
+        "newton_contact_law": "conditional_only"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 77.41374343824137,
+        "cg_depth_x1.2": 77.3887481504536,
+        "inertia_x0.8": 77.39467114655437,
+        "inertia_x1.2": 77.40768934397566,
+        "newton_contact_law": 77.40247724866299
+      }
+    },
+    {
+      "key": "C21",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "condition": "Pitching Wedge, Curve \u00d72, 1\u00b0 Twist SD, Shaft Only",
+      "club_id": "pitching_wedge",
+      "protocol": "pw-primary-face-bounds/1",
+      "target_x_m": 77.40247724866299,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 1.1019152415584275,
+          "downrange_sd_m": 1.1451148674494898,
+          "mean_carry_m": 77.38689737458496,
+          "target_rmse_m": 1.5894576612309668
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 1.1367074619146518,
+          "downrange_sd_m": 1.0378997728926111,
+          "mean_carry_m": 77.38557133263063,
+          "target_rmse_m": 1.539546391871209
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 1.0595994343328377,
+          "downrange_sd_m": 1.251732494283186,
+          "mean_carry_m": 77.38810539109521,
+          "target_rmse_m": 1.640263223082752
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.5690509508919609,
+        "Draw": 0.5779290132471046,
+        "Fade": 0.5601166273581931
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.008878062355143672,
+          "lower_95": 0.008734671507533846,
+          "upper_95": 0.009022020307049308
+        },
+        "Fade": {
+          "estimate": -0.008934323533767868,
+          "lower_95": -0.009077577244485208,
+          "upper_95": -0.008793895377843296
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.008878062355143672,
+            "lower_95": 0.008734671507533846,
+            "upper_95": 0.009022020307049308
+          },
+          "estimate_min": 0.008872806202586276,
+          "estimate_max": 0.008882473886162316,
+          "band_lower_95": 0.008729421151533287,
+          "band_upper_95": 0.00902648573015725,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.008882473886162316,
+            "cg_depth_x1.2": 0.008872806202586276,
+            "inertia_x0.8": 0.008875066043207975,
+            "inertia_x1.2": 0.008880090295171257,
+            "newton_contact_law": 0.008878062355143618
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.008934323533767868,
+            "lower_95": -0.009077577244485208,
+            "upper_95": -0.008793895377843296
+          },
+          "estimate_min": -0.008939353710990626,
+          "estimate_max": -0.008928235857841088,
+          "band_lower_95": -0.00908274125513024,
+          "band_upper_95": -0.008788027493276505,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.008939353710990626,
+            "cg_depth_x1.2": -0.008928235857841088,
+            "inertia_x0.8": -0.0089308441356301,
+            "inertia_x1.2": -0.008936650625205229,
+            "newton_contact_law": -0.008934323533767885
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 77.41374343824137,
+        "cg_depth_x1.2": 77.3887481504536,
+        "inertia_x0.8": 77.39467114655437,
+        "inertia_x1.2": 77.40768934397566,
+        "newton_contact_law": 77.40247724866299
+      }
+    },
+    {
+      "key": "C22",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "condition": "Pitching Wedge, Curve \u00d72, 1\u00b0 Twist SD, Combined",
+      "club_id": "pitching_wedge",
+      "protocol": "pw-primary-face-bounds/1",
+      "target_x_m": 77.40247724866299,
+      "scoring_status": "conditional_only",
+      "paired_n": 9999,
+      "geometry": {
+        "Straight": {
+          "supported_n": 9999,
+          "lateral_sd_m": 1.0742797900037906,
+          "downrange_sd_m": 4.00124809209157,
+          "mean_carry_m": 75.62162233388473,
+          "target_rmse_m": 4.5123581401248956
+        },
+        "Draw": {
+          "supported_n": 9999,
+          "lateral_sd_m": 1.108678109244904,
+          "downrange_sd_m": 3.9711056417180606,
+          "mean_carry_m": 75.6191999332909,
+          "target_rmse_m": 4.495154249505183
+        },
+        "Fade": {
+          "supported_n": 9999,
+          "lateral_sd_m": 1.036004891432779,
+          "downrange_sd_m": 4.027752789118699,
+          "mean_carry_m": 75.6235243287094,
+          "target_rmse_m": 4.526316273348623
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.19118657494270486,
+        "Draw": 0.19143787989757027,
+        "Fade": 0.19147849772049422
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.00025130495486543904,
+          "lower_95": -3.883216118976e-05,
+          "upper_95": 0.000554649653001833
+        },
+        "Fade": {
+          "estimate": 0.00029192277778935453,
+          "lower_95": 2.62846012084824e-05,
+          "upper_95": 0.0005753260545622655
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.00025130495486543904,
+            "lower_95": -3.883216118976e-05,
+            "upper_95": 0.000554649653001833
+          },
+          "estimate_min": 7.816068228721374e-05,
+          "estimate_max": 0.0003141317106249536,
+          "band_lower_95": -0.00021316299537231813,
+          "band_upper_95": 0.0006239362428145475,
+          "direction": "spans_zero",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.00026175029517388874,
+            "cg_depth_x1.2": 0.00018612621291987032,
+            "inertia_x0.8": 7.816068228721374e-05,
+            "inertia_x1.2": 0.0002152192426134906,
+            "newton_contact_law": 0.0003141317106249536
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": 0.00029192277778935453,
+            "lower_95": 2.62846012084824e-05,
+            "upper_95": 0.0005753260545622655
+          },
+          "estimate_min": 0.0002602439499380912,
+          "estimate_max": 0.00029653797590785787,
+          "band_lower_95": -2.11924579318222e-05,
+          "band_upper_95": 0.0005922028046714397,
+          "direction": "spans_zero",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0002822861277519763,
+            "cg_depth_x1.2": 0.0002602439499380912,
+            "inertia_x0.8": 0.00029653797590785787,
+            "inertia_x1.2": 0.00029458602442553435,
+            "newton_contact_law": 0.0002702590717371882
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "conditional_only",
+        "cg_depth_x1.2": "conditional_only",
+        "inertia_x0.8": "conditional_only",
+        "inertia_x1.2": "conditional_only",
+        "newton_contact_law": "conditional_only"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 77.41374343824137,
+        "cg_depth_x1.2": 77.3887481504536,
+        "inertia_x0.8": 77.39467114655437,
+        "inertia_x1.2": 77.40768934397566,
+        "newton_contact_law": 77.40247724866299
+      }
+    },
+    {
+      "key": "C23",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "condition": "Pitching Wedge, Curve \u00d72, 2\u00b0 Twist SD, Shaft Only",
+      "club_id": "pitching_wedge",
+      "protocol": "pw-primary-face-bounds/1",
+      "target_x_m": 77.40247724866299,
+      "scoring_status": "available",
+      "paired_n": 10000,
+      "geometry": {
+        "Straight": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.20081277462137,
+          "downrange_sd_m": 2.286090666304557,
+          "mean_carry_m": 77.33908746507768,
+          "target_rmse_m": 3.1759588916680417
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.2684928109851743,
+          "downrange_sd_m": 2.0728697447153888,
+          "mean_carry_m": 77.33396819962806,
+          "target_rmse_m": 3.0756242017233975
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "lateral_sd_m": 2.118181513411924,
+          "downrange_sd_m": 2.4983382395951206,
+          "mean_carry_m": 77.34396768070069,
+          "target_rmse_m": 3.2780494192560994
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.3439964596350485,
+        "Draw": 0.35511355988052656,
+        "Fade": 0.33303049165187965
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.011117100245477967,
+          "lower_95": 0.010998017515264651,
+          "upper_95": 0.011235665614766547
+        },
+        "Fade": {
+          "estimate": -0.010965967983168907,
+          "lower_95": -0.011080613436542458,
+          "upper_95": -0.01084861169459484
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.011117100245477967,
+            "lower_95": 0.010998017515264651,
+            "upper_95": 0.011235665614766547
+          },
+          "estimate_min": 0.011108434028348126,
+          "estimate_max": 0.011124208482395885,
+          "band_lower_95": 0.010989348414897506,
+          "band_upper_95": 0.01124288259509153,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.011124208482395885,
+            "cg_depth_x1.2": 0.011108434028348126,
+            "inertia_x0.8": 0.011112176089728266,
+            "inertia_x1.2": 0.011120391485594905,
+            "newton_contact_law": 0.01111710024547794
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.010965967983168907,
+            "lower_95": -0.011080613436542458,
+            "upper_95": -0.01084861169459484
+          },
+          "estimate_min": -0.010973568541646743,
+          "estimate_max": -0.010956749336404328,
+          "band_lower_95": -0.011088341192924943,
+          "band_upper_95": -0.01083938319015299,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.010973568541646743,
+            "cg_depth_x1.2": -0.010956749336404328,
+            "inertia_x0.8": -0.010960719642902203,
+            "inertia_x1.2": -0.010969473519470469,
+            "newton_contact_law": -0.010965967983168932
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "available",
+        "cg_depth_x1.2": "available",
+        "inertia_x0.8": "available",
+        "inertia_x1.2": "available",
+        "newton_contact_law": "available"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 77.41374343824137,
+        "cg_depth_x1.2": 77.3887481504536,
+        "inertia_x0.8": 77.39467114655437,
+        "inertia_x1.2": 77.40768934397566,
+        "newton_contact_law": 77.40247724866299
+      }
+    },
+    {
+      "key": "C24",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "condition": "Pitching Wedge, Curve \u00d72, 2\u00b0 Twist SD, Combined",
+      "club_id": "pitching_wedge",
+      "protocol": "pw-primary-face-bounds/1",
+      "target_x_m": 77.40247724866299,
+      "scoring_status": "conditional_only",
+      "paired_n": 9999,
+      "geometry": {
+        "Straight": {
+          "supported_n": 9999,
+          "lateral_sd_m": 2.1378682852990294,
+          "downrange_sd_m": 4.431038555936541,
+          "mean_carry_m": 75.57420447032331,
+          "target_rmse_m": 5.259624029187918
+        },
+        "Draw": {
+          "supported_n": 9999,
+          "lateral_sd_m": 2.2030008084664336,
+          "downrange_sd_m": 4.328464647188038,
+          "mean_carry_m": 75.56800786464947,
+          "target_rmse_m": 5.203096526900156
+        },
+        "Fade": {
+          "supported_n": 9999,
+          "lateral_sd_m": 2.060088940612412,
+          "downrange_sd_m": 4.535138395735808,
+          "mean_carry_m": 75.57977417546074,
+          "target_rmse_m": 5.315170379853339
+        }
+      },
+      "mean_strokes_gained": {
+        "Straight": 0.10111118029419924,
+        "Draw": 0.102157664110418,
+        "Fade": 0.10048400585001513
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.0010464838162187525,
+          "lower_95": 0.0007494264962679769,
+          "upper_95": 0.0013340822986225968
+        },
+        "Fade": {
+          "estimate": -0.0006271744441841138,
+          "lower_95": -0.0009444213327906272,
+          "upper_95": -0.00031679054849701095
+        }
+      },
+      "assumption_band": {
+        "variants_attempted": 5,
+        "variants_available": 5,
+        "unavailable_variants": [],
+        "Draw": {
+          "nominal": {
+            "estimate": 0.0010464838162187525,
+            "lower_95": 0.0007494264962679769,
+            "upper_95": 0.0013340822986225968
+          },
+          "estimate_min": 0.0010464838162187525,
+          "estimate_max": 0.0011573901722022018,
+          "band_lower_95": 0.000701125081160675,
+          "band_upper_95": 0.0014622261917812576,
+          "direction": "positive",
+          "variant_estimates": {
+            "cg_depth_x0.8": 0.0010873475271209626,
+            "cg_depth_x1.2": 0.0010751473435922844,
+            "inertia_x0.8": 0.0010494579388607558,
+            "inertia_x1.2": 0.0011573901722022018,
+            "newton_contact_law": 0.0011307793986522969
+          }
+        },
+        "Fade": {
+          "nominal": {
+            "estimate": -0.0006271744441841138,
+            "lower_95": -0.0009444213327906272,
+            "upper_95": -0.00031679054849701095
+          },
+          "estimate_min": -0.0007064138947400094,
+          "estimate_max": -0.0004882290201670304,
+          "band_lower_95": -0.001027918710838307,
+          "band_upper_95": -0.00018450851521953436,
+          "direction": "negative",
+          "variant_estimates": {
+            "cg_depth_x0.8": -0.000579116469344618,
+            "cg_depth_x1.2": -0.0006564565125663625,
+            "inertia_x0.8": -0.0004882290201670304,
+            "inertia_x1.2": -0.0007064138947400094,
+            "newton_contact_law": -0.0005374135107533005
+          }
+        }
+      },
+      "nominal_reproduction": {
+        "shots_compared": 30000,
+        "status_mismatches": 0,
+        "max_abs_endpoint_difference_m": 0.0
+      },
+      "variant_status": {
+        "cg_depth_x0.8": "conditional_only",
+        "cg_depth_x1.2": "conditional_only",
+        "inertia_x0.8": "conditional_only",
+        "inertia_x1.2": "conditional_only",
+        "newton_contact_law": "conditional_only"
+      },
+      "variant_target_x_m": {
+        "cg_depth_x0.8": 77.41374343824137,
+        "cg_depth_x1.2": 77.3887481504536,
+        "inertia_x0.8": 77.39467114655437,
+        "inertia_x1.2": 77.40768934397566,
+        "newton_contact_law": 77.40247724866299
+      }
+    }
+  ],
+  "contrasts": {
+    "E01": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "driver_lean0_curve1_rotation1_shaft_only",
+        "driver_lean0_curve1_rotation2_shaft_only"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "available",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0028180068958573046,
+          "lower_95": 0.0023703619249166395,
+          "upper_95": 0.003290927177296941
+        },
+        "Fade": {
+          "estimate": -0.0012933794105451592,
+          "lower_95": -0.0016570708378168411,
+          "upper_95": -0.0009246344369920702
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "7f27353d289f3482a394b7e76583449286ed806be2f221f4c7048e86d077f4b7",
+          "source_csv_sha256": "5361a0db5ec21a204065160b5c88be95cc9d88776c6ed22be6f2d11c6a69d8dc"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "1234076d52f81edbdbc0210661e437aabb5fbf009e16b361ca246a74490b03e6",
+          "source_csv_sha256": "24a3509c525869a000552a12a37f4def44fb908a25e6b19538d24735ec24dd24"
+        }
+      ]
+    },
+    "E02": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "driver_lean0_curve1_rotation2_shaft_only",
+        "driver_lean0_curve2_rotation2_shaft_only"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "available",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.004905032591681015,
+          "lower_95": 0.00437176817561401,
+          "upper_95": 0.005439816249981192
+        },
+        "Fade": {
+          "estimate": -0.00023541937361689288,
+          "lower_95": -0.0005663606717119732,
+          "upper_95": 9.329878343612068e-05
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "1234076d52f81edbdbc0210661e437aabb5fbf009e16b361ca246a74490b03e6",
+          "source_csv_sha256": "24a3509c525869a000552a12a37f4def44fb908a25e6b19538d24735ec24dd24"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b1b7b45851091bc7f34414ba3cf6cc57a055baa94fb582f8a8a045f615482ad1",
+          "source_csv_sha256": "ea7f05fd5927b05acd076922aae4d99e448dd0ec261355deeafad973aaa4b3c0"
+        }
+      ]
+    },
+    "E03": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "driver_lean0_curve1_rotation1_combined2",
+        "driver_lean0_curve1_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "available",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.002168248544520088,
+          "lower_95": 0.0016233071066926185,
+          "upper_95": 0.002680023242100785
+        },
+        "Fade": {
+          "estimate": -0.0009698727685856757,
+          "lower_95": -0.0014396667872652934,
+          "upper_95": -0.0004979775316046014
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c81ec05db850fff61cc2e12d921ab003fbd8daab04a2db6c99cb6345f6a99c9c",
+          "source_csv_sha256": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "e3c312ff56c6285e803348792cc8e520813cb4acdfcd402d0001718ac6c51073",
+          "source_csv_sha256": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d"
+        }
+      ]
+    },
+    "E04": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "driver_lean0_curve1_rotation2_combined2",
+        "driver_lean0_curve2_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "available",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.004487149875537121,
+          "lower_95": 0.003937481330456317,
+          "upper_95": 0.005064704350633376
+        },
+        "Fade": {
+          "estimate": 9.2985393232592e-05,
+          "lower_95": -0.00027386633465902277,
+          "upper_95": 0.00046184858563667045
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "e3c312ff56c6285e803348792cc8e520813cb4acdfcd402d0001718ac6c51073",
+          "source_csv_sha256": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b268743fd6b01fa887e647d6f1ab5d29c4657a6283254c5256396dcb15ae0dba",
+          "source_csv_sha256": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76"
+        }
+      ]
+    },
+    "E05": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "seven_iron_lean0_curve1_rotation1_shaft_only",
+        "seven_iron_lean0_curve1_rotation2_shaft_only"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "available",
+      "target_x_m": 127.88194166336235,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 6.4485471218489035e-06,
+          "lower_95": -7.302063631914756e-05,
+          "upper_95": 4.9357780961393666e-05
+        },
+        "Fade": {
+          "estimate": 1.999968811025618e-05,
+          "lower_95": -6.0719816499139404e-05,
+          "upper_95": 0.00013304390847614897
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "6dd067c21dd6ad4c3c68f39ea6a1137f404077f084c4127c1e29232a7e44340d",
+          "source_csv_sha256": "dd3a8f4f94d3c6ed5d47984fea72b1409329ee622d8cd259f1f07c6ed15e1763"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3580f65b4d4d19295d04cdd76cab89cdf3cf5998ac5c8f45478a3b8f0227520f",
+          "source_csv_sha256": "3046d2ac0e0521aca132b44b29d61faf6b4b87064b20ef8244d6f95e4444f57b"
+        }
+      ]
+    },
+    "E06": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "seven_iron_lean0_curve1_rotation2_shaft_only",
+        "seven_iron_lean0_curve2_rotation2_shaft_only"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "available",
+      "target_x_m": 127.88194166336235,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0002108861249960735,
+          "lower_95": 6.885165251815802e-05,
+          "upper_95": 0.00036060320605274884
+        },
+        "Fade": {
+          "estimate": 0.001514678528792121,
+          "lower_95": 0.0014329270974327876,
+          "upper_95": 0.0016311605838773846
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3580f65b4d4d19295d04cdd76cab89cdf3cf5998ac5c8f45478a3b8f0227520f",
+          "source_csv_sha256": "3046d2ac0e0521aca132b44b29d61faf6b4b87064b20ef8244d6f95e4444f57b"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "e43c7cc3af83d433a9fc0825d904dcfa9b3def4a7fde214b48149ae269c7babd",
+          "source_csv_sha256": "ad0352190ef9d4db2f3be075db58bddd788ae8817cce07149546d73e51f9050f"
+        }
+      ]
+    },
+    "E07": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "seven_iron_lean0_curve1_rotation1_combined2",
+        "seven_iron_lean0_curve1_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "conditional_only",
+      "target_x_m": 127.88194166336235,
+      "common_six_n": 9996,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": -6.027502181628796e-05,
+          "lower_95": -0.00028927684162666326,
+          "upper_95": 0.0001555642991275521
+        },
+        "Fade": {
+          "estimate": 0.000217539684880919,
+          "lower_95": -5.8165234113700454e-05,
+          "upper_95": 0.0005075193415471592
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "0e3b119e8b3842758fe614122f81d25d6d402ddc5a29b8ad653bbc9a2a2950fb",
+          "source_csv_sha256": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3fd95f290c14757eebc963c932f0b283cd8207d50c43e05c661357d65bbfc102",
+          "source_csv_sha256": "b16f41b07ae36f889aab9305669b725388f41d62e4cbbcf2c65b2f3df07d8953"
+        }
+      ]
+    },
+    "E08": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "seven_iron_lean0_curve1_rotation2_combined2",
+        "seven_iron_lean0_curve2_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "conditional_only",
+      "target_x_m": 127.88194166336235,
+      "common_six_n": 9996,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": -0.0002475919060323463,
+          "lower_95": -0.0004943879007167445,
+          "upper_95": 1.1321046623105803e-05
+        },
+        "Fade": {
+          "estimate": 0.0011829007931870577,
+          "lower_95": 0.0009783116434075026,
+          "upper_95": 0.0013708148641233934
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3fd95f290c14757eebc963c932f0b283cd8207d50c43e05c661357d65bbfc102",
+          "source_csv_sha256": "b16f41b07ae36f889aab9305669b725388f41d62e4cbbcf2c65b2f3df07d8953"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "58275723fba1a0e767a5d0a00928f850e265ddc210965073df7dab4718eddee1",
+          "source_csv_sha256": "d078ff414f85308ca32f58478da8d1006da5b79298e452df5be947f4f0c44e86"
+        }
+      ]
+    },
+    "E09": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+        "pitching_wedge_lean0_curve1_rotation2_shaft_only"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "available",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0010926831924960153,
+          "lower_95": 0.0010276202319096893,
+          "upper_95": 0.001157561663125492
+        },
+        "Fade": {
+          "estimate": -0.001037096289165767,
+          "lower_95": -0.0011027126954496515,
+          "upper_95": -0.0009723383119665852
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "a10d87e329e46e4edaf49b860f38b07dffbbd1acd80e755ccb3309b124389eff",
+          "source_csv_sha256": "75ba66e1a9463335ad422cc5ae1ca01c878a7cb2361bcea4d990c4dd839f424d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c50db5d761ec95e5fcdc4aaae0f3c87b747aa68e641a8a845fd506acffbbebf8",
+          "source_csv_sha256": "86fa7a72e64b460436d4c5cc3dfe7b3992cd535276c74d606984334c4f485430"
+        }
+      ]
+    },
+    "E10": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+        "pitching_wedge_lean0_curve2_rotation2_shaft_only"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "pw-primary-face-bounds/1"
+      ],
+      "status": "available",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 10000,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0055904915250099,
+          "lower_95": 0.0055316340151458,
+          "upper_95": 0.005650237049770371
+        },
+        "Fade": {
+          "estimate": -0.0054790198292634,
+          "lower_95": -0.0055365293311511275,
+          "upper_95": -0.005420079298566004
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c50db5d761ec95e5fcdc4aaae0f3c87b747aa68e641a8a845fd506acffbbebf8",
+          "source_csv_sha256": "86fa7a72e64b460436d4c5cc3dfe7b3992cd535276c74d606984334c4f485430"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        }
+      ]
+    },
+    "E11": {
+      "comparison_kind": "shaft_rotation_sd",
+      "cells": [
+        "pitching_wedge_lean0_curve1_rotation1_combined2",
+        "pitching_wedge_lean0_curve1_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "status": "conditional_only",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 9999,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.00038931530362772474,
+          "lower_95": 0.00022364264868277248,
+          "upper_95": 0.0005602420895505798
+        },
+        "Fade": {
+          "estimate": -0.00042761049247152697,
+          "lower_95": -0.0005481598527096314,
+          "upper_95": -0.00031562084840445033
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ddfb29baa84601abc460d9a1f7134aa6bd60a1a108d275c3b2ba74ddcdd21f4e",
+          "source_csv_sha256": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ccc8a06f1c98fc08aa5ab70b2e27800d35506b1b17c349e4bf2e14554fdc3b4c",
+          "source_csv_sha256": "9d089f3b70b0cb5ddeeabe1ff309cfec960c5ed78368d4b764f3dea2315a3eee"
+        }
+      ]
+    },
+    "E12": {
+      "comparison_kind": "curve_strength",
+      "cells": [
+        "pitching_wedge_lean0_curve1_rotation2_combined2",
+        "pitching_wedge_lean0_curve2_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "pw-primary-face-bounds/1"
+      ],
+      "status": "conditional_only",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 9999,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.0005620856518476551,
+          "lower_95": 0.00041959210699309287,
+          "upper_95": 0.0007189217549238488
+        },
+        "Fade": {
+          "estimate": -0.00029346307415259936,
+          "lower_95": -0.0004959059597595492,
+          "upper_95": -0.00010794107828167266
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ccc8a06f1c98fc08aa5ab70b2e27800d35506b1b17c349e4bf2e14554fdc3b4c",
+          "source_csv_sha256": "9d089f3b70b0cb5ddeeabe1ff309cfec960c5ed78368d4b764f3dea2315a3eee"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        }
+      ]
+    },
+    "F1": {
+      "comparison_kind": "across_lean",
+      "cells": [
+        "driver_lean0_curve2_rotation2_combined2",
+        "driver_lean5_curve2_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "original_control/1",
+        "driver-control-speed-bounds/1"
+      ],
+      "status": "conditional_only",
+      "target_x_m": 178.94875782337786,
+      "common_six_n": 9940,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": 0.005980075434717973,
+          "lower_95": 0.004849005299311208,
+          "upper_95": 0.007060628560778899
+        },
+        "Fade": {
+          "estimate": -0.00139744977274586,
+          "lower_95": -0.002319957068376065,
+          "upper_95": -0.00045430487777683526
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b268743fd6b01fa887e647d6f1ab5d29c4657a6283254c5256396dcb15ae0dba",
+          "source_csv_sha256": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76"
+        },
+        {
+          "protocol_id": "driver-control-speed-bounds/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+          "source_cell_manifest_sha256": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+          "source_csv_sha256": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758"
+        }
+      ]
+    },
+    "F2": {
+      "comparison_kind": "across_lean",
+      "cells": [
+        "pitching_wedge_lean0_curve2_rotation2_combined2",
+        "pitching_wedge_lean5_curve2_rotation2_combined2"
+      ],
+      "source_protocols": [
+        "pw-primary-face-bounds/1",
+        "pw-control-face-bounds/1"
+      ],
+      "status": "conditional_only",
+      "target_x_m": 77.40247724866299,
+      "common_six_n": 9999,
+      "total_n_per_population": 10000,
+      "effect_modification": {
+        "Draw": {
+          "estimate": -0.0003513244825749293,
+          "lower_95": -0.0005618620130234146,
+          "upper_95": -0.00013259228201186986
+        },
+        "Fade": {
+          "estimate": 0.0006868011750515063,
+          "lower_95": 0.00047945787267671597,
+          "upper_95": 0.000902934074844211
+        }
+      },
+      "sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ]
+    }
+  },
+  "inputs_sha256": {
+    "statistics_v2/final_v1.json": "81e09a89db42a1c4433e108c9f3ab698ce91a68b56d3dd932177c457ec23c15a",
+    "statistics_v2/pw_primary_face.json": "32b939013e2dab3a500ec8f73fa3ca1c6e5d59c19880e4254ea6d46deb587be7",
+    "statistics_v2/contrasts.json": "8588d8eef4c2561898728e11acfd8dde90cda13b5ab89966bfbfadf7fd05e449",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_combined2__cg_depth_x0.8.json": "a4ad9888ad37af5ea9fce69ab04c5bbfc2143bd91ad6ea350b6db129d7a8bd54",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_combined2__cg_depth_x1.2.json": "67eeda3297fb7aa76a7cf0be3acd6844fd5c15495433401c38e25eeb340b7029",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_combined2__face_radii_x0.8.json": "5006824b87f4f9739d8ffb9c1df006c9939756892f6c5be5b434302be375bf40",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_combined2__face_radii_x1.2.json": "c2af87b034badc65091143762c9487074955b32ca3a9d4c8f653e1ea1eb1c280",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_combined2__inertia_x0.8.json": "59efbc3603e34f59cdd75426d773baec6e2a5dfc663608d9bc3fe45612cbd4f8",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_combined2__inertia_x1.2.json": "77c78bb5b3f03f32af6f01bdaba83d1c60e31a2b90509f5fca6cc00035a9fca6",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_combined2__newton_contact_law.json": "e0b2a88be43cdd491b78d9f4271ba4aee4f11e9bf9e5baa3e1ba67d1cc58dbdd",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_combined2__nominal_reproduction.json": "009a1cfba02093e5e4a4a0cb56084f581d3d2cbd6ad7f1ebbbeb401f103a4d1f",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_shaft_only__cg_depth_x0.8.json": "7202f2c0d2b6dbfe688fae930e83f05a6a998dfb56b9121414506b220ae16826",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_shaft_only__cg_depth_x1.2.json": "ef879e9c2dfbfd3c852cc327ddec3110da796a857f53dfcd24b8729e67b95d38",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_shaft_only__face_radii_x0.8.json": "b2225612feff0ee77cccf003db18b78f65fb01f14c94535e3024f6a0937b0a49",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_shaft_only__face_radii_x1.2.json": "0901e21fb1c7358b769b95089ef0f215f559705e21e9922aba8c3c92d1af520b",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_shaft_only__inertia_x0.8.json": "8d80eaa4df7c67d8b95da50b40ea049ac66083a255a151bae319329cc955395f",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_shaft_only__inertia_x1.2.json": "8be9d9af5187cd436be6ba0ea33dd49cf87f89147c9909991021330dfbf3f201",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_shaft_only__newton_contact_law.json": "9947bd7d2355e1e62f29ce447db97e0286594ea4b0fc8116b7ad2637077e90b4",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation1_shaft_only__nominal_reproduction.json": "bce2b1c53429908fe0d46b96c4786590767099cef15b30f48f641cb6a8e78444",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_combined2__cg_depth_x0.8.json": "40839bc71e2d6492af4a88d09fec7c3e9c7d5c3556a96183150025074da2b44e",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_combined2__cg_depth_x1.2.json": "54b3a348e48825312bf7715176039a3276423bba941aa003d07bfc7698a01662",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_combined2__face_radii_x0.8.json": "06abacfb02b99028184b5eb8a7880c80867ef417bfb77329fd0450aeaf9a2845",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_combined2__face_radii_x1.2.json": "cdcd655059833fe625462bb45e6b0e4d75a33776e94c405592686d375059fb27",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_combined2__inertia_x0.8.json": "7d2f8c660213dce523d297647438c58acb2913d869d6e3c3bcfc582bfc8bd916",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_combined2__inertia_x1.2.json": "d1d9038ea2705852898e20dbb47762a1af5eec02f08c22a2f92ece7962e781bd",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_combined2__newton_contact_law.json": "79db79ee2611b4462e52fcbabeff9b094da740ca1a63a43c59fac055841b6930",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_combined2__nominal_reproduction.json": "472f038634fd2af3c15f8ee339d77298de3b7e6ec05415c6bf4599a8de751b68",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_shaft_only__cg_depth_x0.8.json": "4f0ed11b59ef27e1032b4a55c5dc704e598153b5f433e9bd97b7f5a16f7dfcd8",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_shaft_only__cg_depth_x1.2.json": "32224b4a720c6204737e4342fc996ebcf3d0677001617d4af41ef4bfee7642df",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_shaft_only__face_radii_x0.8.json": "2294306f3d8ea83a7a800ab4596c57d4d33de5aa41d9c7635709cf8dff8c10bb",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_shaft_only__face_radii_x1.2.json": "e4017be209bb9120a4a23e8ee2ad389a50fa543a17dba20e7891a1f0fd0e818e",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_shaft_only__inertia_x0.8.json": "a5a6d794562511a74110436e46d00ed3909c5490a69c9f11e74ecac90a07c518",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_shaft_only__inertia_x1.2.json": "1c61a8220b743a7cea7879f7ced8076a6234fecad452507d2fdb39ba4181afc8",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_shaft_only__newton_contact_law.json": "e092186931646f559d7df5c423cb64668c92828b852d1cfaaa274af42d543c55",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve1_rotation2_shaft_only__nominal_reproduction.json": "e241fb6fafaae7e136509b61fa5135a932ad66ca9c08074550776633c1aac5b9",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_combined2__cg_depth_x0.8.json": "73fe0cee397c197d5775aa4b569015ba84249c61821322df044658f3c2db822c",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_combined2__cg_depth_x1.2.json": "ed8434f909bb73b0e8bb034ef36a1e994a7cf646590242e9e43a291f7ddf03a5",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_combined2__face_radii_x0.8.json": "d2989a56da3a715c4801ebe2ed189284d0d29ddb59b8ae5074ce2281ff9675f8",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_combined2__face_radii_x1.2.json": "331239229a408417d8fec82774cbeba8b47db900fa79a22482b937b13f05f196",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_combined2__inertia_x0.8.json": "7ed1f850e85fad467d212f4ee8e45736190e4095273d7f1d40d642edf725495c",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_combined2__inertia_x1.2.json": "056f1b5af4a66676583c54542909967a19e557d4004b5ec9a5157aed79e46a3e",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_combined2__newton_contact_law.json": "a21ac3d8e2fbc2255fc8ba36f39a170a8c4bdddb79539c6d54f87e62d4fec576",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_combined2__nominal_reproduction.json": "61dfb56bfeb97f7565730ff851936bf1ebc353a7c27917a78a5ce770f0d0d668",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_shaft_only__cg_depth_x0.8.json": "e15195d03451b01de4ad11b20a515ebf87d1a583a6f72e0bec23aece2243f5e6",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_shaft_only__cg_depth_x1.2.json": "29b10ff782c3c7718068c8b16dd7a9eb89864cb7e802c34add9ffd8234996f95",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_shaft_only__face_radii_x0.8.json": "31fcca05cf95dfd7765e062585a7c6fd0147a622d579a60ac6082582218ef937",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_shaft_only__face_radii_x1.2.json": "d22ce0b029cdb897586be10d54c2ad8ce4dc0467f56999a601c43679c76c7e01",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_shaft_only__inertia_x0.8.json": "0ffc05019ac53542b2909394904ef1a1666360e51babe15fbec11a2c5d39a406",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_shaft_only__inertia_x1.2.json": "6e87171a33a3ed6ad622b942412f5525840c5291533f8aeae50ae2d325923808",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_shaft_only__newton_contact_law.json": "5915d6639ffab13ab76639aaf1d737f430dda52c30c69159bcb2bda4b381d582",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation1_shaft_only__nominal_reproduction.json": "3d500bec9d433689175b460fb0188d42dc7d6b0567c290f17afb52a4f7bf338b",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_combined2__cg_depth_x0.8.json": "5824fbb359ae8eb12a1452ea7bad62ac901b1cb4ad63270062d5810a576cf775",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_combined2__cg_depth_x1.2.json": "9f6c765375919367ff06485667e0b58ea114cec948aa9d6c388fce96aa48369f",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_combined2__face_radii_x0.8.json": "aeeb8cedba2210d985a2e56ba44c245db46f7ba07806963e323b77d8a0565b07",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_combined2__face_radii_x1.2.json": "e115fd8b11881f211f7f74bbdcda3dffdb8b326950bc91ecaa0af55e97e4a049",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_combined2__inertia_x0.8.json": "bb84f85309e12aa66caa1e967fc3604a262dee99ae33cb21eb44b1bd5eb74689",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_combined2__inertia_x1.2.json": "301825b7abfb50abf6d5e68edb1fec244ea6cf52ba9af1d5b67f89d82e88ae12",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_combined2__newton_contact_law.json": "54e19e89179c683997821c26f7d760208625752f50e4e4e2c03a047010a3a022",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_combined2__nominal_reproduction.json": "f64fc3c51ff1d7756163401a81e3a866ecc5b9d25e20dcb43da984610b536cd9",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_shaft_only__cg_depth_x0.8.json": "55ab31f384a38c2c6d843d5dfb727584743c1e34affb1a4d0ac073d9d3ab4890",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_shaft_only__cg_depth_x1.2.json": "7e10e9745be32b359a5e9098ba772c8e40a32356f6f5a72654bfc725aee2a4e8",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_shaft_only__face_radii_x0.8.json": "a0fce5228b94d039e0b21033223652f236fb8d22fb602d496201593314d5841d",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_shaft_only__face_radii_x1.2.json": "54ebb5bd7d3452e29109972e59ec49f9d223b55e06c7cd46f9cd02f4b03fd5b1",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_shaft_only__inertia_x0.8.json": "56f9c96527a273af685f1d4524a663f66bc0398c04fba17126cd00a6c17642d9",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_shaft_only__inertia_x1.2.json": "ad500f105ea317d67071400836ce6ff57f3d75c157ca2fa5d729a6357ea04c2a",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_shaft_only__newton_contact_law.json": "b803c1f3b5d1faaf587fdd4fe154cb2500f2b98544646bafd1de676933d342b4",
+    "statistics_v2/assumption_band/runs/driver_lean0_curve2_rotation2_shaft_only__nominal_reproduction.json": "44bc9ff1f185efb279d8e35d68bcb6935dfbce1538786f6340d301dc1ac5506d",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_combined2__cg_depth_x0.8.json": "65a2d871b2453e10080d81e6e92d35bbea4debede15b2f7f3eb57b3405e77c61",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_combined2__cg_depth_x1.2.json": "dbddd5547666d341d019830174e04e32419c74cc4e75935426069eb39d21a76e",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_combined2__inertia_x0.8.json": "8e2b8f39ccd40851fa5e33399a78e7090449d46bd6a5915ffec2475fad1b2843",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_combined2__inertia_x1.2.json": "810c0743406da62b8cecbcef85d861da97e0909bf3ad7bf17a99347e35c66610",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_combined2__newton_contact_law.json": "a7322bdbf47c1704e9c4564d3cfefeee47e0a866812892d4fc3dcaefdd3a0c93",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_combined2__nominal_reproduction.json": "65d4a4e5494608c635945fe44edc96a6b1f1bdee48cd287c0a353514d6b40a0e",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_shaft_only__cg_depth_x0.8.json": "14efcaec33ed5a6bc7f50ff8d0c8be41e2d727590602a0f7cf36fc7542d3bee9",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_shaft_only__cg_depth_x1.2.json": "ca67c07d211091998ded596a76c82702d7034016988e3e18bebb4daf29f5149d",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_shaft_only__inertia_x0.8.json": "8e85d52b23bd22235b119c1e968b75c8c331c96e9a45eba1c7929ee007b143a0",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_shaft_only__inertia_x1.2.json": "a8950d1f3aa288a4f8b9903a805bd33fbf60d3832805b12d7d054f66f012a427",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_shaft_only__newton_contact_law.json": "53cc0ccf3850f4540c823733df662998492eeb7c8cf89d271bfb2af7f7a72da2",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation1_shaft_only__nominal_reproduction.json": "30ecae76f4337bafd4ea83a8fc94a06f87e7c05d11aedf021af9034278704f03",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_combined2__cg_depth_x0.8.json": "21fb510b623071803392285aa3263c38a25ec08c5b9ed54f87e0c525d38f569a",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_combined2__cg_depth_x1.2.json": "c3849346fd18ea3ac2cd2932584b791c522f358dfbb9e131550e818f258939c9",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_combined2__inertia_x0.8.json": "09bbeb89fb815c0e4332e3e5e16dac42f2d3202eb7ecc7d744fd477133e21d2f",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_combined2__inertia_x1.2.json": "7438fd465a377a7d5a1c934c44b2c763e3327e488c69c2875dcc57c6459b465d",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_combined2__newton_contact_law.json": "44d0ae7053e6583a116a9b8e968a69bee87cfbc4915723e92405c7e8a6815707",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_combined2__nominal_reproduction.json": "fd77d29acc4e62eeb1f78861eed5cdc0a188900c47176203335804e0ffc46fbe",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_shaft_only__cg_depth_x0.8.json": "5065c5a7ea901d8355a0beb3c7ce4296f44eb4ac4198aa59d7008048bd54d787",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_shaft_only__cg_depth_x1.2.json": "45d2eb4a8cab7206c8bb5d795fda2d7bdf3de18fd6833a7596957c6a0aeebba9",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_shaft_only__inertia_x0.8.json": "3071555919198a43be19f26a01d5fef7f20731a7369f9dd31046f15c1026564b",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_shaft_only__inertia_x1.2.json": "75008173ceb3ac8b4595eb8cf849862e772d4d0608a8e371f39014688faaffbc",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_shaft_only__newton_contact_law.json": "4cd69885db7de591294196bcc4e0e10867383c2101e488b78a05cb7962532abe",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve1_rotation2_shaft_only__nominal_reproduction.json": "9aa9950449ea3d7d402a018c64ac3ebc458b117c153b8e8e048baa8b199afcf4",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_combined2__cg_depth_x0.8.json": "1ff8ed40f0afb344937649085408035991f44ea6e4cc9b93981396c0c75086a0",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_combined2__cg_depth_x1.2.json": "c223ad6635fb58e3ea90ed4f60439762f827a475cb3c8ecc8199a4e885190ac9",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_combined2__inertia_x0.8.json": "45cbf044d92a8e23cde5517c2574e723060ff13e79b827c3fd8dc2624a396229",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_combined2__inertia_x1.2.json": "07120ba779a43fce8161db9ba28c73245e8945b6c2cfb48969dc5c8e8cd29274",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_combined2__newton_contact_law.json": "adf3bf71680885d826f7029b3a34dd07b1829ee57233d87ca013067eae2dbf8c",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_combined2__nominal_reproduction.json": "f10328bed17ae94f57ce60f11c127ae55efc38604a8cbb99147717fa489d5f47",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_shaft_only__cg_depth_x0.8.json": "24686b08981a3aa4d8c0e8c448a81f1726b5901bba152a8f9014bd23b27b9d75",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_shaft_only__cg_depth_x1.2.json": "810cc2c11a60ed27264fc378e384591ad200b82e14982ae1c8d9cc1cb65201d3",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_shaft_only__inertia_x0.8.json": "0372258932a963025d238459ba202332b906ef8a321a94996cc2a34fb0bc07e1",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_shaft_only__inertia_x1.2.json": "78bd4caca8fb5f4f6e099a78a0ad57873e8110ea93a4571ed9a6989110ef9402",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_shaft_only__newton_contact_law.json": "925e098bc292a7a8d27a9c941228c3bc839c08fc74fe1cc0efaed735b8b6d46c",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation1_shaft_only__nominal_reproduction.json": "3ed259b4785b7674c28f43e7fb1f121ccac7836d93cc7cde1538c0782b003bea",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_combined2__cg_depth_x0.8.json": "8bf4f27e282917e4d403685626a6d4b4c2b8eecb9af39844b980695b6cec7acb",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_combined2__cg_depth_x1.2.json": "27f3584a9cd56d228acad1409ad84315c9fcfd745f31c45e5e36bec9e4a241de",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_combined2__inertia_x0.8.json": "8f63466fe176d4fc8a18acb0b612256a71aa7b3ab605409ff54004e74275b98c",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_combined2__inertia_x1.2.json": "564f0f8da4ba102555b07d6fb79846b32e1c35a652fded6ad5951e0b1c5f9b14",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_combined2__newton_contact_law.json": "87f1420d1623a87aeab8d1071d8d1136fdb982781098020e175b4c7db8fd4d7b",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_combined2__nominal_reproduction.json": "2bf5dae77e0506956a7dec6ac640b3d46d9dec742a4745c167f57cbb1a998e49",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_shaft_only__cg_depth_x0.8.json": "a0f217a6d46aac9efd5bb5929058bc8b7cc4350cebd512ec4e49ecf7864d6dcc",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_shaft_only__cg_depth_x1.2.json": "c8c4cfe3deac06136afb3c54e6fb1c83967f065853c0a408bfd0e12581c4005f",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_shaft_only__inertia_x0.8.json": "d3b162f1ac38e4492cfbb8513ea0e58381f95101567de736cc583b0611b3e457",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_shaft_only__inertia_x1.2.json": "f2d7fd72eb6a6a2206ca71c85e7950164e4e8332582886748d729a1ef8c0b83b",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_shaft_only__newton_contact_law.json": "6b97b19c4c27cf0b943f0e20bcc4823df9b5c5a77f0ee8c15d0f46195efaf8b1",
+    "statistics_v2/assumption_band/runs/pitching_wedge_lean0_curve2_rotation2_shaft_only__nominal_reproduction.json": "68bf8c8c9a614e6ebbf72a3de98f238ae2f487a9b2d4f0d55478fd89cf05a925",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_combined2__cg_depth_x0.8.json": "39e1a0e7d22465abaaf2c93233c1216652e12f507ee095fc6ae44e73b050ef9b",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_combined2__cg_depth_x1.2.json": "bad2d0cbdd73db8b5d2908751933fb90df9417c6bf080d5768f29acaeb66c9b2",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_combined2__inertia_x0.8.json": "1f5e3e26e65c83ba1261a2cfaedfe216c9f4fdd482c24a515b2e9654293ed314",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_combined2__inertia_x1.2.json": "12fceed8ef2b74ab56a30031b6ac080aea41c5f6cf79fca475fb2543d3078c0e",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_combined2__newton_contact_law.json": "9d07d8dea1c4e2eb7e81fa9599f07fcedeeec13829df20dad78937035dba6b7f",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_combined2__nominal_reproduction.json": "f762d4ae4ab401a6b1062db82cac0a2fb9685285cdeab99f11e7564dfdcfe1ed",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_shaft_only__cg_depth_x0.8.json": "7df78316c86004e007d5fe67746cd42ae1cacfbef3955e1df92575039a70b411",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_shaft_only__cg_depth_x1.2.json": "babd8f461edbf0216b3c6f94edb593dbc1aab2f8e788b634c7edec633d8e4682",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_shaft_only__inertia_x0.8.json": "4cf4ef2fa5fb223be686e71e6fa21cccf3b4c716878ee37c82793e13c317e65a",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_shaft_only__inertia_x1.2.json": "1470837bf101d9dd07d532a7157e0f564c48f76f3dd6e898bd3f9a7006d7a7cd",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_shaft_only__newton_contact_law.json": "ad48b2513617e4186eed01fd1405d8ab388802e685433577293109908b9ae63a",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation1_shaft_only__nominal_reproduction.json": "5ab7839d6be971a0eba99cf858486f60378f727e5d732ac0debb103fd58e8be8",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_combined2__cg_depth_x0.8.json": "e5503d1942936ef88da5c595b3e2bdfa50accd795636b9a6401fe585d4e2e7a8",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_combined2__cg_depth_x1.2.json": "cd90e0e31824fba01fc0b44df563de4ca2c4cc00ca39a827c4e36d4a460e1ccc",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_combined2__inertia_x0.8.json": "75694cf6c11a841133a5fb8c977d3ad41f71f24147ebccf49aa012373cd9f740",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_combined2__inertia_x1.2.json": "3e79c456437045de4d8b62d1ab67dd6352da254b70b26e6e0b4d74b2897a048b",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_combined2__newton_contact_law.json": "c74f274906c472cfe53fbe15369ca775e9a8ccbb9ff67a38861200c12ff7aa5f",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_combined2__nominal_reproduction.json": "91a1a41a287333bca553a7813a1f6e7021341cab95f618bebfd37180d04f0922",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_shaft_only__cg_depth_x0.8.json": "6928821ec955c8fbc6455f3b5cf66ed18f696aa7c90c9055cdaaa1a99502b113",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_shaft_only__cg_depth_x1.2.json": "caa2897b3585af6e68dabf5b902bd4a402aac116577834acb6fbab6e83b3e274",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_shaft_only__inertia_x0.8.json": "927742d308ea1796fb009aacb1fb67f9e1a9dc95b91dad16fe5595a7ed266189",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_shaft_only__inertia_x1.2.json": "a3419d9929d1693020ec122dd2e67ac716140b3ffc51fe86e4fc154492eacc7a",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_shaft_only__newton_contact_law.json": "74380912a09628afb875425758301f1fe54b0dd3379ed1bae1054aacd8146e45",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve1_rotation2_shaft_only__nominal_reproduction.json": "c2d17c3a3e18b9d512a401474ceb87d60fbcd67a9771a168116893cda172064e",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_combined2__cg_depth_x0.8.json": "4d5ba6c2354ccd43fa2e37a98fe697af5a094adba7f747aa5663660c3edf69ed",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_combined2__cg_depth_x1.2.json": "1b6eae73a41aa5b100e3466ee762807af3032f130d380be0ca49d8a47e4f00f8",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_combined2__inertia_x0.8.json": "bfa4c4f2316b013ed1c3a9e5a7b61a29bb6af5049be28819e153b5af929c3e62",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_combined2__inertia_x1.2.json": "cc40544183229d93c901a3d8dcc6fafbca44bdb70ed237881a926ab14bcf555e",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_combined2__newton_contact_law.json": "5b01510ecb9a7e65e0cd6a1de899991b62f94e5543b02c095f40a8c026301742",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_combined2__nominal_reproduction.json": "433c07444fb92dae7b795643803317e2731810c24b65b4557346aa56ed47cfe5",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_shaft_only__cg_depth_x0.8.json": "f5d16994f5d40211635142278d456a2e0a9a84b04ce21bf46edb4e30918299dd",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_shaft_only__cg_depth_x1.2.json": "6d13089396ce3a6661c65c1e5070d5a5c544168c03f6694e579e1ef732ea4635",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_shaft_only__inertia_x0.8.json": "1bbd5fdee9516b586eee08174695914cd62653fc3bfc5587864c9bf415ef22a2",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_shaft_only__inertia_x1.2.json": "742a322e041aca6f5ceeb972fd16bc1c582719b272034789c2bc9240ce64de30",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_shaft_only__newton_contact_law.json": "0772f0ec9ca61ee6537cc5f86fc5f12bb42668a34cb1b849590ca61da7bff499",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation1_shaft_only__nominal_reproduction.json": "7d5a8736700a48dd3b1320f2869f8b8cb5834c83de152802f42605726e4a9525",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_combined2__cg_depth_x0.8.json": "2d1f1965b486b96438f9f470de824503906c218da0694daae3f9df2ea6459b62",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_combined2__cg_depth_x1.2.json": "be082621af8091c227d0f6ca946667cd38b0aa9b65ad54a26757a63fd1ad0724",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_combined2__inertia_x0.8.json": "39dcd8297905a97acd2fd7005ed18532c8be485b15a0dff98c690c1219f84cb0",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_combined2__inertia_x1.2.json": "95c60d3fe0b8300852818ec1c005cff1778f40dd598f24042acde86887693569",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_combined2__newton_contact_law.json": "93c12e637a0eade21b5a7839633064991814a24c95574693c8a77c481c231215",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_combined2__nominal_reproduction.json": "e308809035b6c5c81bdb5efe959edd7b0ecabd5d5180b98fa05b1800a6208a4f",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_shaft_only__cg_depth_x0.8.json": "a0cde4a8bf99e55cebdbaf0370c98d4a36b1696aee3d5d6e465243a80127c2bc",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_shaft_only__cg_depth_x1.2.json": "a21b9cf8a9336d7244bcfd20fa0c0469470326f9711e8d2bf763e4034769cc8e",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_shaft_only__inertia_x0.8.json": "539bcaa6db860d329cd22a84b1ec2e58e0a3956392976f70a25157013c615e90",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_shaft_only__inertia_x1.2.json": "e12ef0ad8b4dbdf6f3ddd6b6d12b40a4e78403d1455a02af936219ff2b22c746",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_shaft_only__newton_contact_law.json": "87aa6d2b2961811695509778fda9282baea366d15dee0aad7fe3480deb89bd67",
+    "statistics_v2/assumption_band/runs/seven_iron_lean0_curve2_rotation2_shaft_only__nominal_reproduction.json": "7b64f98aae6a2e1b96af51a1d5bb5ba0119d20b2fd12318b502357b1ae9e4fd6"
+  }
+}

@@ -53,6 +53,17 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+# Failures a result presenter can raise while reading or formatting a result
+# (missing keys, malformed JSON, unreadable files).
+_PRESENTER_ERRORS: Final = (
+    KeyError,
+    IndexError,
+    TypeError,
+    ValueError,
+    AttributeError,
+    OSError,
+)
+
 __all__ = [
     "DEFAULT_JOIN_TIMEOUT_MS",
     "AsyncActionBar",
@@ -336,7 +347,14 @@ class AsyncActionBar(QWidget):
         def _finished(result: Any) -> None:
             self._set_busy(False)
             self.status_label.setText(f"{name}: complete.")
-            on_finished(result)
+            try:
+                on_finished(result)
+            except _PRESENTER_ERRORS as exc:
+                # An exception escaping a Qt slot aborts the process under
+                # PyQt6; report it like a worker failure instead.
+                logger.exception("Presenting the %s result failed", name)
+                _failed(f"presenting the result failed: {exc!r}")
+                return
             self.finished.emit(result)
 
         def _failed(message: str) -> None:
