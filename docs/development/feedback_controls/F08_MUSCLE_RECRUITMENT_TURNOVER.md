@@ -24,6 +24,7 @@ model. A later replay reader can reuse the primitive only after validating its
 serialized artifact. Artifact reading, OpenSim parity, and replay are outside
 this change. The module has no allocator/controller dependency, although the
 package aggregate initializer still imports the allocator.
+
 ## Validation
 
 Focused command on Python 3.12.10:
