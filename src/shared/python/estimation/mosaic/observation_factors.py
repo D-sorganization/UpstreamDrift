@@ -180,18 +180,32 @@ class CameraModel:
             return np.concatenate([pw, zeros], axis=-1), True
         return pw, False
 
-    def project(self, p_world: FloatArray) -> FloatArray:
-        """Project world points into 2-D pixel coordinates (u, v)."""
+    def _camera_frame_points(
+        self, p_world: FloatArray
+    ) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray, bool]:
+        """Transform world points to camera coordinates (pw_3d, xc, yc, zc, is_planar)."""
         pw_3d, is_planar = self._to_3d_points(p_world)
-        # Batched matrix multiplication: p_c = pw_3d @ R.T + t
         pc = pw_3d @ self.R.T + self.t
         zc = pc[..., 2]
         require(
             bool(np.all(zc > 0.0)),
             "all projected points must have positive depth (Z_c > 0)",
         )
-        xc = pc[..., 0]
-        yc = pc[..., 1]
+        return pw_3d, pc[..., 0], pc[..., 1], zc, is_planar
+
+    def _jacobian_camera_frame(
+        self, xc: FloatArray, yc: FloatArray, zc: FloatArray
+    ) -> FloatArray:
+        """Analytic Jacobian d_proj / d_pc of shape (..., 2, 3)."""
+        zc2 = zc * zc
+        zeros = np.zeros_like(zc)
+        j_cam_u = np.stack([self.fx / zc, zeros, -self.fx * xc / zc2], axis=-1)
+        j_cam_v = np.stack([zeros, self.fy / zc, -self.fy * yc / zc2], axis=-1)
+        return np.stack([j_cam_u, j_cam_v], axis=-2)
+
+    def project(self, p_world: FloatArray) -> FloatArray:
+        """Project world points into 2-D pixel coordinates (u, v)."""
+        _, xc, yc, zc, _ = self._camera_frame_points(p_world)
         u = self.fx * (xc / zc) + self.cx
         v = self.fy * (yc / zc) + self.cy
         return np.stack([u, v], axis=-1)
@@ -201,22 +215,8 @@ class CameraModel:
 
         Returns shape (..., 2, 3) for 3-D inputs or (..., 2, 2) for planar 2-D inputs.
         """
-        pw_3d, is_planar = self._to_3d_points(p_world)
-        pc = pw_3d @ self.R.T + self.t
-        zc = pc[..., 2]
-        require(
-            bool(np.all(zc > 0.0)),
-            "all projected points must have positive depth (Z_c > 0)",
-        )
-        xc = pc[..., 0]
-        yc = pc[..., 1]
-        zc2 = zc * zc
-
-        # d_proj / d_pc has shape (..., 2, 3)
-        zeros = np.zeros_like(zc)
-        j_cam_u = np.stack([self.fx / zc, zeros, -self.fx * xc / zc2], axis=-1)
-        j_cam_v = np.stack([zeros, self.fy / zc, -self.fy * yc / zc2], axis=-1)
-        j_cam = np.stack([j_cam_u, j_cam_v], axis=-2)
+        _, xc, yc, zc, is_planar = self._camera_frame_points(p_world)
+        j_cam = self._jacobian_camera_frame(xc, yc, zc)
 
         # d_proj / d_pw = j_cam @ R
         j_pw = j_cam @ self.R
@@ -229,15 +229,7 @@ class CameraModel:
 
         Returns shape (..., 2, 4).
         """
-        pw_3d, _ = self._to_3d_points(p_world)
-        pc = pw_3d @ self.R.T + self.t
-        zc = pc[..., 2]
-        require(
-            bool(np.all(zc > 0.0)),
-            "all projected points must have positive depth (Z_c > 0)",
-        )
-        xc = pc[..., 0]
-        yc = pc[..., 1]
+        _, xc, yc, zc, _ = self._camera_frame_points(p_world)
         zeros = np.zeros_like(zc)
         ones = np.ones_like(zc)
 
@@ -287,21 +279,8 @@ class CameraModel:
 
         Returns shape (..., 2, 6).
         """
-        pw_3d, _ = self._to_3d_points(p_world)
-        pc = pw_3d @ self.R.T + self.t
-        zc = pc[..., 2]
-        require(
-            bool(np.all(zc > 0.0)),
-            "all projected points must have positive depth (Z_c > 0)",
-        )
-        xc = pc[..., 0]
-        yc = pc[..., 1]
-        zc2 = zc * zc
-
-        zeros = np.zeros_like(zc)
-        j_cam_u = np.stack([self.fx / zc, zeros, -self.fx * xc / zc2], axis=-1)
-        j_cam_v = np.stack([zeros, self.fy / zc, -self.fy * yc / zc2], axis=-1)
-        j_cam = np.stack([j_cam_u, j_cam_v], axis=-2)  # (..., 2, 3)
+        pw_3d, xc, yc, zc, _ = self._camera_frame_points(p_world)
+        j_cam = self._jacobian_camera_frame(xc, yc, zc)
 
         d_R = self._d_rotation_d_rvec()  # (3, 3, 3)
         # d_pc / d_r_k = pw_3d @ d_R[k].T
