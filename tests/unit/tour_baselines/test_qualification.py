@@ -25,6 +25,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+from tests.helpers.ezc3d_support import require_ezc3d
 from src.shared.python.tour_baselines.baseline_package import (
     BaselineIdentity,
     BaselinePackage,
@@ -938,7 +939,7 @@ def test_raw_to_package_reproduction_generates_reported_status_and_residual(
     """Raw-to-package reproduction generates the reported status and residual (#11097)."""
     import math
 
-    pytest.importorskip("ezc3d")
+    require_ezc3d()
     from src.engines.physics_engines.pendulum.python.motion_matching.qualification import (
         generate_baseline_package_for_target,
         resolve_qualification_paths,

@@ -17,6 +17,8 @@ import pytest
 
 from ._apps_coverage_helpers import make_model
 
+from tests.helpers.ezc3d_support import require_ezc3d
+
 pytestmark = pytest.mark.unit
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -410,7 +412,7 @@ def test_loader_thread_reports_invalid_csv_without_terminating(qapp):
 
 def test_loader_thread_loads_golden_c3d_fixture(qapp):
     """The bundled, valid C3D fixture must load without crashing the worker."""
-    pytest.importorskip("ezc3d")
+    require_ezc3d()
     from PyQt6.QtCore import QEventLoop, QTimer
 
     from src.apps.services.loader_thread import C3DLoaderThread  # type: ignore

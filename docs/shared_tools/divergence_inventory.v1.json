@@ -11,10 +11,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 375,
+    "identical": 376,
     "diverged": 271,
     "ud-only": 1696,
-    "tools-only": 837,
+    "tools-only": 838,
     "spelling-only": 121
   },
   "packages": {
@@ -754,10 +754,10 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 210,
+      "identical": 211,
       "diverged": 68,
       "ud-only": 36,
-      "tools-only": 91,
+      "tools-only": 92,
       "spelling-only": 23
     },
     "sidekick_data_processing_bridge.py": {
@@ -7384,7 +7384,7 @@
       "classification": "ud-only",
       "package": "data_io",
       "subpackage": "",
-      "ud_bytes": 3963,
+      "ud_bytes": 739,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -26365,13 +26365,13 @@
     },
     {
       "path": "sidekick/lab/bio/c3d_reader.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "lab",
-      "ud_bytes": 34123,
-      "tools_bytes": 34123,
+      "ud_bytes": 34734,
+      "tools_bytes": 34734,
       "byte_delta": 0,
-      "byte_identical": false,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -29220,6 +29220,18 @@
       "spelling_only": false
     },
     {
+      "path": "sidekick/tests/test_native_dll_guard.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "tests",
+      "ud_bytes": null,
+      "tools_bytes": 4249,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "sidekick/tests/test_notes_store.py",
       "classification": "identical",
       "package": "sidekick",
@@ -30429,6 +30441,18 @@
       "byte_delta": 0,
       "byte_identical": true,
       "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/utils/native_dll_guard.py",
+      "classification": "diverged",
+      "package": "sidekick",
+      "subpackage": "utils",
+      "ud_bytes": 4589,
+      "tools_bytes": 4303,
+      "byte_delta": 286,
+      "byte_identical": false,
+      "ud_has_child_copy_header": true,
       "spelling_only": false
     },
     {
@@ -41793,9 +41817,9 @@
     {
       "path": "sidekick/data_processing/core.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-11",
-        "commit": "cdc8b8b708600d2a484af7d9768b9db1ddbfd672"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-10-13",
+        "commit": "0644635c939a8daba0aad6088cb694bbecc1937d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41806,9 +41830,9 @@
     {
       "path": "sidekick/data_processing/exceptions.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-11",
-        "commit": "cdc8b8b708600d2a484af7d9768b9db1ddbfd672"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-10-13",
+        "commit": "0644635c939a8daba0aad6088cb694bbecc1937d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -41827,19 +41851,6 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "sidekick/lab/bio/c3d_reader.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-05",
-        "commit": "6da2cd6e1662f860f9d9c6bbd69b8cacfb8bc0ec"
       }
     },
     {
@@ -42581,6 +42592,19 @@
         "author": "codex-scheduled-tasks[bot]",
         "date": "2026-06-12",
         "commit": "416368136ce26454fdb2f743ab71e06a0272a5d1"
+      }
+    },
+    {
+      "path": "sidekick/utils/native_dll_guard.py",
+      "ud": {
+        "author": null,
+        "date": null,
+        "commit": null
+      },
+      "tools": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-10-13",
+        "commit": "bdc3eed0e934ec84d94f5f74ef4b2b7745c1a545"
       }
     },
     {

@@ -37,4 +37,4 @@ def require_ezc3d() -> ModuleType:
     try:
         return import_ezc3d()
     except ModuleNotFoundError:
-        pytest.skip(SKIP_REASON)
+        pytest.skip(SKIP_REASON, allow_module_level=True)

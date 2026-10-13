@@ -119,7 +119,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
-| `sidekick` | 210 | 68 | 23 | 36 | 91 | 278 |
+| `sidekick` | 211 | 68 | 23 | 36 | 92 | 279 |
 | `sidekick_data_processing_bridge.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `signal_toolkit` | 0 | 0 | 0 | 1 | 27 | 0 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
@@ -143,7 +143,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **375** | **271** | **121** | **1696** | **837** | **646** |
+| **Total** | **376** | **271** | **121** | **1696** | **838** | **647** |
 
 ## Diverged Files by Package
 
@@ -425,10 +425,9 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/calculators/thermo/steam_engine.py` | -983 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `sidekick/calculators/thermo/thermo_properties.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/data_io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `sidekick/data_processing/core.py` | -24973 |  | fleet-orchestrator 2026-10-11 | Dieter Olson 2026-08-23 |
-| `sidekick/data_processing/exceptions.py` | -1347 |  | fleet-orchestrator 2026-10-11 | Dieter Olson 2026-05-22 |
+| `sidekick/data_processing/core.py` | -24973 |  | d-sorgclaudeagent[bot] 2026-10-13 | Dieter Olson 2026-08-23 |
+| `sidekick/data_processing/exceptions.py` | -1347 |  | d-sorgclaudeagent[bot] 2026-10-13 | Dieter Olson 2026-05-22 |
 | `sidekick/data_processing/io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `sidekick/lab/bio/c3d_reader.py` | +0 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `sidekick/latex_renderer.py` | -79 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 | `sidekick/notes_store.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/notes_tab.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
@@ -486,5 +485,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/ui/widgets/unit_aware_input.py` | -121 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-06 |
 | `sidekick/ui/widgets/unit_converter_widget.py` | -2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/utils/json_io.py` | -1 |  | Dieter Olson 2026-08-01 | codex-scheduled-tasks[bot] 2026-06-12 |
+| `sidekick/utils/native_dll_guard.py` | +286 |  | ? | d-sorgclaudeagent[bot] 2026-10-13 |
 | `sidekick/utils/state_manager.py` | -14 |  | Dieter Olson 2026-08-01 | codex-scheduled-tasks[bot] 2026-06-12 |
 

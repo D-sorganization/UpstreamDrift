@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from tests.helpers.ezc3d_support import require_ezc3d
 from src.motion_capture.reference.importers import (
     finish_motion_import,
     load_motion_draft,
@@ -91,7 +92,7 @@ def test_existing_body_target_export_is_imported_without_resampling(
 
 
 def test_real_c3d_units_and_occlusions(tmp_path: Path) -> None:
-    ezc3d = pytest.importorskip("ezc3d")
+    ezc3d = require_ezc3d()
     c3d = ezc3d.c3d()
     c3d["parameters"]["POINT"]["RATE"]["value"] = [100]
     c3d["parameters"]["POINT"]["UNITS"]["value"] = ["mm"]

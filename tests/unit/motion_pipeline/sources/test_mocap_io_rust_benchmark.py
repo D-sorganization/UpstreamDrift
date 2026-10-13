@@ -32,6 +32,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from tests.helpers.ezc3d_support import require_ezc3d
+
 FACADE_MIN_RELATIVE_SPEED = 0.60
 
 pytestmark = [pytest.mark.benchmark, pytest.mark.slow]
@@ -216,7 +218,7 @@ def _python_c3d_loop(points: np.ndarray, labels: list[str], scale: float) -> lis
 
 def test_c3d_parser_at_least_10x_faster(synthetic_c3d: Path) -> None:
     """Parser-only: ``parse_c3d`` returning raw arrays vs the cited Python hot-loop."""
-    ezc3d = pytest.importorskip("ezc3d")
+    ezc3d = require_ezc3d()
 
     def rust_call() -> None:
         # Parser-only: just produce the numpy arrays. The Python facade's
@@ -256,7 +258,7 @@ def test_c3d_facade_no_regression(synthetic_c3d: Path) -> None:
     pydantic construction overhead is included. The ≥10× headline number from
     issue #5213 lives in :func:`test_c3d_parser_at_least_10x_faster`.
     """
-    pytest.importorskip("ezc3d")
+    require_ezc3d()
     from src.shared.python.motion_pipeline.sources.c3d_adapter import C3DAdapter
 
     adapter = C3DAdapter()

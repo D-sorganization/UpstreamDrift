@@ -10,14 +10,16 @@ bare ImportError that call sites turn into a silent skip.
 from __future__ import annotations
 
 import glob
+import os
 import subprocess
 import sys
 import textwrap
 from pathlib import Path
 
 import pytest
+from src.shared.python.data_io import native_dll_guard as facade
+from src.shared.python.sidekick.utils import native_dll_guard as guard
 
-from src.shared.python.data_io import native_dll_guard as guard
 from tests.helpers.ezc3d_support import require_ezc3d
 
 pytestmark = pytest.mark.unit
@@ -89,6 +91,19 @@ def test_loaded_dll_path_rejects_empty_name() -> None:
         guard.loaded_dll_path("")
 
 
+def _repo_env(repo: Path) -> dict[str, str]:
+    """Child-process env mirroring pytest's ``pythonpath = [..., "src"]``.
+
+    The Tools guard lives under ``src.shared.python.sidekick``, whose canonical
+    ``shared.python`` alias needs ``src`` importable, as in every real entry point.
+    """
+    env = dict(os.environ)
+    existing = env.get("PYTHONPATH")
+    src = str(repo / "src")
+    env["PYTHONPATH"] = src if not existing else os.pathsep.join([src, existing])
+    return env
+
+
 def _opensim_ezc3d_dll() -> str | None:
     hits = sorted(glob.glob(r"C:\OpenSim*\bin\ezc3d.dll"))
     return hits[-1] if hits else None
@@ -120,6 +135,7 @@ def test_native_first_then_ezc3d_in_fresh_process_is_explicit() -> None:
     proc = subprocess.run(  # noqa: S603 - fixed argv, test-only
         [sys.executable, "-c", script, dll],
         cwd=repo,
+        env=_repo_env(repo),
         capture_output=True,
         text=True,
         timeout=120,
@@ -141,6 +157,7 @@ def test_ezc3d_first_then_native_dll_never_raises_in_fresh_process() -> None:
     proc = subprocess.run(  # noqa: S603 - fixed argv, test-only
         [sys.executable, "-c", script],
         cwd=repo,
+        env=_repo_env(repo),
         capture_output=True,
         text=True,
         timeout=120,
@@ -148,3 +165,9 @@ def test_ezc3d_first_then_native_dll_never_raises_in_fresh_process() -> None:
     )
     assert proc.returncode == 0, proc.stderr
     assert proc.stdout.strip() == "True"
+
+
+def test_data_io_facade_exposes_the_canonical_guard_objects() -> None:
+    """The stable ``data_io`` path re-exports Tools' guard (no duplicate)."""
+    for name in facade.__all__:
+        assert getattr(facade, name) is getattr(guard, name), name
