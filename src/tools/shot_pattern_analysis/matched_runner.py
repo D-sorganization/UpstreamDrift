@@ -11,16 +11,16 @@ from typing import Any, Protocol, TypedDict
 import numpy as np
 from scipy.stats import binomtest
 
-from .core import AnalysisCancelled, PATTERNS
+from .core import PATTERN_NAMES, PATTERNS, AnalysisCancelled
 from .dispersion_stats import landing_dispersion
-from .matched_config import MatchedConfig
+from .matched_config import MAX_CLUB_SPEED_MPS, MatchedConfig
 from .matched_diagnostics import joint_diagnostics
 from .matched_physics import MatchedDeliveryOutcome, MatchedShotPhysics, UnsupportedShot
 from .noise import NOISE_FIELDS, NoiseSpec, sample_paired_noise
 from .nominal_matching import MatchBounds, MatchedNominal, match_nominal_landing
 from .physics import ShotOutcome
 from .scenario_scoring import score_course_endpoints
-from .uncertainty import paired_mean_difference
+from .uncertainty import PUBLICATION_RESAMPLES, paired_mean_difference
 
 
 @dataclass(frozen=True)
@@ -39,6 +39,10 @@ class ExperimentConfig:
     match_speed_factors: tuple[float, float] = (0.75, 1.25)
 
     def __post_init__(self) -> None:
+        if not isinstance(self.club, MatchedConfig):
+            raise TypeError("club must be a MatchedConfig")
+        if not isinstance(self.noise, NoiseSpec):
+            raise TypeError("noise must be a NoiseSpec")
         if (
             isinstance(self.n_shots, bool)
             or not isinstance(self.n_shots, int)
@@ -76,6 +80,33 @@ class ExperimentConfig:
             raise ValueError(
                 "match speed bounds require finite ordered positive factors"
             )
+        if factors[1] * self.club.club_speed_mps >= MAX_CLUB_SPEED_MPS:
+            raise ValueError("match speed bounds must stay below 100 m/s club speed")
+
+    @classmethod
+    def from_dict(cls, values: dict[str, Any]) -> ExperimentConfig:
+        """Rebuild a request from its ``asdict`` JSON form (lists become tuples).
+
+        Raises KeyError, TypeError or ValueError for an incomplete or invalid
+        record; the round trip ``from_dict(asdict(config)) == config`` holds.
+        """
+        club = dict(values["club"])
+        club["inertia_diagonal_kg_m2"] = tuple(club["inertia_diagonal_kg_m2"])
+        noise = values["noise"]
+        correlation = noise.get("correlation")
+        options: dict[str, Any] = {
+            key: tuple(value) if isinstance(value, list) else value
+            for key, value in values.items()
+            if key not in ("club", "noise")
+        }
+        return cls(
+            club=MatchedConfig(**club),
+            noise=NoiseSpec(
+                tuple(noise["standard_deviations"]),
+                None if correlation is None else tuple(map(tuple, correlation)),
+            ),
+            **options,
+        )
 
     def bounds_for(self, reference_face_deg: float) -> MatchBounds:
         """Resolve the recorded request into an absolute physical search box."""
@@ -156,7 +187,7 @@ class MatchedPhysicsProtocol(Protocol):
         path_deg: float,
         config: MatchedConfig,
         sample_trajectory: bool = False,
-        nominal_face_deg: float = 0.0,
+        nominal_face_deg: float | None = None,
     ) -> ShotOutcome: ...
     def simulate_delivery(
         self,
@@ -247,6 +278,7 @@ def _paired_results(
     request: ExperimentConfig,
     target: float,
     include_scoring: bool,
+    resamples: int = PUBLICATION_RESAMPLES,
 ) -> tuple[dict, dict]:
     by = {
         p.name: {
@@ -257,15 +289,52 @@ def _paired_results(
         for p in PATTERNS
     }
     indices = sorted(set.intersection(*(set(v) for v in by.values())))
-    conditioning = (
-        "all_samples"
-        if len(indices) == request.n_shots
-        else "common_supported_indices_only"
+    endpoints = {name: [(i, *_point(v[i])) for i in indices] for name, v in by.items()}
+    return paired_endpoint_statistics(
+        endpoints,
+        club_id=request.club.club_id,
+        target_x_m=target,
+        target_radius_m=request.target_radius_m,
+        n_shots=request.n_shots,
+        seed=request.seed,
+        include_scoring=include_scoring,
+        resamples=resamples,
     )
+
+
+def paired_endpoint_statistics(
+    endpoints: dict[str, list[tuple[int, float, float]]],
+    *,
+    club_id: str,
+    target_x_m: float,
+    target_radius_m: float,
+    n_shots: int,
+    seed: int,
+    include_scoring: bool = True,
+    resamples: int = PUBLICATION_RESAMPLES,
+) -> tuple[dict, dict]:
+    """Return ``(course_scoring, paired_comparisons)`` for common endpoints.
+
+    ``endpoints`` maps every pattern name to the same ordered shot indices:
+    the shots each pattern supported. Intervals are paired bootstraps over
+    those shared indices; they cover Monte Carlo sampling only.
+    """
+    if set(endpoints) != set(PATTERN_NAMES):
+        raise ValueError("endpoints must cover exactly the Straight/Draw/Fade patterns")
+    indices = [i for i, _, _ in endpoints["Straight"]]
+    if any([i for i, _, _ in points] != indices for points in endpoints.values()):
+        raise ValueError("every pattern must use the same ordered shot indices")
+    if len(indices) > n_shots:
+        raise ValueError("paired count cannot exceed the attempted shot count")
     info = {
         "paired_n": len(indices),
-        "total_n": request.n_shots,
-        "conditioning": conditioning,
+        "total_n": n_shots,
+        "conditioning": (
+            "all_samples"
+            if len(indices) == n_shots
+            else "common_supported_indices_only"
+        ),
+        "bootstrap_resamples": resamples,
     }
     if len(indices) < 2:
         return {
@@ -273,30 +342,25 @@ def _paired_results(
             "status": "unavailable",
             "reason": "fewer_than_two_common_supported_shots",
         }, {**info, "status": "unavailable"}
-    endpoints = {name: [(i, *_point(v[i])) for i in indices] for name, v in by.items()}
     radii = {
-        name: np.asarray([math.hypot(x - target, y) for _, x, y in points])
+        name: np.asarray([math.hypot(x - target_x_m, y) for _, x, y in points])
         for name, points in endpoints.items()
     }
-    comparisons = {
-        **info,
-        "mean_radial_error_difference_vs_straight": {
-            name: paired_mean_difference(
-                radii[name], radii["Straight"], seed=request.seed
-            )
-            for name in ("Draw", "Fade")
-        },
-    }
+    comparisons: dict[str, Any] = {**info}
     for key, transform in (
+        ("mean_radial_error_difference_vs_straight", lambda r: r),
         ("mean_squared_target_error_difference_m2", lambda r: r**2),
         (
             "containment_fraction_difference",
-            lambda r: (r <= request.target_radius_m).astype(float),
+            lambda r: (r <= target_radius_m).astype(float),
         ),
     ):
         comparisons[key] = {
             name: paired_mean_difference(
-                transform(radii[name]), transform(radii["Straight"]), seed=request.seed
+                transform(radii[name]),
+                transform(radii["Straight"]),
+                seed=seed,
+                resamples=resamples,
             )
             for name in ("Draw", "Fade")
         }
@@ -308,15 +372,16 @@ def _paired_results(
     try:
         scoring = score_course_endpoints(
             endpoints,
-            club_id=request.club.club_id,
-            target_x_m=target,
-            green_radius_m=request.target_radius_m,
-            seed=request.seed,
+            club_id=club_id,
+            target_x_m=target_x_m,
+            green_radius_m=target_radius_m,
+            seed=seed,
+            resamples=resamples,
         )
     except ValueError as exc:
         return {**info, "status": "unavailable", "reason": str(exc)}, comparisons
     scoring.update(info)
-    if len(indices) < request.n_shots:
+    if len(indices) < n_shots:
         scoring["status"] = "conditional_only"
         scoring["full_population_status"] = "unavailable_unsupported_terminal_lies"
     else:
@@ -355,6 +420,64 @@ def _supported_record(
     )
 
 
+def _simulate_noisy_shot(
+    engine: MatchedPhysicsProtocol,
+    request: ExperimentConfig,
+    name: str,
+    nominal: MatchedNominal,
+    nominal_club: MatchedConfig,
+    index: int,
+    error: np.ndarray,
+) -> tuple[MatchedShotRecord, tuple[tuple[float, float], ...] | None]:
+    """Simulate one perturbed delivery; return its record and sampled flight.
+
+    A delivery outside the club's valid range or an unsupported contact is
+    recorded with its reason, never dropped. The flight is returned only for
+    the first five supported shots of a pattern.
+    """
+    rotation, path, speed, horizontal, vertical, lean, attack = (
+        float(v) for v in error
+    )
+    inputs: _ShotInputs = {
+        "pattern": name,
+        "shot_index": index,
+        "status": "supported",
+        "shaft_rotation_deg": rotation,
+        "path_deg": nominal.path_deg + path,
+        "speed_mps": nominal.speed_mps + speed,
+        "contact_horizontal_m": horizontal,
+        "contact_vertical_m": vertical,
+        "shaft_lean_deg": request.club.shaft_lean_deg + lean,
+        "attack_angle_deg": request.club.attack_angle_deg + attack,
+    }
+    try:
+        club = replace(
+            nominal_club,
+            club_speed_mps=inputs["speed_mps"],
+            shaft_lean_deg=inputs["shaft_lean_deg"],
+            attack_angle_deg=inputs["attack_angle_deg"],
+        )
+    except ValueError:
+        inputs["status"] = "delivery_out_of_range"
+        return MatchedShotRecord(**inputs), None
+    sample = index < 5
+    try:
+        delivered = engine.simulate_delivery(
+            nominal_face_deg=nominal.face_deg,
+            path_deg=inputs["path_deg"],
+            config=club,
+            shaft_rotation_deg=rotation,
+            contact_horizontal_m=horizontal,
+            contact_vertical_m=vertical,
+            sample_trajectory=sample,
+        )
+    except UnsupportedShot as exc:
+        inputs["status"] = exc.reason
+        return MatchedShotRecord(**inputs), None
+    trajectory = delivered.outcome.trajectory_xy_m if sample else None
+    return _supported_record(inputs, delivered), trajectory
+
+
 def _input_diagnostics(request: ExperimentConfig, errors: np.ndarray) -> dict:
     """Summarize the original paired, untruncated input matrix in field order."""
     return {
@@ -375,8 +498,12 @@ def run_matched_analysis(
     include_scoring: bool = True,
     progress: Callable[[int, int], None] | None = None,
     cancelled: Callable[[], bool] | None = None,
+    resamples: int = PUBLICATION_RESAMPLES,
 ) -> MatchedAnalysisResult:
-    """Retain every seeded input once per pattern; never clip or resample failures."""
+    """Retain every seeded input once per pattern; never clip or resample failures.
+
+    ``resamples`` sets the paired-bootstrap count for the reported intervals.
+    """
     engine = physics or MatchedShotPhysics()
     target, nominals = calibrate_patterns(request, engine)
     errors = sample_paired_noise(
@@ -397,50 +524,12 @@ def run_matched_analysis(
         for index, error in enumerate(errors):
             if cancelled is not None and cancelled():
                 raise AnalysisCancelled("matched shot analysis cancelled")
-            rotation, path, speed, horizontal, vertical, lean, attack = (
-                float(v) for v in error
+            record, trajectory = _simulate_noisy_shot(
+                engine, request, name, nominal, nominal_club, index, error
             )
-            inputs: _ShotInputs = {
-                "pattern": name,
-                "shot_index": index,
-                "status": "supported",
-                "shaft_rotation_deg": rotation,
-                "path_deg": nominal.path_deg + path,
-                "speed_mps": nominal.speed_mps + speed,
-                "contact_horizontal_m": horizontal,
-                "contact_vertical_m": vertical,
-                "shaft_lean_deg": request.club.shaft_lean_deg + lean,
-                "attack_angle_deg": request.club.attack_angle_deg + attack,
-            }
-            try:
-                club = replace(
-                    nominal_club,
-                    club_speed_mps=inputs["speed_mps"],
-                    shaft_lean_deg=inputs["shaft_lean_deg"],
-                    attack_angle_deg=inputs["attack_angle_deg"],
-                )
-            except ValueError:
-                inputs["status"] = "delivery_out_of_range"
-                rows.append(MatchedShotRecord(**inputs))
-                continue
-            try:
-                delivered = engine.simulate_delivery(
-                    nominal_face_deg=nominal.face_deg,
-                    path_deg=inputs["path_deg"],
-                    config=club,
-                    shaft_rotation_deg=rotation,
-                    contact_horizontal_m=horizontal,
-                    contact_vertical_m=vertical,
-                    sample_trajectory=index < 5,
-                )
-            except UnsupportedShot as exc:
-                inputs["status"] = exc.reason
-                rows.append(MatchedShotRecord(**inputs))
-            else:
-                rows.append(_supported_record(inputs, delivered))
-                outcome = delivered.outcome
-                if index < 5:
-                    paths.append(outcome.trajectory_xy_m)
+            rows.append(record)
+            if trajectory is not None:
+                paths.append(trajectory)
             if progress is not None and (
                 index % 100 == 0 or index == request.n_shots - 1
             ):
@@ -453,7 +542,9 @@ def run_matched_analysis(
         )
         for name in nominals
     }
-    scoring, comparisons = _paired_results(records, request, target, include_scoring)
+    scoring, comparisons = _paired_results(
+        records, request, target, include_scoring, resamples
+    )
     diagnostics = _input_diagnostics(request, errors)
     return MatchedAnalysisResult(
         request,

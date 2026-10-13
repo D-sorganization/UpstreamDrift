@@ -23,10 +23,16 @@ PATTERNS = (
     PatternConfig("Draw", 1.5, 3.0),
     PatternConfig("Fade", -1.5, -3.0),
 )
+PATTERN_NAMES = tuple(pattern.name for pattern in PATTERNS)
 
 
 class AnalysisCancelled(RuntimeError):
     """Raised when a caller cancels a running Monte Carlo comparison."""
+
+
+def _is_int(value: object) -> bool:
+    """True for real integers; ``bool`` is rejected even though it subclasses int."""
+    return isinstance(value, int) and not isinstance(value, bool)
 
 
 @dataclass(frozen=True)
@@ -50,9 +56,9 @@ class AnalysisConfig:
     def __post_init__(self) -> None:
         if not isinstance(self.club_id, str) or not self.club_id.strip():
             raise ValueError("club_id must be a non-empty string")
-        if not isinstance(self.n_shots, int) or self.n_shots < 2:
+        if not _is_int(self.n_shots) or self.n_shots < 2:
             raise ValueError("n_shots must be an integer >= 2")
-        if not isinstance(self.seed, int) or self.seed < 0:
+        if not _is_int(self.seed) or self.seed < 0:
             raise ValueError("seed must be a non-negative integer")
         for name in (
             "face_sd_deg",
@@ -68,8 +74,12 @@ class AnalysisConfig:
             "target_radius_m",
         ):
             value = getattr(self, name)
-            if not isinstance(value, (int, float)) or not math.isfinite(value):
-                raise ValueError(f"{name} must be finite")
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+            ):
+                raise ValueError(f"{name} must be a finite number")
         if self.face_sd_deg < 0 or self.face_sd_deg > 5:
             raise ValueError("face_sd_deg must be in [0, 5]")
         if not 0 < self.curve_scale <= 2:
@@ -155,6 +165,71 @@ def _rotate_to_aim(x: float, y: float, aim_angle: float) -> tuple[float, float]:
     return x * ca + y * sa, -x * sa + y * ca
 
 
+_WILSON_Z95 = 1.959963984540054
+
+
+def wilson_interval(success_fraction: float, n: int) -> tuple[float, float]:
+    """Two-sided 95% Wilson score interval for a binomial proportion.
+
+    Preconditions: ``0 <= success_fraction <= 1`` and ``n >= 1``.
+    Postcondition: ``low <= success_fraction <= high`` and both bounds lie in
+    [0, 1] up to floating-point rounding.
+    """
+    if not _is_int(n) or n < 1:
+        raise ValueError("n must be a positive integer")
+    if not math.isfinite(success_fraction) or not 0.0 <= success_fraction <= 1.0:
+        raise ValueError("success_fraction must lie in [0, 1]")
+    z2 = _WILSON_Z95 * _WILSON_Z95
+    center = (success_fraction + z2 / (2 * n)) / (1 + z2 / n)
+    spread = (
+        _WILSON_Z95
+        * math.sqrt(success_fraction * (1 - success_fraction) / n + z2 / (4 * n * n))
+        / (1 + z2 / n)
+    )
+    return center - spread, center + spread
+
+
+def opposite_curve_fraction(rows: list[ShotRecord]) -> float:
+    """Fraction of shots whose face-to-path sign curves against the pattern.
+
+    A draw curves the wrong way when face exceeds path; a fade when face is
+    below path. Straight shots have no intended curve and return 0.
+    """
+    if not rows:
+        raise ValueError("at least one shot is required")
+    pattern = rows[0].pattern
+    if pattern == "Draw":
+        return float(np.mean([r.face_deg > r.path_deg for r in rows]))
+    if pattern == "Fade":
+        return float(np.mean([r.face_deg < r.path_deg for r in rows]))
+    return 0.0
+
+
+def _require_reachable_faces(
+    config: AnalysisConfig,
+    patterns: tuple[PatternConfig, ...],
+    face_deviations: np.ndarray,
+) -> None:
+    """Fail before any simulation if a shaft-twist draw is unreachable."""
+    if config.delivery_mode != "shaft_rotation":
+        return
+    from .delivery_geometry import reachable_face_range_deg
+
+    low, high = reachable_face_range_deg(
+        base_loft_deg=config.loft_deg,
+        lie_deg=config.lie_deg,
+        shaft_lean_deg=config.shaft_lean_deg,
+    )
+    lowest = min(p.face_deg for p in patterns) + float(np.min(face_deviations))
+    highest = max(p.face_deg for p in patterns) + float(np.max(face_deviations))
+    if lowest < low or highest > high:
+        raise ValueError(
+            f"sampled face angles [{lowest:.2f}, {highest:.2f}] deg leave the "
+            f"reachable shaft-twist branch [{low:.2f}, {high:.2f}] deg; "
+            "reduce face_sd_deg or curve_scale"
+        )
+
+
 def _summarize(
     rows: list[ShotRecord], target_x_m: float, radius_m: float
 ) -> dict[str, float]:
@@ -170,23 +245,10 @@ def _summarize(
     q5, q50, q95 = np.quantile(lateral, [0.05, 0.5, 0.95])
     aq5, aq50, aq95 = np.quantile(aimed_lateral, [0.05, 0.5, 0.95])
     n = len(rows)
-
-    def wilson(success_fraction: float) -> tuple[float, float]:
-        z = 1.959963984540054
-        center = (success_fraction + z * z / (2 * n)) / (1 + z * z / n)
-        spread = (
-            z
-            * math.sqrt(
-                success_fraction * (1 - success_fraction) / n + z * z / (4 * n * n)
-            )
-            / (1 + z * z / n)
-        )
-        return center - spread, center + spread
-
     raw_hit = float(np.mean(raw_error <= radius_m))
     aimed_hit = float(np.mean(aimed_error <= radius_m))
-    raw_hit_lo, raw_hit_hi = wilson(raw_hit)
-    aimed_hit_lo, aimed_hit_hi = wilson(aimed_hit)
+    raw_hit_lo, raw_hit_hi = wilson_interval(raw_hit, n)
+    aimed_hit_lo, aimed_hit_hi = wilson_interval(aimed_hit, n)
     return {
         "n": float(n),
         "raw_mean_lateral_m": float(np.mean(lateral)),
@@ -216,18 +278,7 @@ def _summarize(
         "carry_sd_m": float(np.std(carries, ddof=1)),
         "mean_launch_azimuth_deg": float(np.mean([r.launch_azimuth_deg for r in rows])),
         "mean_spin_axis_tilt_deg": float(np.mean([r.spin_axis_tilt_deg for r in rows])),
-        "opposite_curve_fraction": float(
-            np.mean(
-                [
-                    r.face_deg > r.path_deg
-                    if rows[0].pattern == "Draw"
-                    else r.face_deg < r.path_deg
-                    if rows[0].pattern == "Fade"
-                    else False
-                    for r in rows
-                ]
-            )
-        ),
+        "opposite_curve_fraction": opposite_curve_fraction(rows),
     }
 
 
@@ -284,6 +335,7 @@ def run_analysis(
     engine = physics if physics is not None else ShotPhysics()
     rng = np.random.default_rng(config.seed)
     face_deviations = rng.normal(0.0, config.face_sd_deg, config.n_shots)
+    _require_reachable_faces(config, patterns, face_deviations)
     sample_indices = {
         int(v)
         for v in np.argsort(face_deviations)[
@@ -357,11 +409,14 @@ def run_analysis(
 
 
 __all__ = [
+    "PATTERN_NAMES",
     "AnalysisCancelled",
     "AnalysisConfig",
     "AnalysisResult",
     "PATTERNS",
     "PatternConfig",
     "ShotRecord",
+    "opposite_curve_fraction",
     "run_analysis",
+    "wilson_interval",
 ]

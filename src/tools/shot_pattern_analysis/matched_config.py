@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, replace
+
+
+MAX_CLUB_SPEED_MPS = 100.0
 
 
 @dataclass(frozen=True)
@@ -46,7 +49,7 @@ class MatchedConfig:
                 raise ValueError(f"{name} must be finite")
         if not self.club_id or not self.loft_source:
             raise ValueError("club identity and geometry source are required")
-        if not 0 < self.club_speed_mps < 100:
+        if not 0 < self.club_speed_mps < MAX_CLUB_SPEED_MPS:
             raise ValueError("club speed must be in (0,100) m/s")
         if not 0 < self.loft_deg < 80 or not 0 < self.lie_deg < 90:
             raise ValueError("static loft must be in (0,80), lie in (0,90) degrees")
@@ -119,3 +122,44 @@ def matched_preset(club_id: str) -> MatchedConfig:
             face_half_height_m=0.025,
         )
     raise ValueError(f"unknown matched-delivery club: {club_id}")
+
+
+PRESET_CLUB_IDS = ("driver", "seven_iron", "pitching_wedge")
+
+
+def preset_modifications(club: MatchedConfig) -> tuple[str, ...]:
+    """Return the fields where ``club`` departs from its named preset.
+
+    Every field is compared, including the contact law and the advanced head
+    geometry, so a result labelled with a preset name is flagged whenever any
+    assumption differs. A custom club has no preset and returns ``()``.
+    """
+    if not isinstance(club, MatchedConfig):
+        raise TypeError("club must be a MatchedConfig")
+    if club.club_id not in PRESET_CLUB_IDS:
+        return ()
+    preset = matched_preset(club.club_id)
+    return tuple(
+        item.name
+        for item in fields(MatchedConfig)
+        if getattr(club, item.name) != getattr(preset, item.name)
+    )
+
+
+def delivery_warnings(club: MatchedConfig) -> tuple[str, ...]:
+    """Return reader-facing cautions for atypical but valid club settings.
+
+    Forward shaft lean with the driver delofts a teed, upward strike; the
+    study retains such cells as geometric sensitivities, not typical play.
+    """
+    if not isinstance(club, MatchedConfig):
+        raise TypeError("club must be a MatchedConfig")
+    warnings: list[str] = []
+    if club.club_id == "driver" and club.shaft_lean_deg > 0:
+        warnings.append(
+            f"Driver with {club.shaft_lean_deg:g}° forward shaft lean: delivered "
+            f"loft is {club.loft_deg - club.shaft_lean_deg:g}° at zero twist. "
+            "Forward lean is atypical for a teed driver; treat these results "
+            "as a geometric sensitivity, not typical play."
+        )
+    return tuple(warnings)
