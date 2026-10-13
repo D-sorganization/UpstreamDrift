@@ -2,8 +2,31 @@
 
 from __future__ import annotations
 
+from typing import Final
+
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+
+PUBLICATION_RESAMPLES: Final = 2000
+"""Paired bootstrap resamples for published intervals (third digit stable)."""
+
+HISTORICAL_RESAMPLES: Final = 500
+"""Resamples used by the frozen October 2026 phase-two records; reproduce only."""
+
+DEFAULT_BOOTSTRAP_SEED: Final = 20261008
+
+_MAX_BATCH_DRAWS: Final = 2_000_000
+
+
+def _bootstrap_indices(rng: np.random.Generator, size: int, resamples: int):
+    """Yield index batches whose stream equals ``resamples`` draws of ``size``.
+
+    Batching only bounds memory: row ``i`` of the concatenated batches equals
+    the ``i``-th sequential ``rng.integers(0, size, size)`` draw.
+    """
+    rows = max(1, _MAX_BATCH_DRAWS // size)
+    for start in range(0, resamples, rows):
+        yield rng.integers(0, size, size=(min(rows, resamples - start), size))
 
 
 def _paired_arrays(
@@ -32,8 +55,8 @@ def paired_hit_difference(
     curved: ArrayLike,
     straight: ArrayLike,
     *,
-    resamples: int = 500,
-    seed: int = 20261008,
+    resamples: int = PUBLICATION_RESAMPLES,
+    seed: int = DEFAULT_BOOTSTRAP_SEED,
 ) -> dict[str, float]:
     """Return curved-minus-straight hit fraction and paired 95% bootstrap interval.
 
@@ -52,8 +75,8 @@ def paired_mean_difference(
     curved: ArrayLike,
     straight: ArrayLike,
     *,
-    resamples: int = 500,
-    seed: int = 20261008,
+    resamples: int = PUBLICATION_RESAMPLES,
+    seed: int = DEFAULT_BOOTSTRAP_SEED,
 ) -> dict[str, float]:
     """Estimate a finite paired mean difference and its sampling-only 95% CI.
 
@@ -64,10 +87,12 @@ def paired_mean_difference(
     if not np.all(np.isfinite(differences)):
         raise ValueError("paired differences must be finite")
     rng = np.random.default_rng(seed)
-    estimates = np.empty(resamples)
-    for i in range(resamples):
-        indices = rng.integers(0, a.size, size=a.size)
-        estimates[i] = np.mean(differences[indices])
+    estimates = np.concatenate(
+        [
+            np.mean(differences[batch], axis=1)
+            for batch in _bootstrap_indices(rng, a.size, resamples)
+        ]
+    )
     lower, upper = np.quantile(estimates, [0.025, 0.975])
     result = {
         "estimate": float(np.mean(differences)),
@@ -83,8 +108,8 @@ def paired_variance_ratio(
     curved: ArrayLike,
     straight: ArrayLike,
     *,
-    resamples: int = 500,
-    seed: int = 20261008,
+    resamples: int = PUBLICATION_RESAMPLES,
+    seed: int = DEFAULT_BOOTSTRAP_SEED,
 ) -> dict[str, float]:
     """Return the variance ratio and paired percentile bootstrap 95% interval.
 

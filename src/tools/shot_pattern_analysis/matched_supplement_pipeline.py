@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .core import PATTERN_NAMES
 from .matched_lean_control import analyze_explicit_source_pair
 from .matched_report import (
     load_matrix_report,
@@ -28,7 +29,8 @@ from .matched_supplement_report import (
     write_supplement_comparisons,
 )
 from .matched_formatting import format_sg_interval_record
-from .provenance import manifest_files_match
+from .provenance import manifest_files_match, sha256_file
+from .uncertainty import HISTORICAL_RESAMPLES
 from .matched_supplement_figures import (
     _condition,
     _render_cell_figures,
@@ -36,16 +38,8 @@ from .matched_supplement_figures import (
     validate_planned_figure_identities,
 )
 
-_PATTERNS = ("Straight", "Draw", "Fade")
+_PATTERNS = PATTERN_NAMES
 _ROOT_REQUIREMENTS = {"original_primary": 324, "original_control": 72}
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 _NUMERIC_ARTIFACT_NAMES = frozenset(
@@ -87,7 +81,7 @@ def _load_numeric_parity_reference(path: Path | None) -> dict[str, Any] | None:
     ):
         raise ValueError("numeric reference must contain exactly seven SHA256 hashes")
     digest = hashlib.sha256(raw).hexdigest()
-    if _sha256(path) != digest:
+    if sha256_file(path) != digest:
         raise ValueError("numeric reference changed while reading")
     return {"path": str(path), "sha256": digest, "artifact_sha256": values}
 
@@ -109,7 +103,7 @@ def _check_numeric_parity_reference(
         raise ValueError("numeric reference changed")
     for name, expected in reference["artifact_sha256"].items():
         path = output_dir / name
-        if not path.is_file() or _sha256(path) != expected:
+        if not path.is_file() or sha256_file(path) != expected:
             raise ValueError(f"numeric artifact differs from expected bytes: {name}")
 
 
@@ -134,7 +128,7 @@ def _report_source_hashes() -> dict[str, str]:
         "uncertainty.py",
         "matched_pair_social.py",
     )
-    return {name: _sha256(package / name) for name in names}
+    return {name: sha256_file(package / name) for name in names}
 
 
 def _source_cell_hashes(refs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -232,7 +226,7 @@ def _load_original_sources(root_value: Path, protocol: str) -> tuple[dict, list[
         targets = reviewed_targets
     validate_original_matrix_protocol(report, protocol=protocol, common_targets=targets)
     report["common_targets_path"] = str(targets_path.resolve())
-    report["common_targets_sha256"] = _sha256(targets_path)
+    report["common_targets_sha256"] = sha256_file(targets_path)
     report["common_target_provenance"] = target_provenance
     plan_path = root / "matrix_plan.json"
     plan = json.loads(plan_path.read_text(encoding="utf-8"))
@@ -255,11 +249,13 @@ def _load_original_sources(root_value: Path, protocol: str) -> tuple[dict, list[
                 "source_plan_sha256": report["plan_sha256"],
                 "source_cell_manifest_sha256": report["cell_manifest_sha256"].get(name),
                 "source_summary_sha256": (
-                    _sha256(cell_dir / "summary.json")
+                    sha256_file(cell_dir / "summary.json")
                     if (cell_dir / "summary.json").is_file()
                     else None
                 ),
-                "source_csv_sha256": _sha256(csv_path) if csv_path.is_file() else None,
+                "source_csv_sha256": sha256_file(csv_path)
+                if csv_path.is_file()
+                else None,
                 "_execution": plan["execution"],
             }
         )
@@ -340,7 +336,10 @@ def _pair_spec(kind: str, first: dict, second: dict) -> dict[str, Any]:
 
 
 def _pair_result(
-    pair: dict[str, Any], transition_path: Path, transition_sha256: str
+    pair: dict[str, Any],
+    transition_path: Path,
+    transition_sha256: str,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> dict[str, Any]:
     first, second = pair["first"], pair["second"]
     same_execution = first["_execution"] == second["_execution"]
@@ -351,6 +350,7 @@ def _pair_result(
         target_x_m=pair["target_x_m"],
         transition_receipt_path=None if same_execution else transition_path,
         transition_receipt_sha256=None if same_execution else transition_sha256,
+        resamples=resamples,
     )
 
 
@@ -366,7 +366,7 @@ def _recheck_source_inputs(
 ) -> None:
     for root_text, expected_hash in plan_hashes.items():
         plan_path = Path(root_text) / "matrix_plan.json"
-        if not plan_path.is_file() or _sha256(plan_path) != expected_hash:
+        if not plan_path.is_file() or sha256_file(plan_path) != expected_hash:
             raise ValueError("a source matrix plan changed during report generation")
     for ref in refs:
         status = ref.get("status")
@@ -382,7 +382,7 @@ def _recheck_source_inputs(
             raise ValueError(
                 f"source cell manifest changed during report generation: {name}"
             )
-        if _sha256(manifest) != ref.get("source_cell_manifest_sha256"):
+        if sha256_file(manifest) != ref.get("source_cell_manifest_sha256"):
             raise ValueError(
                 f"source cell manifest changed during report generation: {name}"
             )
@@ -390,7 +390,7 @@ def _recheck_source_inputs(
         if (
             expected_summary_hash is None
             or not summary.is_file()
-            or _sha256(summary) != expected_summary_hash
+            or sha256_file(summary) != expected_summary_hash
         ):
             raise ValueError(
                 f"source cell summary changed during report generation: {name}"
@@ -403,14 +403,16 @@ def _recheck_source_inputs(
         if status != "completed":
             continue
         csv_path = cell_dir / "shots.csv.gz"
-        if not csv_path.is_file() or _sha256(csv_path) != ref.get("source_csv_sha256"):
+        if not csv_path.is_file() or sha256_file(csv_path) != ref.get(
+            "source_csv_sha256"
+        ):
             raise ValueError(f"source cell changed during report generation: {name}")
-    if _sha256(inventory_path) != inventory_sha256:
+    if sha256_file(inventory_path) != inventory_sha256:
         raise ValueError("supplement inventory changed during report generation")
     if common_targets_path is not None and (
         common_targets_sha256 is None
         or not common_targets_path.is_file()
-        or _sha256(common_targets_path) != common_targets_sha256
+        or sha256_file(common_targets_path) != common_targets_sha256
     ):
         raise ValueError(
             "original control common targets changed during report generation"
@@ -429,12 +431,15 @@ def _recheck_source_inputs(
         if set(evidence_paths) != set(reviewed_target_sources):
             raise ValueError("reviewed target source inventory is incomplete")
         for label, path in evidence_paths.items():
-            if not path.is_file() or _sha256(path) != reviewed_target_sources[label]:
+            if (
+                not path.is_file()
+                or sha256_file(path) != reviewed_target_sources[label]
+            ):
                 raise ValueError("reviewed common-target provenance changed")
 
 
 def _recheck_transition_evidence(receipt_path: Path, expected_sha256: str) -> None:
-    if not receipt_path.is_file() or _sha256(receipt_path) != expected_sha256:
+    if not receipt_path.is_file() or sha256_file(receipt_path) != expected_sha256:
         raise ValueError("source-transition receipt changed during report generation")
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     evidence_files = receipt.get("evidence_files", {})
@@ -444,7 +449,7 @@ def _recheck_transition_evidence(receipt_path: Path, expected_sha256: str) -> No
         path = (receipt_path.parent / relative).resolve()
         if not path.is_relative_to(receipt_path.parent) or not path.is_file():
             raise ValueError("source-transition evidence changed or escaped its root")
-        if _sha256(path) != expected:
+        if sha256_file(path) != expected:
             raise ValueError(
                 "source-transition evidence changed during report generation"
             )
@@ -540,7 +545,7 @@ def _verify_figure_assets(output_dir: Path, ledger: dict[str, Any]) -> None:
         seen_paths.add(path)
         if not path.is_relative_to(figure_root) or not path.is_file():
             raise ValueError("supplement figure artifact is missing or unsafe")
-        if _sha256(path) != item.get("sha256"):
+        if sha256_file(path) != item.get("sha256"):
             raise ValueError("supplement figure artifact changed")
 
 
@@ -550,7 +555,7 @@ def load_verified_supplement_artifacts(output_dir: Path) -> dict[str, Any]:
     receipt_path = output_dir / "REPORT_SUPPLEMENT_PIPELINE.json"
     if not receipt_path.is_file():
         raise ValueError("supplement pipeline receipt is missing")
-    receipt_sha256 = _sha256(receipt_path)
+    receipt_sha256 = sha256_file(receipt_path)
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     if (
         receipt.get("schema") != "matched-supplement-pipeline-receipt/1"
@@ -576,7 +581,7 @@ def load_verified_supplement_artifacts(output_dir: Path) -> dict[str, Any]:
         path = (output_dir / relative).resolve()
         if not path.is_relative_to(output_dir) or not path.is_file():
             raise ValueError(f"report artifact is missing or unsafe: {key}")
-        if _sha256(path) != artifact_hashes[key]:
+        if sha256_file(path) != artifact_hashes[key]:
             raise ValueError(f"report artifact changed: {key}")
     if receipt.get("postprocessing_source_sha256") != _report_source_hashes():
         raise ValueError("reporting or figure source changed after generation")
@@ -589,11 +594,11 @@ def load_verified_supplement_artifacts(output_dir: Path) -> dict[str, Any]:
     _recheck_receipt_sources(receipt)
     _verify_figure_assets(output_dir, ledger)
     for key, relative in artifact_paths.items():
-        if _sha256(output_dir / relative) != artifact_hashes[key]:
+        if sha256_file(output_dir / relative) != artifact_hashes[key]:
             raise ValueError(f"report artifact changed during verification: {key}")
     if _report_source_hashes() != receipt.get("postprocessing_source_sha256"):
         raise ValueError("reporting or figure source changed during verification")
-    if _sha256(receipt_path) != receipt_sha256:
+    if sha256_file(receipt_path) != receipt_sha256:
         raise ValueError("supplement pipeline receipt changed during verification")
     artifact_bytes = {
         key: (output_dir / relative).read_bytes()
@@ -604,7 +609,7 @@ def load_verified_supplement_artifacts(output_dir: Path) -> dict[str, Any]:
         for key in artifact_paths
     ):
         raise ValueError("report artifact changed while reading verified outputs")
-    if _sha256(receipt_path) != receipt_sha256:
+    if sha256_file(receipt_path) != receipt_sha256:
         raise ValueError("supplement pipeline receipt changed while reading outputs")
     _check_numeric_parity_reference(receipt.get("numeric_parity_reference"), output_dir)
     return {
@@ -731,6 +736,45 @@ def _load_pipeline_sources(
     validate_planned_figure_identities(pair_specs, supplement["unique_cells"])
     return _PipelineSources(
         original_reports, original_cells, supplement, report_sources, pair_specs
+    )
+
+
+SUPPLEMENT_TRANSITION_SHA256 = (
+    "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981"
+)
+"""Accepted hash of ``source_transition_supplement.json`` (see REPRODUCING.md)."""
+
+
+def explicit_pair_specs(phase2_root: Path) -> list[dict[str, Any]]:
+    """Load and validate every explicit pair from a restored phase-two tree.
+
+    ``phase2_root`` uses the published layout: ``final_v1``,
+    ``control_final_v1``, ``supplement_final_v1/<protocol>`` and
+    ``review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json``.
+    """
+    root = Path(phase2_root)
+    supplement = root / "supplement_final_v1"
+    return _load_pipeline_sources(
+        root / "final_v1",
+        root / "control_final_v1",
+        {
+            "pw-primary-face-bounds/1": supplement / "pw_primary_face",
+            "pw-control-face-bounds/1": supplement / "pw_control_face",
+            "driver-control-speed-bounds/1": supplement / "driver_control_speed",
+        },
+        root / "review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json",
+    ).pair_specs
+
+
+def analyze_pair_spec(
+    pair: dict[str, Any], phase2_root: Path, *, resamples: int
+) -> dict[str, Any]:
+    """Analyze one explicit pair against the accepted source transition."""
+    return _pair_result(
+        pair,
+        Path(phase2_root) / "source_transition_supplement.json",
+        SUPPLEMENT_TRANSITION_SHA256,
+        resamples,
     )
 
 
@@ -869,7 +913,7 @@ def _pipeline_receipt_payload(
         "issue": 12000,
         "original_sources": _original_source_receipts(original_reports, roots),
         "supplement_inventory_sha256": supplement["inventory_sha256"],
-        "original_source_inventory_sha256": _sha256(original_inventory_path),
+        "original_source_inventory_sha256": sha256_file(original_inventory_path),
         "source_transition_receipt_path": str(transition_path),
         "inventory_path": str(Path(inventory_path).resolve()),
         "artifact_sha256": artifact_sha256,
@@ -906,7 +950,7 @@ def _pipeline_receipt_payload(
             }
         ),
         "postprocessing_source_sha256": report_sources,
-        "figure_ledger_sha256": _sha256(ledger_path),
+        "figure_ledger_sha256": sha256_file(ledger_path),
         "interpretation": "separate add-on report; original matrices and inventories remain unchanged",
         "monte_carlo_uncertainty": "shared seeded primitive draws; paired intervals describe saved simulation samples, not independent replications or multiplicity-adjusted discoveries",
     }
@@ -934,7 +978,8 @@ def _write_pipeline_receipt(
         "figure_ledger": "REPORT_SUPPLEMENT_FIGURES.json",
     }
     artifact_sha256 = {
-        key: _sha256(output_dir / relative) for key, relative in artifact_names.items()
+        key: sha256_file(output_dir / relative)
+        for key, relative in artifact_names.items()
     }
     source_cells_sha256 = _source_cell_hashes(
         [*original_cells, *supplement["unique_cells"]]
@@ -984,7 +1029,7 @@ def build_final_supplement_report(
     transition_path = Path(transition_receipt_path).resolve()
     if (
         not transition_path.is_file()
-        or _sha256(transition_path) != transition_receipt_sha256
+        or sha256_file(transition_path) != transition_receipt_sha256
     ):
         raise ValueError("source-transition receipt is missing or has the wrong hash")
     _recheck_transition_evidence(transition_path, transition_receipt_sha256)
