@@ -426,6 +426,49 @@ class MujocoRegressorModel:
         tau: FloatArray = np.asarray(self.data.qfrc_inverse.copy(), dtype=np.float64)
         return tau
 
+    def _eval_inverse_for_body(
+        self,
+        b: int,
+        mass: float,
+        ipos: FloatArray,
+        inertia: FloatArray,
+        iquat: FloatArray,
+        q: FloatArray,
+        v: FloatArray,
+        a: FloatArray,
+    ) -> FloatArray:
+        self.model.body_mass[b] = mass
+        self.model.body_ipos[b] = ipos
+        self.model.body_inertia[b] = inertia
+        self.model.body_iquat[b] = iquat
+        self.model.body_sameframe[b] = 0
+        mujoco.mj_setConst(self.model, self.data)
+        self.data.qpos[: q.size] = q
+        self.data.qvel[:] = v
+        self.data.qacc[:] = a
+        mujoco.mj_inverse(self.model, self.data)
+        return np.asarray(self.data.qfrc_inverse.copy(), dtype=np.float64)
+
+    def _restore_params(
+        self,
+        params: Sequence[tuple[float, FloatArray, FloatArray, FloatArray]],
+        q: FloatArray,
+        v: FloatArray,
+        a: FloatArray,
+    ) -> None:
+        for b_idx, b in enumerate(self._moving_bodies):
+            m_o, ipos_o, inertia_o, iquat_o = params[b_idx]
+            self.model.body_mass[b] = m_o
+            self.model.body_ipos[b] = ipos_o
+            self.model.body_inertia[b] = inertia_o
+            self.model.body_iquat[b] = iquat_o
+            self.model.body_sameframe[b] = 0
+        mujoco.mj_setConst(self.model, self.data)
+        self.data.qpos[: q.size] = q
+        self.data.qvel[:] = v
+        self.data.qacc[:] = a
+        mujoco.mj_inverse(self.model, self.data)
+
     def compute_regressor(
         self, q: FloatArray, v: FloatArray, a: FloatArray, h_step: float = 1e-6
     ) -> FloatArray:
@@ -462,58 +505,21 @@ class MujocoRegressorModel:
                     pi_plus = pi_orig.copy()
                     pi_plus[k] += h_step
                     m_p, c_p, I_p, q_p = spatial_to_mujoco_parameters(pi_plus)
-                    self.model.body_mass[b] = m_p
-                    self.model.body_ipos[b] = c_p
-                    self.model.body_inertia[b] = I_p
-                    self.model.body_iquat[b] = q_p
-                    self.model.body_sameframe[b] = 0
-                    mujoco.mj_setConst(self.model, self.data)
-                    self.data.qpos[: q.size] = q
-                    self.data.qvel[:] = v
-                    self.data.qacc[:] = a
-                    mujoco.mj_inverse(self.model, self.data)
-                    tau_plus = self.data.qfrc_inverse.copy()
+                    tau_plus = self._eval_inverse_for_body(b, m_p, c_p, I_p, q_p, q, v, a)
 
                     # Backward perturbation
                     pi_minus = pi_orig.copy()
                     pi_minus[k] -= h_step
                     m_m, c_m, I_m, q_m = spatial_to_mujoco_parameters(pi_minus)
-                    self.model.body_mass[b] = m_m
-                    self.model.body_ipos[b] = c_m
-                    self.model.body_inertia[b] = I_m
-                    self.model.body_iquat[b] = q_m
-                    self.model.body_sameframe[b] = 0
-                    mujoco.mj_setConst(self.model, self.data)
-                    self.data.qpos[: q.size] = q
-                    self.data.qvel[:] = v
-                    self.data.qacc[:] = a
-                    mujoco.mj_inverse(self.model, self.data)
-                    tau_minus = self.data.qfrc_inverse.copy()
+                    tau_minus = self._eval_inverse_for_body(b, m_m, c_m, I_m, q_m, q, v, a)
 
                     col = b_idx * SPATIAL_PARAMETERS_PER_BODY + k
                     Y_full[:, col] = (tau_plus - tau_minus) / (2.0 * h_step)
 
                 # Restore this body before moving to the next
-                self.model.body_mass[b] = m_o
-                self.model.body_ipos[b] = ipos_o
-                self.model.body_inertia[b] = inertia_o
-                self.model.body_iquat[b] = iquat_o
-                self.model.body_sameframe[b] = 0
-                mujoco.mj_setConst(self.model, self.data)
+                self._eval_inverse_for_body(b, m_o, ipos_o, inertia_o, iquat_o, q, v, a)
         finally:
-            # Ensure full restoration of model parameters in case of exception
-            for b_idx, b in enumerate(self._moving_bodies):
-                m_o, ipos_o, inertia_o, iquat_o = original_params[b_idx]
-                self.model.body_mass[b] = m_o
-                self.model.body_ipos[b] = ipos_o
-                self.model.body_inertia[b] = inertia_o
-                self.model.body_iquat[b] = iquat_o
-                self.model.body_sameframe[b] = 0
-            mujoco.mj_setConst(self.model, self.data)
-            self.data.qpos[: q.size] = q
-            self.data.qvel[:] = v
-            self.data.qacc[:] = a
-            mujoco.mj_inverse(self.model, self.data)
+            self._restore_params(original_params, q, v, a)
 
         if self.planar:
             Y_planar: FloatArray = np.asarray(
