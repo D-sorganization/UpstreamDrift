@@ -5,6 +5,10 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 ROOT = Path(__file__).resolve().parents[2]
 REFERENCES = ROOT / "docs/research/proximal_distal_energy_transfer/references.bib"
 
