@@ -85,7 +85,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 16 | 0 | 0 |
 | `model_generation` | 25 | 54 | 16 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 307 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 308 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `native_lanes` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -143,7 +143,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **376** | **271** | **121** | **1699** | **838** | **647** |
+| **Total** | **376** | **271** | **121** | **1700** | **838** | **647** |
 
 ## Diverged Files by Package
 
@@ -485,6 +485,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/ui/widgets/unit_aware_input.py` | -121 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-06 |
 | `sidekick/ui/widgets/unit_converter_widget.py` | -2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/utils/json_io.py` | -1 |  | Dieter Olson 2026-08-01 | codex-scheduled-tasks[bot] 2026-06-12 |
-| `sidekick/utils/native_dll_guard.py` | +286 |  | Dieter Olson 2026-10-13 | d-sorgclaudeagent[bot] 2026-10-13 |
+| `sidekick/utils/native_dll_guard.py` | +286 |  | d-sorgclaudeagent[bot] 2026-10-13 | d-sorgclaudeagent[bot] 2026-10-13 |
 | `sidekick/utils/state_manager.py` | -14 |  | Dieter Olson 2026-08-01 | codex-scheduled-tasks[bot] 2026-06-12 |
 
