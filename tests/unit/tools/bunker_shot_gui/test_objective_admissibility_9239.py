@@ -321,10 +321,14 @@ class TestTheModelAttachesTheStanding:
         grids["right"][0, 0] -= NARROW_HALF_WIDTH
 
         def fake_evaluate(design, sand, swing):  # type: ignore[no-untyped-def]
+            carry = grids[design.name]
             playability = dataclasses.replace(
                 nominal_evaluation.playability,
-                carry_m=grids[design.name],
+                carry_m=carry,
+                carry_lower_m=np.full_like(carry, np.nan),
+                carry_upper_m=np.full_like(carry, np.nan),
                 carry_verdict=nominal_evaluation.verdict,
+                window_area_band=None,
             )
             return dataclasses.replace(
                 nominal_evaluation, design=design, playability=playability
