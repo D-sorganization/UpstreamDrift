@@ -19,6 +19,7 @@ def validate_comparison(summaries: list[dict[str, Any]]) -> None:
                 raise ValueError(f"Experiments must be matched on {key}")
         for key in (
             "club_id",
+            "delivery_mode",
             "club_speed_mps",
             "loft_deg",
             "attack_angle_deg",
@@ -39,6 +40,21 @@ def validate_comparison(summaries: list[dict[str, Any]]) -> None:
             raise ValueError("All three shot patterns are required")
 
 
+def comparison_headings(summary: dict[str, Any]) -> tuple[str, str]:
+    """Return the hit-rate panel title and subtitle from a saved config.
+
+    Both strings come from the validated configuration, so a bundle saved with
+    a different target radius or shot count is never mislabeled.
+    """
+    config = summary["config"]
+    radius = float(config["target_radius_m"])
+    shots = int(config["n_shots"])
+    return (
+        f"Landings Within {radius:g} m",
+        f"{shots:,} Shots per Pattern • Paired Face Errors • Fixed Path • Nominal Aiming",
+    )
+
+
 def export_comparison(bundles: list[Path], output: Path) -> Path:
     """Create a shareable overview from validated, paired result bundles."""
     import matplotlib
@@ -49,6 +65,7 @@ def export_comparison(bundles: list[Path], output: Path) -> Path:
 
     summaries = [json.loads((p / "summary.json").read_text()) for p in bundles]
     validate_comparison(summaries)
+    hit_title, subtitle = comparison_headings(summaries[0])
     labels = [
         f"Face SD {s['config']['face_sd_deg']:g}°\nCurve {s['config'].get('curve_scale', 1):g}×"
         for s in summaries
@@ -68,7 +85,7 @@ def export_comparison(bundles: list[Path], output: Path) -> Path:
         fig, axes = plt.subplots(1, 3, figsize=(19.2, 10.8), dpi=100)
         measures = [
             ("aimed_lateral_sd_m", "Lateral Standard Deviation", "m", 1),
-            ("aimed_target_hit_fraction", "Landings Within 15 m", "%", 100),
+            ("aimed_target_hit_fraction", hit_title, "%", 100),
             ("mean_carry_m", "Mean Carry", "m", 1),
         ]
         x = np.arange(len(summaries))
@@ -112,7 +129,7 @@ def export_comparison(bundles: list[Path], output: Path) -> Path:
         fig.text(
             0.5,
             0.84,
-            "10,000 Shots per Pattern • Paired Face Errors • Fixed Path • Nominal Aiming",
+            subtitle,
             ha="center",
         )
         fig.text(

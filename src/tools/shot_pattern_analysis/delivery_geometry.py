@@ -85,6 +85,31 @@ def delivery_from_shaft_rotation(
     )
 
 
+MAX_FACE_ANGLE_DEG = 15.0
+_TWIST_BRANCH_DEG = 30.0
+
+
+def reachable_face_range_deg(
+    *, base_loft_deg: float, lie_deg: float, shaft_lean_deg: float
+) -> tuple[float, float]:
+    """Return the (closed, open) face angles reachable by shaft twist.
+
+    Postcondition: ``low <= 0 <= high`` and both lie within
+    ``±MAX_FACE_ANGLE_DEG``; ``delivery_from_face_angle`` accepts exactly
+    the angles in this interval.
+    """
+    kwargs = {
+        "base_loft_deg": base_loft_deg,
+        "lie_deg": lie_deg,
+        "shaft_lean_deg": shaft_lean_deg,
+    }
+    open_twist = delivery_from_shaft_rotation(-_TWIST_BRANCH_DEG, **kwargs)
+    closed_twist = delivery_from_shaft_rotation(_TWIST_BRANCH_DEG, **kwargs)
+    low = max(closed_twist.face_angle_deg, -MAX_FACE_ANGLE_DEG)
+    high = min(open_twist.face_angle_deg, MAX_FACE_ANGLE_DEG)
+    return low, high
+
+
 def delivery_from_face_angle(
     face_angle_deg: float,
     *,
@@ -97,7 +122,7 @@ def delivery_from_face_angle(
     The scalar bisection is confined to the locally monotonic ±30° twist
     branch. A requested face angle outside that branch raises ValueError.
     """
-    if not math.isfinite(face_angle_deg) or abs(face_angle_deg) > 15.0:
+    if not math.isfinite(face_angle_deg) or abs(face_angle_deg) > MAX_FACE_ANGLE_DEG:
         raise ValueError("face angle must be finite and within 15 degrees")
     if face_angle_deg == 0.0:
         return delivery_from_shaft_rotation(
@@ -111,11 +136,10 @@ def delivery_from_face_angle(
         "lie_deg": lie_deg,
         "shaft_lean_deg": shaft_lean_deg,
     }
-    low = delivery_from_shaft_rotation(-30.0, **kwargs)
-    high = delivery_from_shaft_rotation(30.0, **kwargs)
-    if not high.face_angle_deg <= face_angle_deg <= low.face_angle_deg:
+    low_face, high_face = reachable_face_range_deg(**kwargs)
+    if not low_face <= face_angle_deg <= high_face:
         raise ValueError("face angle cannot be reached on the local shaft-twist branch")
-    lo, hi = -30.0, 30.0
+    lo, hi = -_TWIST_BRANCH_DEG, _TWIST_BRANCH_DEG
     for _ in range(48):
         mid = (lo + hi) / 2.0
         state = delivery_from_shaft_rotation(mid, **kwargs)

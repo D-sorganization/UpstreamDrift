@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 import textwrap
@@ -12,6 +11,7 @@ from typing import Any, Literal, Mapping
 
 import numpy as np
 
+from .core import PATTERN_NAMES
 from .academic_plots import (
     FigureOptions,
     write_academic_dispersion_figure,
@@ -24,11 +24,12 @@ from .matched_figure_identity import (
     validate_planned_figure_identities as validate_planned_figure_identities,
 )
 from .density import DensityComparison, shared_histogram_density
+from .figure_style import PUBLICATION_PATTERN_COLORS, reproducible_metadata
 from .matched_matrix import PROFILES
 from .matched_pair_social import PairSocialContext, write_pair_social_density
 from .matched_report import load_individually_supported_endpoints
 from .matched_sensitivity import _supported_endpoints
-from .provenance import manifest_files_match
+from .provenance import manifest_files_match, sha256_file
 from .noise import NOISE_DISPLAY_LABELS, NoiseSpec
 
 CLOSED_SELECTED_FIGURE_KINDS: frozenset[str] = frozenset(
@@ -52,16 +53,8 @@ __all__ = [
     "validate_planned_figure_identities",
 ]
 
-_PATTERNS = ("Straight", "Draw", "Fade")
+_PATTERNS = PATTERN_NAMES
 _StyledCondition = tuple[str, dict[str, Any], Literal["solid", "dashed"]]
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def _profile(cell_name: str) -> str:
@@ -269,8 +262,8 @@ def _cell_figure_ledger(
                         if "overhead" in figure_group
                         else None
                     ),
-                    "relative_path": str(path.relative_to(output_dir)),
-                    "sha256": _sha256(path),
+                    "relative_path": path.relative_to(output_dir).as_posix(),
+                    "sha256": sha256_file(path),
                 }
             )
     return ledger
@@ -395,7 +388,11 @@ def _save_figure(
         if suffix not in formats:
             continue
         path = stem.with_suffix(f".{suffix}")
-        options: dict[str, Any] = {"bbox_inches": "tight", "facecolor": "white"}
+        options: dict[str, Any] = {
+            "bbox_inches": "tight",
+            "facecolor": "white",
+            "metadata": reproducible_metadata(suffix),
+        }
         if dpi is not None:
             options["dpi"] = dpi
         figure.savefig(path, **options)
@@ -553,7 +550,7 @@ def _draw_pair_density_panels(
 
     norm = Normalize(vmin=0.0, vmax=estimate.density_vmax_per_m2)
     color_mesh = None
-    pattern_colors = {"Straight": "#286090", "Draw": "#c66a19", "Fade": "#7b4a9e"}
+    pattern_colors = PUBLICATION_PATTERN_COLORS
     for row_index, (condition_name, _) in enumerate(row_conditions):
         for col_index, pattern in enumerate(_PATTERNS):
             key = f"{pattern} · {condition_name}"
@@ -790,7 +787,7 @@ def _create_pair_overhead_figure(
         facecolor="white",
     )
     figure.subplots_adjust(top=0.70, bottom=0.19, left=0.085, right=0.98, wspace=0.13)
-    colors = {"Straight": "#286090", "Draw": "#c66a19", "Fade": "#7b4a9e"}
+    colors = PUBLICATION_PATTERN_COLORS
     conditions: tuple[_StyledCondition, _StyledCondition] = (
         (first_label, first, "solid"),
         (second_label, second, "dashed"),
@@ -969,8 +966,8 @@ def _pair_density_ledger(
                 "total_n_per_population": first["config"]["n_shots"],
                 "conditioning": "same shot indices supported in all six populations",
                 "target_x_m": context.target_x,
-                "relative_path": str(path.relative_to(request.output_dir)),
-                "sha256": _sha256(path),
+                "relative_path": path.relative_to(request.output_dir).as_posix(),
+                "sha256": sha256_file(path),
             }
         )
     return ledger
@@ -1095,8 +1092,8 @@ def _pair_overhead_ledger(
                 "saved_trajectory_samples_by_pattern": {
                     key: len(samples) for key, samples in trajectory_sets.items()
                 },
-                "relative_path": str(path.relative_to(request.output_dir)),
-                "sha256": _sha256(path),
+                "relative_path": path.relative_to(request.output_dir).as_posix(),
+                "sha256": sha256_file(path),
             }
         )
     return ledger

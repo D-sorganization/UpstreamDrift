@@ -16,6 +16,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from src.shared.python.core.process_safety import managed_popen
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.tools.async_action import AsyncActionBar, WorkerContext
+from .core import PATTERN_NAMES
 from .preview import scale_previews
 from src.tools.shot_pattern_analysis.presets import CLUB_PRESETS, get_club_preset
 
@@ -531,7 +532,7 @@ class MainWidget(QtWidgets.QWidget):
             ("mean_carry_m", "{:.1f} m"),
             ("mean_strokes_gained", "{:+.3f}"),
         )
-        for row, name in enumerate(("Straight", "Draw", "Fade")):
+        for row, name in enumerate(PATTERN_NAMES):
             self.summary_table.setItem(row, 0, QtWidgets.QTableWidgetItem(name))
             self.summary_table.setItem(
                 row,

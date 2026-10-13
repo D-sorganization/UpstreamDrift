@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import csv
 import gzip
-import hashlib
 import io
 import json
 import os
@@ -23,6 +22,7 @@ from .academic_plots import (
     write_overhead_trajectory_figure,
 )
 from .core import AnalysisCancelled
+from .matched_config import preset_modifications
 from .matched_physics import UnsupportedShot
 from .matched_runner import (
     ExperimentConfig,
@@ -30,7 +30,11 @@ from .matched_runner import (
     run_matched_analysis,
 )
 from .nominal_matching import NominalMatchError
-from .provenance import assert_source_unchanged, source_snapshot
+from .provenance import (
+    assert_source_unchanged,
+    relative_file_hashes,
+    source_snapshot,
+)
 from .scoring import build_broadie_approx_baseline
 
 
@@ -61,12 +65,7 @@ def matched_source_snapshot() -> dict:
     matrix = package / "matched_matrix.py"
     if matrix.is_file():
         files.append(matrix)
-    result["source_sha256"].update(
-        {
-            str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in files
-        }
-    )
+    result["source_sha256"].update(relative_file_hashes(files, root))
     result["contact_backend"] = contact_backend_info()
     result["numerical_runtime"] = {
         "python": platform.python_version(),
@@ -88,11 +87,14 @@ def _check_cancelled(cancelled: Callable[[], bool] | None) -> None:
 
 
 def _write_manifest(output_dir: Path) -> None:
-    hashes = {
-        str(p.relative_to(output_dir)): hashlib.sha256(p.read_bytes()).hexdigest()
-        for p in sorted(output_dir.rglob("*"))
-        if p.is_file() and p.name != "manifest.json"
-    }
+    hashes = relative_file_hashes(
+        (
+            p
+            for p in sorted(output_dir.rglob("*"))
+            if p.is_file() and p.name != "manifest.json"
+        ),
+        output_dir,
+    )
     _write_json(
         output_dir / "manifest.json",
         {"schema": "matched-shot-study/1", "files_sha256": hashes},
@@ -234,6 +236,7 @@ def export_matched_analysis(
             "source_unchanged_during_run": True,
             "model_qualification": "conditional_geometric_research_no_empirical_accuracy_claim",
             "contact_execution": _contact_execution(result.config),
+            "preset_modifications": list(preset_modifications(result.config.club)),
             "shot_rows": len(result.shots),
             "all_inputs_retained": True,
         },
@@ -299,5 +302,19 @@ def execute_and_export(
                 cancelled=cancelled,
             )
         _check_cancelled(cancelled)
-        os.replace(staging, output_dir)
+        _publish_directory(staging, output_dir)
     return output_dir
+
+
+def _publish_directory(staging: Path, output_dir: Path) -> None:
+    """Move a complete staging tree into place without overwriting data.
+
+    Windows cannot ``os.replace`` onto an existing directory, so a still-empty
+    pre-created destination is removed immediately before the move. Any
+    content that appeared during the run aborts publication.
+    """
+    if output_dir.exists():
+        if not output_dir.is_dir() or any(output_dir.iterdir()):
+            raise FileExistsError("output destination gained data during the run")
+        output_dir.rmdir()
+    os.replace(staging, output_dir)

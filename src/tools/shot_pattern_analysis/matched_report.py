@@ -11,9 +11,10 @@ import re
 from collections import Counter
 from pathlib import Path
 
-from .provenance import assert_source_unchanged, manifest_files_match
+from .core import PATTERN_NAMES
+from .provenance import assert_source_unchanged, manifest_files_match, sha256_file
 
-_PATTERNS = ("Straight", "Draw", "Fade")
+_PATTERNS = PATTERN_NAMES
 
 
 def verify_nominal_deliveries_hit_target(
@@ -158,7 +159,7 @@ def load_reviewed_common_targets(
         r"validation/independent_control_pilot_audit\.json`?:\s*`?([0-9a-f]{64})",
         acceptance,
     )
-    if match is None or _sha256(audit_path) != match.group(1):
+    if match is None or sha256_file(audit_path) != match.group(1):
         raise ValueError("control-pilot audit is not bound by final acceptance")
     audit = json.loads(audit_path.read_text(encoding="utf-8"))
     if audit.get("pass") is not True or audit.get("failures") != []:
@@ -210,15 +211,11 @@ def load_reviewed_common_targets(
     if json.loads(target_path.read_text(encoding="utf-8")) != targets:
         raise ValueError("common_targets.json differs from the accepted pilot targets")
     return targets, {
-        "acceptance_sha256": _sha256(acceptance_path),
-        "audit_sha256": _sha256(audit_path),
+        "acceptance_sha256": sha256_file(acceptance_path),
+        "audit_sha256": sha256_file(audit_path),
         "pilot_plan_sha256": hashlib.sha256(plan_bytes).hexdigest(),
-        "common_targets_sha256": _sha256(target_path),
+        "common_targets_sha256": sha256_file(target_path),
     }
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def load_validated_cell(
@@ -270,7 +267,7 @@ def load_matrix_report(root: Path, *, require_complete: bool = True) -> dict:
                 if item["total_n"] != config["n_shots"]:
                     raise ValueError(f"population count mismatch: {name}")
         cells.append({**summary, "cell": name})
-        manifests[name] = hashlib.sha256(manifest.read_bytes()).hexdigest()
+        manifests[name] = sha256_file(manifest)
     counts = dict.fromkeys(("completed", "unavailable", "not_run"), 0)
     counts.update(Counter(cell["status"] for cell in cells))
     if require_complete and counts["not_run"]:
@@ -282,8 +279,8 @@ def load_matrix_report(root: Path, *, require_complete: bool = True) -> dict:
         "planned_cells": len(cells),
         "counts": counts,
         "cells": cells,
-        "plan_sha256": hashlib.sha256(plan_path.read_bytes()).hexdigest(),
+        "plan_sha256": sha256_file(plan_path),
         "cell_manifest_sha256": manifests,
-        "report_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "report_source_sha256": sha256_file(Path(__file__)),
         "interpretation": "conditional geometric simulation; not empirical qualification",
     }

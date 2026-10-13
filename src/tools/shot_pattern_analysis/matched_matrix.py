@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import logging
 from dataclasses import asdict, dataclass, replace
@@ -16,7 +15,12 @@ from .matched_export import execute_and_export, matched_source_snapshot
 from .matched_runner import ExperimentConfig
 from .matrix_cli import add_matrix_arguments
 from .noise import NoiseSpec
-from .provenance import assert_source_unchanged, manifest_files_match
+from .provenance import (
+    assert_source_unchanged,
+    manifest_files_match,
+    publish_new_text,
+    sha256_file,
+)
 
 LOGGER = logging.getLogger(__name__)
 PROFILES = (
@@ -160,6 +164,21 @@ def matched_matrix_cells(
     return tuple(cells)
 
 
+def resolve_evidence_file(receipt_path: Path, name: str) -> Path:
+    """Resolve a receipt's evidence name, confined to the receipt directory.
+
+    Raises ValueError for absolute names or ``..`` escapes so an edited
+    receipt cannot make acceptance hash files elsewhere on disk.
+    """
+    base = Path(receipt_path).parent.resolve()
+    if not isinstance(name, str) or not name or Path(name).is_absolute():
+        raise ValueError(f"acceptance evidence path is outside the receipt: {name!r}")
+    resolved = (base / name).resolve()
+    if not resolved.is_relative_to(base) or name.startswith(("/", "\\")):
+        raise ValueError(f"acceptance evidence path is outside the receipt: {name!r}")
+    return resolved
+
+
 def validate_final_acceptance(path: Path | None, execution: dict) -> None:
     """Require reviewed, source-bound evidence before a final matrix job."""
     if path is None:
@@ -184,11 +203,8 @@ def validate_final_acceptance(path: Path | None, execution: dict) -> None:
             "acceptance requires hashed review, pilot, numerical, visual and test evidence"
         )
     for name, expected in evidence.items():
-        file = Path(path).parent / name
-        if (
-            not file.is_file()
-            or hashlib.sha256(file.read_bytes()).hexdigest() != expected
-        ):
+        file = resolve_evidence_file(Path(path), name)
+        if not file.is_file() or sha256_file(file) != expected:
             raise ValueError(f"acceptance evidence missing or changed: {name}")
 
 
@@ -253,11 +269,15 @@ def _publish_matrix_plan(
         plan["selected_cell_names"] = [name for name, _ in cells]
     plan = json.loads(json.dumps(plan))
     plan_path = output_root / "matrix_plan.json"
-    if plan_path.exists():
+    # Shards started together race here: exactly one publish wins and every
+    # other shard verifies the complete plan it finds.
+    try:
+        publish_new_text(plan_path, json.dumps(plan, indent=2) + "\n")
+    except FileExistsError:
         if json.loads(plan_path.read_text()) != plan:
-            raise RuntimeError("existing matrix plan differs; use a new output root")
-    else:
-        plan_path.write_text(json.dumps(plan, indent=2) + "\n")
+            raise RuntimeError(
+                "existing matrix plan differs; use a new output root"
+            ) from None
 
 
 def run_matched_matrix(
@@ -335,7 +355,7 @@ def run_matched_matrix(
                 "cell": name,
                 "status": summary["status"],
                 "reason": summary.get("reason"),
-                "manifest_sha256": hashlib.sha256(manifest.read_bytes()).hexdigest(),
+                "manifest_sha256": sha256_file(manifest),
             }
         )
     assert_source_unchanged(execution, matched_source_snapshot())

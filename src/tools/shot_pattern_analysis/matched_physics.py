@@ -105,12 +105,25 @@ class MatchedShotPhysics:
         path_deg: float,
         config: MatchedConfig,
         sample_trajectory: bool = False,
-        nominal_face_deg: float = 0.0,
+        nominal_face_deg: float | None = None,
     ) -> ShotOutcome:
-        """Implement the nominal-face calibration protocol without rotating carry."""
-        # Calibration varies nominal yaw directly. Shaft twist is independent.
-        if not math.isfinite(nominal_face_deg) or abs(nominal_face_deg) > 30:
-            raise UnsupportedShot("delivery_out_of_range")
+        """Implement the nominal-face calibration protocol without rotating carry.
+
+        Calibration varies nominal yaw directly, so ``face_deg`` *is* the
+        nominal face and shaft twist is zero. ``nominal_face_deg`` exists only
+        for protocol compatibility with the legacy solver: it must be omitted
+        or equal ``face_deg``; any other value raises ``ValueError`` instead of
+        being silently ignored.
+        """
+        if nominal_face_deg is not None:
+            if not math.isfinite(nominal_face_deg) or abs(nominal_face_deg) > 30:
+                raise UnsupportedShot("delivery_out_of_range")
+            if nominal_face_deg != face_deg:
+                raise ValueError(
+                    "matched physics takes face_deg as the nominal face; "
+                    f"nominal_face_deg={nominal_face_deg} differs from "
+                    f"face_deg={face_deg}"
+                )
         return self.simulate_delivery(
             face_deg,
             path_deg,
