@@ -18,7 +18,10 @@ import json
 import math
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
+
+if TYPE_CHECKING:
+    from src.tools.shot_pattern_analysis.academic_plots import FigureOptions
 
 PATTERNS = ("Straight", "Draw", "Fade")
 _COMBINED_NOISE = (0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0)
@@ -355,6 +358,25 @@ def _social_metadata(
     }
 
 
+def _figure_options(
+    presentation: Literal["academic", "social"], dpi: int
+) -> FigureOptions:
+    """Map the builder's presentation/DPI controls onto writer options.
+
+    This is the single keyword-to-options mapping for every final writer call
+    (#12309). Only ``presentation`` and ``dpi`` are set; histogram bins and
+    HDR region masses keep the writer defaults, exactly as the historical
+    keyword calls did.
+    """
+    from src.tools.shot_pattern_analysis.academic_plots import FigureOptions
+
+    if presentation not in ("academic", "social"):
+        raise ValueError("presentation must be academic or social")
+    if isinstance(dpi, bool) or not isinstance(dpi, int):
+        raise TypeError("dpi must be an integer")
+    return FigureOptions(presentation=presentation, dpi=dpi)
+
+
 def _render_cell_figures(
     cell: dict[str, Any],
     source_root: Path,
@@ -365,7 +387,6 @@ def _render_cell_figures(
     presentation: Literal["academic", "social"],
 ) -> list[Path]:
     from src.tools.shot_pattern_analysis.academic_plots import (
-        FigureOptions,
         write_academic_dispersion_figure,
         write_overhead_trajectory_figure,
     )
@@ -399,7 +420,7 @@ def _render_cell_figures(
         scenario=scenario,
         metadata=metadata,
         target_point_m=(target_x, 0.0),
-        options=FigureOptions(presentation=presentation, dpi=dpi),
+        options=_figure_options(presentation, dpi),
     )
     paths.extend(density_paths.values())
 
@@ -412,7 +433,7 @@ def _render_cell_figures(
         target_x_m=float(raw["target_x_m"]),
         scenario=scenario,
         metadata=metadata,
-        options=FigureOptions(presentation=presentation, dpi=dpi),
+        options=_figure_options(presentation, dpi),
     )
     paths.extend(overhead_paths.values())
     return paths
@@ -538,7 +559,6 @@ def _render_density_comparison(
     preview: bool,
 ) -> tuple[dict[str, Any], list[Path]]:
     from src.tools.shot_pattern_analysis.academic_plots import (
-        FigureOptions,
         write_academic_dispersion_figure,
     )
 
@@ -613,7 +633,7 @@ def _render_density_comparison(
         scenario=scenario,
         metadata=metadata,
         target_point_m=(float(target_x_values[0]), 0.0),
-        options=FigureOptions(presentation="social", dpi=dpi),
+        options=_figure_options("social", dpi),
     )
     row["status"] = "completed"
     row["target_x_m"] = float(target_x_values[0])
