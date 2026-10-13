@@ -53,13 +53,17 @@
       "merge_shas": [],
       "implementation": [
         "src/bunkershot3d/metrics/playability.py",
-        "src/bunkershot3d/ball/splash.py"
+        "src/bunkershot3d/ball/splash.py",
+        "src/tools/bunker_shot_gui/objective.py"
       ],
-      "tests": ["tests/bunkershot3d/metrics/test_playability.py"],
+      "tests": [
+        "tests/bunkershot3d/metrics/test_playability.py",
+        "tests/unit/tools/bunker_shot_gui/test_objective_admissibility_9239.py"
+      ],
       "acceptance_evidence": null,
       "owner": "unassigned",
       "depends_on": [9543],
-      "plan": "The corrected divot mass makes the nominal window 0.0 everywhere. Plausible carry must not be restored by retuning the borrowed splash coefficients. Until U13 calibrates the transfer, the playability objective is unqualified: RED, a test that ranking or comparison on the playability objective raises rather than returning an ordering; GREEN, mark the objective inadmissible in the study/ranking layer and surface that verdict in the workbench."
+      "plan": "The corrected divot mass makes the nominal window 0.0 everywhere. Plausible carry must not be restored by retuning the borrowed splash coefficients. Until U13 calibrates the transfer, the playability objective is unqualified: RED, a test that ranking or comparison on the playability objective raises rather than returning an ordering; GREEN, mark the objective inadmissible in the study/ranking layer and surface that verdict in the workbench. Partial (#9545 slice): `WorkbenchModel.compare` now attaches a `CarryObjectiveStanding` in the canonical `ObjectiveDisposition` vocabulary, `WorkbenchComparison.winner` is `None` unless the standing is predictive, and the report labels the lead EXPLORATORY with every reason; an empty window or an identical objective demotes even a qualified objective to `degenerate-target`. Remaining: re-run the nominal grid on the supported flight stack and attach exact-head outputs."
     },
     {
       "key": "U4",
@@ -288,11 +292,14 @@
       "implementation": [
         "src/tools/bunker_shot_gui/gui.py",
         "src/tools/bunker_shot_gui/model.py",
+        "src/tools/bunker_shot_gui/objective.py",
+        "src/api/routes/bunker_workbench.py",
         "src/config/feature_parity.json"
       ],
       "tests": [
         "tests/config/feature_parity/test_registry.py",
-        "tests/unit/tools/bunker_shot_gui/test_workbench_model.py"
+        "tests/unit/tools/bunker_shot_gui/test_workbench_model.py",
+        "tests/unit/tools/bunker_shot_gui/test_objective_admissibility_9239.py"
       ],
       "acceptance_evidence": null,
       "owner": "unassigned",
@@ -345,7 +352,7 @@
       "id": "unqualified-outputs-explicit",
       "criterion": "Bad Data or Out-of-Envelope Requests Never Become a Plausible Ranked Recommendation; Unqualified Outputs Are Explicit.",
       "status": "partial",
-      "evidence": "`solvers/mpm/envelope.py` refuses F1 ball launch, absolute club force and out-of-plane results, and the launch handoff stamps ball launch as `MODELED_CONVENTION`. The playability objective still ranks designs from an uncalibrated transfer whose corrected divot mass leaves the nominal window degenerate (#9239), and the contact regimes have no cross-tier verdict (#9544).",
+      "evidence": "`solvers/mpm/envelope.py` refuses F1 ball launch, absolute club force and out-of-plane results, and the launch handoff stamps ball launch as `MODELED_CONVENTION`. The playability objective is computed from an uncalibrated transfer whose corrected divot mass leaves the nominal window degenerate (#9239); the workbench comparison and the v1 API now refuse to name a predictive winner on it and label any lead exploratory, but the nominal grid has not been re-run on the supported flight stack, and the contact regimes have no cross-tier verdict (#9544).",
       "blockers": [9239, 9544]
     },
     {
