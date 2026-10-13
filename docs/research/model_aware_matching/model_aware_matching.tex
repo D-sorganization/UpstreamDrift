@@ -506,9 +506,26 @@ container.
   \item \textbf{Observations.} Markerless 2-D keypoints enter through camera
     projection with robust kernels; marker attachment offsets are geometry
     variables so dimension refinement propagates to the markers.
-  \item \textbf{Actuation layer.} Net torques first; an optional declared
-    joint-level activation model maps torques to bounded activations with
-    first-order dynamics (reported as a model choice, not a measurement).
+  \item \textbf{Actuation layer (MOSAIC-11, \#11543).} Net torques first; an
+    optional declared joint-level activation model maps commanded torques $\bu$
+    to physically realisable bounded applied torques $\mathbf{a}$ with
+    first-order lag dynamics:
+    \begin{equation}
+      \frac{\mathrm{d}a_j}{\mathrm{d}t} = \frac{u_j - a_j}{\tau_j}, \quad
+      \tau_j = \begin{cases}
+        \tau_{\mathrm{act},j}, & u_j > a_j \\
+        \tau_{\mathrm{deact},j}, & u_j \le a_j
+      \end{cases}
+    \end{equation}
+    subject to hard bounds $a_j \in [u_{\min,j}, u_{\max,j}]$ and optional slew-rate
+    limits $|\dot{a}_j| \le r_j$.  Under zero-order-hold commands each step
+    satisfies the exact discrete recurrence
+    $a_{k+1} = u_k + (a_k - u_k)\exp(-\Delta t/\tau)$, preserving analytic
+    step/ramp responses to machine precision.  Time constants are fitted
+    separately on rising and falling steps or reported unobservable (\texttt{None})
+    when unexcited.  Both open-loop rollouts (with and without the actuation
+    layer) are evaluated on fitted trials and reported side-by-side in
+    \texttt{SubjectFitReport.activation\_report} alongside declared provenance.
 \end{itemize}
 
 \section{Generalisation to Humanoids and Manipulation}

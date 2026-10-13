@@ -58,14 +58,18 @@ def test_activation_model_preconditions_enforced() -> None:
 
 def test_time_constant_recovery_and_unobservable_reporting() -> None:
     dt = 0.005
-    times = np.arange(200) * dt
+    times = np.arange(200, dtype=np.float64) * dt
     # Step up then down
-    u = np.zeros(200)
+    u = np.zeros(200, dtype=np.float64)
     u[20:100] = 5.0
     u[100:180] = 1.0
 
     model = ActivationModel(
-        tau_act=0.04, tau_deact=0.08, lower=-10.0, upper=10.0, provenance="literature_priors"
+        tau_act=0.04,
+        tau_deact=0.08,
+        lower=-10.0,
+        upper=10.0,
+        provenance="literature_priors",
     )
     a = simulate_activation(model, times, u[:, None], a0=np.array([0.0]))[:, 0]
 
@@ -77,8 +81,8 @@ def test_time_constant_recovery_and_unobservable_reporting() -> None:
     assert fit.tau_deact == pytest.approx(0.08, rel=0.05)
 
     # Completely flat signal reports unobservable (None)
-    u_flat = np.full(200, 2.0)
-    a_flat = np.full(200, 2.0)
+    u_flat = np.full(200, 2.0, dtype=np.float64)
+    a_flat = np.full(200, 2.0, dtype=np.float64)
     fit_flat = fit_time_constants(times, u_flat, a_flat, lower=-10.0, upper=10.0)
     assert fit_flat.tau_act is None
     assert fit_flat.tau_deact is None
@@ -105,7 +109,7 @@ def test_subject_fit_reports_activation_side_by_side() -> None:
         initial_parameters=pi_prior,
         parameterization=PlanarParameterization(),
         priors=reference_priors(pi_prior),
-        options=OuterOptions(max_outer_iterations=2),
+        options=OuterOptions(continuation=(0.0, 1.0), max_iterations_per_stage=2),
         activation_model=activation_model,
     )
 
