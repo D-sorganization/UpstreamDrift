@@ -2094,16 +2094,16 @@
       "bytes": 69285
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf": {
-      "sha256": "bf855f791e142e9ff84a30af61966bee6a0fcf406fdb7f41616e0de8a6e567e5",
-      "bytes": 2012367
+      "sha256": "d31845c18029151ab08aeefef4e7d067d7bd6605698ee5beb0895325cd45b76c",
+      "bytes": 2013145
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd": {
       "sha256": "0f963245c75dad095f50e64772ff4b68c8b97a877adbac57d6991ba60197733b",
       "bytes": 20195
     },
     "docs/research/proximal_distal_energy_transfer/references.bib": {
-      "sha256": "befdd73b9ec20dbeb2eb696cfd5f139d59f12ad510d69e6c685c3f33f59e77d7",
-      "bytes": 42931
+      "sha256": "c978a5db95187e363e10a230910adf250821e8ae4a5c5ada8f14aee28b71299c",
+      "bytes": 42938
     },
     "scripts/research/proximal_distal_energy/__init__.py": {
       "sha256": "6284875dd432761d214dbcad5031e14cc4203018bc19b59005712521acb1bea1",
