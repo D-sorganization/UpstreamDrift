@@ -244,6 +244,64 @@ def _seed_floor_plateaus(
     return seeded
 
 
+class _BoundedPathEvaluator:
+    """Invocation-local LRU cache of at most two observations for one path."""
+
+    __slots__ = ("_path", "_dt_s", "_max_entries", "_cache")
+
+    def __init__(
+        self,
+        path: MuscleRecruitmentPath,
+        dt_s: float,
+        max_entries: int = 2,
+    ) -> None:
+        self._path = path
+        self._dt_s = dt_s
+        self._max_entries = max_entries
+        self._cache: dict[float, _Evaluation] = {}
+
+    def __call__(self, excitation: float) -> _Evaluation:
+        raw = float(excitation)
+        if not math.isfinite(raw):
+            return _evaluate(self._path, raw, self._dt_s)
+        if raw in self._cache:
+            entry = self._cache.pop(raw)
+            self._cache[raw] = entry
+            return _Evaluation(
+                activation=entry.activation,
+                effective_excitation=entry.effective_excitation,
+                components=dict(entry.components),
+                tendon_force=entry.tendon_force,
+                equilibrium_residual_n=entry.equilibrium_residual_n,
+            )
+        result = _evaluate(self._path, raw, self._dt_s)
+        if len(self._cache) >= self._max_entries:
+            first_key = next(iter(self._cache))
+            del self._cache[first_key]
+        self._cache[raw] = result
+        return _Evaluation(
+            activation=result.activation,
+            effective_excitation=result.effective_excitation,
+            components=dict(result.components),
+            tendon_force=result.tendon_force,
+            equilibrium_residual_n=result.equilibrium_residual_n,
+        )
+
+
+def _default_evaluator_factory(
+    path: MuscleRecruitmentPath, dt_s: float
+) -> Callable[[float], _Evaluation]:
+    """Default invocation-local evaluator factory with a bounded cache."""
+    return _BoundedPathEvaluator(path, dt_s)
+
+
+def _uncached_path_evaluator_factory(
+    path: MuscleRecruitmentPath, dt_s: float
+) -> Callable[[float], _Evaluation]:
+    """Uncached evaluator factory used for reference checks in unit tests."""
+    return lambda excitation: _evaluate(path, float(excitation), dt_s)
+
+
 class _ExcitationSearcher:
     """Bounded least-squares search over free excitation channels."""
 
@@ -253,11 +311,17 @@ class _ExcitationSearcher:
         coordinate_names: Sequence[str],
         request: _ParsedAllocationRequest,
         boxes: list[tuple[float, float]],
+        evaluator_factory: (
+            Callable[[MuscleRecruitmentPath, float], Callable[[float], _Evaluation]]
+            | None
+        ) = None,
     ) -> None:
         self._paths = paths
         self._coordinate_names = coordinate_names
         self._request = request
         self._boxes = boxes
+        factory = evaluator_factory or _default_evaluator_factory
+        self._evaluators = [factory(path, request.dt) for path in paths]
         self._fixed = {i: low for i, (low, high) in enumerate(boxes) if low == high}
         self._free = [i for i, (low, high) in enumerate(boxes) if low < high]
         self._candidate0 = np.asarray(
@@ -277,10 +341,7 @@ class _ExcitationSearcher:
                 f"maximum candidate-evaluation budget {self._request.max_nfev} exhausted"
             )
         self.evaluation_count += 1
-        details = [
-            _evaluate(path, float(value), self._request.dt)
-            for path, value in zip(self._paths, values, strict=True)
-        ]
+        details = [self._evaluators[i](float(value)) for i, value in enumerate(values)]
         effort = np.zeros(self._request.size, dtype=float)
         for path, detail in zip(self._paths, details, strict=True):
             for i, coordinate in enumerate(self._coordinate_names):

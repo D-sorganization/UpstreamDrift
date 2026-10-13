@@ -59,7 +59,11 @@ dynamically infeasible. Chapter 39 and
 activation-kernel floor, evaluation budget, and limits. Chapter 39 also defines
 the shared immutable scalar Hill-force snapshot used by the allocator and
 available to a future artifact-validated replay reader; this does not add a
-serialized reader or native-engine parity. Before full-body use,
+serialized reader or native-engine parity. An invocation-local, bounded LRU cache
+(at most two observations per path, keyed by raw excitation float under fixed-step
+inputs) avoids redundant equilibrium solves during finite-difference Jacobian probes
+(#12388). Candidate budget counting, equations, and outputs are unchanged.
+Before full-body use,
 the next bounded synthetic slice must connect the existing controller seam to
 this allocation layer, keep requested/applied effort and raw/effective
 excitation distinct, then replay saved commands with feedback disabled under

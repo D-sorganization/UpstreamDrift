@@ -529,7 +529,9 @@ def test_optimizer_budget_exhaustion_never_claims_feasible(
     assert result.status == "budget_exhausted"
     assert not result.feasible
     assert result.nfev == 3
-    assert equilibrium_calls == 3
+    # With invocation-local caching, x0 is a cache hit from the initial baseline;
+    # uncached evaluation required 3 equilibrium solves.
+    assert equilibrium_calls == 2
 
 
 def test_optimizer_failure_is_distinct_from_infeasible_residual(
@@ -557,3 +559,302 @@ def test_optimizer_failure_is_distinct_from_infeasible_residual(
     assert result.status == "solver_failed"
     assert not result.feasible
     assert "solver-failure" in result.excitations
+
+
+def _assert_nested_forces_approx(
+    actual: dict[str, dict[str, float]], expected: dict[str, dict[str, float]]
+) -> None:
+    assert set(actual) == set(expected)
+    for path_name, comp in expected.items():
+        assert actual[path_name] == pytest.approx(comp, abs=1e-12)
+
+
+def test_cached_and_uncached_allocation_results_agree_exactly(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for n in (2, 8, 16):
+        n_coords = min(4, n)
+        coords = tuple(f"coord_{j}" for j in range(n_coords))
+        paths = tuple(
+            _path(
+                f"m_{i}",
+                {coords[i % n_coords]: 0.03 if i % 2 == 0 else -0.025},
+                prior=0.1 + 0.02 * (i % 10),
+            )
+            for i in range(n)
+        )
+        targets = tuple(1.0 - 0.5 * j for j in range(n_coords))
+        units = ("N*m",) * n_coords
+        tols = (1e-2,) * n_coords
+
+        cached = allocate_muscle_excitations(
+            paths,
+            coords,
+            targets,
+            coordinate_effort_units=units,
+            dt_s=0.001,
+            effort_tolerances=tols,
+        )
+
+        monkeypatch.setattr(
+            muscle_allocation,
+            "_default_evaluator_factory",
+            muscle_allocation._uncached_path_evaluator_factory,
+        )
+        uncached = allocate_muscle_excitations(
+            paths,
+            coords,
+            targets,
+            coordinate_effort_units=units,
+            dt_s=0.001,
+            effort_tolerances=tols,
+        )
+        monkeypatch.undo()
+
+        assert cached.status == uncached.status
+        assert cached.feasible == uncached.feasible
+        assert cached.nfev == uncached.nfev
+        assert cached.excitations == pytest.approx(uncached.excitations, abs=1e-12)
+        assert cached.effective_excitations == pytest.approx(
+            uncached.effective_excitations, abs=1e-12
+        )
+        assert cached.activations == pytest.approx(uncached.activations, abs=1e-12)
+        assert cached.generalized_effort == pytest.approx(
+            uncached.generalized_effort, abs=1e-12
+        )
+        assert cached.residual_by_coordinate == pytest.approx(
+            uncached.residual_by_coordinate, abs=1e-12
+        )
+        assert cached.effective_bounds == uncached.effective_bounds
+        _assert_nested_forces_approx(cached.muscle_forces_n, uncached.muscle_forces_n)
+
+
+def test_cache_reduces_equilibrium_solves_on_manufactured_fixture(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    n = 16
+    n_coords = 4
+    coords = tuple(f"coord_{j}" for j in range(n_coords))
+    paths = tuple(
+        _path(
+            f"m_{i}",
+            {coords[i % n_coords]: 0.03 if i % 2 == 0 else -0.025},
+            prior=0.1 + 0.02 * (i % 10),
+        )
+        for i in range(n)
+    )
+    targets = tuple(1.0 - 0.5 * j for j in range(n_coords))
+    units = ("N*m",) * n_coords
+    tols = (1e-2,) * n_coords
+
+    solves = {"cached": 0, "uncached": 0}
+    orig_solve = EquilibriumSolver.solve_fiber_length
+    orig_factory = muscle_allocation._default_evaluator_factory
+
+    def count_uncached(
+        self: EquilibriumSolver, *args: object, **kwargs: object
+    ) -> float:
+        solves["uncached"] += 1
+        return orig_solve(self, *args, **kwargs)
+
+    monkeypatch.setattr(EquilibriumSolver, "solve_fiber_length", count_uncached)
+    monkeypatch.setattr(
+        muscle_allocation,
+        "_default_evaluator_factory",
+        muscle_allocation._uncached_path_evaluator_factory,
+    )
+    uncached = allocate_muscle_excitations(
+        paths,
+        coords,
+        targets,
+        coordinate_effort_units=units,
+        dt_s=0.001,
+        effort_tolerances=tols,
+    )
+
+    def count_cached(self: EquilibriumSolver, *args: object, **kwargs: object) -> float:
+        solves["cached"] += 1
+        return orig_solve(self, *args, **kwargs)
+
+    monkeypatch.setattr(EquilibriumSolver, "solve_fiber_length", count_cached)
+    monkeypatch.setattr(
+        muscle_allocation,
+        "_default_evaluator_factory",
+        orig_factory,
+    )
+    cached = allocate_muscle_excitations(
+        paths,
+        coords,
+        targets,
+        coordinate_effort_units=units,
+        dt_s=0.001,
+        effort_tolerances=tols,
+    )
+
+    assert cached.nfev == uncached.nfev
+    # For N=16 paths, every uncached candidate evaluation must evaluate all 16 paths.
+    assert solves["uncached"] == n * uncached.nfev
+    # Bounded caching drops finite-difference redundant solves dramatically (e.g. 832 down to 96).
+    assert solves["cached"] < solves["uncached"] / 4
+
+
+def test_cache_is_invocation_local_and_does_not_persist() -> None:
+    path_a = _path("m", {"hip": 0.05}, prior=0.2)
+    path_b = replace(
+        path_a, muscle_tendon_length_m=0.33, activation=0.4, previous_excitation=0.4
+    )
+
+    res_a1 = allocate_muscle_excitations(
+        (path_a,),
+        ("hip",),
+        (1.0,),
+        coordinate_effort_units=("N*m",),
+        dt_s=0.001,
+        effort_tolerances=(1e-2,),
+    )
+    res_b = allocate_muscle_excitations(
+        (path_b,),
+        ("hip",),
+        (1.0,),
+        coordinate_effort_units=("N*m",),
+        dt_s=0.001,
+        effort_tolerances=(1e-2,),
+    )
+    res_a2 = allocate_muscle_excitations(
+        (path_a,),
+        ("hip",),
+        (1.0,),
+        coordinate_effort_units=("N*m",),
+        dt_s=0.001,
+        effort_tolerances=(1e-2,),
+    )
+
+    assert res_a1.excitations == pytest.approx(res_a2.excitations, abs=1e-12)
+    _assert_nested_forces_approx(res_a1.muscle_forces_n, res_a2.muscle_forces_n)
+    assert res_b.excitations["m"] != pytest.approx(res_a1.excitations["m"], abs=1e-4)
+
+
+def test_bounded_path_evaluator_lru_and_capacity_bound() -> None:
+    path = _path("m", {"hip": 0.05})
+    evaluator = muscle_allocation._BoundedPathEvaluator(path, dt_s=0.001, max_entries=2)
+
+    assert len(evaluator._cache) == 0
+    # Entry 1
+    evaluator(0.1)
+    assert len(evaluator._cache) == 1
+    assert 0.1 in evaluator._cache
+
+    # Entry 2
+    evaluator(0.2)
+    assert len(evaluator._cache) == 2
+    assert 0.1 in evaluator._cache
+    assert 0.2 in evaluator._cache
+
+    # Access entry 1 (becomes MRU)
+    evaluator(0.1)
+    assert len(evaluator._cache) == 2
+
+    # Entry 3 evicts 0.2 (oldest LRU entry), keeps 0.1 and 0.3
+    evaluator(0.3)
+    assert len(evaluator._cache) == 2
+    assert 0.2 not in evaluator._cache
+    assert 0.1 in evaluator._cache
+    assert 0.3 in evaluator._cache
+
+
+def test_evaluator_does_not_cache_exceptions(monkeypatch: pytest.MonkeyPatch) -> None:
+    path = _path("m", {"hip": 0.05})
+    evaluator = muscle_allocation._BoundedPathEvaluator(path, dt_s=0.001, max_entries=2)
+
+    # Non-finite values raise before or inside _evaluate and are not stored in cache
+    with pytest.raises(ValueError):
+        evaluator(float("nan"))
+    assert len(evaluator._cache) == 0
+
+    calls = 0
+
+    def failing_evaluate(
+        *args: object, **kwargs: object
+    ) -> muscle_allocation._Evaluation:
+        nonlocal calls
+        calls += 1
+        raise RuntimeError("simulated solver crash")
+
+    monkeypatch.setattr(muscle_allocation, "_evaluate", failing_evaluate)
+
+    with pytest.raises(RuntimeError, match="simulated solver crash"):
+        evaluator(0.25)
+    with pytest.raises(RuntimeError, match="simulated solver crash"):
+        evaluator(0.25)
+
+    assert calls == 2
+    assert len(evaluator._cache) == 0
+
+
+def test_mutation_isolation_on_cached_evaluations() -> None:
+    paths = (_path("m1", {"hip": 0.05}),)
+    result = allocate_muscle_excitations(
+        paths,
+        ("hip",),
+        (0.5,),
+        coordinate_effort_units=("N*m",),
+        dt_s=0.001,
+        effort_tolerances=(1e-2,),
+    )
+    original_force = result.muscle_forces_n["m1"]["tendon_n"]
+    # Caller mutates returned dictionary
+    result.muscle_forces_n["m1"]["tendon_n"] = 999999.0
+
+    # Repeat call must return fresh uncorrupted dictionaries
+    result2 = allocate_muscle_excitations(
+        paths,
+        ("hip",),
+        (0.5,),
+        coordinate_effort_units=("N*m",),
+        dt_s=0.001,
+        effort_tolerances=(1e-2,),
+    )
+    assert result2.muscle_forces_n["m1"]["tendon_n"] == pytest.approx(
+        original_force, abs=1e-12
+    )
+
+
+def test_fixed_and_raw_zero_channels_interact_properly_with_cache(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    paths = (
+        _path("free", {"hip": 0.05}, prior=0.2),
+        replace(
+            _path("fixed_zero", {"hip": 0.02}, prior=0.0, rate=0.0),
+            excitation_bounds=(0.0, 0.0),
+        ),
+        replace(
+            _path("fixed_pos", {"hip": 0.02}, prior=0.3, rate=0.0),
+            excitation_bounds=(0.3, 0.3),
+        ),
+    )
+    solves = {"free": 0, "fixed_zero": 0, "fixed_pos": 0}
+    orig_eval = muscle_allocation._evaluate
+
+    def spy_evaluate(
+        path: MuscleRecruitmentPath, exc: float, dt: float
+    ) -> muscle_allocation._Evaluation:
+        if path.name in solves:
+            solves[path.name] += 1
+        return orig_eval(path, exc, dt)
+
+    monkeypatch.setattr(muscle_allocation, "_evaluate", spy_evaluate)
+
+    result = allocate_muscle_excitations(
+        paths,
+        ("hip",),
+        (0.5,),
+        coordinate_effort_units=("N*m",),
+        dt_s=0.001,
+        effort_tolerances=(10.0,),
+    )
+    assert result.feasible
+    # Fixed channels are evaluated at candidate0 and cached; they should never be evaluated again
+    assert solves["fixed_zero"] == 1
+    assert solves["fixed_pos"] == 1
+    assert solves["free"] > 1

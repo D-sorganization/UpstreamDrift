@@ -49,6 +49,24 @@ A future trace must also bind the continuous input basis: held commands and a
 piecewise-linear input player are different trajectories even when their
 sampled command values match.
 
+## Bounded Path Observation Caching (#12388)
+
+`muscle_allocation._BoundedPathEvaluator` wraps each path evaluator with an
+invocation-local, bounded LRU cache of at most two observations per path, keyed
+by exact raw excitation float under fixed-step inputs. No global cache, state
+persistence across invocations, or rounding exists. Exceptions are never cached.
+During dense finite-difference Jacobian probes, each perturbation modifies only
+one free channel while the other channels remain identical to the base candidate;
+the cache avoids redundant equilibrium solves for all unchanged channels.
+
+Equations, numerical statuses, candidate evaluation budget counting (`max_nfev`),
+and results are completely unchanged: unit tests prove bit-for-bit agreement
+between cached and uncached allocations across N=2, 8, and 16 muscle fixtures. On
+an N=16 synthetic fixture, actual equilibrium solves dropped from 832 to 96
+(an 88.5% reduction) with identical candidate counts and results. Caching does
+not solve the dense Jacobian startup limit for large channel counts (>78 free
+channels), which remains bounded by explicit `max_nfev` budget exhaustion.
+
 ## Limits and Next Step
 
 This finite-difference least-squares prototype evaluates per-path equilibrium at every candidate. The tests cover only the small analytic fixture; there is no 557-muscle throughput or scaling evidence. The default 80-evaluation budget counts the initial candidate, duplicate objective evaluations, and finite-difference probes; a problem with roughly 78 free channels can exhaust before a complete dense Jacobian. Cached/sparse Jacobians, solver/factorization warm-start reuse, measured cost, and a bounded closed-loop fixture are needed before full-body integration. The next fixture should feed the allocator desired effort from the existing controller seam, preserve separate desired effort, applied effort, raw commands, and effective excitations, and replay saved commands with feedback disabled under the same declared kernel. No change to qualification in the 17-row model inventory or cross-engine parity follows. Anatomy, sourced moment arms, physiological acceptance, passive-load policy, contact, full-clock replay, and all-model qualification remain open.
