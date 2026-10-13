@@ -73,6 +73,7 @@ class DrakeUIMixin:
 
     def _setup_ui(self: Any) -> None:
         """Build the PyQt Interface."""
+        self._drake_ui_initialized = False
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
@@ -97,6 +98,7 @@ class DrakeUIMixin:
 
         # Populate Kinematic Sliders
         self._build_kinematic_controls()
+        self._drake_ui_initialized = True
 
     def _setup_model_selector(self: Any, layout: Any) -> None:
         """Build the model selection group box."""
@@ -373,14 +375,18 @@ class DrakeUIMixin:
 
         # Populate induced source combo with joint names
         current_text = self.combo_induced_source.currentText()
-        self.combo_induced_source.clear()
-        self.combo_induced_source.addItems(["gravity", "velocity", "total"])
-        for i in range(plant.num_joints()):
-            joint = plant.get_joint(JointIndex(i))
-            if joint.num_velocities() == 1:
-                self.combo_induced_source.addItem(joint.name())
-        if current_text:
-            self.combo_induced_source.setCurrentText(current_text)
+        was_blocked = self.combo_induced_source.blockSignals(True)
+        try:
+            self.combo_induced_source.clear()
+            self.combo_induced_source.addItems(["gravity", "velocity", "total"])
+            for i in range(plant.num_joints()):
+                joint = plant.get_joint(JointIndex(i))
+                if joint.num_velocities() == 1:
+                    self.combo_induced_source.addItem(joint.name())
+            if current_text:
+                self.combo_induced_source.setCurrentText(current_text)
+        finally:
+            self.combo_induced_source.blockSignals(was_blocked)
 
         # Iterate over joints
         for i in range(plant.num_joints()):

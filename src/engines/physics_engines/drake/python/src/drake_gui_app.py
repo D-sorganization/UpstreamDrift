@@ -189,7 +189,9 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         self._init_simulation()
 
         # UI Setup
+        self._drake_ui_initialized = False
         self._setup_ui()
+        self._drake_ui_initialized = True
 
         install_force_color_menu(
             self, lambda: [self._force_overlay or self.segment_force_colors]

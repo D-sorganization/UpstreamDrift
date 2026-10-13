@@ -53,6 +53,7 @@ class UISetupMixin:
 
     def _setup_ui(self) -> None:
         """Build the PyQt Interface."""
+        self._drake_ui_initialized = False
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)  # type: ignore[attr-defined]
         layout = QtWidgets.QVBoxLayout(central_widget)
@@ -77,6 +78,7 @@ class UISetupMixin:
 
         # Populate Kinematic Sliders
         self._build_kinematic_controls()
+        self._drake_ui_initialized = True
 
     def _setup_model_selector(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the model selection group box."""
@@ -268,8 +270,11 @@ class UISetupMixin:
         self.chk_show_forces.toggled.connect(self._on_visualization_changed)  # type: ignore[attr-defined]
         self.chk_show_torques = QtWidgets.QCheckBox("Show Torques")
         self.chk_show_torques.toggled.connect(self._on_visualization_changed)  # type: ignore[attr-defined]
+        self.chk_show_gravity = QtWidgets.QCheckBox("Show Gravity")
+        self.chk_show_gravity.toggled.connect(self._on_visualization_changed)  # type: ignore[attr-defined]
         ft_grid.addWidget(self.chk_show_forces, 0, 0)
         ft_grid.addWidget(self.chk_show_torques, 0, 1)
+        ft_grid.addWidget(self.chk_show_gravity, 0, 2)
         vis_layout.addLayout(ft_grid)
 
         # Ellipsoid Toggles
@@ -364,14 +369,18 @@ class UISetupMixin:
 
         # Populate induced source combo with joint names
         current_text = self.combo_induced_source.currentText()
-        self.combo_induced_source.clear()
-        self.combo_induced_source.addItems(["gravity", "velocity", "total"])
-        for i in range(plant.num_joints()):
-            joint = plant.get_joint(JointIndex(i))
-            if joint.num_velocities() == 1:
-                self.combo_induced_source.addItem(joint.name())
-        if current_text:
-            self.combo_induced_source.setCurrentText(current_text)
+        was_blocked = self.combo_induced_source.blockSignals(True)
+        try:
+            self.combo_induced_source.clear()
+            self.combo_induced_source.addItems(["gravity", "velocity", "total"])
+            for i in range(plant.num_joints()):
+                joint = plant.get_joint(JointIndex(i))
+                if joint.num_velocities() == 1:
+                    self.combo_induced_source.addItem(joint.name())
+            if current_text:
+                self.combo_induced_source.setCurrentText(current_text)
+        finally:
+            self.combo_induced_source.blockSignals(was_blocked)
 
         # Iterate over joints
 
