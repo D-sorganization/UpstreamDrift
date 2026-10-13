@@ -42,6 +42,9 @@ __all__ = [
     "OutputPolicyError",
     "OutputStatus",
     "evaluate_output_policy",
+    "face_observability_of_receipt",
+    "render_face_observability_markdown",
+    "render_output_policy_markdown",
 ]
 
 ADVERTISED_OUTPUTS: tuple[str, ...] = (
@@ -199,3 +202,36 @@ def render_output_policy_markdown(statuses: Mapping[str, OutputStatus]) -> str:
         label = _DISPLAY_LABELS.get(status.status, status.status)
         lines.append(f"| `{name}` | **{label}** | {status.reason} |")
     return "\n".join(lines) + "\n"
+
+
+def face_observability_of_receipt(
+    receipt: Mapping[str, Any],
+) -> FaceObservability | None:
+    """The receipt's ``ik.face_observability`` audit, or None when absent.
+
+    Raises:
+        ValueError: When the block is present but malformed (fail closed).
+    """
+    from src.shared.python.motion_matching.club_observability import (
+        face_observability_from_receipt,
+    )
+
+    ik = receipt.get("ik")
+    block = ik.get("face_observability") if isinstance(ik, Mapping) else None
+    return None if block is None else face_observability_from_receipt(block)
+
+
+def render_face_observability_markdown(
+    observability: FaceObservability | None,
+) -> str:
+    """Render the face-angle audit: coverage and gap runs, never an angle."""
+    if observability is None:
+        return "Face-angle observability: not audited for this receipt.\n"
+    gaps = ", ".join(f"[{a}, {b})" for a, b in observability.gaps) or "none"
+    verdict = "observable" if observability.observable else "unobservable"
+    return (
+        f"Face-angle observability: {verdict} ({observability.reason}).\n\n"
+        f"- Observed frames: {observability.observed_frames}/"
+        f"{observability.total_frames} ({observability.coverage:.1%})\n"
+        f"- Unobserved frame runs: {gaps}\n"
+    )

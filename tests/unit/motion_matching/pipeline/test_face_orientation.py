@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching import club_face_target as cft
+from src.shared.python.motion_matching.club_observability import FaceObservability
 from src.shared.python.motion_matching.pipeline.constants import (
     LEG_SEEDS,
     capture_path,
@@ -56,6 +57,9 @@ def test_face_targets_cover_every_observed_capture_frame(
     assert first[cft.FACE_FRAME][2] == 2.0
     assert lane.face_weight == 2.0
     assert lane.face_unavailable_reason is None
+    audit = lane.face_observability
+    assert audit is not None and audit.observable
+    assert audit.observed_frames == int(observed.sum())
 
 
 def _document_attachments(name: str) -> tuple[dict, dict]:
@@ -81,6 +85,8 @@ def test_mismatched_head_triad_leaves_face_and_impact_unavailable() -> None:
     assert lane.face_targets is None
     assert lane.face_weight == 3.0
     assert "do not match" in (lane.face_unavailable_reason or "")
+    assert lane.face_observability is not None
+    assert not lane.face_observability.observable
     lane.set_impact_split(iron_att, iron_spec)
     assert lane.impact_index is None
     assert lane.impact_split_reason.startswith("unavailable")
@@ -109,12 +115,32 @@ def test_attach_face_report_records_the_unavailable_reason() -> None:
         impact_split_report=dict,
         face_targets=None,
         face_unavailable_reason="triad mismatch",
+        face_observability=FaceObservability(False, "triad mismatch", 0, 4, ((0, 4),)),
     )
     report: dict = {}
     _attach_face_report(report, lane, None, (np.zeros(1), np.zeros(1)), 3.0)
     block = report["face_orientation"]
     assert block["available"] is False and block["reason"] == "triad mismatch"
     assert block["weight"] == 3.0 and block["targeted_frames"] == 0
+    assert report["face_observability"] == lane.face_observability.to_receipt()
+
+
+def test_attach_face_report_records_the_audit_even_at_zero_weight() -> None:
+    from types import SimpleNamespace
+
+    from src.shared.python.motion_matching.pipeline.cli import _attach_face_report
+
+    audit = FaceObservability(True, "observable", 3, 4, ((1, 2),))
+    lane = SimpleNamespace(
+        impact_split_report=dict,
+        face_targets=None,
+        face_unavailable_reason=None,
+        face_observability=audit,
+    )
+    report: dict = {}
+    _attach_face_report(report, lane, None, (np.zeros(1), np.zeros(1)), 0.0)
+    assert report["face_observability"] == audit.to_receipt()
+    assert "face_orientation" not in report
 
 
 def test_zero_weight_keeps_the_marker_only_fit(

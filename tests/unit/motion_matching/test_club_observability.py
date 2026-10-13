@@ -20,6 +20,7 @@ from src.shared.python.motion_matching.club_observability import (
     REASON_TOO_FEW_MARKERS,
     FaceObservability,
     audit_face_observability,
+    face_observability_from_receipt,
 )
 
 pytestmark = pytest.mark.unit
@@ -148,3 +149,56 @@ class TestContract:
                 total_frames=4,
                 gaps=((0, 4),),
             )
+
+
+class TestShapeMismatchConsistency:
+    def test_observed_frames_agree_with_gaps(self) -> None:
+        points, valid = _capture()
+        valid[2:4, 0] = False
+        other = {label: 2.0 * offset for label, offset in OFFSETS.items()}
+        audit = audit_face_observability(points, valid, LABELS, other)
+        assert audit.reason == REASON_SHAPE_MISMATCH
+        assert audit.gaps == ((2, 4),)
+        gap_frames = sum(stop - start for start, stop in audit.gaps)
+        assert audit.observed_frames + gap_frames == audit.total_frames
+        assert audit.observed_frames == FRAMES - 2
+
+
+class TestReceiptBlock:
+    def test_round_trip_preserves_the_audit(self) -> None:
+        points, valid = _capture()
+        valid[1:3, 2] = False
+        audit = audit_face_observability(points, valid, LABELS, OFFSETS)
+        block = audit.to_receipt()
+        assert block["gaps"] == [[1, 3]]
+        assert block["coverage"] == pytest.approx((FRAMES - 2) / FRAMES)
+        assert face_observability_from_receipt(block) == audit
+
+    def test_block_is_json_serialisable(self) -> None:
+        import json
+
+        points, valid = _capture()
+        audit = audit_face_observability(points, valid, LABELS, OFFSETS)
+        assert json.loads(json.dumps(audit.to_receipt())) == audit.to_receipt()
+
+    @pytest.mark.parametrize(
+        "mutate",
+        [
+            lambda b: b.pop("reason"),
+            lambda b: b.update(observed_frames=-1),
+            lambda b: b.update(observed_frames=True),
+            lambda b: b.update(gaps=[[3, 1]]),
+            lambda b: b.update(gaps=[[0, 99]]),
+            lambda b: b.update(observable="yes"),
+        ],
+    )
+    def test_malformed_block_is_rejected(self, mutate) -> None:
+        points, valid = _capture()
+        block = audit_face_observability(points, valid, LABELS, OFFSETS).to_receipt()
+        mutate(block)
+        with pytest.raises(ValueError):
+            face_observability_from_receipt(block)
+
+    def test_non_mapping_is_rejected(self) -> None:
+        with pytest.raises(ValueError, match="mapping"):
+            face_observability_from_receipt([1, 2])
