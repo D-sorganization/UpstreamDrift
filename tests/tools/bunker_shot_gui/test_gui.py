@@ -212,9 +212,10 @@ class TestComparison:
     ) -> None:
         """Issue #9243: the report headlines a verdict, never a leader.
 
-        The verdict is allowed to be "indistinguishable", so this asserts that
-        one of the three admissible answers reached the widget -- not that a
-        design name did.
+        The verdict is allowed to be "indistinguishable", and an uncalibrated
+        objective's lead is only exploratory (#9239), so this asserts that one
+        of the admissible answers reached the widget -- not that a design name
+        did.
         """
         widget.run_comparison()
         text = widget.report_text
@@ -222,6 +223,7 @@ class TestComparison:
         assert (
             "INDISTINGUISHABLE" in text
             or "is better" in text
+            or "EXPLORATORY ONLY" in text
             or "not available" in text
         )
         assert "Leader" not in text

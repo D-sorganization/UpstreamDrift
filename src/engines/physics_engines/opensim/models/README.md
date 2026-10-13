@@ -91,7 +91,8 @@ following modifications:
    rotation (`grip_hand_rotation`, #12306: the shaft diagonally across the
    palm toward the thumb, the trail palm facing the target with its fingers
    wrapping under the shaft, the lead palm facing away from it, so the
-   palms are opposed; within 2 degrees at the solution), keeps the wrists in
+   palms are opposed; within 2 degrees at the solution; the palm diagonal
+   and palm facing come from the shared `grip_pose` definition, #11728), keeps the wrists in
    their physiological deviation range, follows
    the generated model's hip, shoulder and elbow centres at the captured
    address and plants the feet (the generated feet are unobserved). The
