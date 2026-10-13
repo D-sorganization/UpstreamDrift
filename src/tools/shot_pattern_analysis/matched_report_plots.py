@@ -17,9 +17,11 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from .core import PATTERN_NAMES
+from .figure_style import reproducible_metadata
 from .noise import NOISE_DISPLAY_LABELS, NoiseSpec
 
-PATTERNS = ("Straight", "Draw", "Fade")
+PATTERNS = PATTERN_NAMES
 CLUBS = ("driver", "seven_iron", "pitching_wedge")
 _METRICS = {
     "target_rmse_m": ("Raw-Endpoint Target RMSE (m)", "viridis", "RMSE (m)"),
@@ -790,7 +792,12 @@ def _draw_metric(
     for extension in formats:
         path = output_stem.with_suffix(f".{extension}")
         fig.savefig(
-            path, format=extension, dpi=dpi, bbox_inches="tight", facecolor="white"
+            path,
+            format=extension,
+            dpi=dpi,
+            bbox_inches="tight",
+            facecolor="white",
+            metadata=reproducible_metadata(extension),
         )
         outputs[extension] = path
     plt.close(fig)

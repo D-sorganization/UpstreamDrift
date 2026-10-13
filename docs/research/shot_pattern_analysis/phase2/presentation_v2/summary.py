@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import re
+import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -24,18 +24,27 @@ SG = {
 }
 
 
+HEADLINE_DATASET = "phase2/statistics_v2/headline_dataset.json"
+"""The article's tables are generated from this file, relative to the article."""
+
+_CLUB_IDS = {
+    "Driver": "driver",
+    "Seven Iron": "seven_iron",
+    "Pitching Wedge": "pitching_wedge",
+}
+
+
 def _verify_ranges(tex: Path) -> None:
-    source = tex.read_text()
+    """Fail unless the plotted ranges equal the headline dataset to 7 digits."""
+    dataset = json.loads((tex.parent / HEADLINE_DATASET).read_text(encoding="utf-8"))
     for club, patterns in SG.items():
-        table_club = "7-Iron" if club == "Seven Iron" else club
+        cells = [c for c in dataset["cells"] if c["club_id"] == _CLUB_IDS[club]]
         for pattern, (low, high, _) in patterns.items():
-            match = re.search(
-                rf"^{re.escape(table_club)} & {pattern} & \\numtext\{{([^}}]+)\}} & \\numtext\{{([^}}]+)\}}",
-                source,
-                re.MULTILINE,
-            )
-            if match is None or not np.allclose(
-                [float(match[1]), float(match[2])], [low, high], rtol=1e-8, atol=1e-12
+            estimates = [
+                c["paired_benefit_vs_straight"][pattern]["estimate"] for c in cells
+            ]
+            if len(estimates) != 8 or not np.allclose(
+                [min(estimates), max(estimates)], [low, high], rtol=1e-6, atol=1e-12
             ):
                 raise ValueError(
                     f"summary range differs from numerical table: {club} {pattern}"

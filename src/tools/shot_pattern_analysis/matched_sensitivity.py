@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import csv
 import gzip
-import hashlib
 import json
 import math
 import os
@@ -12,13 +11,11 @@ from collections.abc import Iterator
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+from .core import PATTERN_NAMES
 from .matched_report import load_validated_cell
-from .provenance import manifest_files_match
+from .provenance import manifest_files_match, publish_new_text, sha256_file
 from .scenario_scoring import score_course_endpoints
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+from .uncertainty import HISTORICAL_RESAMPLES
 
 
 def _source_hashes() -> dict[str, str]:
@@ -37,13 +34,13 @@ def _source_hashes() -> dict[str, str]:
     }
     provider = "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py"
     files[provider] = root / provider
-    return {name: _sha256(path) for name, path in files.items()}
+    return {name: sha256_file(path) for name, path in files.items()}
 
 
 def _supported_endpoints(
     csv_path: Path, n_shots: int
 ) -> tuple[dict[str, list[tuple[int, float, float]]], dict[str, int]]:
-    names = ("Straight", "Draw", "Fade")
+    names = PATTERN_NAMES
     supported: dict[str, dict[int, tuple[float, float]]] = {name: {} for name in names}
     observed: dict[str, set[int]] = {name: set() for name in names}
     invalid = dict.fromkeys(names, 0)
@@ -101,7 +98,8 @@ def _recheck_sensitivity_inputs(
     if _source_hashes() != provenance["source_sha256"]:
         raise RuntimeError("scoring source changed during sensitivity analysis")
     if not manifest_files_match(cell_dir / "manifest.json") or any(
-        _sha256(plan_path if name == "matrix_plan.json" else cell_dir / name) != digest
+        sha256_file(plan_path if name == "matrix_plan.json" else cell_dir / name)
+        != digest
         for name, digest in provenance["input_sha256"].items()
     ):
         raise RuntimeError("saved input changed during sensitivity analysis")
@@ -131,8 +129,8 @@ def analyze_saved_sensitivity(cell_dir: Path, plan_path: Path) -> dict:
         "schema": "matched-course-sensitivity/1",
         "cell": cell_dir.name,
         "input_sha256": {
-            "matrix_plan.json": _sha256(plan_path),
-            **{name: _sha256(cell_dir / name) for name in input_files},
+            "matrix_plan.json": sha256_file(plan_path),
+            **{name: sha256_file(cell_dir / name) for name in input_files},
         },
         "execution": plan["execution"],
         "source_sha256": _source_hashes(),
@@ -179,6 +177,8 @@ def analyze_saved_sensitivity(cell_dir: Path, plan_path: Path) -> dict:
                 club_id=club_id,
                 target_x_m=target_x_m,
                 seed=seed,
+                # Reproduces the frozen October 2026 sensitivity records.
+                resamples=HISTORICAL_RESAMPLES,
                 **dimensions,
             )
         except ValueError as exc:
@@ -201,18 +201,7 @@ def write_saved_sensitivity(cell_dir: Path, plan_path: Path, output_dir: Path) -
     ):
         raise ValueError("sensitivity output must be outside the frozen cell")
     report = analyze_saved_sensitivity(cell_dir, plan_path)
-    output_dir.mkdir(parents=True, exist_ok=True)
     destination = output_dir / f"{cell_dir.name}.course_sensitivity.json"
-    if destination.exists():
-        raise FileExistsError("sensitivity result already exists")
-    with NamedTemporaryFile(
-        "w", encoding="utf-8", dir=output_dir, delete=False
-    ) as handle:
-        temporary = Path(handle.name)
-        json.dump(report, handle, indent=2, allow_nan=False)
-        handle.write("\n")
-    try:
-        os.replace(temporary, destination)
-    finally:
-        temporary.unlink(missing_ok=True)
-    return destination
+    return publish_new_text(
+        destination, json.dumps(report, indent=2, allow_nan=False) + "\n"
+    )

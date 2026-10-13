@@ -213,11 +213,16 @@ def test_legacy_config_without_nominal_bounds_uses_visible_defaults(
 
 
 def test_imported_valid_bounds_are_not_silently_clamped(qapp, tmp_path: Path) -> None:  # noqa: ANN001
+    from src.tools.shot_pattern_analysis.matched_config import MAX_CLUB_SPEED_MPS
+
     widget = _study(qapp)
+    base = widget.build_experiment()
+    # The widest speed factor the 100 m/s club-speed ceiling still admits.
+    widest = int(MAX_CLUB_SPEED_MPS / base.club.club_speed_mps * 100 - 1) / 100
     request = replace(
-        widget.build_experiment(),
+        base,
         match_face_bounds_deg=(-14.995, 14.995),
-        match_speed_factors=(0.75, 12.0),
+        match_speed_factors=(0.75, widest),
     )
     path = tmp_path / "wide.json"
     widget.export_config(path, request)

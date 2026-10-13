@@ -62,7 +62,7 @@ def test_report_source_hashes_includes_matched_pair_social():
     assert "matched_pair_social.py" in hashes
     package_dir = Path(pipeline.__file__).parent
     social_path = package_dir / "matched_pair_social.py"
-    assert hashes["matched_pair_social.py"] == pipeline._sha256(social_path)
+    assert hashes["matched_pair_social.py"] == pipeline.sha256_file(social_path)
 
 
 def test_condition_caption_uses_readable_physical_units_and_preserves_title_case():

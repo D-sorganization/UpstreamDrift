@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import csv
 import gzip
 import json
@@ -15,20 +14,17 @@ from tempfile import NamedTemporaryFile
 
 import numpy as np
 
+from .core import PATTERN_NAMES
 from .matched_matrix import PROFILES
 from .matched_report import load_validated_cell, verify_nominal_deliveries_hit_target
 from .matched_sensitivity import _source_hashes, _supported_endpoints
-from .provenance import manifest_files_match
+from .provenance import manifest_files_match, publish_new_text, sha256_file
 from .scenario_scoring import score_course_endpoints
 from .course_score_vectors import score_course_endpoint_vectors
-from .uncertainty import paired_mean_difference
+from .uncertainty import HISTORICAL_RESAMPLES, paired_mean_difference
 
-PATTERNS = ("Straight", "Draw", "Fade")
+PATTERNS = PATTERN_NAMES
 LEANS = (0.0, 5.0, 10.0)
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _profile(name: str) -> str:
@@ -63,6 +59,7 @@ def _paired_pattern_metrics(
     target_x_m: float,
     radius_m: float,
     seed: int,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> dict:
     a: np.ndarray = np.asarray([(x, y) for _, x, y in before], dtype=float)
     b: np.ndarray = np.asarray([(x, y) for _, x, y in after], dtype=float)
@@ -70,15 +67,16 @@ def _paired_pattern_metrics(
     radial_b = np.hypot(b[:, 0] - target_x_m, b[:, 1])
     result = {
         "radial_error_difference_m": paired_mean_difference(
-            radial_b, radial_a, seed=seed
+            radial_b, radial_a, seed=seed, resamples=resamples
         ),
         "squared_target_error_difference_m2": paired_mean_difference(
-            radial_b**2, radial_a**2, seed=seed
+            radial_b**2, radial_a**2, seed=seed, resamples=resamples
         ),
         "containment_fraction_difference": paired_mean_difference(
             (radial_b <= radius_m).astype(float),
             (radial_a <= radius_m).astype(float),
             seed=seed,
+            resamples=resamples,
         ),
         "role_mapping": {
             "Straight": "physical pattern at earlier lean",
@@ -96,6 +94,7 @@ def _paired_pattern_metrics(
             target_x_m=target_x_m,
             green_radius_m=radius_m,
             seed=seed,
+            resamples=resamples,
         )
     except ValueError as exc:
         result["course_sg"] = {"status": "unavailable", "reason": str(exc)}
@@ -262,7 +261,7 @@ def _execution_transition(
             "cross-snapshot comparison requires an accepted source-transition receipt"
         )
     receipt_path = Path(receipt_path).resolve()
-    if not receipt_path.is_file() or _sha256(receipt_path) != expected_sha256:
+    if not receipt_path.is_file() or sha256_file(receipt_path) != expected_sha256:
         raise ValueError("source-transition receipt hash mismatch")
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     if (
@@ -340,7 +339,7 @@ def _execution_transition(
             raise ValueError(
                 "source-transition evidence file is missing or escapes its directory"
             )
-        if _sha256(evidence_path) != expected_hash:
+        if sha256_file(evidence_path) != expected_hash:
             raise ValueError("source-transition evidence file hash mismatch")
     return expected_sha256
 
@@ -349,7 +348,7 @@ def _reload_explicit_source(reference: dict) -> tuple[Path, dict, dict, dict]:
     """Revalidate one unique source or a no-execution alias reference."""
     root = Path(reference["source_root"]).resolve()
     plan_path = root / "matrix_plan.json"
-    if not plan_path.is_file() or _sha256(plan_path) != reference.get(
+    if not plan_path.is_file() or sha256_file(plan_path) != reference.get(
         "source_plan_sha256"
     ):
         raise ValueError("explicit comparison source plan hash changed")
@@ -377,9 +376,9 @@ def _reload_explicit_source(reference: dict) -> tuple[Path, dict, dict, dict]:
     csv_path = directory / "shots.csv.gz"
     if (
         not manifest.is_file()
-        or _sha256(manifest) != reference.get("source_cell_manifest_sha256")
+        or sha256_file(manifest) != reference.get("source_cell_manifest_sha256")
         or not csv_path.is_file()
-        or _sha256(csv_path) != reference.get("source_csv_sha256")
+        or sha256_file(csv_path) != reference.get("source_csv_sha256")
     ):
         raise ValueError("explicit comparison source artifact hash changed")
     summary = load_validated_cell(directory, config, plan["execution"])
@@ -398,13 +397,13 @@ def _reload_explicit_source(reference: dict) -> tuple[Path, dict, dict, dict]:
 
 def _recheck_explicit_source(reference: dict, directory: Path) -> None:
     root = Path(reference["source_root"]).resolve()
-    if _sha256(root / "matrix_plan.json") != reference["source_plan_sha256"]:
+    if sha256_file(root / "matrix_plan.json") != reference["source_plan_sha256"]:
         raise ValueError("explicit comparison source plan changed during analysis")
     manifest = directory / "manifest.json"
     if (
         not manifest_files_match(manifest)
-        or _sha256(manifest) != reference["source_cell_manifest_sha256"]
-        or _sha256(directory / "shots.csv.gz") != reference["source_csv_sha256"]
+        or sha256_file(manifest) != reference["source_cell_manifest_sha256"]
+        or sha256_file(directory / "shots.csv.gz") != reference["source_csv_sha256"]
     ):
         raise ValueError("explicit comparison source changed during analysis")
 
@@ -527,8 +526,8 @@ def _paired_scoring_source_hashes() -> dict[str, str]:
     """Bind the scoring adapters and uncertainty helper across pair analysis."""
     package = Path(__file__).parent
     hashes = _source_hashes()
-    hashes["matched_lean_control.py"] = _sha256(Path(__file__))
-    hashes["course_score_vectors.py"] = _sha256(package / "course_score_vectors.py")
+    hashes["matched_lean_control.py"] = sha256_file(Path(__file__))
+    hashes["course_score_vectors.py"] = sha256_file(package / "course_score_vectors.py")
     return hashes
 
 
@@ -544,6 +543,7 @@ def _paired_effect_modification(
     curved_b: np.ndarray,
     *,
     seed: int,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> dict:
     """Bootstrap (curve−straight)_B − (curve−straight)_A by shared index."""
     arrays = tuple(
@@ -558,7 +558,9 @@ def _paired_effect_modification(
         raise ValueError("effect modification inputs must be equal finite vectors")
     interaction_b = arrays[3] - arrays[2]
     interaction_a = arrays[1] - arrays[0]
-    return paired_mean_difference(interaction_b, interaction_a, seed=seed)
+    return paired_mean_difference(
+        interaction_b, interaction_a, seed=seed, resamples=resamples
+    )
 
 
 @dataclass(frozen=True)
@@ -821,6 +823,7 @@ def _populate_explicit_metrics(
     population: _PairedPopulation,
     target_x_m: float,
     comparison_kind: str,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> None:
     config_a, config_b = first.config, second.config
     club_a, club_b = config_a["club"], config_b["club"]
@@ -851,6 +854,7 @@ def _populate_explicit_metrics(
             target_x_m=target_x_m,
             radius_m=float(config_a["target_radius_m"]),
             seed=int(config_a["seed"]),
+            resamples=resamples,
         )
         metrics["physical_pattern"] = pattern
         metrics["first_condition"] = {
@@ -873,7 +877,7 @@ def _populate_explicit_metrics(
         result["patterns"][pattern] = metrics
     if comparison_kind in ("across_lean", "curve_strength", "shaft_rotation_sd"):
         _populate_effect_modification(
-            result, endpoint_maps, config_a, config_b, target_x_m
+            result, endpoint_maps, config_a, config_b, target_x_m, resamples
         )
 
 
@@ -883,6 +887,7 @@ def _populate_effect_modification(
     config_a: dict,
     config_b: dict,
     target_x_m: float,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> None:
     club_a, club_b = config_a["club"], config_b["club"]
     try:
@@ -905,6 +910,7 @@ def _populate_effect_modification(
                 score_b.scores["Straight"],
                 score_b.scores[pattern],
                 seed=int(config_a["seed"]),
+                resamples=resamples,
             )
             for pattern in ("Draw", "Fade")
         }
@@ -934,6 +940,7 @@ def analyze_explicit_source_pair(
     target_x_m: float,
     transition_receipt_path: Path | None = None,
     transition_receipt_sha256: str | None = None,
+    resamples: int = HISTORICAL_RESAMPLES,
 ) -> dict:
     """Pair two validated source cells without conflating their protocols.
 
@@ -959,6 +966,8 @@ def analyze_explicit_source_pair(
     transition_sha = _execution_transition(
         execution_a, execution_b, transition_receipt_path, transition_receipt_sha256
     )
+    if resamples < 1:
+        raise ValueError("resamples must be positive")
     differences = _validate_pair_differences(first, second, comparison_kind)
     _validate_pair_conditions(first.config, second.config, comparison_kind)
     _validate_pair_target(first, second, target_x_m)
@@ -975,7 +984,7 @@ def analyze_explicit_source_pair(
     )
     if len(population.common_indices) >= 2:
         _populate_explicit_metrics(
-            result, first, second, population, target_x_m, comparison_kind
+            result, first, second, population, target_x_m, comparison_kind, resamples
         )
     _recheck_explicit_source(first_source, first.directory)
     _recheck_explicit_source(second_source, second.directory)
@@ -1092,7 +1101,7 @@ def analyze_across_lean(matrix_root: Path) -> dict:
     matrix_root = Path(matrix_root)
     plan_path = matrix_root / "matrix_plan.json"
     plan = json.loads(plan_path.read_text())
-    plan_hash = _sha256(plan_path)
+    plan_hash = sha256_file(plan_path)
     cells = plan.get("cells")
     if not isinstance(cells, dict) or not cells:
         raise ValueError("saved matrix plan must contain cells")
@@ -1114,12 +1123,12 @@ def analyze_across_lean(matrix_root: Path) -> dict:
         directory = matrix_root / name
         if directory.exists():
             loaded[name] = load_validated_cell(directory, config, plan["execution"])
-            manifest_hashes[name] = _sha256(directory / "manifest.json")
+            manifest_hashes[name] = sha256_file(directory / "manifest.json")
         else:
             loaded[name] = {"status": "not_run"}
     source_hashes = {
         **_source_hashes(),
-        "matched_lean_control.py": _sha256(Path(__file__)),
+        "matched_lean_control.py": sha256_file(Path(__file__)),
     }
     pairs = []
     for key, members in groups.items():
@@ -1145,15 +1154,15 @@ def analyze_across_lean(matrix_root: Path) -> dict:
             pairs.append(
                 _analyze_lean_pair(matrix_root, descriptor, members, loaded, seed)
             )
-    if _sha256(plan_path) != plan_hash or any(
+    if sha256_file(plan_path) != plan_hash or any(
         not manifest_files_match(matrix_root / name / "manifest.json")
-        or _sha256(matrix_root / name / "manifest.json") != digest
+        or sha256_file(matrix_root / name / "manifest.json") != digest
         for name, digest in manifest_hashes.items()
     ):
         raise RuntimeError("saved matrix inputs changed during lean comparison")
     if {
         **_source_hashes(),
-        "matched_lean_control.py": _sha256(Path(__file__)),
+        "matched_lean_control.py": sha256_file(Path(__file__)),
     } != source_hashes:
         raise RuntimeError("scoring source changed during lean comparison")
     return {
@@ -1186,15 +1195,6 @@ def write_across_lean_report(matrix_root: Path, destination: Path) -> Path:
     if destination.exists():
         raise FileExistsError("lean report already exists")
     result = analyze_across_lean(matrix_root)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    with NamedTemporaryFile(
-        "w", encoding="utf-8", dir=destination.parent, delete=False
-    ) as handle:
-        temporary = Path(handle.name)
-        json.dump(result, handle, indent=2, allow_nan=False)
-        handle.write("\n")
-    try:
-        os.replace(temporary, destination)
-    finally:
-        temporary.unlink(missing_ok=True)
-    return destination
+    return publish_new_text(
+        destination, json.dumps(result, indent=2, allow_nan=False) + "\n"
+    )

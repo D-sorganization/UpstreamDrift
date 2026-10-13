@@ -17,12 +17,9 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .density import DensityComparison, shared_histogram_density
+from .figure_style import PUBLICATION_PATTERN_COLORS as _COLORS
+from .figure_style import reproducible_metadata
 
-_COLORS = {
-    "Straight": "#286090",
-    "Draw": "#c66a19",
-    "Fade": "#7b4a9e",
-}
 _PILOT_FIGURE_LABEL = "Illustrative Simulation • Assumed Head Properties • Carry Only"
 _LineStyle = Literal["solid", "dashed", "dotted"]
 _HDR_STYLES = {
@@ -257,7 +254,7 @@ def _save_formats(figure: Any, output_stem: Path, *, dpi: int) -> dict[str, Path
             bbox_inches="tight",
             facecolor="white",
             edgecolor="white",
-            metadata={"Creator": "UpstreamDrift shot-pattern analysis"},
+            metadata=reproducible_metadata(extension),
         )
         outputs[extension] = path
     return outputs

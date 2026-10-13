@@ -22,6 +22,7 @@ from .academic_plots import (
     write_overhead_trajectory_figure,
 )
 from .core import AnalysisCancelled
+from .matched_config import preset_modifications
 from .matched_physics import UnsupportedShot
 from .matched_runner import (
     ExperimentConfig,
@@ -235,6 +236,7 @@ def export_matched_analysis(
             "source_unchanged_during_run": True,
             "model_qualification": "conditional_geometric_research_no_empirical_accuracy_claim",
             "contact_execution": _contact_execution(result.config),
+            "preset_modifications": list(preset_modifications(result.config.club)),
             "shot_rows": len(result.shots),
             "all_inputs_retained": True,
         },

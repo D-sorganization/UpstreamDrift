@@ -1,5 +1,23 @@
 # Straight, Draw, and Fade: Shot Pattern Analysis
 
+## At a Glance
+
+In this simulation, curving the ball changes strokes gained only slightly. Across
+the eight selected zero-lean conditions per club, the paired effect of a draw or
+fade against a straight shot ranges from −1.1 to +1.1 strokes per 100 shots, with
+the largest effects for the wedge. The winning shape depends on the club:
+
+| Club           | Draw vs Straight (Strokes per 100 Shots) | Fade vs Straight (Strokes per 100 Shots) |
+| -------------- | ---------------------------------------: | ---------------------------------------: |
+| Driver         |    +0.003 to +0.78 (draw usually better) |                   −0.15 to +0.02 (mixed) |
+| 7-Iron         |     −0.14 to −0.03 (draw worse in all 8) |    +0.09 to +0.26 (fade better in all 8) |
+| Pitching Wedge |     +0.01 to +1.11 (draw usually better) |      −1.10 to +0.03 (fade usually worse) |
+
+Positive values favour the curved shape. These are model-conditional results from
+the [Final Report](phase2/REPORT.md#conclusions-and-geometric-mechanism-synthesis)
+conclusions table, not measured player outcomes, and they don't show that any
+shape is universally best. The 95% intervals cover Monte Carlo sampling only.
+
 ## Current Matched-Delivery Study
 
 The expanded study is documented in the [Phase-Two Scientific Design](phase2/DESIGN.md),
@@ -21,7 +39,36 @@ control cases unavailable within their search bounds. The separately labelled
 rows that remain explicitly exported. Scientific narrative and assigned graphic
 reviews are complete, including selective density-layout repairs. Final repository
 gates and remote delivery are tracked in the [Current Resume Handoff](phase2/RESUME_HANDOFF.md).
-The [Illustrated Article](shot_pattern_analysis.tex) embeds 13 reviewed figure plates in a 33-page locally compiled report; its [Review Record](phase2/validation/illustrated_article_v1/README.md) gives reproduction and compiler limits.
+The [Illustrated Article](shot_pattern_analysis.tex) embeds 13 reviewed figure plates; its [Review Record](phase2/validation/illustrated_article_v1/README.md) gives the figure reproduction steps.
+
+### Revised Statistics and Head-Assumption Band
+
+The October 12, 2026 edition of the article reports strokes gained per 100
+shots and distances in metres with yards. Its headline intervals were
+recomputed from the saved shots with 2,000 paired bootstrap resamples (at 500
+they reproduce the frozen intervals), and each of the 24 headline conditions
+was re-run under seven one-factor clubhead variants (136 runs) to give a
+head-assumption band. A nominal-head re-run reproduced all 720,000 saved
+headline shots exactly. Every table and quoted number in the article is
+rendered from [`headline_dataset.json`](phase2/statistics_v2/headline_dataset.json),
+which records the SHA-256 of each input; `tests/tools/shot_pattern_analysis/test_report_tables.py`
+fails if a table or input drifts. [`phase2/REPORT.md`](phase2/REPORT.md) remains the
+frozen 500-resample record. The interactive tool, matched runs and the
+`--resamples` commands below default to 2,000; the saved-record analyses that
+regenerate `REPORT.md` (lean control, sensitivity and approach scoring) keep
+the historical 500 so they still reproduce it byte for byte.
+
+```bash
+# After restoring the phase-two archives (see phase2/REPRODUCING.md) to PHASE2:
+python3 -m src.tools.shot_pattern_analysis.rescored_statistics PHASE2/final_v1 final_v1.json --workers 8
+python3 -m src.tools.shot_pattern_analysis.rescored_statistics --contrasts PHASE2 contrasts.json
+python3 -m src.tools.shot_pattern_analysis.assumption_band --help  # band runs (native physics required)
+python3 -m src.tools.shot_pattern_analysis.headline_dataset PHASE2 headline_dataset.json
+python3 -m src.tools.shot_pattern_analysis.report_tables \
+  docs/research/shot_pattern_analysis/phase2/statistics_v2/headline_dataset.json \
+  docs/research/shot_pattern_analysis/generated --check
+```
+
 See the [Sharing Guide](phase2/SHARING_GUIDE.md) for the report and six selected Facebook images.
 
 The following sections preserve the separate **phase-one** experiment. Its
@@ -66,10 +113,10 @@ lean, closing by 2° lowers delivered loft in all three presets, but carry respo
 differently:
 
 | Illustrative Club | Closed-Face Loft | Closed-Face Carry Change | Open-Face Loft | Open-Face Carry Change |
-| --- | ---: | ---: | ---: | ---: |
-| Driver | 11.572° | −6.746 m | 14.022° | +2.423 m |
-| 7-Iron | 22.977° | +1.468 m | 25.015° | −1.961 m |
-| Pitching Wedge | 35.719° | +2.223 m | 37.669° | −2.456 m |
+| ----------------- | ---------------: | -----------------------: | -------------: | ---------------------: |
+| Driver            |          11.572° |                 −6.746 m |        14.022° |               +2.423 m |
+| 7-Iron            |          22.977° |                 +1.468 m |        25.015° |               −1.961 m |
+| Pitching Wedge    |          35.719° |                 +2.223 m |        37.669° |               −2.456 m |
 
 These are deterministic face-error ±2° sensitivities around straight delivery,
 not averages over the 10,000-shot populations. The iron and PW examples show
@@ -88,11 +135,11 @@ orientation.
 
 ## Experiment Definition
 
-| Pattern | Nominal Face Relative to Target | Fixed Path Relative to Target |
-| --- | ---: | ---: |
-| Straight | 0° | 0° |
-| Draw | +1.5° | +3° |
-| Fade | −1.5° | −3° |
+| Pattern  | Nominal Face Relative to Target | Fixed Path Relative to Target |
+| -------- | ------------------------------: | ----------------------------: |
+| Straight |                              0° |                            0° |
+| Draw     |                           +1.5° |                           +3° |
+| Fade     |                           −1.5° |                           −3° |
 
 Doubled curves use draw +3° face / +6° path and the mirrored fade. Positive
 angles point right for a right-handed golfer. Each shape receives the same
@@ -101,11 +148,11 @@ and 2°, with path fixed. The 24-cell matrix combines three clubs, both face
 variabilities, both curve magnitudes, and fixed-loft versus assumed shaft-rotation
 geometry. Each cell contains 30,000 shots; the complete matrix contains 720,000.
 
-| Illustrative Club | Speed | Nominal Delivered Loft | Attack | Assumed Shaft Elevation | Head Mass |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Driver | 45 m/s | 12.8° | −0.9° | 58.5° | 0.200 kg |
-| 7-Iron | 36 m/s | 24.0° | −4.0° | 63° | 0.272 kg |
-| Pitching Wedge | 32 m/s | 36.7° | −5.0° | 64° | 0.300 kg |
+| Illustrative Club |  Speed | Nominal Delivered Loft | Attack | Assumed Shaft Elevation | Head Mass |
+| ----------------- | -----: | ---------------------: | -----: | ----------------------: | --------: |
+| Driver            | 45 m/s |                  12.8° |  −0.9° |                   58.5° |  0.200 kg |
+| 7-Iron            | 36 m/s |                  24.0° |  −4.0° |                     63° |  0.272 kg |
+| Pitching Wedge    | 32 m/s |                  36.7° |  −5.0° |                     64° |  0.300 kg |
 
 These hybrid presets are assumptions, not measured player data or a reproduced
 complete club specification. Driver loft is a cited Tour average; PW loft is a
@@ -127,32 +174,32 @@ All 24 corrected cells are complete: 720,000 simulated shots. V2 scoring replace
 
 Each triple below is Straight / Draw / Fade; lateral SD and carry are in metres. SG columns are the mean difference from Straight, in strokes per shot. Positive means a modeled benefit.
 
-| Club | Delivery | Face SD | Curve Scale | Lateral SD S/D/F | Mean Carry S/D/F | Draw ΔSG | Fade ΔSG |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Driver | Fixed Loft | 1° | 1× | 8.60 / 8.53 / 8.53 | 198.39 / 198.05 / 198.05 | -0.0018 | -0.0018 |
-| Driver | Fixed Loft | 1° | 2× | 8.60 / 8.33 / 8.33 | 198.39 / 197.03 / 197.02 | -0.0077 | -0.0074 |
-| Driver | Fixed Loft | 2° | 1× | 16.89 / 16.77 / 16.76 | 197.93 / 197.60 / 197.59 | -0.0014 | -0.0013 |
-| Driver | Fixed Loft | 2° | 2× | 16.89 / 16.38 / 16.37 | 197.93 / 196.57 / 196.56 | -0.0050 | -0.0053 |
-| Driver | Shaft Rotation | 1° | 1× | 8.51 / 8.41 / 8.47 | 197.99 / 197.64 / 197.67 | -0.0016 | -0.0021 |
-| Driver | Shaft Rotation | 1° | 2× | 8.51 / 8.18 / 8.31 | 197.99 / 196.62 / 196.68 | -0.0070 | -0.0078 |
-| Driver | Shaft Rotation | 2° | 1× | 16.29 / 16.08 / 16.25 | 196.50 / 196.07 / 196.26 | -0.0009 | -0.0014 |
-| Driver | Shaft Rotation | 2° | 2× | 16.29 / 15.63 / 15.98 | 196.50 / 194.99 / 195.35 | -0.0046 | -0.0053 |
-| PW | Fixed Loft | 1° | 1× | 1.97 / 1.97 / 1.97 | 101.13 / 101.07 / 101.07 | -0.0001 | -0.0001 |
-| PW | Fixed Loft | 1° | 2× | 1.97 / 1.96 / 1.96 | 101.13 / 100.89 / 100.89 | -0.0034 | -0.0034 |
-| PW | Fixed Loft | 2° | 1× | 3.93 / 3.92 / 3.92 | 101.05 / 100.99 / 100.99 | -0.0000 | -0.0000 |
-| PW | Fixed Loft | 2° | 2× | 3.93 / 3.90 / 3.89 | 101.05 / 100.81 / 100.80 | -0.0021 | -0.0020 |
-| PW | Shaft Rotation | 1° | 1× | 1.97 / 2.00 / 1.94 | 101.13 / 101.06 / 101.07 | +0.0023 | -0.0024 |
-| PW | Shaft Rotation | 1° | 2× | 1.97 / 2.02 / 1.90 | 101.13 / 100.88 / 100.88 | +0.0020 | -0.0071 |
-| PW | Shaft Rotation | 2° | 1× | 3.94 / 3.99 / 3.87 | 101.04 / 100.97 / 100.98 | +0.0025 | -0.0025 |
-| PW | Shaft Rotation | 2° | 2× | 3.94 / 4.02 / 3.80 | 101.04 / 100.78 / 100.80 | +0.0037 | -0.0061 |
-| 7-Iron | Fixed Loft | 1° | 1× | 4.22 / 4.20 / 4.20 | 149.70 / 149.59 / 149.59 | +0.0004 | +0.0005 |
-| 7-Iron | Fixed Loft | 1° | 2× | 4.22 / 4.15 / 4.15 | 149.70 / 149.27 / 149.27 | -0.0042 | -0.0042 |
-| 7-Iron | Fixed Loft | 2° | 1× | 8.36 / 8.33 / 8.33 | 149.56 / 149.45 / 149.45 | +0.0006 | +0.0008 |
-| 7-Iron | Fixed Loft | 2° | 2× | 8.36 / 8.24 / 8.24 | 149.56 / 149.12 / 149.12 | -0.0003 | +0.0002 |
-| 7-Iron | Shaft Rotation | 1° | 1× | 4.22 / 4.28 / 4.13 | 149.68 / 149.57 / 149.58 | -0.0032 | +0.0041 |
-| 7-Iron | Shaft Rotation | 1° | 2× | 4.22 / 4.30 / 4.01 | 149.68 / 149.24 / 149.26 | -0.0111 | +0.0033 |
-| 7-Iron | Shaft Rotation | 2° | 1× | 8.38 / 8.48 / 8.21 | 149.49 / 149.37 / 149.40 | -0.0035 | +0.0054 |
-| 7-Iron | Shaft Rotation | 2° | 2× | 8.38 / 8.51 / 7.99 | 149.49 / 149.02 / 149.10 | -0.0084 | +0.0096 |
+| Club   | Delivery       | Face SD | Curve Scale | Lateral SD S/D/F      | Mean Carry S/D/F         | Draw ΔSG | Fade ΔSG |
+| ------ | -------------- | ------- | ----------- | --------------------- | ------------------------ | -------- | -------- |
+| Driver | Fixed Loft     | 1°      | 1×          | 8.60 / 8.53 / 8.53    | 198.39 / 198.05 / 198.05 | -0.0018  | -0.0018  |
+| Driver | Fixed Loft     | 1°      | 2×          | 8.60 / 8.33 / 8.33    | 198.39 / 197.03 / 197.02 | -0.0077  | -0.0074  |
+| Driver | Fixed Loft     | 2°      | 1×          | 16.89 / 16.77 / 16.76 | 197.93 / 197.60 / 197.59 | -0.0014  | -0.0013  |
+| Driver | Fixed Loft     | 2°      | 2×          | 16.89 / 16.38 / 16.37 | 197.93 / 196.57 / 196.56 | -0.0050  | -0.0053  |
+| Driver | Shaft Rotation | 1°      | 1×          | 8.51 / 8.41 / 8.47    | 197.99 / 197.64 / 197.67 | -0.0016  | -0.0021  |
+| Driver | Shaft Rotation | 1°      | 2×          | 8.51 / 8.18 / 8.31    | 197.99 / 196.62 / 196.68 | -0.0070  | -0.0078  |
+| Driver | Shaft Rotation | 2°      | 1×          | 16.29 / 16.08 / 16.25 | 196.50 / 196.07 / 196.26 | -0.0009  | -0.0014  |
+| Driver | Shaft Rotation | 2°      | 2×          | 16.29 / 15.63 / 15.98 | 196.50 / 194.99 / 195.35 | -0.0046  | -0.0053  |
+| PW     | Fixed Loft     | 1°      | 1×          | 1.97 / 1.97 / 1.97    | 101.13 / 101.07 / 101.07 | -0.0001  | -0.0001  |
+| PW     | Fixed Loft     | 1°      | 2×          | 1.97 / 1.96 / 1.96    | 101.13 / 100.89 / 100.89 | -0.0034  | -0.0034  |
+| PW     | Fixed Loft     | 2°      | 1×          | 3.93 / 3.92 / 3.92    | 101.05 / 100.99 / 100.99 | -0.0000  | -0.0000  |
+| PW     | Fixed Loft     | 2°      | 2×          | 3.93 / 3.90 / 3.89    | 101.05 / 100.81 / 100.80 | -0.0021  | -0.0020  |
+| PW     | Shaft Rotation | 1°      | 1×          | 1.97 / 2.00 / 1.94    | 101.13 / 101.06 / 101.07 | +0.0023  | -0.0024  |
+| PW     | Shaft Rotation | 1°      | 2×          | 1.97 / 2.02 / 1.90    | 101.13 / 100.88 / 100.88 | +0.0020  | -0.0071  |
+| PW     | Shaft Rotation | 2°      | 1×          | 3.94 / 3.99 / 3.87    | 101.04 / 100.97 / 100.98 | +0.0025  | -0.0025  |
+| PW     | Shaft Rotation | 2°      | 2×          | 3.94 / 4.02 / 3.80    | 101.04 / 100.78 / 100.80 | +0.0037  | -0.0061  |
+| 7-Iron | Fixed Loft     | 1°      | 1×          | 4.22 / 4.20 / 4.20    | 149.70 / 149.59 / 149.59 | +0.0004  | +0.0005  |
+| 7-Iron | Fixed Loft     | 1°      | 2×          | 4.22 / 4.15 / 4.15    | 149.70 / 149.27 / 149.27 | -0.0042  | -0.0042  |
+| 7-Iron | Fixed Loft     | 2°      | 1×          | 8.36 / 8.33 / 8.33    | 149.56 / 149.45 / 149.45 | +0.0006  | +0.0008  |
+| 7-Iron | Fixed Loft     | 2°      | 2×          | 8.36 / 8.24 / 8.24    | 149.56 / 149.12 / 149.12 | -0.0003  | +0.0002  |
+| 7-Iron | Shaft Rotation | 1°      | 1×          | 4.22 / 4.28 / 4.13    | 149.68 / 149.57 / 149.58 | -0.0032  | +0.0041  |
+| 7-Iron | Shaft Rotation | 1°      | 2×          | 4.22 / 4.30 / 4.01    | 149.68 / 149.24 / 149.26 | -0.0111  | +0.0033  |
+| 7-Iron | Shaft Rotation | 2°      | 1×          | 8.38 / 8.48 / 8.21    | 149.49 / 149.37 / 149.40 | -0.0035  | +0.0054  |
+| 7-Iron | Shaft Rotation | 2°      | 2×          | 8.38 / 8.51 / 7.99    | 149.49 / 149.02 / 149.10 | -0.0084  | +0.0096  |
 
 The shots do **not** carry the same distance. Curved driver patterns generally lose carry; narrower lateral spread can coexist with worse tee scoring. The equal-range bearing control separates geometric distance scaling from the remaining change in angular spread; it does not establish causation. In the assumed shaft-rotation iron/PW cases, the fade is often narrower than the draw, and that distinction persists at common range. This follows from the specified right-handed face–loft geometry, rather than a universal advantage of curving shots. Increasing face SD broadens every pattern and can increase these conditional differences. Bigger curves do not give a universal accuracy or scoring improvement.
 
@@ -164,14 +211,14 @@ Effects are small, conditional predictions under illustrative inputs, not measur
 
 For face SD 2°, doubled curves, and assumed shaft rotation, percentages below compare lateral SD with the same-cell Straight pattern. Negative is narrower. The common-range column sets every landing to the Straight target range while retaining bearing; this diagnostic removes geometric range scaling but does not isolate a physical cause.
 
-| Club | Shape | Actual Lateral SD Change | Common-Range Lateral SD Change | Mean Carry Change |
-| --- | --- | --- | --- | --- |
-| Driver | Draw | -4.05% | -3.76% | -1.51 m |
-| Driver | Fade | -1.93% | -1.24% | -1.15 m |
-| 7-Iron | Draw | +1.57% | +2.03% | -0.48 m |
-| 7-Iron | Fade | -4.66% | -4.55% | -0.40 m |
-| PW | Draw | +2.00% | +2.37% | -0.26 m |
-| PW | Fade | -3.58% | -3.47% | -0.24 m |
+| Club   | Shape | Actual Lateral SD Change | Common-Range Lateral SD Change | Mean Carry Change |
+| ------ | ----- | ------------------------ | ------------------------------ | ----------------- |
+| Driver | Draw  | -4.05%                   | -3.76%                         | -1.51 m           |
+| Driver | Fade  | -1.93%                   | -1.24%                         | -1.15 m           |
+| 7-Iron | Draw  | +1.57%                   | +2.03%                         | -0.48 m           |
+| 7-Iron | Fade  | -4.66%                   | -4.55%                         | -0.40 m           |
+| PW     | Draw  | +2.00%                   | +2.37%                         | -0.26 m           |
+| PW     | Fade  | -3.58%                   | -3.47%                         | -0.24 m           |
 
 The driver reduction is partly distance scaling: common-range normalization reduces the apparent narrowing. The residual bearing-based lateral-spread differences remain model-conditional. The iron/PW contrast also persists under this control; its smaller changes are consistent with the smaller carry shifts.
 
@@ -232,9 +279,9 @@ a narrow one-dimensional endpoint locus; covariance statistics are descriptive,
 not a calibrated two-dimensional golfer precision or confidence ellipse.
 
 | Mean Face-to-Path Offset | Opposite-Curve Probability at Face SD 1° | At Face SD 2° |
-| --- | ---: | ---: |
-| 1.5° | 6.68% | 22.66% |
-| 3° | 0.135% | 6.68% |
+| ------------------------ | ---------------------------------------: | ------------: |
+| 1.5°                     |                                    6.68% |        22.66% |
+| 3°                       |                                   0.135% |         6.68% |
 
 These normal-distribution probabilities concern direction consistency, not
 accuracy or strokes gained. Fixed-loft centered still-air delivery is mirror symmetric. The coupled mode
@@ -290,14 +337,7 @@ QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
 The [Editable LaTeX Experiment Reference](shot_pattern_analysis.tex) records
 equations and calculation assumptions. It is separate from the canonical
 engineering design manual in `manuals/upstreamdrift`; that manual's calculation
-inventory and scientific publication gates remain blocked. Built-in LaTeX
-compilation was attempted but could not obtain its uncached Tectonic bundle;
-compilation is unverified. The source remains editable in the native editor.
-
-The local `python3 -m scripts.pre_pr` module is absent. The canonical
-Repository_Management wrapper has been located and runs gates against the
-current working directory; it will be invoked before publication. The full document title audit
-reports 2,505 existing violations across 1,816 documents; this change's document
-titles are checked separately. No unavailable gate is represented as passing. The user explicitly authorized
-the personal GitHub identity for this task; Gemini 3.8 through `agy` is handling
-issue publication, with returned URLs recorded as evidence.
+inventory and scientific publication gates remain blocked. The illustrated
+article is compiled by the repository's LaTeX workflow with Tectonic 0.15.0 on
+every change to it; the PDF is the workflow's `latex-reference-pdfs` artifact.
+A local Tectonic 0.15.0 install rebuilds it from the article directory.

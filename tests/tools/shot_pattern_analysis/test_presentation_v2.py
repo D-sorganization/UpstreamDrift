@@ -193,8 +193,8 @@ def test_flight_plate_preserves_draw_fade_bend_with_dense_paths(monkeypatch, tmp
 
 
 def test_summary_rejects_value_drift_from_numerical_table(tmp_path):
-    source = render.TEX.read_text().replace("+0.007797655", "+0.007797656")
-    modified = tmp_path / "modified.tex"
-    modified.write_text(source)
+    from .test_social_summary import drifted_article
+
+    modified = drifted_article(tmp_path)
     with pytest.raises(ValueError, match="summary range differs"):
         summary._verify_ranges(modified)

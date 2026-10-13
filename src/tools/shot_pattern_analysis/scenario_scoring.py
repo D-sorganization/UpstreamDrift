@@ -5,8 +5,11 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
-from pathlib import Path
+import os
 import subprocess
+import tempfile
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -17,8 +20,13 @@ from .scoring import (
     build_broadie_approx_baseline,
     load_pattern_endpoints,
 )
+from .provenance import sha256_file
 from .scoring_cache import source_backed_score_cache
-from .uncertainty import paired_mean_difference
+from .uncertainty import (
+    DEFAULT_BOOTSTRAP_SEED,
+    PUBLICATION_RESAMPLES,
+    paired_mean_difference,
+)
 
 
 def score_course_endpoints(
@@ -29,7 +37,8 @@ def score_course_endpoints(
     hole_distance_m: float = 400.0,
     fairway_half_width_m: float = 15.0,
     green_radius_m: float = 15.0,
-    seed: int = 20261008,
+    seed: int = DEFAULT_BOOTSTRAP_SEED,
+    resamples: int = PUBLICATION_RESAMPLES,
 ) -> dict:
     """Score paired aimed endpoints on an explicitly hypothetical flat hole.
 
@@ -57,7 +66,10 @@ def score_course_endpoints(
     }
     paired = {
         name: paired_mean_difference(
-            vectors.scores[name], vectors.scores["Straight"], seed=seed
+            vectors.scores[name],
+            vectors.scores["Straight"],
+            seed=seed,
+            resamples=resamples,
         )
         for name in ("Draw", "Fade")
     }
@@ -98,7 +110,7 @@ def _add_sensitivities(
 ) -> None:
     """Add supported course-geometry sensitivity results to a scored report."""
 
-    def sensitivity(**changes: float) -> dict:
+    def sensitivity(**changes: Any) -> dict:
         try:
             return score_course_endpoints(
                 endpoints, club_id=club_id, target_x_m=target, seed=seed, **changes
@@ -176,9 +188,11 @@ def score_corrected_bundle(output_dir: Path) -> Path:
         _add_sensitivities(report, endpoints, club_id=club_id, target=target, seed=seed)
     except ValueError as exc:
         report = {"status": "unavailable", "reason": str(exc), "club_id": club_id}
+    # Read and check everything that can fail before the first write, so a
+    # failure leaves the bundle exactly as it was.
     baseline = build_broadie_approx_baseline()
     baseline_path = output_dir / "strokes_gained_baseline.json"
-    baseline_path.write_text(
+    baseline_bytes = (
         json.dumps(
             {
                 "baseline": baseline.model_dump(mode="json"),
@@ -188,12 +202,10 @@ def score_corrected_bundle(output_dir: Path) -> Path:
             indent=2,
         )
         + "\n"
-    )
+    ).encode("utf-8")
     report["baseline_artifact"] = baseline_path.name
     report_path = output_dir / "strokes_gained.json"
-    report_path.write_text(json.dumps(report, indent=2) + "\n")
     summary["course_scoring"] = report
-    summary_path.write_text(json.dumps(summary, indent=2) + "\n")
     receipt_path = output_dir / "receipt.json"
     receipt = json.loads(receipt_path.read_text())
     repo_root = Path(__file__).resolve().parents[3]
@@ -211,23 +223,49 @@ def score_corrected_bundle(output_dir: Path) -> Path:
         "method": "Public Tools API at baseline knots; exact piecewise-linear interpolation of returned scores at endpoints",
         "api_evaluated_states": report.get("total_api_evaluated_states", 0),
         "scored_shots": report.get("scored_shots", 0),
-        "baseline_artifact_sha256": hashlib.sha256(
-            baseline_path.read_bytes()
-        ).hexdigest(),
+        "baseline_artifact_sha256": hashlib.sha256(baseline_bytes).hexdigest(),
         "source_pdf_sha256": SOURCE_PDF_SHA256,
-        "scoring_source_sha256": hashlib.sha256(
-            Path(__file__).read_bytes()
-        ).hexdigest(),
-        "scoring_cache_source_sha256": hashlib.sha256(
-            (Path(__file__).parent / "scoring_cache.py").read_bytes()
-        ).hexdigest(),
-        "baseline_builder_source_sha256": hashlib.sha256(
-            (Path(__file__).parent / "scoring.py").read_bytes()
-        ).hexdigest(),
+        "scoring_source_sha256": sha256_file(Path(__file__)),
+        "scoring_cache_source_sha256": sha256_file(
+            Path(__file__).parent / "scoring_cache.py"
+        ),
+        "baseline_builder_source_sha256": sha256_file(
+            Path(__file__).parent / "scoring.py"
+        ),
         "provider_commit": provider_commit,
-        "provider_source_sha256": hashlib.sha256(
-            provider_source.read_bytes()
-        ).hexdigest(),
+        "provider_source_sha256": sha256_file(provider_source),
     }
-    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
+    _replace_files_atomically(
+        {
+            baseline_path: baseline_bytes,
+            report_path: _json_bytes(report),
+            summary_path: _json_bytes(summary),
+            receipt_path: _json_bytes(receipt),
+        }
+    )
     return report_path
+
+
+def _json_bytes(payload: dict) -> bytes:
+    return (json.dumps(payload, indent=2) + "\n").encode("utf-8")
+
+
+def _replace_files_atomically(contents: dict[Path, bytes]) -> None:
+    """Stage every file first, then swap each into place with ``os.replace``.
+
+    A failure while staging leaves every destination untouched.
+    """
+    staged: list[tuple[Path, Path]] = []
+    try:
+        for destination, data in contents.items():
+            handle, staging_name = tempfile.mkstemp(
+                prefix=f".{destination.name}.", dir=destination.parent
+            )
+            staged.append((Path(staging_name), destination))
+            with os.fdopen(handle, "wb") as stream:
+                stream.write(data)
+        for temporary, destination in staged:
+            os.replace(temporary, destination)
+    finally:
+        for temporary, _ in staged:
+            temporary.unlink(missing_ok=True)

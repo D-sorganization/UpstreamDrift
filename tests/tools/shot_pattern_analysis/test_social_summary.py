@@ -1,5 +1,6 @@
 """Contracts for the Facebook-sized conditional scoring summary."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -34,12 +35,20 @@ def test_social_summary_writes_exact_facebook_preview_dimensions(tmp_path):
     assert mpimg.imread(result).shape[:2] == (630, 1200)
 
 
+def drifted_article(tmp_path: Path) -> Path:
+    """An article path whose headline dataset moves the Driver Draw maximum."""
+    dataset = json.loads((TEX.parent / summary.HEADLINE_DATASET).read_text("utf-8"))
+    for cell in dataset["cells"]:
+        if cell["key"] == "C07":
+            cell["paired_benefit_vs_straight"]["Draw"]["estimate"] += 1e-6
+    target = tmp_path / summary.HEADLINE_DATASET
+    target.parent.mkdir(parents=True)
+    target.write_text(json.dumps(dataset), encoding="utf-8")
+    return tmp_path / "article.tex"
+
+
 def test_social_summary_rejects_ranges_that_drift_from_the_tex_table(tmp_path):
-    source = TEX.read_text(encoding="utf-8")
-    modified = tmp_path / "modified.tex"
-    modified.write_text(
-        source.replace("+0.007797655", "+0.007797656"), encoding="utf-8"
-    )
+    modified = drifted_article(tmp_path)
     destination = tmp_path / "must-not-exist.png"
 
     with pytest.raises(ValueError, match="summary range differs"):

@@ -7,7 +7,6 @@ not compare separately conditioned means or infer a causal distance effect.
 from __future__ import annotations
 
 import math
-import hashlib
 import csv
 import gzip
 import re
@@ -15,12 +14,13 @@ from pathlib import Path
 from statistics import fmean
 from typing import Any, Iterable, Mapping
 
+from .core import PATTERN_NAMES
 from .matched_formatting import format_sg_interval, format_sg_value
 from .matched_report import load_validated_cell
-from .provenance import manifest_files_match
+from .provenance import manifest_files_match, sha256_file
 
 
-PATTERNS = ("Straight", "Draw", "Fade")
+PATTERNS = PATTERN_NAMES
 _QUADRANTS = ("left_long", "left_short", "right_long", "right_short")
 
 
@@ -31,16 +31,11 @@ def _finite(value: Any, label: str) -> float:
     return number
 
 
-def _sha256_file(path: Path) -> str:
-    with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
-
-
 def _saved_file_state(directory: Path) -> tuple[str, str | None]:
     csv_path = directory / "shots.csv.gz"
     return (
-        _sha256_file(directory / "manifest.json"),
-        _sha256_file(csv_path) if csv_path.is_file() else None,
+        sha256_file(directory / "manifest.json"),
+        sha256_file(csv_path) if csv_path.is_file() else None,
     )
 
 
@@ -407,10 +402,7 @@ def select_verified_assets(
         if not path.is_relative_to(root) or not path.is_file():
             raise ValueError(f"indexed asset is missing: {relative}")
         expected = outputs.get(relative.as_posix())
-        if (
-            expected is None
-            or hashlib.sha256(path.read_bytes()).hexdigest() != expected
-        ):
+        if expected is None or sha256_file(path) != expected:
             raise ValueError(f"indexed asset hash differs: {relative}")
         selected.append(
             {

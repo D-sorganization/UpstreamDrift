@@ -1,0 +1,89 @@
+{
+  "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+  "variant": "inertia_x0.8",
+  "config": {
+    "club": {
+      "club_id": "seven_iron",
+      "club_speed_mps": 36.0,
+      "loft_deg": 34.0,
+      "lie_deg": 63.0,
+      "shaft_lean_deg": 0.0,
+      "attack_angle_deg": -4.0,
+      "clubhead_mass_kg": 0.272,
+      "inertia_diagonal_kg_m2": [
+        9.6e-05,
+        0.00016,
+        0.0002
+      ],
+      "cg_depth_m": 0.01,
+      "face_half_width_m": 0.035,
+      "face_half_height_m": 0.023,
+      "bulge_radius_m": 0.0,
+      "roll_radius_m": 0.0,
+      "cor": 0.83,
+      "friction_coefficient": 0.4,
+      "contact_law": "incremental_coulomb_energetic",
+      "steps_per_compression": 128,
+      "contact_backend": "auto",
+      "dt_s": 0.02,
+      "max_time_s": 12.0,
+      "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100"
+    },
+    "noise": {
+      "standard_deviations": [
+        1.0,
+        0.5,
+        0.89408,
+        0.00635,
+        0.00635,
+        0.0,
+        0.0
+      ],
+      "correlation": null
+    },
+    "n_shots": 10000,
+    "seed": 20261009,
+    "curve_scale": 2.0,
+    "target_x_m": null,
+    "match_tolerance_m": 0.05,
+    "target_radius_m": 15.0,
+    "match_face_bounds_deg": null,
+    "match_speed_factors": [
+      0.75,
+      1.25
+    ]
+  },
+  "resamples": 2000,
+  "status": "conditional_only",
+  "target_x_m": 127.87234602692536,
+  "paired_n": 9996,
+  "paired_benefit_vs_straight": {
+    "Draw": {
+      "estimate": -0.0014144977675672973,
+      "lower_95": -0.001776036513024092,
+      "upper_95": -0.0010884722714500877
+    },
+    "Fade": {
+      "estimate": 0.0018549654775899674,
+      "lower_95": 0.001488473928613486,
+      "upper_95": 0.002229139339724957
+    }
+  },
+  "mean_radial_error_difference_vs_straight": {
+    "Draw": {
+      "estimate": 0.011171195748931752,
+      "lower_95": 0.008979720937114098,
+      "upper_95": 0.013544911997348712
+    },
+    "Fade": {
+      "estimate": -0.014345595740771615,
+      "lower_95": -0.01672572429074712,
+      "upper_95": -0.012123380425359358
+    }
+  },
+  "supported_by_pattern": {
+    "Straight": 9996,
+    "Draw": 9996,
+    "Fade": 9996
+  }
+}

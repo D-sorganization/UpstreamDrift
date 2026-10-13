@@ -86,17 +86,17 @@ def test_matched_snapshot_binds_shared_matrix_cli_and_rejects_its_changes(
         before["source_sha256"][key] == hashlib.sha256(helper.read_bytes()).hexdigest()
     )
 
-    original_read = Path.read_bytes
+    from src.tools.shot_pattern_analysis import provenance
 
-    def altered_helper_bytes(path):
-        payload = original_read(path)
-        return (
-            payload + b"\n# changed CLI defaults\n"
-            if path.resolve() == helper
-            else payload
-        )
+    original_hash = provenance.sha256_file
 
-    monkeypatch.setattr(Path, "read_bytes", altered_helper_bytes)
+    def altered_helper_digest(path):
+        if Path(path).resolve() != helper:
+            return original_hash(path)
+        payload = helper.read_bytes() + b"\n# changed CLI defaults\n"
+        return hashlib.sha256(payload).hexdigest()
+
+    monkeypatch.setattr(provenance, "sha256_file", altered_helper_digest)
     after = matched_source_snapshot()
     with pytest.raises(RuntimeError, match="source changed"):
         assert_source_unchanged(before, after)

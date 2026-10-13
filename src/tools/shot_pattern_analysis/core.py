@@ -23,6 +23,7 @@ PATTERNS = (
     PatternConfig("Draw", 1.5, 3.0),
     PatternConfig("Fade", -1.5, -3.0),
 )
+PATTERN_NAMES = tuple(pattern.name for pattern in PATTERNS)
 
 
 class AnalysisCancelled(RuntimeError):
@@ -408,6 +409,7 @@ def run_analysis(
 
 
 __all__ = [
+    "PATTERN_NAMES",
     "AnalysisCancelled",
     "AnalysisConfig",
     "AnalysisResult",
