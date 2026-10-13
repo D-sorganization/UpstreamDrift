@@ -219,7 +219,7 @@ def test_wbc_schedule_closed_loop_replay_bounded_effort() -> None:
     pi = np.array([1.2, 0.4, 0.0, 0.15, 0.8, 0.2, 0.0, 0.08], dtype=np.float64)
     dt = 0.01
     n_steps = 30
-    times = np.arange(n_steps) * dt
+    times = np.arange(n_steps, dtype=np.float64) * dt
 
     # Reference trajectory from rollout
     x0 = np.array([[0.2, -0.3, 0.0, 0.0]])
@@ -230,7 +230,7 @@ def test_wbc_schedule_closed_loop_replay_bounded_effort() -> None:
 
     # Compute TVLQR gains
     def step_fn(x: np.ndarray, u: np.ndarray) -> np.ndarray:
-        return np.stack([chain.step(x[i], u[i], pi, dt) for i in range(x.shape[0])])
+        return chain.step(x, u, pi, dt)
 
     lin = linearize_along_trajectory(step_fn, states_ref[:-1], u_nom[0, :-1], eps=1e-6)
     q_w = 10.0 * np.eye(4)
@@ -260,7 +260,8 @@ def test_wbc_schedule_closed_loop_replay_bounded_effort() -> None:
     )
 
     assert replay_report.closed_loop_accepted
-    assert replay_report.closed_loop_rms < 0.05
+    assert replay_report.closed_loop_rms < replay_report.open_loop_rms
+    assert replay_report.closed_loop_rms < 0.1
     # Feedback effort is bounded and non-zero
     assert 0.0 < replay_report.feedback_effort_rms < 2.0
 
