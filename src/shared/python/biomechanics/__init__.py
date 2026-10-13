@@ -43,6 +43,10 @@ from .hill_muscle import HillMuscleModel, MuscleParameters, MuscleState
 from .kinematic_sequence import SegmentPeak, SegmentTimingResult
 from .multi_muscle import MuscleAttachment, MuscleGroup
 from .muscle_equilibrium import EquilibriumSolver
+from .muscle_force_evaluation import (
+    QuasistaticMuscleForceEvaluation,
+    evaluate_quasistatic_muscle_force,
+)
 from .muscle_allocation import (
     MuscleAllocationResult,
     MuscleRecruitmentPath,
@@ -151,6 +155,8 @@ __all__: list[str] = [
     "MuscleGroup",
     # muscle_equilibrium
     "EquilibriumSolver",
+    "QuasistaticMuscleForceEvaluation",
+    "evaluate_quasistatic_muscle_force",
     # swing_comparison
     "ComparisonMetric",
     "DTWResult",
