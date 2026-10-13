@@ -1,0 +1,45 @@
+{
+  "status": "operational_harness_qualified",
+  "production_execution": false,
+  "v6_acceptance": false,
+  "checks": "22 passed; Ruff and format passed",
+  "test_command": "/tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest -o addopts='' -q /tmp/shot-pattern-v6-output-review/test_review_batch.py",
+  "evidence_sha256": {
+    "review_batch.py": "7965f518b09a31903a13e38ed7de3f831805f6e34e05b688cf1ec19a8e600b5e",
+    "test_review_batch.py": "1ea312446bc5b0a83cccc6aaad807b0ba154463de1c96913a4cb103eeceadc7e",
+    "saved_caption_fixtures.json": "c05bb39fe20e08bb0de18dc6e37d691922da8b3372ed4a6b607bd09345bc47be",
+    "actual_v6_start_fixture.json": "ab2d3b97b8be26a0fbe4bfa7f2fabaccefb8de602493f76a6d07d2682595bfc0",
+    "unqualified_initial.py.txt": "e1b454a6c29dabea25bd4483950fe4ccdb3b72de4c8909a0b07c389b4f33d2c1",
+    "qualification_red.txt": "2a259c5db911cdc1aa5508b62362c0d3199dbf26bd36190bb2db67a0877a2911",
+    "cell_count_red.txt": "2df4094cff5f205053675aa7e4d4cd43308ee2ae403f934a9e7ceb16f1aba816",
+    "pinned_boundary_red.txt": "27f0bb6de1ead0200adb1b49e965d6a04932822640ea5651d40a0b27597b224a",
+    "qualification_final_green.txt": "0155572e24fce9bd5e4e50ff078d77d7e9e7e7888c0a407ae677ebfa8842ab03",
+    "qualification_ruff.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "qualification_format.txt": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "REVIEW_PLAN.md": "b6df6bd9baf6844a2bb6cc21a7218f9da3bd399768caf3407e506a9daf8eaca3"
+  },
+  "completion_contract": "No asset/numeric reads until successful terminal boundary bound to exact SHA-pinned start, full command, output-dir,15-source map,pipeline receipt and figure ledger. Live/failed runs return pending.",
+  "schema_findings": [
+    "Pair source_protocols is present and matches ordered source proofs.",
+    "Pair counts common_supported_n / total_n_per_population.",
+    "Cell counts summary.summary[pattern].supported_n / config.n_shots.",
+    "Actual wrapper flag is --output-dir; initial invented --output fixture corrected and real start schema regression added."
+  ],
+  "covered_negatives": [
+    "wrong protocol including prefix lookalike",
+    "wrong numeric target including substring lookalike",
+    "wrong pair or individual cell count",
+    "wrong population",
+    "missing/changed/unbound artifacts",
+    "wrong numeric hash",
+    "running/failed/no boundary",
+    "changed source/receipt/ledger/output",
+    "changed full CLI argument",
+    "changed pinned start bytes"
+  ],
+  "limitations": [
+    "Contact creation is not visual acceptance.",
+    "Full strict public loader and complete6456-output reconciliation remain required after terminal success.",
+    "Fixtures use preserved v5 data; no v6 output was read."
+  ]
+}

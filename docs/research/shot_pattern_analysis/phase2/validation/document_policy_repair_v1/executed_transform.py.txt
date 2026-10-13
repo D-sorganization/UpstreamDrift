@@ -1,0 +1,46 @@
+from pathlib import Path
+import hashlib,json,zipfile,subprocess
+r=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+p=Path('docs/research/shot_pattern_analysis/phase2')
+e=r/p/'validation/document_policy_repair_v1'; e.mkdir(exist_ok=True)
+changes={
+'TURNOVER.md': [('Repository Readiness Repair In Progress','Repository Readiness Repair in Progress')],
+'validation/article_candidate_rejection_v1/candidate_p2-article-numeric-expansion-review.md':[('Seventy-Two Pattern Rows (Tables 2, 3, and 4)','Seventy-Two Pattern Rows (Tables 2, 3, And 4)'),('Fixed-Target Across-Lean Controls and Rematching Physics (Tables 6 and 7)','Fixed-Target Across-Lean Controls and Rematching Physics (Tables 6 And 7)')],
+'validation/control_final_graphics_independent_review_v3/VISUAL_REVIEW.md':[('Control v3 Graphics Visual Review','Control V3 Graphics Visual Review')],
+'validation/delivery_readiness_review_v1/AGY_REVIEW.md':[('Category A: Actual Actionable Defects (Not covered by active jobs)','Category A: Actual Actionable Defects (Not Covered by Active Jobs)')],
+'validation/original_final_graphics_independent_review_v4/astra_driver_details/REVIEW.md':[('Primary v4 Driver Detail Review','Primary V4 Driver Detail Review')]}
+sha=lambda b:hashlib.sha256(b).hexdigest()
+original={str(p/k):(r/p/k).read_bytes() for k in changes}
+z=e/'original_documents.zip'
+if z.exists(): raise RuntimeError('Preserve existing archive')
+with zipfile.ZipFile(z,'w',compression=zipfile.ZIP_DEFLATED) as f:
+ for k,b in original.items():
+  i=zipfile.ZipInfo(k,date_time=(2026,10,10,0,0,0)); i.compress_type=zipfile.ZIP_DEFLATED; f.writestr(i,b)
+with zipfile.ZipFile(z) as f:
+ for k,b in original.items():
+  if f.read(k)!=b: raise RuntimeError('Archive mismatch')
+records=[]
+for k,replacements in changes.items():
+ path=r/p/k; text=path.read_text()
+ for old,new in replacements:
+  if text.count(old)!=1: raise RuntimeError((k,old))
+  text=text.replace(old,new)
+ if k=='TURNOVER.md':
+  old='Canonical preliminary gate session `33360` remains active, log `/tmp/p2-prepr-readiness-20261010-safe.txt`; the first invocation failed to resolve the module.'
+  new='Canonical preliminary gate session `33360` ended with exit 1: 24 failed, 3,822 passed, 29 skipped, 26 deselected, one xpass and seven errors; consistency passed. One failure is the owned protocol-precondition defect; the other 23 failures and seven errors have unchanged test/provider source relative to the comparison baseline, not a baseline runtime replay. See `validation/protocol_precondition_review_v1/` and `validation/prepr_readiness_diagnostic_v1/`. The first invocation failed to resolve the module.'
+  if old not in text: raise RuntimeError('Turnover gate text drift')
+  text=text.replace(old,new)
+  text=text.replace('The current run is diagnostic only because helper repairs proceeded while its broad test selection ran;','This run is diagnostic only because helper repairs proceeded while its broad test selection ran;')
+  old='BOUNDS (`/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`, branch `codex/shot-pattern-report-precision`) is inactive; its accepted repairs are already in MAIN.'
+  new='BOUNDS (`/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`, branch `codex/shot-pattern-protocol-preconditions`, based at `b231eed2f8`) has an active Gemini protocol-guard repair. The candidate is not accepted; preserve its ownership. Earlier accepted repairs are already in MAIN.'
+  if old not in text: raise RuntimeError('Turnover bounds text drift')
+  text=text.replace(old,new)
+ path.write_text(text)
+ records.append({'path':str(p/k),'old_sha256':sha(original[str(p/k)]),'new_sha256':sha(path.read_bytes()),'heading_replacements':replacements,'additional_change': 'Current-state pre-PR diagnostic and active BOUNDS ownership update' if k=='TURNOVER.md' else None})
+v=r/p/'validation/v6_output_review_harness_v1/VECTOR_REVIEW_PLAN.md'; v.write_bytes(Path('/tmp/p2-v6-vector-review-plan.md').read_bytes())
+receipt={'scope':'Six heading corrections across five documents; explicit derivative copies of historical evidence, with exact originals preserved. No historical receipt rewritten.','original_archive':{'path':str(z.relative_to(r)),'sha256':sha(z.read_bytes())},'documents':records,'vector_plan':{'path':str(v.relative_to(r)),'sha256':sha(v.read_bytes())},'divergence':{'check_exit':1,'only_stale_path':'physics/impact_model/README.md','classification':'ud-only','introduced_by':'07e2e3fcc59475e9a1ad9a78e7c5bab7bce14a3b','remedy':'Add generated record; increment physics ud-only and total ud-only by one in JSON and Markdown. No shared inventory edit made.'}}
+(e/'transform_receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+args=['/tmp/shot-pattern-validation-venv-20261009/bin/python','scripts/check_document_title_case.py',*[str(p/k) for k in changes],str(v.relative_to(r))]
+proc=subprocess.run(args,cwd=r,text=True,capture_output=True)
+(e/'title_check.txt').write_text(proc.stdout+proc.stderr)
+print(proc.returncode,proc.stdout,proc.stderr)

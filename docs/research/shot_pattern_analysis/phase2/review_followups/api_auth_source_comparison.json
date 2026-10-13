@@ -1,0 +1,63 @@
+{
+  "base_commit": "10c7d61aa686e456b7962f1d9aa9ecfda4e8405f",
+  "entire_api_tree_unchanged": true,
+  "files": [
+    {
+      "path": "tests/api/test_physics_api.py",
+      "base_sha256": "463ca5395c87d600f8e627c6ffa32969af7a9723ff6922c0c51afb636b1992c6",
+      "current_sha256": "463ca5395c87d600f8e627c6ffa32969af7a9723ff6922c0c51afb636b1992c6",
+      "identical": true
+    },
+    {
+      "path": "tests/conftest.py",
+      "base_sha256": "c7f55372366ec0670f372b6ea858b1a72d1e0350f70595e46728f8300b21ed82",
+      "current_sha256": "c7f55372366ec0670f372b6ea858b1a72d1e0350f70595e46728f8300b21ed82",
+      "identical": true
+    },
+    {
+      "path": "src/api/server.py",
+      "base_sha256": "0af7b404b869ae40f107e3d7eb9527db30bec53f2714c261533456902564e822",
+      "current_sha256": "0af7b404b869ae40f107e3d7eb9527db30bec53f2714c261533456902564e822",
+      "identical": true
+    },
+    {
+      "path": "src/api/route_registry.py",
+      "base_sha256": "81a203d44399b6ecd57f943b8bbccb0115833447cb25652b53a66f5471f56c61",
+      "current_sha256": "81a203d44399b6ecd57f943b8bbccb0115833447cb25652b53a66f5471f56c61",
+      "identical": true
+    },
+    {
+      "path": "src/api/auth/dependencies.py",
+      "base_sha256": "094ed4e0bd6808064202123718e1e4ed9a5ae929c602b40551d99739ce4c54c8",
+      "current_sha256": "094ed4e0bd6808064202123718e1e4ed9a5ae929c602b40551d99739ce4c54c8",
+      "identical": true
+    },
+    {
+      "path": "src/api/routes/physics.py",
+      "base_sha256": "3912d4f180b8c85bc53b298d76c02bd2d723ad82d93800338f0a2a59d32985ed",
+      "current_sha256": "3912d4f180b8c85bc53b298d76c02bd2d723ad82d93800338f0a2a59d32985ed",
+      "identical": true
+    },
+    {
+      "path": "src/shared/python/config/environment.py",
+      "base_sha256": "103df8f8a21e588cb67206c78fa2ff2de76e5a734c50eed162a2d3021423b0aa",
+      "current_sha256": "103df8f8a21e588cb67206c78fa2ff2de76e5a734c50eed162a2d3021423b0aa",
+      "identical": true
+    }
+  ],
+  "scope": "Source-equivalent base comparison, not a separate full base checkout execution",
+  "environment": {
+    "GOLF_SUITE_MODE": "unset",
+    "GOLF_AUTH_DISABLED": "unset"
+  },
+  "settings_modified": false,
+  "focused_reproduction": {
+    "test": "tests/api/test_physics_api.py::TestCameraPresetAPI::test_valid_preset_returns_200",
+    "exit_code": 1,
+    "expected_status": 200,
+    "observed_status": 401,
+    "log_sha256": "a7cbb9a51fc7684ffcd74475fac4d414eaf2c90724dae9e4b745e5bb9029a03c",
+    "execution": "Current worktree with byte-identical base API, fixture, and auth sources; same validation interpreter as preliminary pre_pr",
+    "auth_settings_modified": false
+  }
+}

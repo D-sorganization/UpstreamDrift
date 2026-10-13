@@ -1,0 +1,8 @@
+{
+  "number": 11984,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11984",
+  "title": "Empirically Qualify Off-Center Contact and Player Delivery Covariance",
+  "body": "The matched shot study provides geometric and numerically verified conditional predictions, not empirical equipment or player accuracy. Independent contact-law and head-parameter sensitivity cannot replace physical validation.\n\n## Acceptance Criteria\n\nMeasure clubhead mass, CG location, full inertia tensor and face geometry for each tested head. Obtain instrumented launch velocity/spin and strike-location data across a preregistered center/heel/toe/high/low grid with repeated trials, measurement uncertainties and held-out validation. Compare contact-law and aerodynamic predictions against preregistered error criteria. Collect repeated player delivery variables with synchronized face/path/speed/shaft/strike measurements before fitting and validating covariance or a human distribution.\n\n## External Resources\n\nRequires physical clubs, calibrated launch and strike measurements, laboratory/field access, and human-trial authorization where applicable. No such dataset is available in this task. Retain open and record the obligation in the deferred-validation catalog; do not claim measured accuracy or close from software tests.",
+  "updated_at": "2026-10-09T16:33:06Z",
+  "state": "open"
+}

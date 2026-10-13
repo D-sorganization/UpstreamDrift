@@ -1,0 +1,836 @@
+{
+  "schema": "independent-supplement-control-cell-graphics-review/1",
+  "utc": "2026-10-10T09:00:10.718586+00:00",
+  "status": "provisional_changes_required_standalone_identity",
+  "whole_pipeline_accepted": false,
+  "report_sha256": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+  "files": [
+    {
+      "index": 1,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density.png",
+      "sha256": "683fe49296afb355f30cbca96a72dfec8731540b446f3fd6b35232b0a2131f00",
+      "pixels": [
+        4827,
+        2835
+      ]
+    },
+    {
+      "index": 2,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density_social.png",
+      "sha256": "411457f71bbee9654e9c76c75f91532f61a54fb1f5bdac455e6103442f807a97",
+      "pixels": [
+        3099,
+        5281
+      ]
+    },
+    {
+      "index": 3,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead.png",
+      "sha256": "5696aebe8add2f89024f443352d5ccfa96262cb28e2456157356d0a37cd19b20",
+      "pixels": [
+        5163,
+        1800
+      ]
+    },
+    {
+      "index": 4,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead_social.png",
+      "sha256": "44845cc38ea64639301d55dd7fdc2e7fe9de2d4087580eee805e03bdd3307da1",
+      "pixels": [
+        4620,
+        2666
+      ]
+    },
+    {
+      "index": 5,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density.png",
+      "sha256": "258fe2b1fcbf85b71b9770f91304049be03aafdfce90fbeaf021b839ce0cee4d",
+      "pixels": [
+        4800,
+        2835
+      ]
+    },
+    {
+      "index": 6,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.png",
+      "sha256": "9c715760cd446456c230a959d067ddddfffaabf54c8241138cb4be9837c83ff1",
+      "pixels": [
+        3075,
+        5281
+      ]
+    },
+    {
+      "index": 7,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead.png",
+      "sha256": "12a0b2199ddac3345820a7219d1eb2d3f1144355b22a20dca45111a08cd3a88d",
+      "pixels": [
+        5193,
+        1800
+      ]
+    },
+    {
+      "index": 8,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead_social.png",
+      "sha256": "359117785fb7330f6dd4d2dbc5f4c2c7327f625f4f04b01297b1d0b957640596",
+      "pixels": [
+        4651,
+        2666
+      ]
+    },
+    {
+      "index": 9,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png",
+      "sha256": "3c7caabbbae0a97483bd01ca7c645395b1168ad14e6c147415f9153830a5cea6",
+      "pixels": [
+        4827,
+        2835
+      ]
+    },
+    {
+      "index": 10,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png",
+      "sha256": "cf4f3c94a724d8f38235742933e4d21bc640b94251acbb702cb0833b881888a7",
+      "pixels": [
+        3099,
+        5281
+      ]
+    },
+    {
+      "index": 11,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png",
+      "sha256": "104c1ddfef3ac536e71faeeba15a864cf4a9296c3f3f40d45a73b3d6430a4dc7",
+      "pixels": [
+        5123,
+        1800
+      ]
+    },
+    {
+      "index": 12,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png",
+      "sha256": "1e649a3d7c729c280ad010e85887817921fb5b4507c5ec42733098a1a8c2d208",
+      "pixels": [
+        4580,
+        2666
+      ]
+    },
+    {
+      "index": 13,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density.png",
+      "sha256": "f3df69e5203ddb9bab51ec0056fe20b2a2f3f2da717a5d3858e40c853867518b",
+      "pixels": [
+        4800,
+        2835
+      ]
+    },
+    {
+      "index": 14,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density_social.png",
+      "sha256": "c1b84b348ee946bf2435811ec7818d1317808c69220942c94c896f5bf87a4c25",
+      "pixels": [
+        3075,
+        5281
+      ]
+    },
+    {
+      "index": 15,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead.png",
+      "sha256": "a3fe23cdd88ff4892edc23041e90a49dad41b1d9cceae5d9f428397ed5851de3",
+      "pixels": [
+        5123,
+        1800
+      ]
+    },
+    {
+      "index": 16,
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead_social.png",
+      "sha256": "9120ccd40fdb7982d47be8d750245de51c34a6123505cc8e83e7c2c635c0f315",
+      "pixels": [
+        4580,
+        2666
+      ]
+    },
+    {
+      "index": 17,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density.png",
+      "sha256": "4984db44fe03162308f6020ff521762e0f024d6931465ca561da6e7aeb21dc8b",
+      "pixels": [
+        4753,
+        2835
+      ]
+    },
+    {
+      "index": 18,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density_social.png",
+      "sha256": "77700ba9e14416b7183903bfa49d95377791120a6f526531e5b1f67f1c6d3574",
+      "pixels": [
+        3027,
+        5281
+      ]
+    },
+    {
+      "index": 19,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead.png",
+      "sha256": "3ac8b9d60195ddc0aad7e6aba547878d860304317994b120d1a499908e7cbdfe",
+      "pixels": [
+        5136,
+        1800
+      ]
+    },
+    {
+      "index": 20,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead_social.png",
+      "sha256": "df5dbf9e54e468ae842355cc07c39620ce7fc279c1cf8913d6a0c88722f8eb4e",
+      "pixels": [
+        4593,
+        2666
+      ]
+    },
+    {
+      "index": 21,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density.png",
+      "sha256": "fbe473df466991f3e952645f142d9529cd052092334844567bb8446aca33a738",
+      "pixels": [
+        4725,
+        2835
+      ]
+    },
+    {
+      "index": 22,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.png",
+      "sha256": "a1d20523d732a635cf5465f2f654d0855d7773bea16d00be2b3541e59f657ea2",
+      "pixels": [
+        2992,
+        5281
+      ]
+    },
+    {
+      "index": 23,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead.png",
+      "sha256": "ab66e4ae9dd398aac9ff2cfa78c42acff4dccc6432a9533a4ed1a9fdc1f75c97",
+      "pixels": [
+        5136,
+        1800
+      ]
+    },
+    {
+      "index": 24,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead_social.png",
+      "sha256": "645e89e651db939934872e74a2ecf69537ea551ebdc376033cda8b9ff567ebc6",
+      "pixels": [
+        4593,
+        2666
+      ]
+    },
+    {
+      "index": 25,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png",
+      "sha256": "43f7ebe4d683706f04c914268ba6f615ccc0468b39e0c48533d5c9cd9f1204bf",
+      "pixels": [
+        4831,
+        2835
+      ]
+    },
+    {
+      "index": 26,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png",
+      "sha256": "17cfdb54900764fcbdfffe0b0d5970b496167605c1bfc402a8777140922025ea",
+      "pixels": [
+        3107,
+        5281
+      ]
+    },
+    {
+      "index": 27,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png",
+      "sha256": "f60e99822b75893eab24e4b53393e62ddc43eda7ea1624eb21fd8c1de0945cab",
+      "pixels": [
+        5096,
+        1800
+      ]
+    },
+    {
+      "index": 28,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png",
+      "sha256": "5cd2dda727ca99063bc653586e2d6653f6354ceb7eaef85df6d71c08bbf5e823",
+      "pixels": [
+        4553,
+        2666
+      ]
+    },
+    {
+      "index": 29,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density.png",
+      "sha256": "e69cf4b9447a400d8f0a15cb6eff2e64a568994c983c317063580e3dc42016ce",
+      "pixels": [
+        4756,
+        2835
+      ]
+    },
+    {
+      "index": 30,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density_social.png",
+      "sha256": "4709c47fe3c95268ab8da5f3b21c1d1d1a2616c96c3a05e042ac01a1e7cdd5f7",
+      "pixels": [
+        3032,
+        5281
+      ]
+    },
+    {
+      "index": 31,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead.png",
+      "sha256": "e8f166540825a36fb77915faf38c37f38949d428759c4d31228a56fd7f23c2e9",
+      "pixels": [
+        5096,
+        1800
+      ]
+    },
+    {
+      "index": 32,
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead_social.png",
+      "sha256": "e6f89293db78466d7e20330f0ccc3586a888fdc6792e9dce822d7697f1ce874e",
+      "pixels": [
+        4553,
+        2666
+      ]
+    }
+  ],
+  "contact_sheets_reviewed": 4,
+  "full_size_reviewed_indices": [
+    9,
+    10,
+    16,
+    21,
+    26,
+    27
+  ],
+  "checks": [
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density.png",
+      "source_cell": "driver_lean5_curve2_rotation1_combined2",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "ac9f328de946ace9321abcededc156eb0c84d44b64e587461bf6afb58eba29c8",
+      "supported_n": {
+        "Draw": 9974,
+        "Fade": 9974,
+        "Straight": 9974
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density_social.png",
+      "source_cell": "driver_lean5_curve2_rotation1_combined2",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "ac9f328de946ace9321abcededc156eb0c84d44b64e587461bf6afb58eba29c8",
+      "supported_n": {
+        "Draw": 9974,
+        "Fade": 9974,
+        "Straight": 9974
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead.png",
+      "source_cell": "driver_lean5_curve2_rotation1_combined2",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "ac9f328de946ace9321abcededc156eb0c84d44b64e587461bf6afb58eba29c8",
+      "supported_n": {
+        "Draw": 9974,
+        "Fade": 9974,
+        "Straight": 9974
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead_social.png",
+      "source_cell": "driver_lean5_curve2_rotation1_combined2",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "ac9f328de946ace9321abcededc156eb0c84d44b64e587461bf6afb58eba29c8",
+      "supported_n": {
+        "Draw": 9974,
+        "Fade": 9974,
+        "Straight": 9974
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density.png",
+      "source_cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "29a8d4c89fe5cc348cd14c0ca81ab62705d089316c58a0127f4e167b8c7b047f",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.png",
+      "source_cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "29a8d4c89fe5cc348cd14c0ca81ab62705d089316c58a0127f4e167b8c7b047f",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead.png",
+      "source_cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "29a8d4c89fe5cc348cd14c0ca81ab62705d089316c58a0127f4e167b8c7b047f",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead_social.png",
+      "source_cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "29a8d4c89fe5cc348cd14c0ca81ab62705d089316c58a0127f4e167b8c7b047f",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png",
+      "source_cell": "driver_lean5_curve2_rotation2_combined2",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "038055a639246c267964e62b2f5f73683b3502b733a4246c0ab7f7740dabae4c",
+      "supported_n": {
+        "Draw": 9940,
+        "Fade": 9940,
+        "Straight": 9940
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png",
+      "source_cell": "driver_lean5_curve2_rotation2_combined2",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "038055a639246c267964e62b2f5f73683b3502b733a4246c0ab7f7740dabae4c",
+      "supported_n": {
+        "Draw": 9940,
+        "Fade": 9940,
+        "Straight": 9940
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png",
+      "source_cell": "driver_lean5_curve2_rotation2_combined2",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "038055a639246c267964e62b2f5f73683b3502b733a4246c0ab7f7740dabae4c",
+      "supported_n": {
+        "Draw": 9940,
+        "Fade": 9940,
+        "Straight": 9940
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png",
+      "source_cell": "driver_lean5_curve2_rotation2_combined2",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "038055a639246c267964e62b2f5f73683b3502b733a4246c0ab7f7740dabae4c",
+      "supported_n": {
+        "Draw": 9940,
+        "Fade": 9940,
+        "Straight": 9940
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density.png",
+      "source_cell": "driver_lean5_curve2_rotation2_shaft_only",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "4ba1a89317a07155802c981988379aaf34323598b1ba4d64ce8d56a0f1d83d6e",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density_social.png",
+      "source_cell": "driver_lean5_curve2_rotation2_shaft_only",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "4ba1a89317a07155802c981988379aaf34323598b1ba4d64ce8d56a0f1d83d6e",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead.png",
+      "source_cell": "driver_lean5_curve2_rotation2_shaft_only",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "4ba1a89317a07155802c981988379aaf34323598b1ba4d64ce8d56a0f1d83d6e",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead_social.png",
+      "source_cell": "driver_lean5_curve2_rotation2_shaft_only",
+      "protocol": "driver-control-speed-bounds/1",
+      "source_summary_sha256": "4ba1a89317a07155802c981988379aaf34323598b1ba4d64ce8d56a0f1d83d6e",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 178.94875782337786,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "c0ac0c29490f6a6df217a4e49d7e0eb9dcaf37dc3c8143a6a907fd1ee48ce923",
+      "supported_n": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density_social.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "c0ac0c29490f6a6df217a4e49d7e0eb9dcaf37dc3c8143a6a907fd1ee48ce923",
+      "supported_n": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "c0ac0c29490f6a6df217a4e49d7e0eb9dcaf37dc3c8143a6a907fd1ee48ce923",
+      "supported_n": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead_social.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "c0ac0c29490f6a6df217a4e49d7e0eb9dcaf37dc3c8143a6a907fd1ee48ce923",
+      "supported_n": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "79915f841418bb77f7f9c369c8c45ca445f962bb6502fbe2a6c5eee88356098d",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "79915f841418bb77f7f9c369c8c45ca445f962bb6502fbe2a6c5eee88356098d",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "79915f841418bb77f7f9c369c8c45ca445f962bb6502fbe2a6c5eee88356098d",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead_social.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "79915f841418bb77f7f9c369c8c45ca445f962bb6502fbe2a6c5eee88356098d",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "a107158ee7f608276495532f38de4580013feae92fc8836af61e330b8559f4f3",
+      "supported_n": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "a107158ee7f608276495532f38de4580013feae92fc8836af61e330b8559f4f3",
+      "supported_n": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "a107158ee7f608276495532f38de4580013feae92fc8836af61e330b8559f4f3",
+      "supported_n": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "a107158ee7f608276495532f38de4580013feae92fc8836af61e330b8559f4f3",
+      "supported_n": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "3c1a0d9d2cfc5d67040889a0962caf5633fe01138695f217adbbd40d27b56d9e",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density_social.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "3c1a0d9d2cfc5d67040889a0962caf5633fe01138695f217adbbd40d27b56d9e",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "3c1a0d9d2cfc5d67040889a0962caf5633fe01138695f217adbbd40d27b56d9e",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": false
+    },
+    {
+      "asset": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead_social.png",
+      "source_cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "protocol": "pw-control-face-bounds/1",
+      "source_summary_sha256": "3c1a0d9d2cfc5d67040889a0962caf5633fe01138695f217adbbd40d27b56d9e",
+      "supported_n": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "target_x_m": 77.40247724866299,
+      "population_caption_verified": true,
+      "standalone_protocol_and_target_omitted": true
+    }
+  ],
+  "bound_inputs_unchanged": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/summary.json": "ac9f328de946ace9321abcededc156eb0c84d44b64e587461bf6afb58eba29c8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/manifest.json": "b58753e9e89bc47f22d3c37595faf77f796affdfa9d0905b665a8051168a51c4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density.svg": "4d27074183eed6439faa7abbe00b211dc9e3ac0028d4003aba893556d25b330e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density_social.svg": "32e2ef9c204b6ef63b1bf6825f1d28ea4b15e43b64b04f99b406735a5dd9429c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead.svg": "daca2351fdcfd3d93a347129950fb4af5476820a0910b54dab91dfbee6a44656",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead_social.svg": "a167154633fdd0968c116d7dd6a44b6d8be7984e43a2b7b252abcdbeabde3c15",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation1_shaft_only/summary.json": "29a8d4c89fe5cc348cd14c0ca81ab62705d089316c58a0127f4e167b8c7b047f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation1_shaft_only/manifest.json": "ca113bc8625bc577d72a05c59514582d8241e4ae4b75c68231146e3abd0c7eef",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density.svg": "6e2f514a4abc9b234af65801e31a4dc90b2e693301b1778149db3d7222898303",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.svg": "acfdd5426f20fa1ded274579ea4458a39389b4688ef69d40429d93305a512355",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead.svg": "7c247f36847c7bff966bfc76b41550f5ca1bd3a2f4c17aed92cbe8c7f2a1e017",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead_social.svg": "a17bf27ce5da1db07d4f68fe36a75cafa3530363c7218919438818a909ba8f0f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/summary.json": "038055a639246c267964e62b2f5f73683b3502b733a4246c0ab7f7740dabae4c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/manifest.json": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.svg": "fe8e0cf3c6008dd79aca2bb7178e08727511b072b4ab179e6f8e746e05d43e11",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.svg": "604adf433a64c310b027fbbf335a32e9edf54551b7b082e0a10cbae979ec8171",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.svg": "81b3c4410c6f53e4621918d135323712d591d05b14b1598b06b1177453c3de05",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.svg": "23a9a6dc36469d44887859cc76d2f07916f35f48319f37f7c919db685b01df8a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation2_shaft_only/summary.json": "4ba1a89317a07155802c981988379aaf34323598b1ba4d64ce8d56a0f1d83d6e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation2_shaft_only/manifest.json": "2663e3b66d3286d8b57d214e00dd984fb225bb7c907046067b470f564c5c4137",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density.svg": "6abc268882054b9c4a5587e7439f555e368d73e619f3a396a3e20f1ed7557649",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density_social.svg": "b441030f685b72eb925743e9c520cc0ea3a067067b80612fd407f38fcd94a039",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead.svg": "d9888a2cfceaaacac4095d324f244c17546c426be74725ace08311f5f42bc958",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead_social.svg": "f8fd9deae7706a06ecb6593a9413431d135258b4855bf5bb05bd0836c53e6a51",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_combined2/summary.json": "c0ac0c29490f6a6df217a4e49d7e0eb9dcaf37dc3c8143a6a907fd1ee48ce923",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_combined2/manifest.json": "e69df20a9bf202aaf92ebd49d18f5fc98f7b7cc1764ec9a54028d550889ec73d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density.svg": "7a7dc80a3e579551ec64fbbaaa9e0a8b1005e2d57708025b29c66de5fb2bb658",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density_social.svg": "40c267a644ecd5eecfcbb3e5586466e27f1e75a7c9b710d4824512d3cb99d4b4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead.svg": "dbfc47fd3654d1ddf03c1c1e5c89c733ba2b5b951adde85648e1831bf16e0765",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead_social.svg": "0bc34bbaef137c9f0f4b7ffdc551df54d8bae5472e6df4722bc82f55309f6fc9",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_shaft_only/summary.json": "79915f841418bb77f7f9c369c8c45ca445f962bb6502fbe2a6c5eee88356098d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_shaft_only/manifest.json": "10a94bc345184717fb58c65ef917acb483c9e3f8939b0d8576dfd8ecc3947211",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density.svg": "395dfe03d3ac955e5a74f7da90379959fab3d8a1fa1aed082e6938b9da896cba",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.svg": "4a8d814130fcb5e5c8b95adff2da36b451f15686424be2bf7b226a3b30bd1fa6",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead.svg": "07225011615a2dd3b42897b87a59d704a7ff9dbf962a982d9d961e9730f25217",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead_social.svg": "380b09471756ef4faa5b1092720aafad92c40aee29d3da14b46b0f899f976ee2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/summary.json": "a107158ee7f608276495532f38de4580013feae92fc8836af61e330b8559f4f3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/manifest.json": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.svg": "d4c4064d5974cd6bc7b905fa207ba7ae270dac54ab715c0f5448a530af4e10a4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.svg": "43d9cd88e33a8207cd703b52c7b7b43002d42e916393306a88ff8a26629634ff",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.svg": "661d4bd8897dcbd2894c0f3866a1ba38124c2ec7f54b890276f3f41fe450b973",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.svg": "ec17c7991f8bcb83bb428555762557511f0171f70fd7b12fe46b01816116e374",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_shaft_only/summary.json": "3c1a0d9d2cfc5d67040889a0962caf5633fe01138695f217adbbd40d27b56d9e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_shaft_only/manifest.json": "2530f389663e3ecc37427b07824efeba3f1c44bb673da770cfda2d4c1b07f113",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density.svg": "e48f7036710f8b94482a004fad7b4040197d5d5759f0b8ef20db3eee841df73f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density_social.svg": "a852992ac7f22162f917994b7270288291388cc4803097a4ba87e69b84049120",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead.svg": "73f7311a92319bb9d430dc45e7ff43577b95ba31d32c41bda33ea923d2a2bd47",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead_social.svg": "4cafa875c84b7aecefafb889fcd2b9cbc0dc46f85a2ba429f6617517f4f16715"
+  },
+  "findings": [
+    {
+      "affected_png_count": 16,
+      "paths": [
+        "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density_social.png",
+        "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead_social.png",
+        "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.png",
+        "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead_social.png",
+        "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png",
+        "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png",
+        "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density_social.png",
+        "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead_social.png",
+        "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density_social.png",
+        "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead_social.png",
+        "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.png",
+        "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead_social.png",
+        "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png",
+        "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png",
+        "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density_social.png",
+        "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead_social.png"
+      ],
+      "description": "Social control-cell cards omit supplemental protocol and numeric fixed-target distance; identical club/lean/curve/noise labels can also describe within-lean primary conditions. Academic companions retain exact protocol identity. Qualify these social files only with attached source context until standalone captions identify the protocol/target."
+    }
+  ],
+  "limits": [
+    "Producer still live: final receipt and output manifest reconciliation remain required.",
+    "All 32 PNGs decoded and viewed in contact sheets; six representative originals inspected at available display resolution.",
+    "No numerical recalculation, bootstrap, simulation, or production-source/output mutation."
+  ]
+}

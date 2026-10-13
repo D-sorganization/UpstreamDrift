@@ -1,0 +1,1257 @@
+"""The final research report never invents unavailable model results."""
+
+from __future__ import annotations
+
+import csv
+import io
+import json
+from collections import Counter
+from pathlib import Path
+
+import pytest
+
+from scripts.research.shot_pattern_analysis import build_final_report
+from src.tools.shot_pattern_analysis.matched_interpretation import (
+    describe_cell,
+    describe_effect_modification,
+    describe_scoring,
+)
+
+pytestmark = pytest.mark.unit
+
+
+def _cell(name: str, *, status: str = "completed") -> dict:
+    config = {
+        "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0.0,
+            "loft_deg": 10.0,
+            "lie_deg": 58.5,
+            "club_speed_mps": 45.0,
+            "attack_angle_deg": -0.9,
+            "clubhead_mass_kg": 0.2,
+        },
+        "noise": {"standard_deviations": [1.0, 0, 0, 0, 0, 0, 0], "correlation": None},
+        "curve_scale": 1.0,
+        "n_shots": 10_000,
+        "target_x_m": None,
+        "seed": 20261009,
+        "match_tolerance_m": 0.05,
+    }
+    result = {"cell": name, "status": status, "config": config}
+    if status == "unavailable":
+        return {**result, "reason": "nonairborne_nominal"}
+    interval = {"estimate": 0.02, "lower_95": 0.01, "upper_95": 0.03}
+    return {
+        **result,
+        "target_x_m": 179.0,
+        "nominals": {
+            name: {"face_deg": 0.0, "path_deg": 0.0, "speed_mps": 45.0}
+            for name in ("Straight", "Draw", "Fade")
+        },
+        "summary": {
+            name: {
+                "total_n": 10_000,
+                "supported_n": 9_999,
+                "lateral_sd_m": 5.0,
+                "downrange_sd_m": 3.0,
+                "target_rmse_m": 6.0,
+                "target_containment_fraction": 0.8,
+                "mean_carry_m": 179.0,
+                "realized_face_path_correlation": 0.1,
+            }
+            for name in ("Straight", "Draw", "Fade")
+        },
+        "paired_comparisons": {
+            "paired_n": 9_999,
+            "mean_radial_error_difference_vs_straight": {
+                "Draw": interval,
+                "Fade": interval,
+            },
+            "mean_squared_target_error_difference_m2": {
+                "Draw": interval,
+                "Fade": interval,
+            },
+        },
+        "course_scoring": {
+            "status": "conditional_only",
+            "paired_n": 9_999,
+            "paired_benefit_vs_straight": {"Draw": interval, "Fade": interval},
+        },
+    }
+
+
+def _matrix(cells: list[dict], stage: str) -> dict:
+    counts = {
+        status: sum(cell["status"] == status for cell in cells)
+        for status in ("completed", "unavailable", "not_run")
+    }
+    return {
+        "schema": "matched-study-report/1",
+        "stage": stage,
+        "planned_cells": len(cells),
+        "counts": counts,
+        "cells": cells,
+        "plan_sha256": "a" * 64,
+    }
+
+
+def test_report_shows_completed_and_unavailable_without_fabricating_effects():
+    primary = _matrix(
+        [
+            _cell("driver_lean0_curve1_rotation1_shaft_only"),
+            _cell("driver_lean10_curve1_rotation1_shaft_only", status="unavailable"),
+        ],
+        "final",
+    )
+    control = _matrix(
+        [_cell("driver_lean0_curve1_rotation1_shaft_only")], "control_final"
+    )
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    text = build_final_report.render_final_report(primary, control, lean, {})
+    assert "10,000" in text
+    assert "1 / 2" in text
+    assert "nonairborne_nominal" in text
+    assert "+0.020 [+0.010, +0.030]" in text
+    assert "conditional" in text.lower()
+    assert "Phase One" in text
+    assert "Missing Metric in Completed Cells" in text
+    assert "1 unavailable planned cell" in text
+    assert "successful nominal matching under the stated bounds" in text
+    assert "Infeasible cells" not in text
+    assert "| Mean Radial Error Difference | Draw | 1 | 0 | 0 | 0 |" in text
+
+
+def test_report_rejects_incomplete_or_wrong_study_population():
+    completed = _cell("driver_lean0_curve1_rotation1_shaft_only")
+    control = _matrix(
+        [_cell("driver_lean0_curve1_rotation1_shaft_only")], "control_final"
+    )
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    with pytest.raises(ValueError, match="incomplete"):
+        build_final_report.render_final_report(
+            _matrix(
+                [completed, {**completed, "cell": "later", "status": "not_run"}],
+                "final",
+            ),
+            control,
+            lean,
+            {},
+        )
+    completed["summary"]["Draw"]["total_n"] = 32
+    with pytest.raises(ValueError, match="10,000"):
+        build_final_report.render_final_report(
+            _matrix([completed], "final"), control, lean, {}
+        )
+    unavailable = _cell(
+        "driver_lean10_curve1_rotation1_shaft_only", status="unavailable"
+    )
+    unavailable["config"]["n_shots"] = 32
+    with pytest.raises(ValueError, match="10,000"):
+        build_final_report.render_final_report(
+            _matrix([unavailable], "final"), control, lean, {}
+        )
+
+
+def test_course_sensitivity_is_reported_only_when_supplied():
+    cell = _cell("driver_lean0_curve1_rotation1_shaft_only")
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    text = build_final_report.render_final_report(matrix, matrix, lean, {})
+    assert "Course-Dimension Sensitivity" in text
+    assert "not computed" in text.lower()
+
+
+def test_main_report_uses_compact_tables_and_separate_complete_inventory():
+    cell = _cell("driver_lean0_curve1_rotation1_combined2")
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    text = build_final_report.render_final_report(matrix, matrix, lean, {})
+    assert "REPORT_CELLS.csv" in text
+    assert "9-profile" in text or "Nine-Profile" in text
+    assert "common paired" in text.lower()
+    assert "Mean Carry" in text
+    assert "final_figures_v1/comparisons/driver/combined2" in text
+    assert "### Complete Cell Inventory" not in text
+    rows = list(
+        csv.DictReader(
+            io.StringIO(build_final_report.render_cell_inventory(matrix, matrix))
+        )
+    )
+    assert len(rows) == 6
+    assert {row["pattern"] for row in rows} == {"Straight", "Draw", "Fade"}
+    assert rows[1]["nominal_speed_mps"] == "45.0"
+    assert rows[1]["planned_n_per_pattern"] == "10000"
+    assert rows[1]["attempted_n_per_pattern"] == "10000"
+
+
+def test_unavailable_inventory_separates_planned_from_attempted_shots():
+    unavailable = _cell(
+        "driver_lean10_curve1_rotation1_shaft_only", status="unavailable"
+    )
+    matrix = _matrix([unavailable], "final")
+    rows = list(
+        csv.DictReader(
+            io.StringIO(build_final_report.render_cell_inventory(matrix, matrix))
+        )
+    )
+    assert len(rows) == 6
+    assert all(row["planned_n_per_pattern"] == "10000" for row in rows)
+    assert all(row["attempted_n_per_pattern"] == "0" for row in rows)
+    assert all(row["supported_n"] == "" for row in rows)
+
+
+def _detailed_cell(*, status="completed"):
+    cell = _cell("driver_lean0_curve1_rotation2_combined2", status=status)
+    if status != "completed":
+        return cell
+    for item in cell["summary"].values():
+        item["supported_fraction_exact95"] = [0.999, 1.0]
+        item["statistics"] = {
+            "mean_downrange_error_m": -4.0,
+            "mean_lateral_error_m": 0.5,
+            "quadrant_fractions": {
+                "left_long": 0.1,
+                "left_short": 0.4,
+                "right_long": 0.3,
+                "right_short": 0.2,
+            },
+        }
+        item["joint_delivery_outcome_diagnostics"] = {
+            "fields": ["face_deg", "loft_deg"],
+            "covariance": [[1.0, 0.6], [0.6, 1.0]],
+        }
+    cell["course_scoring"].update(
+        scenario_id="tee_fairway_rough",
+        start_lie="tee",
+        start_distance_m=400.0,
+        hole_distance_m=400.0,
+        fairway_half_width_m=15.0,
+        green_radius_m=None,
+        total_n=10_000,
+        patterns={
+            name: {"n": 9_999, "mean_strokes_gained": -0.4}
+            for name in ("Straight", "Draw", "Fade")
+        },
+    )
+    return cell
+
+
+def _qualified_interpretation():
+    cell = _detailed_cell()
+    pair = {
+        "schema": "matched-explicit-source-pair/1",
+        "comparison_kind": "shaft_rotation_sd",
+        "status": "conditional_only",
+        "conditioning": "same_indices_supported_in_all_six_populations",
+        "common_supported_n": 9_998,
+        "total_n_per_population": 10_000,
+        "source_protocols": ["original_primary", "pw-primary-face-bounds/1"],
+        "sources": [
+            {
+                "protocol_id": "original_primary",
+                "cell": "before",
+                "source_plan_sha256": "a" * 64,
+                "source_cell_manifest_sha256": "b" * 64,
+                "source_csv_sha256": "c" * 64,
+            },
+            {
+                "protocol_id": "pw-primary-face-bounds/1",
+                "cell": "after",
+                "source_plan_sha256": "d" * 64,
+                "source_cell_manifest_sha256": "e" * 64,
+                "source_csv_sha256": "f" * 64,
+            },
+        ],
+        "analysis_source_sha256": {"matched_lean_control.py": "1" * 64},
+        "course_scoring_effect_modification": {
+            "Draw": {"estimate": 0.012, "lower_95": 0.006, "upper_95": 0.018},
+            "Fade": {"estimate": -0.003, "lower_95": -0.009, "upper_95": 0.003},
+        },
+    }
+    return {
+        "selected_cells": [describe_cell(cell)],
+        "scores": [(cell["cell"], describe_scoring(cell))],
+        "effects": [describe_effect_modification(pair)],
+        "figure_links": [
+            {
+                "club": "driver",
+                "kind": "density",
+                "presentation": "academic",
+                "source_protocol": "original_primary",
+                "source_kind": "individual_supported_endpoints",
+                "relative_path": "final_figures_v1/details/driver/density.png",
+            },
+            {
+                "club": "driver",
+                "kind": "density",
+                "presentation": "social",
+                "source_protocol": "original_primary",
+                "source_kind": "individual_supported_endpoints",
+                "relative_path": "final_figures_v1/social/details/driver/density.png",
+            },
+        ],
+        "supplement": {
+            "status": "qualified",
+            "unique_executed_cells": 26,
+            "verified_control_aliases": 4,
+            "receipt_sha256": "9" * 64,
+            "comparison_inventory": "supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.csv",
+            "figure_inventory": "supplement_report_v1/REPORT_SUPPLEMENT_FIGURES.json",
+        },
+    }
+
+
+def test_final_interpretation_uses_qualified_populations_and_additive_protocol():
+    cell = _detailed_cell()
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=_qualified_interpretation()
+    )
+    assert "9,999 / 10,000" in rendered
+    assert "Common-Three Scored" in rendered
+    assert "Face–Loft Covariance" in rendered
+    assert "Left-Long" in rendered
+    assert "9,998 / 10,000" in rendered
+    assert "pw-primary-face-bounds/1" in rendered
+    assert "supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.csv" in rendered
+    assert "REPORT_DRIVER.md" in rendered
+    assert "final_figures_v1/social/details/driver/density.png" in "\n".join(
+        build_final_report.render_club_appendices(
+            _qualified_interpretation()
+            | {
+                "resolved_selected_cells": json.loads(
+                    (
+                        Path(__file__).parent
+                        / "fixtures/shot_pattern_selected_synthesis.json"
+                    ).read_text(encoding="utf-8")
+                )["cells"]
+            }
+        ).values()
+    )
+    assert "not a causal" in rendered
+
+
+def test_final_interpretation_does_not_invent_unavailable_assets_or_shots():
+    unavailable = _detailed_cell(status="unavailable")
+    matrix = _matrix([unavailable], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    interpretation = _qualified_interpretation()
+    interpretation["selected_cells"] = [describe_cell(unavailable)]
+    interpretation["scores"] = [(unavailable["cell"], describe_scoring(unavailable))]
+    interpretation["figure_links"] = []
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=interpretation
+    )
+    assert "Not Attempted" in rendered
+    assert (
+        "final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/overhead.png"
+        not in rendered
+    )
+
+
+def test_verified_original_figures_require_both_presentations(tmp_path):
+    import hashlib
+    import json
+
+    cell = _detailed_cell()["cell"]
+    figure_root = tmp_path / "final_figures_v1"
+    figure_root.mkdir()
+    paths = (
+        f"details/{cell}/density.png",
+        f"details/{cell}/overhead.png",
+        f"social/details/{cell}/density.png",
+        f"social/details/{cell}/overhead.png",
+        "availability.csv",
+    )
+    outputs = {}
+    for relative in paths:
+        path = figure_root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(relative.encode())
+        outputs[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+    manifest = {
+        "schema": "matched-study-figure-production/1",
+        "kind": "final",
+        "source_stage": "final",
+        "plan_sha256": "a" * 64,
+        "cell_manifest_sha256": {cell: "b" * 64},
+        "availability_ledger": "availability.csv",
+        "outputs": outputs,
+    }
+    (figure_root / "figure_manifest.json").write_text(json.dumps(manifest))
+    report = _matrix([_detailed_cell()], "final")
+    report["cells"][0]["config"]["noise"]["standard_deviations"][0] = 2.0
+    report["cell_manifest_sha256"] = {cell: "b" * 64}
+    links = build_final_report.verified_original_figure_links(
+        figure_root, report, report_root=tmp_path, protocol="original_primary"
+    )
+    assert {(item["kind"], item["presentation"]) for item in links} == {
+        ("density", "academic"),
+        ("overhead", "academic"),
+        ("density", "social"),
+        ("overhead", "social"),
+    }
+    assert (
+        build_final_report.verified_original_figure_inventory(
+            figure_root, report, report_root=tmp_path, protocol="original_primary"
+        )
+        == "final_figures_v1/availability.csv"
+    )
+    (figure_root / paths[-1]).write_bytes(b"changed")
+    with pytest.raises(ValueError, match="figure availability inventory changed"):
+        build_final_report.verified_original_figure_inventory(
+            figure_root, report, report_root=tmp_path, protocol="original_primary"
+        )
+    (figure_root / paths[0]).write_bytes(b"changed")
+    with pytest.raises(ValueError, match="figure artifact changed"):
+        build_final_report.verified_original_figure_links(
+            figure_root, report, report_root=tmp_path, protocol="original_primary"
+        )
+
+
+def test_control_final_stage_assets_keep_control_protocol(tmp_path):
+    import hashlib
+    import json
+
+    cell = "driver_lean0_curve1_rotation2_combined2"
+    root = tmp_path / "control_final_figures_v1"
+    outputs = {}
+    for prefix in ("", "social/"):
+        for kind in ("density", "overhead"):
+            relative = f"{prefix}details/{cell}/{kind}.png"
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(relative.encode())
+            outputs[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+    (root / "figure_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema": "matched-study-figure-production/1",
+                "kind": "final",
+                "source_stage": "final",
+                "plan_sha256": "a" * 64,
+                "cell_manifest_sha256": {cell: "b" * 64},
+                "outputs": outputs,
+            }
+        )
+    )
+    report = _matrix([_detailed_cell()], "final")
+    report["cells"][0]["config"]["noise"]["standard_deviations"][0] = 2.0
+    report["cell_manifest_sha256"] = {cell: "b" * 64}
+    links = build_final_report.verified_original_figure_links(
+        root, report, report_root=tmp_path, protocol="original_control"
+    )
+    assert {item["source_protocol"] for item in links} == {"original_control"}
+
+
+@pytest.mark.slow
+@pytest.mark.integration
+def test_publication_boundary_rejects_mutated_png_and_supplement_receipt(
+    tmp_path, monkeypatch
+):
+    import hashlib
+    import json
+
+    from src.tools.shot_pattern_analysis import matched_supplement_pipeline
+
+    cell = _detailed_cell()
+    cell["config"]["noise"]["standard_deviations"][0] = 2.0
+    name = cell["cell"]
+    reports = []
+    figure_roots = []
+    originals = []
+    manifest_hashes = {}
+    for label in ("primary", "control"):
+        root = tmp_path / label
+        (root / name).mkdir(parents=True)
+        (root / "matrix_plan.json").write_bytes(b"plan")
+        (root / name / "manifest.json").write_bytes(b"manifest")
+        report = _matrix([cell], "final")
+        report["plan_sha256"] = hashlib.sha256(b"plan").hexdigest()
+        report["cell_manifest_sha256"] = {name: hashlib.sha256(b"manifest").hexdigest()}
+        reports.append((root, report))
+        figure_root = tmp_path / f"{label}_figures"
+        outputs = {}
+        for relative in (
+            f"details/{name}/density.png",
+            f"details/{name}/overhead.png",
+            f"social/details/{name}/density.png",
+            f"social/details/{name}/overhead.png",
+            "availability.csv",
+        ):
+            path = figure_root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(relative.encode())
+            outputs[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+        (figure_root / "figure_manifest.json").write_text(
+            json.dumps(
+                {
+                    "schema": "matched-study-figure-production/1",
+                    "kind": "final",
+                    "source_stage": "final",
+                    "plan_sha256": report["plan_sha256"],
+                    "cell_manifest_sha256": report["cell_manifest_sha256"],
+                    "availability_ledger": "availability.csv",
+                    "outputs": outputs,
+                }
+            )
+        )
+        manifest_hashes[figure_root] = hashlib.sha256(
+            (figure_root / "figure_manifest.json").read_bytes()
+        ).hexdigest()
+        figure_roots.append(figure_root)
+        originals.append((figure_root / f"details/{name}/density.png").read_bytes())
+    supplement_dir = tmp_path / "supplement"
+    supplement_dir.mkdir()
+    receipt_path = supplement_dir / "REPORT_SUPPLEMENT_PIPELINE.json"
+    receipt_path.write_bytes(b"receipt")
+    receipt_sha = hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+    monkeypatch.setattr(
+        matched_supplement_pipeline, "load_verified_supplement_artifacts", lambda _: {}
+    )
+    arguments = {
+        "primary_root": reports[0][0],
+        "primary": reports[0][1],
+        "control_root": reports[1][0],
+        "control": reports[1][1],
+        "primary_figures": figure_roots[0],
+        "control_figures": figure_roots[1],
+        "figure_manifest_sha256": manifest_hashes,
+        "supplement_dir": supplement_dir,
+        "supplement_receipt_sha256": receipt_sha,
+        "source_sha256": build_final_report._report_source_hashes(),
+        "report_root": tmp_path,
+    }
+    build_final_report.assert_publication_inputs_unchanged(**arguments)
+    png = figure_roots[0] / f"details/{name}/density.png"
+    png.write_bytes(b"replaced during aggregation")
+    with pytest.raises(ValueError, match="figure artifact changed"):
+        build_final_report.assert_publication_inputs_unchanged(**arguments)
+    png.write_bytes(originals[0])
+    receipt_path.write_bytes(b"coherently replaced receipt")
+    with pytest.raises(RuntimeError, match="supplement receipt changed"):
+        build_final_report.assert_publication_inputs_unchanged(**arguments)
+    assert not (tmp_path / "REPORT.md").exists()
+
+
+def test_supplement_loader_return_cannot_rebind_old_data_to_new_receipt(
+    tmp_path, monkeypatch
+):
+    from src.tools.shot_pattern_analysis import matched_supplement_pipeline
+
+    receipt = tmp_path / "REPORT_SUPPLEMENT_PIPELINE.json"
+    receipt.write_bytes(b"first qualified receipt")
+
+    def replaced_at_return(_directory):
+        receipt.write_bytes(b"second qualified receipt")
+        return {"report": "old qualified values"}
+
+    monkeypatch.setattr(
+        matched_supplement_pipeline,
+        "load_verified_supplement_artifacts",
+        replaced_at_return,
+    )
+    with pytest.raises(RuntimeError, match="changed during supplement loading"):
+        build_final_report.load_supplement_at_stable_receipt(tmp_path)
+
+
+def test_final_publication_receipt_binds_report_and_supplement(tmp_path):
+    report = tmp_path / "REPORT.md"
+    cells = tmp_path / "REPORT_CELLS.csv"
+    lean = tmp_path / "REPORT_LEAN.csv"
+    appendices = tuple(
+        tmp_path / f"REPORT_{club}.md"
+        for club in ("DRIVER", "SEVEN_IRON", "PITCHING_WEDGE")
+    )
+    for path in (report, cells, lean, *appendices):
+        path.write_text(path.name, encoding="utf-8")
+    receipt = build_final_report.final_publication_receipt(
+        output_paths=(report, cells, lean, *appendices),
+        source_sha256={"builder.py": "a" * 64},
+        primary_plan_sha256="b" * 64,
+        control_plan_sha256="c" * 64,
+        figure_manifest_sha256={"primary": "d" * 64, "control": "e" * 64},
+        supplement_receipt_sha256="f" * 64,
+        archive_provenance={
+            "supersedes_publication_receipt_sha256": "1" * 64,
+            "source_archive_manifest_sha256": "2" * 64,
+        },
+    )
+    assert receipt["schema"] == "matched-final-publication-receipt/1"
+    assert receipt["source_sha256"]["builder.py"] == "a" * 64
+    assert receipt["supplement_receipt_sha256"] == "f" * 64
+    assert receipt["supersedes_publication_receipt_sha256"] == "1" * 64
+    assert receipt["source_archive_manifest_sha256"] == "2" * 64
+    assert set(receipt["output_sha256"]) == {
+        "REPORT.md",
+        "REPORT_CELLS.csv",
+        "REPORT_LEAN.csv",
+        "REPORT_DRIVER.md",
+        "REPORT_SEVEN_IRON.md",
+        "REPORT_PITCHING_WEDGE.md",
+    }
+
+
+def test_compact_comparison_table_does_not_wrap_full_optimizer_failure() -> None:
+    unavailable = _cell("driver_lean0_curve2_rotation2_combined2", status="unavailable")
+    unavailable["reason"] = (
+        "nominal landing unreachable within bounds: residual=0.351838 m"
+    )
+    rendered = "\n".join(
+        build_final_report._selected_comparison_lines(_matrix([unavailable], "final"))
+    )
+    assert "Nominal Match Unavailable (See Inventory)" in rendered
+    assert "residual=0.351838" not in rendered
+    inventory = build_final_report.render_cell_inventory(
+        _matrix([unavailable], "final"), _matrix([], "final")
+    )
+    assert "residual=0.351838" in inventory
+
+
+def test_matrix_input_change_is_rejected_before_publication(tmp_path):
+    import hashlib
+
+    (tmp_path / "matrix_plan.json").write_text("fixed plan", encoding="utf-8")
+    cell = tmp_path / "cell"
+    cell.mkdir()
+    (cell / "manifest.json").write_text("fixed manifest", encoding="utf-8")
+
+    def digest(path):
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    report = {
+        "plan_sha256": digest(tmp_path / "matrix_plan.json"),
+        "cell_manifest_sha256": {"cell": digest(cell / "manifest.json")},
+    }
+    build_final_report.assert_matrix_inputs_unchanged(tmp_path, report)
+    (cell / "manifest.json").write_text("changed manifest", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="changed"):
+        build_final_report.assert_matrix_inputs_unchanged(tmp_path, report)
+
+
+def test_final_builder_requires_full_324_and_72_cell_protocols():
+    from dataclasses import asdict
+    import json
+
+    from src.tools.shot_pattern_analysis.matched_matrix import matched_matrix_cells
+
+    targets = {
+        "driver": 178.94875782337786,
+        "seven_iron": 127.88194166336235,
+        "pitching_wedge": 77.40247724866299,
+    }
+    with pytest.raises(ValueError, match="324"):
+        build_final_report.validate_final_plans(
+            {"planned_cells": 1, "stage": "final", "cells": []},
+            {"planned_cells": 72, "stage": "final", "cells": []},
+            common_targets=targets,
+        )
+
+    def report(configs):
+        return {
+            "planned_cells": len(configs),
+            "stage": "final",
+            "cells": [
+                {"cell": name, "config": json.loads(json.dumps(asdict(config)))}
+                for name, config in configs
+            ],
+        }
+
+    primary = report(matched_matrix_cells(n_shots=10_000, seed=20261009))
+    control = report(
+        matched_matrix_cells(
+            n_shots=10_000,
+            seed=20261009,
+            profiles=("shaft_only", "combined2"),
+            common_targets=targets,
+        )
+    )
+    build_final_report.validate_final_plans(primary, control, common_targets=targets)
+    altered = dict(primary)
+    altered["cells"] = list(primary["cells"])
+    altered["cells"][0] = {
+        **altered["cells"][0],
+        "config": {**altered["cells"][0]["config"], "seed": 2},
+    }
+    with pytest.raises(ValueError, match="reviewed protocol"):
+        build_final_report.validate_final_plans(
+            altered, control, common_targets=targets
+        )
+
+
+def _make_source_pair(
+    *,
+    comparison_kind: str = "across_lean",
+    first_cell: str,
+    second_cell: str,
+    first_protocol: str = "original_control/1",
+    second_protocol: str,
+    status: str = "conditional_only",
+    common_n: int = 9_995,
+    total_n: int = 10_000,
+    draw_effect: dict | None = None,
+    fade_effect: dict | None = None,
+) -> dict:
+    effects = {}
+    if draw_effect is not None:
+        effects["Draw"] = draw_effect
+    if fade_effect is not None:
+        effects["Fade"] = fade_effect
+    return {
+        "schema": "matched-explicit-source-pair/1",
+        "comparison_kind": comparison_kind,
+        "status": status,
+        "conditioning": "same_indices_supported_in_all_six_populations",
+        "common_supported_n": common_n,
+        "total_n_per_population": total_n,
+        "source_protocols": [first_protocol, second_protocol],
+        "sources": [
+            {
+                "protocol_id": first_protocol,
+                "cell": first_cell,
+                "source_plan_sha256": "1" * 64,
+                "source_cell_manifest_sha256": "2" * 64,
+                "source_csv_sha256": "3" * 64,
+            },
+            {
+                "protocol_id": second_protocol,
+                "cell": second_cell,
+                "source_plan_sha256": "4" * 64,
+                "source_cell_manifest_sha256": "5" * 64,
+                "source_csv_sha256": "6" * 64,
+            },
+        ],
+        "analysis_source_sha256": {"matched_lean_control.py": "7" * 64},
+        "course_scoring_effect_modification": effects,
+    }
+
+
+def test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distractors():
+    from scripts.research.shot_pattern_analysis import final_report_inputs
+
+    driver_valid = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+        draw_effect={"estimate": 0.015, "lower_95": 0.008, "upper_95": 0.022},
+        fade_effect={"estimate": -0.005, "lower_95": -0.011, "upper_95": 0.001},
+    )
+    pw_valid = _make_source_pair(
+        first_cell="pitching_wedge_lean0_curve2_rotation2_combined2",
+        second_cell="pitching_wedge_lean5_curve2_rotation2_combined2",
+        first_protocol="pw-primary-face-bounds/1",
+        second_protocol="pw-control-face-bounds/1",
+        draw_effect={"estimate": 0.007, "lower_95": 0.002, "upper_95": 0.012},
+        fade_effect={"estimate": -0.002, "lower_95": -0.006, "upper_95": 0.002},
+    )
+    distractors = [
+        # Wrong lean (0->10)
+        _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_combined2",
+            second_cell="driver_lean10_curve2_rotation2_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+        ),
+        # Wrong curve (curve 1 instead of curve 2 for driver)
+        _make_source_pair(
+            first_cell="driver_lean0_curve1_rotation2_combined2",
+            second_cell="driver_lean5_curve1_rotation2_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+        ),
+        # Wrong shaft SD (rotation 1 instead of rotation 2)
+        _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation1_combined2",
+            second_cell="driver_lean5_curve2_rotation1_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+        ),
+        # Wrong profile (shaft_only instead of combined2)
+        _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_shaft_only",
+            second_cell="driver_lean5_curve2_rotation2_shaft_only",
+            second_protocol="driver-control-speed-bounds/1",
+        ),
+        # Wrong protocol (original_control instead of driver-control-speed-bounds/1)
+        _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_combined2",
+            second_cell="driver_lean5_curve2_rotation2_combined2",
+            second_protocol="original_control/1",
+        ),
+        # Wrong PW curve (curve 1 instead of reviewed curve 2)
+        _make_source_pair(
+            first_cell="pitching_wedge_lean0_curve1_rotation2_combined2",
+            second_cell="pitching_wedge_lean5_curve1_rotation2_combined2",
+            second_protocol="pw-control-face-bounds/1",
+        ),
+    ]
+
+    # Only driver present: driver selected, PW reported unavailable, distractors rejected
+    effects, unavailable = final_report_inputs.select_bounds_control_pairs(
+        [driver_valid, *distractors]
+    )
+    assert len(effects) == 1
+    assert effects[0]["source_protocols"] == (
+        "original_control/1",
+        "driver-control-speed-bounds/1",
+    )
+    assert effects[0]["source_cells"] == (
+        "driver_lean0_curve2_rotation2_combined2",
+        "driver_lean5_curve2_rotation2_combined2",
+    )
+    assert len(unavailable) == 1
+    assert "pitching wedge" in unavailable[0].lower() or "pw" in unavailable[0].lower()
+
+    # Both reviewed driver and PW curve2 controls present: both selected
+    effects_both, unavailable_both = final_report_inputs.select_bounds_control_pairs(
+        [driver_valid, pw_valid, *distractors]
+    )
+    assert len(effects_both) == 2
+    assert effects_both[0]["source_protocols"][1] == "driver-control-speed-bounds/1"
+    assert effects_both[1]["source_protocols"][1] == "pw-control-face-bounds/1"
+    assert len(unavailable_both) == 0
+
+    # Neither present (only distractors): both unavailable, no fabrication
+    effects_none, unavailable_none = final_report_inputs.select_bounds_control_pairs(
+        distractors
+    )
+    assert len(effects_none) == 0
+    assert len(unavailable_none) == 2
+
+
+def test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity():
+    cell = _detailed_cell()
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    interpretation = _qualified_interpretation()
+
+    driver_pair = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+        draw_effect={"estimate": 0.015, "lower_95": 0.008, "upper_95": 0.022},
+        fade_effect={"estimate": -0.005, "lower_95": -0.011, "upper_95": 0.001},
+    )
+    interpretation["bounds_control"] = {
+        "effects": [describe_effect_modification(driver_pair)],
+        "unavailable": [
+            "Pitching Wedge across-lean 0°→5° control (curve 2, shaft SD 2°, combined-2; pw-control-face-bounds/1): Unavailable (absent from verified supplement comparisons)."
+        ],
+    }
+
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=interpretation
+    )
+
+    # 1. Bounds-control section
+    assert "### Fixed-Target Across-Lean Bounds Controls" in rendered
+    assert "bounds adapted after original search" in rendered
+    assert "original unavailable cells remain unchanged" in rendered
+    assert "rematched" in rendered and "causal" in rendered
+    assert "driver-control-speed-bounds/1" in rendered
+    assert "driver_lean0_curve2_rotation2_combined2" in rendered
+    assert "driver_lean5_curve2_rotation2_combined2" in rendered
+    assert "9,995 / 10,000" in rendered
+    assert "+0.015 [+0.008, +0.022]" in rendered
+    assert "pw-control-face-bounds/1" in rendered
+    assert "Unavailable" in rendered
+    # Must be separate from zero-lean interactions section
+    assert rendered.index(
+        "### Direct Curve and Shaft-Variability Interactions"
+    ) < rendered.index("### Fixed-Target Across-Lean Bounds Controls")
+
+    # 2. Deterministic head sensitivity link and distinction from MC uncertainty
+    assert "DESIGN.md#deterministic-head-assumption-sensitivity" in rendered
+    assert "validation/independent_head_sensitivity_summary.json" in rendered
+    assert "validation/independent_head_sensitivity.json" in rendered
+    assert "±20%" in rendered or "+/-20%" in rendered
+    assert "model sensitivities" in rendered
+    assert "not measured" in rendered
+    assert "Monte Carlo" in rendered
+    assert "do not validate" in rendered
+    # Ensure unbound displacement summaries (like 22.63 or 7.10) are not copied
+    assert "22.63" not in rendered
+
+
+def test_bounds_control_rejects_wrong_first_protocol_and_duplicate_identity():
+    from scripts.research.shot_pattern_analysis.final_report_inputs import (
+        select_bounds_control_pairs,
+    )
+
+    wrong = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+        first_protocol="original_primary/1",
+    )
+    effects, unavailable = select_bounds_control_pairs([wrong])
+    assert effects == []
+    assert len(unavailable) == 2
+    valid = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+    )
+    with pytest.raises(ValueError, match="ambiguous|duplicate"):
+        select_bounds_control_pairs([valid, valid])
+
+
+def test_bounds_control_preserves_actual_unavailable_reason_without_invention():
+    from scripts.research.shot_pattern_analysis.final_report_inputs import (
+        select_bounds_control_pairs,
+    )
+
+    pair = _make_source_pair(
+        first_cell="pitching_wedge_lean0_curve2_rotation2_combined2",
+        second_cell="pitching_wedge_lean5_curve2_rotation2_combined2",
+        first_protocol="pw-primary-face-bounds/1",
+        second_protocol="pw-control-face-bounds/1",
+        status="unavailable",
+        common_n=1,
+    )
+    pair["reason"] = "fewer_than_two_common_supported_shots"
+    effects, unavailable = select_bounds_control_pairs([pair])
+    assert not effects
+    assert any(pair["reason"] in item for item in unavailable)
+    assert all("physical" not in item.lower() for item in unavailable)
+
+
+@pytest.mark.parametrize(
+    "scoring_failure", [None, "course state outside baseline support"]
+)
+def test_bounds_control_missing_relative_effect_is_explicitly_unavailable(
+    scoring_failure,
+):
+    from scripts.research.shot_pattern_analysis.final_report_inputs import (
+        select_bounds_control_pairs,
+    )
+
+    # The old real producer emitted supported across-lean pairs without relative
+    # scoring fields. Geometry availability must not imply scoring availability.
+    pair = _make_source_pair(
+        first_cell="driver_lean0_curve2_rotation2_combined2",
+        second_cell="driver_lean5_curve2_rotation2_combined2",
+        second_protocol="driver-control-speed-bounds/1",
+        common_n=9940,
+    )
+    pair.pop("course_scoring_effect_modification")
+    if scoring_failure:
+        pair["course_scoring_effect_modification"] = {
+            "status": "unavailable",
+            "reason": scoring_failure,
+        }
+    effects, unavailable = select_bounds_control_pairs([pair])
+    assert effects == []
+    expected = scoring_failure or "relative scoring effects were not emitted"
+    assert any(expected in reason for reason in unavailable)
+
+
+def test_f2_exact_12_representative_interaction_contrasts():
+    import random
+    from scripts.research.shot_pattern_analysis.final_report_inputs import (
+        select_representative_interaction_pairs,
+    )
+    from src.tools.shot_pattern_analysis.matched_interpretation import (
+        render_effect_table,
+    )
+
+    clubs = ("driver", "seven_iron", "pitching_wedge")
+    profiles = ("shaft_only", "combined2")
+    pairs = []
+
+    for club in clubs:
+        for prof in profiles:
+            # Pair 1: SD 1 -> 2, Curve 1
+            pairs.append(
+                _make_source_pair(
+                    comparison_kind="shaft_rotation_sd",
+                    first_cell=f"{club}_lean0_curve1_rotation1_{prof}",
+                    second_cell=f"{club}_lean0_curve1_rotation2_{prof}",
+                    first_protocol="original_control/1",
+                    second_protocol="original_control/1",
+                    draw_effect={
+                        "estimate": 0.002,
+                        "lower_95": 0.001,
+                        "upper_95": 0.003,
+                    },
+                    fade_effect={
+                        "estimate": -0.001,
+                        "lower_95": -0.002,
+                        "upper_95": 0.0,
+                    },
+                )
+            )
+            # Pair 2: Curve 1 -> 2, SD 2
+            proto_b = (
+                "pw-primary-face-bounds/1"
+                if club == "pitching_wedge"
+                else "original_control/1"
+            )
+            pairs.append(
+                _make_source_pair(
+                    comparison_kind="curve_strength",
+                    first_cell=f"{club}_lean0_curve1_rotation2_{prof}",
+                    second_cell=f"{club}_lean0_curve2_rotation2_{prof}",
+                    first_protocol="original_control/1",
+                    second_protocol=proto_b,
+                    draw_effect={
+                        "estimate": 0.004,
+                        "lower_95": 0.003,
+                        "upper_95": 0.005,
+                    },
+                    fade_effect={
+                        "estimate": 0.0001,
+                        "lower_95": -0.0002,
+                        "upper_95": 0.0004,
+                    },
+                )
+            )
+
+    assert len(pairs) == 12
+
+    # Selection selects all 12 in exact intended order
+    selected = select_representative_interaction_pairs(pairs)
+    assert len(selected) == 12
+
+    # Order permutation invariance: reversing or shuffling input leaves output identical
+    shuffled = list(pairs)
+    random.Random(42).shuffle(shuffled)
+    selected_shuffled = select_representative_interaction_pairs(shuffled)
+    assert [e["source_cells"] for e in selected_shuffled] == [
+        e["source_cells"] for e in selected
+    ]
+    assert [e["comparison_kind"] for e in selected_shuffled] == [
+        e["comparison_kind"] for e in selected
+    ]
+
+    # Duplicate fails closed
+    with pytest.raises(ValueError, match="ambiguous|duplicate"):
+        select_representative_interaction_pairs([*pairs, pairs[0]])
+
+    # Omission fails closed
+    with pytest.raises(ValueError, match="missing|unavailable"):
+        select_representative_interaction_pairs(pairs[1:])
+
+    # Table rendering works
+    rendered_table = render_effect_table(selected)
+    assert "| Draw |" in rendered_table
+    assert "| Fade |" in rendered_table
+    assert "pw-primary-face-bounds/1" in rendered_table
+    # Supported geometry cannot masquerade as an available scoring interaction.
+    pairs[0].pop("course_scoring_effect_modification")
+    with pytest.raises(ValueError, match="relative scoring"):
+        select_representative_interaction_pairs(pairs)
+
+
+def test_f4_speed_bounds_scoping_and_driver_supplement_disclosure():
+    cell = _detailed_cell()
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    interpretation = _qualified_interpretation()
+
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=interpretation
+    )
+
+    # 1. Controlled Inputs scopes 75–125% to original protocols
+    assert "original_primary/1" in rendered
+    assert "75–125%" in rendered or "75-125%" in rendered
+
+    # 2. Fixed-Target Across-Lean Bounds Controls discloses Driver 75–130% and ±6° face box
+    assert "driver-control-speed-bounds/1" in rendered
+    assert "75–130%" in rendered or "75-130%" in rendered
+    assert "6.0°" in rendered or "6°" in rendered
+    assert "not preregistered" in rendered or "were not preregistered" in rendered
+
+
+def test_f5_figure_population_prose_distinguishes_individual_and_paired_densities():
+    cell = _detailed_cell()
+    matrix = _matrix([cell], "final")
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+    interpretation = _qualified_interpretation()
+
+    rendered = build_final_report.render_final_report(
+        matrix, matrix, lean, {}, interpretation=interpretation
+    )
+
+    # Figure population prose distinguishes individual vs paired populations
+    assert "Individual cell densities use individually supported endpoints" in rendered
+    assert (
+        "shared six-population" in rendered
+        or "six-population supported-index intersection" in rendered
+    )
+
+
+def test_f6_draft_conclusions_provenance_truthful_v5_pending():
+    repo_root = Path(__file__).resolve().parents[2]
+    path = (
+        repo_root
+        / "docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md"
+    )
+    content = path.read_text(encoding="utf-8")
+    assert "completed v4 receipt" not in content
+    assert "v4" in content.lower()
+    assert "v5" in content.lower()
+
+
+def test_final_report_rendering_is_byte_deterministic_for_fixed_inputs():
+    import hashlib
+
+    primary = _matrix(
+        [
+            _cell("driver_lean0_curve1_rotation1_shaft_only"),
+            _cell("driver_lean10_curve1_rotation1_shaft_only", status="unavailable"),
+        ],
+        "final",
+    )
+    control = _matrix(
+        [_cell("driver_lean0_curve1_rotation1_shaft_only")], "control_final"
+    )
+    lean = {
+        "schema": "matched-across-lean/1",
+        "pairs": [],
+        "population": {"planned_pairs": 0},
+    }
+
+    rendered = build_final_report.render_final_report(primary, control, lean, {})
+
+    assert len(rendered) == 13_510
+    assert hashlib.sha256(rendered.encode()).hexdigest() == (
+        "62c9553c0d1b25d4eeb726bba3593fed1822d097c29c78ad295796b6da83a376"
+    )
+
+
+def test_report_builder_validates_inputs_before_first_publication_write(
+    tmp_path, monkeypatch
+):
+    from scripts.research.shot_pattern_analysis import build_final_report as builder
+
+    events = []
+    primary_root = tmp_path / "primary"
+    control_root = tmp_path / "control"
+    primary_root.mkdir()
+    control_root.mkdir()
+    primary_figures = tmp_path / "primary_figures"
+    control_figures = tmp_path / "control_figures"
+    primary_figures.mkdir()
+    control_figures.mkdir()
+    for root in (primary_figures, control_figures):
+        (root / "figure_manifest.json").write_bytes(b"manifest")
+    primary = {"cells": [], "plan_sha256": "p"}
+    control = {"cells": [], "plan_sha256": "c"}
+    matrix_calls = iter((primary, control))
+
+    monkeypatch.setattr(builder, "_report_source_hashes", lambda: {"stable": "hash"})
+    monkeypatch.setattr(
+        "src.tools.shot_pattern_analysis.matched_report.load_matrix_report",
+        lambda root: (events.append(f"load:{root.name}"), next(matrix_calls))[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "load_supplement_at_stable_receipt",
+        lambda root: (events.append("supplement"), ({}, "supplement-receipt"))[1],
+    )
+    monkeypatch.setattr(
+        "src.tools.shot_pattern_analysis.matched_report.load_reviewed_common_targets",
+        lambda root: (events.append("targets"), ({}, "target-receipt"))[1],
+    )
+    monkeypatch.setattr(
+        builder, "validate_final_plans", lambda *args, **kwargs: events.append("plans")
+    )
+    monkeypatch.setattr(
+        "src.tools.shot_pattern_analysis.matched_lean_control.analyze_across_lean",
+        lambda root: (events.append("lean"), {"pairs": []})[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "assemble_qualified_interpretation",
+        lambda *args, **kwargs: (
+            events.append("interpretation"),
+            {"supplement": {"receipt_sha256": "s"}},
+        )[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "render_final_report",
+        lambda *args, **kwargs: (events.append("render"), "report")[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "render_club_appendices",
+        lambda *args, **kwargs: (
+            events.append("appendices"),
+            {"driver": "d", "seven_iron": "i", "pitching_wedge": "w"},
+        )[1],
+    )
+    monkeypatch.setattr(
+        builder,
+        "assert_publication_inputs_unchanged",
+        lambda context: events.append("validate-inputs"),
+    )
+    original_write = builder._write_atomic
+
+    def record_write(path, content):
+        events.append(f"write:{Path(path).name}")
+        original_write(path, content)
+
+    monkeypatch.setattr(builder, "_write_atomic", record_write)
+    destination = tmp_path / "REPORT.md"
+
+    builder.build_final_report(
+        primary_root,
+        control_root,
+        destination,
+        primary_figures=primary_figures,
+        control_figures=control_figures,
+    )
+
+    first_write = next(
+        index for index, event in enumerate(events) if event.startswith("write:")
+    )
+    assert events.index("validate-inputs") < first_write
+    assert events[: events.index("validate-inputs")] == [
+        "load:primary",
+        "load:control",
+        "supplement",
+        "targets",
+        "plans",
+        "lean",
+        "interpretation",
+        "render",
+        "appendices",
+    ]

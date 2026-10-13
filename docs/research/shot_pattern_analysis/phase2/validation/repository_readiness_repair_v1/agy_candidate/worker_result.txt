@@ -1,0 +1,57 @@
+### Implementation Summary for Issue [#12160](https://github.com/D-sorganization/UpstreamDrift/issues/12160)
+
+All 33 baseline Mypy diagnostics and Ruff format/check errors across the 17 owned validation helper files have been repaired, verified against contract regression tests, and brought to green without modifying historical outputs or executing top-level scripts.
+
+---
+
+### 1. Test-First Regression Harness
+
+A focused contract regression test suite was authored prior to repairs:
+- [`tests/research/test_validation_helper_contracts.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py) (13 tests)
+  - Validates `Decimal.is_finite()` and integer exponent guards on `verify.py`, `audit_interactions.py`, `final_check.py`, and `audit_candidate.py`.
+  - Validates container typing and `tuple`/`key` variable scoping.
+  - Validates GUI `scrollbar` optional chaining in `capture_bounds_gui.py`.
+  - Validates `dataclass` class-exclusion before `asdict()` and scoped `unittest.mock.patch.object` for figure saving in `qualify.py`.
+  - Validates import and reference guards in `review_batch.py` and `reproduce_saved_cell.py`.
+
+---
+
+### 2. Repaired Files (17 Owned Files)
+
+All 17 files adhere to PEP 8, strict type-checking, and isolated mock patching:
+
+1. [`docs/.../article_source_repair_v1/root/verify.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py): Added `d.is_finite() and isinstance(d.as_tuple().exponent, int)` finite Decimal guard, typed collections (`effects`, `expected_e`, `seen`).
+2. [`docs/.../article_source_repair_v1/astra/audit_interactions.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py): Added finite Decimal guard and typed `checks` list.
+3. [`docs/.../article_source_repair_v1/astra/final_check.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py): Added finite Decimal guard, renamed loop variable `_p` to resolve B007, updated FURB171 single-item equality.
+4. [`docs/.../article_source_repair_v1/astra/audit_candidate.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py): Added finite Decimal guard, renamed `cell_key` tuple variable to eliminate type collision with string `key`, annotated collection types.
+5. [`docs/.../capture_bounds_gui.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py): Cached `controls_scroll.verticalScrollBar()` in `scrollbar`, guarded against `None`, typed `capture() -> dict[str, Any]`.
+6. [`docs/.../reproduce_saved_cell.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py): Defined `TickGapRow` and `CaptureResult` `TypedDict` annotations, aligned `_save_formats(figure, output_stem, *, dpi)` parameter names.
+7. [`docs/.../v6_output_review_harness_v1/test_review_batch.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py): Validated `spec` and `spec.loader` existence before `exec_module`, used `monkeypatch.setattr(..., raising=False)` for pipeline mocks.
+8. [`docs/.../v6_output_review_harness_v1/review_batch.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py): Guarded `_load_numeric_parity_reference()` against `None`, typed `pending: list[dict[str, Any]] = []` and `reviewed`.
+9. [`docs/.../driver_curve_bounds_reporting_review_v1/preflight.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py): Renamed loop variable `path_str` in `source_hashes.items()` loop to prevent conflict with `pair` records.
+10. [`docs/.../selected_renderer_representative_v1/qualify.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py): Guarded `isinstance(value, type)` before `asdict()` dataclass reflection, replaced direct method assignment with scoped `unittest.mock.patch.object(Figure, "savefig", new=save)`.
+11. [`docs/.../actual_pair_adapter_preflight_v1/check.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py): Split imports, typed container variables, added inline justifications.
+12. [`docs/.../article_source_repair_v1/astra/rewrite.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py): Split imports, added inline print justification.
+13. [`docs/.../article_source_repair_v1/astra/tidy_article.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py): Updated regex flag to `re.DOTALL`, added inline print justification.
+14. [`docs/.../article_source_repair_v1/astra/verify_repair.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py): Split imports, added inline print justification.
+15. [`docs/.../original_final_graphics_independent_review_v1/review_inventory.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py): Converted generator to set comprehension, added inline print justification.
+16. [`docs/.../supplement_v6_numeric_review_v1/verify_numeric.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_numeric_review_v1/verify_numeric.py): Reformatted cleanly with ruff.
+17. [`tests/research/test_independent_supplement_audit.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_independent_supplement_audit.py): Reformatted cleanly with ruff.
+
+---
+
+### 3. Verification & Evidence Artifacts
+
+All verification artifacts are saved under `/tmp/p2-readiness-repair-agy/`:
+
+| Artifact | Verification Status | Details |
+|---|---|---|
+| `mypy_green_v2.log` | **0 errors** | `Success: no issues found in 18 source files` |
+| `ruff_check_green_v2.log` | **All passed** | Clean across all 17 owned files and new test suite |
+| `ruff_format_green_v2.log` | **Formatted** | All 17 owned files + tests formatted to repository spec |
+| `pytest_green_v2.log` | **60 passed** | 13 contract tests + 22 review harness tests + 25 supplement audit tests |
+| `post_repair_hashes_v2.json` | **Complete** | SHA-256 hashes recorded for all 18 modified/created files |
+| `repair_receipt_v2.json` | **Recorded** | Machine-readable receipt with explicit scope and disclaimers |
+
+> [!NOTE]
+> Historical outputs and top-level scripts were preserved without mutation. In accordance with policy, no claims of independent Root/Astra review approval or whole publication acceptance are made.

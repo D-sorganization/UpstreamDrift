@@ -1,0 +1,359 @@
+{
+  "source_sha256": "ebdc1e1696fbf8bd1aa07299574f458da83246aab2d355c10dbee6b901ae0c08",
+  "cases": [
+    {
+      "endpoints": {
+        "Straight": [
+          [
+            0,
+            200.0,
+            0
+          ],
+          [
+            1,
+            201.0,
+            4
+          ],
+          [
+            2,
+            202.0,
+            8
+          ],
+          [
+            3,
+            203.0,
+            12
+          ]
+        ],
+        "Draw": [
+          [
+            0,
+            200.0,
+            0
+          ],
+          [
+            1,
+            201.0,
+            2
+          ],
+          [
+            2,
+            202.0,
+            4
+          ],
+          [
+            3,
+            203.0,
+            6
+          ]
+        ],
+        "Fade": [
+          [
+            0,
+            200.0,
+            0
+          ],
+          [
+            1,
+            201.0,
+            7
+          ],
+          [
+            2,
+            202.0,
+            14
+          ],
+          [
+            3,
+            203.0,
+            21
+          ]
+        ]
+      },
+      "radius": 10.0,
+      "output": {
+        "scenario": "Historical PGA Tour approach from fairway to a circular green; carry-only stop",
+        "status": "available",
+        "source_backed_status": "available",
+        "evaluation": "Every endpoint scored by the source-backed public Tools API",
+        "api_scored_shots": 12,
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "target_distance_m": 200.0,
+        "green_radius_m": 10.0,
+        "patterns": {
+          "Straight": {
+            "n": 4,
+            "mean_strokes_gained": 0.5306211027963437
+          },
+          "Draw": {
+            "n": 4,
+            "mean_strokes_gained": 0.779839054281218
+          },
+          "Fade": {
+            "n": 4,
+            "mean_strokes_gained": 0.30780529562731657
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.2492179514848744,
+            "lower_95": 0.07270478055350388,
+            "upper_95": 0.45541518589070895
+          },
+          "Fade": {
+            "estimate": -0.2228158071690271,
+            "lower_95": -0.4357626768007689,
+            "upper_95": -0.04925205486390982
+          }
+        },
+        "limitations": [
+          "Historical 2003-2010 PGA Tour benchmark is not player-specific.",
+          "Putting fit reconciles a printed coefficient/unit inconsistency using published anchors; it is approximate.",
+          "Circular green and surrounding rough are hypothetical; carry endpoints have no roll or hazards.",
+          "Confidence intervals describe Monte Carlo sampling only, not physics, course, or benchmark uncertainty."
+        ]
+      }
+    },
+    {
+      "endpoints": {
+        "Straight": [
+          [
+            0,
+            200.0,
+            0
+          ],
+          [
+            1,
+            201.0,
+            4
+          ],
+          [
+            2,
+            202.0,
+            8
+          ],
+          [
+            3,
+            203.0,
+            12
+          ]
+        ],
+        "Draw": [
+          [
+            0,
+            200.0,
+            0
+          ],
+          [
+            1,
+            201.0,
+            2
+          ],
+          [
+            2,
+            202.0,
+            4
+          ],
+          [
+            3,
+            203.0,
+            6
+          ]
+        ],
+        "Fade": [
+          [
+            0,
+            200.0,
+            0
+          ],
+          [
+            1,
+            201.0,
+            7
+          ],
+          [
+            2,
+            202.0,
+            14
+          ],
+          [
+            3,
+            203.0,
+            21
+          ]
+        ]
+      },
+      "radius": 15.0,
+      "output": {
+        "scenario": "Historical PGA Tour approach from fairway to a circular green; carry-only stop",
+        "status": "available",
+        "source_backed_status": "available",
+        "evaluation": "Every endpoint scored by the source-backed public Tools API",
+        "api_scored_shots": 12,
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "target_distance_m": 200.0,
+        "green_radius_m": 15.0,
+        "patterns": {
+          "Straight": {
+            "n": 4,
+            "mean_strokes_gained": 0.6225261490150635
+          },
+          "Draw": {
+            "n": 4,
+            "mean_strokes_gained": 0.779839054281218
+          },
+          "Fade": {
+            "n": 4,
+            "mean_strokes_gained": 0.40037663292634235
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.15731290526615455,
+            "lower_95": 0.042195615242577415,
+            "upper_95": 0.23435557036957533
+          },
+          "Fade": {
+            "estimate": -0.2221495160887212,
+            "lower_95": -0.46406591487864707,
+            "upper_95": -0.042464290057291465
+          }
+        },
+        "limitations": [
+          "Historical 2003-2010 PGA Tour benchmark is not player-specific.",
+          "Putting fit reconciles a printed coefficient/unit inconsistency using published anchors; it is approximate.",
+          "Circular green and surrounding rough are hypothetical; carry endpoints have no roll or hazards.",
+          "Confidence intervals describe Monte Carlo sampling only, not physics, course, or benchmark uncertainty."
+        ]
+      }
+    },
+    {
+      "endpoints": {
+        "Straight": [
+          [
+            0,
+            200.0,
+            0
+          ],
+          [
+            1,
+            201.0,
+            4
+          ],
+          [
+            2,
+            202.0,
+            8
+          ],
+          [
+            3,
+            203.0,
+            12
+          ]
+        ],
+        "Draw": [
+          [
+            0,
+            200.0,
+            0
+          ],
+          [
+            1,
+            201.0,
+            2
+          ],
+          [
+            2,
+            202.0,
+            4
+          ],
+          [
+            3,
+            203.0,
+            6
+          ]
+        ],
+        "Fade": [
+          [
+            0,
+            200.0,
+            0
+          ],
+          [
+            1,
+            201.0,
+            7
+          ],
+          [
+            2,
+            202.0,
+            14
+          ],
+          [
+            3,
+            203.0,
+            21
+          ]
+        ]
+      },
+      "radius": 20.0,
+      "output": {
+        "scenario": "Historical PGA Tour approach from fairway to a circular green; carry-only stop",
+        "status": "available",
+        "source_backed_status": "available",
+        "evaluation": "Every endpoint scored by the source-backed public Tools API",
+        "api_scored_shots": 12,
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "target_distance_m": 200.0,
+        "green_radius_m": 20.0,
+        "patterns": {
+          "Straight": {
+            "n": 4,
+            "mean_strokes_gained": 0.6225261490150635
+          },
+          "Draw": {
+            "n": 4,
+            "mean_strokes_gained": 0.779839054281218
+          },
+          "Fade": {
+            "n": 4,
+            "mean_strokes_gained": 0.40037663292634235
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.15731290526615455,
+            "lower_95": 0.042195615242577415,
+            "upper_95": 0.23435557036957533
+          },
+          "Fade": {
+            "estimate": -0.2221495160887212,
+            "lower_95": -0.46406591487864707,
+            "upper_95": -0.042464290057291465
+          }
+        },
+        "limitations": [
+          "Historical 2003-2010 PGA Tour benchmark is not player-specific.",
+          "Putting fit reconciles a printed coefficient/unit inconsistency using published anchors; it is approximate.",
+          "Circular green and surrounding rough are hypothetical; carry endpoints have no roll or hazards.",
+          "Confidence intervals describe Monte Carlo sampling only, not physics, course, or benchmark uncertainty."
+        ]
+      }
+    }
+  ]
+}

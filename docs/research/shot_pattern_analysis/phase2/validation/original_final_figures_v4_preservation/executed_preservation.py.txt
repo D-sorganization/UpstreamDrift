@@ -1,0 +1,16 @@
+from pathlib import Path
+import hashlib,json,datetime,shutil
+p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest();review=p/'validation/original_final_graphics_independent_review_v4/astra_control_remaining/review.json';assert h(review)=='e0511ec897a920d4e02dbd0e385413de1c4abdbf256638e24f8c6fccfa3d4bba';assert json.loads(review.read_text())['safe_to_relocate_reviewed_v4_outputs']
+receipt=json.loads((p/'validation/original_final_figures_rendering_revision_v4.json').read_text());assert all(x['exit_code']==0 for x in receipt['runs'])
+destination=p/'presentation_preview_rejected_final_v4';assert not destination.exists();records=[]
+for name in ('final_figures_v1','control_final_figures_v1'):
+ source=p/name;manifest=source/'figure_manifest.json';assert h(manifest)==receipt['manifests'][name];m=json.loads(manifest.read_text())
+ for rel,digest in m['outputs'].items():assert h(source/rel)==digest,rel
+ files={str(f.relative_to(source)):h(f) for f in sorted(source.rglob('*')) if f.is_file()}
+ records.append({'original_path':name,'preserved_path':str((destination/name).relative_to(p)),'manifest_sha256':h(manifest),'file_count':len(files),'files_sha256':files})
+destination.mkdir()
+for record in records:
+ source=p/record['original_path'];target=p/record['preserved_path'];source.rename(target)
+ assert {str(f.relative_to(target)):h(f) for f in sorted(target.rglob('*')) if f.is_file()}==record['files_sha256']
+out=p/'validation/original_final_figures_v4_preservation';out.mkdir(exist_ok=True)
+(out/'relocation.json').write_text(json.dumps({'status':'preserved_byte_identical','checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'reason':'Final shareable SD comparison captions must explicitly name shaft twist; canonical output names retained for qualified rebuild.','review_sha256':h(review),'records':records},indent=2)+'\n');shutil.copy(__file__,out/'executed_preservation.py.txt');print([(x['original_path'],x['file_count']) for x in records]);print(h(out/'relocation.json'))

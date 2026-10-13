@@ -1,0 +1,16 @@
+{
+  ".pdf": {
+    "size": 139501,
+    "images": 7,
+    "warnings": [],
+    "text_count": 1235,
+    "comments": 0
+  },
+  ".svg": {
+    "size": 387539,
+    "images": 7,
+    "warnings": [],
+    "text_count": 0,
+    "comments": 89
+  }
+}

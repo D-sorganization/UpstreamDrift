@@ -1,0 +1,15 @@
+{
+  "status": "interrupted_without_pipeline_completion",
+  "observed_utc": "2026-10-10T10:59:41.110771+00:00",
+  "exec_session": 56879,
+  "exec_session_exit_code": 143,
+  "wrapper_pid": 3263660,
+  "child_pid": 3264166,
+  "both_processes_confirmed_absent": true,
+  "cause": "unknown; terminal-session lifetime is a hypothesis, not established",
+  "output_directory_exists": false,
+  "completion_receipt_exists": false,
+  "candidate_sources_and_bound_input_hashes_unchanged": true,
+  "start_receipt_sha256": "d6af966d503090e90fd4722878b10c0576ba02b2fe2b61405fb812c5d58a846c",
+  "next_action": "Guarded same-source saved-data pipeline in a separately tracked owned session; no Monte Carlo rerun"
+}

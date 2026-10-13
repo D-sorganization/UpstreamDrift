@@ -576,7 +576,7 @@ ISSUES.append(
         """## Failing test
 
 ```
-tests/test_build_humanoid_models.py::test_opensim_check_handles_missing_submodule
+tests/scripts/test_build_humanoid_models.py::test_opensim_check_handles_missing_submodule
 ```
 
 ## Likely cause
@@ -1357,7 +1357,7 @@ def main() -> None:
         f"Creating {len(remaining)} issues (skipping {len(ISSUES) - len(remaining)} already created) against milestone '{MILESTONE}'...\n"
     )
     created: list[dict[str, object]] = []
-    for title, labels, body in remaining:  # noqa
+    for title, labels, body in remaining:
         try:
             num = gh_issue_create(title, body, labels)
             created.append({"number": num, "title": title, "labels": labels})

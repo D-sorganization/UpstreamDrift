@@ -1,0 +1,15 @@
+{
+  "exit_code": 1,
+  "documents_checked": 2017,
+  "violations_reported": 2508,
+  "tracked_baseline_issue": 11935,
+  "changed_documents": [
+    "AGENT_HANDOFF.md",
+    "src/tools/shot_pattern_analysis/README.md",
+    "docs/research/shot_pattern_analysis/phase2/TURNOVER.md",
+    "docs/research/shot_pattern_analysis/phase2/REPRODUCING.md"
+  ],
+  "findings_in_changed_documents": [],
+  "historical_study_evidence_titles_retained": "Three listed historical validation documents remain unchanged; their immutable receipts are preserved.",
+  "log_sha256": "69b8cb594dba8fbb3f585617d43d191389133a05786debbab091a8001a0aaadc"
+}

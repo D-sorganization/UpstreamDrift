@@ -1,0 +1,20 @@
+{
+  "status": "accepted_execution_composed",
+  "head": "3f5945edff8ac9b758e288c9e39748cdf81ba377",
+  "bounds_merge": "b21a57f2d0",
+  "presentation_merge": "3f5945edff",
+  "source_review": "../source_transition_supplement.json",
+  "source_review_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
+  "execution_equality_verified": true,
+  "tests": {
+    "passed": 97,
+    "deselected": 2,
+    "log": "SUPPLEMENT_COMPOSITION_TESTS.txt",
+    "sha256": "4d4d01af6515054c1fa4aafd70825d4b00c0f360e59ad3cf16afaa87900cfe88"
+  },
+  "conflict_resolution": "Bounds loader retains validated individual endpoint loading. Presentation conflicts use exact independently reviewed a40cf86dc0 versions.",
+  "limitations": [
+    "Not supplemental Monte Carlo acceptance.",
+    "Final layout renderer remains isolated and is not part of this execution."
+  ]
+}

@@ -1,0 +1,62 @@
+............                                                             [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+============================= slowest 20 durations =============================
+36.56s call     tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[pitching_wedge_shaft_only_narrow-pitching_wedge-77.402-2.0-2.0]
+24.55s call     tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_shaft_only_narrow-seven_iron-148.5-4.0-4.0]
+21.36s call     tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_density_covariance_caption_containment_and_separation
+16.37s call     tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_selective_generation_no_extra_files
+15.61s call     tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_combined_noise-seven_iron-148.5-5.0-3.8]
+7.01s call     tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_and_social_overhead_covariance_caption_containment_and_separation
+3.57s call     tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_exact_metadata_and_path_parity
+2.62s call     tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_format_routing_subset
+1.78s setup    tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_density_covariance_caption_containment_and_separation
+1.23s call     tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_overhead_social_only
+0.12s setup    tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_format_routing_subset
+0.07s setup    tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_incomplete_returns_empty
+0.07s setup    tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[pitching_wedge_shaft_only_narrow-pitching_wedge-77.402-2.0-2.0]
+0.06s call     tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_preserves_common_points_and_no_numerical_calls
+0.06s teardown tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_closed_kind_rejection
+0.05s teardown tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_preserves_common_points_and_no_numerical_calls
+0.05s setup    tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_overhead_social_only
+0.05s setup    tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_and_social_overhead_covariance_caption_containment_and_separation
+0.04s setup    tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_selective_generation_no_extra_files
+0.04s teardown tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_incomplete_returns_empty
+=========================== short test summary info ============================
+PASSED tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_density_covariance_caption_containment_and_separation
+PASSED tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_and_social_overhead_covariance_caption_containment_and_separation
+PASSED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_closed_kind_rejection
+PASSED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_exact_metadata_and_path_parity
+PASSED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_format_routing_subset
+PASSED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_preserves_common_points_and_no_numerical_calls
+PASSED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_selective_generation_no_extra_files
+PASSED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_overhead_social_only
+PASSED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_incomplete_returns_empty
+PASSED tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[pitching_wedge_shaft_only_narrow-pitching_wedge-77.402-2.0-2.0]
+PASSED tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_shaft_only_narrow-seven_iron-148.5-4.0-4.0]
+PASSED tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_combined_noise-seven_iron-148.5-5.0-3.8]

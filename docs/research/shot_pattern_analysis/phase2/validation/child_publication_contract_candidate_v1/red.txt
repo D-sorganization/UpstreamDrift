@@ -1,0 +1,144 @@
+EEEEEEEEE                                                                [100%]
+==================================== ERRORS ====================================
+_____ ERROR at setup of test_child_preserves_parent_and_reuses_exact_bytes _____
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_child_preserves_parent_an0')
+
+    @pytest.fixture
+    def parent(tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+______________ ERROR at setup of test_tampering_rejected[numeric] ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_numeri0')
+
+    @pytest.fixture
+    def parent(tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+______________ ERROR at setup of test_tampering_rejected[reused] _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_reused0')
+
+    @pytest.fixture
+    def parent(tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+_______________ ERROR at setup of test_tampering_rejected[extra] _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_extra_0')
+
+    @pytest.fixture
+    def parent(tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+_____________ ERROR at setup of test_tampering_rejected[identity] ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_identi0')
+
+    @pytest.fixture
+    def parent(tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+_____________ ERROR at setup of test_tampering_rejected[duplicate] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_duplic0')
+
+    @pytest.fixture
+    def parent(tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+______________ ERROR at setup of test_tampering_rejected[source] _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_tampering_rejected_source0')
+
+    @pytest.fixture
+    def parent(tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+_ ERROR at setup of test_parent_mutation_during_render_rejected_without_receipt _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_parent_mutation_during_re0')
+
+    @pytest.fixture
+    def parent(tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+_____________ ERROR at setup of test_wrong_renderer_scope_rejected _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2187/test_wrong_renderer_scope_reje0')
+
+    @pytest.fixture
+    def parent(tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_publication import ARTIFACTS
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_publication'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:16: ModuleNotFoundError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.35s setup    tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.02s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+0.01s teardown tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+0.01s teardown tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]
+0.01s teardown tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[source]
+0.01s teardown tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+0.01s teardown tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+0.01s teardown tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+
+(5 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+ERROR tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+ERROR tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+ERROR tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]
+ERROR tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+ERROR tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+ERROR tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+ERROR tests/research/test_supplement_publication_revision.py::test_tampering_rejected[source]
+ERROR tests/research/test_supplement_publication_revision.py::test_parent_mutation_during_render_rejected_without_receipt
+ERROR tests/research/test_supplement_publication_revision.py::test_wrong_renderer_scope_rejected

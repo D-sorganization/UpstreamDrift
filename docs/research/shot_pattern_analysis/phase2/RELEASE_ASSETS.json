@@ -1,0 +1,1413 @@
+{
+  "schema": "shot-pattern-release-assets/1",
+  "release_tag": "shot-pattern-phase2-research-2026-10-10",
+  "release_url": "https://github.com/D-sorganization/UpstreamDrift/releases/tag/shot-pattern-phase2-research-2026-10-10",
+  "reason": "Binary study archives and review photographs are kept out of git history; restore with scripts/research/shot_pattern_analysis/fetch_release_assets.py",
+  "files": {
+    "docs/research/shot_pattern_analysis/flight_source_snapshot.zip": {
+      "asset": "root__flight_source_snapshot.zip",
+      "bytes": 476560,
+      "sha256": "e6de6acc7979f0cc7affffc4ccb73b6429c74d0ed4e3ba097e65871e2926dd73"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/control_pilot_v1/control_pilot_v1-001.zip": {
+      "asset": "phase2__data_archives__control_pilot_v1__control_pilot_v1-001.zip",
+      "bytes": 11518803,
+      "sha256": "83504664fdba0bd20218b43dde5f7adda6ea122baeb640da228b73db9c26cf44"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_control_v1/control_final_v1-001.zip": {
+      "asset": "phase2__data_archives__final_control_v1__control_final_v1-001.zip",
+      "bytes": 79352817,
+      "sha256": "7e60f040a4ecbd00bdd967eb1ea5103d6c12f48608643ef01fc6d8d26f10b39a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_control_v1/control_final_v1-002.zip": {
+      "asset": "phase2__data_archives__final_control_v1__control_final_v1-002.zip",
+      "bytes": 76505364,
+      "sha256": "da4a1f2ce00eaa0fc288dbc6597e54ce800935bb3f07a828e05c846650333032"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_control_v1/control_final_v1-003.zip": {
+      "asset": "phase2__data_archives__final_control_v1__control_final_v1-003.zip",
+      "bytes": 45787502,
+      "sha256": "84fee9e292dec012feea7716b572175e9cdeb04b40407e0281237ef34f40cc25"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-001.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-001.zip",
+      "bytes": 79938512,
+      "sha256": "8eaba91beaf1c9cf3be7dda504efaed7f513f27db005b266ae55b37e06644e7d"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-002.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-002.zip",
+      "bytes": 79213344,
+      "sha256": "08443abc7fcb1c696274f7d93d0a495cf0b3cd6158f151390a11dd449c692e5d"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-003.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-003.zip",
+      "bytes": 79014334,
+      "sha256": "ddafb14a04facefa29b37b74e647f6b2663fec46befb92364db8d718b238cb2e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-004.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-004.zip",
+      "bytes": 79037500,
+      "sha256": "8e1135bbdbd571d7750a2cceac05263193e5f4d648d47273a7ce4ad0666455f6"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-005.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-005.zip",
+      "bytes": 79372067,
+      "sha256": "e5e0f1acafcf8755f506b2ae2f080c140b182bd747ca68a26912d358fa92e01e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-006.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-006.zip",
+      "bytes": 78691822,
+      "sha256": "ba25a5ae05f4b545bec41a8f490bc4c86c947f3b5281627f499cbe8d49e79bf9"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-007.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-007.zip",
+      "bytes": 77743582,
+      "sha256": "96339adca4647c5c77dc78b2f24921bd200a011cdb47ccb87ff61af57cceaeca"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-008.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-008.zip",
+      "bytes": 78654239,
+      "sha256": "4d2af644836aba5f910eecc19ace47c0226ff695443658685cc3795a0d72fcfc"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-009.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-009.zip",
+      "bytes": 78694760,
+      "sha256": "ba6ca0b6289a6caee77c8199c4a628e159a426df8fa394891e5c014e1ec63b4e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-010.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-010.zip",
+      "bytes": 79760372,
+      "sha256": "081e49e0c1b696f8699286e206368fd4ddc985e4030ca30231487a62c8a50127"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-011.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-011.zip",
+      "bytes": 79281863,
+      "sha256": "a2b53589af2cf447f64e691d156e9c5e23f9a3c70429d7580825570d9d472a44"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-012.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-012.zip",
+      "bytes": 78757485,
+      "sha256": "8ee73076f98f2a899c2d4a172ed9620490084c582ef53c9918e260b1e60b4b85"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-013.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-013.zip",
+      "bytes": 77606018,
+      "sha256": "32465c1629a4a21077ba967a320d0ffa6c357e3ff745f9b394a9a3aaacd26ccf"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-014.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-014.zip",
+      "bytes": 78924853,
+      "sha256": "f944eb422ccbc201e7c868ef70491e543ae17762ff87608198a90f415ee61c3a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/final_primary_v1/final_v1-015.zip": {
+      "asset": "phase2__data_archives__final_primary_v1__final_v1-015.zip",
+      "bytes": 3833318,
+      "sha256": "c58fa8a6fec2ba699b6cec76a0ef8ab9d732e53a9a789ceb510827dc0ebde17a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/pilot_v1/pilot_v1-001.zip": {
+      "asset": "phase2__data_archives__pilot_v1__pilot_v1-001.zip",
+      "bytes": 79982242,
+      "sha256": "9c52674af1c3d17914eb555f692cf9b10c793716967b3ae2e9663d587efece6a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/pilot_v1/pilot_v1-002.zip": {
+      "asset": "phase2__data_archives__pilot_v1__pilot_v1-002.zip",
+      "bytes": 5450553,
+      "sha256": "7289774527b20448b3a02b7a26b3345f42b4656d1d38c075b89bf525a14b88c8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/supplement_final_v1/supplement_final_v1-001.zip": {
+      "asset": "phase2__data_archives__supplement_final_v1__supplement_final_v1-001.zip",
+      "bytes": 79694653,
+      "sha256": "d078e81389981c2de27e556b160026a657fbc2c035c195ea2ab7ae9747e56562"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/supplement_final_v1/supplement_final_v1-002.zip": {
+      "asset": "phase2__data_archives__supplement_final_v1__supplement_final_v1-002.zip",
+      "bytes": 21959328,
+      "sha256": "2045dbe82b2de96366ffb148f6a56d39a8d426feba3a06032b5bc8e6bd3dc078"
+    },
+    "docs/research/shot_pattern_analysis/phase2/data_archives/supplement_pilot_v1/supplement_pilot_v1-001.zip": {
+      "asset": "phase2__data_archives__supplement_pilot_v1__supplement_pilot_v1-001.zip",
+      "bytes": 5663598,
+      "sha256": "8f719c0831b8047245ab4fa663d413c8ae02b5eddfc1bae569c0068880c6eaa2"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_01.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_01.jpg",
+      "bytes": 559027,
+      "sha256": "a1569116054d44cd451563222e01b0108ce65ac5b8435ea1a4047676349a5eff"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_02.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_02.jpg",
+      "bytes": 562039,
+      "sha256": "8dd100c516689c6fba5986c56b9093294d5d143cb9e87760b76871d03cdcfbc6"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_03.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_03.jpg",
+      "bytes": 578454,
+      "sha256": "fa8b6040623e8d1c83afa5d5c4369fcf263af23006a0375dadbce781e6a99f17"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_04.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_04.jpg",
+      "bytes": 579280,
+      "sha256": "9f13581718215242d679336c3f7d820a657a90074cd3881688a1e587f9203ef6"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_05.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_05.jpg",
+      "bytes": 570920,
+      "sha256": "860334a97e51540f0837a14f732d8cc386c5315e13bb179b413acad24eae3082"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_06.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_06.jpg",
+      "bytes": 572182,
+      "sha256": "b9174e1fb8a27f067dac075b04ef7f123744c4e63997e7736bfc98bfcb013600"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_07.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_07.jpg",
+      "bytes": 737122,
+      "sha256": "ad1cd89ab802c23d69490bbe60271aec012573ee8a99ad05ad1978cdeeba890b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_08.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_08.jpg",
+      "bytes": 804436,
+      "sha256": "c845ce9244258dd97ed3c0f27780b43aff2a327ee94d036d56579e27c8c86ef9"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_09.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_09.jpg",
+      "bytes": 499463,
+      "sha256": "46200aea86b698d371f424f78ab2ced00e3fa43241bac1c0dac23b6c53d287f2"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_10.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_10.jpg",
+      "bytes": 494671,
+      "sha256": "1d3e1093665902007a3cb8ba662c44f9b594a65a67bb0ba4118b580e88fec853"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_11.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_11.jpg",
+      "bytes": 471879,
+      "sha256": "bb524fce25aaca79bf3057037cebd9cb4f16c1630b410c431cebb7b203da41ec"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_12.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_12.jpg",
+      "bytes": 476513,
+      "sha256": "c183fb6b7b7464f9b2ec8f8a014139d336a16faad5ef05df6297e49a2592b50c"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/contact_13.jpg": {
+      "asset": "phase2__validation__control_final_graphics_independent_review_v3__contact_13.jpg",
+      "bytes": 104688,
+      "sha256": "f4a2a1633acdb90705b84b5c9afc6644c39ab92e2cfdc882a1a20649bc869f4f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/document_policy_repair_v1/original_documents.zip": {
+      "asset": "phase2__validation__document_policy_repair_v1__original_documents.zip",
+      "bytes": 25346,
+      "sha256": "d682fc2ba9d9bafacef5006f5f13fe6290d65ec0eaf4f55681246b8fca009325"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/launcher_boundary_independent_review_v1/executed_evidence.zip": {
+      "asset": "phase2__validation__launcher_boundary_independent_review_v1__executed_evidence.zip",
+      "bytes": 4037,
+      "sha256": "9b228c9789c63676a822c29b856012548485f70c19da8c65a31d90258c380ddf"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/main_integration_candidate_v1/issue_record.zip": {
+      "asset": "phase2__validation__main_integration_candidate_v1__issue_record.zip",
+      "bytes": 3881,
+      "sha256": "9e725eed0a3b0c2a1c1a88ff5fd3e9fa7c885c181eca4b9ecc283f8c47f9450e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/main_integration_candidate_v1/unverified_worker_evidence.zip": {
+      "asset": "phase2__validation__main_integration_candidate_v1__unverified_worker_evidence.zip",
+      "bytes": 47073,
+      "sha256": "9c1967c88cd40e81881d74d2a2cc59e4df8b5164c751a55cc09ea7ca1c29f7d6"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/main_integration_handoff_qualification_v1/executed_evidence.zip": {
+      "asset": "phase2__validation__main_integration_handoff_qualification_v1__executed_evidence.zip",
+      "bytes": 86337,
+      "sha256": "aa4ff0a1f9df5ea3bc0d6cf62c04380fea61b2be715d9c308a4517f2ea18ec86"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/main_integration_independent_runtime_v1/executed_evidence.zip": {
+      "asset": "phase2__validation__main_integration_independent_runtime_v1__executed_evidence.zip",
+      "bytes": 43226,
+      "sha256": "9eb2494f5cdbe62d2dd9eb28c4a74a91ce2dcb287146aa6b6b5e73330a938811"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/main_integration_local_dependency_recovery_v1/executed_prompt.zip": {
+      "asset": "phase2__validation__main_integration_local_dependency_recovery_v1__executed_prompt.zip",
+      "bytes": 3090,
+      "sha256": "e998f670173cedfab8fe10a22842403b748df562e8c0ff78ec1a47a1e520815f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/main_integration_metadata_qualification_v1/executed_evidence.zip": {
+      "asset": "phase2__validation__main_integration_metadata_qualification_v1__executed_evidence.zip",
+      "bytes": 72413,
+      "sha256": "5776b05374b6084eb1f4ff1d3d07fcc2cbb756f6cf7d573e5fc1533508516f2b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_01.jpg",
+      "bytes": 557563,
+      "sha256": "a6419295a5a4aee8257126fd87ac0aa9733057f1263af0fcd45d3067332d3843"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_02.jpg",
+      "bytes": 547130,
+      "sha256": "868c6510bd2f1814063e68d62464930619c516293f3274e5026458bd8666f1ef"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_03.jpg",
+      "bytes": 575178,
+      "sha256": "c9d49c7055e362981c355e22bbf8d5bf74a7230eda8eee4e08c9c2682df2d58b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_04.jpg",
+      "bytes": 574866,
+      "sha256": "b4fa2b0efbc7ad9880ff7a216c9430e26fcbc9e91a7391f7c5329d381416b11b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_05.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_05.jpg",
+      "bytes": 578010,
+      "sha256": "dee7bef6c10231ad8dd1b46e61dc493d64bbd931f32abc80d805233dc3e372e5"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_06.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_06.jpg",
+      "bytes": 566592,
+      "sha256": "01979fb6c81547e8ec468fd9ee2280165da3730fc25ec74838a753f256e366a7"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_07.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_07.jpg",
+      "bytes": 565889,
+      "sha256": "77266ce2cce152d8929e128d9f5c269625f4a19cba015ba7278f0c6765224258"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_08.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_08.jpg",
+      "bytes": 688008,
+      "sha256": "8c8496ff304dae87afefddf9f3166c6b5f3c7e2d9dd7e948e5bd5894489f3629"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_09.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_09.jpg",
+      "bytes": 798153,
+      "sha256": "6654f432c5a6de464cc1793819497a64c49f35ba81fd98116c0d0b05accb42d4"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_10.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_10.jpg",
+      "bytes": 796784,
+      "sha256": "2f7e9df1a0dc1749472ac65bbcc0276498721a2b99e651a518d699d7e805493b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_11.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_11.jpg",
+      "bytes": 803497,
+      "sha256": "93729e618a8f6d880cfea26723547f5742332ad12a1b1509eac9a042af0060d4"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_12.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_12.jpg",
+      "bytes": 795901,
+      "sha256": "aa7e14c02efb28e4e6cec2124ac781e876351975f46fcb74d0987692dfbeef83"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_13.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_13.jpg",
+      "bytes": 794337,
+      "sha256": "1989372107129c0d64a62e656967e3f870e1ba23cfbf7d543633f3943e04e9a4"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_14.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_14.jpg",
+      "bytes": 528415,
+      "sha256": "31f979d4ea05d9dd2dfbf05066e25ed3d97368937cc8df8f0446fe4ee75d1f5f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_15.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_15.jpg",
+      "bytes": 500961,
+      "sha256": "b79a7adc4966af662165ef8cd6d2039172d7bd708de214afcd71d25999643c96"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_16.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_16.jpg",
+      "bytes": 469203,
+      "sha256": "95d5981f9672adbb92a93abffd59b05bdb300551396b3dd7891b3b58da6e2440"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_17.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_17.jpg",
+      "bytes": 481409,
+      "sha256": "2ae3e0194fd18aa338b61df4b5e25c304014d2aa0bdca636c8c8eecdf00c983f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/contact_18.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v1__contact_18.jpg",
+      "bytes": 475436,
+      "sha256": "83968e4f97ed8e40d01d3c3cc1ca60e970d870a2f073abfe5691281bd217b7e6"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_01.jpg",
+      "bytes": 559027,
+      "sha256": "a1569116054d44cd451563222e01b0108ce65ac5b8435ea1a4047676349a5eff"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_02.jpg",
+      "bytes": 548767,
+      "sha256": "b46773ef7e0cc068beadeec0542d1869319d4a4f0ff706f5532a2b903ffb64d8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_03.jpg",
+      "bytes": 577378,
+      "sha256": "ab1660b74fab78e07b29ebb211501ca6063870c4a21b6c7defff4ec7a4202e73"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_04.jpg",
+      "bytes": 576738,
+      "sha256": "28d07e6c267f1199771b0c8e98a21147b9230820e2b4c892f55f5aba12b2abbf"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_05.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_05.jpg",
+      "bytes": 580056,
+      "sha256": "cf2633b6e8003fd0f6b142363e76924877825a61d4fde733231cbe2b6747d58f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_06.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_06.jpg",
+      "bytes": 568358,
+      "sha256": "8ed71968f6f7554eccfc85aadcb1350297d20f83d197a69d31022f0929828284"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_07.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_07.jpg",
+      "bytes": 567657,
+      "sha256": "27425038f978a19e682d136d1481b6f5348b5eaa280d62a617cb4b3c2c8d732a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_08.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_08.jpg",
+      "bytes": 736024,
+      "sha256": "701ec17be0c89dd4a37d5963e5fa82c4d96b6c2f6a97a681c823177c7ab9e12c"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_09.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_09.jpg",
+      "bytes": 890565,
+      "sha256": "edc0dd70fa7372ef637c55210a55ba0a09ba8854014f4b0abf7369e6f0c93b66"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_10.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_10.jpg",
+      "bytes": 876931,
+      "sha256": "95ca192e88f21106054a627c3db7d1f427ed62e03a5303b733ec2b8357d438c4"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_11.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_11.jpg",
+      "bytes": 890734,
+      "sha256": "603896cb21e145f462cf499fe4c36661132986081f8f479a7ad817f7d8314835"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_12.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_12.jpg",
+      "bytes": 880966,
+      "sha256": "5c57145a47020e39917d984b70421aa4f13de6fc50470b70f7ec8479e377c293"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_13.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_13.jpg",
+      "bytes": 872629,
+      "sha256": "9332a89f219a9817e41e6b2d6cab023251be314e18caf61d6f8ec725944897e0"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_14.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_14.jpg",
+      "bytes": 542488,
+      "sha256": "e1d4f7fad419a109b0b6cb2fbe60dde1b0a1dea380cc9442d2aad0d1e8a48229"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_15.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_15.jpg",
+      "bytes": 509779,
+      "sha256": "bb7df79c7a7104f4a7beb8c95459a38a841c7f172b9c40808707cf3ac8b42eaa"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_16.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_16.jpg",
+      "bytes": 469203,
+      "sha256": "95d5981f9672adbb92a93abffd59b05bdb300551396b3dd7891b3b58da6e2440"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_17.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_17.jpg",
+      "bytes": 481409,
+      "sha256": "2ae3e0194fd18aa338b61df4b5e25c304014d2aa0bdca636c8c8eecdf00c983f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v3/contact_18.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v3__contact_18.jpg",
+      "bytes": 475436,
+      "sha256": "83968e4f97ed8e40d01d3c3cc1ca60e970d870a2f073abfe5691281bd217b7e6"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_driver_details/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_driver_details__contact_01.jpg",
+      "bytes": 210377,
+      "sha256": "96309104067e1a806d2d59ede9177a30965ca79bbac51666ae478286a142dcd5"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_driver_details/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_driver_details__contact_02.jpg",
+      "bytes": 210098,
+      "sha256": "8f0dcc45df1b4adca308384fb271296d1fe6564c68cb3a37b84f8a33c13c14fe"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_driver_details/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_driver_details__contact_03.jpg",
+      "bytes": 208532,
+      "sha256": "f8327e33a0729f6764b66eea2f070cf7e322d5dc039069f479ab44eaa8d0f3e9"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_pitching_wedge_details/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_pitching_wedge_details__contact_01.jpg",
+      "bytes": 250383,
+      "sha256": "4058dbcc9fdf298b948ecdfd3a163124736731ba5c6431ed0974dad65a61797f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_pitching_wedge_details/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_pitching_wedge_details__contact_02.jpg",
+      "bytes": 249775,
+      "sha256": "9a4a65503afebbba039f091e81e227010b184eeb1ed811e34338506fc03260ed"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_pitching_wedge_details/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_pitching_wedge_details__contact_03.jpg",
+      "bytes": 249389,
+      "sha256": "a388cd06ee9c5dd84eb432a5da4f4d0aeae4b24427a6279cdc97417fb08a6dc5"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_pitching_wedge_details/contact_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_pitching_wedge_details__contact_04.jpg",
+      "bytes": 250066,
+      "sha256": "7a490994f4e45f940fe05529740e14d271a733fa7fefcb3e52c2dd45caea1da8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/comparisons_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__comparisons_01.jpg",
+      "bytes": 413150,
+      "sha256": "8d6ef6d655536d74a91fdb87fd3770c55678e72275690b0cea91c92c3f816a71"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/comparisons_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__comparisons_02.jpg",
+      "bytes": 413244,
+      "sha256": "de7c217ea27b1bc195cc4c7afa620e80aff03c32030d54a5e83861c55c1abc5b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/comparisons_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__comparisons_03.jpg",
+      "bytes": 432989,
+      "sha256": "481380beaedad7714daff301e6a3797594c17e043f91edbe991ad2911eb229e9"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/comparisons_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__comparisons_04.jpg",
+      "bytes": 309947,
+      "sha256": "21d095ec8410289d81c647f737864e9a0b805b49a87dfd32ede5e3a457773526"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/matrix_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__matrix_01.jpg",
+      "bytes": 341540,
+      "sha256": "0e7fd1473092c81b61b3c5210aca886ab5b4db12ae03d5e68387eced0b3ea32f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/matrix_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__matrix_02.jpg",
+      "bytes": 340723,
+      "sha256": "6c79a01757dee06908e9c250141dab122dc3050ce2cc4258e7009049d140ade5"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/matrix_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__matrix_03.jpg",
+      "bytes": 178113,
+      "sha256": "5aaedc343d435bad4e20e51dd0332e43a8aa36861c6e5dcead74c0e4d8f2ca02"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/social_details_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__social_details_01.jpg",
+      "bytes": 270021,
+      "sha256": "29bcab9c2787e2278597a12c7d47da7396b59fd2d0155d83fdeff4b4ab85d4d1"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/social_details_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__social_details_02.jpg",
+      "bytes": 273498,
+      "sha256": "ed0b21c8353fc98e558c43a1647089b07fa7ff0eef73f201ba22326b932c3dc3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/social_details_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__social_details_03.jpg",
+      "bytes": 282673,
+      "sha256": "d6ebe8cb582294722fc9e68bf11e023a412dc319010c2aec4a2b2a2f994c9b3a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/social_details_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__social_details_04.jpg",
+      "bytes": 278373,
+      "sha256": "da0689a74bb87aa4d0d9cf6d5aa072512e371b51ee7240133f8e48dfe6bdc34c"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_control_remaining/social_details_05.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_control_remaining__social_details_05.jpg",
+      "bytes": 277317,
+      "sha256": "1657a76ec0ef31f573a8c9bf417eb26cb69183ab9cf9d6248ca25f81bc9d2f26"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_driver_details/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_driver_details__contact_01.jpg",
+      "bytes": 301052,
+      "sha256": "3edaa352db0914613f56d766b0577d1b8f345f53bbbe4ea06baf6378c3b10a8f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_driver_details/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_driver_details__contact_02.jpg",
+      "bytes": 301595,
+      "sha256": "181b043037747a313bef2475b69d1de451963e2906beddef0cc372d1efec3f05"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_driver_details/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_driver_details__contact_03.jpg",
+      "bytes": 291385,
+      "sha256": "242b26743b4ff0a00d49487ccaae89afe98d55152d4f792db7c7c0150add2cd2"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_driver_details/contact_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_driver_details__contact_04.jpg",
+      "bytes": 292348,
+      "sha256": "ffea652dbe3e9b8ad402a6c22e872c0cc194587d80518a03cf8c7d9edc53ecfd"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_social_details/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_social_details__contact_01.jpg",
+      "bytes": 267632,
+      "sha256": "51d0d2defc4f6ef63179ff6e422b752f6e3acb856e6be8e31d44b5c49a25907e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_social_details/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_social_details__contact_02.jpg",
+      "bytes": 269970,
+      "sha256": "32a22e37b17e6b32b1d7d68a16d013992f726a8f4093bc337b01b0d9aeed39a8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_social_details/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_social_details__contact_03.jpg",
+      "bytes": 281177,
+      "sha256": "645dcaad4d54a1b6a32369e6935634877f54eaf365e2863a27c3e85df40fe7cb"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_social_details/contact_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_social_details__contact_04.jpg",
+      "bytes": 274826,
+      "sha256": "f84a6fd64339b2e88b55d2bb111ae5c715e4e5bf1f65a67871fb222c7a114629"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_social_details/contact_05.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_social_details__contact_05.jpg",
+      "bytes": 274401,
+      "sha256": "905cf2b8fbc8f5118f3281fe5650112c41c1bbcddc0cdffc4e7f61257ff524dd"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_social_details/contact_06.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__astra_social_details__contact_06.jpg",
+      "bytes": 273312,
+      "sha256": "8d88b5a62c607c91e5acb44b300c0127806e6f4b80c7ade796921ee15127bc36"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_control_seven_iron_details__contact_01.jpg",
+      "bytes": 616500,
+      "sha256": "d8fa82c198a2f1d4f887575cd7c11737ad9b74dfd9e4c798e20fec76013efe34"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_control_seven_iron_details__contact_02.jpg",
+      "bytes": 600042,
+      "sha256": "9b97cd507e81f4d81a92794e5f12f94d231ce6eab383724031dfddbf04bc725f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_control_seven_iron_details__contact_03.jpg",
+      "bytes": 610549,
+      "sha256": "6cd0faf73cd78401e33c09f1b7b21ac697a4f50eb62e80c2bf08016f50e0eac6"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details/contact_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_control_seven_iron_details__contact_04.jpg",
+      "bytes": 600450,
+      "sha256": "2d7a832dafc03f7b6c80854b6bf7e1c54c33e544c367c7ebb91cad61ce1cb319"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details/contact_05.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_control_seven_iron_details__contact_05.jpg",
+      "bytes": 609616,
+      "sha256": "e2fafb3e7ad366da025bcd136dbc6a875d3764edec5d7964eb60f16f56230a88"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details/contact_06.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_control_seven_iron_details__contact_06.jpg",
+      "bytes": 599464,
+      "sha256": "9a577271cd8c16ec80b439b599b77522006ee33e4b68655791149b3b795a241b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details/contact_07.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_control_seven_iron_details__contact_07.jpg",
+      "bytes": 612214,
+      "sha256": "7ff4fe5076b7bd92319b5dec8b5eb6f18e25ec1e2248144d9a3c99747568483f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details/contact_08.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_control_seven_iron_details__contact_08.jpg",
+      "bytes": 602592,
+      "sha256": "8f7fd7a1b42beba59f3db8ceab6c390f37dd19fd691f777139a7a85cad01514d"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_pitching_wedge_details/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_pitching_wedge_details__contact_01.jpg",
+      "bytes": 569530,
+      "sha256": "3ca3ff45e80e9a5364e0847d93813993dbe0d2c66b778a733a14c607a5fc38c3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_pitching_wedge_details/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_pitching_wedge_details__contact_02.jpg",
+      "bytes": 568823,
+      "sha256": "1b4e28d387fec89765cb75a96de319bfc80b42c47b4487814fd51958fbaf12c9"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_pitching_wedge_details/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_pitching_wedge_details__contact_03.jpg",
+      "bytes": 317595,
+      "sha256": "165e118789aab63866f0f920401212611dbf3f873e8ed20fb216817f172a619d"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_01.jpg",
+      "bytes": 499782,
+      "sha256": "5291e323466c32f0b12227d8d22497f632bdf679e49887be593ed8d24dbe9c1a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_02.jpg",
+      "bytes": 480522,
+      "sha256": "0fe598467139aa9d052a7453bc6c155249b4f2d3b8df24e849c654d31e47f32e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_03.jpg",
+      "bytes": 484081,
+      "sha256": "94797e5dc4972cb92f0f17521229a8f20718527d8e961c4081cf504990212d34"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_04.jpg",
+      "bytes": 473588,
+      "sha256": "1f9cc5feba029c5b69dec39324396277027a6bd40e8dab9c9d688c0ce4d08417"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_05.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_05.jpg",
+      "bytes": 472763,
+      "sha256": "8ee7ebb90cc63ac6faaa5df42b39ab81a99b953f21b761437691d48fe84ad20f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_06.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_06.jpg",
+      "bytes": 483864,
+      "sha256": "9439f8f46405b54b757dbe08b6023e548c0a10aed786b023a66db66ed1d68daa"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_07.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_07.jpg",
+      "bytes": 471304,
+      "sha256": "051f074fe5a7c40434ef323f7a2fa5893ef5e443dee42ddb4f4514c9a8798346"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_08.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_08.jpg",
+      "bytes": 479515,
+      "sha256": "5341df7403778f48933dc5867130e0b72df3513408cc163634c76c15d2d0f728"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_09.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_09.jpg",
+      "bytes": 480055,
+      "sha256": "fd197c9706414724dd033b7cb08d5a43dd563760e6a402f6e4d54cfd90547b8a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_10.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_10.jpg",
+      "bytes": 485038,
+      "sha256": "a9f2aa8536da55bdded3ec17c88c6cf6b8702e6ac7fa6bf5c6dd35ede32f79dc"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_11.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_11.jpg",
+      "bytes": 483016,
+      "sha256": "a9a6ab99962f52feb9d99d6a2dd1be1d8e3d58173fa8519ad818b2cde1bd5635"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_12.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_12.jpg",
+      "bytes": 471396,
+      "sha256": "bf56f25d7979e37ca3e13f3ef0fb091b80bd09792afa01934e2a51fa02c4c523"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_13.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_13.jpg",
+      "bytes": 470487,
+      "sha256": "6f1c4eac2d64a29dda7b17587d2686508344b0613c6217368a4485f7cf732f33"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_14.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_14.jpg",
+      "bytes": 474224,
+      "sha256": "98eec491869b87f3f4d448cdd131f62133bb798875c2d257459abae34a65efcb"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_primary_matrix/contact_15.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_primary_matrix__contact_15.jpg",
+      "bytes": 470397,
+      "sha256": "64b8e2b957f6deba588dd9ea77e8c17667745873ba553932d4a1d9a5e138594b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_seven_iron_details/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_seven_iron_details__contact_01.jpg",
+      "bytes": 565319,
+      "sha256": "e769e6633c35e4bd40fe7245eb55b504059d40d2bfdbe5b5c1b16916cd840392"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_seven_iron_details/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_seven_iron_details__contact_02.jpg",
+      "bytes": 558464,
+      "sha256": "f4179f2ed1c876e30228fdfb262b96dc9cd496489485576ae98da8ba33f6d714"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_seven_iron_details/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_seven_iron_details__contact_03.jpg",
+      "bytes": 562788,
+      "sha256": "3a24b459dc6ac22e46570a0e1ae01ac9c5726c676fd9c880fb7022c94b3fc413"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_social_comparisons/contact_01.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_social_comparisons__contact_01.jpg",
+      "bytes": 624761,
+      "sha256": "ee5f4607ca6a9ff8e82ec0df093bc9eaa750ce848d0e5cdd2eeb4edf0b2428d9"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_social_comparisons/contact_02.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_social_comparisons__contact_02.jpg",
+      "bytes": 590385,
+      "sha256": "39614fd039bcfbff46356ab87640df960bdcac5b488f0a1ddb7a6bac92d40388"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_social_comparisons/contact_03.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_social_comparisons__contact_03.jpg",
+      "bytes": 624187,
+      "sha256": "e6e3cda88755c6762164b169c3807374050ce45c82a72f98aafe36cd19b3a231"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_social_comparisons/contact_04.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_social_comparisons__contact_04.jpg",
+      "bytes": 671231,
+      "sha256": "5f388816f6e209470ebdca231c85449fad2f5b4229e8de3d919710a6cd8288b7"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/root_social_comparisons/contact_05.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v4__root_social_comparisons__contact_05.jpg",
+      "bytes": 602008,
+      "sha256": "643bcec60f9228f72af0902eba3358ffd702768a703a9c8c954aa214cbb4a61a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v6/control_changed_driver.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v6__control_changed_driver.jpg",
+      "bytes": 659154,
+      "sha256": "4280a1aee9ddd9ec9a2e33dd67822f4bb15d73d18daf203555d153f5791d37b8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v6/control_changed_pitching_wedge.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v6__control_changed_pitching_wedge.jpg",
+      "bytes": 677272,
+      "sha256": "0417946040e6b9c38c0d92eac95baa78e2139c8fde579e448d07a5422ac7f480"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v6/control_changed_seven_iron.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v6__control_changed_seven_iron.jpg",
+      "bytes": 680742,
+      "sha256": "61f2576df406bd06349320c848775dc2d55ca0f8dd4bf6b842744e42021710a3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v6/primary_changed_driver.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v6__primary_changed_driver.jpg",
+      "bytes": 645295,
+      "sha256": "59401b511b97e008c5f9c0c393136c05205d2b8b5b9914f8001c8e82c870d836"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v6/primary_changed_pitching_wedge.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v6__primary_changed_pitching_wedge.jpg",
+      "bytes": 668120,
+      "sha256": "703a6d6a4f5d94f3e022aa01ef7d89815542d19894cce91ac97fa50187846a20"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v6/primary_changed_seven_iron.jpg": {
+      "asset": "phase2__validation__original_final_graphics_independent_review_v6__primary_changed_seven_iron.jpg",
+      "bytes": 667054,
+      "sha256": "d72a2a58e7f706fb1b5d10d2082af8b66ad370349d09d468f52a00ff85d73256"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_vector_diagnostics_v1/raw_evidence.zip": {
+      "asset": "phase2__validation__original_vector_diagnostics_v1__raw_evidence.zip",
+      "bytes": 414668,
+      "sha256": "61896ad8f9ef987dd87928ca1d237b59a9751a76bf7dbcd1b15d8c3ffdafe05c"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_vector_rasterization_v1/raw_diagnostics.zip": {
+      "asset": "phase2__validation__original_vector_rasterization_v1__raw_diagnostics.zip",
+      "bytes": 2615450,
+      "sha256": "40c02c1248b58f2da0e4aca73e16e3d43696d1416a97bc82051c3fe3fb3614ff"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/original_vector_visual_review_v1/raw_evidence.zip": {
+      "asset": "phase2__validation__original_vector_visual_review_v1__raw_evidence.zip",
+      "bytes": 20317537,
+      "sha256": "fd31ac818150a010f9257951a15edc3e10e1276102e6a53c7b2df722e1bbd9f4"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/prepr_readiness_diagnostic_v1/original_evidence.zip": {
+      "asset": "phase2__validation__prepr_readiness_diagnostic_v1__original_evidence.zip",
+      "bytes": 20813,
+      "sha256": "e91169544184f540035357925648f445db4363f2facd973a66f68bd0c6222d83"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/protocol_precondition_review_v1/agy_candidate/candidate.zip": {
+      "asset": "phase2__validation__protocol_precondition_review_v1__agy_candidate__candidate.zip",
+      "bytes": 13077,
+      "sha256": "40fa0d0ff3c84a75e01cedd5d5b1ed80243c1c42e37955714963daa55f2a4952"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/protocol_precondition_review_v1/agy_candidate/worker_evidence.zip": {
+      "asset": "phase2__validation__protocol_precondition_review_v1__agy_candidate__worker_evidence.zip",
+      "bytes": 19402,
+      "sha256": "69674decf659820fcc03e8d7e87f11c51ffe0253653669eb17d6deaa9824cf66"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/protocol_precondition_review_v1/independent_acceptance/astra/raw_evidence.zip": {
+      "asset": "phase2__validation__protocol_precondition_review_v1__independent_acceptance__astra__raw_evidence.zip",
+      "bytes": 13973972,
+      "sha256": "0b1f82198a2e129cdfec54c7c58e2745a76d8d93fa1a4992ef1e0dfac924bd79"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/protocol_precondition_review_v1/independent_acceptance/root/raw_evidence.zip": {
+      "asset": "phase2__validation__protocol_precondition_review_v1__independent_acceptance__root__raw_evidence.zip",
+      "bytes": 1114,
+      "sha256": "f66f32b67249b973cef14ed558edb0f19d66fbe47d73ad3ccc90a966357fa780"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/protocol_precondition_review_v1/original_evidence.zip": {
+      "asset": "phase2__validation__protocol_precondition_review_v1__original_evidence.zip",
+      "bytes": 5287,
+      "sha256": "46ec436077e08ab144a090925355f1f82d16da34f3e12dac92c2010e6b499623"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/protocol_precondition_review_v1/resolved_pair_evidence.zip": {
+      "asset": "phase2__validation__protocol_precondition_review_v1__resolved_pair_evidence.zip",
+      "bytes": 23686,
+      "sha256": "32744eba4f621d9776c6878a1c3de877dd639e5984ea9a46e1c06b940c35efb2"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/repository_readiness_repair_v1/agy_candidate/candidate_helpers.zip": {
+      "asset": "phase2__validation__repository_readiness_repair_v1__agy_candidate__candidate_helpers.zip",
+      "bytes": 49009,
+      "sha256": "11f43abca35ca87e15210515eddce33e744c6194e708e5cef8b293e05bbf9b0f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/repository_readiness_repair_v1/agy_candidate/worker_evidence_raw.zip": {
+      "asset": "phase2__validation__repository_readiness_repair_v1__agy_candidate__worker_evidence_raw.zip",
+      "bytes": 25918,
+      "sha256": "6aa1bae317d6d6285218767437ebee9197399f700300891d4fc6802e825ff1d1"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/repository_readiness_repair_v1/independent_acceptance/astra/raw_evidence.zip": {
+      "asset": "phase2__validation__repository_readiness_repair_v1__independent_acceptance__astra__raw_evidence.zip",
+      "bytes": 37170,
+      "sha256": "3295758e53b37f20a82650fd68098520b40e2276c4c996e9c363db6f726dcd30"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/repository_readiness_repair_v1/independent_acceptance/root/raw_evidence.zip": {
+      "asset": "phase2__validation__repository_readiness_repair_v1__independent_acceptance__root__raw_evidence.zip",
+      "bytes": 3103,
+      "sha256": "9e090dca1b1b6e196bd329c6dc4173e93b99e6125b42a752659198a334ea5020"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/repository_readiness_repair_v1/original_helpers.zip": {
+      "asset": "phase2__validation__repository_readiness_repair_v1__original_helpers.zip",
+      "bytes": 42645,
+      "sha256": "b8492d68ee960d84a71a3f30b019e10359da00e851011a3859a02ecc221f1642"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/scientific_merge_preflight_v1/executed_compare.zip": {
+      "asset": "phase2__validation__scientific_merge_preflight_v1__executed_compare.zip",
+      "bytes": 1085,
+      "sha256": "480d7b988507485a556bed07d46b343b287233466be748ed0c96d89c5791dcee"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_social_context_candidate_v1/review_contact_1.jpg": {
+      "asset": "phase2__validation__supplement_social_context_candidate_v1__review_contact_1.jpg",
+      "bytes": 421343,
+      "sha256": "e4e0d208e85cd645a1759a777a1ae31c20a2fb793b9ca52ca6883c6b713d7ca3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_social_context_candidate_v1/review_contact_2.jpg": {
+      "asset": "phase2__validation__supplement_social_context_candidate_v1__review_contact_2.jpg",
+      "bytes": 411546,
+      "sha256": "6ae574de99993bf33418c16b99dddfbd0b1732f84a136bb57b92676827f2dc8c"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_social_context_candidate_v1/review_contact_3.jpg": {
+      "asset": "phase2__validation__supplement_social_context_candidate_v1__review_contact_3.jpg",
+      "bytes": 394201,
+      "sha256": "b5de4bafb891f6c08f1ffb61f7de37c22576582b7fc3d10d820aa9758706f049"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/astra_control_cells/contact_01.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__astra_control_cells__contact_01.jpg",
+      "bytes": 433766,
+      "sha256": "6cc0aec4a6af1a88d2628f0349f055d8041362258895ebf073fa5c3bb21cddc9"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/astra_control_cells/contact_02.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__astra_control_cells__contact_02.jpg",
+      "bytes": 426016,
+      "sha256": "6ef9c895c464008d34b7b8eb58ecae8069ccd01965a59679c13043b1635c3fbf"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/astra_control_cells/contact_03.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__astra_control_cells__contact_03.jpg",
+      "bytes": 441901,
+      "sha256": "b74a1e1702608f2f56600a6892f8deebf8586f7cd6819894b979dd2ae23233bf"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/astra_control_cells/contact_04.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__astra_control_cells__contact_04.jpg",
+      "bytes": 443307,
+      "sha256": "6ad559c1c3ca11e868361e42c5f42f33a76eefda80178939b2c0d4a65eb28495"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_01.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_01.jpg",
+      "bytes": 320685,
+      "sha256": "fd2f4914c1ef7167757065ac45ae6b8acded5f26cfafc0d257e1b245da7fac0b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_02.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_02.jpg",
+      "bytes": 310765,
+      "sha256": "b331d08998fc7116ade446f3c50cb0ad9a0bf4698cfdfdbd888dc1cbb89bae26"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_03.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_03.jpg",
+      "bytes": 320169,
+      "sha256": "00bdc10c5ada1b97476c5965843f72397a1a3b11b4d866ce0ca2b7acbf5b3fb8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_04.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_04.jpg",
+      "bytes": 299489,
+      "sha256": "70a3e0767c668a0125a31447dd47d778fc5caff31acd8601c70c7b216371c902"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_05.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_05.jpg",
+      "bytes": 322742,
+      "sha256": "ea4289bf8602786797024c948cfd0e49253c359be616c83be47b196d1e7adce3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_06.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_06.jpg",
+      "bytes": 301619,
+      "sha256": "bbe6e4dbaa7e4d3605eb4e87aeff42e23cfeead63c97029e14a9a52e31e74ff5"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_07.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_07.jpg",
+      "bytes": 316639,
+      "sha256": "bbb0bd07aa53499bcf2cfee62d9887d46960cce0d54ca8619dfd198284849fb3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_08.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_08.jpg",
+      "bytes": 308377,
+      "sha256": "1ac2c0acbe7fd8296cf1d9deff4543d545bb0ab647f29125073e98587d5633ce"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_09.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_09.jpg",
+      "bytes": 313809,
+      "sha256": "a81b150f5498d27f029ef46558ee84b5909bc25ee46f729a94a4eddd8e18c8ff"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_10.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_10.jpg",
+      "bytes": 299084,
+      "sha256": "885323eb2bd8c2df9c837d66f8c38af7e12f9d2fb8acdd77f3c8c5582b584b60"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_11.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_11.jpg",
+      "bytes": 316103,
+      "sha256": "df24bc6e69ceab842ac8094562a945ddde89d7cbe73fdbfc3749f0ea4eba0a6c"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v3_graphical_review/root_pw_primary_cells/contact_12.jpg": {
+      "asset": "phase2__validation__supplement_v3_graphical_review__root_pw_primary_cells__contact_12.jpg",
+      "bytes": 299151,
+      "sha256": "7c77058d549ed5dfbe2cc4299182b664a23b9fc439b463c343bac90a0ee4a14b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_01.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_01.jpg",
+      "bytes": 1029001,
+      "sha256": "3dca6b4628b5e2b88a7b1087f37ac9eaea3fba87725584088be3bd4053487ca6"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_02.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_02.jpg",
+      "bytes": 940731,
+      "sha256": "462139b8955ce8e32a1ad870a9379a58d509452d01c7a7947847814c4ea351d4"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_03.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_03.jpg",
+      "bytes": 1041485,
+      "sha256": "a129fb0037e409bcc025880896e3db5ce95e2ad5bd2fafa947cd1f7d93710c2e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_04.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_04.jpg",
+      "bytes": 959935,
+      "sha256": "97d986803fb04d76fcbc428bfb2cb7c22ec7985656082fe4faf87af435bf883f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_05.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_05.jpg",
+      "bytes": 1031515,
+      "sha256": "d219b6100bae404c37f1e6ff1e8e2cb113787f7ce62b00a75291f7b31705e38d"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_06.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_06.jpg",
+      "bytes": 939743,
+      "sha256": "0944cc1e53eb3ef3e00f386c1c76f46df9c5d9bb1a6019a04bcb0b2d59aa5e1e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_07.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_07.jpg",
+      "bytes": 1050574,
+      "sha256": "61c9ddcb50da73c6000861d5cebf7766c7716201c25463c166cf9d59788db976"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_08.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_08.jpg",
+      "bytes": 966403,
+      "sha256": "b33d46de2f566c1ca89aff33c92c2d509e253e84335d43fe52cca0622d4cd760"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_09.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_09.jpg",
+      "bytes": 977170,
+      "sha256": "4658e7d8a206528114c021f294aabe0521de20231d7a31d504952f36e203952b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_10.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_10.jpg",
+      "bytes": 982333,
+      "sha256": "d51207d816cf1c4a0dc2604398424a430c2bd2e416d17685bfcdfbe8493c9cde"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_11.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_11.jpg",
+      "bytes": 899396,
+      "sha256": "2d7359cc7ca41dab7d7aa68e2bfbe8f9ec7c3d331b27859e739fac6177836691"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_12.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_12.jpg",
+      "bytes": 898068,
+      "sha256": "1adea9e65d14af86a15e6d1b3321b4901962d091902d4ebdc27b6261e6813f18"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_13.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_13.jpg",
+      "bytes": 1048352,
+      "sha256": "23687a2172005bb38d14ec4fc730fab84cd3b54c9857d4b7438b31b5ee5973e8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_14.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_14.jpg",
+      "bytes": 1056346,
+      "sha256": "864ff6ec33b80951efdf1a9fdc274dc3849571d4064f2aa4c12ae1c508643321"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_15.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_15.jpg",
+      "bytes": 956788,
+      "sha256": "acd9207bbe24100264dce6e2836ee986d14fd1d987d5cb7e5cd75a8a6073e840"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_16.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_16.jpg",
+      "bytes": 956295,
+      "sha256": "4f4918f0f30d19ecdf54b312f0dc894a0f0b226a18e9add0a539f8d2347347fa"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_17.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_17.jpg",
+      "bytes": 980775,
+      "sha256": "5a4e0a085f772f1e7f772a97792f6507d387153a35ad3d9311ea4626df73a459"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_18.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_18.jpg",
+      "bytes": 992195,
+      "sha256": "4ca2153554aeb14d343181718b5422d53abc10ca81b92c76a96cefe1aeb420da"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_19.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_19.jpg",
+      "bytes": 906354,
+      "sha256": "b1abae0b2dc9b2d5c61ae6524c7d1b60e8dd211e60bf18c078960dd0623a2dd8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_20.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_20.jpg",
+      "bytes": 909485,
+      "sha256": "389046ebe95a19020a91810d859f150d8b968248e57b5bc400bc518ff2bcd36c"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_21.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_21.jpg",
+      "bytes": 1054820,
+      "sha256": "0cc48220852307771554aa26641f63cff86d50b3456d26c6414b75f40751eac3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_22.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_22.jpg",
+      "bytes": 1064440,
+      "sha256": "96bdf979a6a620b51c96f1ac158ff39dd7e0597cc76a44028ffa501adf8cd179"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_23.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_23.jpg",
+      "bytes": 963362,
+      "sha256": "c5de90ddc3a0e26f452d7ce3205f3dd090c4a61ac336a9a0fe19caca9a3cc478"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_24.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_24.jpg",
+      "bytes": 964861,
+      "sha256": "ca6d3d2185c8dcce1e8cd361d193d4509a5800548d1c13e88e6a0f4dda917361"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_25.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_25.jpg",
+      "bytes": 986977,
+      "sha256": "894fafdb74c5c52949245975900ceca5b58c9335febee1c86593924796f7ba3e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_26.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_26.jpg",
+      "bytes": 894085,
+      "sha256": "5affc1241ec9be16e7a6cf544722292cfca5053b93f9dc69c8dd3f074dce57c4"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_27.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_27.jpg",
+      "bytes": 1055941,
+      "sha256": "d67dc1bba3d519135c1f976b3107d96369f3684c223de2fd0718abfe2bce01af"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_28.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_28.jpg",
+      "bytes": 941984,
+      "sha256": "1b394546dd07c4350245c6904a7a16e847abdf9140c8acb5a7e9998ad471b579"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_29.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_29.jpg",
+      "bytes": 990770,
+      "sha256": "1cb7c3ca56b4117216732732edf11f355f2a4352c8cb8e6ebea3c089b4560a49"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_30.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_30.jpg",
+      "bytes": 904953,
+      "sha256": "67e8c6f347eb6db42360e9e918c59af6881ceb1465913726870a4fa01fadc4dd"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_31.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_31.jpg",
+      "bytes": 1058147,
+      "sha256": "a5286d79556475c326c99ab05a579dccb0a500b94fb5cfed1551dd6ceed50e13"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_32.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_32.jpg",
+      "bytes": 950707,
+      "sha256": "376185d8286c3428d2dd0b9d14600480ca25ed999b21527d290fb57ad010bce4"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_33.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_33.jpg",
+      "bytes": 1080476,
+      "sha256": "2cf1ba7f24a6890dbeb97fc3c8cb84ea8801275b98884190ca7cd0d1aebaa4d2"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_34.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_34.jpg",
+      "bytes": 1091835,
+      "sha256": "c8c65f8ce0a5ba6bfaa2196cfdbb89efacdb5bed4f6ed875907ad0a59b0ad6b8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_35.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_35.jpg",
+      "bytes": 898322,
+      "sha256": "f00197205b49b6617e84a0d90d2a7d2b7b9e4012cb1d7768009574c717326798"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_36.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_36.jpg",
+      "bytes": 928662,
+      "sha256": "3b4b7eff2fc85bcfad53b07e2aa4a4cceb4d088fd4d18a7089ad8035bb635383"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_37.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_37.jpg",
+      "bytes": 1145418,
+      "sha256": "3061d62222d4721b078706e6e44e8c55df04eb812ea3b9a0581d2b5ed4b9a777"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_38.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_38.jpg",
+      "bytes": 1150070,
+      "sha256": "52d5028734a361666d70befff50ead5186af4445ede965978b14f35359d84ed2"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_39.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_39.jpg",
+      "bytes": 955838,
+      "sha256": "8c1cadce336d5214d2f79cd8785a4f8151c07fa07b315129dc3ff305ed490d3a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_40.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_40.jpg",
+      "bytes": 955852,
+      "sha256": "abb781a549943975daabb82f3b84309ff26636edca37819d50c8cf5ba71993df"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_41.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_41.jpg",
+      "bytes": 1076472,
+      "sha256": "2fe87a56a27639616674538593bc086d974b4e4175da8356217a2657ee0c2857"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_42.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_42.jpg",
+      "bytes": 1089543,
+      "sha256": "e7ada91fa0ba748f84774eacf05fe1fb95598565cae5c49ffec2cdebad339ee7"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_43.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_43.jpg",
+      "bytes": 901728,
+      "sha256": "b26bf81f21b502ea26a88a5307bfaa466803f8ed7bbe1317c0267b610f9cd4f7"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_44.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_44.jpg",
+      "bytes": 906155,
+      "sha256": "fc66cdd0d8b8c27685abd28b399284373c045a1be7d4b6668889b7a8524adc9b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_45.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_45.jpg",
+      "bytes": 1148902,
+      "sha256": "665ba65bdd9db9e20ac9dc3295ff1f9b3a8cfd10e2f6cdca556b224b9ee26853"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_46.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_46.jpg",
+      "bytes": 1147702,
+      "sha256": "2e4bbb00dfb88c24c3655f6d6294f35def4d8eacc6cef454eccb0be91ea1b733"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_47.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_47.jpg",
+      "bytes": 942345,
+      "sha256": "7f7261b599424e7f370d382abcad3515c341f83d478c5ddc2605408d1fd48b7d"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_48.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_48.jpg",
+      "bytes": 965349,
+      "sha256": "f5d49546490a85db8fa95e5b6cbd2c66e618577a5292006c9a048602b9cdd00f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_49.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_49.jpg",
+      "bytes": 1093730,
+      "sha256": "6be8cd4396abb63d5d789e16c0d80c9b6dd38ece4a7c64c08aff57a52eb35896"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_50.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_50.jpg",
+      "bytes": 905242,
+      "sha256": "588d398d63cf1a80bd850803e22f892913361875f1610c5a88e1c98654325186"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_51.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_51.jpg",
+      "bytes": 1154070,
+      "sha256": "6ad4ab2b87ca67a4fcfd31e5872b232d5fb9294faeb7cddf4199881b2dcd0318"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_52.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_52.jpg",
+      "bytes": 951354,
+      "sha256": "f945bc02b0ff3a126fef3d899b8ad071ab9f348aa53ec09ab24e6a10f4cebc74"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_53.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_53.jpg",
+      "bytes": 1089548,
+      "sha256": "22fbb98c7ac69f2303c1a94a5158d1f8ae01fc10e4ca62832490d3beac7131e8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_54.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_54.jpg",
+      "bytes": 902834,
+      "sha256": "e7f670153210a705b508b5559c9eb2f7cfc3c507c49f87303afb79bd6362205e"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_55.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_55.jpg",
+      "bytes": 1154657,
+      "sha256": "1a71d6841403ae4470de45ed54ab44332cbdf9fc8277d533013f302d435728dd"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/contact_56.jpg": {
+      "asset": "phase2__validation__supplement_v5_across_lean_graphics_review_v1__contact_56.jpg",
+      "bytes": 944096,
+      "sha256": "b2592d6cb0251dfda34bbf5fac6113f8653b1f76704806ed6e81c0aa70ae636b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_01.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_01.jpg",
+      "bytes": 430426,
+      "sha256": "3ba51c801b141442771b9d9022b92a8e0abb606af5d5ae8fa2aeb82587e67b12"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_02.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_02.jpg",
+      "bytes": 425748,
+      "sha256": "46b853464dfb2cfa1ecb9540d184ff3a555db8e13bc7d8f5541e29176c45968b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_03.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_03.jpg",
+      "bytes": 458464,
+      "sha256": "26bac4d522e2e4a5062b6732cd2cc6a2ab0f6d90d2fa15adebf28bbb88291a03"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_04.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_04.jpg",
+      "bytes": 479588,
+      "sha256": "2cb69e67f8fc322d6fc70559e33a697357a829445c54bfb62f6ac65507c6b944"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_05.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_05.jpg",
+      "bytes": 425345,
+      "sha256": "8e4ad5acc8bd50c78c84c1215ae1324f43c5ef4b5400ae4ce2969fc2f614d7e6"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_06.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_06.jpg",
+      "bytes": 458773,
+      "sha256": "b53c19bd65b86637487fd4e85045a19ab9aa36149a487009e8d743c0c3043986"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_07.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_07.jpg",
+      "bytes": 467535,
+      "sha256": "565c32347c9e14cc0c014c69400a41814388ff62ba240535cb32644ae1c81df3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_08.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_08.jpg",
+      "bytes": 482969,
+      "sha256": "ee3221860b07b3cd518e58db8ca0bae14f866447f82483085f297dbcd99cf503"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_09.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_09.jpg",
+      "bytes": 457885,
+      "sha256": "253c6613054d15fac7b7eb8ce0f5741fc0dcdea4bedd73b44fc80ce402ee6ca8"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_10.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_10.jpg",
+      "bytes": 450540,
+      "sha256": "80281684b510ad48681ba7a496203081723578d6b9acab1d27c1e83f23282bda"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_11.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_11.jpg",
+      "bytes": 465778,
+      "sha256": "a354cced61deaf18fb982cc8aeee51e4ce17a70063be0f532458fbee7708b231"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_12.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_12.jpg",
+      "bytes": 436599,
+      "sha256": "9a939f0a658986d225268a5863101bedfecfbe6e28729e99288b16d303cefd8b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/contact_13.jpg": {
+      "asset": "phase2__validation__supplement_v5_cell_graphics_review_v1__contact_13.jpg",
+      "bytes": 453820,
+      "sha256": "14e1fc80dd0f1db5dbcc3914498db980add12d5f614692b47bb655f9ddac2854"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_01.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_01.jpg",
+      "bytes": 1031978,
+      "sha256": "e94a3176e1de17f6764ef2923931d1a674e3587fd1dac688139a28a09adbf996"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_02.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_02.jpg",
+      "bytes": 1014982,
+      "sha256": "272473a6b035248a56d8c19559c9d3b4819c84d4d400a151d28735364fa309a5"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_03.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_03.jpg",
+      "bytes": 983682,
+      "sha256": "896195aa2b8507a31fb2d35462d97654a732944de3af396fef3aa5f78596ad26"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_04.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_04.jpg",
+      "bytes": 971903,
+      "sha256": "ab0cfd2f5ead143fa3fcc94d116d89ecf29afe475c7a63b176c810d2b2be8770"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_05.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_05.jpg",
+      "bytes": 911496,
+      "sha256": "3a048aad44b8c806400b3c876eecc7a1c96e36c69a392e1108eadbaccb092a60"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_06.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_06.jpg",
+      "bytes": 921921,
+      "sha256": "c7b132d90192999e26fda030604c44ca5f97d8c26066d42d8ea27bc604f50734"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_07.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_07.jpg",
+      "bytes": 1054438,
+      "sha256": "7427bff1003e88bc9c20c2d5b45bc9ac3eeffe829e00e0b6be2ceb0482c2c61a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_08.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_08.jpg",
+      "bytes": 1018354,
+      "sha256": "58fe72e46775568b8b68bf3649f09dcb4594805a0b7d8292875e2c4f586f2e9f"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_09.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_09.jpg",
+      "bytes": 1011209,
+      "sha256": "a76a66af7eef7587c97cd5b7a2522e6abeb820e1e51cddae508e0bb94e3d40af"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_10.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_10.jpg",
+      "bytes": 1100966,
+      "sha256": "f97cab716378efe2bd1a99b8b82622767766fa39006f870e17f6675768799437"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_11.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_11.jpg",
+      "bytes": 1086388,
+      "sha256": "f67ca302c20a7e0e6f858b9a4bf975f34ea78c7ff9c3091d4edb0dfa1ab12a7a"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_curve_graphics_first12_v1/contact_12.jpg": {
+      "asset": "phase2__validation__supplement_v5_curve_graphics_first12_v1__contact_12.jpg",
+      "bytes": 1015990,
+      "sha256": "cecbe6c278b7c19cc8b4c4756514e7f7522a3ee13bee3c8483120c3d9fad3039"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_initial_pair_review_v1/contact_1.jpg": {
+      "asset": "phase2__validation__supplement_v5_initial_pair_review_v1__contact_1.jpg",
+      "bytes": 575329,
+      "sha256": "8610df1e484cc113c0c1ec8637684ca2ae7480f6c42e3f92ef1597233f560044"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_initial_pair_review_v1/contact_2.jpg": {
+      "asset": "phase2__validation__supplement_v5_initial_pair_review_v1__contact_2.jpg",
+      "bytes": 659380,
+      "sha256": "22f61a460b673fa9205af7324ebda981894bc273548dc511cf4602213c7964f3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/tools_pin_compatibility_preflight_v1/executed_comparison.zip": {
+      "asset": "phase2__validation__tools_pin_compatibility_preflight_v1__executed_comparison.zip",
+      "bytes": 1180,
+      "sha256": "43b92e161b618804067908a40b8b7e07633e1c3eaaaefdf198f821e9c0d1fd58"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/user_requested_stop_20261010_final/partial_graphics_review.zip": {
+      "asset": "phase2__validation__user_requested_stop_20261010_final__partial_graphics_review.zip",
+      "bytes": 18957138,
+      "sha256": "263649aefb0c08586fd8aa46f41ee5514426463e14bf8e57b14d3dd942ac2e6b"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/vector_inspection_candidate_v1/original_candidate.zip": {
+      "asset": "phase2__validation__vector_inspection_candidate_v1__original_candidate.zip",
+      "bytes": 15162,
+      "sha256": "6a3c92e9307f4edb9f291e1e5ce98dc05d3b272c3ea0434e4bccd81a00e5e4a5"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/vector_inspection_candidate_v1/provisional_review.zip": {
+      "asset": "phase2__validation__vector_inspection_candidate_v1__provisional_review.zip",
+      "bytes": 4410,
+      "sha256": "53141c03f1a0d9816be8053c2f76fcfab8f7db09e1ff55d81fffdb12be4c6922"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/vector_inspection_qualification_v1/astra/raw_evidence.zip": {
+      "asset": "phase2__validation__vector_inspection_qualification_v1__astra__raw_evidence.zip",
+      "bytes": 15641,
+      "sha256": "12f46f347156ea1101ddc8e03985417c411338c44997cf52c025084f718d26b7"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/vector_inspection_qualification_v1/root/raw_evidence.zip": {
+      "asset": "phase2__validation__vector_inspection_qualification_v1__root__raw_evidence.zip",
+      "bytes": 6193,
+      "sha256": "2997525ba41711b8f0a102294bc35e877188e71397a3aec1df4ebb63aeb6c9a5"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/vector_raster_sample_v1/raw_evidence.zip": {
+      "asset": "phase2__validation__vector_raster_sample_v1__raw_evidence.zip",
+      "bytes": 1729704,
+      "sha256": "5baf00e9c17cb23923f0256997e9cb50d63b9ca960abdb321d987c552306d852"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/vector_rasterization_candidate_v1/original_candidate.zip": {
+      "asset": "phase2__validation__vector_rasterization_candidate_v1__original_candidate.zip",
+      "bytes": 19582,
+      "sha256": "9995f86df82df2afc89adfa351f85e73c27d76e2caca4203adf99c1b48348bf7"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/vector_rasterization_qualification_v1/astra/raw_evidence.zip": {
+      "asset": "phase2__validation__vector_rasterization_qualification_v1__astra__raw_evidence.zip",
+      "bytes": 3739071,
+      "sha256": "10bb65cbaaa2c2e850adaaeffff1bc5b4daca0a8443354307bcb4516f7085d83"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/vector_rasterization_qualification_v1/issue/raw_evidence.zip": {
+      "asset": "phase2__validation__vector_rasterization_qualification_v1__issue__raw_evidence.zip",
+      "bytes": 4902,
+      "sha256": "86ab460a20b7f9fd756e9bffaf4545808e6bc8ac3da7fdbcaa343c6704d2e4a3"
+    },
+    "docs/research/shot_pattern_analysis/phase2/validation/vector_rasterization_qualification_v1/root/raw_evidence.zip": {
+      "asset": "phase2__validation__vector_rasterization_qualification_v1__root__raw_evidence.zip",
+      "bytes": 3967,
+      "sha256": "7183da22755acdf93b5ebdc3a0381eafd2c25c8498d11dcc182174457c36ba35"
+    },
+    "docs/research/shot_pattern_analysis/pre_tapin_fix_scoring_snapshot.zip": {
+      "asset": "root__pre_tapin_fix_scoring_snapshot.zip",
+      "bytes": 407758,
+      "sha256": "9c5130e845b91442fe427d9166a7c89c4b48655a50a849ff7abc5129df7da9ec"
+    }
+  }
+}

@@ -1,0 +1,294 @@
+{
+  "source_unchanged": true,
+  "gate_m": 0.05,
+  "comparisons": {
+    "contact_coarse": {
+      "counts": {
+        "evaluated": 225,
+        "same_unsupported_domain": 18
+      },
+      "failures": 0,
+      "maximum_change_m": 1.489169872337017e-05
+    },
+    "contact_fine": {
+      "counts": {
+        "evaluated": 225,
+        "same_unsupported_domain": 18
+      },
+      "failures": 0,
+      "maximum_change_m": 6.700624896524442e-06
+    },
+    "contact_primary_to_fine": {
+      "counts": {
+        "evaluated": 225,
+        "same_unsupported_domain": 18
+      },
+      "failures": 0,
+      "maximum_change_m": 2.0122741214080617e-05
+    },
+    "flight_coarse": {
+      "counts": {
+        "evaluated": 225,
+        "same_unsupported_domain": 18
+      },
+      "failures": 0,
+      "maximum_change_m": 0.03683666534028772
+    },
+    "flight_fine": {
+      "counts": {
+        "evaluated": 225,
+        "same_unsupported_domain": 18
+      },
+      "failures": 0,
+      "maximum_change_m": 0.010915388766403503
+    }
+  },
+  "flight_primary_to_fine_max_m": 0.04292262762337815,
+  "feasibility_counts": {
+    "matched": 72,
+    "bounded_unreachable": 8,
+    "unsupported": 10
+  },
+  "max_matched_fine_replay_residual_m": 0.002183218095524353,
+  "unmatched_cases": [
+    {
+      "club": "driver",
+      "lean_deg": 5.0,
+      "context": "across_lean",
+      "face_to_path_deg": -3.0,
+      "target_x_m": 178.94875782337786,
+      "bounds": {
+        "face_min_deg": 0.0,
+        "face_max_deg": 6.0,
+        "speed_min_mps": 33.75,
+        "speed_max_mps": 56.25
+      },
+      "status": "bounded_unreachable",
+      "reason": "nominal landing unreachable within bounds: residual=0.635088 m"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 5.0,
+      "context": "across_lean",
+      "face_to_path_deg": 3.0,
+      "target_x_m": 178.94875782337786,
+      "bounds": {
+        "face_min_deg": -6.0,
+        "face_max_deg": 0.0,
+        "speed_min_mps": 33.75,
+        "speed_max_mps": 56.25
+      },
+      "status": "bounded_unreachable",
+      "reason": "nominal landing unreachable within bounds: residual=0.635088 m"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "within_lean",
+      "face_to_path_deg": 0.0,
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "within_lean",
+      "face_to_path_deg": -1.5,
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "within_lean",
+      "face_to_path_deg": 1.5,
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "within_lean",
+      "face_to_path_deg": -3.0,
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "within_lean",
+      "face_to_path_deg": 3.0,
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "across_lean",
+      "face_to_path_deg": 0.0,
+      "target_x_m": 178.94875782337786,
+      "bounds": {
+        "face_min_deg": -3.0,
+        "face_max_deg": 3.0,
+        "speed_min_mps": 33.75,
+        "speed_max_mps": 56.25
+      },
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "across_lean",
+      "face_to_path_deg": -1.5,
+      "target_x_m": 178.94875782337786,
+      "bounds": {
+        "face_min_deg": -1.5,
+        "face_max_deg": 4.5,
+        "speed_min_mps": 33.75,
+        "speed_max_mps": 56.25
+      },
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "across_lean",
+      "face_to_path_deg": 1.5,
+      "target_x_m": 178.94875782337786,
+      "bounds": {
+        "face_min_deg": -4.5,
+        "face_max_deg": 1.5,
+        "speed_min_mps": 33.75,
+        "speed_max_mps": 56.25
+      },
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "across_lean",
+      "face_to_path_deg": -3.0,
+      "target_x_m": 178.94875782337786,
+      "bounds": {
+        "face_min_deg": 0.0,
+        "face_max_deg": 6.0,
+        "speed_min_mps": 33.75,
+        "speed_max_mps": 56.25
+      },
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "driver",
+      "lean_deg": 10.0,
+      "context": "across_lean",
+      "face_to_path_deg": 3.0,
+      "target_x_m": 178.94875782337786,
+      "bounds": {
+        "face_min_deg": -6.0,
+        "face_max_deg": 0.0,
+        "speed_min_mps": 33.75,
+        "speed_max_mps": 56.25
+      },
+      "status": "unsupported",
+      "reason": "nonairborne_launch"
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 0.0,
+      "context": "within_lean",
+      "face_to_path_deg": -3.0,
+      "target_x_m": 77.40247724866299,
+      "bounds": {
+        "face_min_deg": 0.0,
+        "face_max_deg": 6.0,
+        "speed_min_mps": 24.0,
+        "speed_max_mps": 40.0
+      },
+      "status": "bounded_unreachable",
+      "reason": "nominal landing unreachable within bounds: residual=0.351838 m"
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 0.0,
+      "context": "within_lean",
+      "face_to_path_deg": 3.0,
+      "target_x_m": 77.40247724866299,
+      "bounds": {
+        "face_min_deg": -6.0,
+        "face_max_deg": 0.0,
+        "speed_min_mps": 24.0,
+        "speed_max_mps": 40.0
+      },
+      "status": "bounded_unreachable",
+      "reason": "nominal landing unreachable within bounds: residual=0.351838 m"
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 0.0,
+      "context": "across_lean",
+      "face_to_path_deg": -3.0,
+      "target_x_m": 77.40247724866299,
+      "bounds": {
+        "face_min_deg": 0.0,
+        "face_max_deg": 6.0,
+        "speed_min_mps": 24.0,
+        "speed_max_mps": 40.0
+      },
+      "status": "bounded_unreachable",
+      "reason": "nominal landing unreachable within bounds: residual=0.351838 m"
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 0.0,
+      "context": "across_lean",
+      "face_to_path_deg": 3.0,
+      "target_x_m": 77.40247724866299,
+      "bounds": {
+        "face_min_deg": -6.0,
+        "face_max_deg": 0.0,
+        "speed_min_mps": 24.0,
+        "speed_max_mps": 40.0
+      },
+      "status": "bounded_unreachable",
+      "reason": "nominal landing unreachable within bounds: residual=0.351838 m"
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 5.0,
+      "context": "across_lean",
+      "face_to_path_deg": -3.0,
+      "target_x_m": 77.40247724866299,
+      "bounds": {
+        "face_min_deg": 0.0,
+        "face_max_deg": 6.0,
+        "speed_min_mps": 24.0,
+        "speed_max_mps": 40.0
+      },
+      "status": "bounded_unreachable",
+      "reason": "nominal landing unreachable within bounds: residual=0.103616 m"
+    },
+    {
+      "club": "pitching_wedge",
+      "lean_deg": 5.0,
+      "context": "across_lean",
+      "face_to_path_deg": 3.0,
+      "target_x_m": 77.40247724866299,
+      "bounds": {
+        "face_min_deg": -6.0,
+        "face_max_deg": 0.0,
+        "speed_min_mps": 24.0,
+        "speed_max_mps": 40.0
+      },
+      "status": "bounded_unreachable",
+      "reason": "nominal landing unreachable within bounds: residual=0.103616 m"
+    }
+  ],
+  "receipt_sha256": {
+    "independent_contact_audit.json": "ca4c5b91d3113d55677ab8923af8cf567077d9a0493963aa8280e3d7bf72ca0e",
+    "independent_preflight.json": "b472dd91bfea058737f6bc441f29d903bc2718d4354438ba65d3a2c9ff108ed9"
+  }
+}

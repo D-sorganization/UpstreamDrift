@@ -1,0 +1,9 @@
+{
+  "all_28_asset_hashes_verified": true,
+  "all_candidate_source_hashes_match_integrated_main": true,
+  "all_12_png_bytes_equal_prior_reviewed_versions": true,
+  "candidate_commit": "a8d7fe4612",
+  "main_commit": "29bfb31cfd",
+  "integration_tests": "running; /tmp/shot-pattern-presentation-main-integration.txt",
+  "publication_accepted": false
+}

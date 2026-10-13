@@ -1,0 +1,89 @@
+{
+  "schema": "primary-final-graphics-visual-review/3",
+  "status": "changes_required",
+  "manifest_sha256": "f4929abc3c34a7eb6005f92616d05bf08e2e4ec607a6bdaacce34b5111ecb41f",
+  "inventory_review_sha256": "1d07597072f96ed82d7fda45666a29a930711da05438a3e4934d19a62df8c866",
+  "coverage": {
+    "contact_sheets": 18,
+    "all_pngs_contact_sheet_reviewed": 288,
+    "full_size_reviewed": [
+      {
+        "index": 29,
+        "page": 2,
+        "path": "details/driver_lean5_curve2_rotation2_combined2/density.png",
+        "sha256": "1968a5a57e32114963696a51e30a90c1b2ddb96ce5df8c1f950a5385ba24056d"
+      },
+      {
+        "index": 91,
+        "page": 6,
+        "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.png",
+        "sha256": "2c1497a00fae07b32510aa75a20446cc19717c4847eaa36a3c00569c985af33c"
+      },
+      {
+        "index": 181,
+        "page": 12,
+        "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+        "sha256": "22ac6e370d7dade48f45ac83412a1cee19c04d54f4981f0f2aa33b911dc2b7f9"
+      },
+      {
+        "index": 211,
+        "page": 14,
+        "path": "social/comparisons/driver/combined2/Draw/curve_scale.png",
+        "sha256": "c088c3e4162794e3e7c46a5998bdd6bd7db7e8955215ad3217c68c6470b42a0e"
+      },
+      {
+        "index": 223,
+        "page": 14,
+        "path": "social/comparisons/pitching_wedge/combined2/Draw/shaft_rotation_sd.png",
+        "sha256": "155c0444cfc100097103293996a02bff600ff5d713b51bd1cb2e496241895386"
+      },
+      {
+        "index": 229,
+        "page": 15,
+        "path": "social/comparisons/seven_iron/combined2/Draw/curve_scale.png",
+        "sha256": "98b8df5e35405be4821fcfd72e4daf8b131757f8635f6ed0444d68c6f583649d"
+      },
+      {
+        "index": 242,
+        "page": 16,
+        "path": "social/details/driver_lean0_curve1_rotation1_combined2/overhead.png",
+        "sha256": "e7fd63f2d6b617c9cf1b41a624faae629b6a46462db50df5e74837c94ee34c34"
+      },
+      {
+        "index": 269,
+        "page": 17,
+        "path": "social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.png",
+        "sha256": "4618cfb1a033969e4b0807fbfc90855e49d8052ad2e8572315bed0e1bc27e91a"
+      },
+      {
+        "index": 288,
+        "page": 18,
+        "path": "social/details/seven_iron_lean0_curve2_rotation2_shaft_only/overhead.png",
+        "sha256": "06e112917db211d9999cf50f11a65a94b0b7b14c5b6f48e4ec02376bcd0645e9"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.png",
+      "sha256": "2c1497a00fae07b32510aa75a20446cc19717c4847eaa36a3c00569c985af33c",
+      "issue": "Adjacent main-axis decimal tick labels run together (144.8,145.6,...152.0); fixed main/marginal boundary is distinct.",
+      "affected_count": "One visually confirmed; screening all 60 detail-density PDFs found only this suspect. Screening is not universal geometric overlap proof."
+    }
+  ],
+  "qualified_components": [
+    "Comparison condition identities and units visible",
+    "Matrix course context and green radius visible",
+    "Matrix contrast and wrapped unavailable reasons readable",
+    "Main/marginal boundary in prior Driver failure now clear",
+    "Social overhead magnification and sample counts disclosed",
+    "Histogram/HDR and 600-dot versus full density population distinction disclosed"
+  ],
+  "limitations": [
+    "Control producer is still live and is not accepted",
+    "Whole-set visual acceptance withheld pending neighboring main tick repair",
+    "Contact-sheet review covers layout; fine text checked on representative full-size images, not every text glyph",
+    "No new simulation or statistical inference"
+  ],
+  "scope_screen": "pdf_tick_scope.json"
+}

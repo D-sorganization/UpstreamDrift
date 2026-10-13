@@ -92,3 +92,21 @@ def test_public_solver_to_native_flight_curves_toe_left_and_heel_right():
         lateral.append(float(landing[1]))
     assert lateral[0] < lateral[1] < lateral[2]
     assert abs(lateral[1]) < 1e-12
+
+
+@pytest.mark.integration
+def test_matched_contact_path_never_adds_legacy_gear_spin(monkeypatch):
+    pytest.importorskip("upstream_physics", reason="Native flight kernel unavailable")
+    from src.shared.python.physics.impact_model import solver
+    from src.tools.shot_pattern_analysis.matched_config import matched_preset
+    from src.tools.shot_pattern_analysis.matched_physics import MatchedShotPhysics
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Matched contact must not add legacy gear spin")
+
+    monkeypatch.setattr(solver, "compute_gear_effect_spin", forbidden)
+    shot = MatchedShotPhysics().simulate_delivery(
+        0.0, 0.0, matched_preset("driver"), contact_horizontal_m=0.00635
+    )
+    assert math.isfinite(shot.outcome.carry_x_m)
+    assert math.isfinite(shot.outcome.carry_y_m)

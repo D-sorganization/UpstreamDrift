@@ -1,0 +1,52 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+PyQt6 6.11.0 -- Qt runtime 6.11.1 -- Qt compiled 6.11.0
+rootdir: /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift
+configfile: pyproject.toml
+collected 4 items
+
+tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py FFFF  [100%]
+
+=================================== FAILURES ===================================
+________ test_colliding_fixtures_produce_distinct_identities_and_stems _________
+
+    def test_colliding_fixtures_produce_distinct_identities_and_stems(tmp_path: Path) -> None:
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            pair_comparison_identity,
+            pair_comparison_slug,
+        )
+E       ImportError: cannot import name 'pair_comparison_identity' from 'src.tools.shot_pattern_analysis.matched_supplement_figures'
+
+__ test_colliding_fixtures_render_without_file_overwrite_or_duplicate_ledger ___
+
+    def test_colliding_fixtures_render_without_file_overwrite_or_duplicate_ledger(...)
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            _render_pair_figures,
+            validate_unique_figure_ledger,
+        )
+E       ImportError: cannot import name 'validate_unique_figure_ledger' from 'src.tools.shot_pattern_analysis.matched_supplement_figures'
+
+______ test_enumerate_all_384_saved_comparisons_yields_384_distinct_stems ______
+
+    def test_enumerate_all_384_saved_comparisons_yields_384_distinct_stems() -> None:
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            pair_comparison_identity,
+            pair_comparison_slug,
+        )
+E       ImportError: cannot import name 'pair_comparison_identity' from 'src.tools.shot_pattern_analysis.matched_supplement_figures'
+
+____________ test_preflight_identity_validation_and_duplicate_guard ____________
+
+    def test_preflight_identity_validation_and_duplicate_guard() -> None:
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            pair_comparison_identity,
+            validate_unique_figure_ledger,
+        )
+E       ImportError: cannot import name 'pair_comparison_identity' from 'src.tools.shot_pattern_analysis.matched_supplement_figures'
+
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_colliding_fixtures_produce_distinct_identities_and_stems
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_colliding_fixtures_render_without_file_overwrite_or_duplicate_ledger
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_enumerate_all_384_saved_comparisons_yields_384_distinct_stems
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_preflight_identity_validation_and_duplicate_guard
+======================== 4 failed, 6 warnings in 2.53s =========================

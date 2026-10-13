@@ -1,0 +1,285 @@
+{
+  "status": "rejected_candidate",
+  "reason": "Passing fixtures did not prevent unsupported hard-coded scientific claims. This receipt checks qualified selected evidence; it does not qualify a publication.",
+  "evidence_sha256": "f4cc8ab15c65167617ecda4be1ae408c47b1039171cb44ffd4a63d5f3cd515cd",
+  "candidate_patch_sha256": "d8a047f9c9f6bd0659bcaec17692b05995e196107f49e509fc2203d6d51f5bc5",
+  "counterexamples": [
+    {
+      "club": "driver",
+      "pattern": "Draw",
+      "selected_cell_count": 8,
+      "actual_sg_estimate_range": [
+        2.6911773453713884e-05,
+        0.0077976550468906
+      ],
+      "rows": [
+        {
+          "cell": "driver_lean0_curve1_rotation1_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 7.461555935228152e-05,
+            "lower_95": -7.104046933162085e-05,
+            "upper_95": 0.00021896077539046698
+          }
+        },
+        {
+          "cell": "driver_lean0_curve1_rotation1_combined2",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 2.6911773453713884e-05,
+            "lower_95": -0.00016417507301096237,
+            "upper_95": 0.00022037368523597208
+          }
+        },
+        {
+          "cell": "driver_lean0_curve1_rotation2_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.002892622455209583,
+            "lower_95": 0.002462300702968206,
+            "upper_95": 0.0033783187780881603
+          }
+        },
+        {
+          "cell": "driver_lean0_curve1_rotation2_combined2",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.002195160317973801,
+            "lower_95": 0.001694900809112219,
+            "upper_95": 0.00263646030502905
+          }
+        },
+        {
+          "cell": "driver_lean0_curve2_rotation1_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.0003250170574719388,
+            "lower_95": 0.00010419990359491727,
+            "upper_95": 0.0005512859618879582
+          }
+        },
+        {
+          "cell": "driver_lean0_curve2_rotation1_combined2",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.0005625981068929291,
+            "lower_95": 0.00023922180285302648,
+            "upper_95": 0.000897767091841708
+          }
+        },
+        {
+          "cell": "driver_lean0_curve2_rotation2_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.0077976550468906,
+            "lower_95": 0.007132512276517505,
+            "upper_95": 0.00851800983301036
+          }
+        },
+        {
+          "cell": "driver_lean0_curve2_rotation2_combined2",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.006682310193510924,
+            "lower_95": 0.00593805307697459,
+            "upper_95": 0.007437961717395396
+          }
+        }
+      ]
+    },
+    {
+      "club": "seven_iron",
+      "pattern": "Fade",
+      "selected_cell_count": 8,
+      "actual_sg_estimate_range": [
+        0.0008933617862555983,
+        0.0025816340316445357
+      ],
+      "rows": [
+        {
+          "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.0010469558147421583,
+            "lower_95": 0.0010332127670539123,
+            "upper_95": 0.001059062684997039
+          }
+        },
+        {
+          "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+          "protocol": "original_primary/1",
+          "n": 9996,
+          "interval": {
+            "estimate": 0.0008933617862555983,
+            "lower_95": 0.0007089665616960485,
+            "upper_95": 0.001077775678132865
+          }
+        },
+        {
+          "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.0010669555028524154,
+            "lower_95": 0.0009860655573140106,
+            "upper_95": 0.0011823456196609781
+          }
+        },
+        {
+          "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+          "protocol": "original_primary/1",
+          "n": 9996,
+          "interval": {
+            "estimate": 0.0011109014711365183,
+            "lower_95": 0.0008441733823956837,
+            "upper_95": 0.0013554839330177611
+          }
+        },
+        {
+          "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.00255256876498472,
+            "lower_95": 0.0025200337078003718,
+            "upper_95": 0.0025800222645107466
+          }
+        },
+        {
+          "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+          "protocol": "original_primary/1",
+          "n": 9996,
+          "interval": {
+            "estimate": 0.001974931464121476,
+            "lower_95": 0.001622698230536737,
+            "upper_95": 0.002286495553933502
+          }
+        },
+        {
+          "cell": "seven_iron_lean0_curve2_rotation2_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.0025816340316445357,
+            "lower_95": 0.002452822708401985,
+            "upper_95": 0.0027363617926215254
+          }
+        },
+        {
+          "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+          "protocol": "original_primary/1",
+          "n": 9996,
+          "interval": {
+            "estimate": 0.0022938022643235758,
+            "lower_95": 0.0019305516115089587,
+            "upper_95": 0.0026454744396299298
+          }
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "pattern": "Draw",
+      "selected_cell_count": 8,
+      "actual_sg_estimate_range": [
+        9.508286074337285e-05,
+        0.011117100245477964
+      ],
+      "rows": [
+        {
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.004433925527972051,
+            "lower_95": 0.004363272128619715,
+            "upper_95": 0.004501976200912722
+          }
+        },
+        {
+          "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+          "protocol": "original_primary/1",
+          "n": 9999,
+          "interval": {
+            "estimate": 9.508286074337285e-05,
+            "lower_95": -6.220824133306044e-05,
+            "upper_95": 0.0002799945735120517
+          }
+        },
+        {
+          "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+          "protocol": "original_primary/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.005526608720468065,
+            "lower_95": 0.0054655311492273605,
+            "upper_95": 0.005576311501475418
+          }
+        },
+        {
+          "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+          "protocol": "original_primary/1",
+          "n": 9999,
+          "interval": {
+            "estimate": 0.0004843981643710978,
+            "lower_95": 0.0003075226887943026,
+            "upper_95": 0.0006522765451755754
+          }
+        },
+        {
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "protocol": "pw-primary-face-bounds/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.008878062355143674,
+            "lower_95": 0.008737846175303628,
+            "upper_95": 0.009015448386456537
+          }
+        },
+        {
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "protocol": "pw-primary-face-bounds/1",
+          "n": 9999,
+          "interval": {
+            "estimate": 0.0002513049548654383,
+            "lower_95": -3.604852436822569e-05,
+            "upper_95": 0.0005325912067969175
+          }
+        },
+        {
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "protocol": "pw-primary-face-bounds/1",
+          "n": 10000,
+          "interval": {
+            "estimate": 0.011117100245477964,
+            "lower_95": 0.010993544758325062,
+            "upper_95": 0.011219336437250878
+          }
+        },
+        {
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "protocol": "pw-primary-face-bounds/1",
+          "n": 9999,
+          "interval": {
+            "estimate": 0.0010464838162187527,
+            "lower_95": 0.0007406395903417094,
+            "upper_95": 0.0013323229558774572
+          }
+        }
+      ]
+    }
+  ],
+  "actual_shaft_sd_degrees": [
+    1,
+    2
+  ]
+}

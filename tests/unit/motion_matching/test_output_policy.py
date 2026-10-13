@@ -187,3 +187,69 @@ class TestExportReportCLIGuard:
         assert ret == 1
         assert "joint_loads" in capsys.readouterr().err
         assert not out_md.exists()
+
+
+class TestOutputPolicyPayload:
+    """Structured policy payload shared by the report, API and viewers."""
+
+    @staticmethod
+    def _by_name(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+        return {row["name"]: row for row in payload["outputs"]}
+
+    def test_every_output_has_status_label_and_reason(self) -> None:
+        from src.shared.python.motion_matching.output_policy import (
+            output_policy_payload,
+        )
+
+        payload = output_policy_payload(_receipt())
+        rows = self._by_name(payload)
+        assert set(rows) == set(ADVERTISED_OUTPUTS) | set(WITHHELD_OUTPUTS)
+        assert rows["clubhead_speed"]["status"] == "advertised"
+        assert rows["face_angle"]["status"] == "withheld"
+        assert rows["face_angle"]["label"] == "NOT VALIDATED"
+        assert rows["face_angle"]["reason"] == "not validated"
+        assert payload["face_observability"] is None
+        assert "value" not in rows["face_angle"]
+
+    def test_face_audit_coverage_and_gaps_are_structured(self) -> None:
+        from src.shared.python.motion_matching.output_policy import (
+            output_policy_payload,
+        )
+
+        receipt = _receipt()
+        receipt["ik"] = {
+            "face_observability": {
+                "observable": False,
+                "reason": "club head markers are collinear or coincident",
+                "observed_frames": 1,
+                "total_frames": 4,
+                "gaps": [[1, 4]],
+            }
+        }
+        payload = output_policy_payload(receipt)
+        assert self._by_name(payload)["face_angle"]["status"] == "unavailable"
+        face = payload["face_observability"]
+        assert face["observable"] is False
+        assert face["coverage"] == pytest.approx(0.25)
+        assert face["gaps"] == [[1, 4]]
+
+    def test_invalid_receipt_fails_closed_to_unavailable(self) -> None:
+        from src.shared.python.motion_matching.output_policy import (
+            output_policy_payload,
+        )
+
+        payload = output_policy_payload(_receipt({"face_angle": {"validated": True}}))
+        for row in payload["outputs"]:
+            assert row["status"] == "unavailable"
+            assert row["reason"].startswith("policy error:")
+        assert payload["face_observability"] is None
+
+    def test_markdown_and_payload_agree_on_status_labels(self) -> None:
+        from src.shared.python.motion_matching.output_policy import (
+            output_policy_payload,
+        )
+
+        payload = output_policy_payload(_receipt())
+        markdown = render_output_policy_markdown(evaluate_output_policy(_receipt()))
+        for row in payload["outputs"]:
+            assert f"| `{row['name']}` | **{row['label']}** |" in markdown

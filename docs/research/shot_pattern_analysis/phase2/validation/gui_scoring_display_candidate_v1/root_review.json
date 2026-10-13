@@ -1,0 +1,16 @@
+{
+  "status": "candidate_requires_precision_repair_and_independent_review",
+  "issue": 12067,
+  "initial_agent_session": 39626,
+  "initial_agent_exit": 0,
+  "root_precision_test_exit": 1,
+  "root_precision_test_failures": 2,
+  "finding": "Fixed .3f rendering rounds small nonzero SG estimates and their interval bounds to zero.",
+  "followup_session": 73095,
+  "followup_log": "/tmp/p2-gui-sg-precision-agent.log",
+  "evidence_sha256": {
+    "AGENT_CANDIDATE_REVIEW.md": "63b30beb2cd21cae89d734f8aae80532e64799c389738feb9f294300b84ab488",
+    "root_precision_red.txt": "d7dd6929681244fed30d5527179b8cd66cd132c685dd2489a2d8a760c3cbb159",
+    "agent_candidate_log.txt": "e9509f97414ece8f9a7f5f1f8f96a8f177706452db2ba5456dbd5c1a46fff01b"
+  }
+}

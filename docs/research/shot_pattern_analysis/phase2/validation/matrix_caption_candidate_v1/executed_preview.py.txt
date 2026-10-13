@@ -1,0 +1,22 @@
+from pathlib import Path
+from collections import defaultdict
+import json, hashlib
+from src.tools.shot_pattern_analysis.matched_report import load_matrix_report
+from src.tools.shot_pattern_analysis.matched_report_plots import export_matched_matrix_heatmaps
+from scripts.research.shot_pattern_analysis.build_final_figures import _stratum_key, _stratum_name, _heatmap_cells
+root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+out=Path('/tmp/p2-matrix-root-preview-v2');out.mkdir(exist_ok=True)
+assets=[]
+for source in ('final_v1','control_final_v1'):
+    report=load_matrix_report(root/source,require_complete=True)
+    groups=defaultdict(list)
+    for cell in report['cells']:
+        groups[_stratum_key(cell)].append(cell)
+    chosen=[group for group in groups.values() if 'combined2' in group[0]['cell'] or 'correlated' in group[0]['cell']]
+    if not chosen: chosen=list(groups.values())[:2]
+    for group in chosen:
+        name=_stratum_name(group)
+        paths=export_matched_matrix_heatmaps(_heatmap_cells(group),out/source/name,selection_label=f'Final Saved Data: {source}',metrics=('conditional_sg','target_hit_fraction'),formats=('png',))
+        assets.extend({'path':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in paths.values())
+(out/'receipt.json').write_text(json.dumps(assets,indent=2)+'\n')
+print(f'Finished {len(assets)} previews',flush=True)

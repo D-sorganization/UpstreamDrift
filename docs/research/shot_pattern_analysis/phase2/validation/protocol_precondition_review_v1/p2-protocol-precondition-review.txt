@@ -1,0 +1,54 @@
+# Protocol Precondition and Provenance Review
+
+## Confirmed Owned Failure
+
+The broad selected-test log reports24 failures and7 errors. One is in the study scope: `test_matched_social_integration::test_render_pair_figures_cross_protocol_passes_ordered_protocols`.
+
+`matched_supplement_figures._render_pair_figures_core` reads the two completed refs, then calls `pair_comparison_identity`. The generic identity helper deliberately supports serialized records whose protocol key is `protocol_id`; `_source_parts` falls back when `source_protocol` is absent/None. That fallback is appropriate for ledger records but insufficient for the renderer's resolved-ref contract. The invalid test ref therefore passes identity validation and endpoint loading, then `_write_pair_density_figure` creates a Figure and raises KeyError while indexing `first['source_protocol']`. The intended clear ValueError never occurs. This is not a statistical or valid-input rendering discrepancy.
+
+## Minimal Isolated Fix
+
+In the existing core, retain the early incomplete-status return. Immediately afterward and before identity extraction, reject either completed ref whose actual `source_protocol` key is missing or None, with the existing test's clear `pair references lack source protocol` ValueError. Let `pair_comparison_identity` keep validating nonempty string type/whitespace and exact identity; do not duplicate or weaken it. Do not remove its generic `protocol_id` support, since real comparison JSON legitimately uses that schema.
+
+Both `_render_pair_figures` and `render_selected_pair_figures` delegate to the core, so one precondition fixes both. No synthetic protocol default, mutation of caller refs or adapter normalization should hide a missing actual source field.
+
+Parent has prepared isolated BOUNDS branch `codex/shot-pattern-protocol-preconditions` atb231eed2f8. MAIN and live frozen PRESENTATION4023111 remain untouched. TDD acceptance should cover first/second refs, missing/None source_protocol with plausible fallback, invalid empty/type/whitespace values, and both full/selective entry points. Monkeypatch endpoint loading, trajectory reading and Figure/output creation to raise a sentinel if touched; expect the protocol failure first and no new output path. Retain ordinary valid cross-protocol ordering/target-mode tests. The current broad failing test is already direct red evidence; new fast no-side-effect cases prevent a late-failure regression.
+
+Valid-input proof: freeze old/new source hashes, show only the precondition branch differs, run focused tests, and reconstruct all384 saved resolved pairs (no statistics) to confirm every completed ref passes. For a small representative actual valid pair, reuse existing renderer instrumentation to compare artist arrays/limits/metadata and PNG bytes against the qualified prior output. Do not require PDF byte equality because export metadata may vary. No Monte Carlo or full graphics rerun is warranted for this invalid-input-only guard if those proofs pass.
+
+## Preserve Immutable V6 Provenance
+
+`load_verified_supplement_artifacts` compares `postprocessing_source_sha256` with the executing source map. Changing this renderer in a new checkout correctly causes that checkout to reject the older4023111 report. A source-transition note is not permission to replace old hashes or bypass the loader.
+
+Use the existing frozen-source reproduction contract:
+
+1. Keep PRESENTATION at exact4023111 until v6 completes, all-output review passes and the final report is built/verified under that source. Preserve the source commit, full source/runtime/native pin and final output/receipt hashes.
+2. Qualify and commit the guard independently. Record explicit old/new renderer hashes, strict invalid-input changes and valid-input parity in a NEW review receipt. Do not alter the v6 start, final receipt, artifact ledger or historical acceptance.
+3. Reproduce or inspect the4023111 publication from an exact preserved/restored4023111 checkout and pinned interpreter using its unchanged strict loader. The existing `supplement_parent_verifier.verify_parent_in_frozen_source` can verify such an old publication through a hash-bound checkout/executable pin without changing the publication; preserve/import origin, commit, source-map, runtime/native and post-read checks.
+4. The simplest final report route is invoking the already-qualified report builder from that same frozen checkout against the verified datasets/publication. Confirm its report-composition source hashes cover the accepted narrative fixes; do not assume a newer MAIN consumer is equivalent. The article is a separate existing editable source, not a reason to mutate producer provenance.
+5. Afterward integrate the new invalid-input guard into MAIN. New executions record the new source. Document that historical4023111 publication replay uses its exact source pin. The current strict loader should continue rejecting an unqualified cross-version read.
+
+The existing public publication dispatcher uses frozen verification only for an explicit child revision; plain parent publications call the local strict loader. Therefore merely integrating the guard and calling the new MAIN builder on the old parent report will fail. Do NOT fabricate a child receipt, create a no-op revision, silently refresh hashes, or loosen the source equality check to make it pass. If a future requirement truly needs a newer report consumer to use an older parent, a separately reviewed explicit pinned-parent loading option could reuse the current verifier; it is unnecessary for this repair and should not be introduced by default.
+
+The earlier scientific `source_transition_supplement.json` concerns simulation execution/source qualification; it does not authorize postprocessing source drift. Keep these contracts distinct. This route preserves exact old reproduction and allows the bug fix without restarting the live producer or rerendering thousands of valid figures.
+
+## Other Failures: Cheap Source-Based Classification
+
+Compared actual HEAD against baseline10c7d61aa686e456b7962f1d9aa9ecfda4e8405f. Exact blob evidence is `/tmp/p2-prepr-failure-source-comparison.json`. All nine non-study failing/error test modules are byte-identical, as are the relevant directly inspected providers and tests/conftest.py. Vendor Tools gitlink is unchanged. This establishes unchanged branch surfaces, not a fresh baseline execution of every case.
+
+| Group | Count | Observed Failure | Source-Based Disposition |
+|---|---:|---|---|
+| Physics API |15 failures|401 instead of expected200/400/422|Test, physics routes and auth dependencies identical to baseline; existing auth/fixture issue, not a study edit. Prior baseline evidence should be cited if available. No auth-setting change.|
+| Test Layout |1 failure|Legacy root-test allowlist is nonempty|Test and scripts/check_test_layout.py identical. Existing contract mismatch.|
+| MJCF Validation |1 failure|MuJoCo malformed-XML ValueError escapes expected error-list pathway|Test and format_utils provider identical; environment/API behavior may matter.|
+| Logger Utility |1 failure|`_USING_FULL_IMPLEMENTATION` attribute missing|Test identical; provider is in vendor Tools, whose gitlink is unchanged. The guessed local git path is absent, not a changed local provider.|
+| Magic Numbers |3 failures|Gravity literal not reported by current rule|Both test modules and src/tools/code_quality_check.py identical. Existing expectation/rule mismatch.|
+| Drake GUI |1 failure|Mocked superclass initialization leaves window.menuBar invalid|Test, Drake GUI source and force_color_controls identical. Existing mocking/constructor mismatch.|
+| OpenSim |1 failure|load_from_string does not call mocked load_from_path|Test and provider identical; existing fixture/implementation mismatch.|
+| Drake Engine Fixture |7 errors|Module-scoped fixture requests function-scoped mock_drake_dependencies|Engine test and tests/conftest.py identical. Explicit fixture ScopeMismatch, before engine behavior.|
+
+These sum to23 non-study failures and7 errors. No unrelated fix or broad rerun was performed. Full baseline runtime reproduction is not claimed. The log also contains MediaPipe-unavailable messages and Matplotlib Qt/list-shape cleanup traces; these are not additional counted test failures and should not be conflated with the owned renderer precondition.
+
+## Status
+
+Read-only review complete. No code, source pin, live asset or receipt was modified; no producer restart. The isolated precondition candidate still requires actual red/green and valid-input qualification before acceptance.

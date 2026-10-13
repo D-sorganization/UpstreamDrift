@@ -1,0 +1,136 @@
+{
+  "scenario": "Historical PGA Tour approach from fairway to a circular green; carry-only stop",
+  "source_backed_status": "available",
+  "evaluation": "Every endpoint scored by the source-backed public Tools API",
+  "api_scored_shots": 30000,
+  "baseline": {
+    "id": "broadie-2011-historical-tour-approx",
+    "version": "table9-plus-anchor-reconciled-putting/1",
+    "table_sha256": "8ab114fe77ed2b81831fd49da9e426bff887b8a6984c0eb919caa199969cde6a",
+    "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+  },
+  "target_distance_m": 195.33398305868675,
+  "green_radius_m": 15.0,
+  "patterns": {
+    "Straight": {
+      "n": 10000,
+      "mean_strokes_gained": 0.4459990443430466
+    },
+    "Draw": {
+      "n": 10000,
+      "mean_strokes_gained": 0.4436084942036494
+    },
+    "Fade": {
+      "n": 10000,
+      "mean_strokes_gained": 0.44309081412251106
+    }
+  },
+  "paired_benefit_vs_straight": {
+    "Draw": {
+      "estimate": -0.002390550139397238,
+      "lower_95": -0.003389822906867372,
+      "upper_95": -0.0014985389994426137
+    },
+    "Fade": {
+      "estimate": -0.0029082302205357003,
+      "lower_95": -0.0039022288729133165,
+      "upper_95": -0.0020837987516814007
+    }
+  },
+  "limitations": [
+    "Historical 2003-2010 PGA Tour benchmark is not player-specific.",
+    "Putting fit reconciles a printed coefficient/unit inconsistency using published anchors; it is approximate.",
+    "Circular green and surrounding rough are hypothetical; carry endpoints have no roll or hazards.",
+    "Confidence intervals describe Monte Carlo sampling only, not physics, course, or benchmark uncertainty."
+  ],
+  "green_radius_sensitivity_m": {
+    "10": {
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": 0.3802615437749012
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": 0.37739435225437684
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": 0.37765189016333217
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.0028671915205244237,
+          "lower_95": -0.0037983261935674974,
+          "upper_95": -0.0020309554328992526
+        },
+        "Fade": {
+          "estimate": -0.002609653611569078,
+          "lower_95": -0.0035169377704965857,
+          "upper_95": -0.0018218706112020093
+        }
+      }
+    },
+    "15": {
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": 0.4459990443430466
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": 0.4436084942036494
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": 0.44309081412251106
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.002390550139397238,
+          "lower_95": -0.003389822906867372,
+          "upper_95": -0.0014985389994426137
+        },
+        "Fade": {
+          "estimate": -0.0029082302205357003,
+          "lower_95": -0.0039022288729133165,
+          "upper_95": -0.0020837987516814007
+        }
+      }
+    },
+    "20": {
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": 0.4772349504164096
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": 0.47410259374595426
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": 0.47453282682400305
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.0031323566704554297,
+          "lower_95": -0.004011166298026603,
+          "upper_95": -0.0023507953537913757
+        },
+        "Fade": {
+          "estimate": -0.002702123592406552,
+          "lower_95": -0.0036153684662329766,
+          "upper_95": -0.0018609176295848854
+        }
+      }
+    }
+  },
+  "baseline_artifact": "strokes_gained_baseline.json",
+  "status": "available",
+  "analysis_status": "superseded_impact_approximation",
+  "supersession_reason": "Superseded impact approximation: friction spin was applied without its matching tangential translational impulse. These results are historical controls, not the corrected-model conclusions."
+}

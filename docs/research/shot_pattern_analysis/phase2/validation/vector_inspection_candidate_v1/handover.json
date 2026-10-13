@@ -1,0 +1,51 @@
+{
+  "worker_session": 34618,
+  "worker_exit_code": 0,
+  "new_owner": "Astra independent repair; only /tmp/p2-vector-review-agy source/test files",
+  "candidate_accepted": false,
+  "initial_TDD_claim": "unverified; worker omitted separate raw test logs",
+  "provisional_archive_sha256": "53141c03f1a0d9816be8053c2f76fcfab8f7db09e1ff55d81fffdb12be4c6922",
+  "provisional_files": [
+    {
+      "path": "PROVISIONAL_REVIEW.md",
+      "sha256": "181c9eb5c57adf1aa5adb2e67171c54fcbb319562f18bb166ed8984dd77ce773"
+    },
+    {
+      "path": "duplicate_ids.svg",
+      "sha256": "7386b5cc06091eb8c012d90fbddc4c9485c8d6cb05ad1f8936e5bc7fdf75290d"
+    },
+    {
+      "path": "external_stylesheet_pi.svg",
+      "sha256": "dbe3b403ee2119026fac0b41a59d502cda5cca9d61709f5d9bb7eac9eecfae8b"
+    },
+    {
+      "path": "metadata_text.svg",
+      "sha256": "720936531d20140b20da2b21ca00b53da2982c9197cea74b4e5072c62b76abb6"
+    },
+    {
+      "path": "nonimage_data.svg",
+      "sha256": "34834d0cf4d397f514115951f796d7c067054f9e278c3fe35100a3ed32d57832"
+    },
+    {
+      "path": "partial_viewport.svg",
+      "sha256": "4dca372bfaf68d027b1495fa2d191ca5b213cc9fc478ba4ea6ad77bcd322f306"
+    },
+    {
+      "path": "probe.py",
+      "sha256": "ef6fd009ec2b2e4cc6748386cb79e827a127346770037e700d083f7290c4ef1c"
+    },
+    {
+      "path": "provisional_probes.json",
+      "sha256": "3fe2d84e8321e668ebd89c3fc701e13551c531b00f3ad7c375141abb7d145547"
+    },
+    {
+      "path": "valid_local_style.svg",
+      "sha256": "b230c243568fdc534c4abde083711972a73352d42510e5695a6b5de70ac841c0"
+    },
+    {
+      "path": "wrong_namespace.svg",
+      "sha256": "057c02693706ead78c8e46351343470b618cb5d8be51907f48413f3d12393755"
+    }
+  ],
+  "next_step": "Independently demonstrate failures, correct helper, qualify actual completed original PDF/SVG samples, retain no visual-acceptance claim"
+}

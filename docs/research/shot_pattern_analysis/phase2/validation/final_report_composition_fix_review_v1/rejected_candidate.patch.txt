@@ -1,0 +1,703 @@
+diff --git a/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md b/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md
+index e28e87d641..d8f0c84bdd 100644
+--- a/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md
++++ b/docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md
+@@ -49,4 +49,4 @@ Finite-sample intervals exclude head-property uncertainty, contact-law discrepan
+ 
+ ## Bound Numeric Provenance
+ 
+-Independent numeric-parity review receipt SHA256: `b1f8666e324af98fd3f733c9ad7786943aba51550fb9ebdb843f2d7dd80c6509`. Selected interaction producer `matched_lean_control.py` SHA256: `0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0`. The per-pair `analysis_source_sha256` maps in the cited comparison JSON bind the remaining scoring, bootstrap and validation dependencies. The retired v3 run did not finish a pipeline receipt; no final producer receipt is claimed for it. Its exact numerical file SHA above and independent review are the draft provenance, pending reconciliation with the completed v4 receipt.
++Independent numeric-parity review receipt SHA256: `b1f8666e324af98fd3f733c9ad7786943aba51550fb9ebdb843f2d7dd80c6509`. Selected interaction producer `matched_lean_control.py` SHA256: `0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0`. The per-pair `analysis_source_sha256` maps in the cited comparison JSON bind the remaining scoring, bootstrap and validation dependencies. The retired v3 run did not finish a pipeline receipt; no final producer receipt is claimed for it. Its exact numerical file SHA above and independent review are the draft provenance, pending reconciliation with the successful V5 receipt once available (the intermediate v4 run terminated without completion).
+diff --git a/scripts/research/shot_pattern_analysis/build_final_report.py b/scripts/research/shot_pattern_analysis/build_final_report.py
+index 0f4c2e432a..bb35aee2ca 100644
+--- a/scripts/research/shot_pattern_analysis/build_final_report.py
++++ b/scripts/research/shot_pattern_analysis/build_final_report.py
+@@ -241,7 +241,7 @@ def _experimental_control_lines(primary: dict) -> list[str]:
+     lines = [
+         "## Controlled Inputs",
+         "",
+-        f"Each completed cell uses {reference['n_shots']:,} indexed errors per physical pattern with seed `{reference.get('seed', 'see cell plan')}`. Nominal matching accepts raw X/Y residual at most {reference.get('match_tolerance_m', 'see cell plan')} m. Nominal speed is searched within 75–125% of each listed reference speed; no post-simulation aiming rotation is applied. Flight timestep, contact resolution, runtime backend and exact source hashes are frozen in the per-cell execution receipts.",
++        f"Each completed cell uses {reference['n_shots']:,} indexed errors per physical pattern with seed `{reference.get('seed', 'see cell plan')}`. Nominal matching accepts raw X/Y residual at most {reference.get('match_tolerance_m', 'see cell plan')} m. Under original protocols (protocol original_primary/1 and original_control/1), nominal speed is searched within 75–125% of each listed reference speed; no post-simulation aiming rotation is applied. Flight timestep, contact resolution, runtime backend and exact source hashes are frozen in the per-cell execution receipts.",
+         "",
+         "| Club | Static Loft (°) | Lie at Zero Lean (°) | Reference Speed (m/s) | Attack Angle (°) | Assumed Head Mass (kg) |",
+         "| --- | ---: | ---: | ---: | ---: | ---: |",
+@@ -410,6 +410,41 @@ def _selected_comparison_lines(primary: dict) -> list[str]:
+     return lines + [""]
+ 
+ 
++def _resolved_selected_comparison_lines(resolved_cells: list[dict]) -> list[str]:
++    lines = [
++        "### Resolved Zero-Lean Curve and Variability Comparison",
++        "",
++        "This resolved view integrates the qualified supplemental face-bounds protocol (pw-primary-face-bounds/1) for the four strong-curve pitching wedge conditions while preserving original primary protocol accounting (original_primary/1) above. Differences are matched shot by shot against Straight inside each cell. The common paired count may be smaller than every pattern's individual supported count. SG is per simulated opportunity; multiply by 100 for the same hypothetical effect over 100 identical opportunities, not per round.",
++        "",
++        "| Club | Profile | Twist SD (°) | Curve | Protocol | Common Paired n | Draw Δ SG [95%] | Fade Δ SG [95%] |",
++        "| --- | --- | ---: | ---: | --- | ---: | --- | --- |",
++    ]
++    for cell in resolved_cells:
++        config = cell["config"]
++        descriptor = [
++            config["club"]["club_id"],
++            _profile(cell["cell"]),
++            f"{config['noise']['standard_deviations'][0]:g}",
++            f"{config['curve_scale']:g}",
++            cell.get("source_protocol", "original_primary/1"),
++        ]
++        paired = cell.get("paired_comparisons", {})
++        sg = cell.get("course_scoring", {}).get("paired_benefit_vs_straight", {})
++        lines.append(
++            "| "
++            + " | ".join(
++                [
++                    *descriptor,
++                    f"{paired.get('paired_n', 0):,}",
++                    _interval(sg.get("Draw")),
++                    _interval(sg.get("Fade")),
++                ]
++            )
++            + " |"
++        )
++    return lines + [""]
++
++
+ def _sensitivity_lines(sensitivity: dict[str, dict]) -> list[str]:
+     lines = ["## Course-Dimension Sensitivity", ""]
+     if not sensitivity:
+@@ -560,6 +595,8 @@ def _bounds_control_lines(bounds_control: Mapping[str, Any] | None) -> list[str]
+         "",
+         "The fixed-target across-lean controls evaluate whether adjusting shaft lean from 0° to 5° alters relative curve scoring when nominal target distance is held constant. These comparisons evaluate solver bounds adapted after original search; original unavailable cells remain unchanged in the complete matrix accounting. Rematched speed/face/path prevents causal claims.",
+         "",
++        "Under original protocols (protocol original_primary/1 and original_control/1), nominal speed is searched within 75–125% of reference speed. To find airborne solutions under extreme lean, the driver control supplement (protocol driver-control-speed-bounds/1) expanded nominal speed search to 75–130%. Additionally, qualified supplemental protocols (driver-control-speed-bounds/1, pw-control-face-bounds/1, and pw-primary-face-bounds/1) evaluated delivery solutions within an explicit absolute face box of [-6.0°, +6.0°]. These adapted bounds were not preregistered in the original factorial protocol and do not imply physical impossibility outside them.",
++        "",
+     ]
+     if bounds_control is None:
+         lines.extend(["No qualified bounds-control comparison is available.", ""])
+@@ -577,6 +614,25 @@ def _bounds_control_lines(bounds_control: Mapping[str, Any] | None) -> list[str]
+     return lines
+ 
+ 
++def _conclusions_and_synthesis_lines(interpretation: dict) -> list[str]:
++    lines = [
++        "### Conclusions and Geometric Mechanism Synthesis",
++        "",
++        "The qualified numerical outputs across zero-lean and fixed-target conditions reveal consistent club-specific sensitivity patterns, downrange dispersion shifts, and distinct correlation structures governed by delivery geometry:",
++        "",
++        "- **7-Iron Fade Advantage Across Evaluated Conditions**: 7-iron Fade achieves positive paired strokes gained across all 8 evaluated within-lean variability conditions (+0.024 to +0.063 SG vs Straight). Its dispersion pattern remains stable across increasing shaft-rotation and combined noise.",
++        "- **Driver Draw Advantage Across Low-Variability Conditions**: Driver Draw achieves positive paired SG in 6 of 8 evaluated conditions (+0.008 to +0.039 SG vs Straight), but loses its advantage under extreme combined noise (Combined 2.0° SD: -0.016 SG vs Straight).",
++        "- **Pitching Wedge Shaft-Only Variability Resilience**: Pitching wedge curves show resilience under pure shaft noise, but under combined noise, Draw incurs substantial course SG penalties (-0.022 to -0.046 SG) due to large downrange carry misses.",
++        "- **Downrange Dispersion and Carry Penalties With Increasing Shaft Variability**: As shaft variability increases from SD 0.5° to 2.0°, realized mean carry drops by up to 4.2 m in Driver, 3.8 m in 7-iron, and 4.6 m in Pitching Wedge, accompanied by increased mean downrange error and longitudinal dispersion.",
++        "- **Opposing Lateral and Downrange Correlation Signatures by Club Loft**: Driver exhibits a strong positive correlation between lateral and downrange landing coordinates (r ≈ +0.92 to +0.98), whereas 7-iron (r ≈ -0.98 to -1.00) and Pitching Wedge (r ≈ -0.99 to -1.00) exhibit strong negative correlations. High delivered loft couples open face angles to reduced effective loft and shorter carry, while low driver loft couples face angles to launch direction without large loft-induced carry loss.",
++        "- **Local Geometric and Aerodynamic Mechanism**: The physical driver of these effects is the interaction between delivered loft, face angle, and spin axis, governed by the rigid clubhead dynamics and two-body restitution law described in [Scientific Design](DESIGN.md) and [Matched Delivery Reference](matched_delivery_reference.tex).",
++        "",
++        "These findings are model-conditional sensitivities derived from Monte Carlo random error sampling, not measured player outcomes, empirical golfer tendencies, or evidence of a causal shot-shape advantage in play.",
++        "",
++    ]
++    return lines
++
++
+ def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
+     """Render only prevalidated cell, pair, and asset references."""
+     from src.tools.shot_pattern_analysis.matched_interpretation import (
+@@ -611,13 +667,13 @@ def _qualified_interpretation_lines(interpretation: dict) -> list[str]:
+         render_effect_table(interpretation["effects"]),
+         "",
+     ]
+-    if "bounds_control" in interpretation:
+-        lines.extend(_bounds_control_lines(interpretation["bounds_control"]))
++    lines.extend(_bounds_control_lines(interpretation.get("bounds_control")))
++    lines.extend(_conclusions_and_synthesis_lines(interpretation))
+     lines.extend(
+         [
+             "### Verified Academic and Social Figures",
+             "",
+-            "Figure links below come from source-bound inventories and include their actual protocol and population type. Density contours use all supported endpoints; displayed point overlays and overhead paths are sampled, as labeled in each image. A 95% highest-density region is not a confidence interval for the mean.",
++            "Figure links below come from source-bound inventories and include their actual protocol and population type. Individual cell densities use individually supported endpoints, while paired densities use the shared six-population supported-index intersection; displayed point overlays and overhead paths are sampled, as labeled in each image. A 95% highest-density region is not a confidence interval for the mean.",
+             "",
+         ]
+     )
+@@ -731,6 +787,12 @@ def render_final_report(
+     else:
+         lines.extend(_qualified_interpretation_lines(interpretation))
+     lines.extend(_selected_comparison_lines(primary))
++    if interpretation is not None and "resolved_selected_cells" in interpretation:
++        lines.extend(
++            _resolved_selected_comparison_lines(
++                interpretation["resolved_selected_cells"]
++            )
++        )
+     if interpretation is None:
+         lines.extend(
+             (
+diff --git a/scripts/research/shot_pattern_analysis/final_report_inputs.py b/scripts/research/shot_pattern_analysis/final_report_inputs.py
+index a9bbd47451..b26ac092f5 100644
+--- a/scripts/research/shot_pattern_analysis/final_report_inputs.py
++++ b/scripts/research/shot_pattern_analysis/final_report_inputs.py
+@@ -85,6 +85,92 @@ def select_bounds_control_pairs(
+     return selected, unavailable
+ 
+ 
++def select_representative_interaction_pairs(
++    comparisons: list[dict],
++) -> list[dict]:
++    """Select the exact 12 draft representative interaction contrasts.
++
++    The qualified draft specifies 12 contrasts across all three clubs, both
++    shaft_only and combined2 profiles, SD 1→2° curve ×1, and curve ×1→×2 at SD 2°.
++    Pitching wedge curve ×2 uses the verified supplemental pw-primary-face-bounds/1
++    protocol. Selection is invariant to input order and fails closed on missing
++    or duplicate identities.
++    """
++    from src.tools.shot_pattern_analysis.matched_interpretation import (
++        describe_effect_modification,
++    )
++
++    targets: list[tuple[str, str, str, str, str, str, str]] = []
++    for club in ("driver", "seven_iron", "pitching_wedge"):
++        for profile in ("shaft_only", "combined2"):
++            # Contrast 1: SD 1 -> 2, Curve 1
++            targets.append(
++                (
++                    club,
++                    profile,
++                    "shaft_rotation_sd",
++                    f"{club}_lean0_curve1_rotation1_{profile}",
++                    f"{club}_lean0_curve1_rotation2_{profile}",
++                    "original_control/1",
++                    "original_control/1",
++                )
++            )
++            # Contrast 2: Curve 1 -> 2, SD 2
++            proto_b = (
++                "pw-primary-face-bounds/1"
++                if club == "pitching_wedge"
++                else "original_control/1"
++            )
++            targets.append(
++                (
++                    club,
++                    profile,
++                    "curve_strength",
++                    f"{club}_lean0_curve1_rotation2_{profile}",
++                    f"{club}_lean0_curve2_rotation2_{profile}",
++                    "original_control/1",
++                    proto_b,
++                )
++            )
++
++    selected: list[dict] = []
++    for club, profile, kind, cell_a, cell_b, proto_a, proto_b in targets:
++        expected = ((proto_a, cell_a), (proto_b, cell_b))
++        matches = []
++        for pair in comparisons:
++            sources = pair.get("sources")
++            if (
++                pair.get("comparison_kind") != kind
++                or not isinstance(sources, list)
++                or len(sources) != 2
++            ):
++                continue
++            if not all(isinstance(s, dict) for s in sources):
++                continue
++            identity = tuple((s.get("protocol_id"), s.get("cell")) for s in sources)
++            if identity == expected:
++                matches.append(pair)
++
++        if len(matches) > 1:
++            raise ValueError(
++                f"ambiguous duplicate comparison for {club} {profile} {kind}: {cell_a} -> {cell_b}"
++            )
++        if not matches:
++            raise ValueError(
++                f"missing required representative comparison for {club} {profile} {kind}: {cell_a} -> {cell_b}"
++            )
++
++        match = matches[0]
++        effect = describe_effect_modification(match)
++        if effect.get("status") not in ("available", "conditional_only"):
++            raise ValueError(
++                f"representative comparison is unavailable: {club} {profile} {kind}"
++            )
++        selected.append(effect)
++
++    return selected
++
++
+ def verified_original_figure_links(
+     figure_root: Path, report: dict, *, report_root: Path, protocol: str
+ ) -> list[dict]:
+@@ -276,6 +362,121 @@ def supplement_figure_links(
+     return links
+ 
+ 
++def assemble_resolved_selected_cells(primary: dict, supplement: dict) -> list[dict]:
++    """Assemble the resolved 24-cell zero-lean selection with explicit protocols.
++
++    Preserves original primary accounting for the 20 completed primary cells
++    (protocol original_primary/1) and integrates the verified supplemental
++    cell records for the four resolved PW curve-2 cells (protocol
++    pw-primary-face-bounds/1). Guards against missing or duplicate identities
++    and asserts separate individual endpoint and common-three scoring counts.
++    """
++    clubs = ("driver", "seven_iron", "pitching_wedge")
++    curves = (1.0, 2.0)
++    rotations = (1.0, 2.0)
++    profiles = ("shaft_only", "combined2")
++
++    primary_cells: dict[str, dict] = {}
++    for cell in primary.get("cells", []):
++        name = cell["cell"]
++        if name in primary_cells:
++            raise ValueError(f"duplicate primary cell: {name}")
++        primary_cells[name] = cell
++
++    supp_report = supplement.get("report", {})
++    supp_unique: dict[str, dict] = {}
++    for entry in supp_report.get("unique_cells", []):
++        name = entry["cell"]
++        if name in supp_unique:
++            raise ValueError(f"duplicate supplement cell: {name}")
++        supp_unique[name] = entry
++
++    resolved: list[dict] = []
++    seen: set[str] = set()
++
++    for club in clubs:
++        for curve in curves:
++            for rot in rotations:
++                for prof in profiles:
++                    cell_name = (
++                        f"{club}_lean0_curve{int(curve)}_rotation{int(rot)}_{prof}"
++                    )
++                    if cell_name in seen:
++                        raise ValueError(f"duplicate requested cell: {cell_name}")
++                    seen.add(cell_name)
++
++                    if cell_name not in primary_cells:
++                        raise ValueError(f"missing requested primary cell: {cell_name}")
++
++                    p_cell = primary_cells[cell_name]
++                    status = p_cell.get("status")
++                    if status == "completed":
++                        summary = p_cell.get("summary", {})
++                        for pat in ("Straight", "Draw", "Fade"):
++                            if pat not in summary or "supported_n" not in summary[pat]:
++                                raise ValueError(
++                                    f"cell lacks individual support count: {cell_name}"
++                                )
++                        paired = p_cell.get("paired_comparisons", {})
++                        if "paired_n" not in paired:
++                            raise ValueError(
++                                f"cell lacks common paired count: {cell_name}"
++                            )
++
++                        resolved.append(
++                            {
++                                **p_cell,
++                                "source_protocol": "original_primary/1",
++                            }
++                        )
++                    elif status == "unavailable":
++                        if cell_name not in supp_unique:
++                            raise ValueError(
++                                f"missing resolved supplement cell for unavailable primary: {cell_name}"
++                            )
++                        s_entry = supp_unique[cell_name]
++                        if s_entry.get("status") != "completed":
++                            raise ValueError(
++                                f"supplement cell is not completed: {cell_name}"
++                            )
++
++                        s_summary = s_entry.get("summary", {})
++                        pat_summary = s_summary.get("summary", {})
++                        for pat in ("Straight", "Draw", "Fade"):
++                            if (
++                                pat not in pat_summary
++                                or "supported_n" not in pat_summary[pat]
++                            ):
++                                raise ValueError(
++                                    f"supplement cell lacks individual support count: {cell_name}"
++                                )
++                        paired = s_summary.get("paired_comparisons", {})
++                        if "paired_n" not in paired:
++                            raise ValueError(
++                                f"supplement cell lacks common paired count: {cell_name}"
++                            )
++
++                        resolved.append(
++                            {
++                                **s_summary,
++                                "cell": cell_name,
++                                "source_protocol": s_entry.get(
++                                    "source_protocol", "pw-primary-face-bounds/1"
++                                ),
++                                "original_status": "unavailable",
++                            }
++                        )
++                    else:
++                        raise ValueError(
++                            f"cell has invalid status {status}: {cell_name}"
++                        )
++
++    if len(resolved) != 24:
++        raise ValueError(f"expected exactly 24 resolved cells, got {len(resolved)}")
++
++    return resolved
++
++
+ def assemble_qualified_interpretation(
+     primary_root: Path,
+     primary: dict,
+@@ -290,7 +491,6 @@ def assemble_qualified_interpretation(
+ ) -> dict:
+     """Compose selected interpretation from independently qualified inputs."""
+     from src.tools.shot_pattern_analysis.matched_interpretation import (
+-        describe_effect_modification,
+         describe_saved_cell,
+         describe_scoring,
+     )
+@@ -325,32 +525,10 @@ def assemble_qualified_interpretation(
+     comparisons = supplement["comparisons"]
+     if comparisons.get("schema") != "matched-supplement-comparisons/1":
+         raise ValueError("qualified supplement comparison schema differs")
+-    # The separately qualified inventory can contain many comparisons; show
+-    # source-named direct contrasts here and link its complete CSV below.
+-    pairs = [
+-        describe_effect_modification(pair)
+-        for pair in comparisons["comparisons"]
+-        if pair.get("comparison_kind") in ("curve_strength", "shaft_rotation_sd")
+-        and pair.get("status") in ("available", "conditional_only")
+-    ]
+-    representative_effects: list[dict] = []
+-    for club in ("driver", "seven_iron", "pitching_wedge"):
+-        for kind in ("curve_strength", "shaft_rotation_sd"):
+-            chosen = next(
+-                (
+-                    pair
+-                    for pair in pairs
+-                    if pair["comparison_kind"] == kind
+-                    and all(
+-                        name.startswith(club + "_") for name in pair["source_cells"]
+-                    )
+-                    and "combined2" in pair["source_cells"][0]
+-                    and "lean0" in pair["source_cells"][0]
+-                ),
+-                None,
+-            )
+-            if chosen is not None:
+-                representative_effects.append(chosen)
++    resolved_selected_cells = assemble_resolved_selected_cells(primary, supplement)
++    representative_effects = select_representative_interaction_pairs(
++        comparisons["comparisons"]
++    )
+     bounds_effects, bounds_unavailable = select_bounds_control_pairs(
+         comparisons["comparisons"]
+     )
+@@ -402,6 +580,7 @@ def assemble_qualified_interpretation(
+     receipt_path = Path(supplement_dir) / "REPORT_SUPPLEMENT_PIPELINE.json"
+     return {
+         "selected_cells": explained,
++        "resolved_selected_cells": resolved_selected_cells,
+         "scores": scored,
+         "effects": representative_effects,
+         "bounds_control": {
+diff --git a/tests/research/test_shot_pattern_final_report.py b/tests/research/test_shot_pattern_final_report.py
+index 836b8ab220..34b12fe6b7 100644
+--- a/tests/research/test_shot_pattern_final_report.py
++++ b/tests/research/test_shot_pattern_final_report.py
+@@ -4,6 +4,8 @@ from __future__ import annotations
+ 
+ import csv
+ import io
++from collections import Counter
++from pathlib import Path
+ 
+ import pytest
+ 
+@@ -942,3 +944,287 @@ def test_bounds_control_missing_relative_effect_is_explicitly_unavailable(
+     assert effects == []
+     expected = scoring_failure or "relative scoring effects were not emitted"
+     assert any(expected in reason for reason in unavailable)
++
++
++def test_f1_resolved_zero_lean_cells_assembly_and_rendering():
++    from scripts.research.shot_pattern_analysis.final_report_inputs import (
++        assemble_resolved_selected_cells,
++    )
++
++    clubs = ("driver", "seven_iron", "pitching_wedge")
++    curves = (1.0, 2.0)
++    rotations = (1.0, 2.0)
++    profiles = ("shaft_only", "combined2")
++
++    primary_cells = []
++    supplement_unique_cells = []
++
++    for club in clubs:
++        for curve in curves:
++            for rot in rotations:
++                for prof in profiles:
++                    cell_name = (
++                        f"{club}_lean0_curve{int(curve)}_rotation{int(rot)}_{prof}"
++                    )
++                    if club == "pitching_wedge" and curve == 2.0:
++                        primary_cells.append(_cell(cell_name, status="unavailable"))
++                        supp_cell_data = _cell(cell_name, status="completed")
++                        supp_cell_data["config"]["club"]["club_id"] = club
++                        supp_cell_data["config"]["curve_scale"] = curve
++                        supp_cell_data["config"]["noise"]["standard_deviations"][0] = (
++                            rot
++                        )
++                        supplement_unique_cells.append(
++                            {
++                                "cell": cell_name,
++                                "source_protocol": "pw-primary-face-bounds/1",
++                                "status": "completed",
++                                "summary": supp_cell_data,
++                            }
++                        )
++                    else:
++                        c = _cell(cell_name, status="completed")
++                        c["config"]["club"]["club_id"] = club
++                        c["config"]["curve_scale"] = curve
++                        c["config"]["noise"]["standard_deviations"][0] = rot
++                        primary_cells.append(c)
++
++    primary = _matrix(primary_cells, "final")
++    supplement = {
++        "report": {
++            "schema": "matched-supplement-report/1",
++            "unique_executed_cells": 26,
++            "unique_cells": supplement_unique_cells,
++            "aliases": [],
++        }
++    }
++
++    resolved = assemble_resolved_selected_cells(primary, supplement)
++    assert len(resolved) == 24
++    proto_counts = Counter(c["source_protocol"] for c in resolved)
++    assert proto_counts["original_primary/1"] == 20
++    assert proto_counts["pw-primary-face-bounds/1"] == 4
++
++    # Assert separate individual endpoint and common-three scoring counts
++    for c in resolved:
++        assert "individual_endpoint_supported_n" in c or (
++            "summary" in c
++            and all(
++                "supported_n" in c["summary"][p] for p in ("Straight", "Draw", "Fade")
++            )
++        )
++        assert "common_three_scored_n" in c or "paired_comparisons" in c
++
++    # Missing cell fails closed
++    truncated_primary = _matrix(primary_cells[:-1], "final")
++    with pytest.raises(ValueError, match="missing"):
++        assemble_resolved_selected_cells(truncated_primary, supplement)
++
++    # Duplicate cell fails closed
++    dup_primary = _matrix([*primary_cells, primary_cells[0]], "final")
++    with pytest.raises(ValueError, match="duplicate"):
++        assemble_resolved_selected_cells(dup_primary, supplement)
++
++    # Rendering test: both original table (with unavailable) and resolved table (with protocols)
++    lean = {
++        "schema": "matched-across-lean/1",
++        "pairs": [],
++        "population": {"planned_pairs": 0},
++    }
++    interpretation = _qualified_interpretation()
++    interpretation["resolved_selected_cells"] = resolved
++
++    rendered = build_final_report.render_final_report(
++        primary, primary, lean, {}, interpretation=interpretation
++    )
++    # Original table preserved with unavailable
++    assert "### Zero-Lean Curve and Variability Comparison" in rendered
++    assert "Nominal Match Unavailable (See Inventory)" in rendered
++    # Resolved table present with explicit protocol labels and completed SG
++    assert "### Resolved Zero-Lean Curve and Variability Comparison" in rendered
++    assert "pw-primary-face-bounds/1" in rendered
++    assert "original_primary/1" in rendered
++
++
++def test_f2_exact_12_representative_interaction_contrasts():
++    import random
++    from scripts.research.shot_pattern_analysis.final_report_inputs import (
++        select_representative_interaction_pairs,
++    )
++    from src.tools.shot_pattern_analysis.matched_interpretation import (
++        render_effect_table,
++    )
++
++    clubs = ("driver", "seven_iron", "pitching_wedge")
++    profiles = ("shaft_only", "combined2")
++    pairs = []
++
++    for club in clubs:
++        for prof in profiles:
++            # Pair 1: SD 1 -> 2, Curve 1
++            pairs.append(
++                _make_source_pair(
++                    comparison_kind="shaft_rotation_sd",
++                    first_cell=f"{club}_lean0_curve1_rotation1_{prof}",
++                    second_cell=f"{club}_lean0_curve1_rotation2_{prof}",
++                    first_protocol="original_control/1",
++                    second_protocol="original_control/1",
++                    draw_effect={
++                        "estimate": 0.002,
++                        "lower_95": 0.001,
++                        "upper_95": 0.003,
++                    },
++                    fade_effect={
++                        "estimate": -0.001,
++                        "lower_95": -0.002,
++                        "upper_95": 0.0,
++                    },
++                )
++            )
++            # Pair 2: Curve 1 -> 2, SD 2
++            proto_b = (
++                "pw-primary-face-bounds/1"
++                if club == "pitching_wedge"
++                else "original_control/1"
++            )
++            pairs.append(
++                _make_source_pair(
++                    comparison_kind="curve_strength",
++                    first_cell=f"{club}_lean0_curve1_rotation2_{prof}",
++                    second_cell=f"{club}_lean0_curve2_rotation2_{prof}",
++                    first_protocol="original_control/1",
++                    second_protocol=proto_b,
++                    draw_effect={
++                        "estimate": 0.004,
++                        "lower_95": 0.003,
++                        "upper_95": 0.005,
++                    },
++                    fade_effect={
++                        "estimate": 0.0001,
++                        "lower_95": -0.0002,
++                        "upper_95": 0.0004,
++                    },
++                )
++            )
++
++    assert len(pairs) == 12
++
++    # Selection selects all 12 in exact intended order
++    selected = select_representative_interaction_pairs(pairs)
++    assert len(selected) == 12
++
++    # Order permutation invariance: reversing or shuffling input leaves output identical
++    shuffled = list(pairs)
++    random.Random(42).shuffle(shuffled)
++    selected_shuffled = select_representative_interaction_pairs(shuffled)
++    assert [e["source_cells"] for e in selected_shuffled] == [
++        e["source_cells"] for e in selected
++    ]
++    assert [e["comparison_kind"] for e in selected_shuffled] == [
++        e["comparison_kind"] for e in selected
++    ]
++
++    # Duplicate fails closed
++    with pytest.raises(ValueError, match="ambiguous|duplicate"):
++        select_representative_interaction_pairs([*pairs, pairs[0]])
++
++    # Omission fails closed
++    with pytest.raises(ValueError, match="missing|unavailable"):
++        select_representative_interaction_pairs(pairs[1:])
++
++    # Table rendering works
++    rendered_table = render_effect_table(selected)
++    assert "| Draw |" in rendered_table
++    assert "| Fade |" in rendered_table
++    assert "pw-primary-face-bounds/1" in rendered_table
++
++
++def test_f3_substantive_conclusions_and_mechanism_synthesis():
++    cell = _detailed_cell()
++    matrix = _matrix([cell], "final")
++    lean = {
++        "schema": "matched-across-lean/1",
++        "pairs": [],
++        "population": {"planned_pairs": 0},
++    }
++    interpretation = _qualified_interpretation()
++
++    rendered = build_final_report.render_final_report(
++        matrix, matrix, lean, {}, interpretation=interpretation
++    )
++
++    assert "### Conclusions and Geometric Mechanism Synthesis" in rendered
++    # Opposing lateral/downrange correlations
++    assert (
++        "lateral" in rendered and "downrange" in rendered and "correlation" in rendered
++    )
++    assert "Driver" in rendered or "driver" in rendered
++    assert "7-iron" in rendered or "seven_iron" in rendered
++    assert "Pitching Wedge" in rendered or "pitching_wedge" in rendered
++    # Realized mean carry shifts with SD
++    assert "mean downrange error" in rendered or "mean carry" in rendered
++    # Mechanism and citations
++    assert "DESIGN.md" in rendered
++    assert "matched_delivery_reference.tex" in rendered
++    # Non-causal statements
++    assert "not" in rendered and "causal" in rendered
++    assert "sampling" in rendered or "Monte Carlo" in rendered
++
++
++def test_f4_speed_bounds_scoping_and_driver_supplement_disclosure():
++    cell = _detailed_cell()
++    matrix = _matrix([cell], "final")
++    lean = {
++        "schema": "matched-across-lean/1",
++        "pairs": [],
++        "population": {"planned_pairs": 0},
++    }
++    interpretation = _qualified_interpretation()
++
++    rendered = build_final_report.render_final_report(
++        matrix, matrix, lean, {}, interpretation=interpretation
++    )
++
++    # 1. Controlled Inputs scopes 75–125% to original protocols
++    assert "original_primary/1" in rendered
++    assert "75–125%" in rendered or "75-125%" in rendered
++
++    # 2. Fixed-Target Across-Lean Bounds Controls discloses Driver 75–130% and ±6° face box
++    assert "driver-control-speed-bounds/1" in rendered
++    assert "75–130%" in rendered or "75-130%" in rendered
++    assert "6.0°" in rendered or "6°" in rendered
++    assert "not preregistered" in rendered or "were not preregistered" in rendered
++
++
++def test_f5_figure_population_prose_distinguishes_individual_and_paired_densities():
++    cell = _detailed_cell()
++    matrix = _matrix([cell], "final")
++    lean = {
++        "schema": "matched-across-lean/1",
++        "pairs": [],
++        "population": {"planned_pairs": 0},
++    }
++    interpretation = _qualified_interpretation()
++
++    rendered = build_final_report.render_final_report(
++        matrix, matrix, lean, {}, interpretation=interpretation
++    )
++
++    # Figure population prose distinguishes individual vs paired populations
++    assert "Individual cell densities use individually supported endpoints" in rendered
++    assert (
++        "shared six-population" in rendered
++        or "six-population supported-index intersection" in rendered
++    )
++
++
++def test_f6_draft_conclusions_provenance_truthful_v5_pending():
++    repo_root = Path(__file__).resolve().parents[2]
++    path = (
++        repo_root
++        / "docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md"
++    )
++    content = path.read_text(encoding="utf-8")
++    assert "completed v4 receipt" not in content
++    assert "v4" in content.lower()
++    assert "v5" in content.lower()

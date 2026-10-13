@@ -1,0 +1,249 @@
+{
+  "status": "visual_review_pending",
+  "source_sha256": "a3b6aa26c2fa5d6ad98a39e697f5d0a5ab75de9e3c4d537b5265f07996ccbfe3",
+  "baseline": "3615196639",
+  "changed_functions": [
+    "_render_density_comparison"
+  ],
+  "inputs": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_shaft_only/scoring_baseline.json": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_shaft_only/flight_samples.json": "81f2461ae42bf6d5e33cc141730b1951282cee3acaaef0965a2b67eef381060b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_shaft_only/shots.csv.gz": "5361a0db5ec21a204065160b5c88be95cc9d88776c6ed22be6f2d11c6a69d8dc",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_shaft_only/receipt.json": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_shaft_only/summary.json": "2ff839ccbc3efed5501e9ce228f57262402e68cb414607881a6f68cd71493a4a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_shaft_only/manifest.json": "9059d5c431f90838d9c62825493842e2703d48208b8635a1baa8ac4ac0e7db40",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_shaft_only/run_start.json": "2c0a9fe686a0f0efdd3fc925fbf16fc1dc25b32ef1a5ff42e4d963ab00fe93c1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_shaft_only/scoring_baseline.json": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_shaft_only/flight_samples.json": "eecc3b2e49289b292ddcd96dc15201af95b941c0ae55bc09c14424faad0cba20",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_shaft_only/shots.csv.gz": "24a3509c525869a000552a12a37f4def44fb908a25e6b19538d24735ec24dd24",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_shaft_only/receipt.json": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_shaft_only/summary.json": "79ec2a67fdc585f466b290dde44213a7080f01ecc9d2445ff12605af25a58e4f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_shaft_only/manifest.json": "5ec8282c7102415247d83c0c7167b06a796008963ee5162c739f387041f39951",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_shaft_only/run_start.json": "37d1d69e737184fc833d8b789341fa60ba9d336c34883c2dcfe610b66909ea4f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_shaft_only/scoring_baseline.json": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_shaft_only/flight_samples.json": "9e5d4a38567915ba7e17fd32235f26340b596b017983646365cc7ed0847cd2be",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_shaft_only/shots.csv.gz": "ea7f05fd5927b05acd076922aae4d99e448dd0ec261355deeafad973aaa4b3c0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_shaft_only/receipt.json": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_shaft_only/summary.json": "ecb0dcf6c73d992bcb75bc6752bcfb5ab37b8f77502e8dbead57a77b4f063c89",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_shaft_only/manifest.json": "68ca59d60cbe090e38b6e0f8c7e842f8e79d5063d2e5d4a97efd7704cb7a3b29",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_shaft_only/run_start.json": "fdbecf336c09e26b4ab34b072cf7eb2b6e4ee21a87e85487105b1445d37b0a39",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2/scoring_baseline.json": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2/flight_samples.json": "e1783bde8253090ee9ff04e085ece3962ed2f7dd015093d044fc43ca6545d152",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2/shots.csv.gz": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2/receipt.json": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2/summary.json": "7bf03b58d7349b32112e3961747f882662ffa83a1f22f913d2d29a9a9f1dd373",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2/manifest.json": "b184a59e08d7918c8cf4d1f8d7762a5612eed3e72be4941291f16059fb140009",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2/run_start.json": "ddc9b5ca1b9ca16ea8a33beb2908ca45d42c23acbb81596421c30bfb26fe8800",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_combined2/scoring_baseline.json": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_combined2/flight_samples.json": "f1304903884a12c61fdf4471600d310a885214375d14c2695cfc77babca5cb2a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_combined2/shots.csv.gz": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_combined2/receipt.json": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_combined2/summary.json": "f8c27205ba8dcd6f6597143f54e9418917f6b696961b6a9a6188df2906fa3346",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_combined2/manifest.json": "8f1cbc232614a0bd538138aae01ee69ce95ab1ef165e080cb5c28c68d6ee5b19",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation2_combined2/run_start.json": "0a9905f54ce69694052af877c0304a6eed61d1ef75afecf85a3f1ad893cb909d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_combined2/scoring_baseline.json": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_combined2/flight_samples.json": "40df2781499a88ba199bdd60e5434f5a25d411fcfa24108511b681bbdcbceb40",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_combined2/shots.csv.gz": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_combined2/receipt.json": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_combined2/summary.json": "ac47b4ed7e3920a5552df059257ae19e891c2345d6c57721370ce2136301ad40",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_combined2/manifest.json": "c1cbf8d53589b0b634fe46a9c645737dde5bc2f74abc7f2950fc7cde280c98a5",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve2_rotation2_combined2/run_start.json": "2833059018f634c7ed1822f01fba04c180b8fab5501679233ba91639b1dcc228"
+  },
+  "inputs_unchanged": true,
+  "results": [
+    {
+      "row": {
+        "comparison": "shaft_rotation_sd",
+        "pattern": "Draw",
+        "club": "driver",
+        "profile": "shaft_only",
+        "first_cell": "driver_lean0_curve1_rotation1_shaft_only",
+        "second_cell": "driver_lean0_curve1_rotation2_shaft_only",
+        "first_condition": "SD 1\u00b0",
+        "second_condition": "SD 2\u00b0",
+        "status": "completed",
+        "reason": "",
+        "target_x_m": 178.94875782337786,
+        "png": "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.png",
+        "pdf": "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.pdf",
+        "svg": "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.svg"
+      },
+      "assets": {
+        "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.png": "df33518293c3b5b7a9f5c27b423a9c0827ed50c432b67bb804c9a7802d55e1ad",
+        "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.pdf": "951abdf0f4634c990d8b6e5fd0c66c29a5eaa61a93a6c005b64306dca97a8cde",
+        "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.svg": "36815769876753805e37b7e48addef5607f00a6e16fe7b0ed300615c5da676b2"
+      }
+    },
+    {
+      "row": {
+        "comparison": "shaft_rotation_sd",
+        "pattern": "Draw",
+        "club": "driver",
+        "profile": "combined2",
+        "first_cell": "driver_lean0_curve1_rotation1_combined2",
+        "second_cell": "driver_lean0_curve1_rotation2_combined2",
+        "first_condition": "SD 1\u00b0",
+        "second_condition": "SD 2\u00b0",
+        "status": "completed",
+        "reason": "",
+        "target_x_m": 178.94875782337786,
+        "png": "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.png",
+        "pdf": "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.pdf",
+        "svg": "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.svg"
+      },
+      "assets": {
+        "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.png": "212f73fd3baf2a7f049cd03b114ac5288a0c242183bd8ac8e099152929336fc2",
+        "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.pdf": "dc8081e81d76fecc1acdf3e4a0e329a23f04f94b163480a3e638c7b84c9f64b2",
+        "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.svg": "8cfe77924ef543188196666e14158e2dd2bf1b8ac458e3f5065dec66d50a65e9"
+      }
+    },
+    {
+      "row": {
+        "comparison": "curve_scale",
+        "pattern": "Draw",
+        "club": "driver",
+        "profile": "combined2",
+        "first_cell": "driver_lean0_curve1_rotation2_combined2",
+        "second_cell": "driver_lean0_curve2_rotation2_combined2",
+        "first_condition": "Curve \u00d71",
+        "second_condition": "Curve \u00d72",
+        "status": "completed",
+        "reason": "",
+        "target_x_m": 178.94875782337786,
+        "png": "social/comparisons/driver/combined2/Draw/curve_scale.png",
+        "pdf": "social/comparisons/driver/combined2/Draw/curve_scale.pdf",
+        "svg": "social/comparisons/driver/combined2/Draw/curve_scale.svg"
+      },
+      "assets": {
+        "social/comparisons/driver/combined2/Draw/curve_scale.png": "c088c3e4162794e3e7c46a5998bdd6bd7db7e8955215ad3217c68c6470b42a0e",
+        "social/comparisons/driver/combined2/Draw/curve_scale.pdf": "f36d10592d2bf78846eb3ce53fea89e6dfdf08b761ec135fa687f4c04f52380b",
+        "social/comparisons/driver/combined2/Draw/curve_scale.svg": "fabdc970bee2955af7f869d8cdbde2744df792614c4e6c28477803058b72b3b7"
+      }
+    }
+  ],
+  "layout": [
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/shaft_twist_caption_candidate_v1/social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.png",
+      "text": [
+        {
+          "text": "Driver: Shot Dispersion",
+          "bounds": [
+            0.08,
+            0.9664771412037036,
+            0.30648148148148147,
+            0.018522858796296338
+          ]
+        },
+        {
+          "text": "Draw \u2022 Shaft Twist SD 1\u00b0 vs SD 2\u00b0 \u2022 Curve \u00d71 \u2022 Shaft Twist Only",
+          "bounds": [
+            0.08,
+            0.9428937596450616,
+            0.602806712962963,
+            0.013583381558642027
+          ]
+        },
+        {
+          "text": "Protocol: Original Matched-Delivery Protocol  |  Target: 178.95 m downrange  |\nStatic Loft: 10\u00b0  |  Nominal Lean: 0\u00b0  |  Noise: Path SD 0\u00b0 \u2022 Speed SD 0 mph \u2022\nStrike SD 0/0 mm horizontal/vertical  |  Match Residuals: 2e-13 vs 2e-13 m  |\nValid/Total: Draw | SD 1\u00b0 10,000/10,000 valid; Draw | SD 2\u00b0 10,000/10,000\nvalid",
+          "bounds": [
+            0.08,
+            0.8685970413773149,
+            0.5477719907407408,
+            0.06629671826774675
+          ]
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Draw | SD 1\u00b0 600/10,000; Draw | SD 2\u00b0 600/10,000. Density, HDR, and marginals use\nevery valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            0.08,
+            0.018,
+            0.5886429398148149,
+            0.03735827787422839
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/shaft_twist_caption_candidate_v1/social/comparisons/driver/combined2/Draw/shaft_rotation_sd.png",
+      "text": [
+        {
+          "text": "Driver: Shot Dispersion",
+          "bounds": [
+            0.08,
+            0.9664771412037036,
+            0.30648148148148147,
+            0.018522858796296338
+          ]
+        },
+        {
+          "text": "Draw \u2022 Shaft Twist SD 1\u00b0 vs SD 2\u00b0 \u2022 Curve \u00d71 \u2022 Combined Delivery Noise",
+          "bounds": [
+            0.08,
+            0.9428937596450616,
+            0.683347800925926,
+            0.013583381558642027
+          ]
+        },
+        {
+          "text": "Protocol: Original Matched-Delivery Protocol  |  Target: 178.95 m downrange  |\nStatic Loft: 10\u00b0  |  Nominal Lean: 0\u00b0  |  Noise: Path SD 0.5\u00b0 \u2022 Speed SD 2 mph\n\u2022 Strike SD 6.35/6.35 mm horizontal/vertical  |  Match Residuals: 2e-13 vs\n2e-13 m  |  Valid/Total: Draw | SD 1\u00b0 10,000/10,000 valid; Draw | SD 2\u00b0\n10,000/10,000 valid",
+          "bounds": [
+            0.08,
+            0.8685970413773149,
+            0.5486979166666667,
+            0.06629671826774675
+          ]
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Draw | SD 1\u00b0 600/10,000; Draw | SD 2\u00b0 600/10,000. Density, HDR, and marginals use\nevery valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            0.08,
+            0.018,
+            0.5886429398148149,
+            0.03735827787422839
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/shaft_twist_caption_candidate_v1/social/comparisons/driver/combined2/Draw/curve_scale.png",
+      "text": [
+        {
+          "text": "Driver: Shot Dispersion",
+          "bounds": [
+            0.08,
+            0.9664771412037036,
+            0.30648148148148147,
+            0.018522858796296338
+          ]
+        },
+        {
+          "text": "Draw \u2022 Curve \u00d71 vs Curve \u00d72 \u2022 Shaft Twist SD 2\u00b0 \u2022 Combined Delivery\nNoise",
+          "bounds": [
+            0.08,
+            0.9239553594393004,
+            0.6601996527777778,
+            0.032521781764403235
+          ]
+        },
+        {
+          "text": "Protocol: Original Matched-Delivery Protocol  |  Target: 178.95 m downrange  |\nStatic Loft: 10\u00b0  |  Nominal Lean: 0\u00b0  |  Noise: Path SD 0.5\u00b0 \u2022 Speed SD 2 mph\n\u2022 Strike SD 6.35/6.35 mm horizontal/vertical  |  Match Residuals: 2e-13 vs\n3.03e-14 m  |  Valid/Total: Draw | Curve \u00d71 10,000/10,000 valid; Draw | Curve\n\u00d72 10,000/10,000 valid",
+          "bounds": [
+            0.08,
+            0.8496586411715537,
+            0.5503616898148148,
+            0.06629671826774686
+          ]
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Draw | Curve \u00d71 600/10,000; Draw | Curve \u00d72 600/10,000. Density, HDR, and\nmarginals use every valid endpoint. Shared axes and density scale; contours are simulated-\nsample HDR.",
+          "bounds": [
+            0.08,
+            0.018,
+            0.5534866898148149,
+            0.04981103716563785
+          ]
+        }
+      ]
+    }
+  ]
+}

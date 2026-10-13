@@ -1,0 +1,665 @@
+{
+  "status": "provisional_caption_scope_while_producer_live",
+  "counts": {
+    "cell": {
+      "total": 52,
+      "density_missing_both": 26,
+      "overhead_missing_both": 26
+    },
+    "pair": {
+      "total": 29,
+      "density_missing_both": 29,
+      "overhead_missing_both": 0
+    }
+  },
+  "files": [
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density_social.svg",
+      "sha256": "32e2ef9c204b6ef63b1bf6825f1d28ea4b15e43b64b04f99b406735a5dd9429c",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead_social.svg",
+      "sha256": "a167154633fdd0968c116d7dd6a44b6d8be7984e43a2b7b252abcdbeabde3c15",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.svg",
+      "sha256": "acfdd5426f20fa1ded274579ea4458a39389b4688ef69d40429d93305a512355",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead_social.svg",
+      "sha256": "a17bf27ce5da1db07d4f68fe36a75cafa3530363c7218919438818a909ba8f0f",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.svg",
+      "sha256": "604adf433a64c310b027fbbf335a32e9edf54551b7b082e0a10cbae979ec8171",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.svg",
+      "sha256": "23a9a6dc36469d44887859cc76d2f07916f35f48319f37f7c919db685b01df8a",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density_social.svg",
+      "sha256": "b441030f685b72eb925743e9c520cc0ea3a067067b80612fd407f38fcd94a039",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead_social.svg",
+      "sha256": "f8fd9deae7706a06ecb6593a9413431d135258b4855bf5bb05bd0836c53e6a51",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density_social.svg",
+      "sha256": "2a3120745c284215f4634d80f5dd536d07c3ccbb9dd1f237fd93d3da97b4a25a",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead_social.svg",
+      "sha256": "406f337b7cbcf2a1a430842ca6937345dda88a83e089903e0ef6db0fd5a5602a",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_density_social.svg",
+      "sha256": "538b459151f2b9246f0b62d4876e62e13c8f01aa0a94b73902e3e0a6dfa179e6",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_overhead_social.svg",
+      "sha256": "e1eed8eacd57be473ed511a9198e6f81452d31d7a36592494eda41085bfe0957",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_density_social.svg",
+      "sha256": "a70a0299438d9ca92e9041a2f9d64563b289e23f9344adadef7136366c6f07ff",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_overhead_social.svg",
+      "sha256": "1ee69b668f80420a5dbc2045393e0c5a8116ffc7be2ea1b7918b5fa80a72083f",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_density_social.svg",
+      "sha256": "caa9ff77b6057627f2ab4fad9f3a71992d483c21e20964ec6d40417c408e0d29",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_overhead_social.svg",
+      "sha256": "5ff9be94f93c5ea78b0108d2452cab814aefe653e7380d8aeb4167dcc0fa2bb4",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_density_social.svg",
+      "sha256": "8cbe2b43a12e278b8ac9910e054fa567d7794d0f94b3f4a8a780770b77fea59b",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead_social.svg",
+      "sha256": "11c25ae39cb2fc631d0a9e82816fe3d0418a7d6610e3484092cb73d2e55bce21",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_density_social.svg",
+      "sha256": "b8edfbb630cf4c42beaad623c6baad036085a36f084c5996bcb60bddc321aee8",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_overhead_social.svg",
+      "sha256": "ae327e1a129a31c52c0801f5d7cac7511f510d6bfd2673aadde6f89dc79eb393",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_density_social.svg",
+      "sha256": "290630addffe874e8246f08f46cd6abd59da9df624131d315f5fc7a4766ca5f2",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_overhead_social.svg",
+      "sha256": "29adc9ac83f9b9e325df19c5936683a71b533071ddd670448df3cca2d653fc4f",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_density_social.svg",
+      "sha256": "0f8616d150f3670702b7e52cda61afa5c0ea5a09f1492315dbbe32491790818a",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_overhead_social.svg",
+      "sha256": "aa40be1d08d07def98dafd631ef8261c3a1e3814754d584060607a3e3b356b21",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_density_social.svg",
+      "sha256": "22f472ea9d501ed20699213dd720064bf99487c7075201d8a2e9326e20f738f9",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_overhead_social.svg",
+      "sha256": "ce21363ec7930c7d8d32a96f61ff6fec0aee67ad8f8a0323524c6f1c1701fd50",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_density_social.svg",
+      "sha256": "69e7186f772c41a6e9c1b228ebf9adaaf57c1ddf773b44cdd466957072017657",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_overhead_social.svg",
+      "sha256": "1f9f9566ed620f54ceba3675427dab9aab46bb41e1a8a7c139cfc1a9355207ef",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_density_social.svg",
+      "sha256": "6377267e37bab742fa6573f9e4a8fdc5e6cc228be4a7c2c1339f1d347f8e712c",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_overhead_social.svg",
+      "sha256": "9a1989dbbab252750dc9a07aa3165ae93bcdeb8983fda967fe28e20278c20d89",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_density_social.svg",
+      "sha256": "16a5cb1d571f45adf0de26cb4135e666137186999e4b003aed64480eea68958a",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_overhead_social.svg",
+      "sha256": "0db784ef35dae44e8ce76cf69a0ea00486dfbde7ce5284afbca7d62195900030",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.svg",
+      "sha256": "ecde88dc2864b145713e3fa34e12920de708f554e001f2bd0c1b5127c62b6943",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.svg",
+      "sha256": "9516b531d3686b8cc09058a77cc49fb582a671cd329b72d0b5318aead05a670e",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_density_social.svg",
+      "sha256": "7e2a1163f449f20974686988b9fb2c1be7b1ba45f216d8b2ad29428589392ea7",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_overhead_social.svg",
+      "sha256": "4f4df3fcb8800dea3ab598c85bc6b3463acc230925692cbfc7e60a6f0e165397",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_density_social.svg",
+      "sha256": "ab2a22e53cb190f2be5caf78871ebf51f6c3596a7501e315fd065351c32c46e3",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_overhead_social.svg",
+      "sha256": "4578921d8accdee88c266b066c378e38378a044f0758e7e49a87785a7009bfb6",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_density_social.svg",
+      "sha256": "96e87917120380c3a233020898c22c02272dc48993b60bf82cd2347a8f4bf9a4",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_overhead_social.svg",
+      "sha256": "a4d5484d017affb9150c5131206bf8e97f25a515caa7b8f7f01435d6d679263b",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_density_social.svg",
+      "sha256": "4489a34d6f980b8ea36a5ab86df0628f4ecdbd7f2f4e69f34271acc6da0e20b1",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_overhead_social.svg",
+      "sha256": "f33d07189be1f87f42f7190bb48d179622086c5eb313be7841e7334c436a16b8",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_density_social.svg",
+      "sha256": "8177587e504264ea80cdd321abd528553337240fa9173a8e5b884d980947c49a",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_overhead_social.svg",
+      "sha256": "1178977bc13f34c397f6a41d742011cf4ebbe4fae580352c36bd2270955f4523",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density_social.svg",
+      "sha256": "40c267a644ecd5eecfcbb3e5586466e27f1e75a7c9b710d4824512d3cb99d4b4",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead_social.svg",
+      "sha256": "0bc34bbaef137c9f0f4b7ffdc551df54d8bae5472e6df4722bc82f55309f6fc9",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.svg",
+      "sha256": "4a8d814130fcb5e5c8b95adff2da36b451f15686424be2bf7b226a3b30bd1fa6",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead_social.svg",
+      "sha256": "380b09471756ef4faa5b1092720aafad92c40aee29d3da14b46b0f899f976ee2",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.svg",
+      "sha256": "43d9cd88e33a8207cd703b52c7b7b43002d42e916393306a88ff8a26629634ff",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.svg",
+      "sha256": "ec17c7991f8bcb83bb428555762557511f0171f70fd7b12fe46b01816116e374",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density_social.svg",
+      "sha256": "a852992ac7f22162f917994b7270288291388cc4803097a4ba87e69b84049120",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "cell",
+      "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead_social.svg",
+      "sha256": "4cafa875c84b7aecefafb889fcd2b9cbc0dc46f85a2ba429f6617517f4f16715",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": false
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve1_rotation1_combined2_fa53d1eb03_density_draw_social.svg",
+      "sha256": "47c6d3a73ceee6f421c73b1ba66598cd36c06fda1ea7ac0fe700475a8020a373",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve1_rotation1_combined2_fa53d1eb03_density_fade_social.svg",
+      "sha256": "623135b04f27a143be51d646c06101b8118efa23309d0c1b10301f3fc6d11a9b",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve1_rotation1_combined2_fa53d1eb03_density_straight_social.svg",
+      "sha256": "b28a2934997b9b2acd5697d8b4fc240f3d902eb6a9d2f39311de1c893a7b9f4d",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve1_rotation1_combined2_a3193a32ce_density_draw_social.svg",
+      "sha256": "82cf5708b653973500c11feaabffce942e0ecb6453d286a9c9b9bb95f8a3ad1e",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve1_rotation1_combined2_a3193a32ce_density_fade_social.svg",
+      "sha256": "8b74cf8400ac604c2d3ec0afeac3123d5b9bf6be31dfd4c6e95ab9bf67f666d5",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve1_rotation1_combined2_a3193a32ce_density_straight_social.svg",
+      "sha256": "50f7da916a70a5dbbfcb41aff3bd8699d93745af77fbf0b3105717d7577f373b",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve1_rotation1_shaft_only_9a7f95d848_density_draw_social.svg",
+      "sha256": "6a45771649b1f649e6239b7a866b96360ad8387adfe414dfd0e22254c9670214",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve1_rotation1_shaft_only_9a7f95d848_density_fade_social.svg",
+      "sha256": "d19d69ce5cf9c56ae8268a95a91e8d5689d9af07f08e42026f75cf904e000f9f",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve1_rotation1_shaft_only_9a7f95d848_density_straight_social.svg",
+      "sha256": "b004bef3f090eb9a00722935d534b87dcbb2d3670dd849a3b199944b76021abe",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve1_rotation1_shaft_only_3acc690a50_density_draw_social.svg",
+      "sha256": "b9761b191bcc6c0924dee2c35e9de772bd873c53e0eacb2c6313b4ae18c022a8",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve1_rotation1_shaft_only_3acc690a50_density_fade_social.svg",
+      "sha256": "96b161b9b226807ef5fc63956f1d4097a8bf25aeea85f2b15f4a86244c755923",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve1_rotation1_shaft_only_3acc690a50_density_straight_social.svg",
+      "sha256": "c33e2d20c825818874ce3828081b6fcc7c6de41448204faaefc220353f1fd30d",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve1_rotation2_combined2_eb6b85726e_density_draw_social.svg",
+      "sha256": "5078780a0863074c151fbf6dcec297281f797fd0ef7196943b876cb83be245b1",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve1_rotation2_combined2_eb6b85726e_density_fade_social.svg",
+      "sha256": "ff55992e6f38babc0789a0226bf3c224badc012e0fa0c57d96e119ad95fdbe03",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve1_rotation2_combined2_eb6b85726e_density_straight_social.svg",
+      "sha256": "d0a8a6fe5dd8a19cec4e47638a5cde24cf1b3f3ee06c4640f84fe297848135eb",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve1_rotation2_combined2_efa9dab089_density_draw_social.svg",
+      "sha256": "09d60327a1ba6a1abbc883c23bf89924dd8542d7f3c60379bf6d99f52a76e20c",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve1_rotation2_combined2_efa9dab089_density_fade_social.svg",
+      "sha256": "635ca938cfc0ee88235b26fb9acdb41e3a0742b6535835eb7b5e37975d8b07a7",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve1_rotation2_combined2_efa9dab089_density_straight_social.svg",
+      "sha256": "7aad71f704e656607e052f90a51e391a1b77f1c69714c40f4a51577898c911f4",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve1_rotation2_shaft_only_9e15f192e0_density_draw_social.svg",
+      "sha256": "77f801a0099ff637f6d7ab5ebb66a975df2eebf09a2812018142fee878b5b4d6",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve1_rotation2_shaft_only_9e15f192e0_density_fade_social.svg",
+      "sha256": "5c8138103adb32e72be0450d1dd7c3c15239133f32ad5f8a2d977fc413fca52e",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve1_rotation2_shaft_only_9e15f192e0_density_straight_social.svg",
+      "sha256": "4ac8d42664997381fea021e15af74b3b0f9bb522163b3c525a80154e47664e0c",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve1_rotation2_shaft_only_5318fc8c62_density_draw_social.svg",
+      "sha256": "e76764072233100a93cb5b1e23096bfb3a3041f8aa213a51f80b380b148ab41d",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve1_rotation2_shaft_only_5318fc8c62_density_fade_social.svg",
+      "sha256": "c8dd0b7938f46f11b622db73082e6c23665476e0450b96111770451d03f18a3d",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve1_rotation2_shaft_only_5318fc8c62_density_straight_social.svg",
+      "sha256": "3e26e5d933fbac3accbd110f6a18acd22442fb592d3e88ca3d7f78fd69eced4c",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_8041b5d355_density_draw_social.svg",
+      "sha256": "e123161fb71d150d327b98b3477c54723d67ab60cc2cc0b7d0993b2301ab52f4",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_8041b5d355_density_fade_social.svg",
+      "sha256": "cac7685f38ec179460281e61115f027d0b09ca021e786109b4502b68ecb3aa2e",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_8041b5d355_density_straight_social.svg",
+      "sha256": "6a85d580b75cd9ba0924329dc3b5f9e861635be1c2ff164676286a22632d59b5",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_d42c3de959_density_draw_social.svg",
+      "sha256": "22422896dfc3fb8e79d8b36e1d9275fa66a98191fe37b592e318e6279b6f4dcb",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    },
+    {
+      "group": "pair",
+      "path": "supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_d42c3de959_density_straight_social.svg",
+      "sha256": "460e93246586d9848696542da612fdbbdfcd6aea5ac1bfe6e54c19255d6e4ac1",
+      "numeric_target_caption": false,
+      "protocol_caption": false,
+      "density": true
+    }
+  ]
+}

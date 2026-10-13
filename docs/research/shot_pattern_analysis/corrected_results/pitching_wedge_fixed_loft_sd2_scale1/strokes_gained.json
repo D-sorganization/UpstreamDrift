@@ -1,0 +1,163 @@
+{
+  "status": "available",
+  "scenario_id": "approach_green_rough",
+  "scenario": "Historical PGA approach to a centered circular green with rough outside",
+  "club_id": "pitching_wedge",
+  "start_lie": "fairway",
+  "start_distance_m": 101.15986452790243,
+  "target_x_m": 101.15986452790243,
+  "hole_distance_m": null,
+  "fairway_half_width_m": null,
+  "green_radius_m": 15.0,
+  "source_backed_status": "available",
+  "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+  "api_evaluated_states": 112,
+  "scored_shots": 30000,
+  "interpolation_tolerance_strokes": 1e-12,
+  "baseline": {
+    "id": "broadie-2011-historical-tour-approx",
+    "version": "table9-full-plus-anchor-reconciled-putting/2",
+    "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+    "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+  },
+  "patterns": {
+    "Straight": {
+      "n": 10000,
+      "mean_strokes_gained": 0.3395450949973291,
+      "green_fraction": 1.0
+    },
+    "Draw": {
+      "n": 10000,
+      "mean_strokes_gained": 0.3395168987377209,
+      "green_fraction": 1.0
+    },
+    "Fade": {
+      "n": 10000,
+      "mean_strokes_gained": 0.3395249147294668,
+      "green_fraction": 1.0
+    }
+  },
+  "paired_benefit_vs_straight": {
+    "Draw": {
+      "estimate": -2.8196259608201146e-05,
+      "lower_95": -3.747206271902673e-05,
+      "upper_95": -1.9026291251914903e-05
+    },
+    "Fade": {
+      "estimate": -2.0180267862344657e-05,
+      "lower_95": -2.952484538669945e-05,
+      "upper_95": -1.1030642400940024e-05
+    }
+  },
+  "limitations": [
+    "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+    "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+    "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+  ],
+  "green_radius_sensitivity_m": {
+    "10": {
+      "status": "available",
+      "scenario": "Historical PGA approach to a centered circular green with rough outside",
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": 0.33552713120807826,
+          "green_fraction": 0.989
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": 0.3355716355379205,
+          "green_fraction": 0.9892
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": 0.3354706735534826,
+          "green_fraction": 0.9889
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 4.450432984223232e-05,
+          "lower_95": -3.0233719641917187e-05,
+          "upper_95": 0.0001547383541820713
+        },
+        "Fade": {
+          "estimate": -5.645765459568947e-05,
+          "lower_95": -0.0001355961940629512,
+          "upper_95": -1.358930634706025e-05
+        }
+      },
+      "api_evaluated_states": 112
+    },
+    "15": {
+      "status": "available",
+      "scenario": "Historical PGA approach to a centered circular green with rough outside",
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": 0.3395450949973291,
+          "green_fraction": 1.0
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": 0.3395168987377209,
+          "green_fraction": 1.0
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": 0.3395249147294668,
+          "green_fraction": 1.0
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -2.8196259608201146e-05,
+          "lower_95": -3.747206271902673e-05,
+          "upper_95": -1.9026291251914903e-05
+        },
+        "Fade": {
+          "estimate": -2.0180267862344657e-05,
+          "lower_95": -2.952484538669945e-05,
+          "upper_95": -1.1030642400940024e-05
+        }
+      },
+      "api_evaluated_states": 112
+    },
+    "20": {
+      "status": "available",
+      "scenario": "Historical PGA approach to a centered circular green with rough outside",
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": 0.3395450949973291,
+          "green_fraction": 1.0
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": 0.3395168987377209,
+          "green_fraction": 1.0
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": 0.3395249147294668,
+          "green_fraction": 1.0
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -2.8196259608201146e-05,
+          "lower_95": -3.747206271902673e-05,
+          "upper_95": -1.9026291251914903e-05
+        },
+        "Fade": {
+          "estimate": -2.0180267862344657e-05,
+          "lower_95": -2.952484538669945e-05,
+          "upper_95": -1.1030642400940024e-05
+        }
+      },
+      "api_evaluated_states": 112
+    }
+  },
+  "total_api_evaluated_states": 336,
+  "baseline_artifact": "strokes_gained_baseline.json"
+}

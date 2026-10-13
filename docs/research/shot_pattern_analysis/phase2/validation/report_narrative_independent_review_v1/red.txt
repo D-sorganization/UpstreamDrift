@@ -1,0 +1,175 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distractors _
+
+    def test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distractors():
+        from scripts.research.shot_pattern_analysis import final_report_inputs
+    
+        driver_valid = _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_combined2",
+            second_cell="driver_lean5_curve2_rotation2_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+            draw_effect={"estimate": 0.015, "lower_95": 0.008, "upper_95": 0.022},
+            fade_effect={"estimate": -0.005, "lower_95": -0.011, "upper_95": 0.001},
+        )
+        pw_valid = _make_source_pair(
+            first_cell="pitching_wedge_lean0_curve2_rotation2_combined2",
+            second_cell="pitching_wedge_lean5_curve2_rotation2_combined2",
+            first_protocol="pw-primary-face-bounds/1",
+            second_protocol="pw-control-face-bounds/1",
+            draw_effect={"estimate": 0.007, "lower_95": 0.002, "upper_95": 0.012},
+            fade_effect={"estimate": -0.002, "lower_95": -0.006, "upper_95": 0.002},
+        )
+        distractors = [
+            # Wrong lean (0->10)
+            _make_source_pair(
+                first_cell="driver_lean0_curve2_rotation2_combined2",
+                second_cell="driver_lean10_curve2_rotation2_combined2",
+                second_protocol="driver-control-speed-bounds/1",
+            ),
+            # Wrong curve (curve 1 instead of curve 2 for driver)
+            _make_source_pair(
+                first_cell="driver_lean0_curve1_rotation2_combined2",
+                second_cell="driver_lean5_curve1_rotation2_combined2",
+                second_protocol="driver-control-speed-bounds/1",
+            ),
+            # Wrong shaft SD (rotation 1 instead of rotation 2)
+            _make_source_pair(
+                first_cell="driver_lean0_curve2_rotation1_combined2",
+                second_cell="driver_lean5_curve2_rotation1_combined2",
+                second_protocol="driver-control-speed-bounds/1",
+            ),
+            # Wrong profile (shaft_only instead of combined2)
+            _make_source_pair(
+                first_cell="driver_lean0_curve2_rotation2_shaft_only",
+                second_cell="driver_lean5_curve2_rotation2_shaft_only",
+                second_protocol="driver-control-speed-bounds/1",
+            ),
+            # Wrong protocol (original_control instead of driver-control-speed-bounds/1)
+            _make_source_pair(
+                first_cell="driver_lean0_curve2_rotation2_combined2",
+                second_cell="driver_lean5_curve2_rotation2_combined2",
+                second_protocol="original_control/1",
+            ),
+            # Wrong PW curve (curve 1 instead of reviewed curve 2)
+            _make_source_pair(
+                first_cell="pitching_wedge_lean0_curve1_rotation2_combined2",
+                second_cell="pitching_wedge_lean5_curve1_rotation2_combined2",
+                second_protocol="pw-control-face-bounds/1",
+            ),
+        ]
+    
+        # Only driver present: driver selected, PW reported unavailable, distractors rejected
+        effects, unavailable = final_report_inputs.select_bounds_control_pairs(
+            [driver_valid, *distractors]
+        )
+>       assert len(effects) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([{'comparison_kind': 'across_lean', 'status': 'conditional_only', 'common_six_n': 9995, 'total_n_per_population': 1000...arison_kind': 'across_lean', 'status': 'conditional_only', 'common_six_n': 9995, 'total_n_per_population': 10000, ...}])
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:787: AssertionError
+_ test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity _
+
+    def test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity():
+        cell = _detailed_cell()
+        matrix = _matrix([cell], "final")
+        lean = {
+            "schema": "matched-across-lean/1",
+            "pairs": [],
+            "population": {"planned_pairs": 0},
+        }
+        interpretation = _qualified_interpretation()
+    
+        driver_pair = _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_combined2",
+            second_cell="driver_lean5_curve2_rotation2_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+            draw_effect={"estimate": 0.015, "lower_95": 0.008, "upper_95": 0.022},
+            fade_effect={"estimate": -0.005, "lower_95": -0.011, "upper_95": 0.001},
+        )
+        interpretation["bounds_control"] = {
+            "effects": [describe_effect_modification(driver_pair)],
+            "unavailable": [
+                "Pitching Wedge across-lean 0°→5° control (curve 2, shaft SD 2°, combined-2): Unavailable (absent from verified supplement comparisons)."
+            ],
+        }
+    
+        rendered = build_final_report.render_final_report(
+            matrix, matrix, lean, {}, interpretation=interpretation
+        )
+    
+        # 1. Bounds-control section
+        assert "### Fixed-Target Across-Lean Bounds Controls" in rendered
+        assert "bounds adapted after original search" in rendered
+        assert "original unavailable cells remain unchanged" in rendered
+        assert "rematched" in rendered and "causal" in rendered
+        assert "driver-control-speed-bounds/1" in rendered
+        assert "driver_lean0_curve2_rotation2_combined2" in rendered
+        assert "driver_lean5_curve2_rotation2_combined2" in rendered
+        assert "9,995 / 10,000" in rendered
+        assert "+0.015 [+0.008, +0.022]" in rendered
+>       assert "pw-control-face-bounds/1" in rendered
+E       AssertionError: assert 'pw-control-face-bounds/1' in '# Matched Shot Patterns: Final Conditional Simulation Report\n\n## Scope and Status\n\nThe primary within-lean matrix..._pdf docs/research/shot_pattern_analysis/phase2/REPORT.md docs/research/shot_pattern_analysis/phase2/REPORT.pdf\n```\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:854: AssertionError
+___ test_bounds_control_rejects_wrong_first_protocol_and_duplicate_identity ____
+
+    def test_bounds_control_rejects_wrong_first_protocol_and_duplicate_identity():
+        from scripts.research.shot_pattern_analysis.final_report_inputs import select_bounds_control_pairs
+    
+        arguments = dict(first_cell="driver_lean0_curve2_rotation2_combined2", second_cell="driver_lean5_curve2_rotation2_combined2", second_protocol="driver-control-speed-bounds/1")
+        wrong = _make_source_pair(**arguments, first_protocol="original_primary/1")
+        effects, unavailable = select_bounds_control_pairs([wrong])
+>       assert effects == []
+E       AssertionError: assert [{'comparison...: 10000, ...}] == []
+E         
+E         Left contains one more item: {'comparison_kind': 'across_lean', 'status': 'conditional_only', 'common_six_n': 9995, 'total_n_per_population': 10000, ...}
+E         Use -v to get more diff
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:880: AssertionError
+__ test_bounds_control_preserves_actual_unavailable_reason_without_invention ___
+
+    def test_bounds_control_preserves_actual_unavailable_reason_without_invention():
+        from scripts.research.shot_pattern_analysis.final_report_inputs import select_bounds_control_pairs
+    
+        pair = _make_source_pair(first_cell="pitching_wedge_lean0_curve2_rotation2_combined2", second_cell="pitching_wedge_lean5_curve2_rotation2_combined2", first_protocol="pw-primary-face-bounds/1", second_protocol="pw-control-face-bounds/1", status="unavailable", common_n=1)
+        pair["reason"] = "fewer_than_two_common_supported_shots"
+        effects, unavailable = select_bounds_control_pairs([pair])
+        assert not effects
+>       assert any(pair["reason"] in item for item in unavailable)
+E       assert False
+E        +  where False = any(<generator object test_bounds_control_preserves_actual_unavailable_reason_without_invention.<locals>.<genexpr> at 0x73b4b6a22190>)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:894: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_final_report.py::test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distractors
+FAILED tests/research/test_shot_pattern_final_report.py::test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity
+FAILED tests/research/test_shot_pattern_final_report.py::test_bounds_control_rejects_wrong_first_protocol_and_duplicate_identity
+FAILED tests/research/test_shot_pattern_final_report.py::test_bounds_control_preserves_actual_unavailable_reason_without_invention
+4 failed, 15 deselected, 6 warnings in 3.38s

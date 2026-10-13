@@ -1,0 +1,13 @@
+{
+  "worker_session": 71510,
+  "exit_code": 0,
+  "candidate_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "f4282ad097854b635a8c5e0a6c19b7cc8ac8a3e2d4384efb8ede89570db74c1b",
+    "tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py": "3bfc6fccd74a9644c9a1b718b610993fd224e0c2bc53fc77b7bde436bf200b5f"
+  },
+  "archives": {
+    "candidate.zip": "40fa0d0ff3c84a75e01cedd5d5b1ed80243c1c42e37955714963daa55f2a4952",
+    "worker_evidence.zip": "69674decf659820fcc03e8d7e87f11c51ffe0253653669eb17d6deaa9824cf66"
+  },
+  "scope": "Unaccepted Gemini candidate before independent improvements"
+}

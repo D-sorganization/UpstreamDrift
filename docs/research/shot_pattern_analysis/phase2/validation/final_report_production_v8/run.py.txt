@@ -1,0 +1,18 @@
+from pathlib import Path
+import json,subprocess,sys,hashlib,datetime,os
+p=Path(__file__).resolve().parents[2]
+e=Path(__file__).resolve().parent
+prior=json.loads((p/'validation/final_report_production_v6/start.json').read_text())
+args=prior['command'];cwd=prior['cwd']
+assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=cwd,text=True).strip()==prior['producer_commit']
+r={'status':'running','command':args,'cwd':cwd,'producer_commit':prior['producer_commit'],'started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'wrapper_pid':os.getpid()}
+(e/'start.json').write_text(json.dumps(r,indent=2)+'\n')
+with (e/'stdout.txt').open('w') as out,(e/'stderr.txt').open('w') as err:
+ child=subprocess.Popen(args,cwd=cwd,stdout=out,stderr=err)
+ r['child_pid']=child.pid
+ (e/'start.json').write_text(json.dumps(r,indent=2)+'\n')
+ code=child.wait()
+r.update(status='completed' if code==0 else 'failed',exit_code=code,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat())
+if code==0:r['outputs']={n:hashlib.sha256((p/n).read_bytes()).hexdigest() for n in ['REPORT.md','REPORT_CELLS.csv','REPORT_LEAN.csv','REPORT_PUBLICATION_RECEIPT.json']}
+(e/'exit.json').write_text(json.dumps(r,indent=2)+'\n')
+sys.exit(code)

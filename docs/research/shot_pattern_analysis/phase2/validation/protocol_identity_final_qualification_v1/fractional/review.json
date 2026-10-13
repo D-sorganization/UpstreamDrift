@@ -1,0 +1,46 @@
+{
+  "status": "component_checks_passed",
+  "scope": "Protocol-qualified filenames, full planned stem preflight, seven-artifact parity guard; not final publication acceptance",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_figure_identity.py": "fc475ced792c889c2e63a216b7194da2f0ab27ca8e940e472fcbb15c2b68e4d1",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "8a61cc4df94a59b4a8ee8ab110d51899e2390587e1f76862a6c871ea884f5754",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "3ec4bd21a86d7a2666a4cf7ea732a4668d86881434a87c864537c08716d8f47e",
+    "tests/tools/shot_pattern_analysis/test_figure_output_paths.py": "0c2d91bbe71aa6488c5b5ae08ef5153738904bc25fd0935f5f13ae393cbcc9d0",
+    "tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py": "f91467f1fc282224a5c464c8908870df1888231dff668bd22c56fb86c4ae16a8",
+    "tests/tools/shot_pattern_analysis/test_supplement_numeric_parity_guard.py": "317a6729aea015035b519df9353694c48307fdbaa278f1796b28a3c6dfcd4700"
+  },
+  "line_counts": {
+    "src/tools/shot_pattern_analysis/matched_figure_identity.py": 177,
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": 1068,
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": 938,
+    "tests/tools/shot_pattern_analysis/test_figure_output_paths.py": 40,
+    "tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py": 597,
+    "tests/tools/shot_pattern_analysis/test_supplement_numeric_parity_guard.py": 312
+  },
+  "validation": {
+    "focused": "45 passed, 1 slow deselected",
+    "renderer_regressions": "38 passed",
+    "ruff": "passed",
+    "format": "six files passed",
+    "mypy": "three sources passed",
+    "actual26_cell_slugs": "all unchanged; planned preflight passes"
+  },
+  "evidence_sha256": {
+    "rejected_figure.py.txt": "ae18896ee6789dd7d18a9c1901f2ffd8a09579398706bc42dcca153584ca476d",
+    "rejected_test.py.txt": "cb8b95bf4544b19797f59176a99a649251dc089e2f1c0061216a9462f58087a7",
+    "format.txt": "ef7d13d02214e98ca902b05257cdbe6a8e84f3b4714508efdc19766460b54209",
+    "actual26_slug_parity.json": "5f5ad27f962881f3899f915882d93c27b426bfc398735091582b12e76a59c75e",
+    "red.txt": "eaeccff640c997e8fe6d3214a915e305c3f4fd08e9c16cae2296c577c3770218",
+    "renderer-regressions.txt": "0d14b9e551ccba66dfb9fb576d502c1e5c750dacb270ec39d087d77528dd3be7",
+    "green.txt": "dcba107eec47d6b5c6cff2c979785d32f919e040c9da0d043a14d565c7933c6d",
+    "mypy.txt": "8228fcc5ce46d42d01caf3cd941f4e9c5f2bcc372bb5b147a2f0572d2dd675a8",
+    "ruff.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  "limitations": [
+    "Final complete saved-data pipeline and artifact receipt remain pending.",
+    "Parent owns actual384 path verification and four-pair graphical replay.",
+    "Initial provenance regression used a path-qualified key while actual source map uses basenames; corrected to basename before green. Both forms failed before helper registration."
+  ],
+  "no_simulation_or_bootstrap_run": true,
+  "no_commit": true
+}

@@ -1,0 +1,26 @@
+{
+  "utc": "2026-10-10T19:03:30.798501+00:00",
+  "reason": "Submodule update --no-fetch attempted initial remote clone; exact cached dependency is available. Stopped only owned clone descendants, not AGY or merge.",
+  "signals": [
+    {
+      "pid": 671863,
+      "executable": "git",
+      "start_ticks": "52725708"
+    },
+    {
+      "pid": 671750,
+      "executable": "git-remote-https",
+      "start_ticks": "52725545"
+    },
+    {
+      "pid": 671749,
+      "executable": "git",
+      "start_ticks": "52725544"
+    },
+    {
+      "pid": 671748,
+      "executable": "git",
+      "start_ticks": "52725542"
+    }
+  ]
+}

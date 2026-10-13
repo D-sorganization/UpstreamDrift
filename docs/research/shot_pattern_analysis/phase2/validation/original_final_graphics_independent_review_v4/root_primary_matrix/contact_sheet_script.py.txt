@@ -1,0 +1,39 @@
+from pathlib import Path
+from PIL import Image, ImageOps, ImageDraw
+import hashlib,json,csv
+root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+p=root/'final_figures_v1';v=root/'validation/original_final_graphics_independent_review_v4'
+h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
+m=json.loads((p/'figure_manifest.json').read_text())
+for name,expected in m['outputs'].items():assert h(p/name)==expected,name
+reconciled=[]
+for name in ('astra_driver_details','root_seven_iron_details','root_pitching_wedge_details','astra_social_details','root_social_comparisons'):
+ d=v/name
+ inventory=d/'inventory.json'
+ if not inventory.exists(): inventory=d/'review.json'
+ record=json.loads(inventory.read_text())
+ entries=record.get('files',[])
+ if not entries:
+  for f in d.glob('*.json'):
+   r=json.loads(f.read_text())
+   if isinstance(r,dict) and r.get('files'):entries=r['files'];inventory=f;break
+ for row in entries:
+  rel=row.get('path',row.get('relative_path',''))
+  rel=rel.removeprefix('final_figures_v1/')
+  if rel in m['outputs']:
+   assert m['outputs'][rel]==row['sha256'],rel
+   reconciled.append(rel)
+rows=list(csv.DictReader((p/'comparison_availability.csv').open()))
+print('Verified',len(m['outputs']),'manifest outputs; reconciled',len(set(reconciled)),'previously reviewed file hashes; comparisons',len(rows))
+(v/'primary_manifest_reconciliation.json').write_text(json.dumps({'manifest_sha256':h(p/'figure_manifest.json'),'verified_output_count':len(m['outputs']),'reconciled_review_files':sorted(set(reconciled)),'whole_run_accepted':False,'pending':'Caption repair and matrix visual review; control and supplemental jobs ongoing.'},indent=2)+'\n')
+files=sorted((p/'matrix').rglob('*.png'));assert len(files)==90
+out=v/'root_primary_matrix';out.mkdir(exist_ok=True)
+for k in range(0,len(files),6):
+ canvas=Image.new('RGB',(1800,930),'#eeeeee');draw=ImageDraw.Draw(canvas)
+ for n,f in enumerate(files[k:k+6]):
+  x=(n%3)*600;y=(n//3)*465
+  with Image.open(f) as im:
+   thumb=ImageOps.contain(im.convert('RGB'),(596,423));canvas.paste(thumb,(x+(600-thumb.width)//2,y+38))
+  draw.text((x+5,y+3),f'{k+n+1}: {f.name}',fill='black')
+ canvas.save(out/f'contact_{k//6+1:02}.jpg',quality=93)
+(out/'inventory.json').write_text(json.dumps({'files':[{'path':str(f.relative_to(p)),'sha256':h(f)} for f in files]},indent=2)+'\n')

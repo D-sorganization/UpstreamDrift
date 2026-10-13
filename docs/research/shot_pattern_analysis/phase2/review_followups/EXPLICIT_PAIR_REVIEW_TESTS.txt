@@ -1,0 +1,52 @@
+..............................                                           [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+7.11s call     tests/tools/shot_pattern_analysis/test_matched_lean_control.py::test_real_public_course_scoring_uses_paired_lean_rows
+1.92s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rechecks_transition_evidence_after_calculation
+1.61s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rechecks_course_score_helper_source_after_calculation
+0.88s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_rotation_sd_pair_reports_common_index_sg_difference_of_differences
+0.81s call     tests/tools/shot_pattern_analysis/test_matched_lean_control.py::test_joint_indices_and_unavailable_lean_pairs
+0.77s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rechecks_source_bytes_after_analysis
+0.71s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_reviewed_driver_speed_bound_pair_passes_full_explicit_api
+0.67s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_centers_nominal_delivery_and_uses_six_population_intersection
+0.59s call     tests/tools/shot_pattern_analysis/test_matched_supplement_report.py::test_loader_rejects_unknown_config_fields_and_nonradial_nominal_miss
+0.44s call     tests/tools/shot_pattern_analysis/test_matched_lean_control.py::test_separate_atomic_report_never_overwrites_frozen_cells
+0.34s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_curve_strength_pair_reports_paired_sg_interaction
+0.31s call     tests/tools/shot_pattern_analysis/test_matched_supplement_report.py::test_loader_requires_exact_protocol_inventory_and_marks_four_source_aliases
+0.29s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_supports_5_to_10_degrees
+0.26s call     tests/tools/shot_pattern_analysis/test_matched_supplement_report.py::test_loader_requires_one_shared_execution_snapshot_across_protocol_roots
+0.17s call     tests/tools/shot_pattern_analysis/test_matched_supplement_report.py::test_loader_rejects_missing_extra_duplicate_or_mislabelled_plan_cells
+0.15s setup    tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_effect_modification_bootstraps_difference_of_within_condition_benefits
+0.12s call     tests/tools/shot_pattern_analysis/test_matched_supplement_report.py::test_loader_rejects_wrong_bounds_even_if_cell_names_match
+0.12s call     tests/tools/shot_pattern_analysis/test_matched_supplement_report.py::test_loader_rejects_nonfinite_nominal_coordinates
+0.09s setup    tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rejects_coherently_rehashed_protected_execution[protected_source]
+0.07s setup    tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rejects_coherently_valid_different_execution

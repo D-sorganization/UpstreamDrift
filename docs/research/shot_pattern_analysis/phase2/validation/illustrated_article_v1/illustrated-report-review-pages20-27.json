@@ -1,0 +1,20 @@
+{
+  "scope": "Visual inspection of revised page PNGs 20\u201327 only; not final PDF acceptance",
+  "page_png_sha256": {
+    "20": "0b888b6587b4ef466d4d395d02b2d22285717028270d3b785ce82d2892cef594",
+    "21": "5bb34ac093c34252c4f3b0fc517c109c3f0080c7d9a13690dddd88b942b652fa",
+    "22": "ca087894a49dafb8e5b6137a17d30a8af3b8b8a7cb3a1fffb29d922f7010b43c",
+    "23": "bb0bc016b2b5a30e5be635ea814941947b0e427d4caf99659e312f274798f144",
+    "24": "bb7c2386556fb3faec303f9bef5cc0cb23cbcdd2ca4b071e40baa8aea20c9798",
+    "25": "88a9f8f8712711fe2345058b23dcd67a4f501aca05248709c7673c887c57222d",
+    "26": "960f69910659b396a7e5b13302748f96c234b5d24da908fec913c16a7ec606a3",
+    "27": "6b51092bb52d9272a9a6c76bf4843e80da68733ca13ff445648b8e0f23fc4ea4"
+  },
+  "findings": {
+    "20-23": "Tables 1\u20137 legible; Tables 4 and 6 start at top rather than being orphaned; no clipping or overlap.",
+    "24-25": "Table 9 continues with repeated header and explicit Continued caption; two-row continuation is sparse but readable. Tables 8, 10 and 11 are legible.",
+    "26": "Table 12 and publication-status text legible; paragraph continues onto page 27 without clipping.",
+    "27": "Old render has stale publication-status sentence and large blank remainder; pending parent\u2019s targeted rerender and rereview."
+  },
+  "conclusion": "Pages 20\u201326 pass scoped layout review; page 27 remains pending corrected rendering. This receipt does not bind a final PDF hash."
+}

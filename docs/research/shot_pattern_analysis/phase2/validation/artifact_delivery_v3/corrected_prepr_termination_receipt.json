@@ -1,0 +1,12 @@
+{
+  "status": "terminated_incomplete",
+  "exec_session": 28424,
+  "observed_session_exit": 143,
+  "child_pre_pr_pid": 2164894,
+  "child_missing": true,
+  "matching_pytest_process_missing": true,
+  "wrapper_exit_receipt_present": false,
+  "reason": "Termination source unknown; no complete pytest summary or final canonical gate result. Do not infer an engine failure or a passing gate.",
+  "log_sha256": "3ec39d6ca064cf486341722b7bdcbe6b0fb59792ffee9245307feed57d74fa4e",
+  "verified_utc": "2026-10-11T05:12:12.799435+00:00"
+}

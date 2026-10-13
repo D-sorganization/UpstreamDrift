@@ -1,0 +1,70 @@
+....................                                                     [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+============================= slowest 20 durations =============================
+3.24s setup    tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.41s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+0.40s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+0.23s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+0.22s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+0.21s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+0.18s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+0.18s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+0.14s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+0.13s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+0.12s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+0.11s call     tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.10s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+0.09s call     tests/research/test_supplement_publication_revision.py::test_report_load_uses_child_receipt_identity
+0.09s call     tests/research/test_supplement_publication_revision.py::test_child_mutation_during_second_parent_validation_rejected
+0.09s call     tests/research/test_supplement_publication_revision.py::test_coherently_rehashed_protected_source_is_still_rejected
+0.08s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+0.08s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+0.08s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+0.08s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]
+=========================== short test summary info ============================
+PASSED tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[source]
+PASSED tests/research/test_supplement_publication_revision.py::test_parent_mutation_during_render_rejected_without_receipt
+PASSED tests/research/test_supplement_publication_revision.py::test_wrong_renderer_scope_rejected
+PASSED tests/research/test_supplement_publication_revision.py::test_ordinary_dispatch_retains_public_parent_verifier
+PASSED tests/research/test_supplement_publication_revision.py::test_parent_executable_pin_rejects_tamper
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+PASSED tests/research/test_supplement_publication_revision.py::test_child_mutation_during_second_parent_validation_rejected
+PASSED tests/research/test_supplement_publication_revision.py::test_report_load_uses_child_receipt_identity
+PASSED tests/research/test_supplement_publication_revision.py::test_final_receipt_retains_parent_and_child_identity
+PASSED tests/research/test_supplement_publication_revision.py::test_coherently_rehashed_protected_source_is_still_rejected

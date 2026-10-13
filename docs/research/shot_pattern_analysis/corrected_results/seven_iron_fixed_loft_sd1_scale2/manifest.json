@@ -1,0 +1,33 @@
+{
+  "scenario": "seven_iron_fixed_loft_sd1_scale2",
+  "config": {
+    "club_id": "seven_iron",
+    "n_shots": 10000,
+    "face_sd_deg": 1.0,
+    "curve_scale": 2.0,
+    "seed": 20261008,
+    "club_speed_mps": 36.0,
+    "loft_deg": 24.0,
+    "attack_angle_deg": -4.0,
+    "clubhead_mass_kg": 0.272,
+    "delivery_mode": "fixed_loft",
+    "lie_deg": 63.0,
+    "shaft_lean_deg": 0.0,
+    "dt_s": 0.02,
+    "max_time_s": 12.0,
+    "target_radius_m": 15.0
+  },
+  "files_sha256": {
+    "shots.csv": "1d7fdcb25ccc2ba94c7a519dfcb2b3408b14e32216918ac00160a9196e14fa11",
+    "summary.json": "5eda9dbb130625d2732b10d8b932446cddd5f72fb505d0b8d44ef87eedde60cc",
+    "receipt.json": "eb57211a7d94509275864aadd330e65a421349ad4073a30dff0232720db5e538",
+    "overhead_flight.png": "5914db38ce7c471d01b4068490c921870e9438f43c87cee31c4266dc4e82beab",
+    "dispersion.png": "8305550a6673c84a813d771d3429d83e5eedc7ca7bdcc4c0e4fd269325326ac9",
+    "dispersion_equal_range.png": "570cd97e267bb3fb17b6166392ee936d9569e4399e4d77d703f21d9e388c811b",
+    "strokes_gained.json": "0053b20ce5a22e5e4923c321d44b8a4f2b904e6cbd53458eccdd332c8b4fdb67",
+    "strokes_gained_baseline.json": "334d425d328c6dcbc43002d6134cfc359c2688213c2a37065c1184991103260a",
+    "run_start.json": "43cc883c0594727e0b3505777acadf4fc75b167042f3ae10699198e12b489c6f"
+  },
+  "scoring_revision": "table9-full-plus-anchor-reconciled-putting/2",
+  "pre_correction_scoring_archive_sha256": "9c5130e845b91442fe427d9166a7c89c4b48655a50a849ff7abc5129df7da9ec"
+}

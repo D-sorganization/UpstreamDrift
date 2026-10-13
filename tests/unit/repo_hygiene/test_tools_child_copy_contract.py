@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 from datetime import date
 import json
 import os
@@ -313,6 +314,38 @@ def _converges_on_canonical(relative: Path) -> bool:
     return normalised_local == _normalise_seam_imports(canonical)
 
 
+def _is_pure_provider_alias(relative: Path) -> bool:
+    """Permit only the exact deprecated core/exception aliases to pinned Tools."""
+    if (
+        relative.parent.as_posix() != "sidekick/data_processing"
+        or "sidekick" not in _split_entries()
+    ):
+        return False
+    name = relative.stem
+    if relative.suffix != ".py" or name not in {"core", "exceptions"}:
+        return False
+    path = _SHARED_ROOT / relative
+    if not path.is_file() or path.is_symlink():
+        return False
+    title = "Core" if name == "core" else "Exceptions"
+    expected = f'''"""Compatibility Alias for the Pinned Tools Data Processing {title}."""
+import sys
+import warnings
+from src.shared.python.sidekick_data_processing_bridge import load_provider_module
+warnings.warn(
+    "Legacy sidekick.data_processing.{name} resolves to the pinned Tools provider.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+sys.modules[__name__] = load_provider_module("{name}")
+'''
+    try:
+        actual_tree = ast.parse(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, SyntaxError):
+        return False
+    return ast.dump(actual_tree) == ast.dump(ast.parse(expected))
+
+
 def _direct_tools_edit_offenders(
     base: str,
     tools_paths: set[str],
@@ -327,6 +360,7 @@ def _direct_tools_edit_offenders(
             or _is_tools_child_copy(_SHARED_ROOT / relative)
         )
         and not _converges_on_canonical(relative)
+        and not _is_pure_provider_alias(relative)
         and not _is_ud_canonical(relative)
         and not _is_deferred(relative)
         and not _is_split_ud_only(relative, tools_paths)
@@ -424,6 +458,66 @@ def test_current_branch_does_not_edit_tools_child_copies() -> None:
         "Deleting a migrated child copy remains allowed.\n\n"
         "Direct child-copy edits:\n  " + "\n  ".join(offenders)
     )
+
+
+@pytest.mark.parametrize("name", ["core", "exceptions"])
+def test_compatibility_alias_has_only_provider_delegation(name: str) -> None:
+    """Legacy module files carry no independently executable Tools logic."""
+    assert _is_pure_provider_alias(Path(f"sidekick/data_processing/{name}.py"))
+
+
+def test_compatibility_alias_requires_sidekick_split_ruling(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(sys.modules[__name__], "_split_entries", lambda: frozenset())
+    assert not _is_pure_provider_alias(Path("sidekick/data_processing/core.py"))
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "\nclass LocalCopy: pass\n",
+        "\nfrom os import system\n",
+        "\nprint('extra execution')\n",
+        "\nsys.modules['other'] = load_provider_module('core')\n",
+        "\ndef copied_calculation(): return 1\n",
+    ],
+)
+def test_compatibility_alias_rejects_extra_execution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, change: str
+) -> None:
+    """An alias must not camouflage a new local implementation or side effect."""
+    shared = tmp_path / "shared"
+    relative = Path("sidekick/data_processing/core.py")
+    path = shared / relative
+    path.parent.mkdir(parents=True)
+    canonical = _SHARED_ROOT / relative
+    path.write_text(canonical.read_text() + change)
+    monkeypatch.setattr(sys.modules[__name__], "_SHARED_ROOT", shared)
+    assert not _is_pure_provider_alias(relative)
+
+
+@pytest.mark.parametrize(
+    "replacement",
+    [
+        'load_provider_module("io")',
+        'load_provider_module("core", extra=True)',
+        "load_provider_module(name)",
+    ],
+)
+def test_compatibility_alias_rejects_wrong_provider_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, replacement: str
+) -> None:
+    shared = tmp_path / "shared"
+    relative = Path("sidekick/data_processing/core.py")
+    path = shared / relative
+    path.parent.mkdir(parents=True)
+    canonical = _SHARED_ROOT / relative
+    path.write_text(
+        canonical.read_text().replace('load_provider_module("core")', replacement)
+    )
+    monkeypatch.setattr(sys.modules[__name__], "_SHARED_ROOT", shared)
+    assert not _is_pure_provider_alias(relative)
 
 
 def test_comparison_base_falls_back_to_fetched_main_ref(

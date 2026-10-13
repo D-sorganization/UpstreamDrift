@@ -1,0 +1,7 @@
+{
+  "status": "failed",
+  "finished_utc": "2026-10-11T00:38:25.952026+00:00",
+  "pid": 1559536,
+  "error": "RuntimeError('batch failed: curve_strength_000: 1')",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/run_remaining_batches.py\", line 86, in <module>\n    raise RuntimeError(f\"batch failed: {name}: {result.returncode}\")\nRuntimeError: batch failed: curve_strength_000: 1\n"
+}

@@ -1,0 +1,3 @@
+# Historical Plot-Verifier Unit Sources
+
+These six deterministic gzip files preserve exact Git blobs from the two recorded full commits. The manifest and literal test map bind commit, repository path, raw SHA256 and stored SHA256. Unit tests transport only these exact requests, preserving all source authentication, AST and84 exact numerical comparisons without requiring historical objects in the shallow CI clone. Production Git retrieval is unchanged and remains separately evidenced by the full-history verification receipt. These fixtures do not renew current plotting or scientific qualification.

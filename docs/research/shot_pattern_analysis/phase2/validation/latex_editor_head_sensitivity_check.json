@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-10-10T06:15:12.404195+00:00",
+  "status": "compile-failed",
+  "failure_stage": "Tectonic bundle initialization before document parsing",
+  "diagnostic": "src/config.rs:154:18 Result::unwrap(): uncached bundle; GET https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz failed",
+  "source_path": "docs/research/shot_pattern_analysis/shot_pattern_analysis.tex",
+  "source_sha256": "a4913d2c23351ce4c0a83185fb4c63895c577b1d3c195b5ebd8a350e00846a8d",
+  "source_change": "Added source-bound deterministic head-parameter/contact-law sensitivity; no numerical model changes",
+  "saved_sensitivity_sha256": "3bd6acb1118b6cbedd03171744a09a1b810f8a77cd7e4dc72c1d609181edb558",
+  "editor": "Existing editor retained; no replacement PDF",
+  "design_reference_compile": {
+    "path": "docs/research/shot_pattern_analysis/phase2/matched_delivery_reference.tex",
+    "sha256": "b1023c04449f79b9f5adf65ce7b427f8773cb4aca5bb3bd1f15418f0b455fa70",
+    "status": "same Tectonic bundle initialization failure before parsing; no PDF exported or tab opened"
+  },
+  "title_case_check": "3 documents checked; 0 violations",
+  "independent_review": "Astra verified all ten maxima, 300 evaluations / 268 supported / 32 unsupported, Driver maximum condition, fixed delivery and restitution definitions; no factual correction."
+}

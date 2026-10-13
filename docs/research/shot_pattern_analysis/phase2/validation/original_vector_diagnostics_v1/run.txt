@@ -1,0 +1,8 @@
+inspected 100 errors 0
+inspected 200 errors 0
+inspected 300 errors 0
+inspected 400 errors 0
+inspected 500 errors 0
+inspected 600 errors 0
+inspected 700 errors 0
+DONE 744 0 errors 0 warning files

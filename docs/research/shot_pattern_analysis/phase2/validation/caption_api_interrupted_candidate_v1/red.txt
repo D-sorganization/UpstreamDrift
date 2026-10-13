@@ -1,0 +1,203 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+_____ test_academic_density_covariance_caption_containment_and_separation ______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_academic_density_covarian0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7565ac9bca10>
+
+    def test_academic_density_covariance_caption_containment_and_separation(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Academic paired-density figure with covariance captions must not expand or overlap."""
+        canvas_agg_cls, plt, img_cls = _load_plotting_deps()
+        import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
+        from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            _condition_caption,
+            _pair_condition_label,
+            _write_pair_density_figure,
+        )
+    
+        first, second, point_sets, _ = _synthetic_covariance_pair()
+        first_label = _pair_condition_label("curve_strength", first)
+        second_label = _pair_condition_label("curve_strength", second)
+    
+        captured_figures: list[Any] = []
+        orig_save = msf._save_figure
+    
+        def capturing_save(figure: Any, stem: Path) -> dict[str, Path]:
+            captured_figures.append(figure)
+            return orig_save(figure, stem)
+    
+        monkeypatch.setattr(msf, "_save_figure", capturing_save)
+    
+        output_stem = tmp_path / "density_cov_test"
+        outputs = _write_pair_density_figure(
+            point_sets,
+            first=first,
+            second=second,
+            comparison="curve_strength",
+            first_label=first_label,
+            second_label=second_label,
+            target_x=125.0,
+            common_n=10,
+            output_stem=output_stem,
+        )
+    
+        # 1. Output PNG width must not be expanded by uncontained caption text.
+        # Standard 16-inch wide figure at 300 dpi with tight bbox is ~4400-4750 px.
+        # Unpatched covariance caption expands width to 6115-6449 px.
+        img = img_cls.open(outputs["png"])
+>       assert img.size[0] <= 4850, (
+            f"Exported academic density PNG width expanded to {img.size[0]} px (> 4850 px); "
+            "indicates unwrapped caption text extending beyond the canvas."
+        )
+E       AssertionError: Exported academic density PNG width expanded to 6270 px (> 4850 px); indicates unwrapped caption text extending beyond the canvas.
+E       assert 6270 <= 4850
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py:137: AssertionError
+_ test_academic_and_social_overhead_covariance_caption_containment_and_separation _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_academic_and_social_overh0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x756585247050>
+
+    def test_academic_and_social_overhead_covariance_caption_containment_and_separation(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Academic and social overhead figures must contain text without clipping or overlap."""
+        canvas_agg_cls, plt, img_cls = _load_plotting_deps()
+        import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
+        from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            _condition_caption,
+            _create_pair_overhead_figure,
+            _pair_condition_label,
+            _write_pair_overhead_figure,
+        )
+    
+        first, second, _, trajectory_sets = _synthetic_covariance_pair()
+        first_label = _pair_condition_label("curve_strength", first)
+        second_label = _pair_condition_label("curve_strength", second)
+    
+        output_stem = tmp_path / "overhead_cov_test"
+        outputs = _write_pair_overhead_figure(
+            trajectory_sets,
+            first=first,
+            second=second,
+            comparison="curve_strength",
+            first_label=first_label,
+            second_label=second_label,
+            target_x=125.0,
+            output_stem=output_stem,
+        )
+    
+        # 1. Academic overhead PNG width must not be expanded (> 4850 px).
+        # Unpatched overhead PNG is ~6367-6450 px.
+        img_acad = img_cls.open(outputs["png"])
+>       assert img_acad.size[0] <= 4850, (
+            f"Exported academic overhead PNG width expanded to {img_acad.size[0]} px (> 4850 px)."
+        )
+E       AssertionError: Exported academic overhead PNG width expanded to 6274 px (> 4850 px).
+E       assert 6274 <= 4850
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py:228: AssertionError
+___________ test_render_selected_pair_figures_closed_kind_rejection ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu0')
+
+    def test_render_selected_pair_figures_closed_kind_rejection(tmp_path: Path) -> None:
+        """render_selected_pair_figures must reject unknown, invalid, or empty figure_kinds."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            render_selected_pair_figures,
+        )
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:119: ImportError
+_______ test_render_selected_pair_figures_exact_metadata_and_path_parity _______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu1')
+
+    def test_render_selected_pair_figures_exact_metadata_and_path_parity(
+        tmp_path: Path,
+    ) -> None:
+        """Selected renderer ledger entries and file paths match ordinary renderer exactly."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            _render_pair_figures,
+            render_selected_pair_figures,
+        )
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:153: ImportError
+____ test_render_selected_pair_figures_selective_generation_no_extra_files _____
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu2')
+
+    def test_render_selected_pair_figures_selective_generation_no_extra_files(
+        tmp_path: Path,
+    ) -> None:
+        """Only requested figure kinds are written to disk; no extra untracked files."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            render_selected_pair_figures,
+        )
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:197: ImportError
+____________ test_render_selected_pair_figures_overhead_social_only ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu3')
+
+    def test_render_selected_pair_figures_overhead_social_only(tmp_path: Path) -> None:
+        """Requesting only overhead_social_png writes only that single file."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            render_selected_pair_figures,
+        )
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:220: ImportError
+__________ test_render_selected_pair_figures_incomplete_returns_empty __________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2213/test_render_selected_pair_figu4')
+
+    def test_render_selected_pair_figures_incomplete_returns_empty(tmp_path: Path) -> None:
+        """Pair with uncompleted status returns empty list without error."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            render_selected_pair_figures,
+        )
+E       ImportError: cannot import name 'render_selected_pair_figures' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py:240: ImportError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_density_covariance_caption_containment_and_separation
+FAILED tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_and_social_overhead_covariance_caption_containment_and_separation
+FAILED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_closed_kind_rejection
+FAILED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_exact_metadata_and_path_parity
+FAILED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_selective_generation_no_extra_files
+FAILED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_overhead_social_only
+FAILED tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py::test_render_selected_pair_figures_incomplete_returns_empty
+7 failed, 6 warnings in 16.17s

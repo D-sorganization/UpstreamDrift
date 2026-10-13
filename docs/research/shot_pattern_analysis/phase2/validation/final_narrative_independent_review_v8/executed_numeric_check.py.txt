@@ -1,0 +1,66 @@
+import json,re,hashlib
+from pathlib import Path
+from decimal import Decimal
+P=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+paths=[P/'REPORT.md',P/'validation/selected_headline_traceability_v1/review.json',P/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json',P/'review_followups/FINAL_NARRATIVE_ACCEPTANCE.md']
+def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+before={str(p.relative_to(P)):sha(p) for p in paths}
+r=paths[0].read_text(); data=json.loads(paths[1].read_text()); pairs=json.loads(paths[2].read_text())['comparisons']; checks=[]
+def require(x,msg):
+ if not x: raise ValueError(msg)
+def number(token,value,label):
+ d=Decimal(token.strip()); tolerance=Decimal(5).scaleb(d.as_tuple().exponent-1)
+ require(abs(d-Decimal(str(value)))<=tolerance+Decimal('1e-15'),f'{label}: {token} != {value}')
+ checks.append(label)
+def interval(s,value,label):
+ t=re.fullmatch(r'([+\-\d.eE]+) \[([+\-\d.eE]+), ([+\-\d.eE]+)\]',s)
+ require(t is not None,label+' format')
+ for token,key in zip(t.groups(),['estimate','lower_95','upper_95']): number(token,value[key],label+'/'+key)
+def count(s,a,b,label):
+ require(s==f'{a:,} / {b:,}',label);checks.append(label)
+resolved=r.split('### Resolved Zero-Lean Curve and Variability Comparison')[1].split('##',1)[0]
+keys={k:(cell,protocol) for k,cell,protocol in re.findall(r'\*\*(C\d+)\*\*: `([^`]+)`; protocol `([^`]+)`',resolved)}
+require(len(keys)==24,'24 keys')
+rows={(x['cell'],x['pattern']):x for x in data['rows']}
+for line in resolved.splitlines():
+ if not re.match(r'\| C\d+ \|',line):continue
+ fields=[x.strip() for x in line.strip('|').split('|')];key=fields[0];cell,protocol=keys[key]
+ source=next(x for x in data['cells'] if x['cell']==cell);require(source['source_protocol']==protocol,key+' protocol')
+ if '[' in line:
+  for i,pattern in enumerate(['Draw','Fade']):
+   row=rows[cell,pattern];interval(fields[i+2],row['paired_sg_vs_straight'],key+pattern)
+   count(fields[1],row['scoring_paired_n'],row['attempted_n'],key+pattern+' common3')
+ else:
+  for i,pattern in enumerate(['Straight','Draw','Fade']):
+   row=rows[cell,pattern];count(fields[i+1],row['supported_n'],row['attempted_n'],key+pattern+' individual')
+for title,end in [('### Direct Curve and Shaft-Variability Interactions','### Fixed-Target'),('### Fixed-Target Across-Lean Bounds Controls','### Conclusions')]:
+ section=r.split(title)[1].split(end)[0]
+ pattern=r'\*\*(E\d+)\*\* — (\w+):\s+A: `([^`]+)`; `([^`]+)`\.\s+B: `([^`]+)`; `([^`]+)`\.'
+ mapping={}
+ for key,kind,pa,ca,pb,cb in re.findall(pattern,section):
+  matches=[p for p in pairs if p['comparison_kind']==kind and [(s['protocol_id'],s['cell']) for s in p['sources']]==[(pa,ca),(pb,cb)]]
+  require(len(matches)==1,key+' unique ordered source');mapping[key]=matches[0]
+ require(len(mapping)==(12 if 'Direct' in title else 2),'interaction inventory')
+ for line in section.splitlines():
+  if not re.match(r'\| E\d+ \|',line):continue
+  key,pat,val,n=[s.strip() for s in line.strip('|').split('|')];p=mapping[key]
+  interval(val,p['course_scoring_effect_modification'][pat],title+key+pat)
+  count(n,p['common_supported_n'],p['total_n_per_population'],title+key+pat+' common6')
+synthesis=r.split('### Conclusions and Geometric Mechanism Synthesis')[1].split('###',1)[0]
+for line in synthesis.splitlines():
+ if not re.match(r'\| (driver|seven_iron|pitching_wedge) \|',line):continue
+ fields=[s.strip() for s in line.strip('|').split('|')];club=fields[0]
+ if fields[1] in ['Draw','Fade']:
+  selected=[x for x in data['rows'] if x['club']==club and x['pattern']==fields[1]]
+  vals=[x['paired_sg_vs_straight'] for x in selected];lo,hi=fields[2].split(' to ')
+  number(lo,min(v['estimate'] for v in vals),club+fields[1]+' min');number(hi,max(v['estimate'] for v in vals),club+fields[1]+' max')
+  positive=sum(v['lower_95']>0 for v in vals);negative=sum(v['upper_95']<0 for v in vals)
+  require(fields[3]==f'{positive} / {negative} / {8-positive-negative}','direction count')
+  ns=[x['scoring_paired_n'] for x in selected];require(fields[4]==f'{min(ns):,}–{max(ns):,} / 10,000','range n')
+ else:
+  sd=int(fields[1]);x=next(x for x in data['rows'] if x['club']==club and x['pattern']=='Straight' and x['curve']==1 and x['profile']=='shaft_only' and x['shaft_twist_sd_deg']==sd)
+  number(fields[2],x['lateral_downrange_correlation'],club+str(sd)+' correlation');number(fields[3],x['mean_downrange_m']-x['target_x_m'],club+str(sd)+' bias');count(fields[4],x['supported_n'],x['attempted_n'],'bias population')
+require(before=={str(p.relative_to(P)):sha(p) for p in paths},'input stability')
+result={'passed':True,'scope':'Independent display/identity/denominator reconciliation, no recomputation of statistics','source_sha256':before,'numeric_and_count_checks':len(checks),'selected_conditions':24,'individual_rows':72,'direct_interactions':12,'fixed_target_interactions':2,'checks':checks}
+Path('/tmp/p2-final-narrative-review/numeric_check.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({k:v for k,v in result.items() if k!='checks'},indent=2))

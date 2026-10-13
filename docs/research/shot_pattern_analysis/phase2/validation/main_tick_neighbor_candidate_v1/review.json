@@ -1,0 +1,62 @@
+{
+  "schema": "main-tick-neighbor-candidate/1",
+  "status": "component_accepted_for_regeneration",
+  "sources": {
+    "src/tools/shot_pattern_analysis/academic_plots.py": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb",
+    "tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py": "8d2e59ceac7e83c40da731eba35444649ee4e24011f4b7568567e179e656cf26"
+  },
+  "production_builder_sha256": "daecb84c22a758e013c2ebdd27d2e0617999ccf693bba117637640a2bf764ac1",
+  "inputs_sha256": {
+    "docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/summary.json": "e8b2e18554af3a47c502ac26285c0ae852fc8b7854915265b0abfe15f8ce5aa3",
+    "docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/manifest.json": "a751aaeb2f13d83d623bf9781fcdc8d603c203a35639d5689ca90f69f2d0a5f2",
+    "docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/shots.csv.gz": "75ba66e1a9463335ad422cc5ae1ca01c878a7cb2361bcea4d990c4dd839f424d",
+    "docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean5_curve2_rotation2_combined2/summary.json": "921f4fb57442ada57884d0a22b1744b6f92ee73d07de37d1c5dceede961e87ac",
+    "docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean5_curve2_rotation2_combined2/manifest.json": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+    "docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean5_curve2_rotation2_combined2/shots.csv.gz": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776",
+    "docs/research/shot_pattern_analysis/phase2/final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/summary.json": "e3df4aa95b97c484d67278c8a8512925c8af6ec99609b7f2b0ebdf72e7201b9f",
+    "docs/research/shot_pattern_analysis/phase2/final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/manifest.json": "24c949a67a8cf148b9d1b8ff2e4fb58c7113a9aad3d4ba27a6449c80147b25ca",
+    "docs/research/shot_pattern_analysis/phase2/final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/shots.csv.gz": "ef382cce339cd4ec3bd1042dddb5d65350820eae3fc8e17d1a4c67b27d8b161e"
+  },
+  "actual_render_receipt_sha256": "7fed0069bbf98ae9b7cb9eaeb679847981bbf738f2a5fa0085dc74cbd1123997",
+  "actual_pngs_visually_reviewed": 6,
+  "minimum_main_tick_gutter_pt": 8.26050015297542,
+  "narrow_case_xlim_m": [
+    144.49132941108118,
+    152.18175832485224
+  ],
+  "narrow_case_shared_ticks_m": [
+    144.8,
+    146.4,
+    148.0,
+    149.6,
+    151.2
+  ],
+  "test_red_failures": 2,
+  "limitation": "Component qualification only; primary v3 remains changes_required and full regenerated outputs need acceptance. Initial zero-target harness was rejected; final harness calls exact current MAIN builder with saved targets/metadata. Diagnostic PNG export uses 100dpi; production builder is called with its 180dpi argument. No physical simulations or altered density inputs.",
+  "tests": {
+    "final_suite_passed": 20,
+    "invariant_suite_passed": 9,
+    "ruff": "pass",
+    "mypy": "pass"
+  },
+  "evidence_sha256": {
+    "exploratory_passing_ranges.txt": "d9de9e33a2d81e4632eee6b7011300ce11300674cc674c87e35379ed6d712533",
+    "pitching_wedge_lean0_curve1_rotation1_shaft_only_academic.png": "144ba08e7e56855ce43a554bfbac88a3c1c9293e764a28315bac908d8aa072a2",
+    "pitching_wedge_lean0_curve1_rotation1_shaft_only_social.png": "a9f0fe681a718561c3d48cdd603b56bc8a69ee5be49e90b9734264f024187b0d",
+    "seven_iron_lean10_curve1_rotation1_shaft_only_academic.png": "373875de16dfe851fda7be2472920e7424b3d3505857d0baab16cc697f6ed2f5",
+    "EXPLORATORY_NOTE.txt": "dce894e71c4421f5a22cf8dbfd1568c6fef0669a588d56fa02f55e4f74271b1c",
+    "actual_render_log.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ruff.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "driver_lean5_curve2_rotation2_combined2_academic.png": "3814419998f697178de17d5fe64971d5cce8c681cc5001004619c06486f87ce8",
+    "invariants_green.txt": "cf3394784ea6717ddf9fc1db1c03a234a48996d842c28476a2d8c0c5cd28a7c7",
+    "green_initial.txt": "b9b42f4023f53238df9b15683e2343aed003ed3ef3a7305195009e8667ef1db0",
+    "red.txt": "935080017c588e0a5e1cb5823d12e536215e548eac7707151be06bcd02f026f3",
+    "actual_review.json": "7fed0069bbf98ae9b7cb9eaeb679847981bbf738f2a5fa0085dc74cbd1123997",
+    "green.txt": "d4b4088cb628c8c024b92d2b751e70e2aa84909dd12f7682dc2c1948166259d2",
+    "seven_iron_lean10_curve1_rotation1_shaft_only_social.png": "2645be49af8c418e8795d939ae122e8b3aeb9985f838609eed2ff84e4fbb97b6",
+    "driver_lean5_curve2_rotation2_combined2_social.png": "81bae2da229a64432f90dbe7e28854717c2cf2a43b6cfc9a7fbb860dc7df3cf0",
+    "mypy.txt": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+    "production_limit_parity.json": "08991ff94e03fe7102dc29a0c74c673fa96eb465aac8e20b70564fa5466e8e51",
+    "actual_render.py.txt": "320a2179862d740c22da8381a25a62034be59b21d72512e7216234443a454458"
+  }
+}

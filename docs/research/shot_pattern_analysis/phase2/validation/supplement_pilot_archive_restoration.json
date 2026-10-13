@@ -1,0 +1,38 @@
+{
+  "status": "passed",
+  "scope": "Packaging and Fresh Restoration Only",
+  "files": 188,
+  "protocols": {
+    "pw_primary_face": {
+      "completed": 18,
+      "unavailable": 0,
+      "not_run": 0
+    },
+    "pw_control_face": {
+      "completed": 4,
+      "unavailable": 0,
+      "not_run": 0
+    },
+    "driver_control_speed": {
+      "completed": 4,
+      "unavailable": 0,
+      "not_run": 0
+    }
+  },
+  "bundle_files": {
+    "supplement_pilot_v1/archive_manifest.json": {
+      "sha256": "691738f72c90af3c877d01afd4385ae5b94bb16d7c5e866aad4694ae9840158b",
+      "bytes": 50872
+    },
+    "supplement_pilot_v1/supplement_pilot_v1-001.zip": {
+      "sha256": "8f719c0831b8047245ab4fa663d413c8ae02b5eddfc1bae569c0068880c6eaa2",
+      "bytes": 5663598
+    }
+  },
+  "archive_manifest_sha256": "691738f72c90af3c877d01afd4385ae5b94bb16d7c5e866aad4694ae9840158b",
+  "exact_file_hashes_and_sizes": true,
+  "full_reports_equal": true,
+  "temporary_directory_removed": true,
+  "originals_and_archives_unchanged": true,
+  "executed_script_sha256": "fe79e3d9dc73741269f41af6dc9a3b5363daca10e313acdc3078c5c0edafc74d"
+}

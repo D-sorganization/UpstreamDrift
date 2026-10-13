@@ -141,7 +141,12 @@ class TestAssistantPackage:
 
     def test_package_exposes_all_classes(self) -> None:
         """The package __init__ should re-export all three key classes."""
-        import src.shared.python.ai.gui.assistant as pkg
+        import importlib
+
+        # ``import a.b.c as pkg`` reads ``c`` as an attribute of the parent,
+        # which is lost when the parent is re-aliased to ``shared.python``
+        # mid-run (#8766); import_module returns the registered submodule.
+        pkg = importlib.import_module("src.shared.python.ai.gui.assistant")
 
         for name in ("MessageWidget", "StreamWorker", "ChatInput"):
             assert hasattr(pkg, name), f"Package missing: {name}"

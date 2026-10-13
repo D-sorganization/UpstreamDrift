@@ -3522,6 +3522,54 @@ export interface SwingObjectiveCompareRequest {
   objective_keys?: string[] | null;
 }
 
+/**
+ * Export a Full or Custom selection of a report as the S4 package.
+ */
+export interface SwingReportExportRequest {
+  /** swing-report-v1 document */
+  report: Record<string, unknown>;
+  /** Full report or Custom */
+  mode: "full" | "custom";
+  /** Custom selection (ignored for Full) */
+  plot_ids?: string[];
+}
+
+/**
+ * One plot as the dialog shows it (text only, never data).
+ */
+export interface SwingReportPlotRow {
+  plot_id: string;
+  title: string;
+  kind: string;
+  /** False for a withheld plot */
+  enabled: boolean;
+  /** 'Not Validated' or advertised */
+  status_label: string;
+  /** Uncertainty text or withheld reason */
+  detail: string;
+  unavailable_reason?: string | null;
+}
+
+/**
+ * A ``swing-report-v1`` document to show; validated by the route.
+ */
+export interface SwingReportViewRequest {
+  /** swing-report-v1 document */
+  report: Record<string, unknown>;
+}
+
+/**
+ * Rows of a validated report plus the default Custom selection.
+ */
+export interface SwingReportViewResponse {
+  report_id: string;
+  /** Download name of the export */
+  package_filename: string;
+  rows: SwingReportPlotRow[];
+  /** Enabled plots selected by default in Custom mode */
+  default_custom_ids: string[];
+}
+
 export interface SwingRequest {
   id: string;
   name: string;

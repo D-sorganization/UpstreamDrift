@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/run_remaining_batches.py"
+  ],
+  "pid": 1559536,
+  "start_ticks": 54759429,
+  "launched_utc": "2026-10-11T00:31:27.997370+00:00",
+  "log": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/remaining_runner.log",
+  "start_new_session": true
+}

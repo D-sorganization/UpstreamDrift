@@ -1,0 +1,34 @@
+import csv,hashlib,json,collections,io
+from pathlib import Path
+from datetime import datetime,timezone
+p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');old=p/'presentation_preview_rejected_supplement_v2/supplement_report_v1';new=p/'supplement_report_v1';out=p/'validation/supplement_v3_numeric_comparison_review';out.mkdir(parents=True,exist_ok=True)
+names=['REPORT_SUPPLEMENT_COMPARISONS.json','REPORT_SUPPLEMENT_COMPARISONS.csv','REPORT_SUPPLEMENT_COMPARISONS.md','REPORT_SUPPLEMENT.json','REPORT_SUPPLEMENT.csv'];files=[d/n for d in [old,new] for n in names];qualified=p/'validation/across_lean_interaction_review_v1/actual_control_effects.json';files.append(qualified);raw={str(f):f.read_bytes() for f in files};hashes={k:hashlib.sha256(v).hexdigest() for k,v in raw.items()}
+def read(d,n):return json.loads(raw[str(d/n)])
+def key(x):return x['comparison_kind'],tuple((s['protocol_id'],s['cell']) for s in x['sources'])
+def diff(a,b,path=''):
+ if type(a)!=type(b):return [path]
+ if isinstance(a,dict):return [path+'/'+k for k in a.keys()^b.keys()]+[q for k in a.keys()&b.keys() for q in diff(a[k],b[k],path+'/'+k)]
+ if isinstance(a,list):
+  if len(a)!=len(b):return [path]
+  return [q for i,(x,y) in enumerate(zip(a,b)) for q in diff(x,y,path+'/'+str(i))]
+ return [] if a==b else [path]
+a=read(old,names[0])['comparisons'];b=read(new,names[0])['comparisons'];ma={key(x):x for x in a};mb={key(x):x for x in b};assert len(a)==len(b)==len(ma)==len(mb)==384;assert ma.keys()==mb.keys();counts=dict(collections.Counter(x['comparison_kind'] for x in b));assert counts=={'across_lean':56,'curve_strength':164,'shaft_rotation_sd':164}
+paths=collections.Counter()
+for k,x in ma.items():
+ y=mb[k];d=set(diff(x,y));expected={'/analysis_source_sha256/matched_lean_control.py'}
+ if k[0]=='across_lean':expected|={'/course_scoring_effect_modification_scope','/course_scoring_effect_modification','/course_scoring_provenance'};assert set(y['course_scoring_effect_modification'])=={'Draw','Fade'}
+ assert d==expected,(k,d);assert x['patterns']==y['patterns'];paths.update(d)
+assert read(old,'REPORT_SUPPLEMENT.json')==read(new,'REPORT_SUPPLEMENT.json')
+assert raw[str(old/'REPORT_SUPPLEMENT.csv')]==raw[str(new/'REPORT_SUPPLEMENT.csv')]
+a_csv=list(csv.DictReader(io.StringIO(raw[str(old/names[1])].decode())));b_csv=list(csv.DictReader(io.StringIO(raw[str(new/names[1])].decode())));assert len(a_csv)==len(b_csv)==1152;csv_diffs=collections.Counter()
+for x,y in zip(a_csv,b_csv):
+ changed={k for k in x if x[k]!=y[k]};allow={'analysis_source_sha256'}
+ if x['comparison_kind']=='across_lean' and x['physical_pattern'] in ['Draw','Fade']:allow|={'sg_effect_modification_strokes','sg_effect_lower_95_strokes','sg_effect_upper_95_strokes'}
+ assert changed<=allow;csv_diffs.update(changed)
+selected=[]
+for q in json.loads(raw[str(qualified)])['results']:
+ x=q['pair_result'];y=mb[key(x)];assert x==y;selected.append({'club':q['club'],'common_supported_n':y['common_supported_n'],'sources':y['sources'],'effect':y['course_scoring_effect_modification'],'exact_full_pair_object_parity':True})
+assert [x['common_supported_n'] for x in selected]==[9940,9999]
+assert all(hashlib.sha256(Path(f).read_bytes()).hexdigest()==v for f,v in hashes.items())
+receipt={'schema':'independent-supplement-v3-numeric-review/1','status':'provisional_numeric_parity_pass','producer_complete':False,'utc':datetime.now(timezone.utc).isoformat(),'input_sha256':hashes,'inputs_unchanged_after_review':True,'pair_counts':counts,'total_pairs':384,'per_pattern_objects_exactly_preserved':384,'comparison_csv_rows':1152,'json_difference_paths':dict(paths),'csv_difference_columns':dict(csv_diffs),'supplement_inventory_json_equal':True,'supplement_inventory_csv_bytes_equal':True,'selected_controls':selected,'findings':[],'limits':['Live output; final production receipt and artifact hashes must reconcile these same bytes.','Markdown is hash-bound but not independently re-rendered here; comparison checks target numeric JSON/CSV.','No simulation, scoring calculation or bootstrap was rerun.']}
+(out/'review.json').write_text(json.dumps(receipt,indent=2)+'\n');(out/'REVIEW.md').write_text('# Supplemental V3 Numerical Parity Review\n\nProvisional numerical pass: all 384 ordered source-pair identities remain identical (164 curve-strength, 164 shaft-SD, 56 across-lean). Every existing per-pattern object, population, status, estimate and interval is exactly preserved. Recursive JSON differences consist only of the matched_lean_control source hash and the 56 newly emitted across-lean interaction/scope/scoring-provenance blocks. The 1,152-row CSV likewise differs only in analysis provenance and the newly populated across-lean Draw/Fade interaction columns. The 26-unique-cell/4-alias report inventory JSON is identical and its CSV is byte-identical.\n\nThe selected Driver and Pitching Wedge curve2, SD2, combined-noise 0→5° controls are exactly equal as complete pair objects to the prior independent actual-data qualification, with common-six counts 9,940 and 9,999. All recorded input hashes remained stable through this review.\n\nThis is not final production acceptance: rendering remains live, and the eventual production receipt must bind these bytes. No Monte Carlo, bootstrap or score calculation was repeated. Numeric evidence is in review.json; Markdown files were hash-bound without claiming a new full narrative/render review.\n');print('PASS',hashlib.sha256((out/'review.json').read_bytes()).hexdigest());print(dict(csv_diffs))

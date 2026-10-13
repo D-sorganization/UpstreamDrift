@@ -1,0 +1,250 @@
+# Completion Audit: Shot-Pattern Analysis Matched-Delivery Goal
+
+**Audit Date**: October 9, 2026  
+**Auditor**: Antigravity (Gemini 3.8 Flash High)  
+**Target Repository**: `UpstreamDrift`  
+**Target Worktree**: `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`  
+**Branch**: `codex/shot-pattern-matched-delivery`  
+**Audit Mode**: Read-only completion inspection (no production source, tests, validation receipts, or GUI state edited; live Monte Carlo processes protected and undisturbed; headless inspection only; no simulations executed; no GitHub mutations or issue closures).
+
+---
+
+## 1. Executive Summary
+
+This audit assesses the completion of the phase-two **Matched Shot-Pattern Analysis** goal against all explicit user requirements:
+- Integrated shot-pattern tile with Driver, 7-Iron, and Pitching Wedge
+- Matched nominal physical landings without post-flight aiming
+- Sourced static loft documentation
+- Shaft lean variations at 0°, 5°, and 10°
+- Shaft twist SD 1° and 2°
+- Contact horizontal and vertical SD 0.25 inch
+- Variable club speed SD 1 and 2 mph
+- Variable club path SD 0.5°
+- User-editable symmetric covariance matrix across all seven delivery noise variables with positive-semidefinite (PSD) validation
+- Publication graphics: 2D endpoint density, discrete highest-density region (HDR) contours, scatter dot overlay, and raw overhead flight trajectories
+- Complete atomic export bundle and configuration JSON import/export
+- Appropriate conditional course strokes gained (SG) modeling
+
+### Key Findings
+
+1. **Core Scientific & Numerical Foundation**: **PASSED**.  
+   The underlying physics, numerical solvers, 3D rigid delivery geometry (`club_geometry.py`), nominal matching (`nominal_matching.py`), 7-variable Gaussian noise generator (`noise.py`), academic plotting (`academic_plots.py`, `density.py`), and atomic export pipeline (`matched_export.py`) are fully implemented, rigorously unit-tested, and scientifically sound.
+2. **Tile Integration & Embedded Launcher Registration**: **PASSED**.  
+   `_embed_adapter.py`, `pyproject.toml`, `models.yaml`, and `launcher_manifest.json` are properly configured. `MainWidget` in `gui.py` embeds `MatchedStudyWidget` inside a dedicated tab ("Matched Delivery Study"). Clean lifecycle management, bounded shutdown, and lazy PyQt imports conform to repo contracts.
+3. **Material Unmet UI Requirement in `matched_gui.py`**: **UNMET IN GUI PRESENTATION**.  
+   While `matched_runner.py` computes conditional course strokes gained via `score_course_endpoints()` and saves it to `summary.json` under `course_scoring`, the GUI presentation layer `MatchedStudyWidget._completed()` in `matched_gui.py` **does not extract or display strokes gained anywhere in the UI view**. In contrast, the legacy tab (`gui.py`) displays Model SG in its summary table and a dedicated strokes-gained label.
+4. **Tile Default Tab UX Inconsistency**: **OBSERVED CAVEAT**.  
+   `models.yaml` describes the tile as featuring matched delivery, shaft rotation, strike variation, and covariance. However, `MainWidget` defaults to Tab 0 ("Independent Pattern Comparison", the Phase-1 1D face-variation model), requiring users to explicitly click Tab 1 ("Matched Delivery Study") to access the matched controls.
+5. **Initial Speed SD Display Default**: **MINOR NUMERIC DISCREPANCY**.  
+   `_DEFAULT_SD[2]` in `matched_gui.py` is initialized to `0.25` in SI m/s, which converts to `0.56 mph SD` on screen instead of `1.0` or `2.0 mph SD`. However, the control is a fully functional `QDoubleSpinBox` accepting 1.0 or 2.0 mph.
+
+---
+
+## 2. Requirement-by-Requirement Audit Matrix
+
+| # | Requirement | Implementation Status | Source Evidence | Test Evidence | Covered vs. Unverified Runtime |
+|---|-------------|-----------------------|-----------------|---------------|--------------------------------|
+| 1 | **Integrated shot-pattern tile** | **Implemented** (Tab 1 in `MainWidget`) | `src/config/models.yaml:731-744`<br>`pyproject.toml:382`<br>`src/tools/shot_pattern_analysis/_embed_adapter.py:10-52`<br>`src/tools/shot_pattern_analysis/gui.py:235-248` | `tests/ui/tools/shot_pattern_analysis/test_launcher_registration.py:23-44`<br>`tests/ui/tools/shot_pattern_analysis/test_embed_adapter.py:30-46`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:33-42, 493-506` | Headless unit/UI lifecycle covered; embedded tab rendered within height limits. |
+| 2 | **Driver / 7-Iron / Wedge presets** | **Implemented** | `src/tools/shot_pattern_analysis/matched_config.py:84-121`<br>`src/tools/shot_pattern_analysis/matched_gui.py:141-150, 319-357` | `tests/tools/shot_pattern_analysis/test_matched_config.py:1-40`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:59-74` | Covered; presets enforce documented geometries and support "Modified" customization. |
+| 3 | **Matched nominal physical landings (no postflight aiming)** | **Implemented** | `src/tools/shot_pattern_analysis/nominal_matching.py:78-157`<br>`src/tools/shot_pattern_analysis/matched_runner.py:170-220`<br>`src/tools/shot_pattern_analysis/matched_gui.py:88-137, 668-698` | `tests/tools/shot_pattern_analysis/test_nominal_matching.py:1-85`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:323-363` | Covered; least-squares solves face/speed to land within ≤0.05 m; trajectories are never rotated post-flight. |
+| 4 | **Static loft documentation** | **Implemented** | `src/tools/shot_pattern_analysis/matched_config.py:23, 41, 95, 101, 113`<br>`src/tools/shot_pattern_analysis/club_geometry.py:1-100`<br>`src/tools/shot_pattern_analysis/matched_gui.py:192, 329-331, 381-384`<br>`src/tools/shot_pattern_analysis/README.md:29-31` | `tests/tools/shot_pattern_analysis/test_club_geometry.py:1-60`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:44-57` | Covered; static loft explicitly cited from Titleist GT2 / 720 T100 and distinguished from delivered loft. |
+| 5 | **Lean 0 / 5 / 10** | **Implemented** | `src/tools/shot_pattern_analysis/matched_matrix.py:130`<br>`src/tools/shot_pattern_analysis/matched_gui.py:156-158`<br>`src/tools/shot_pattern_analysis/matched_lean_control.py:24` | `tests/tools/shot_pattern_analysis/test_matched_matrix.py:17`<br>`tests/tools/shot_pattern_analysis/test_matched_lean_control.py:1-80`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:64` | Covered; factorial matrix checks {0°, 5°, 10°}; GUI spinbox accepts [-30°, 30°]. |
+| 6 | **Shaft twist SD 1 / 2** | **Implemented** | `src/tools/shot_pattern_analysis/matched_matrix.py:133`<br>`src/tools/shot_pattern_analysis/matched_gui.py:29, 206-222` | `tests/tools/shot_pattern_analysis/test_matched_matrix.py:97-98`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:92, 261` | Covered; matrix uses 1° and 2° profiles; GUI spinbox allows 0.0° to 15.0° (default 1.2°). |
+| 7 | **Contact horizontal / vertical SD 0.25 inch** | **Implemented** | `src/tools/shot_pattern_analysis/noise.py:18-19`<br>`src/tools/shot_pattern_analysis/matched_matrix.py:76-87`<br>`src/tools/shot_pattern_analysis/matched_gui.py:27, 32-33, 41-42, 218` | `tests/tools/shot_pattern_analysis/test_noise.py:1-60`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:50-51, 103-104` | Covered; displays in inches (`in SD`), default 0.25 in, scaled to SI metres (`0.00635 m`). |
+| 8 | **Variable speed SD 1 / 2 mph** | **Implemented** | `src/tools/shot_pattern_analysis/matched_matrix.py:63-75`<br>`src/tools/shot_pattern_analysis/matched_gui.py:31, 40, 206-222` | `tests/tools/shot_pattern_analysis/test_matched_matrix.py:15-30`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:102` | Covered in matrix (1 & 2 mph) and GUI spinbox (`mph SD`); default UI display value is 0.56 mph. |
+| 9 | **Variable path SD 0.5 deg** | **Implemented** | `src/tools/shot_pattern_analysis/matched_matrix.py:51-62`<br>`src/tools/shot_pattern_analysis/matched_gui.py:27, 30, 218` | `tests/tools/shot_pattern_analysis/test_matched_matrix.py:15-30`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:52` | Covered; default in GUI is exactly 0.5° SD; matrix profiles use 0.5° SD. |
+| 10 | **Editable covariance across all 7 noise variables** | **Implemented** | `src/tools/shot_pattern_analysis/noise.py:14-58`<br>`src/tools/shot_pattern_analysis/matched_gui.py:224-277, 386-440` | `tests/tools/shot_pattern_analysis/test_noise.py:15-45`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:105-128, 289-305, 508-528` | Covered; 7x7 table, auto-mirroring, non-editable unit diagonal, strict PSD validation with eigenvalue clipping of roundoff. |
+| 11 | **Density / HDR / scatter / overhead graphics** | **Implemented** | `src/tools/shot_pattern_analysis/density.py:91-216`<br>`src/tools/shot_pattern_analysis/academic_plots.py:173-330, 488-530`<br>`src/tools/shot_pattern_analysis/matched_export.py:150-166`<br>`src/tools/shot_pattern_analysis/matched_gui.py:305-317, 702-715` | `tests/tools/shot_pattern_analysis/test_academic_plots.py:1-250`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:307-321` | Covered; exports PNG/PDF/SVG for 2D density (`pcolormesh`), HDR contours (50/80/95%), scatter dots (≤600), overhead flights. |
+| 12 | **Export** | **Implemented** | `src/tools/shot_pattern_analysis/matched_export.py:174-300`<br>`src/tools/shot_pattern_analysis/matched_gui.py:281-288, 474-509, 727-748` | `tests/tools/shot_pattern_analysis/test_matched_export.py:1-120`<br>`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:130-189, 402-436` | Covered; atomic staging and rename; gzip shots, summary JSON, baseline, receipt, manifest sha256, config JSON import/export. |
+| 13 | **Appropriate conditional course SG** | **Partially Unmet in GUI Presentation** | `src/tools/shot_pattern_analysis/course_score_vectors.py:33-118`<br>`src/tools/shot_pattern_analysis/scenario_scoring.py:18-88`<br>`src/tools/shot_pattern_analysis/matched_runner.py:308-326`<br>`src/tools/shot_pattern_analysis/matched_export.py:224-225`<br>`src/tools/shot_pattern_analysis/matched_gui.py:647-715` | `tests/tools/shot_pattern_analysis/test_course_score_vectors.py:24-64`<br>`tests/tools/shot_pattern_analysis/test_course_scoring_delegation.py:17-39`<br>`tests/tools/shot_pattern_analysis/test_matched_runner.py:109-124` | **Backend Covered; GUI View Missing**: Backend computes scenario-specific conditional SG and exports to `summary.json`; however, `MatchedStudyWidget` UI completely omits SG from its results view. |
+
+---
+
+## 3. Deep-Dive Findings and Technical Observations
+
+### Finding 1: Course Strokes Gained Display in `MatchedStudyWidget` (`matched_gui.py`)
+
+#### Specification vs. Implementation
+The user explicitly requested:
+> *"integrated shot-pattern tile with ... appropriate conditional course SG. Review actual gui.py, matched_gui.py ... Find any material unmet explicit requirement or actual inconsistency."*
+
+#### Backend Implementation (`matched_runner.py` & `course_score_vectors.py`)
+In the backend, conditional course SG is fully implemented:
+1. `course_score_vectors.py` defines hypothetical flat course scenarios:
+   - **Driver**: 400 m hole, tee start, 30 m fairway corridor (`fairway_half_width_m = 15.0 m`), rough outside.
+   - **Irons / Wedge**: fairway start at nominal straight carry (`target_x_m`), circular green (`green_radius_m = 15.0 m`), rough outside.
+   - Lookups delegate to Mark Broadie (2011) PGA Tour baseline curves.
+2. `matched_runner.py` (lines 308–326) invokes `score_course_endpoints()` and handles conditionality:
+   ```python
+   if len(indices) < request.n_shots:
+       scoring["status"] = "conditional_only"
+       scoring["full_population_status"] = "unavailable_unsupported_terminal_lies"
+   else:
+       scoring["full_population_status"] = (
+           "available_under_hypothetical_course_assumptions"
+       )
+   ```
+3. `matched_export.py` preserves `course_scoring` in `summary.json` and writes `scoring_baseline.json`.
+
+#### Frontend Omission (`matched_gui.py`)
+In `MatchedStudyWidget` (`matched_gui.py`):
+1. There is no column, table, or label dedicated to strokes gained.
+2. In `_completed()` (lines 647–715), the summary payload is loaded from `output_dir / "summary.json"`:
+   - It reads `summary['target_x_m']`, `summary['nominals']`, and `summary.get('summary', {}).items()`.
+   - It formats nominal face/path, speed in mph, delivered loft, residual in metres, supported shot counts, realized face/path correlation, and unsupported reasons into `self.result_label`.
+   - It **never reads** `summary.get("course_scoring")` or `summary.get("scoring")`.
+   - It never displays `mean_strokes_gained`, paired SG differences vs. Straight, or the course scenario description.
+3. In contrast, the legacy presenter in `gui.py` (lines 169–181, 510–559):
+   - Includes a "Model SG" column in `summary_table`.
+   - Populates `mean_strokes_gained` per pattern.
+   - Formats a detailed label: `Model-Conditional Strokes Gained: {scenario} ... Paired Difference vs. Straight (95% Monte Carlo Interval): {intervals}`.
+
+**Impact**: A user running the Matched Delivery Study through the GUI cannot view the Strokes Gained results without navigating to the filesystem and opening `summary.json` or running offline report scripts.
+
+---
+
+### Finding 2: Integrated Tile Manifest vs. Active Tab Selection
+
+#### Registration Architecture
+- `src/config/models.yaml` (lines 731–744):
+  ```yaml
+  - id: "shot_pattern_analysis"
+    name: "Shot Pattern Analysis"
+    description: "Compare straight, draw, and fade patterns with matched delivery, shaft rotation, strike variation, and covariance. Install: pip install -e '.[gui-tools]'; requires the native upstream-physics wheel."
+    type: "special_app"
+    path: "src/tools/shot_pattern_analysis/__main__.py"
+    launcher:
+      category: "tool"
+      status: "ready"
+      default_launch: "tab"
+  ```
+- `pyproject.toml` (line 382) registers entry-point:
+  ```toml
+  shot_pattern_analysis = "src.tools.shot_pattern_analysis._embed_adapter"
+  ```
+- `_embed_adapter.py` instantiates `MainWidget(parent=parent)`.
+
+#### Tab Setup in `gui.py`
+In `gui.py` (lines 235–248):
+```python
+self.mode_tabs = QtWidgets.QTabWidget(self)
+legacy_scroll = QtWidgets.QScrollArea()
+legacy_scroll.setObjectName("independentPatternScroll")
+legacy_scroll.setWidgetResizable(True)
+legacy_scroll.setWidget(legacy_page)
+self.mode_tabs.addTab(legacy_scroll, "Independent Pattern Comparison")
+
+from .matched_gui import MatchedStudyWidget
+self.matched_study = MatchedStudyWidget(self.mode_tabs)
+self.mode_tabs.addTab(self.matched_study, "Matched Delivery Study")
+root_layout = QtWidgets.QVBoxLayout(self)
+root_layout.setContentsMargins(0, 0, 0, 0)
+root_layout.addWidget(self.mode_tabs)
+```
+- By default, Qt `QTabWidget` activates tab index 0 ("Independent Pattern Comparison").
+- Tab 0 represents the Phase-1 simulation model (independent patterns with post-flight aiming rotation, 1D face SD noise only, fixed path).
+- The user must manually click Tab 1 ("Matched Delivery Study") to access the matched delivery extension advertised in `models.yaml`.
+
+---
+
+### Finding 3: CLI Entry Point Discrepancy
+
+- `python -m src.tools.shot_pattern_analysis` without arguments correctly launches `MainWidget` (which hosts both GUI modes).
+- `python -m src.tools.shot_pattern_analysis --output <dir> ...` executes Phase-1 `core.run_analysis()` only (`__main__.py` lines 108–137). It accepts only `--face-sd`, `--delivery-mode`, etc., and does not expose the 7 matched noise dimensions, covariance matrix, or nominal matching bounds.
+- Headless execution of the Phase-2 matched study is handled by a separate module:
+  `python -m src.tools.shot_pattern_analysis.matched_matrix <dir> ...` (or `matched_supplement.py`).
+- This separation is documented in `README.md` (lines 56–79), but users expecting `python -m src.tools.shot_pattern_analysis` to run matched simulations via CLI will encounter only Phase-1 parameters.
+
+---
+
+### Finding 4: Default Speed SD Display Value
+
+- In `matched_matrix.py` (lines 63–75), the matrix profiles define club speed SD as:
+  - 1 mph (`0.44704 m/s`) for `shaft_speed1`, `combined1`, and `cov_...`
+  - 2 mph (`2 * 0.44704 m/s`) for `shaft_speed2` and `combined2`
+- In `matched_gui.py`:
+  - `_DISPLAY["speed_mps"]` sets the control label to "Club Speed SD" with suffix "mph SD".
+  - `_SCALE_TO_SI["speed_mps"] = 0.44704`.
+  - However, `_DEFAULT_SD` (line 27) initializes index 2 to `0.25` (in SI m/s).
+  - On line 218: `control.setValue(self._DEFAULT_SD[2] / self._SCALE_TO_SI["speed_mps"])` evaluates to `0.25 / 0.44704 ≈ 0.559 mph SD`.
+- **Result**: When opened, the spinbox displays `0.56 mph SD` rather than 1.0 or 2.0 mph SD.
+- The control is fully editable up to 20.0 mph SD, and config JSON import/export preserves exact values.
+
+---
+
+### Finding 5: Covariance & Positive-Semidefinite Validation
+
+The 7-variable covariance implementation in `noise.py` and `matched_gui.py` is exemplary:
+1. `NOISE_FIELDS` defines the exact canonical sequence:
+   `("shaft_rotation_deg", "path_deg", "speed_mps", "contact_horizontal_m", "contact_vertical_m", "shaft_lean_deg", "attack_angle_deg")`.
+2. The UI table in `matched_gui.py` locks the diagonal to `1.000` and mirrors off-diagonal edits symmetrically.
+3. `NoiseSpec.__post_init__()` validates:
+   - Symmetry (`np.allclose(corr, corr.T, atol=1e-12, rtol=0)`)
+   - Unit diagonal (`np.allclose(np.diag(corr), 1.0, atol=1e-12, rtol=0)`)
+   - Correlation bounds (`np.max(np.abs(corr)) <= 1.0 + 1e-12`)
+   - Positive semidefiniteness (`float(np.linalg.eigvalsh(corr).min()) >= -1e-10`)
+4. Sampling in `sample_paired_noise()` uses `np.linalg.eigh` with eigenvalue clipping of negative numerical roundoff, ensuring identical standard normal draws are transformed and reused across Straight, Draw, and Fade.
+5. In `matched_gui.py`, attempting to run with a non-PSD matrix is caught synchronously and displays an explicit error message in `status_label` without starting background worker processes.
+
+---
+
+### Finding 6: Graphics Export Compliance
+
+The graphics pipeline in `academic_plots.py` and `matched_export.py` fulfills every element of the visual requirement:
+1. **Density**: 2D histogram probability density ($1/\text{m}^2$) computed by `shared_histogram_density()` on shared spatial grids, plotted via `pcolormesh`.
+2. **HDR**: Discrete empirical highest-density-region contours for 50%, 80%, and 95% probability mass plotted via `axis.contour` with distinct line styles (solid, dashed, dotted).
+3. **Scatter Overlay**: Deterministic colored scatter dots overlaying raw landing points (capped at $\le 600$ points with count disclosed in captions) via `axis.scatter`.
+4. **Marginals**: 1D normalized histogram density marginals on top and right subplots.
+5. **Overhead Trajectories**: Raw simulated flight paths plotted on shared axes to the target point without post-flight aiming via `write_overhead_trajectory_figure()`.
+6. **Multi-Format Export**: All figures export simultaneously to PNG, PDF, and SVG.
+7. **GUI Previews**: `MatchedStudyWidget` provides two dedicated tabs ("Endpoint Density" and "Raw Flight Trajectories") with smooth aspect-ratio scaling.
+
+---
+
+## 4. Architectural & Lifecycle Contract Compliance
+
+1. **Lazy GUI Imports**:
+   - `_embed_adapter.py` imports no PyQt6 or GUI dependencies at module level.
+   - `test_launcher_registration.py` explicitly tests that importing `_embed_adapter` leaves `sys.modules` free of `PyQt6` and `gui`.
+2. **Embedded Sizing**:
+   - `min_size = (1000, 760)` declared in `EmbedCapabilities`.
+   - `MatchedStudyWidget` wraps its extensive control inputs in a scroll area (`matchedControlsScroll`) ensuring controls fit within the 760 px height budget without clipping or layout overflow (`test_matched_delivery_controls_fit_launcher_height_with_scroll`).
+3. **Shutdown and Cleanup**:
+   - `cleanup()` is idempotent and shuts down background worker threads via `AsyncActionBar.shutdown()`.
+   - `delete_when_idle()` connects worker completion signals to `deleteLater()`, preventing segfaults during asynchronous teardown.
+4. **Data Layer Decoupling**:
+   - All physics (`matched_physics.py`), geometry (`club_geometry.py`), calibration (`nominal_matching.py`), noise (`noise.py`), scoring (`course_score_vectors.py`, `scenario_scoring.py`), and runner (`matched_runner.py`) modules operate completely independently of PyQt and are testable headlessly.
+
+---
+
+## 5. Verification Status & Evidence Provenance
+
+| Evidence Class | Status | Verification Summary |
+|----------------|--------|----------------------|
+| **Unit Tests** | **Covered** | 50+ unit tests across `tests/tools/shot_pattern_analysis/` pass in headless execution environments, verifying geometry, contact laws, noise sampling, nominal matching, scoring cache, and academic plots. |
+| **UI Tests** | **Covered** | `tests/ui/tools/shot_pattern_analysis/test_matched_gui.py` (528 lines), `test_embed_adapter.py` (301 lines), and `test_launcher_registration.py` (68 lines) cover offscreen controls, lifecycle, import/export, and sizing. |
+| **Live Monte Carlo** | **Undisturbed & Frozen** | Active background processes (PIDs 1934294, 1934587, 1979491) executing final supplemental shards were monitored without interference. Zero workspace files were modified. |
+| **GUI Runtime Presentation** | **Partially Verified (Headless)** | Headless Qt widget instantiation and signal/slot inspection confirm widget creation, layout containment, and preview mapping; actual on-screen rendering is unverified due to headless constraints. |
+
+---
+
+## 6. Recommendations for Post-Freeze Follow-Up
+
+*(For consideration after current live Monte Carlo runs complete; no code changes permitted during frozen execution)*
+
+1. **Expose Course SG in `MatchedStudyWidget`**:
+   Update `MatchedStudyWidget._completed()` in `src/tools/shot_pattern_analysis/matched_gui.py` to extract `summary.get("course_scoring")` and append the mean strokes gained per pattern (and paired differences vs. Straight with 95% bootstrap intervals) to `self.result_label` or a dedicated summary table.
+2. **Align Default Tab with Tile Manifest**:
+   Consider having `MainWidget` default to Tab 1 ("Matched Delivery Study") or setting `self.mode_tabs.setCurrentIndex(1)` when opened as the Shot Pattern Analysis tool, so users immediately see the matched delivery features described in `models.yaml`.
+3. **Synchronize Speed SD Display Default**:
+   Update `_DEFAULT_SD[2]` in `matched_gui.py` to `1.0 * 0.44704` (or `2.0 * 0.44704`) so the GUI defaults to 1.0 or 2.0 mph SD on startup.
+4. **Export Re-Exports in Package Façade**:
+   Export `MatchedConfig`, `matched_preset`, `run_matched_analysis`, and `MatchedStudyWidget` in `src/tools/shot_pattern_analysis/__init__.py` to provide a unified package-level public API.
+
+---
+
+## 7. Conclusion
+
+The shot-pattern analysis codebase represents a high-integrity, scientifically qualified, and well-tested implementation of matched-delivery simulation. All 12 domain requirements are implemented in the underlying scientific engine, matrix orchestration, plotting, and export packages.
+
+The single material unmet requirement is that **conditional course Strokes Gained (SG) is not displayed in the GUI presentation layer of `MatchedStudyWidget`** (`matched_gui.py`), despite being computed, validated, and saved in `summary.json`. This review is recorded exclusively in this document with zero mutation to workspace source, tests, or live Monte Carlo execution.

@@ -1,0 +1,130 @@
+{
+  "status": "changes_required",
+  "scope": "Completed original primary graphics only; not final publication or empirical qualification",
+  "inventory_receipt_sha256": "2d974ec9c5445332caacb47affdab6fbc0785918ccd3441e8009b5ec88f19deb",
+  "all_png_contact_sheets_visually_inspected": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "contact_png_coverage": 288,
+  "full_size_inspected": [
+    {
+      "index": 29,
+      "page": 2,
+      "path": "details/driver_lean5_curve2_rotation2_combined2/density.png",
+      "sha256": "22a8940afb7376d99080e5296e3a0b893a41c7d4c5f8d2d06bf5028304da6c47"
+    },
+    {
+      "index": 54,
+      "page": 4,
+      "path": "details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.png",
+      "sha256": "7b4401014e40d53f3ba7570b906e235c2ce4c9913fa7f6ca97429693bcc1eb44"
+    },
+    {
+      "index": 103,
+      "page": 7,
+      "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+      "sha256": "7df6aeb244c3a82d09d0b1b44082d36e8fcfbe26c1785587bbf341869125b77d"
+    },
+    {
+      "index": 123,
+      "page": 8,
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_supported_fraction.png",
+      "sha256": "066192c20f3051503630b47c0a79c8caa017a2502a764f7a63eef7c4ee4e3878"
+    },
+    {
+      "index": 145,
+      "page": 10,
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
+      "sha256": "18c580e6b40ec07009e544f5c93421d3532a8c2ab684bf22e9e4694ea3b78ac7"
+    },
+    {
+      "index": 181,
+      "page": 12,
+      "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "a328ae2ec1594aa1ffeee6b716d6bda15ef3c309d161c3b2f5dd4d55366c2ab5"
+    },
+    {
+      "index": 211,
+      "page": 14,
+      "path": "social/comparisons/driver/combined2/Draw/curve_scale.png",
+      "sha256": "370435944b52fd08bd4db23ceb0267d30a3bc900e0df4fbc207128390ca1d7d8"
+    },
+    {
+      "index": 235,
+      "page": 15,
+      "path": "social/comparisons/seven_iron/shaft_only/Draw/curve_scale.png",
+      "sha256": "ebaf2eaadd5df2c77edd303575ae078a3f4785ab0aa6bbc5300605fa4b3acf2d"
+    },
+    {
+      "index": 254,
+      "page": 16,
+      "path": "social/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+      "sha256": "6ea7deaf5c9e763a8702cd26a10df16933e4a28408f083d672978fef1530f38e"
+    },
+    {
+      "index": 269,
+      "page": 17,
+      "path": "social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.png",
+      "sha256": "4618cfb1a033969e4b0807fbfc90855e49d8052ad2e8572315bed0e1bc27e91a"
+    },
+    {
+      "index": 286,
+      "page": 18,
+      "path": "social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
+      "sha256": "77feb526c4b519da2814c74102e0cdd3566eb9f584cb4e8cdc4031a77f27c1d6"
+    }
+  ],
+  "findings": [
+    {
+      "id": "G1",
+      "status": "changes_required",
+      "scope": "30 completed direct-comparison cards (18 shaft-SD and12 curve); PNG/PDF/SVG",
+      "finding": "Fixed curve or shaft-twist SD and explicit non-twist noise units absent from standalone comparison captions."
+    },
+    {
+      "id": "G2",
+      "status": "changes_required",
+      "scope": "90 matrix PNGs",
+      "finding": "Unlabeled noise SD vector omits units and correlation identity; covariance strata cannot be distinguished visually. SG pages also lack tee/approach course geometry and target-matching context."
+    },
+    {
+      "id": "G3",
+      "status": "changes_required",
+      "scope": "Matrix numerical annotations",
+      "finding": "Uniform black text has inadequate visual contrast over dark purple/green cells. Confirmed at full size in support and RMSE matrices."
+    },
+    {
+      "id": "G4",
+      "status": "changes_required",
+      "scope": "Driver lean5 curve2 rotation2 combined2 academic density, all3 panels",
+      "finding": "Last main tick180 overlaps marginal origin0.00; exact saved endpoint probe measures -2.6009024608186pt gap."
+    },
+    {
+      "id": "G5",
+      "status": "changes_required",
+      "scope": "Academic detail caption units",
+      "finding": "Named noise values omit units: speed0.89408, horizontal/verticalcontact0.00635, path0.5. Use m/s or mph, m or mm, and degrees explicitly."
+    }
+  ],
+  "numerical_or_hash_failure": false,
+  "control_status": "Manifest absent at final review checkpoint; no whole-control acceptance",
+  "population_review": "Individual supported endpoints per panel; common-three SG in heatmaps. Direct-comparison graphics are descriptive individual populations, not common-six paired inference. Overhead consists of nominal plus supported shots among first5 saved Monte Carlo inputs; it does not depict10k paths. No aim rotation; vertical magnification disclosed. HDR is histogram sample mass, not parameter CI. PW lean5 fallback explicitly shown and indexed.",
+  "limitations": "Contact sheets check every PNG for broad layout/completeness. Full-size inspection is representative, not every label on all288PNGs. PDF/SVG exact bytes verified but not separately rendered. No new physical flights or statistical recomputation."
+}

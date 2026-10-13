@@ -1,0 +1,6 @@
+{
+  "old_sha256": "4ada68a52f8250be7866a11d063904df454e264cfeba32e53515aa59917a8688",
+  "new_sha256": "a267bb996e033d9728ef8edc59df297c92d82e0e38e81844ecab5e280dff26f7",
+  "normalized_python_ast_equal": true,
+  "change": "Type-checker comments only; historical executed harness preserved byte-for-byte"
+}

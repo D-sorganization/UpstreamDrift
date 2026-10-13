@@ -1,0 +1,1 @@
+{"path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_parent_verifier_pin_v1/parent_pin.json", "sha256": "d018db37c950e3e4999cad223a78dd9853f8336416d50b40646002901243ed64"}

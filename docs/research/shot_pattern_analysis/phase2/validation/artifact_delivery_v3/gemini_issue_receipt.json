@@ -1,0 +1,8 @@
+{
+  "model": "gemini-3.8-flash-high",
+  "tool": "agy",
+  "exit_code": 0,
+  "issue": 11976,
+  "comment_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11976#issuecomment-6105512917",
+  "scope": "Report presentation defect and local correction; issue remains open pending merged evidence"
+}

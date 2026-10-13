@@ -1,0 +1,32 @@
+{
+  "status": "accepted_for_full_regeneration",
+  "scope": "Narrow circular-containment-radius caption correction, following eight-preview review at 56ea967f53",
+  "source_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "sources_sha256": {
+    "src/tools/shot_pattern_analysis/matched_report_plots.py": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
+    "tests/tools/shot_pattern_analysis/test_matched_report_plots.py": "f298bcc0242d87f138fc54c37ab14a636a4489238af796faf89a0046bbcbb57a"
+  },
+  "source_review": "Only a radius-caption helper and target_hit_fraction caption call added. No values, limits, populations, source validation or calculations changed.",
+  "tests": {
+    "independent_rendered_7_5m_caption_and_mixed_rejection": "passed, exit0",
+    "independent_additional_contract_checks": "Eight mixed/missing/invalid variants reject; actual7.5m and all-missing Unspecified labels pass.",
+    "root_full_suite": "15 passed per preserved log"
+  },
+  "visual_review": {
+    "asset_sha256": "41aa346534d41190b46b6557f7b8571687a7d1a6d12a89db34925f681b680c13",
+    "result": "Actual saved primary15m image explicitly says Circular Target Radius: 15 m; footer readable, clear of axes, no new clipping or overlap.",
+    "previous_review": "matrix_independent_preview_review_v1/review.json (all eight prior header/contrast/covariance/SG previews inspected)."
+  },
+  "limitations": [
+    "Full regenerated asset inventories, output hashes and visual review remain required after producer completion.",
+    "This does not accept a full final report or establish empirical accuracy."
+  ],
+  "evidence_sha256": {
+    "actual_target_containment.png": "41aa346534d41190b46b6557f7b8571687a7d1a6d12a89db34925f681b680c13",
+    "root_red.txt": "012996de5b793d2e1e818a27e3d5d92f92d04e212e5999c7316e3161911133fa",
+    "root_full_suite.txt": "a041dc0fdd78196f5043a90252aed771fdaa27f6350a443584cfde35d0dab4e8",
+    "independent_test.txt": "eaf0e873c020e235efba0c4ab64da964b10c454aaac297cc888ab1a76b0dd189",
+    "executed_preview.py.txt": "dbf1b482c73a0e44582e0aeeb6f1a2df648aa649049210c48be3327555725b17",
+    "preview_log.txt": "b51e63002854c8a25f112a7d3adea93c53919802efcf6a5e5bee74f04a3d5892"
+  }
+}

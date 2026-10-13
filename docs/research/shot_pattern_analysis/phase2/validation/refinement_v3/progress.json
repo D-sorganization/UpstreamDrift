@@ -1,0 +1,107 @@
+{
+  "status": "active",
+  "integration_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-refinement-integration/UpstreamDrift",
+  "integration_base": "3172c3986afd17f49589814b45efc3685ea8e046",
+  "integration_branch": "codex/shot-pattern-refinement-integration",
+  "methods_commit": "e5ba4018ac",
+  "methods_review": "Final39page review completed; stale Figure14 caption corrected and page17 re-reviewed. All other page text unchanged.",
+  "replay": "Accepted 100 common IDs per pattern in5cells; separate supplemental_traces_v3 receipt and trajectories; original data unchanged",
+  "replay_sha256": "93fb01c874c007f4af7badc6603d887bddd90a02aaa5a4e1d478f26ad73dbdcd",
+  "affinedrift_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-affinedrift-publication",
+  "affinedrift_issue": 5004,
+  "affinedrift_status": "Final-head canonical pre-PR passed at0e33178d; branch pushed. Publication PR is next; public deployment unverified. Owner-approved generated reconciliation preserved all111other entries and limits.",
+  "upstream_status": "PR12278 remains unmerged. Integration includes aecd90783b; newer remote2921f4b756be92f56257300dc6dd4db1af63b391 not yet integrated. Fetch session56550 remains active; pack is growing. Full pre-PR after final cleanup and remote reconciliation remains outstanding.",
+  "live_processes": {
+    "fetch_latest_upstream": {
+      "session_id": 56550,
+      "log": "/tmp/shot-pattern-fetch-current.log",
+      "remote_PR_head": "2921f4b756be92f56257300dc6dd4db1af63b391",
+      "remote_main": "944d798ed3748fc09e115825cf9db30b65d1f232"
+    }
+  },
+  "next": [
+    "Reconcile fetched remote PR2921f4b and inspect stopped follow-up e426bac0dd for useful unmerged repairs",
+    "Run unchanged full pre-PR; inherited development-log issue11935 remains blocking",
+    "Open ready AffineDrift publication PR and arm protected merge; public verification remains a later session"
+  ],
+  "upstream_dry_issue": 12299,
+  "checks": "Presentation/replay/social tests passed; matrix CLI28/provenanceCLI21; viewport24; plot option+academic suite and matched GUI suite exit0; Ruff on changed batches passes.",
+  "quarto": {
+    "version": "1.8.26",
+    "path": "/tmp/shot-pattern-quarto-1.8.26/opt/quarto/bin/quarto",
+    "sha256": "60451a42095dd60bc23ad529b39ca81017da688aab029bec9b5565818fc55cf8"
+  },
+  "integration_commits": [
+    "bb1292a246",
+    "b15aa53c45",
+    "242ce075c6",
+    "0ef05631ea",
+    "e2c3b22c93",
+    "bf82043a75",
+    "7d710819f7",
+    "27714d77c3",
+    "fb1bb97809",
+    "a2ab3aa3c5",
+    "e8ed9c02e1",
+    "19b7d6d08d",
+    "1904afc749",
+    "048bb958f4",
+    "e2b1032e02",
+    "1c6ddf948e",
+    "8d9c181688",
+    "e8a81e53fd",
+    "9e7a8d4d7d",
+    "4cd8b14c79",
+    "d157da6e80",
+    "00a364f840",
+    "3c85c9fb7f",
+    "27c6a72ad1",
+    "c69fc7eefe",
+    "57b53abc29"
+  ],
+  "affine_checks": "Quarto1.8.26 render; title case672 sources; render coverage253 URLs; article links/full site gate; 9 assets match; headless browser review; canonical consistency tests pass.",
+  "local_delivery": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+  "architecture_issue": 12302,
+  "integration_work": "Archive restoration refactor committed4831146c7d; footer helper and last architecture exemption removal committed8877a5fd54. Root8fast tests and1explicit slow native writer test pass.",
+  "focused_dry": "49 committed shot-pattern/kernel source files at19b7d6d: zero findings. Not a full repository gate.",
+  "architecture": "All67new #12278 architecture exceptions removed; both new document-size waivers removed. Changed-file architecture passes; no new waivers or relaxed limits.",
+  "performance": "Renderer vectorization committed e8a81e53fd;26 tests pass with original1ms limit unchanged (#12303).",
+  "affinedrift_commit": "0e33178d",
+  "integration_head": "8877a5fd54",
+  "upstream_merged_head": "aecd90783beab50cc091def25f13bbfdaeeb7834",
+  "integration_report": "Fresh local Tectonic compile from integration sources plus14 tracked hash-verified figures succeeded:39 pages, no warnings; /tmp/shot-integration-report/shot_pattern_analysis.pdf SHA256 f589bbb54253666fbda5daaca3f651952a78db2665e660fea7b69da486f9799b. Desktop accepted version unchanged.",
+  "post_merge_checks": "16 statistics/restoration/handoff checks;13 approach-scoring tests;50 adapter tests plus9 final checks;22 presentation/replay/layout tests;77 GUI-focused tests;20 native rasterization tests all passed. Relevant Ruff and rasterizer mypy pass. Full unchanged repository gates remain pending.",
+  "flight_layout_parity": "Exact RGBA hashes/axis text/ranges/line counts across4 cases; committed receipt flight_panel_layout_parity.json. Accepted PDF remains unchanged.",
+  "checks_latest": "Final figure22tests; geometry4; preflight5; saved audits10; article77 including existing helper contracts; representative renderer70 including helper contracts; review components5 plus90 existing tests; historical graphics11. Relevant Ruff/mypy and changed-file architecture checks pass. Full unchanged repository gates pending. Review-provider import-order regression fixed0fd7d6d177 with7focusedtests. Control archive error text preserved; footer native interface migration pending.",
+  "figure_builder_regression": {
+    "issue": 12309,
+    "status": "Committed: final builder and historical pilot renderer use FigureOptions; native writer tests pass. Intended-output adapter parity explicitly distinguished from broken original interface."
+  },
+  "report_split": "Four Markdown outputs below51,200 bytes; all original figure lines and C01-C24 numeric rows preserved; original historical receipt unchanged; separate layout-only receipt and deterministic gzip archive. No fresh scientific run claimed.",
+  "upstream_global_policy_blocker": {
+    "issue": 11935,
+    "same_on_main_and_integration": true,
+    "structural_findings": 207,
+    "active_entries": 143,
+    "ceiling": 75,
+    "bytes": 336131,
+    "size_ceiling": 200000,
+    "status": "Inherited metadata and state repair requires governed resolution; no waiver applied."
+  },
+  "full_repository_dry": {
+    "status": "passed",
+    "exit_code": 0,
+    "receipt": "full_repository_dry.txt",
+    "baseline": "Original approved baseline unchanged;594 historical fingerprints;164 advisory reductions",
+    "scope": "All tracked src inputs; source stable during scan"
+  },
+  "footer_native_test": {
+    "artifacts": 9,
+    "previews": 3,
+    "measured_seconds": 74.18,
+    "default_timeout_seconds": 60,
+    "new_slow_test_watchdog_seconds": 240,
+    "evidence": "https://github.com/D-sorganization/UpstreamDrift/issues/12309#issuecomment-6114197016",
+    "note": "Final root runs exited0:8fast tests (footer_fast_tests.txt) and explicit -m slow native integration test (footer_native_explicit.txt), verifying9assets and3previews. Ruff and scoped mypy pass."
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "scope": "Exact inventory/config/manifest checks and independent common-six index intersection; no bootstrap, effect estimation or new flight",
+  "results": [
+    {
+      "club": "driver",
+      "curve_scale": 2,
+      "shaft_sd_deg": 2,
+      "profile": "combined2",
+      "ordered_leans": [
+        0,
+        5
+      ],
+      "same_physical_target_m": 178.94875782337786,
+      "common_six_n": 9940,
+      "total_per_population": 10000,
+      "sources": [
+        {
+          "protocol": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation2_combined2",
+          "root": "control_final_v1",
+          "plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "manifest_sha256": "b268743fd6b01fa887e647d6f1ab5d29c4657a6283254c5256396dcb15ae0dba",
+          "csv_sha256": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76",
+          "individual_supported_n": {
+            "Straight": 10000,
+            "Draw": 10000,
+            "Fade": 10000
+          },
+          "config_target_x_m": 178.94875782337786,
+          "actual_target_x_m": 178.94875782337786
+        },
+        {
+          "protocol": "driver-control-speed-bounds/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "root": "supplement_final_v1/driver_control_speed",
+          "plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+          "manifest_sha256": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+          "csv_sha256": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758",
+          "individual_supported_n": {
+            "Straight": 9940,
+            "Draw": 9940,
+            "Fade": 9940
+          },
+          "config_target_x_m": 178.94875782337786,
+          "actual_target_x_m": 178.94875782337786
+        }
+      ]
+    },
+    {
+      "club": "pitching_wedge",
+      "curve_scale": 2,
+      "shaft_sd_deg": 2,
+      "profile": "combined2",
+      "ordered_leans": [
+        0,
+        5
+      ],
+      "same_physical_target_m": 77.40247724866299,
+      "common_six_n": 9999,
+      "total_per_population": 10000,
+      "sources": [
+        {
+          "protocol": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "root": "supplement_final_v1/pw_primary_face",
+          "plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60",
+          "individual_supported_n": {
+            "Straight": 9999,
+            "Draw": 9999,
+            "Fade": 9999
+          },
+          "config_target_x_m": null,
+          "actual_target_x_m": 77.40247724866299
+        },
+        {
+          "protocol": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "root": "supplement_final_v1/pw_control_face",
+          "plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef",
+          "individual_supported_n": {
+            "Straight": 9999,
+            "Draw": 9999,
+            "Fade": 9999
+          },
+          "config_target_x_m": 77.40247724866299,
+          "actual_target_x_m": 77.40247724866299
+        }
+      ]
+    }
+  ],
+  "endpoint_reader_sha256": "be60d94559eec95279d685b0cb0b9bc030c9ffeb165a2e724b932b6833f82912"
+}

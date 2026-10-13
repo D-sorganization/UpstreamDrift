@@ -1,0 +1,10 @@
+{
+  "checked_utc": "2026-10-10T14:46:10.465051+00:00",
+  "issue": 12139,
+  "url": "https://github.com/D-sorganization/UpstreamDrift/issues/12139",
+  "state": "open",
+  "author": "dieterolson",
+  "filed_by": "AGY Gemini3.8 Flash High",
+  "root_rest_verified": true,
+  "root_body_clarified": "Distinguish proven destination collision from timing of individual overwrite; point to tracked evidence rather than temporary paths."
+}

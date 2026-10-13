@@ -1,0 +1,54 @@
+{
+  "status": "accepted_narrow_reporting_protocol_repair",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_lean_control.py": "2b111750073259d21837bab6ab0cc0c87d0c335e5f678593183e82198a8b50a8",
+    "tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py": "656d4770422c762a9ac61db99cf2434455ca1d7abe529008508fa6df38ccc5b4"
+  },
+  "source_lines": 1089,
+  "red": "One valid reviewed Driver5 curve comparison rejected; ten adversarial configurations remained rejected.",
+  "green_tests": 30,
+  "ruff": "passed",
+  "mypy": "passed two source files",
+  "size_budget": "passed",
+  "preflight": {
+    "pairs": 384,
+    "counts": {
+      "across_lean": 56,
+      "curve_strength": 164,
+      "shaft_rotation_sd": 164
+    },
+    "failures": [],
+    "scope": "Source/config/nominal checks only; deliberately stopped before primitive row/statistical computation."
+  },
+  "actual_saved_pair": {
+    "first": "driver_lean5_curve1_rotation2_combined2",
+    "second": "driver_lean5_curve2_rotation2_combined2",
+    "common_six_n": 9940,
+    "total_per_pattern": 10000,
+    "allowed_config_differences": [
+      "curve_scale",
+      "match_face_bounds_deg",
+      "match_speed_factors"
+    ]
+  },
+  "script_formatting": "Executed preflight preserved byte-for-byte in preflight_executed.py.txt; current preflight.py differs only by formatting/comments with exact normalized AST equality.",
+  "limitations": [
+    "No Monte Carlo rerun.",
+    "One actual full statistical pair rechecked; all 384 pairs received only configuration preflight.",
+    "Reviewer implemented this fix; a second independent implementation review has not been claimed.",
+    "Final renderer and full report publication acceptance remain separate."
+  ],
+  "evidence_sha256": {
+    "mypy.txt": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+    "preflight.json": "706d2703965be009942ab0c32a6e7215db77f7becd4cee5636ebfa8b5a33cbd6",
+    "preflight.py": "b6ea4a0d2db2ff14d4c846367e7f4b264041b539ee9a82a0b27706b5d7d839a5",
+    "preflight_executed.py.txt": "e3a953b09ecacdfda742239fadb7ecf36b6876e3a713321f9c24171dd36daacf",
+    "preflight_log.txt": "0d5dd50109aa279269b659278f762a7a15b9289933ce54d561cf525d788a9730",
+    "real_driver_curve_pair.json": "cf1c72d68b076afc6b21e7151881b84b7fe7b04226226a1e914a09e370df13e6",
+    "real_pair_executed.py.txt": "28f2e4fccd17d8b90352c011991af55afea2cff8e2be014dbeeefcd5cc5ef6ee",
+    "real_pair_log.txt": "97b959e133abd97bb7d996e5588bda305398d9b4d976518133f39142258d111e",
+    "size_budget.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests_green.txt": "f1f94987abf2ecee6845b072f14cbeab5c7b413a83c65f3819ef8872318d3215",
+    "tests_red.txt": "0dba6aa83ec7c5d812e0e24692e262be78232b04537bb652ef5d77d022cb1d97"
+  }
+}

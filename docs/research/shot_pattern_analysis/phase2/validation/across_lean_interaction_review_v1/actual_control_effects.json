@@ -1,0 +1,544 @@
+{
+  "schema": "independent-across-lean-actual-control-check/1",
+  "status": "passed",
+  "script_sha256": "1423e6ea888defb99e363e0b3c28eec5fc59259776357fb0b0d033366d49e4b0",
+  "provisional_old_comparisons_sha256": "b00388b9f12f4e2556bebad3a401ee6087f80790a779cf2eaf9afcf73a9e0981",
+  "source_module_sha256": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+  "results": [
+    {
+      "club": "driver",
+      "pair_result": {
+        "schema": "matched-explicit-source-pair/1",
+        "comparison_kind": "across_lean",
+        "status": "conditional_only",
+        "reason": "",
+        "target_x_m": 178.94875782337786,
+        "total_n_per_population": 10000,
+        "common_supported_n": 9940,
+        "conditioning": "same_indices_supported_in_all_six_populations",
+        "input_error_tolerance": 1e-12,
+        "input_error_max_abs_difference": 7.105427357601002e-15,
+        "input_error_comparison": "all centered primitive input errors compared directly",
+        "analysis_source_sha256": {
+          "matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+          "matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+          "scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+          "scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+          "scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+          "uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+          "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1",
+          "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+          "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
+        },
+        "source_protocols": [
+          "original_control/1",
+          "driver-control-speed-bounds/1"
+        ],
+        "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "driver_lean0_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "b268743fd6b01fa887e647d6f1ab5d29c4657a6283254c5256396dcb15ae0dba",
+            "source_csv_sha256": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76"
+          },
+          {
+            "protocol_id": "driver-control-speed-bounds/1",
+            "cell": "driver_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+            "source_cell_manifest_sha256": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+            "source_csv_sha256": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758"
+          }
+        ],
+        "unsupported_by_source_and_pattern": {
+          "first": {
+            "Straight": 0,
+            "Draw": 0,
+            "Fade": 0
+          },
+          "second": {
+            "Straight": 60,
+            "Draw": 60,
+            "Fade": 60
+          }
+        },
+        "allowed_config_differences": [
+          "club.shaft_lean_deg",
+          "match_face_bounds_deg",
+          "match_speed_factors"
+        ],
+        "patterns": {
+          "Straight": {
+            "radial_error_difference_m": {
+              "estimate": 10.98040199906425,
+              "lower_95": 10.729651984700354,
+              "upper_95": 11.220926256425416
+            },
+            "squared_target_error_difference_m2": {
+              "estimate": 781.0382515800294,
+              "lower_95": 749.6424180372222,
+              "upper_95": 811.9493033127027
+            },
+            "containment_fraction_difference": {
+              "estimate": -0.2243460764587525,
+              "lower_95": -0.23189134808853118,
+              "upper_95": -0.21538229376257548
+            },
+            "role_mapping": {
+              "Straight": "physical pattern at first condition",
+              "Draw": "same physical pattern at second condition",
+              "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+            },
+            "course_sg_difference": {
+              "estimate": -0.01824287841852806,
+              "lower_95": -0.019702931256560717,
+              "upper_95": -0.016580509632295997
+            },
+            "course_sg_means": {
+              "earlier_lean": -0.45652745376328113,
+              "later_lean": -0.4747703321818092
+            },
+            "course_sg": {
+              "status": "available",
+              "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+              "baseline": {
+                "id": "broadie-2011-historical-tour-approx",
+                "version": "table9-full-plus-anchor-reconciled-putting/2",
+                "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+              },
+              "api_evaluated_states": 70
+            },
+            "physical_pattern": "Straight",
+            "first_condition": {
+              "shaft_lean_deg": 0.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "second_condition": {
+              "shaft_lean_deg": 5.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "first_curve_scale": 2.0,
+            "second_curve_scale": 2.0
+          },
+          "Draw": {
+            "radial_error_difference_m": {
+              "estimate": 13.884352663314145,
+              "lower_95": 13.600170617317968,
+              "upper_95": 14.16245063573361
+            },
+            "squared_target_error_difference_m2": {
+              "estimate": 1036.0832816001018,
+              "lower_95": 999.2740578567402,
+              "upper_95": 1071.9879530193898
+            },
+            "containment_fraction_difference": {
+              "estimate": -0.2532193158953722,
+              "lower_95": -0.2610186116700201,
+              "upper_95": -0.24391096579476862
+            },
+            "role_mapping": {
+              "Straight": "physical pattern at first condition",
+              "Draw": "same physical pattern at second condition",
+              "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+            },
+            "course_sg_difference": {
+              "estimate": -0.012262802983810089,
+              "lower_95": -0.014170641440842239,
+              "upper_95": -0.0102427196435991
+            },
+            "course_sg_means": {
+              "earlier_lean": -0.44989064675100343,
+              "later_lean": -0.46215344973481354
+            },
+            "course_sg": {
+              "status": "available",
+              "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+              "baseline": {
+                "id": "broadie-2011-historical-tour-approx",
+                "version": "table9-full-plus-anchor-reconciled-putting/2",
+                "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+              },
+              "api_evaluated_states": 70
+            },
+            "physical_pattern": "Draw",
+            "first_condition": {
+              "shaft_lean_deg": 0.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "second_condition": {
+              "shaft_lean_deg": 5.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "first_curve_scale": 2.0,
+            "second_curve_scale": 2.0
+          },
+          "Fade": {
+            "radial_error_difference_m": {
+              "estimate": 8.4041831738389,
+              "lower_95": 8.221663194717387,
+              "upper_95": 8.594217154254073
+            },
+            "squared_target_error_difference_m2": {
+              "estimate": 536.4454524160419,
+              "lower_95": 514.5445493822516,
+              "upper_95": 557.8555225695352
+            },
+            "containment_fraction_difference": {
+              "estimate": -0.2022132796780684,
+              "lower_95": -0.20946177062374244,
+              "upper_95": -0.19406438631790746
+            },
+            "role_mapping": {
+              "Straight": "physical pattern at first condition",
+              "Draw": "same physical pattern at second condition",
+              "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+            },
+            "course_sg_difference": {
+              "estimate": -0.01964032819127392,
+              "lower_95": -0.020928228273856733,
+              "upper_95": -0.018052908344258437
+            },
+            "course_sg_means": {
+              "earlier_lean": -0.45732900816696304,
+              "later_lean": -0.47696933635823696
+            },
+            "course_sg": {
+              "status": "available",
+              "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+              "baseline": {
+                "id": "broadie-2011-historical-tour-approx",
+                "version": "table9-full-plus-anchor-reconciled-putting/2",
+                "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+              },
+              "api_evaluated_states": 70
+            },
+            "physical_pattern": "Fade",
+            "first_condition": {
+              "shaft_lean_deg": 0.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "second_condition": {
+              "shaft_lean_deg": 5.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "first_curve_scale": 2.0,
+            "second_curve_scale": 2.0
+          }
+        },
+        "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
+        "course_scoring_effect_modification": {
+          "Draw": {
+            "estimate": 0.005980075434717972,
+            "lower_95": 0.004831457740921157,
+            "upper_95": 0.006995761867452044
+          },
+          "Fade": {
+            "estimate": -0.0013974497727458593,
+            "lower_95": -0.0023379644288098514,
+            "upper_95": -0.0004807455866901034
+          }
+        },
+        "course_scoring_effect_modification_scope": "(curve\u2212Straight) in the second condition minus (curve\u2212Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit",
+        "course_scoring_provenance": {
+          "source_backed_status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "api_evaluated_states_per_condition": 70,
+          "index_order": "ascending_common_shot_index"
+        }
+      },
+      "independent_mean_interaction_sg": {
+        "Draw": 0.005980075434717972,
+        "Fade": -0.0013974497727458593
+      },
+      "common_index_n": 9940,
+      "old_per_pattern_metrics_exactly_equal": true
+    },
+    {
+      "club": "pitching_wedge",
+      "pair_result": {
+        "schema": "matched-explicit-source-pair/1",
+        "comparison_kind": "across_lean",
+        "status": "conditional_only",
+        "reason": "",
+        "target_x_m": 77.40247724866299,
+        "total_n_per_population": 10000,
+        "common_supported_n": 9999,
+        "conditioning": "same_indices_supported_in_all_six_populations",
+        "input_error_tolerance": 1e-12,
+        "input_error_max_abs_difference": 3.552713678800501e-15,
+        "input_error_comparison": "all centered primitive input errors compared directly",
+        "analysis_source_sha256": {
+          "matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+          "matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+          "scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+          "scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+          "scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+          "uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+          "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1",
+          "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+          "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
+        },
+        "source_protocols": [
+          "pw-primary-face-bounds/1",
+          "pw-control-face-bounds/1"
+        ],
+        "source_transition_receipt_sha256": null,
+        "sources": [
+          {
+            "protocol_id": "pw-primary-face-bounds/1",
+            "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+            "execution_kind": "provenance_alias",
+            "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+            "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+            "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+            "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+          },
+          {
+            "protocol_id": "pw-control-face-bounds/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+            "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+            "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+          }
+        ],
+        "unsupported_by_source_and_pattern": {
+          "first": {
+            "Straight": 1,
+            "Draw": 1,
+            "Fade": 1
+          },
+          "second": {
+            "Straight": 1,
+            "Draw": 1,
+            "Fade": 1
+          }
+        },
+        "allowed_config_differences": [
+          "club.shaft_lean_deg",
+          "target_x_m"
+        ],
+        "patterns": {
+          "Straight": {
+            "radial_error_difference_m": {
+              "estimate": 0.22292216264780676,
+              "lower_95": 0.2120454417031974,
+              "upper_95": 0.23239437267357071
+            },
+            "squared_target_error_difference_m2": {
+              "estimate": 2.804008195039592,
+              "lower_95": 2.6571627562111946,
+              "upper_95": 2.947499758944505
+            },
+            "containment_fraction_difference": {
+              "estimate": -0.0014001400140014,
+              "lower_95": -0.0022002200220022,
+              "upper_95": -0.0007000700070007
+            },
+            "role_mapping": {
+              "Straight": "physical pattern at first condition",
+              "Draw": "same physical pattern at second condition",
+              "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+            },
+            "course_sg_difference": {
+              "estimate": -0.01894986232540289,
+              "lower_95": -0.01993849546208185,
+              "upper_95": -0.01791752889710579
+            },
+            "course_sg_means": {
+              "earlier_lean": 0.10111118029419923,
+              "later_lean": 0.08216131796879635
+            },
+            "course_sg": {
+              "status": "available",
+              "scenario": "Historical PGA approach to a centered circular green with rough outside",
+              "baseline": {
+                "id": "broadie-2011-historical-tour-approx",
+                "version": "table9-full-plus-anchor-reconciled-putting/2",
+                "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+              },
+              "api_evaluated_states": 112
+            },
+            "physical_pattern": "Straight",
+            "first_condition": {
+              "shaft_lean_deg": 0.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "second_condition": {
+              "shaft_lean_deg": 5.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "first_curve_scale": 2.0,
+            "second_curve_scale": 2.0
+          },
+          "Draw": {
+            "radial_error_difference_m": {
+              "estimate": 0.2319849289488776,
+              "lower_95": 0.2211972091010594,
+              "upper_95": 0.24125542795261778
+            },
+            "squared_target_error_difference_m2": {
+              "estimate": 2.9148784123571563,
+              "lower_95": 2.769457675648475,
+              "upper_95": 3.05542367123415
+            },
+            "containment_fraction_difference": {
+              "estimate": -0.001000100010001,
+              "lower_95": -0.0018001800180018,
+              "upper_95": -0.00030003000300030005
+            },
+            "role_mapping": {
+              "Straight": "physical pattern at first condition",
+              "Draw": "same physical pattern at second condition",
+              "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+            },
+            "course_sg_difference": {
+              "estimate": -0.019301186807977818,
+              "lower_95": -0.02026577747095483,
+              "upper_95": -0.01832445976398611
+            },
+            "course_sg_means": {
+              "earlier_lean": 0.10215766411041799,
+              "later_lean": 0.08285647730244017
+            },
+            "course_sg": {
+              "status": "available",
+              "scenario": "Historical PGA approach to a centered circular green with rough outside",
+              "baseline": {
+                "id": "broadie-2011-historical-tour-approx",
+                "version": "table9-full-plus-anchor-reconciled-putting/2",
+                "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+              },
+              "api_evaluated_states": 112
+            },
+            "physical_pattern": "Draw",
+            "first_condition": {
+              "shaft_lean_deg": 0.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "second_condition": {
+              "shaft_lean_deg": 5.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "first_curve_scale": 2.0,
+            "second_curve_scale": 2.0
+          },
+          "Fade": {
+            "radial_error_difference_m": {
+              "estimate": 0.21176544451210327,
+              "lower_95": 0.2009075724326743,
+              "upper_95": 0.22117001769848024
+            },
+            "squared_target_error_difference_m2": {
+              "estimate": 2.663467623193015,
+              "lower_95": 2.5162436782271906,
+              "upper_95": 2.8072931846586657
+            },
+            "containment_fraction_difference": {
+              "estimate": -0.0013001300130013002,
+              "lower_95": -0.0022002200220022,
+              "upper_95": -0.0005000500050005
+            },
+            "role_mapping": {
+              "Straight": "physical pattern at first condition",
+              "Draw": "same physical pattern at second condition",
+              "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+            },
+            "course_sg_difference": {
+              "estimate": -0.018263061150351385,
+              "lower_95": -0.019234752476802067,
+              "upper_95": -0.017270489835003764
+            },
+            "course_sg_means": {
+              "earlier_lean": 0.10048400585001513,
+              "later_lean": 0.08222094469966373
+            },
+            "course_sg": {
+              "status": "available",
+              "scenario": "Historical PGA approach to a centered circular green with rough outside",
+              "baseline": {
+                "id": "broadie-2011-historical-tour-approx",
+                "version": "table9-full-plus-anchor-reconciled-putting/2",
+                "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+              },
+              "api_evaluated_states": 112
+            },
+            "physical_pattern": "Fade",
+            "first_condition": {
+              "shaft_lean_deg": 0.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "second_condition": {
+              "shaft_lean_deg": 5.0,
+              "curve_scale": 2.0,
+              "shaft_rotation_sd_deg": 2.0
+            },
+            "first_curve_scale": 2.0,
+            "second_curve_scale": 2.0
+          }
+        },
+        "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
+        "course_scoring_effect_modification": {
+          "Draw": {
+            "estimate": -0.0003513244825749287,
+            "lower_95": -0.0005602611928363378,
+            "upper_95": -0.00014244297263490242
+          },
+          "Fade": {
+            "estimate": 0.0006868011750515057,
+            "lower_95": 0.00048511943852345713,
+            "upper_95": 0.0008858668665014652
+          }
+        },
+        "course_scoring_effect_modification_scope": "(curve\u2212Straight) in the second condition minus (curve\u2212Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit",
+        "course_scoring_provenance": {
+          "source_backed_status": "available",
+          "scenario_id": "approach_green_rough",
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "api_evaluated_states_per_condition": 112,
+          "index_order": "ascending_common_shot_index"
+        }
+      },
+      "independent_mean_interaction_sg": {
+        "Draw": -0.0003513244825749287,
+        "Fade": 0.0006868011750515057
+      },
+      "common_index_n": 9999,
+      "old_per_pattern_metrics_exactly_equal": true
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "session_id": 68061,
+  "exit_code": 1,
+  "source_edits_before_stop": false,
+  "replacement_session_id": 74572,
+  "replacement_prompt": "/tmp/p2-readiness-repair-agy-v2.txt",
+  "replacement_prompt_sha256": "a3e2a18052b67ed1228ae5a46342bf05416fd04b4f2621a557f62b730a2a10eb"
+}

@@ -1,6 +1,6 @@
 """Pretty-print Drake vs Simscape grip-trajectory residuals (issue #4123).
 
-Companion debug tool for ``tests/test_drake_simscape_equivalence.py``.
+Companion debug tool for ``tests/engines/drake/test_drake_simscape_equivalence.py``.
 Runs the same Drake float-pathway forward-sim (theta=0 + default initial
 pose) used by the test and prints per-pose, per-axis residuals against
 the Simscape reference CSV. Useful when the equivalence test fails and
@@ -14,7 +14,7 @@ Usage:
 
 The script exits 0 even on residual gate violations — its purpose is to
 *report* the divergence, not enforce it. The test in
-``tests/test_drake_simscape_equivalence.py`` is the enforcement gate.
+``tests/engines/drake/test_drake_simscape_equivalence.py`` is the enforcement gate.
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from tests.test_drake_simscape_equivalence import (  # noqa: E402
+from tests.engines.drake.test_drake_simscape_equivalence import (  # noqa: E402
     ORIENT_GATE_RAD,
     RMSE_POSITION_GATE_M,
     SIMSCAPE_CSV,
@@ -63,7 +63,8 @@ def _format_row(
     )
 
 
-def main(argv: list[str] | None = None) -> int:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse the inspection options without importing or running Drake."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
         "--csv",
@@ -83,8 +84,11 @@ def main(argv: list[str] | None = None) -> int:
         default=1000.0,
         help="Drake output sample rate in Hz (default 1000)",
     )
-    args = parser.parse_args(argv)
+    return parser.parse_args(argv)
 
+
+def _print_header(args: argparse.Namespace) -> None:
+    """Print the unchanged inspection context and acceptance thresholds."""
     print("=" * 72)
     print("Drake vs Simscape grip-trajectory equivalence  (issue #4123)")
     print("=" * 72)
@@ -92,6 +96,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Position gate: {RMSE_POSITION_GATE_M * 1e3:.2f} mm")
     print(f"Orientation gate: {np.rad2deg(ORIENT_GATE_RAD):.2f} deg")
     print()
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
+
+    _print_header(args)
 
     # Load Simscape poses up-front (cheap; no Drake needed).
     poses = _load_simscape_poses(args.csv)
@@ -178,7 +188,7 @@ def main(argv: list[str] | None = None) -> int:
     if any_fail:
         print(
             "[divergence] At least one pose failed the equivalence gate. "
-            "See tests/test_drake_simscape_equivalence.py for the enforcement test "
+            "See tests/engines/drake/test_drake_simscape_equivalence.py for the enforcement test "
             "and the PR body / linked issues for tracked follow-ups."
         )
     else:

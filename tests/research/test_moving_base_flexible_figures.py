@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import matplotlib as mpl
 import pytest
 
 from scripts.research.proximal_distal_energy.make_moving_base_flexible_figures import (
@@ -15,7 +16,10 @@ pytestmark = pytest.mark.scientific
 
 
 def test_figure_set_renders_pdf_and_svg(tmp_path: Path) -> None:
-    outputs = render_figures(tmp_path)
+    original_style = dict(mpl.rcParams)
+    with mpl.rc_context():
+        outputs = render_figures(tmp_path)
+    assert dict(mpl.rcParams) == original_style
     assert len(outputs) == 2 * len(FIGURE_STEMS)
     for stem in FIGURE_STEMS:
         pdf = tmp_path / f"{stem}.pdf"

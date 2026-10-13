@@ -1,0 +1,100 @@
+{
+  "scope": "Original Saved-Data Figures, Reporting Revision Only",
+  "status": "rendered_pending_final_visual_review",
+  "source_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift",
+  "source_commit": "4bb2be7362a04fc1af04a3662adae674d50916b7",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/academic_plots.py": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb",
+    "src/tools/shot_pattern_analysis/matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "src/tools/shot_pattern_analysis/scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+    "src/tools/shot_pattern_analysis/matched_report_plots.py": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
+    "src/tools/shot_pattern_analysis/__main__.py": "267d814e6a603cc2b3f49d9eaae351fc83c694be6afd7f367430ad50eee5bf6f",
+    "src/tools/shot_pattern_analysis/numerics.py": "65201b8b1923a908bda0213c4291e741f9ab73b2a95298c48415ea52e1208139",
+    "src/tools/shot_pattern_analysis/__init__.py": "7cb68928d3d01ff739e073100fe00336b71980fdffef3576abd2cf25acc25f4f",
+    "src/tools/shot_pattern_analysis/overview.py": "6b5d5d8a1c0733d936a0e1649fbe73f9fc35570a22fef05a6e220e089e7f5f94",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "f836132f5e850ea58d54c166b405487f8e4508746be466e30122d0ce5c1cdd59",
+    "src/tools/shot_pattern_analysis/matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "src/tools/shot_pattern_analysis/course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+    "src/tools/shot_pattern_analysis/range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987",
+    "src/tools/shot_pattern_analysis/matrix.py": "ad9e540a13b5974e34ac3a2b13ce62109be04c9e2be875489a39a45fa51f72e8",
+    "src/tools/shot_pattern_analysis/physics.py": "cbc5af5e2e1c78a19da20b56b0396fe2fd03b625761769bbda1a8e3082179b35",
+    "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "src/tools/shot_pattern_analysis/matched_physics.py": "b18bd47a7b5998f69d417143678ffb8adfd7c6c5417b01d2f1ffb8ab29e6dd99",
+    "src/tools/shot_pattern_analysis/provenance.py": "d9d11feb69179fbf9ead9875ec1a45a08f1f6c0a914c865e53ff1e669faf6609",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+    "src/tools/shot_pattern_analysis/nominal_matching.py": "8ea4b5e4d1f73518972d71fefd42bc5725c95dacb9694507e9c784fc6eed04fa",
+    "src/tools/shot_pattern_analysis/_embed_adapter.py": "e47723b0915516bb5e6daf982ee4264b4d1056699b7a346435998e98455f733d",
+    "src/tools/shot_pattern_analysis/sensitivity.py": "b83b71d41e33f883f8f5765207e7f9e9ae2dd6f139b1d3cb544662011dcd07dc",
+    "src/tools/shot_pattern_analysis/matched_runner.py": "55ce0984c53f41b8c2b85264cb3222a8426c765eeaab0a08aa54b704f33bbdd5",
+    "src/tools/shot_pattern_analysis/presets.py": "5be2a521220c9dc5474baa020babbb09de037783aee8fb353656c03069ed292a",
+    "src/tools/shot_pattern_analysis/core.py": "f8bb33fa6d0f9a786bb52e260430806635b3c4628b8948f8b611c30a84a39478",
+    "src/tools/shot_pattern_analysis/matched_matrix.py": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732",
+    "src/tools/shot_pattern_analysis/reporting.py": "bf739a50cf287bd47e16f8cb2caaf29bd5a45c60600969dc182eb05c26b18683",
+    "src/tools/shot_pattern_analysis/matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "src/tools/shot_pattern_analysis/delivery_geometry.py": "f8938a47b98b6057cb3e48619ab4453109f1865a74f3f45a3b40e8012b0168a9",
+    "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "src/tools/shot_pattern_analysis/matched_supplement.py": "10058a76f403323850f20ed65d24b44505e07a1938274b36b8d9013924bd39bd",
+    "src/tools/shot_pattern_analysis/matched_diagnostics.py": "6336d2fa15b75afae3ac6dde3040b8377818802e77d234c73caea3d438c22fc9",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "82fe100f03508400e0c87b8a0c6c6055bb02c2bb7c8d10c80b4e9ef4bd1b6ff0",
+    "src/tools/shot_pattern_analysis/density.py": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+    "src/tools/shot_pattern_analysis/matched_gui.py": "788b28561c0684111750895dfbebac365ce6962df4f77be805ce50a58031f7f2",
+    "src/tools/shot_pattern_analysis/dispersion_stats.py": "956eec2eefa14c6ae73c3e460d0c97dcee871299ca52fffb66c9621c92a6ce6e",
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "8b80820cb16b2a4f975a3bfcfa960d30500d3aec3d08fabd6a949bf4f9e37694",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80",
+    "src/tools/shot_pattern_analysis/matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+    "src/tools/shot_pattern_analysis/scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+    "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",
+    "src/tools/shot_pattern_analysis/club_geometry.py": "1bf352c6922a93abdc3f5b814fc63733dea7349bc0b3e54c80df087204c04190",
+    "src/tools/shot_pattern_analysis/matched_export.py": "9f11922d18df34785286f08ea83bf980b1f3bdeba853ba553e664844986a79da",
+    "src/tools/shot_pattern_analysis/matched_config.py": "4426573fb766fa02fcf2f5d247e2eb19bba97bb85a04d2224af113250d2e4814",
+    "src/tools/shot_pattern_analysis/comparison.py": "43560828f6534feb03563da14dc0d43d42126e6aac30c7d73755bc08b61a94cb",
+    "src/tools/shot_pattern_analysis/gui.py": "7e43fbcc0c2a532883bbd30b1802624e9636ebe4f5e0cbfe9c74b4f0cbfc2e27",
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "13f0b30d8c9b4c75f5e6cbf3b769ebc6f832cf6f737088d85692dcca5d08a180",
+    "scripts/research/shot_pattern_analysis/__init__.py": "28e6733b9df7726a4cd66427361aaef98a645c51888ca7115fa07b9b3db7d1a5",
+    "scripts/research/shot_pattern_analysis/archive_data.py": "5f0c483dd31e11517e5d5dbeb464f499df56c94aedcab6bbf049f65537a57969",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "084f580b117bb4a8b3049a7bb497eeef84d4cd70bf269a908ba0bf5e78de1b75",
+    "scripts/research/shot_pattern_analysis/build_pdf.py": "9f1daaeb2d47cc5ba61b4edabc6dc55c3ceed6130ceed608931a75b469b90a03",
+    "scripts/research/shot_pattern_analysis/build_pilot_preview.py": "21003bf72774972c47adb12b4843131a171763cd0c42e7fa7e694d81a80e4a68",
+    "scripts/research/shot_pattern_analysis/build_final_figures.py": "daecb84c22a758e013c2ebdd27d2e0617999ccf693bba117637640a2bf764ac1"
+  },
+  "execution_delta": {
+    "src/tools/shot_pattern_analysis/academic_plots.py": {
+      "accepted": "095994a4e2238c26c15a76dcb3fa6b5f694403417904ca14adc446bdf82e2cac",
+      "rendered": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb"
+    },
+    "src/tools/shot_pattern_analysis/matched_report_plots.py": {
+      "accepted": "72515aef38a1c72b740f0c70a770a4c7db1124a62b4514bb424af7124d6dd8fc",
+      "rendered": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b"
+    }
+  },
+  "runs": [
+    {
+      "command": [
+        "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+        "-m",
+        "scripts.research.shot_pattern_analysis.build_final_figures",
+        "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1",
+        "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1"
+      ],
+      "started": "2026-10-10T07:39:42.416433+00:00",
+      "finished": "2026-10-10T08:20:28.267103+00:00",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+        "-m",
+        "scripts.research.shot_pattern_analysis.build_final_figures",
+        "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1",
+        "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1"
+      ],
+      "started": "2026-10-10T08:20:28.461251+00:00",
+      "finished": "2026-10-10T08:44:52.165829+00:00",
+      "exit_code": 0
+    }
+  ],
+  "manifests": {
+    "final_figures_v1": "799da2ada061019a2bb1355d39d8f0cbf5e3b485703c3746d1475e9f9115258c",
+    "control_final_figures_v1": "28d974e4d44a804adc54a2e93725421bc7a22b6a2759a59ce0444244100fe3f9"
+  }
+}

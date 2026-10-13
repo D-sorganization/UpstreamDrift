@@ -1,0 +1,176 @@
+{
+  "status": "accepted_for_document_delivery",
+  "scope": "Document compilation, 13 source-bound figures, and all 33 rendered pages; not empirical model or repository release acceptance",
+  "source_sha256": "0b484b0393fa6cedbbd907f5ee603d7b0c74eb9908f455b596001bf283fde288",
+  "pdf_sha256": "ca030b3c97fb759b384aab58b3da6be68687a194f353976754d43e7ffa69beda",
+  "pages": 33,
+  "figures": 13,
+  "compiler": "Tectonic 0.15.0",
+  "compiler_exit_code": 0,
+  "compiler_warnings": 0,
+  "command": "tectonic --keep-logs --keep-intermediates --outdir phase2/validation/illustrated_article_v1/final_build shot_pattern_analysis.tex",
+  "built_in_editor": {
+    "status": "failed_before_source_parse",
+    "reason": "Tectonic dependency bundle default_bundle_v33.tar.index.gz download unavailable",
+    "issue": 12120
+  },
+  "reviews": {
+    "root_direct_pages": [
+      1,
+      2,
+      3,
+      17,
+      18,
+      19,
+      26,
+      27
+    ],
+    "astra_figures": [
+      4,
+      16
+    ],
+    "sol_tables": [
+      20,
+      25
+    ],
+    "sol_appendix": [
+      28,
+      33
+    ],
+    "reconciliation": "Figure changes are only printed-page-number pixels; appendix pages are byte-identical to reviewed initial PDF renders. Final status revision changes only pages26/27, reviewed directly."
+  },
+  "rendered_pages": [
+    {
+      "page": 1,
+      "sha256": "eaca0fd127a97f459d965ed52a3e2687274746fffd85ac8c5844a4dd3d7c43b5"
+    },
+    {
+      "page": 2,
+      "sha256": "cc9fe02913178cf4b730eaa0226c77c5c4ca0550493d5928173a4396be4d9375"
+    },
+    {
+      "page": 3,
+      "sha256": "38a5174f0e18fbafe8d74caa7674ab5a147aa396d004f6af24e9f356b7b1a712"
+    },
+    {
+      "page": 4,
+      "sha256": "246442fd62be46782f6fa948b50ac859b4525313eab930f16965a97e4a659ac1"
+    },
+    {
+      "page": 5,
+      "sha256": "be6f64f291e07dc11bf7c2b8228d74f8b2bd9d27b13f7c838517d2595dc94fd5"
+    },
+    {
+      "page": 6,
+      "sha256": "5a8523301321eb665bccd8146fff6055518da1fdc28f21ca62aca1e2bced140f"
+    },
+    {
+      "page": 7,
+      "sha256": "a3797845fc9a00433f9c7fc110475fb40e5b4286997eb93cf8ff2bdbcf70aa7b"
+    },
+    {
+      "page": 8,
+      "sha256": "d44f6bd9970f37fbdfb24852d317df29332ebfce6e719a15304703beab3a0837"
+    },
+    {
+      "page": 9,
+      "sha256": "20d4c5bf72c3597152f0d3eaf2bc370d73524752e297f67811ae724d2bf9329d"
+    },
+    {
+      "page": 10,
+      "sha256": "20a5d4ecaeda60ad40cd81a4fa6f0bca00bc431b9a1b48168a07aacfbf1521ae"
+    },
+    {
+      "page": 11,
+      "sha256": "e4fb1593ac3db06a824b6130a320221147535549ba01cf6c1485d955154db307"
+    },
+    {
+      "page": 12,
+      "sha256": "ec8f50e247fa28c06825fbcbe0b2c1e9c33b05dbe8bd3b52caf84012efc1e4db"
+    },
+    {
+      "page": 13,
+      "sha256": "b0ecd878676cba8b5ea90b1d44534e68df9708e193e873b1ece3f3ebfc6e99be"
+    },
+    {
+      "page": 14,
+      "sha256": "ec971236b92697316ad6caf1b7f0973e8652ff63d853582a168d5bcd7d8793b5"
+    },
+    {
+      "page": 15,
+      "sha256": "d47468e03b9165cdbc16fe612fd1f2f299cd987e1e0dd608b0592b29a21c7925"
+    },
+    {
+      "page": 16,
+      "sha256": "75e6c595db3c48e49c43100d6fc666c55925dfaab0737f8cc9a7b76f9c385674"
+    },
+    {
+      "page": 17,
+      "sha256": "31f92b7ba85939471234efe25d9226913e58c5a21e81c0a80fae1acc50bc4cb8"
+    },
+    {
+      "page": 18,
+      "sha256": "519a2d30903bb54ba5c746e43f50036dd828e676b0fa12f05103c69f27351bc9"
+    },
+    {
+      "page": 19,
+      "sha256": "afb2a2256495cc80d891235094012c0353f3c43f71dcbcedd56f7f911d2c4282"
+    },
+    {
+      "page": 20,
+      "sha256": "0b888b6587b4ef466d4d395d02b2d22285717028270d3b785ce82d2892cef594"
+    },
+    {
+      "page": 21,
+      "sha256": "5bb34ac093c34252c4f3b0fc517c109c3f0080c7d9a13690dddd88b942b652fa"
+    },
+    {
+      "page": 22,
+      "sha256": "ca087894a49dafb8e5b6137a17d30a8af3b8b8a7cb3a1fffb29d922f7010b43c"
+    },
+    {
+      "page": 23,
+      "sha256": "bb0bc016b2b5a30e5be635ea814941947b0e427d4caf99659e312f274798f144"
+    },
+    {
+      "page": 24,
+      "sha256": "bb7c2386556fb3faec303f9bef5cc0cb23cbcdd2ca4b071e40baa8aea20c9798"
+    },
+    {
+      "page": 25,
+      "sha256": "88a9f8f8712711fe2345058b23dcd67a4f501aca05248709c7673c887c57222d"
+    },
+    {
+      "page": 26,
+      "sha256": "da1ba9906e57bd42c30ee8339d684632f93df7a7c48990e901dd23ab05c2eb8a"
+    },
+    {
+      "page": 27,
+      "sha256": "c6d8cd7562cdb7351e39fd0d0ef698c0818912f0b9f4a5b2dadf0e9fb07fe26c"
+    },
+    {
+      "page": 28,
+      "sha256": "d279736ea79c303c6773a619a7e83784d73ab1fba9454e49685c062ddd750ddd"
+    },
+    {
+      "page": 29,
+      "sha256": "2b6cc2854f59fe6e17b3f41312c0e64e990d86ba83509bf89e7ff7099c7bc62c"
+    },
+    {
+      "page": 30,
+      "sha256": "55793d284382fd8f513c9e08ca915b6a0ff88a91bf9c2fea8d77d4f2a86898d9"
+    },
+    {
+      "page": 31,
+      "sha256": "af2b4a9931e0a7e563e176d58e10f79cfe77c9d8e17c7fe3b5f33e74f5827842"
+    },
+    {
+      "page": 32,
+      "sha256": "c29dc1f6849fd57e4a0145dd0b79ca541b94fe05bec29c5979e1d24155b015ac"
+    },
+    {
+      "page": 33,
+      "sha256": "d150730a27c44e266e096cdee26e7adb3f2c88c37d0930e981d6ed1acc787eab"
+    }
+  ]
+}

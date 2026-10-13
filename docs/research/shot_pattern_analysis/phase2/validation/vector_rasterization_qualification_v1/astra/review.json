@@ -1,0 +1,48 @@
+{
+  "accepted_component": true,
+  "full_publication_accepted": false,
+  "visual_approval": false,
+  "source_sha256": {
+    "vector_rasterization.py": "d11d76e1a6be3ed21927032d418546563944317428a96c1dcf0ee45adc92eb6a",
+    "test_vector_rasterization.py": "4a9714b9fa26b9df8217fea281d8e6dcdb57efd7ab31724c570c9e6f03e9e3a1"
+  },
+  "evidence_sha256": {
+    "red.txt": "e2bcb25576ed49ed2f99cdecc5210ac9111cdebaeedeb1e23dda108da97cf815",
+    "green_focus.txt": "f50a84c95b5029daf88f5b6b8131b571c41ab8113485ae9621d042bdf8cf2722",
+    "red_output_identity.txt": "757eb43dea18ccb21853959e8921eb87265894330a2ff8038cbb1f0ef4761292",
+    "green.txt": "ae6134779fdbf3260faba16ca82794b3ec7e203c442c8b3fe60c0d82c8fcc9a0",
+    "ruff.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "format.txt": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "mypy.txt": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+    "native_review.json": "114e078d13a938ab47093dad37cff971c7ff30b423d827180ab09da2bcd4ff36",
+    "native_review.txt": "adda7c7b7ebeba938b4b6fb1a91a1a076e00f3926cd3eb56ea552397471ee81d",
+    "native_review.py": "53ba5e378024b64f1cf3741e8de155bdee8abc1c14f264be6d03f6625b4462dd",
+    "native_tools.json": "28a5a24b096a5ba6ce78dc648a2eef91324e0f7ab2977f2236436fb87eb3fb2a",
+    "REVIEW.md": "f8c96f944a8e97ad76024fe4a4949f148ed6a2495f2e8e2ee0418644c51f80bb"
+  },
+  "independent_red": {
+    "initial_contract_failures": 3,
+    "decode_identity_failures": 1
+  },
+  "final_tests": 18,
+  "static_checks_pass": true,
+  "native_sample_terminal": {
+    "session": 13597,
+    "exit_code": 0
+  },
+  "test_static_terminal": {
+    "session": 27787,
+    "exit_code": 0
+  },
+  "runtime_tool_sha256": {
+    "pdftoppm": "de772e88ab9977ccde25def9b403bf42675d75f5dd82b19fbd7d8123ad183159",
+    "node": "bc17c508ffeed0ec622934f9b7fa72f8e78da65350e63c3eceb56fa688aa5e12",
+    "sharp": "27b5a6c6e1e1f27c527b09a963c932979403837d0f5f013ab5bdfb4a0ef2269a"
+  },
+  "limitations": [
+    "Only bounded conversion/diagnostic acceptance",
+    "Canonical relocation must be requalified",
+    "No live supplemental input",
+    "Explicit proportional SVG resize; no pixel equivalence claim"
+  ]
+}

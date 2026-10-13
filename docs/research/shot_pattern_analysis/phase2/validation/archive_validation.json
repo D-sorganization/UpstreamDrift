@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "tests_passed": 12,
+  "tdd_evidence": {
+    "late_source_and_symlink": "3 failed,7 passed before fix;10 passed after fix",
+    "windows_drive": "2 failed,10 passed before fix;12 passed after fix"
+  },
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/archive_data.py": "5f0c483dd31e11517e5d5dbeb464f499df56c94aedcab6bbf049f65537a57969",
+    "tests/research/test_shot_pattern_archives.py": "8921d6e2db11480160e399558e925b3154fa94e4818055ba7ed5f6672bf0be79"
+  },
+  "existing_bundles_reverified_members": {
+    "pilot_v1": 2178,
+    "control_pilot_v1": 426
+  },
+  "issue": 11988
+}

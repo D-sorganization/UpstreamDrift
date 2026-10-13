@@ -1,0 +1,6 @@
+CELL pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive
+CELL pitching_wedge_lean5_curve2_rotation2_combined2
+CELL driver_lean5_curve2_rotation2_combined2
+PAIR curve_strength
+PAIR across_lean
+RECEIPT 7448f929bb3f75c62d9934cb624d7d1b9ccbd2839ce1c02a6b5880d272bcb221

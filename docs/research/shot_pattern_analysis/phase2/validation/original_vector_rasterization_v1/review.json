@@ -1,0 +1,20 @@
+{
+  "scope": "Completed original primary/control native vector rasterization diagnostics only",
+  "rasterization_pass": true,
+  "visual_approval": false,
+  "full_publication_accepted": false,
+  "attempted": 744,
+  "diagnostic_records": 744,
+  "errors": [],
+  "warning_files": [],
+  "start_sha256": "9b82636a4d44e334716e3380cd6da02705b37750646435d5e7b7e664c1a0a662",
+  "results_sha256": "8be30e4b2f28a4113dcf29c7bba2f7644a23b5a0be456e298e2dfd41200b482a",
+  "script_sha256": "020eeb0d181ca954439de0fc572ebc4f9fcba95e199b94599329a3aa99c8b02d",
+  "sources": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/vector_inspection.py": "268742868c39d6d642c32ad9eae1fdda364bf66cf03ebb3a767f7d218699b51a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/vector_rasterization.py": "0bff9dc885094f3d320cb97f69766cb70b4a9d9a3cdfb70cf52a06396300f736"
+  },
+  "elapsed_seconds": 945.9139173030853,
+  "final_hash_checks_pass": true,
+  "limits": "Decoded pixels and metadata are not visual acceptance. SVG uses proportional viewport fit; no pixel equivalence or equal native DPI claim."
+}

@@ -1,0 +1,69 @@
+{
+  "status": "passed",
+  "cells": 24,
+  "shots_checked": 720000,
+  "manifest_file_hashes_checked": 216,
+  "max_summary_recomputation_error": 2.842170943040401e-14,
+  "putting_invariant": "Every V2 green/standard knot has expected strokes >= 1, so bounded linear interpolation preserves the lower bound.",
+  "scoring_contexts": "Driver tee; 7-iron and PW fairway approaches; V2 summaries and standalone reports agree.",
+  "checks": [
+    "Finite CSVs, 10000 distinct indices per pattern",
+    "V2 baseline content hash and unholed lower bound",
+    "Flight CSV preserved across rescoring",
+    "Aimed lateral sample SD, mean carry, target RMSE, equal-range lateral SD, covariance recomputed",
+    "Paired SG point estimates equal differences of recorded means",
+    "All recorded manifest hashes match current artifacts",
+    "All 72 per-cell figures have both dimensions >=800 pixels"
+  ],
+  "scope": "Internal consistency of model-conditional artifacts; does not establish empirical accuracy.",
+  "reviewed_at_utc": "2026-10-09T05:42:00.510790+00:00",
+  "focused_scoring_tests_passed": 19,
+  "reviewed_artifact_sha256": {
+    "flight_source_snapshot.zip": "e6de6acc7979f0cc7affffc4ccb73b6429c74d0ed4e3ba097e65871e2926dd73",
+    "pre_tapin_fix_scoring_snapshot.zip": "9c5130e845b91442fe427d9166a7c89c4b48655a50a849ff7abc5129df7da9ec",
+    "corrected_numerical_validation.json": "5b040269dfbc0c9b190790aa4f813b34d62d26f234f8468f8f8cae75f5549fb5",
+    "corrected_sensitivity.json": "237aa718a3778900c2649c28077f6ca6f06fc91f97963c0517e0899d4fdf3387",
+    "overview_v2/overview_statistics.json": "11cfe534cb3c492c207e4ea67a563b27a02cdce3dbe94009f1376126ea408254",
+    "overview_v2/strokes_gained_fixed_loft.png": "a726ca7bae4047e47399ce73b7ca3df86bcafad4e881b5b44d0e8481ea6e457d",
+    "overview_v2/strokes_gained_shaft_rotation.png": "321bd777b24e8634dba8604561da1a363f9a93380d7c8c40120eb2dd80df5014"
+  },
+  "cell_manifest_sha256": {
+    "corrected_results/driver_fixed_loft_sd1_scale1/manifest.json": "a86048bc4a10cf9d0099a4912f1257687b65a58ac80e84b3fd232807842e032c",
+    "corrected_results/driver_fixed_loft_sd1_scale2/manifest.json": "cbd1bae983ef3243ead876134679e1c0ff493b367aba6d40caa4f8385d6ccf34",
+    "corrected_results/driver_fixed_loft_sd2_scale1/manifest.json": "b23c03daf792fac1d70889a9bcb74f86d41bbc7b3cdd85aaa52de50201f7e721",
+    "corrected_results/driver_fixed_loft_sd2_scale2/manifest.json": "e4429d9504edc4e5b61bb241d341bca49403e375051f61865f312f1dde96b390",
+    "corrected_results/driver_shaft_rotation_sd1_scale1/manifest.json": "a634ad8b68b168548d42918fb13fd7d70f6780e2f3694de5778b5ea336665d95",
+    "corrected_results/driver_shaft_rotation_sd1_scale2/manifest.json": "6604e78c6fa49900f19d0790eddc4c1ac36b72c9daf7fc360787b6ebacaf72ba",
+    "corrected_results/driver_shaft_rotation_sd2_scale1/manifest.json": "ce4fd9d1ae54207fd3665637c9a172a27bf189a317a20e628d130db6b9f457da",
+    "corrected_results/driver_shaft_rotation_sd2_scale2/manifest.json": "d6f0ea8bc397b528780b281276801b787bcb61b417b3cf8f0ccec70734aabe60",
+    "corrected_results/pitching_wedge_fixed_loft_sd1_scale1/manifest.json": "677e200cd4fb9636c164d75c40564bd392c11eab136d5ccb32b97e0cdd50848a",
+    "corrected_results/pitching_wedge_fixed_loft_sd1_scale2/manifest.json": "81db528a5a7047472cd5e74b04a09e7fa37637d9ad025a27b864c455405011ce",
+    "corrected_results/pitching_wedge_fixed_loft_sd2_scale1/manifest.json": "902f19f9d13fb013c0e1ca16f93a3fca4d3f2f19ff73e8230486515d4088671c",
+    "corrected_results/pitching_wedge_fixed_loft_sd2_scale2/manifest.json": "2ed74e152c0ad58a22186d13ef804e9f2b7788f11c82a587ab06f0165b021916",
+    "corrected_results/pitching_wedge_shaft_rotation_sd1_scale1/manifest.json": "f7ad52fda5f584f36b912e439bcfb4f12a4d75cec6caf55cf45b6b0236f2589c",
+    "corrected_results/pitching_wedge_shaft_rotation_sd1_scale2/manifest.json": "856098bfb685c51fbeb7ef509466df7fa42a22d8da6a5dd4ee8322bababe900d",
+    "corrected_results/pitching_wedge_shaft_rotation_sd2_scale1/manifest.json": "79b57a3184a982f8541ca5da4612ae6f5562a19183d1068c55dca8383011b679",
+    "corrected_results/pitching_wedge_shaft_rotation_sd2_scale2/manifest.json": "f6e89685e8d09c01e2780e3c124c0cf3b79f422ff23af53cec63c2c516626fe8",
+    "corrected_results/seven_iron_fixed_loft_sd1_scale1/manifest.json": "773f967397e398a20200c6c6ec171a88e980d06ef21378dba79d1438c2d4a619",
+    "corrected_results/seven_iron_fixed_loft_sd1_scale2/manifest.json": "ebeb015d65a88dabbaa70cb6874112de373c0424b4e41deca5088713aff7eeda",
+    "corrected_results/seven_iron_fixed_loft_sd2_scale1/manifest.json": "ffda90ca64e1d496073037b54a2f24024f74c0ccb8cdb8e563d0f6677b387d1b",
+    "corrected_results/seven_iron_fixed_loft_sd2_scale2/manifest.json": "e0ca109d32e6aa0671236b462f7b4852bf6fb1196a5b4c4c6b0341d26b9388ec",
+    "corrected_results/seven_iron_shaft_rotation_sd1_scale1/manifest.json": "85899ee6e42fdb30fcbd232d3fa845f5e601458422d077b4dcaf009ef68d723f",
+    "corrected_results/seven_iron_shaft_rotation_sd1_scale2/manifest.json": "0f71222f6f958ad8ed5690ef68367e610d3868ae4a93693f52bb44db8aa35855",
+    "corrected_results/seven_iron_shaft_rotation_sd2_scale1/manifest.json": "de9f85c8432f197bc0f5d1e17c959718515b1650ca7e2c7a6cec6999aa69ee2d",
+    "corrected_results/seven_iron_shaft_rotation_sd2_scale2/manifest.json": "727cbcf3f63e01985a7c8906f58384b6e7924fa0e07ee2e0c505b95c688a31ec"
+  },
+  "resumed_committed_evidence_check": {
+    "checked_at_utc": "2026-10-09T09:07:18.491621+00:00",
+    "git_head": "a2eb2ace3629dd362db5230c958a83a8f61fec45",
+    "head_csv_blobs_matching_frozen_manifests": 24,
+    "reviewed_artifact_hashes_still_matching": 7,
+    "cell_manifest_hashes_still_matching": 24,
+    "flight_rerun": false,
+    "head_artifact_blobs_matching_audit": 7,
+    "archive_member_hashes_verified": {
+      "flight_source_snapshot": 33,
+      "pre_tapin_fix_scoring_snapshot": 144
+    }
+  }
+}

@@ -1,0 +1,136 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____ test_new_study_lifecycle_does_not_present_previous_sg_as_current[run] _____
+
+qapp = <PyQt6.QtWidgets.QApplication object at 0x796ed3b96350>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1911/test_new_study_lifecycle_does_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x796ed3e0e5d0>
+event = 'run'
+
+    @pytest.mark.parametrize("event", ["run", "failure", "cancel"])
+    def test_new_study_lifecycle_does_not_present_previous_sg_as_current(
+        qapp, tmp_path: Path, monkeypatch, event: str
+    ) -> None:  # noqa: ANN001
+        widget = _study(qapp)
+        old_score = "Mean Strokes Gained: Previous Study Draw +0.250"
+        widget.scoring_label.setText(old_score)
+        started = []
+    
+        def capture_start(*args, **kwargs):
+            started.append(widget.scoring_label.text())
+    
+        monkeypatch.setattr(widget.action_bar, "start", capture_start)
+        try:
+            if event == "run":
+                widget.output_edit.setText(str(tmp_path / "new-study"))
+                widget.run_analysis()
+                assert len(started) == 1
+>               assert started[0] != old_score
+E               AssertionError: assert 'Mean Strokes Gained: Previous Study Draw +0.250' != 'Mean Strokes Gained: Previous Study Draw +0.250'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1037: AssertionError
+__ test_new_study_lifecycle_does_not_present_previous_sg_as_current[failure] ___
+
+qapp = <PyQt6.QtWidgets.QApplication object at 0x796ed3b96350>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1911/test_new_study_lifecycle_does_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x796eb4d5ec60>
+event = 'failure'
+
+    @pytest.mark.parametrize("event", ["run", "failure", "cancel"])
+    def test_new_study_lifecycle_does_not_present_previous_sg_as_current(
+        qapp, tmp_path: Path, monkeypatch, event: str
+    ) -> None:  # noqa: ANN001
+        widget = _study(qapp)
+        old_score = "Mean Strokes Gained: Previous Study Draw +0.250"
+        widget.scoring_label.setText(old_score)
+        started = []
+    
+        def capture_start(*args, **kwargs):
+            started.append(widget.scoring_label.text())
+    
+        monkeypatch.setattr(widget.action_bar, "start", capture_start)
+        try:
+            if event == "run":
+                widget.output_edit.setText(str(tmp_path / "new-study"))
+                widget.run_analysis()
+                assert len(started) == 1
+                assert started[0] != old_score
+            elif event == "failure":
+                widget._failed("A deliberate non-simulation test failure")
+            else:
+                widget._cancelled()
+>           assert widget.scoring_label.text() != old_score
+E           AssertionError: assert 'Mean Strokes Gained: Previous Study Draw +0.250' != 'Mean Strokes Gained: Previous Study Draw +0.250'
+E            +  where 'Mean Strokes Gained: Previous Study Draw +0.250' = <built-in method text of QLabel object at 0x796eb4c93cf0>()
+E            +    where <built-in method text of QLabel object at 0x796eb4c93cf0> = <PyQt6.QtWidgets.QLabel object at 0x796eb4c93cf0>.text
+E            +      where <PyQt6.QtWidgets.QLabel object at 0x796eb4c93cf0> = <src.tools.shot_pattern_analysis.matched_gui.MatchedStudyWidget object at 0x796eb4bd76b0>.scoring_label
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1042: AssertionError
+___ test_new_study_lifecycle_does_not_present_previous_sg_as_current[cancel] ___
+
+qapp = <PyQt6.QtWidgets.QApplication object at 0x796ed3b96350>
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1911/test_new_study_lifecycle_does_2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x796eb4d5f320>
+event = 'cancel'
+
+    @pytest.mark.parametrize("event", ["run", "failure", "cancel"])
+    def test_new_study_lifecycle_does_not_present_previous_sg_as_current(
+        qapp, tmp_path: Path, monkeypatch, event: str
+    ) -> None:  # noqa: ANN001
+        widget = _study(qapp)
+        old_score = "Mean Strokes Gained: Previous Study Draw +0.250"
+        widget.scoring_label.setText(old_score)
+        started = []
+    
+        def capture_start(*args, **kwargs):
+            started.append(widget.scoring_label.text())
+    
+        monkeypatch.setattr(widget.action_bar, "start", capture_start)
+        try:
+            if event == "run":
+                widget.output_edit.setText(str(tmp_path / "new-study"))
+                widget.run_analysis()
+                assert len(started) == 1
+                assert started[0] != old_score
+            elif event == "failure":
+                widget._failed("A deliberate non-simulation test failure")
+            else:
+                widget._cancelled()
+>           assert widget.scoring_label.text() != old_score
+E           AssertionError: assert 'Mean Strokes Gained: Previous Study Draw +0.250' != 'Mean Strokes Gained: Previous Study Draw +0.250'
+E            +  where 'Mean Strokes Gained: Previous Study Draw +0.250' = <built-in method text of QLabel object at 0x796eb4c50730>()
+E            +    where <built-in method text of QLabel object at 0x796eb4c50730> = <PyQt6.QtWidgets.QLabel object at 0x796eb4c50730>.text
+E            +      where <PyQt6.QtWidgets.QLabel object at 0x796eb4c50730> = <src.tools.shot_pattern_analysis.matched_gui.MatchedStudyWidget object at 0x796eb4c48050>.scoring_label
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1042: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_gui.py::test_new_study_lifecycle_does_not_present_previous_sg_as_current[run]
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_gui.py::test_new_study_lifecycle_does_not_present_previous_sg_as_current[failure]
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_gui.py::test_new_study_lifecycle_does_not_present_previous_sg_as_current[cancel]
+3 failed, 31 deselected, 6 warnings in 11.60s

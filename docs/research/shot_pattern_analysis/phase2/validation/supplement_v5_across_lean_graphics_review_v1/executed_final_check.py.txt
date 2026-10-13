@@ -1,0 +1,42 @@
+import hashlib,json
+from pathlib import Path
+from collections import Counter
+root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+p=root/'docs/research/shot_pattern_analysis/phase2'
+v=p/'validation/supplement_v5_across_lean_graphics_review_v1'
+assets=p/'supplement_report_v1/figures/comparisons'
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+i=json.loads((v/'inventory.json').read_text());b=json.loads((v/'font_bbox_scope.json').read_text())
+for row in i['pairs']:
+ for name,h in row['assets_sha256'].items(): assert sha(assets/name)==h,name
+ assert sha(v/Path(row['contact']).name)==row['contact_sha256']
+assert sha(p/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json')==i['comparison_json_sha256']
+selected=[(7,'_density_draw_social.png'),(7,'_overhead.png'),(18,'_density_fade_social.png'),(18,'_overhead_social.png'),(35,'_density.png'),(40,'_density_straight_social.png'),(56,'_density_draw_social.png')]
+full=[i['pairs'][n-1]['prefix']+suffix for n,suffix in selected]
+full.append('across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve1_rotation1_shaft_only_9a7f95d848_density.png')
+source_root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
+sources={f'src/tools/shot_pattern_analysis/{name}.py':sha(source_root/f'src/tools/shot_pattern_analysis/{name}.py') for name in ['matched_pair_social','matched_supplement_figures']}
+review={'schema':'independent-across-lean-graphics-review/1','accepted':False,'status':'review_complete_with_academic_density_spacing_gate','scope':'56 across-lean pairs only; live full pipeline and final manifest remain unaccepted','counts':{k:i[k] for k in ['asset_count','png_count','pdf_count','svg_count']},'pairs':56,'all_336_pngs_visually_reviewed_via_contacts':True,'contact_sheets_reviewed':list(range(1,57)),'full_size_representatives_sha256':{name:sha(assets/name) for name in full},'inventory_sha256':sha(v/'inventory.json'),'comparison_json_sha256':i['comparison_json_sha256'],'source_commit':'14f27706e4e9e52ca1324a7a2bac59e86ab33ef9','producer_source_sha256':sources,'all_asset_and_contact_hashes_stable_after_review':True,'data_semantic_checks':'passed: exact ordered protocol/cell identities, target, common-six count, conditional population and 600-dot disclosure; overhead explicitly uses saved paths not paired shot indices','social_and_overhead_visual_review':'passed within this component','academic_density_visual_review':'changes_required: cramped upper xlabel/lower title spacing in full-height equal-aspect panels; no proven glyph collision','font_metric_scan':{'file':'font_bbox_scope.json','sha256':sha(v/'font_bbox_scope.json'),'flagged_pdf_count':30,'counts_by_club_profile':{'pitching_wedge_shaft_only':12,'seven_iron_shaft_only':12,'seven_iron_combined2':6},'qualification':'Font metric box overlap is a screening measure, not glyph overlap. Actual full-size PW and seven-iron views confirm inadequate visual separation.'},'remaining_gate':'Qualified positive decorated-label row gutter and independent review of revised academic density outputs; full pipeline receipt reconciliation still required.','no_simulations_or_statistics_rerun':True,'failed_review_attempts':'Initial extraction assertion failed on hyphenated protocol line wrapping, corrected extraction only. Two contact-generation sessions ended 143 without known cause; resumed successful final session 81615 exited 0. No producer stopped or modified.'}
+(v/'review.json').write_text(json.dumps(review,indent=2)+'\n')
+(v/'REVIEW.md').write_text('''# Across-Lean Graphics Component Review
+
+The 56-pair component is complete and its 896 assets are byte-stable: 336 PNGs, 280 PDFs and 280 SVGs. All 56 six-image contact sheets were inspected, followed by eight larger representative views spanning Driver, Seven Iron and Pitching Wedge, narrow shaft-only and combined-noise distributions, SD 1/2, curvature 1/2, original controls, supplemented controls and the explicit PW alias. Exact inspected paths and hashes are in `review.json`; the full inventory is in `inventory.json`.
+
+## Scientific Labels and Populations
+
+The ordered protocols, physical targets and common-six population counts agree with the 56 numerical comparison records. Density, HDR and marginal captions distinguish all common-supported endpoints from 600 displayed dots. Social cards disclose shared scales within each figure and potentially different scales across physical-pattern figures. Overhead graphics correctly identify saved paths as unpaired by shot index, and disclose lateral display magnification. Model-conditional/carry-only caveats remain visible. No new statistics or physical simulations were run.
+
+## Remaining Academic Layout Gate
+
+The academic six-panel density layout has insufficient row spacing when equal-aspect axes fill their grid slots. The upper Downrange label is visually cramped against the next row title. Full-size PW and Seven Iron examples confirm this spacing defect; this review does **not** claim proven glyph collision. PDF font-metric screening flags 30 of 56 academic density figures: 12 PW shaft-only, 12 Seven Iron shaft-only and six Seven Iron combined-noise figures. Font boxes overlap by up to 9.76949 pt, but those boxes exceed visible glyph ink. The exact files and screening values are in `font_bbox_scope.json`.
+
+The minimal repair belongs in `_write_pair_density_figure` in `matched_supplement_figures.py`: increase or measure the row gutter currently set by `hspace=.24`. A failing regression should measure upper-row decorated x labels against lower-row titles in all three columns, then require positive readable clearance while preserving fonts, limits, density arrays, HDR levels, common masks and counts. No other renderer change is justified by this review.
+
+## Publication Revision Plan
+
+Allow the current producer to finish. Verify its complete receipt with the frozen producer and preserve it unchanged. A separately qualified child publication may rerender only academic paired-density PNG/PDF/SVG files from the same verified endpoint populations, reuse all other assets by exact hash, and bind parent receipt, numerical inputs, old/new renderer hashes and per-output origin in an explicit child manifest. Do not silently update the parent receipt, relax the existing current-source loader guard, or recompute bootstrap statistics for this layout repair. Review every regenerated academic density image before accepting the child publication.
+
+Social density and overhead components pass this review. The entire component remains pending the academic spacing repair and eventual final pipeline-manifest reconciliation. This is not full-study publication acceptance.
+''')
+(v/'final_hash_check.txt').write_text('PASS: all 896 asset hashes, 56 contact hashes and comparison JSON unchanged after visual review.\n')
+print(sha(v/'review.json'))

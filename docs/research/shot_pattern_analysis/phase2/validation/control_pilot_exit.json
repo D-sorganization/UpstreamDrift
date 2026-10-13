@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "-m",
+    "src.tools.shot_pattern_analysis.matched_matrix",
+    "docs/research/shot_pattern_analysis/phase2/control_pilot_v1",
+    "--stage",
+    "pilot",
+    "--shots",
+    "32",
+    "--profiles",
+    "shaft_only",
+    "combined2",
+    "--common-targets",
+    "docs/research/shot_pattern_analysis/phase2/common_targets.json",
+    "--figures",
+    "none"
+  ],
+  "started": "2026-10-09T17:11:03.302182+00:00",
+  "finished": "2026-10-09T17:13:18.473941+00:00",
+  "exit_code": 0
+}

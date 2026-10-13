@@ -1,0 +1,11 @@
+{
+  "source_commit": "0e525333207a3c1ecb64c5932c1dd487519a92c0",
+  "scope": "One historical heading formats the workflow if: key as inline code. No record fields/statuses or scientific acceptance change. Prior normalization remains a historical checkpoint.",
+  "line": 791,
+  "before_sha256": "7bb3560a62361e67619aac89fac76b216cf0e826cf0ca859374e3aa7912d6b82",
+  "after_sha256": "73675e99cd33bd54b3ec8804c29bc5b8adabbc4636ab57ca4c3f6493fa84f85d",
+  "before": "Same-Repo If: Exemption",
+  "after": "Same-Repo `if:` Exemption",
+  "prior_archive": "archive-before-workflow-literal.md.gz",
+  "reason": "Repository title checker requires lowercase if; canonical RM title checker required uppercase If. Literal workflow key is code, preserved by both checkers."
+}

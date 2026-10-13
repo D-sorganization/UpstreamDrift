@@ -1,0 +1,30 @@
+from pathlib import Path
+import json,hashlib,datetime
+b=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');v=b/'validation/supplement_v5_initial_pair_review_v1';p=b/'supplement_report_v1/figures/comparisons'
+def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+x=json.loads((v/'pair_checks.json').read_text());assert h(b/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json')==x['report_sha256']
+for q in x['pairs']:
+ r=q['comparison'];n=r['common_supported_n'];total=r['total_n_per_population']
+ for f,s in q['asset_sha256'].items(): assert h(p/f)==s
+ for f,t in q['svg_text'].items():
+  if '_density_' in f:
+   assert f'{n:,}/{total:,} valid' in t
+   assert 'Same Shot Indices Supported in All Six Populations' in t
+   assert f"{r['target_x_m']:.2f} m downrange" in t
+   assert 'Fixed-Target Control' in t
+   for protocol in r['source_protocols']:assert protocol in t
+  if '_overhead.' in f: assert 'not paired by shot index' in t
+full=[x['pairs'][0]['prefix']+'_density_draw_social.png',x['pairs'][1]['prefix']+'_density.png',x['pairs'][0]['prefix']+'_overhead.png',x['pairs'][1]['prefix']+'_overhead_social.png']
+r={'schema':'initial-pair-visual-review/1','accepted':True,'scope':'Two completed PW across-lean sets only','full_pipeline_accepted':False,'reviewed_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'pair_checks_sha256':h(v/'pair_checks.json'),'comparison_json_sha256':x['report_sha256'],'pairs':[{'prefix':q['prefix'],'common_supported_n':q['comparison']['common_supported_n'],'source_protocols':q['comparison']['source_protocols']} for q in x['pairs']],'asset_count':32,'pngs_contact_reviewed':12,'full_size_reviewed_sha256':{f:h(p/f) for f in full},'contact_sha256':{f.name:h(f) for f in v.glob('contact_*.jpg')},'findings':[],'hashes_stable_after_review':True,'limitations':['Only across_lean sets were complete at selection time; curve_strength and shaft_rotation_sd comparisons are not qualified here.','PNG visual inspection and SVG caption checks; PDFs inventoried but not individually rendered.','Final pipeline receipt must reconcile exact reviewed asset hashes.'],'visual_notes':['No observed clipping, crowded tick labels or metadata/legend collisions.','Exact ordered lean conditions, original_control/1 protocols, fixed-target basis and 77.40 m target are disclosed on social densities.','Density captions accurately distinguish all-common-six endpoints from 600 displayed dots per panel.','Overhead captions disclose six saved raw paths per physical pattern and condition, not paired by shot index, with lateral magnification and shared physical limits.','Shared scales apply within each social physical-pattern figure; cross-pattern scales may differ explicitly.']}
+(v/'review.json').write_text(json.dumps(r,indent=2)+'\n')
+(v/'REVIEW.md').write_text('''# Initial Supplemental V5 Pair Graphics Review
+
+Accepted only the two recorded PW across-lean sets: 0°→5° at shaft-twist SD 1° with shaft-only noise, and 0°→10° at SD 2° with combined noise, both curve scale 1. These are original fixed-target control sources. Their common-six populations are 10,000 and 9,999 of 10,000 respectively, matching the numerical comparison records.
+
+All 12 PNGs were inspected in two contact sheets; four representative academic/social density and overhead images were also inspected individually. No concrete caption, clipping, tick-spacing or population-label defect was observed. Density cards disclose the common-six conditioning, actual matching target, ordered protocols and condition identities. Overhead cards correctly disclose sampled raw paths, their unpaired status and display magnification.
+
+All 32 PNG/PDF/SVG files and the numerical comparison JSON remained unchanged after review. Full byte inventories, extracted SVG captions and exact source records are retained in `pair_checks.json`; the receipt binds the contacts and individually inspected images. PDF pages were not independently rendered.
+
+Only across-lean sets were complete when this sample was selected. This is not acceptance of other contrast types, all pairs or the live pipeline. Final manifest reconciliation remains required. No simulations, bootstrap calculations, source edits or output mutations were performed.
+''')
+(v/'executed_finalize.py.txt').write_bytes(Path(__file__).read_bytes());print(h(v/'review.json'))

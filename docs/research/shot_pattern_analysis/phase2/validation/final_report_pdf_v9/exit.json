@@ -1,0 +1,19 @@
+{
+  "started_utc": "2026-10-11T01:15:19.001521+00:00",
+  "command": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "-m",
+    "scripts.research.shot_pattern_analysis.build_pdf",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/REPORT.md",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/REPORT.pdf",
+    "--pandoc",
+    "/home/dieterolson/.local/bin/pandoc"
+  ],
+  "cwd": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+  "report_markdown_sha256": "ff281f76ee649c44c88afda58701329e7898e8964f9efb6d8aeec73dcd77d79b",
+  "builder_sha256": "95753e325c88944f34287ded766fce8832ff9f84b6782b4f39806dcc8c83dd2a",
+  "note": "AGY process ended143 after writing tested repair; root independently passed9tests and Ruff lint/format. No simulation changes.",
+  "exit_code": 0,
+  "finished_utc": "2026-10-11T01:15:29.129387+00:00",
+  "pdf_sha256": "70a56243ff17ac833a60037562a07777b2bdac4aa4267a9956856a3492763b16"
+}

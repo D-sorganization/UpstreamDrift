@@ -1,0 +1,22 @@
+{
+  "schema": "shot-pattern-figure-assets/1",
+  "files_sha256": {
+    "phase2/presentation_v2/summary.pdf": "438d1c64d534b25309e99b4b49a73138139e903744b1336be05065fa56c9af0b",
+    "phase2/presentation_v2/driver_baseline_density.pdf": "bb1bbf3515bcc66556abc6abb389b19d5a468fb18b11d623ca2794596585bda1",
+    "phase2/presentation_v2/driver_baseline_flight_paths.pdf": "d582aece08285ac2ddc310a437b90eb5140b52626347a28116eb4554750d07a8",
+    "phase2/presentation_v2/seven_iron_baseline_density.pdf": "fe16e828a632e415b8cc9338e4132e762359924a4a7c0b2f81f94bfac979475c",
+    "phase2/presentation_v2/seven_iron_baseline_flight_paths.pdf": "65037a9a0475ee97ba16a385ec70bf8957de851712dbee812fa5d62020bc44d4",
+    "phase2/presentation_v2/pitching_wedge_baseline_density.pdf": "2108d5737b4b28d4393eb94471d456351d0ae588ebb462e165d2eb38160b931f",
+    "phase2/presentation_v2/pitching_wedge_baseline_flight_paths.pdf": "0238a52d3acea1187463f5febc16998392d89d911714b77744442fa60079d3bc",
+    "phase2/presentation_v2/driver_shaft_rotation_sd_density.pdf": "3655ef9da0f0d2cc0eda8043e536c746d9a10aeb77e00d816d827850d31a79ee",
+    "phase2/presentation_v2/driver_curve_strength_density.pdf": "a7a4f2a3d6b9de683a0d6c8d4ba5d10f9197a566e3d19c690648f5cbd34e194b",
+    "phase2/presentation_v2/seven_iron_shaft_rotation_sd_density.pdf": "07627504d2cc96c2f882cd08e05abc3236d7ce306736e98a1742ba35dda9a3a8",
+    "phase2/presentation_v2/seven_iron_curve_strength_density.pdf": "5194e2b49e3ad3952b2dba63b4a150368488443b903516ab3736292accd33964",
+    "phase2/presentation_v2/pitching_wedge_shaft_rotation_sd_density.pdf": "3c9ff639db49de81a8c1072a4565f69455e9178294f4d6a82e0672b9efbed646",
+    "phase2/presentation_v2/pitching_wedge_curve_strength_density.pdf": "fbc8d7a160dcbc429209f78bb667c152e52d0933c632cded4760861d73e4f111",
+    "phase2/presentation_v2/driver_across_lean_flight_paths.pdf": "9d445eec7b34992531938418791918ce0dcec46ae4d3d23f7c6c82842cf24c07"
+  },
+  "reviewed_pdf_sha256": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+  "source_commit": "f3e83ea8aa754d93ea29b8d176a36fa3d4004a7d",
+  "scope": "Reviewed figure assets for the39page illustrated article; original historical outputs remain separate."
+}

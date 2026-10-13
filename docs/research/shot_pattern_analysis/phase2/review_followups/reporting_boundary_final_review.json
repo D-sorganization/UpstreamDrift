@@ -1,0 +1,32 @@
+{
+  "execution_hashed_sources_edited": false,
+  "findings": [],
+  "focused_test_count": 32,
+  "physical_simulations_run": false,
+  "remaining_gates": [
+    "canonical per-physical-pattern social renderer integration and metadata",
+    "final source/asset provenance after integration",
+    "complete original and supplemental data audits",
+    "final narrative and all-assets visual acceptance"
+  ],
+  "reviewed_commits": [
+    "c6492d5c2bcaca50c7c1a13572da8a37490ca786",
+    "f265cf7839aea47e6ca24afa394f1a9b8c11d45f"
+  ],
+  "ruff_exit_code": 0,
+  "schema": "independent-reporting-boundary-review/1",
+  "source_head": "f265cf7839aea47e6ca24afa394f1a9b8c11d45f",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "54c825b878d9f33453a0c35f3b7901c30161d19b602f8a6dfc903fda976f5f8a",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "c5664e4326ee215ca7c7003107d5c910901a12d20bedb7eb444986288c1aa771",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "525e6ce42731212bb1c4ec6bcd3441012ea9d467f648956888ad0ed2c8302ffd",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "7714d0bf31dbb42c98dd6211f3f4a02bcccf2388889cfd77bfc536ce638a302c",
+    "src/tools/shot_pattern_analysis/matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "tests/research/test_shot_pattern_final_report.py": "3a1a799f7543d9fd566e7a95a18b7b9de0b61f48024e3c883918e6a867c43880",
+    "tests/research/test_shot_pattern_final_report_assets.py": "e9043ca09fbf63d95c76cf53947afe316d8374b73a9a780ced0d38421a029578",
+    "tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py": "0fcb87b255ebfaca9023ce41a34dbb0ff1b90beb0ada2e495bf1a2893e560daa"
+  },
+  "status": "accepted_reporting_contracts_pending_presentation_integration",
+  "test_exit_code": 0,
+  "test_log_sha256": "3d811b63088d24c2a365f75785282cc326eb4aa46134af83bd2f91470a65916c"
+}

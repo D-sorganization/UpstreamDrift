@@ -1,0 +1,435 @@
+{
+  "status": "visual_review_pending",
+  "scope": "Actual Saved Data Component, Not Final Study Acceptance",
+  "sources": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py": "b19a946473959e3224646660fd9bfc890008941a2fca874b2259a129e4dd2d72",
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "8b80820cb16b2a4f975a3bfcfa960d30500d3aec3d08fabd6a949bf4f9e37694"
+  },
+  "inputs": {
+    "driver_lean5_curve1_rotation1_combined2": "de7c91b5d88ed5648f96554352d24c5f7ab4eb0292dccc1a38b04ce71a893acd"
+  },
+  "figures": [
+    {
+      "figure_kind": "density_png",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.png",
+      "sha256": "ff1ce5dfec3cfdc64b8c552e8f9d467e95c570012dd26f80ebeefc310d5889ae"
+    },
+    {
+      "figure_kind": "density_pdf",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.pdf",
+      "sha256": "7ed370fff45c3bdc01e413a139d19426428681729125b021dafe8c468715ab9d"
+    },
+    {
+      "figure_kind": "density_svg",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.svg",
+      "sha256": "ca7b5bc2bae42b063f7e66451e0818fe59fd8a0833b8279abf40e8d0694bfe4a"
+    },
+    {
+      "figure_kind": "density_social_png",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.png",
+      "sha256": "32c4b83cd93ec515c6bd43082ce663f2dc7580ae54ac88a82bd7175adfaf4ad1"
+    },
+    {
+      "figure_kind": "density_social_pdf",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.pdf",
+      "sha256": "6cca70f37d806fb27fc4e6c6eff8741478fa389d01bb9454ba30e33a923990f4"
+    },
+    {
+      "figure_kind": "density_social_svg",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.svg",
+      "sha256": "5088b5b4e72798b36dd3d7e6b000882ce7767708a65d64619bcf43f4db76cced"
+    },
+    {
+      "figure_kind": "overhead_png",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.png",
+      "sha256": "7f3b2741ee7d37e944cc21b1d97c9b4fb692f130cc6721c1c592b1f99b6a6411"
+    },
+    {
+      "figure_kind": "overhead_pdf",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.pdf",
+      "sha256": "056bcba4ea7552067d6ddc6b38bd7a0a78c1de1c7e24aa42b6036368b912f4c6"
+    },
+    {
+      "figure_kind": "overhead_svg",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.svg",
+      "sha256": "d6f94dcd9d88caa77db6e2410e876ad3b13b54d9892b05abb4d9ab475d541d7e"
+    },
+    {
+      "figure_kind": "overhead_social_png",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.png",
+      "sha256": "199e559a6e8c2eb1cc9050e35f2f0b95e07c05607d1d33d229559664c395307b"
+    },
+    {
+      "figure_kind": "overhead_social_pdf",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.pdf",
+      "sha256": "96104a584d13578553f6c96517bc25ecc76041b5b2a10181a5e734a42e03bfcb"
+    },
+    {
+      "figure_kind": "overhead_social_svg",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "original_primary/1",
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "target_x_m": 108.02738606179851,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.svg",
+      "sha256": "18eccd88d6e8612e48ffbb35ce1060583d84bb0068b54cae8f1a0cb726011c1e"
+    }
+  ],
+  "layout": [
+    {
+      "path": "/tmp/p2-production-cell-review-v4/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.png",
+      "text": [
+        {
+          "text": "Shot-Endpoint Density Conditional on Supported Airborne Shots",
+          "bounds": [
+            0.06,
+            0.9394838169642856,
+            0.552121212121212,
+            0.025516183035714346
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Supplement Cell: driver_lean5_curve1_rotation1_combined2",
+          "bounds": [
+            0.06,
+            0.9159143813775511,
+            0.3125094696969697,
+            0.017350924744897855
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "source: original_primary/1  |  cell: driver_lean5_curve1_rotation1_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 1.0  |  shaft\nrotation sd deg: 1.0  |  stage: Final Supplemental Analysis  |  figure scope: one-cell supported population  |  conditioning: individually\nsupported endpoints by physical pattern  |  Valid/Total: Straight 9,974/10,000 valid; Draw 9,974/10,000 valid; Fade 9,974/10,000 valid",
+          "bounds": [
+            0.06,
+            0.8344733537946428,
+            0.5267992424242425,
+            0.050526646205357184
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. HDR mass is sample-derived from simulated endpoints. Colored Dots Shown/Valid: Straight 600/9,974; Draw 600/9,974; Fade 600/9,974; density, HDR,\nand marginals use every valid endpoint. Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. Bin resolution: 2.54 \u00d7 0.49 m. Achieved HDR Mass By Pattern (Discrete Ties May\nExceed Request): Straight 50.3%/80.6%/95.1%  |  Draw 50.8%/80.1%/95.0%  |  Fade 50.4%/80.1%/95.1%",
+          "bounds": [
+            0.06,
+            0.020732950569550736,
+            0.7873390151515152,
+            0.047030868011267005
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-cell-review-v4/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.png",
+      "text": [
+        {
+          "text": "Driver: Shot Dispersion",
+          "bounds": [
+            0.06,
+            0.9372157118055555,
+            0.20687500000000003,
+            0.02778428819444445
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Driver \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0",
+          "bounds": [
+            0.06,
+            0.9148097511574074,
+            0.27568359375,
+            0.021604938271604923
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Individually Supported Endpoints by\nPhysical Pattern  |  Valid/Total: Straight 9,974/10,000 valid; Draw 9,974/10,000 valid; Fade 9,974/10,000 valid",
+          "bounds": [
+            0.06,
+            0.8469620466820988,
+            0.6258593750000001,
+            0.03803795331790116
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Straight 600/9,974; Draw 600/9,974; Fade 600/9,974. Density, HDR, and\nmarginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            0.06,
+            0.020010564356674383,
+            0.711689453125,
+            0.03735827787422839
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-cell-review-v4/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.png",
+      "text": [
+        {
+          "text": "Raw Overhead Flight-Trajectory Comparison",
+          "bounds": [
+            0.06,
+            0.9433235677083334,
+            0.34421006944444443,
+            0.04167643229166673
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Supplement Cell: driver_lean5_curve1_rotation1_combined2; Raw Simulator Flight Samples",
+          "bounds": [
+            0.06,
+            0.8966601562500001,
+            0.43460069444444444,
+            0.028339843749999982
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "source: original_primary/1  |  cell: driver_lean5_curve1_rotation1_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 1.0  |  shaft\nrotation sd deg: 1.0  |  stage: Final Supplemental Analysis  |  figure scope: Saved Raw Flight Samples  |  Population: Saved Raw Trajectories;\nNot Paired by Shot Index  |  Paths shown: Straight 6; Draw 6; Fade 6",
+          "bounds": [
+            0.06,
+            0.8074731445312501,
+            0.501484375,
+            0.08252685546874994
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. Raw trajectories; no aim-line rotation. Vertical display magnification: 12.6\u00d7 versus downrange. Only the displayed\npaths are plotted; paths are sampled from supported airborne shots.",
+          "bounds": [
+            0.06,
+            0.017909749348958334,
+            0.6455381944444445,
+            0.05501790364583334
+          ],
+          "outside_canvas": false
+        }
+      ]
+    },
+    {
+      "path": "/tmp/p2-production-cell-review-v4/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.png",
+      "text": [
+        {
+          "text": "Driver: Sample Flight Paths",
+          "bounds": [
+            0.06,
+            0.9572157118055555,
+            0.244580078125,
+            0.02778428819444445
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Driver \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0 \u00b7 Raw Flight Samples",
+          "bounds": [
+            0.06,
+            0.903395061728395,
+            0.403544921875,
+            0.021604938271605034
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Saved Raw Trajectories; Not Paired by\nShot Index  |  figure scope: Saved Raw Flight Samples  |  Paths shown: Straight 6; Draw 6; Fade 6",
+          "bounds": [
+            0.06,
+            0.8519620466820987,
+            0.633798828125,
+            0.038037953317901274
+          ],
+          "outside_canvas": false
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Raw trajectories; no aim-line rotation. Vertical display magnification: 20.9\u00d7 versus downrange. Paths\nShown: Straight 6; Draw 6; Fade 6. Samples from supported airborne shots.",
+          "bounds": [
+            0.06,
+            0.019747962480709876,
+            0.783662109375,
+            0.03803795331790123
+          ],
+          "outside_canvas": false
+        }
+      ]
+    }
+  ]
+}

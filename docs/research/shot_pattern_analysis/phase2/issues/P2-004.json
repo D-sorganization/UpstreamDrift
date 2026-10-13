@@ -1,0 +1,8 @@
+{
+  "number": 11975,
+  "state": "OPEN",
+  "title": "Present Shot Distributions with Academic Density and Marginal Graphics",
+  "url": "https://github.com/D-sorganization/UpstreamDrift/issues/11975",
+  "local_id": "P2-004",
+  "acceptance": "Create shared-axis normalized density maps and empirical highest-density regions plus dots, marginal distributions, raw overhead trajectories, clear units and assumptions. Validate mass, ties and degenerate data; export PNG/PDF/SVG and visually review."
+}

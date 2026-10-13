@@ -1,0 +1,37 @@
+{
+  "schema": "report-narrative-independent-review/1",
+  "status": "component_accepted",
+  "reviewer": "Astra",
+  "candidate_base": "3f023b7ad9e615a3a1e26306cbee1b6939ce25c3",
+  "sources": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "13f0b30d8c9b4c75f5e6cbf3b769ebc6f832cf6f737088d85692dcca5d08a180",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "02d22748f8d8aa7cbab74e5a2aded5e97bde5555f93fe68aba4bf63d3490e552",
+    "tests/research/test_shot_pattern_final_report.py": "aafc011d811e33f1fa62ae74a8c8621f1f47b8a0f6e9d4baa2f053f635fd016b"
+  },
+  "line_counts": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": 1093,
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": 422,
+    "tests/research/test_shot_pattern_final_report.py": 914
+  },
+  "tests": {
+    "red_failures": 4,
+    "green_passed": 35,
+    "ruff": "pass",
+    "mypy": "pass"
+  },
+  "limitations": [
+    "No final publication acceptance",
+    "No new Monte Carlo or bootstrap",
+    "Existing producer receipts remain unchanged"
+  ],
+  "evidence": {
+    "population_check.py.txt": "08a495700a03fbc6b9431b810900cb953d2c2b1eefa3a6eb6b4ba9db49927008",
+    "agy_pre_review_historical.txt": "aa577732546338f3d76a50df1d7830f989d087b720e3232d15c26f75781f935e",
+    "review.md": "f02d76aa83597f910b8991bc94503b040d583aa52717abbbd7a900e5e2e1a5f1",
+    "red.txt": "8b4cca7f883a45e84de927776976f5392b95103897110e80097b4f297dc106cf",
+    "green.txt": "fa2821e97ef03efe0497e725d2842c1a3032028e732176a61ad9879db766c6eb",
+    "actual_population_check.json": "1ff46aac35174ab5d39d436facfc25ee49abde615a1efe6029325ff1cc85b795",
+    "population_check.txt": "1e16e75312164c2f8b2eb2f9db3f182e4bd552e457eb7ff3a9f41edc9c1db0a9",
+    "mypy.txt": "8228fcc5ce46d42d01caf3cd941f4e9c5f2bcc372bb5b147a2f0572d2dd675a8"
+  }
+}

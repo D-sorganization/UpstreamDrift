@@ -1,0 +1,14 @@
+{
+  "method": "pdftotext bbox extraction; concatenated decimal numeric words are screening evidence, not a universal overlap proof",
+  "checked_detail_density_pdfs": 60,
+  "suspected": [
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.pdf",
+      "joined_numeric_words": [
+        "144.8145.6146.4147.2148.0148.8149.6150.4151.2152.0",
+        "144.8145.6146.4147.2148.0148.8149.6150.4151.2152.0",
+        "144.8145.6146.4147.2148.0148.8149.6150.4151.2152.0"
+      ]
+    }
+  ]
+}

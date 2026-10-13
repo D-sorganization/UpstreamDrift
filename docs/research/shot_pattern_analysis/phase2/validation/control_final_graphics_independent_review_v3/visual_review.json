@@ -1,0 +1,118 @@
+{
+  "schema": "independent-control-graphics-visual-review/1",
+  "created_utc": "2026-10-10T07:13:05.653468+00:00",
+  "status": "changes_required",
+  "manifest_sha256": "36c80496b3e347b38f26059b0451017d0f15e38a0a40a046ded6196ca723aec1",
+  "inventory_review_sha256": "ba42f66d78ead3bbe2292477381e961946e97ec40af94b58209b42f00087e2a2",
+  "producer_exit_code": 0,
+  "inventory_scope": {
+    "outputs_verified_by_inventory": 547,
+    "pngs_rehashed_independently": 194,
+    "png_bytes_unchanged": true,
+    "cell_manifests": 72
+  },
+  "visual_scope": {
+    "contact_sheets": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "png_contact_count": 194,
+    "full_size_pngs": [
+      {
+        "index": 22,
+        "page": 2,
+        "path": "details/driver_lean5_curve1_rotation2_combined2/overhead.png",
+        "sha256": "cd3d16add8c69ce2d5c92de8224fdb0e2904cdd559b2b53044d4e82d1d0f9351"
+      },
+      {
+        "index": 35,
+        "page": 3,
+        "path": "details/pitching_wedge_lean10_curve1_rotation1_shaft_only/density.png",
+        "sha256": "83975111cf5b96538f83ce4ee41fd520f022b2a74db4e6d1902dd297cdb3b689"
+      },
+      {
+        "index": 75,
+        "page": 5,
+        "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.png",
+        "sha256": "2b79ec5f81f270dbbb61d876d395bf2d0616e076d8fe6fb31f1e2f5a948b80f6"
+      },
+      {
+        "index": 87,
+        "page": 6,
+        "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+        "sha256": "5bac3be384b543d64697d432f97c636270d3c0848ff4989bd203094a1285e5c9"
+      },
+      {
+        "index": 115,
+        "page": 8,
+        "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+        "sha256": "db84d8d1177d8c9be9deb3b69f6eac148916bf56f8965036404c5e5121f23a2b"
+      },
+      {
+        "index": 126,
+        "page": 8,
+        "path": "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.png",
+        "sha256": "b90748fa80d3585564f7aded0073487a7d99c7e18ac86325748e5f07801d9c3c"
+      },
+      {
+        "index": 137,
+        "page": 9,
+        "path": "social/comparisons/pitching_wedge/combined2/Draw/shaft_rotation_sd.png",
+        "sha256": "155c0444cfc100097103293996a02bff600ff5d713b51bd1cb2e496241895386"
+      },
+      {
+        "index": 143,
+        "page": 9,
+        "path": "social/comparisons/seven_iron/combined2/Draw/curve_scale.png",
+        "sha256": "98b8df5e35405be4821fcfd72e4daf8b131757f8635f6ed0444d68c6f583649d"
+      },
+      {
+        "index": 175,
+        "page": 11,
+        "path": "social/details/pitching_wedge_lean0_curve1_rotation2_combined2/density.png",
+        "sha256": "917a2b3ed786cf2c655f69ada4e4fc422c001c079d3f2d9300dbc8493f070527"
+      },
+      {
+        "index": 194,
+        "page": 13,
+        "path": "social/details/seven_iron_lean0_curve2_rotation2_shaft_only/overhead.png",
+        "sha256": "06e112917db211d9999cf50f11a65a94b0b7b14c5b6f48e4ec02376bcd0645e9"
+      }
+    ],
+    "all_assets_full_size_reviewed": false
+  },
+  "findings": [
+    {
+      "severity": "publication_blocker",
+      "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+      "description": "Neighboring main-axis decimal tick labels run together in all three panels (117.0 through 130.5). Confirmed visually at full size and by concatenated decimal words in the corresponding PDF.",
+      "queued_repair_commit": "8142c78776",
+      "disposition": "Requires corrected saved-data rendering and fresh review; queued source repair does not retroactively qualify these bytes."
+    }
+  ],
+  "qualified_observations": [
+    "All 194 contact images reviewed across all three clubs, both noise profiles, shaft-SD/curve conditions, and available lean cells.",
+    "Sampled captions disclose static loft, lean, target, path/speed/strike units and conditional valid/attempted counts.",
+    "Matrix labels disclose fixed-target control, Driver tee 400 m / 30 m fairway and approach green radius 15 m; unavailable cells remain visibly hatched with bounded-matching reasons.",
+    "Sampled density captions distinguish 600 displayed dots from all valid endpoints used by histogram/HDR/marginals; no empirical precision claim.",
+    "Sampled overheads disclose six displayed paths, support conditioning, raw target-frame geometry and lateral display magnification.",
+    "Direct social comparisons identify condition changes and shared axes/density scales."
+  ],
+  "limitations": [
+    "Contact sheets screen the whole PNG set; representative full-size inspection is not exhaustive per-text bounding-box certification.",
+    "The 52-file PDF concatenated-word screen finds one suspect but does not prove a four-point gutter on every other tick pair.",
+    "This is graphics component review, not final narrative, supplemental pipeline or empirical model acceptance."
+  ],
+  "pdf_tick_scope_sha256": "f61bbf2a89bc8a14f1bb14da77ac93e9b38326a723e08c6c4abbec620149d880"
+}

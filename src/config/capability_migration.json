@@ -634,6 +634,18 @@
       "evidence": "src/tools/launch_monitor_analytics/__main__.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "shot_pattern_analysis": {
+      "id": "shot_pattern_analysis",
+      "name": "Shot Pattern Analysis",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/shot_pattern_analysis/__main__.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
     "shadow_tracker": {
       "id": "shadow_tracker",
       "name": "Shadow Tracker",
@@ -1990,6 +2002,18 @@
       "evidence": "src/tools/launch_monitor_analytics/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "tools.shot_pattern_analysis": {
+      "id": "tools.shot_pattern_analysis",
+      "name": "Shot Pattern Analysis Workbench",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/shot_pattern_analysis/gui.py",
+      "acceptance_owner": "tests/config/test_feature_parity_registry.py"
+    },
     "tools.matlab_suite": {
       "id": "tools.matlab_suite",
       "name": "MATLAB/Simscape model suite",
@@ -2157,6 +2181,18 @@
       "alias_target": null,
       "evidence": "src/engines/physics_engines/opensim/python/opencap_import_action.py",
       "acceptance_owner": "tests/unit/engines/opensim/test_opencap_import_action.py"
+    },
+    "reporting.swing_report_dialog": {
+      "id": "reporting.swing_report_dialog",
+      "name": "Swing Report Full/Custom plot selection and package export",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/api/routes/swing_report.py",
+      "acceptance_owner": "tests/unit/api/test_routes_swing_report.py"
     }
   },
   "fixtures": {

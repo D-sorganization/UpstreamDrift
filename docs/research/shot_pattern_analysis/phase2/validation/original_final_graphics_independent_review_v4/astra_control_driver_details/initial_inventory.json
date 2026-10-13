@@ -1,0 +1,218 @@
+[
+  {
+    "index": 1,
+    "path": "control_final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/density.png",
+    "sha256": "8da5050c59493eb740bbf9a221192c17ad9c5b47e076b414a12a2f49362254e6",
+    "pixels": [
+      2896,
+      1701
+    ]
+  },
+  {
+    "index": 2,
+    "path": "control_final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/overhead.png",
+    "sha256": "c70b71443f64b53e845f02254431fb667ad7cd800288ba4796dab47044b284f9",
+    "pixels": [
+      3073,
+      1080
+    ]
+  },
+  {
+    "index": 3,
+    "path": "control_final_figures_v1/details/driver_lean0_curve1_rotation1_shaft_only/density.png",
+    "sha256": "522a29cc499e6ca08c072b83bed2b3c6ab74745ba0212b0d43636730bc676355",
+    "pixels": [
+      2864,
+      1701
+    ]
+  },
+  {
+    "index": 4,
+    "path": "control_final_figures_v1/details/driver_lean0_curve1_rotation1_shaft_only/overhead.png",
+    "sha256": "67d8f59c7e01672b63a9032475e92245f5501ad29637c09cb821d82a37185ce8",
+    "pixels": [
+      3073,
+      1080
+    ]
+  },
+  {
+    "index": 5,
+    "path": "control_final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/density.png",
+    "sha256": "a8f6efdae7ecf618e13960fc0fb0edbbb6d289a0c52963e7f8de5edb11094cc6",
+    "pixels": [
+      2912,
+      1701
+    ]
+  },
+  {
+    "index": 6,
+    "path": "control_final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/overhead.png",
+    "sha256": "4138ddafa333ec81048bcbe5783047b7a5ebf69881bbda5a490e0ff9f04f8fe3",
+    "pixels": [
+      3073,
+      1080
+    ]
+  },
+  {
+    "index": 7,
+    "path": "control_final_figures_v1/details/driver_lean0_curve1_rotation2_shaft_only/density.png",
+    "sha256": "52e1e423fc0dba201ee9d2399bca24b6af1d0147873e60e50155575c57836fbd",
+    "pixels": [
+      2880,
+      1701
+    ]
+  },
+  {
+    "index": 8,
+    "path": "control_final_figures_v1/details/driver_lean0_curve1_rotation2_shaft_only/overhead.png",
+    "sha256": "a8d18d57017c6d8be480825204042250eebd4fd67ede9578b7e468f0029b71cf",
+    "pixels": [
+      3073,
+      1080
+    ]
+  },
+  {
+    "index": 9,
+    "path": "control_final_figures_v1/details/driver_lean0_curve2_rotation1_combined2/density.png",
+    "sha256": "295a5e7ec25ff02da9893f05648adce7151f481627285e7dd7dbcaea7836235f",
+    "pixels": [
+      2896,
+      1701
+    ]
+  },
+  {
+    "index": 10,
+    "path": "control_final_figures_v1/details/driver_lean0_curve2_rotation1_combined2/overhead.png",
+    "sha256": "29de9f33c1c15e42970ffad4803ede06584454485e65cb83fc3b0f3970225fe0",
+    "pixels": [
+      3097,
+      1080
+    ]
+  },
+  {
+    "index": 11,
+    "path": "control_final_figures_v1/details/driver_lean0_curve2_rotation1_shaft_only/density.png",
+    "sha256": "dedcd908492181662049bb8a64f424f54e28851c5cb2ab4c535b33cda7206265",
+    "pixels": [
+      2864,
+      1701
+    ]
+  },
+  {
+    "index": 12,
+    "path": "control_final_figures_v1/details/driver_lean0_curve2_rotation1_shaft_only/overhead.png",
+    "sha256": "4c3758d9b4a13765a59e8a5f3e747ba7ef7e7976d84d4f4f922e39fc77fcfb6b",
+    "pixels": [
+      3073,
+      1080
+    ]
+  },
+  {
+    "index": 13,
+    "path": "control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/density.png",
+    "sha256": "02f95f0def4b9a0fc87f3c526604bc67e2d54861f74f79242873f3e12627fc43",
+    "pixels": [
+      2896,
+      1701
+    ]
+  },
+  {
+    "index": 14,
+    "path": "control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+    "sha256": "835d738f24ae3730fd8ad3cc7de81aa0da2c7eb34f4138aa49db5cdfa911a814",
+    "pixels": [
+      3073,
+      1080
+    ]
+  },
+  {
+    "index": 15,
+    "path": "control_final_figures_v1/details/driver_lean0_curve2_rotation2_shaft_only/density.png",
+    "sha256": "8de0944eb5fe68bb5e74526cbb52141ab7c945cb583b901375a400eb523c6d47",
+    "pixels": [
+      2896,
+      1701
+    ]
+  },
+  {
+    "index": 16,
+    "path": "control_final_figures_v1/details/driver_lean0_curve2_rotation2_shaft_only/overhead.png",
+    "sha256": "138d1d676bf7bb83c32f4ee6d8da67873f334b8719d56f469e1ea4bc4f742a69",
+    "pixels": [
+      3073,
+      1080
+    ]
+  },
+  {
+    "index": 17,
+    "path": "control_final_figures_v1/details/driver_lean5_curve1_rotation1_combined2/density.png",
+    "sha256": "a93689e34fa646f407c4fc94d07823d8fe463ad70dd0fa9e7b1d66a2aaf1eac3",
+    "pixels": [
+      2896,
+      1701
+    ]
+  },
+  {
+    "index": 18,
+    "path": "control_final_figures_v1/details/driver_lean5_curve1_rotation1_combined2/overhead.png",
+    "sha256": "772d533300d545abdd118b239f2f083d7b9eb9c816f77226954689b3672952cc",
+    "pixels": [
+      3097,
+      1080
+    ]
+  },
+  {
+    "index": 19,
+    "path": "control_final_figures_v1/details/driver_lean5_curve1_rotation1_shaft_only/density.png",
+    "sha256": "4c5c5f6fa448b885990b05afa4a6df8b08d6dc3a861466401caba60c1442e513",
+    "pixels": [
+      2880,
+      1701
+    ]
+  },
+  {
+    "index": 20,
+    "path": "control_final_figures_v1/details/driver_lean5_curve1_rotation1_shaft_only/overhead.png",
+    "sha256": "dac7cc47dd101478a21b7d5770b49d361327276d1ac55db307597bfe741e3551",
+    "pixels": [
+      3097,
+      1080
+    ]
+  },
+  {
+    "index": 21,
+    "path": "control_final_figures_v1/details/driver_lean5_curve1_rotation2_combined2/density.png",
+    "sha256": "0c4c8932867829c81704027cf782c1fcdeb07873aa12361ba047c8d680c80538",
+    "pixels": [
+      2896,
+      1701
+    ]
+  },
+  {
+    "index": 22,
+    "path": "control_final_figures_v1/details/driver_lean5_curve1_rotation2_combined2/overhead.png",
+    "sha256": "cd3d16add8c69ce2d5c92de8224fdb0e2904cdd559b2b53044d4e82d1d0f9351",
+    "pixels": [
+      3086,
+      1080
+    ]
+  },
+  {
+    "index": 23,
+    "path": "control_final_figures_v1/details/driver_lean5_curve1_rotation2_shaft_only/density.png",
+    "sha256": "2c537ff53a06cf91b7953508e81554ecd14843a4cf8034ab8c3d426e055aaf4e",
+    "pixels": [
+      2880,
+      1701
+    ]
+  },
+  {
+    "index": 24,
+    "path": "control_final_figures_v1/details/driver_lean5_curve1_rotation2_shaft_only/overhead.png",
+    "sha256": "d98de16af7f74a543287c343cbffc564927876d6a5d9fa67958a2d82e8be882a",
+    "pixels": [
+      3073,
+      1080
+    ]
+  }
+]

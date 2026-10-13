@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-001",
+  "title": "Apply Tangential Impact Impulse to Ball and Club Translation",
+  "body": "## Problem\n\nFriction updated ball spin but omitted matching tangential linear impulse, making oblique launch follow face exactly.\n\n## Acceptance Criteria\n\nCorrect equal-and-opposite ball/club impulse; preserve momentum, restitution, and energy.\n\n## Validation\n\ntests/unit/physics/test_impact_tangential_impulse.py; tests/unit/physics/test_impact_central_contact_review.py\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11840,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11840",
+  "issue_number": 11840,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11840"
+}

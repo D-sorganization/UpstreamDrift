@@ -1,0 +1,11 @@
+{
+  "status": "passed_before_final_containment_radius_caption",
+  "tests": 48,
+  "selection": [
+    "test_matched_report_plots.py",
+    "test_marginal_tick_gutter.py",
+    "test_reviewed_driver_curve_bounds.py",
+    "test_shot_pattern_final_figures.py"
+  ],
+  "subsequent_scope": "One additional containment radius caption regression; rerun matrix suite after final source integration"
+}

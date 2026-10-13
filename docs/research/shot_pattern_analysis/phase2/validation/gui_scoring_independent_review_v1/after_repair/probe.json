@@ -1,0 +1,326 @@
+[
+  {
+    "cell": "driver_lean0_curve1_rotation1_shaft_only",
+    "main_height": 760,
+    "labels": {
+      "result_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102,
+        "text": "Target: 178.9 m (matched within this lean setting). Solved nominal deliveries (face/path; club speed; delivered loft; residual):\nStraight: +0.00\u00b0/+0.00\u00b0; 100.7 mph; 10.00\u00b0 loft; 0.000 m residual; 10000/10000 supported; empirical face/path \u03c1=unavailable; unsupported={}\nDraw: +2.03\u00b0/+3.53\u00b0; 100.8 mph; 10.00\u00b0 loft; 0.000 m residual; 10000/10000 supported; empirical face/path \u03c1=unavailable; unsupported={}\nFade: -2.03\u00b0/-3.53\u00b0; 100.8 mph; 10.00\u00b0 loft; 0.000 m residual; 10000/10000 supported; empirical face/path \u03c1=unavailable; unsupported={}\nResults saved in /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_shaft_only"
+      },
+      "scoring_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102,
+        "text": "Scenario: Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor.\nCommon supported pairs: 10000/10000 (all samples).\nMean Strokes Gained: Straight: -0.396; Draw: -0.396; Fade: -0.396.\nPaired Difference vs. Straight (95% Monte Carlo Interval): Draw: +7.462e-05 [-7.104e-05, +2.190e-04] strokes; Fade: +6.826e-05 [-5.228e-05, +1.705e-04] strokes.\nCaveats: Model-conditional historical PGA Tour benchmark (approximate baseline fit; not player-specific). Flat hypothetical geometry; carry landing is final lie without roll, hazards, or obstruction. Intervals describe Monte Carlo sampling only."
+      }
+    },
+    "score": {
+      "status": "available",
+      "scenario_id": "tee_fairway_rough",
+      "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+      "club_id": "driver",
+      "start_lie": "tee",
+      "start_distance_m": 400.0,
+      "target_x_m": 178.94875782337786,
+      "hole_distance_m": 400.0,
+      "fairway_half_width_m": 15.0,
+      "green_radius_m": null,
+      "source_backed_status": "available",
+      "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+      "api_evaluated_states": 70,
+      "scored_shots": 30000,
+      "interpolation_tolerance_strokes": 1e-12,
+      "baseline": {
+        "id": "broadie-2011-historical-tour-approx",
+        "version": "table9-full-plus-anchor-reconciled-putting/2",
+        "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+        "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+      },
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": -0.39573704643186763,
+          "fairway_fraction": 0.9867
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": -0.39566243087251535,
+          "fairway_fraction": 0.9884
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": -0.395668786899609,
+          "fairway_fraction": 0.9855
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 7.461555935228152e-05,
+          "lower_95": -7.104046933162085e-05,
+          "upper_95": 0.00021896077539046698
+        },
+        "Fade": {
+          "estimate": 6.825953225868763e-05,
+          "lower_95": -5.2277181705243884e-05,
+          "upper_95": 0.00017049843183190757
+        }
+      },
+      "limitations": [
+        "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+        "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+        "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+      ],
+      "paired_n": 10000,
+      "total_n": 10000,
+      "conditioning": "all_samples",
+      "full_population_status": "available_under_hypothetical_course_assumptions"
+    }
+  },
+  {
+    "cell": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+    "main_height": 760,
+    "labels": {
+      "result_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102,
+        "text": "Target: 108.0 m (matched within this lean setting). Solved nominal deliveries (face/path; club speed; delivered loft; residual):\nStraight: +0.00\u00b0/+0.00\u00b0; 100.7 mph; 5.00\u00b0 loft; 0.000 m residual; 9934/10000 supported; empirical face/path \u03c1=-0.602; unsupported={'nonairborne_launch': 66}\nDraw: +1.29\u00b0/+2.79\u00b0; 101.0 mph; 5.00\u00b0 loft; 0.000 m residual; 9934/10000 supported; empirical face/path \u03c1=-0.602; unsupported={'nonairborne_launch': 66}\nFade: -1.29\u00b0/-2.79\u00b0; 101.0 mph; 5.00\u00b0 loft; 0.000 m residual; 9933/10000 supported; empirical face/path \u03c1=-0.602; unsupported={'nonairborne_launch': 67}\nResults saved in /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean5_curve1_rotation2_cov_facepath_negative"
+      },
+      "scoring_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102,
+        "text": "Scenario: Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor.\nCommon supported pairs: 9933/10000 (conditional on common supported indices only; full population unavailable due to unsupported terminal lies).\nMean Strokes Gained: Straight: -0.788; Draw: -0.786; Fade: -0.787.\nPaired Difference vs. Straight (95% Monte Carlo Interval): Draw: +0.001172 [+9.417e-04, +0.001364] strokes; Fade: +0.001037 [+8.479e-04, +0.001238] strokes.\nCaveats: Model-conditional historical PGA Tour benchmark (approximate baseline fit; not player-specific). Flat hypothetical geometry; carry landing is final lie without roll, hazards, or obstruction. Intervals describe Monte Carlo sampling only."
+      }
+    },
+    "score": {
+      "status": "conditional_only",
+      "scenario_id": "tee_fairway_rough",
+      "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+      "club_id": "driver",
+      "start_lie": "tee",
+      "start_distance_m": 400.0,
+      "target_x_m": 108.02738606179851,
+      "hole_distance_m": 400.0,
+      "fairway_half_width_m": 15.0,
+      "green_radius_m": null,
+      "source_backed_status": "available",
+      "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+      "api_evaluated_states": 70,
+      "scored_shots": 29799,
+      "interpolation_tolerance_strokes": 1e-12,
+      "baseline": {
+        "id": "broadie-2011-historical-tour-approx",
+        "version": "table9-full-plus-anchor-reconciled-putting/2",
+        "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+        "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+      },
+      "patterns": {
+        "Straight": {
+          "n": 9933,
+          "mean_strokes_gained": -0.787595831909206,
+          "fairway_fraction": 0.959226819691936
+        },
+        "Draw": {
+          "n": 9933,
+          "mean_strokes_gained": -0.7864242536826388,
+          "fairway_fraction": 0.959226819691936
+        },
+        "Fade": {
+          "n": 9933,
+          "mean_strokes_gained": -0.7865590174797052,
+          "fairway_fraction": 0.961038961038961
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.00117157822656723,
+          "lower_95": 0.0009417121728510435,
+          "upper_95": 0.001363627207373055
+        },
+        "Fade": {
+          "estimate": 0.0010368144295006783,
+          "lower_95": 0.0008478599135063723,
+          "upper_95": 0.0012380852813236327
+        }
+      },
+      "limitations": [
+        "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+        "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+        "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+      ],
+      "paired_n": 9933,
+      "total_n": 10000,
+      "conditioning": "common_supported_indices_only",
+      "full_population_status": "unavailable_unsupported_terminal_lies"
+    }
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+    "main_height": 760,
+    "labels": {
+      "result_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102,
+        "text": "Target: 127.9 m (matched within this lean setting). Solved nominal deliveries (face/path; club speed; delivered loft; residual):\nStraight: +0.00\u00b0/+0.00\u00b0; 80.5 mph; 34.00\u00b0 loft; 0.000 m residual; 9996/10000 supported; empirical face/path \u03c1=+0.008; unsupported={'off_face': 4}\nDraw: +0.44\u00b0/+1.94\u00b0; 80.6 mph; 34.00\u00b0 loft; 0.000 m residual; 9996/10000 supported; empirical face/path \u03c1=+0.008; unsupported={'off_face': 4}\nFade: -0.44\u00b0/-1.94\u00b0; 80.6 mph; 34.00\u00b0 loft; 0.000 m residual; 9996/10000 supported; empirical face/path \u03c1=+0.008; unsupported={'off_face': 4}\nResults saved in /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/seven_iron_lean0_curve1_rotation2_combined2"
+      },
+      "scoring_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102,
+        "text": "Scenario: Historical PGA approach to a centered circular green with rough outside (127.9 m fairway start, 15 m green radius).\nCommon supported pairs: 9996/10000 (conditional on common supported indices only; full population unavailable due to unsupported terminal lies).\nMean Strokes Gained: Straight: +0.0722; Draw: +0.0714; Fade: +0.0733.\nPaired Difference vs. Straight (95% Monte Carlo Interval): Draw: -8.053e-04 [-0.001038, -5.918e-04] strokes; Fade: +0.00111 [+8.442e-04, +0.001355] strokes.\nCaveats: Model-conditional historical PGA Tour benchmark (approximate baseline fit; not player-specific). Flat hypothetical geometry; carry landing is final lie without roll, hazards, or obstruction. Intervals describe Monte Carlo sampling only."
+      }
+    },
+    "score": {
+      "status": "conditional_only",
+      "scenario_id": "approach_green_rough",
+      "scenario": "Historical PGA approach to a centered circular green with rough outside",
+      "club_id": "seven_iron",
+      "start_lie": "fairway",
+      "start_distance_m": 127.88194166336235,
+      "target_x_m": 127.88194166336235,
+      "hole_distance_m": null,
+      "fairway_half_width_m": null,
+      "green_radius_m": 15.0,
+      "source_backed_status": "available",
+      "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+      "api_evaluated_states": 112,
+      "scored_shots": 29988,
+      "interpolation_tolerance_strokes": 1e-12,
+      "baseline": {
+        "id": "broadie-2011-historical-tour-approx",
+        "version": "table9-full-plus-anchor-reconciled-putting/2",
+        "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+        "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+      },
+      "patterns": {
+        "Straight": {
+          "n": 9996,
+          "mean_strokes_gained": 0.07221941702596886,
+          "green_fraction": 0.9674869947979192
+        },
+        "Draw": {
+          "n": 9996,
+          "mean_strokes_gained": 0.07141414461952926,
+          "green_fraction": 0.9673869547819127
+        },
+        "Fade": {
+          "n": 9996,
+          "mean_strokes_gained": 0.07333031849710539,
+          "green_fraction": 0.967687074829932
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.000805272406439605,
+          "lower_95": -0.0010375654126761375,
+          "upper_95": -0.0005917861027988725
+        },
+        "Fade": {
+          "estimate": 0.0011109014711365183,
+          "lower_95": 0.0008441733823956837,
+          "upper_95": 0.0013554839330177611
+        }
+      },
+      "limitations": [
+        "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+        "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+        "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+      ],
+      "paired_n": 9996,
+      "total_n": 10000,
+      "conditioning": "common_supported_indices_only",
+      "full_population_status": "unavailable_unsupported_terminal_lies"
+    }
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+    "main_height": 760,
+    "labels": {
+      "result_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102,
+        "text": "Target: 77.4 m (matched within this lean setting). Solved nominal deliveries (face/path; club speed; delivered loft; residual):\nStraight: +0.00\u00b0/+0.00\u00b0; 71.6 mph; 46.00\u00b0 loft; 0.000 m residual; 9999/10000 supported; empirical face/path \u03c1=+0.008; unsupported={'off_face': 1}\nDraw: -0.13\u00b0/+1.37\u00b0; 71.6 mph; 46.00\u00b0 loft; 0.000 m residual; 9999/10000 supported; empirical face/path \u03c1=+0.008; unsupported={'off_face': 1}\nFade: +0.13\u00b0/-1.37\u00b0; 71.6 mph; 46.00\u00b0 loft; 0.000 m residual; 9999/10000 supported; empirical face/path \u03c1=+0.008; unsupported={'off_face': 1}\nResults saved in /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean0_curve1_rotation2_combined2"
+      },
+      "scoring_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102,
+        "text": "Scenario: Historical PGA approach to a centered circular green with rough outside (77.4 m fairway start, 15 m green radius).\nCommon supported pairs: 9999/10000 (conditional on common supported indices only; full population unavailable due to unsupported terminal lies).\nMean Strokes Gained: Straight: +0.1011; Draw: +0.1016; Fade: +0.1008.\nPaired Difference vs. Straight (95% Monte Carlo Interval): Draw: +4.844e-04 [+3.075e-04, +6.523e-04] strokes; Fade: -3.337e-04 [-5.016e-04, -1.721e-04] strokes.\nCaveats: Model-conditional historical PGA Tour benchmark (approximate baseline fit; not player-specific). Flat hypothetical geometry; carry landing is final lie without roll, hazards, or obstruction. Intervals describe Monte Carlo sampling only."
+      }
+    },
+    "score": {
+      "status": "conditional_only",
+      "scenario_id": "approach_green_rough",
+      "scenario": "Historical PGA approach to a centered circular green with rough outside",
+      "club_id": "pitching_wedge",
+      "start_lie": "fairway",
+      "start_distance_m": 77.40247724866299,
+      "target_x_m": 77.40247724866299,
+      "hole_distance_m": null,
+      "fairway_half_width_m": null,
+      "green_radius_m": 15.0,
+      "source_backed_status": "available",
+      "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+      "api_evaluated_states": 112,
+      "scored_shots": 29997,
+      "interpolation_tolerance_strokes": 1e-12,
+      "baseline": {
+        "id": "broadie-2011-historical-tour-approx",
+        "version": "table9-full-plus-anchor-reconciled-putting/2",
+        "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+        "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+      },
+      "patterns": {
+        "Straight": {
+          "n": 9999,
+          "mean_strokes_gained": 0.10111118029419923,
+          "green_fraction": 0.9964996499649965
+        },
+        "Draw": {
+          "n": 9999,
+          "mean_strokes_gained": 0.10159557845857033,
+          "green_fraction": 0.9966996699669967
+        },
+        "Fade": {
+          "n": 9999,
+          "mean_strokes_gained": 0.10077746892416772,
+          "green_fraction": 0.9963996399639964
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": 0.0004843981643710978,
+          "lower_95": 0.0003075226887943026,
+          "upper_95": 0.0006522765451755754
+        },
+        "Fade": {
+          "estimate": -0.0003337113700315144,
+          "lower_95": -0.0005016453427555888,
+          "upper_95": -0.00017205136832585546
+        }
+      },
+      "limitations": [
+        "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+        "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+        "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+      ],
+      "paired_n": 9999,
+      "total_n": 10000,
+      "conditioning": "common_supported_indices_only",
+      "full_population_status": "unavailable_unsupported_terminal_lies"
+    }
+  },
+  {
+    "failure_retains_identical_score": false,
+    "status": "Matched study failed: Independent non-simulation test failure"
+  },
+  {
+    "cancellation_retains_identical_score": false,
+    "status": "Matched study cancelled; staged outputs were discarded."
+  }
+]

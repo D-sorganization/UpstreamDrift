@@ -1,0 +1,21 @@
+from pathlib import Path
+import json,hashlib,re,html
+from PIL import Image,ImageDraw
+b=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');p=b/'supplement_report_v1/figures/comparisons';v=b/'validation/supplement_v5_initial_pair_review_v1';v.mkdir(exist_ok=True)
+def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+report=b/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json'; rows=json.loads(report.read_text())['comparisons']; out=[]
+for k,pat in enumerate(['*rotation1_shaft_only_vs*lean5*_overhead_social.png','*rotation2_combined2_vs*lean10*_overhead_social.png']):
+ match=list(p.glob(pat));assert len(match)==1
+ pre=match[0].name.removesuffix('_overhead_social.png');fs=sorted(p.glob(pre+'*'));assert len(fs)==16
+ row=[r for r in rows if pre.startswith(r['comparison_kind']+'_'+r['sources'][0]['cell']+'_vs_'+r['sources'][1]['cell']+'_')];assert len(row)==1;r=row[0]
+ texts={}
+ for f in fs:
+  if f.suffix=='.svg':texts[f.name]=' '.join(' '.join(html.unescape(x) for x in re.findall(r'<!-- (.*?) -->',f.read_text(),re.S)).split())
+ print(pre, r['common_supported_n'],r['source_protocols']); print(texts[pre+'_density_draw_social.svg'][-2400:])
+ pngs=[f for f in fs if f.suffix=='.png'];assert len(pngs)==6
+ canvas=Image.new('RGB',(2100,2500),'white');d=ImageDraw.Draw(canvas)
+ for j,f in enumerate(pngs):
+  im=Image.open(f);im.load();im.thumbnail((1000,775));x=(j%2)*1050;y=(j//2)*830;canvas.paste(im,(x+(1050-im.width)//2,y+30));d.text((x+5,y+5),f.name.removeprefix(pre),fill='black')
+ canvas.save(v/f'contact_{k+1}.jpg',quality=93)
+ out.append({'prefix':pre,'comparison':r,'asset_sha256':{f.name:h(f) for f in fs},'svg_text':texts})
+(v/'pair_checks.json').write_text(json.dumps({'report_sha256':h(report),'pairs':out},indent=2)+'\n');(v/'executed_check.py.txt').write_bytes(Path(__file__).read_bytes())

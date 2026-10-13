@@ -1,0 +1,11 @@
+{
+  "independent_review_result_sha256": "f9f352081f6324fc61ff5f4e22c7693e6916f9a67b2965a67bf12a3df03ef49f",
+  "fingerprint_rechecked": "279446322560959cce7fd7062e4f2c7864b715363053c138c38aa7e058a64d06",
+  "context_checks_pass": true,
+  "before_review_sha256": "48b7368f34db252f34c2fac57d717e3b96a29dce6e68a5ee1ef0198e4021a3ac",
+  "after_review_sha256": "176fecb865bb1d040f314a1c6bdd94757298b8cf66088d068c18b910854491c9",
+  "generated_views": {
+    "docs/agent_context/README.md": "98a4e951c97ae399277f11ead5cb56dcb85c50b5f955f2025a5ffd0460ccddbd",
+    "docs/agent_context/index.html": "2c152ed557cfdfddec6118b3b03c184e447e7446cd75f05ff4f85791247d8c32"
+  }
+}

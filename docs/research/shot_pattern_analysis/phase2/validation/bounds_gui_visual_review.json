@@ -1,0 +1,59 @@
+{
+  "status": "passed",
+  "scope": "Offscreen 1000x760 supplemental bounds GUI visual review; no simulation run",
+  "source_git_head": "07e2e3fcc59475e9a1ad9a78e7c5bab7bce14a3b",
+  "cell": "driver_lean5_curve2_rotation2_combined2",
+  "evidence_sha256": {
+    "src/tools/shot_pattern_analysis/matched_gui.py": "7133da61df806f69a2523e25497654ea5c4c866207c44132f4d60f6e6568d8a4",
+    "tests/ui/tools/shot_pattern_analysis/test_matched_gui.py": "6e19fd547f44abccbc648349f8c595d711a24eb5921277ea0bc91c9ce2396f4e",
+    "docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py": "fce344be4d476cd3d1df1b287bb2ef1582ed72f2ad05efb3adf4cdf60ae47267",
+    "docs/research/shot_pattern_analysis/phase2/validation/bounds_gui_loaded_config.json": "bf8bb05235be2b62caeb38bbc6e01c03877f5f61fa569053065510771907cccf",
+    "docs/research/shot_pattern_analysis/phase2/validation/bounds_gui_capture_checks.json": "b8a5baf931d96130c9cc86b1aa14ba1d1a9384bf29aff00e118148c0f0144918",
+    "docs/research/shot_pattern_analysis/phase2/validation/bounds_gui_main_1000x760.png": "9c83be06ca62bebb8ea564c163417d88009babd768f0193452d8c7c48a94f9db",
+    "docs/research/shot_pattern_analysis/phase2/validation/bounds_gui_scrolled_1000x760.png": "a0ffc361bcedb3dd3a13f01702461692e9b661d2bf09b4cee2ba8c45eed2e1f3",
+    "docs/research/shot_pattern_analysis/phase2/validation/bounds_gui_correlations_1000x760.png": "c6b6a8bae3df438a5ec30d13f92fb7f6eca95aa76480e54442b92e192d22ea51"
+  },
+  "checks": {
+    "cell": "driver_lean5_curve2_rotation2_combined2",
+    "loaded_request_equal": true,
+    "face_bounds_enabled": true,
+    "face_bounds_deg": [
+      -6.0,
+      6.0
+    ],
+    "speed_factors": [
+      0.75,
+      1.3
+    ],
+    "target_x_m": 178.94875782337786,
+    "scroll_max": 1018,
+    "run_visible": true,
+    "cancel_visible": true,
+    "status_visible": true,
+    "run_position": [
+      11,
+      348
+    ],
+    "cancel_position": [
+      11,
+      379
+    ],
+    "status_position": [
+      11,
+      410
+    ]
+  },
+  "visual_review": [
+    "Main view text and target precision are legible at 1000x760.",
+    "Scrolled view shows both absolute face bounds and both speed factors with reference club speed units; fields are not clipped.",
+    "Correlation matrix remains reachable with its own scroll bar.",
+    "Run, Cancel, and status remain visible at fixed positions in all three views; Cancel is disabled in the idle state."
+  ],
+  "validation": {
+    "ui_pytest": "22 passed",
+    "mypy": "Success: no issues found in 1 source file",
+    "ruff": "check and format check passed"
+  },
+  "reproduce": "QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy OPENBLAS_NUM_THREADS=1 PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py docs/research/shot_pattern_analysis/phase2/validation",
+  "limitations": "Linux Qt offscreen review only; no Windows or interactive human acceptance."
+}

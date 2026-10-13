@@ -1,0 +1,31 @@
+import hashlib,json,re
+from pathlib import Path
+from src.tools.shot_pattern_analysis.matched_formatting import format_sg_interval,format_sg_value
+main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');base=main/'docs/research/shot_pattern_analysis/phase2';out=base/'validation/report_precision_independent_review_v1';out.mkdir(exist_ok=True)
+intervals=means=0;failures=[];max_width_error=0.;max_relative_error=0.;inputs={}
+roots=[base/'final_v1',base/'control_final_v1',*(p for p in (base/'supplement_final_v1').iterdir() if p.is_dir())]
+for root in roots:
+ for p in root.glob('*/summary.json'):
+  raw=p.read_bytes();inputs[str(p.relative_to(main))]=hashlib.sha256(raw).hexdigest();d=json.loads(raw);score=d.get('course_scoring',{})
+  for name,v in score.get('paired_benefit_vs_straight',{}).items():
+   if not isinstance(v,dict) or 'estimate' not in v:continue
+   values=[float(v[k]) for k in ('estimate','lower_95','upper_95')];text=format_sg_interval(*values);rendered=[float(x) for x in re.findall(r'[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?',text)];assert len(rendered)==3
+   e,l,h=values;re_,rl,rh=rendered;w=h-l
+   if w>0:
+    error=abs((rh-rl)-w)/w;max_width_error=max(max_width_error,error)
+    if not rh>rl or error>.01:failures.append([str(p),name,'width',text])
+   for val,ren in zip(values,rendered):
+    if val:
+     error=abs(ren-val)/abs(val);max_relative_error=max(max_relative_error,error)
+     if ren*val<=0 or error>.001:failures.append([str(p),name,'value',text])
+    elif ren!=0:failures.append([str(p),name,'zero',text])
+   intervals+=1
+  for name,v in score.get('patterns',{}).items():
+   value=v.get('mean_strokes_gained')
+   if value is None:continue
+   rendered=float(format_sg_value(value));means+=1
+   if value and (rendered*value<=0 or abs(rendered-value)/abs(value)>.001):failures.append([str(p),name,'mean'])
+  assert p.read_bytes()==raw
+sources=['src/tools/shot_pattern_analysis/matched_formatting.py','src/tools/shot_pattern_analysis/matched_gui.py','src/tools/shot_pattern_analysis/matched_interpretation.py','scripts/research/shot_pattern_analysis/build_final_report.py']
+result={'intervals':intervals,'absolute_means':means,'failures':failures,'max_relative_width_error':max_width_error,'max_relative_value_error':max_relative_error,'inputs_sha256':inputs,'candidate_sources_sha256':{p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in sources},'scope':'All saved original/control/supplement per-cell paired SG and absolute means; no simulation or bootstrap.'}
+(out/'all_saved_precision.json').write_text(json.dumps(result,indent=2)+'\n');print({k:v for k,v in result.items() if k not in ('inputs_sha256','candidate_sources_sha256')});assert not failures

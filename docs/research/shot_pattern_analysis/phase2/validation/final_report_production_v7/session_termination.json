@@ -1,0 +1,8 @@
+{
+  "status": "tool_session_terminated_without_terminal_receipt",
+  "tool_session_id": 2584,
+  "tool_exit_code": 143,
+  "cause": "unknown; no user or root stop",
+  "child_present_after_check": false,
+  "utc": "2026-10-11T00:32:05.378771+00:00"
+}

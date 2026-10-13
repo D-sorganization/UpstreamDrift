@@ -1,0 +1,10 @@
+{
+  "schema": "supplement-all-density-colorbar-clearance/1",
+  "created_utc": "2026-10-11T02:51:49.569406+00:00",
+  "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/all_density_colorbar_diagnostic.py",
+  "threshold_pt": 2.0,
+  "svg_count": 384,
+  "crowded_count": 0,
+  "source_sha256": "4d479d8ea71baf3dbb78dc39206fc81f5dbeb2288b1fb7c3c6893bfd8366a073",
+  "crowded": []
+}

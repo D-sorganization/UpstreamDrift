@@ -1,0 +1,14 @@
+import hashlib,json
+from pathlib import Path
+from src.tools.shot_pattern_analysis.matched_lean_control import _supported_endpoints
+main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');b=main/'docs/research/shot_pattern_analysis/phase2';out=b/'validation/report_narrative_independent_review_v1';out.mkdir(exist_ok=True)
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+specs=[('driver','original_control/1','control_final_v1','driver-control-speed-bounds/1','supplement_final_v1/driver_control_speed'),('pitching_wedge','pw-primary-face-bounds/1','supplement_final_v1/pw_primary_face','pw-control-face-bounds/1','supplement_final_v1/pw_control_face')];results=[]
+for club,pa,ra,pb,rb in specs:
+ sources=[];sets=[];targets=[]
+ for protocol,root,lean in [(pa,ra,0),(pb,rb,5)]:
+  cell=f'{club}_lean{lean}_curve2_rotation2_combined2';folder=b/root/cell;plan=json.loads((b/root/'matrix_plan.json').read_text());d=json.loads((folder/'summary.json').read_text());manifest=json.loads((folder/'manifest.json').read_text());csv=folder/'shots.csv.gz';h=sha(csv);assert h==manifest['files_sha256']['shots.csv.gz'];assert d['config']==plan['cells'][cell]
+  endpoint,_=_supported_endpoints(csv,10000);sets.extend({row[0] for row in endpoint[pattern]} for pattern in ('Straight','Draw','Fade'));assert sha(csv)==h;targets.append(d['target_x_m']);sources.append({'protocol':protocol,'cell':cell,'root':root,'plan_sha256':sha(b/root/'matrix_plan.json'),'manifest_sha256':sha(folder/'manifest.json'),'csv_sha256':h,'individual_supported_n':{p:len(v) for p,v in endpoint.items()},'config_target_x_m':d['config']['target_x_m'],'actual_target_x_m':d['target_x_m']})
+ assert abs(targets[0]-targets[1])<1e-12
+ results.append({'club':club,'curve_scale':2,'shaft_sd_deg':2,'profile':'combined2','ordered_leans':[0,5],'same_physical_target_m':targets[0],'common_six_n':len(set.intersection(*sets)),'total_per_population':10000,'sources':sources})
+(out/'actual_population_check.json').write_text(json.dumps({'scope':'Exact inventory/config/manifest checks and independent common-six index intersection; no bootstrap, effect estimation or new flight','results':results,'endpoint_reader_sha256':sha(Path('src/tools/shot_pattern_analysis/matched_lean_control.py'))},indent=2)+'\n');print([(x['club'],x['common_six_n'],x['same_physical_target_m']) for x in results])

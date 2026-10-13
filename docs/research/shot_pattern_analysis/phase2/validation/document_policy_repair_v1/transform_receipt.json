@@ -1,0 +1,84 @@
+{
+  "scope": "Six heading corrections across five documents; explicit derivative copies of historical evidence, with exact originals preserved. No historical receipt rewritten.",
+  "original_archive": {
+    "path": "docs/research/shot_pattern_analysis/phase2/validation/document_policy_repair_v1/original_documents.zip",
+    "sha256": "d682fc2ba9d9bafacef5006f5f13fe6290d65ec0eaf4f55681246b8fca009325"
+  },
+  "documents": [
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/TURNOVER.md",
+      "old_sha256": "4b2b0b2b0ccb2ec0e61cf955bb383bfe3975ec7edb851991817a762ff27b16a2",
+      "new_sha256": "c4d01fd0ebd3272ebb51aa7658fda96e85835c3a06781af2e67cf6e053934e03",
+      "heading_replacements": [
+        [
+          "Repository Readiness Repair In Progress",
+          "Repository Readiness Repair in Progress"
+        ]
+      ],
+      "additional_change": "Current-state pre-PR diagnostic and active BOUNDS ownership update"
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/article_candidate_rejection_v1/candidate_p2-article-numeric-expansion-review.md",
+      "old_sha256": "247e09e80b97fe2bfaa9fb7b72be8db2e9b946051ef6f557e1e5e3882bca1316",
+      "new_sha256": "57d216b41400ad389fcbc939bb53791471b671fed2b0da7546ee803efee4aa37",
+      "heading_replacements": [
+        [
+          "Seventy-Two Pattern Rows (Tables 2, 3, and 4)",
+          "Seventy-Two Pattern Rows (Tables 2\u20134)"
+        ],
+        [
+          "Fixed-Target Across-Lean Controls and Rematching Physics (Tables 6 and 7)",
+          "Fixed-Target Across-Lean Controls and Rematching Physics (Tables 6\u20137)"
+        ]
+      ],
+      "additional_change": null
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/VISUAL_REVIEW.md",
+      "old_sha256": "6c9fc4c3700ba89219dacf70b0b792c8ce158ad64ee71f595be055aac7b773ad",
+      "new_sha256": "7b225f24e202718d9315ecf4c5ca09913af0e1965b5e757dededd583f53ca741",
+      "heading_replacements": [
+        [
+          "Control v3 Graphics Visual Review",
+          "Control V3 Graphics Visual Review"
+        ]
+      ],
+      "additional_change": null
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/delivery_readiness_review_v1/AGY_REVIEW.md",
+      "old_sha256": "9d8990d5ce9de33e70371e6f5ede5bb149f53c5e59fcca6b0f2b2534ef12a663",
+      "new_sha256": "cb67c61d02215f729d10f2eb44c2d1a5bf0a19bba8772ebc361ca62047b555b1",
+      "heading_replacements": [
+        [
+          "Category A: Actual Actionable Defects (Not covered by active jobs)",
+          "Category A: Actual Actionable Defects (Not Covered by Active Jobs)"
+        ]
+      ],
+      "additional_change": null
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_driver_details/REVIEW.md",
+      "old_sha256": "930f4f63e78925201888c323330b57d5368c1ca49b6efe3c24b9db8b41094402",
+      "new_sha256": "925c8e45b3db449362b8a43126e0eb8a45fc5bbfc43b3a4dd14eccce97820c74",
+      "heading_replacements": [
+        [
+          "Primary v4 Driver Detail Review",
+          "Primary V4 Driver Detail Review"
+        ]
+      ],
+      "additional_change": null
+    }
+  ],
+  "vector_plan": {
+    "path": "docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/VECTOR_REVIEW_PLAN.md",
+    "sha256": "122523aff57c2d84b579d557f28b8d9cb23825de5342e22f7b4178f59c4b0844"
+  },
+  "divergence": {
+    "check_exit": 1,
+    "only_stale_path": "physics/impact_model/README.md",
+    "classification": "ud-only",
+    "introduced_by": "07e2e3fcc59475e9a1ad9a78e7c5bab7bce14a3b",
+    "remedy": "Add generated record; increment physics ud-only and total ud-only by one in JSON and Markdown. No shared inventory edit made."
+  }
+}

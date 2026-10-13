@@ -1,0 +1,133 @@
+FFFFFFFFFFF....                                                          [100%]
+=================================== FAILURES ===================================
+_______________ test_reject_snapshot_tampering[candidate_commit] _______________
+
+key = 'candidate_commit'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+___________________ test_reject_snapshot_tampering[worktree] ___________________
+
+key = 'worktree'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+________________ test_reject_snapshot_tampering[source_sha256] _________________
+
+key = 'source_sha256'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+________________ test_reject_snapshot_tampering[review_sha256] _________________
+
+key = 'review_sha256'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+_________________ test_reject_snapshot_tampering[native_path] __________________
+
+key = 'native_path'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+________________ test_reject_snapshot_tampering[native_sha256] _________________
+
+key = 'native_sha256'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+________________ test_reject_snapshot_tampering[vendor_gitlink] ________________
+
+key = 'vendor_gitlink'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+_________________ test_reject_snapshot_tampering[input_sha256] _________________
+
+key = 'input_sha256'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+_______________ test_reject_snapshot_tampering[producer_sha256] ________________
+
+key = 'producer_sha256'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+__________________ test_reject_snapshot_tampering[execution] ___________________
+
+key = 'execution'
+
+    @pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+    def test_reject_snapshot_tampering(key):
+>    actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+                                               ^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'SNAPSHOT_KEYS'
+
+/tmp/test_p2_supplement_v5_guards.py:10: AttributeError
+_________________________ test_exact_snapshot_accepted _________________________
+
+    def test_exact_snapshot_accepted():
+>    m.validate_bound_snapshot({k:BASE[k] for k in m.SNAPSHOT_KEYS},BASE)
+     ^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AttributeError: module 'restart' has no attribute 'validate_bound_snapshot'
+
+/tmp/test_p2_supplement_v5_guards.py:14: AttributeError
+=========================== short test summary info ============================
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[candidate_commit]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[worktree]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[source_sha256]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[review_sha256]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[native_path]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[native_sha256]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[vendor_gitlink]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[input_sha256]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[producer_sha256]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_reject_snapshot_tampering[execution]
+FAILED ../../../../tmp/test_p2_supplement_v5_guards.py::test_exact_snapshot_accepted
+11 failed, 4 passed in 2.02s

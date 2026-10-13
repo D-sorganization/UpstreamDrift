@@ -1,0 +1,60 @@
+{
+  "scope": "One completed primary 7-iron social density family; representative visual check only",
+  "source_sha256": {
+    "docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve1_rotation2_combined2/density.png": "acb677f8b83e607746553b2eef53e138b67234044cb0ed0365539a40ea084c96",
+    "docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve1_rotation2_combined2/density.pdf": "8341083a39f510ec796255e27734a59a78b982c07d8b2a6e33e3a79f8e7b4c22",
+    "docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve1_rotation2_combined2/density.svg": "6a0eb9a01b36925c85c9bd6651bb7eeb6542d0fdfdb02c4ac71c1d5491890f7b"
+  },
+  "render_sha256": {
+    "pdf.png": "0b895350b2d3554c80a2ec360f83d2e6334994e280052f9d6a56a8f0e0d19ec3",
+    "svg.png": "907acdfea72989c13334bca43e7e4abcf52116a16cf83ee2dc8abe54a914244d"
+  },
+  "dimensions": {
+    "pdf": [
+      1472,
+      2536
+    ],
+    "svg": [
+      2943,
+      5071
+    ]
+  },
+  "commands": {
+    "pdf": "pdftoppm -f 1 -singlefile -r 144 -png INPUT OUTPUT_STEM",
+    "svg": "sharp(INPUT,{density:144,limitInputPixels:50000000}).flatten({background:\"#fff\"}).png()"
+  },
+  "render_exit_codes": {
+    "pdf": 0,
+    "svg": 0
+  },
+  "pdf_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "visual_review": {
+    "original_png_viewed": true,
+    "pdf_render_viewed": true,
+    "svg_render_viewed": true,
+    "finding": "Three panels, labels, glyphs, HDR lines, marginals, shared color scale, population/condition header and footer are intact. No visible clipping or missing content in this representative family.",
+    "not_claimed": [
+      "pixel equivalence",
+      "all vector visual approval",
+      "full publication acceptance"
+    ]
+  },
+  "svg_density_probe": {
+    "fixture": "72pt by 144pt explicit viewport with matching viewBox",
+    "configured_density_to_observed_pixels": {
+      "72": [
+        72,
+        144
+      ],
+      "96": [
+        128,
+        256
+      ],
+      "144": [
+        288,
+        576
+      ]
+    },
+    "interpretation": "This installed renderer scales differently from nominal dpi-to-point conversion. Record actual dimensions; do not infer same pixel scale from matching density arguments. Preserve original aspect when fitting comparison thumbnails."
+  }
+}

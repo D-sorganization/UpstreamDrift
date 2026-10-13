@@ -1,0 +1,2 @@
+# Preserve exact CSV evidence bytes across Git checkout platforms.
+*.csv -text

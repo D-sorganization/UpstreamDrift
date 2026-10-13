@@ -44,7 +44,7 @@ The single point where this can silently break is if any intermediate
 value escapes to a ``float``-only path (e.g. ``np.linalg.solve`` instead
 of pydrake's ``LinearSolve``, or a ``float()`` cast on an autodiff
 scalar). The ``test_autodiff_cost_gradient_is_analytic`` test in
-``tests/test_drake_fit_swing_autodiff.py`` guards against this by
+``tests/engines/drake/test_drake_fit_swing_autodiff.py`` guards against this by
 comparing the autodiff gradient against a tight-tolerance finite
 difference.
 

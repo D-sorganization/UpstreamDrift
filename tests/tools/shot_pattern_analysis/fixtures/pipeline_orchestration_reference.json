@@ -1,0 +1,48 @@
+{
+  "description": "Pre-refactor mock-source/mock-render publication receipt. Exact text bytes and checkpoint order, only fixture paths and their dependent hashes normalized; real generated artifact hashes independently checked. No frozen outputs or physics simulation.",
+  "source_sha256": "101a94f5dacef2d2c40a6a9553d4eb28d3094bcd865caab67f402ec9c747a10d",
+  "receipt": {
+    "events": [
+      "_load_numeric_parity_reference",
+      "_load_original_sources",
+      "_load_original_sources",
+      "load_supplement_sources",
+      "_report_source_hashes",
+      "select_explicit_pairs",
+      "validate_planned_figure_identities",
+      "_recheck_transition_evidence",
+      "_pair_result",
+      "write_supplement_artifacts",
+      "render_original_source_inventory",
+      "write_supplement_comparisons",
+      "render_comparison_markdown",
+      "_check_numeric_parity_reference",
+      "_render_cell_figures",
+      "_render_pair_figures",
+      "_recheck_source_inputs",
+      "_recheck_transition_evidence",
+      "_report_source_hashes",
+      "_source_cell_hashes",
+      "_check_numeric_parity_reference",
+      "_verify_figure_assets"
+    ],
+    "paths": {
+      "original_source_inventory": "REPORT_ORIGINAL_SOURCE_INVENTORY.csv",
+      "report": "REPORT_SUPPLEMENT.json",
+      "comparison_markdown": "REPORT_SUPPLEMENT_COMPARISONS.md",
+      "figure_ledger": "REPORT_SUPPLEMENT_FIGURES.json",
+      "pipeline_receipt": "REPORT_SUPPLEMENT_PIPELINE.json"
+    },
+    "files": {
+      "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "source_protocol,cell,status,unavailable_reason,target_x_m,n_shots,source_plan_sha256\n",
+      "REPORT_SUPPLEMENT.csv": "{}",
+      "REPORT_SUPPLEMENT.json": "{\n  \"aliases\": [],\n  \"control_aliases\": {\n    \"references\": []\n  },\n  \"execution\": {},\n  \"inventory_sha256\": \"inventory\",\n  \"protocols\": {},\n  \"unique_cells\": [\n    {\n      \"_execution\": {},\n      \"cell\": \"pw\",\n      \"config\": {},\n      \"source_protocol\": \"pw-primary-face-bounds/1\",\n      \"source_root\": \"<synthetic-root>\",\n      \"status\": \"completed\",\n      \"summary\": {}\n    }\n  ],\n  \"unique_executed_cells\": 1\n}\n",
+      "REPORT_SUPPLEMENT_COMPARISONS.csv": "{}",
+      "REPORT_SUPPLEMENT_COMPARISONS.json": "{}",
+      "REPORT_SUPPLEMENT_COMPARISONS.md": "# Supplemental Matched-Condition Comparisons\n\nThese are paired simulation contrasts on shot IDs supported in all six pattern-by-condition populations. Nominal re-matching and the matched-condition changes remain part of each contrast; the results do not isolate a causal curvature effect.\n\n| Comparison | Pattern | Conditions | Common N / Total | Radial Error Change (m, 95% CI) | Paired Pattern SG Change (Strokes, 95% CI) | SG Relative-Benefit Interaction (Strokes, 95% CI) | Status |\n|---|---|---|---:|---:|---:|---:|---|\n| curve_strength | Straight | : \u2192 : | 0 / 0 | Unavailable | Unavailable | Unavailable | conditional_only |\n| curve_strength | Draw | : \u2192 : | 0 / 0 | Unavailable | Unavailable | Unavailable | conditional_only |\n| curve_strength | Fade | : \u2192 : | 0 / 0 | Unavailable | Unavailable | Unavailable | conditional_only |\n\n**Strokes-Gained Direction:** Paired pattern SG change is second condition minus first; positive is better. Relative-benefit interaction is the pattern change minus the Straight change; positive means greater relative benefit. Both use the same six-population shot-index intersection and require source-backed scoring availability.\n\n**Scope:** Illustrative matched-delivery simulations with assumed head properties. Carry endpoints and historical course-scoring context do not establish measured-player skill or causal effects.\n\n**Monte Carlo Uncertainty:** Grid cells share seeded primitive error draws. Paired bootstrap intervals and direction counts describe saved Monte Carlo samples; they are not independent experimental replications or multiplicity-adjusted discoveries.\n",
+      "REPORT_SUPPLEMENT_FIGURES.json": "{\n  \"figures\": [],\n  \"schema\": \"matched-supplement-figure-ledger/1\",\n  \"source_inventory_sha256\": \"inventory\",\n  \"stage\": \"final\"\n}\n",
+      "REPORT_SUPPLEMENT_PIPELINE.json": "{\n  \"artifact_paths\": {\n    \"comparison_markdown\": \"REPORT_SUPPLEMENT_COMPARISONS.md\",\n    \"comparisons_csv\": \"REPORT_SUPPLEMENT_COMPARISONS.csv\",\n    \"comparisons_json\": \"REPORT_SUPPLEMENT_COMPARISONS.json\",\n    \"control_aliases\": \"control_aliases.json\",\n    \"figure_ledger\": \"REPORT_SUPPLEMENT_FIGURES.json\",\n    \"inventory\": \"REPORT_SUPPLEMENT.csv\",\n    \"original_source_inventory\": \"REPORT_ORIGINAL_SOURCE_INVENTORY.csv\",\n    \"report\": \"REPORT_SUPPLEMENT.json\"\n  },\n  \"artifact_sha256\": {\n    \"comparison_markdown\": \"ac7424a20c90d6a4821c554beb91b215de1375192a1ecec92f30a9a4ff74583b\",\n    \"comparisons_csv\": \"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\n    \"comparisons_json\": \"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\n    \"control_aliases\": \"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\n    \"figure_ledger\": \"7147f04a32a420d3683c53db9123f50023eb4b343461f0747d0fab81be3b339e\",\n    \"inventory\": \"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\n    \"original_source_inventory\": \"c319e4e5865d68ee9f144a614f0c8593a4b6b6ae4769ea7fc4424ca4101f38c2\",\n    \"report\": \"0256fb7cf1b2ca58636f1c96230a90369424d4d96276baf86dd27e6e9de72fd9\"\n  },\n  \"comparison_analysis_source_sha256\": [\n    \"{}\"\n  ],\n  \"comparison_count\": 1,\n  \"comparison_counts_by_kind\": {\n    \"across_lean\": 0,\n    \"curve_strength\": 1,\n    \"shaft_rotation_sd\": 0,\n    \"speed_bound\": 0\n  },\n  \"figure_ledger_sha256\": \"7147f04a32a420d3683c53db9123f50023eb4b343461f0747d0fab81be3b339e\",\n  \"interpretation\": \"separate add-on report; original matrices and inventories remain unchanged\",\n  \"inventory_path\": \"<synthetic-root>/inventory\",\n  \"issue\": 12000,\n  \"monte_carlo_uncertainty\": \"shared seeded primitive draws; paired intervals describe saved simulation samples, not independent replications or multiplicity-adjusted discoveries\",\n  \"original_source_inventory_sha256\": \"c319e4e5865d68ee9f144a614f0c8593a4b6b6ae4769ea7fc4424ca4101f38c2\",\n  \"original_sources\": {\n    \"original_control\": {\n      \"common_target_provenance\": {},\n      \"common_targets_sha256\": \"target\",\n      \"counts\": {},\n      \"plan_sha256\": \"plan\",\n      \"planned_cells\": 0,\n      \"root\": \"<synthetic-root>/control\"\n    },\n    \"original_primary\": {\n      \"common_target_provenance\": {},\n      \"common_targets_sha256\": \"target\",\n      \"counts\": {},\n      \"plan_sha256\": \"plan\",\n      \"planned_cells\": 0,\n      \"root\": \"<synthetic-root>/primary\"\n    }\n  },\n  \"postprocessing_source_sha256\": {\n    \"synthetic\": \"fixed\"\n  },\n  \"report_source_sha256\": {\n    \"synthetic\": \"fixed\"\n  },\n  \"schema\": \"matched-supplement-pipeline-receipt/1\",\n  \"source_cells_sha256\": {\n    \"pw-primary-face-bounds/1:pw\": {\n      \"config\": {},\n      \"csv_sha256\": null,\n      \"manifest_sha256\": null,\n      \"source_root\": \"<synthetic-root>\",\n      \"status\": \"completed\",\n      \"summary_sha256\": null\n    }\n  },\n  \"source_transition_receipt_path\": \"<synthetic-root>/transition\",\n  \"source_transition_receipt_sha256\": \"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\n  \"stage\": \"final\",\n  \"supplement_inventory_sha256\": \"inventory\",\n  \"supplement_protocols\": {},\n  \"unique_executed_cells\": 1,\n  \"verified_control_aliases\": []\n}\n",
+      "control_aliases.json": "{}"
+    }
+  }
+}

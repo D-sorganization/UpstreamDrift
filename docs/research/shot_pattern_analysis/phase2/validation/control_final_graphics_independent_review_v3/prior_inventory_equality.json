@@ -1,0 +1,15 @@
+{
+  "status": "pass",
+  "scope": "Original control v3/v2 inventory and saved input equality; graphical acceptance separate",
+  "plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+  "cell_manifests_unchanged": 72,
+  "byte_identical_csvs": [
+    "availability",
+    "comparison_availability",
+    "facebook_ready",
+    "facebook_overhead",
+    "facebook_pattern_density"
+  ],
+  "v3_manifest_sha256": "36c80496b3e347b38f26059b0451017d0f15e38a0a40a046ded6196ca723aec1",
+  "v2_manifest_sha256": "61efd3df27e0106d1d422ef4700d56eb58d63fda1d3317700efeeebd6f0a0e90"
+}

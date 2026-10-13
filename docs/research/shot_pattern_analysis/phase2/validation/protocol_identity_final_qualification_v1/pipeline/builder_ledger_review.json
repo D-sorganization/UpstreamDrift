@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "scope": "Builder completed-ledger verification before final receipt; retains shared loader validator",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "6590c485e5f8eb71b12ae2616ddb9c30b99e8a762aad781ddb3de64f2cd572f3",
+    "tests/tools/shot_pattern_analysis/test_supplement_numeric_parity_guard.py": "bfed86543837d1a95259d93b82066a2ce17e62046619da5542026ab00e67af09",
+    "tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py": "409f5d138f331ea45a2a487aa7560fc30840b47f61a8c001223dd31ac2ff127d"
+  },
+  "line_counts": {
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": 939,
+    "tests/tools/shot_pattern_analysis/test_supplement_numeric_parity_guard.py": 333,
+    "tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py": 942
+  },
+  "red": "2 expected failures: duplicate resolved output and mismatched hash",
+  "green": "47 passed, 1 slow deselected",
+  "static": "Ruff, format and pipeline Mypy passed",
+  "fixture_correction": "Existing smoke test now writes its two mocked image files and supplies their hash, instead of nonexistent paths/fake hashes. The guard remains active.",
+  "evidence_sha256": {
+    "builder-ledger-red.txt": "1f30351c05270af8ce6d97f43cf4ee13bc2960d65fb6d3f15c32bedd227ad4be",
+    "builder-ledger-final-green.txt": "8f7257b4e27fa1fff8197e09af117470e12acc982184501bd89811b94e0a80b1",
+    "builder-ledger-format.txt": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "builder-ledger-ruff.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "builder-ledger-mypy.txt": "5d4b6d285b77932e3d08212c3b4974d0a803f98ec60408ac6ccf6a063fa6c19e",
+    "builder-ledger-green.txt": "087492a642a14de0b4543fb5c29a5e6e9c001bee62a4efadd622e0e26dd0bee4"
+  },
+  "figure_source_unchanged": true,
+  "identity_source_unchanged": true
+}

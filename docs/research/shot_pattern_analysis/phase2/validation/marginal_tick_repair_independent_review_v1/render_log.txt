@@ -1,0 +1,7 @@
+Rendered driver academic
+Rendered driver social
+Rendered seven_iron academic
+Rendered seven_iron social
+Rendered pitching_wedge academic
+Rendered pitching_wedge social
+{"issues": [], "assets": 18, "previews": 6}

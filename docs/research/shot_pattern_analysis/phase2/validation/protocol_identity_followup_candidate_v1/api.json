@@ -1,0 +1,22 @@
+{
+  "contract_agreement": "validate_planned_figure_identities",
+  "issue": 12139,
+  "module": "src.tools.shot_pattern_analysis.matched_supplement_figures",
+  "function": "validate_planned_figure_identities",
+  "signature": "validate_planned_figure_identities(pairs: Sequence[Mapping[str, Any]], cell_refs: Sequence[Mapping[str, Any]]) -> None",
+  "parameters": {
+    "pairs": "Sequence[Mapping[str, Any]] representing planned comparison pairs (invoked immediately after select_explicit_pairs)",
+    "cell_refs": "Sequence[Mapping[str, Any]] representing unique cell references (e.g. supplement['unique_cells'])"
+  },
+  "return_type": "None",
+  "exceptions": {
+    "TypeError": "Raised when pairs/cell_refs are not Sequences (or are str/bytes) or their elements are not Mappings",
+    "ValueError": "Raised on missing/empty/whitespace protocol or cell fields, non-finite/bool/missing target_x_m, repeated ordered identities in either namespace, or distinct identities yielding colliding production stems"
+  },
+  "namespaces": {
+    "cells": "figures/cells/<slug(cell)>, using production _slug(cell) where current 26 cell stems are distinct",
+    "comparisons": "figures/comparisons/<pair_comparison_slug(pair)>, derived from canonical exact JSON identity serialization"
+  },
+  "pipeline_integration_point": "Pipeline invokes immediately after select_explicit_pairs and before _pair_result bootstrap; existing pipeline resolved-path guard in _verify_figure_assets remains sole completed-ledger check",
+  "peer_agent": "Astra"
+}

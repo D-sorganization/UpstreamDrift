@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-012",
+  "title": "Correct Static Types at Shot Pattern GUI and Physics Boundaries",
+  "body": "## Problem\n\nMypy found optional Qt-header dereferences, an incompatible resize-event override, and untyped expanded physics keyword calls.\n\n## Acceptance Criteria\n\nGuard optional headers, accept the Qt base signature, use explicitly typed physics calls, cast the numeric refinement rows explicitly, and pass package mypy plus existing GUI/core tests. Preserve scientific behavior and frozen provenance.\n\n## Validation\n\nPackage mypy with Python 3.12; explicit typed Qt/physics boundaries and numerics.py refinement row casts; existing core/GUI/numerics tests.\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11851,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11851",
+  "issue_number": 11851,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11851"
+}

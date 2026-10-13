@@ -1,0 +1,15 @@
+{
+  "source_commit_before_fix": "392d98bfdf",
+  "command": "env -u GH_TOKEN -u GITHUB_TOKEN PYTHONPATH=$PWD QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy /tmp/shot-upstream-ci-venv/bin/python -m pytest -q -o addopts= tests/research/test_uncertainty_stability_audit.py::test_stability_audit_rejects_changed_study_array_with_unchanged_rank",
+  "result": "FAILED: expected ValueError, but build_audit returned; original tool output not saved as a raw log",
+  "scoping": "test was added before audit source change; near-identical NPZ matrix edit retains rank thresholds",
+  "compile_attempt": "Built-in LaTeX compile_latex_document returned compile-failed because Tectonic default_bundle_v33 was uncached and relay.fullyjustified.net index fetch failed; source retained, no successful compilation claim",
+  "manifest_before_refresh": {
+    "path": "/tmp/shot-stability-release-manifest-before.json",
+    "sha256": "f03c49652638a939e2388d42cd5ae1fe17e309434dc72a3610a26f1c6ff2ca9c"
+  },
+  "checksums_before_refresh": {
+    "path": "/tmp/shot-stability-checksums-before.sha256",
+    "sha256": "dbdf2d5f48a71d269374d05cd6604ea0fed1f2f1de4ca1f4d29d809d41300116"
+  }
+}

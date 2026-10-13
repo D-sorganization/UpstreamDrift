@@ -1,0 +1,8 @@
+{
+  "number": 11974,
+  "state": "OPEN",
+  "title": "Add Correlated Delivery Variability and Configurable Shot Study Controls",
+  "url": "https://github.com/D-sorganization/UpstreamDrift/issues/11974",
+  "local_id": "P2-003",
+  "acceptance": "Support jointly Gaussian shaft rotation, path, speed, horizontal/vertical strike, lean and attack variations with validated PSD covariance, paired draws and user-editable GUI parameters. Defaults include rotation SD1/2deg, path .5deg, speed1/2mph, strike .25inch eachaxis. Report realized face/path covariance and unsupported trajectories without resampling."
+}

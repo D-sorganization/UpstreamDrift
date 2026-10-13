@@ -1,0 +1,22 @@
+{
+  "status": "preserved_rejected_publication_outputs",
+  "time": "2026-10-10T05:33:41.037446+00:00",
+  "reason": "Reviewed caption, contrast and boundary tick defects; no simulation data changes",
+  "outputs": [
+    {
+      "old_path": "docs/research/shot_pattern_analysis/phase2/final_figures_v1",
+      "preserved_path": "docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_final_v2/final_figures_v1",
+      "manifest_sha256": "051c96073df007bf8fb35af6a100541b2499a49276c9cb95f7decab6a69848d0",
+      "file_count": 690,
+      "bytes": 215360004
+    },
+    {
+      "old_path": "docs/research/shot_pattern_analysis/phase2/control_final_figures_v1",
+      "preserved_path": "docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_final_v2/control_final_figures_v1",
+      "manifest_sha256": "61efd3df27e0106d1d422ef4700d56eb58d63fda1d3317700efeeebd6f0a0e90",
+      "file_count": 548,
+      "bytes": 165529583
+    }
+  ],
+  "supplement_report": "First pipeline failed before creating output directory; failure log preserved separately"
+}

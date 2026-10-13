@@ -1,0 +1,29 @@
+{
+  "command_argv": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "-m",
+    "pytest",
+    "tests/test_build_humanoid_models.py::test_mujoco_check_passes_on_canonical_constants",
+    "tests/test_build_humanoid_models.py::test_opensim_check_handles_missing_submodule",
+    "tests/unit/test_core_install_isolation.py::test_config_import_does_not_require_pandas",
+    "-p",
+    "no:pytestqt",
+    "-ra",
+    "--tb=short"
+  ],
+  "cwd": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+  "env_overrides": {
+    "QT_QPA_PLATFORM": "offscreen",
+    "MPLBACKEND": "Agg",
+    "MUJOCO_GL": "egl",
+    "SDL_VIDEODRIVER": "dummy",
+    "PYTHONPATH": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift"
+  },
+  "head": "14bd822fae4eca02d074196046408b3da1fde69d",
+  "tools_pin": "86d0f28b1cc5acf61185e07e320c816c2d005512",
+  "interpreter": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+  "started_utc": "2026-10-11T04:56:03.958991+00:00",
+  "exit_code": 0,
+  "finished_utc": "2026-10-11T04:56:15.551625+00:00",
+  "log_sha256": "ef4eddbd47df08b225397ed555a1315c12e8fe8f2cf6313c38262d91361158d4"
+}

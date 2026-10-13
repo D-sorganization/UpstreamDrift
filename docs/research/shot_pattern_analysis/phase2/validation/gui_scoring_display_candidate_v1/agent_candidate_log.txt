@@ -1,0 +1,72 @@
+root agent idle; waiting up to 30m0s for 1 background task(s)
+I have launched the pytest run for existing matched GUI tests and will wait for it to complete.
+I have launched `test_embed_adapter.py` and will wait for it to complete.
+I have launched the pytest run to confirm the failing test (RED) and will wait for it to complete.
+I have launched the pytest run for `test_matched_gui.py` and will wait for it to complete.
+I have launched the pytest run and will wait for it to complete.
+I have launched the pytest run for `test_matched_gui.py` and will wait for it to complete.
+I have launched `test_embed_adapter.py` and will wait for it to complete.
+I have launched `scripts/check_document_title_case.py` and will wait for it to complete.
+I have launched mypy on `matched_gui.py` and will wait for it to complete.
+I have launched mypy on `matched_gui.py` and will wait for it to complete.
+I have launched the combined pytest run on `test_matched_gui.py` and `test_embed_adapter.py` and will wait for it to complete.
+I have launched the pytest run on `test_matched_runner.py` and `test_scenario_scoring.py` and will wait for it to complete.
+### Completion Report: Conditional Course Scoring in Matched Study Results
+
+**GitHub Issue**: [D-sorganization/UpstreamDrift#12067](https://github.com/D-sorganization/UpstreamDrift/issues/12067)  
+**Issue JSON**: [`/tmp/p2-gui-sg-issue.json`](file:///tmp/p2-gui-sg-issue.json)  
+**Implementation Review & Truthful Logs**: [`/tmp/p2-gui-sg-implementation-review.md`](file:///tmp/p2-gui-sg-implementation-review.md)  
+**Branch**: `codex/shot-pattern-gui-scoring` (head `2e0a74f8ca`, clean worktree, no commits/pushes made)
+
+---
+
+### 1. Changed Files
+
+- [`src/tools/shot_pattern_analysis/matched_gui.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py):
+  - Implemented the pure formatting helper [`format_matched_course_scoring()`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py#L24-L206) (following DbC, LoD, and DRY) to format saved `course_scoring` without recomputing physics or inventing schema.
+  - Added encapsulated `self.scoring_label` (`QLabel` with word wrap) to [`MatchedStudyWidget._build_ui()`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py#L488-L492).
+  - Updated [`MatchedStudyWidget._completed()`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_gui.py#L886-L892) to render saved course scoring, preserving existing nominal delivery metrics and per-pattern individual-supported counts in `self.result_label`.
+- [`tests/ui/tools/shot_pattern_analysis/test_matched_gui.py`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py):
+  - Added 7 fixture-based unit/UI tests covering: initial red failure demonstration, 7-Iron/Wedge approach scoring, Driver tee scoring, conditional-only status, unavailable status with explicit reasons, custom-club no-published-baseline fallback, pure helper edge cases (null/non-finite values never turned into zeros), and launcher embedded height budget compliance (`<= 760` px).
+- [`src/tools/shot_pattern_analysis/README.md`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/README.md):
+  - Added narrowly focused documentation in step 5 noting that the results view displays saved conditional course scoring alongside solved nominals.
+
+---
+
+### 2. Design by Contract, Law of Demeter, and Truthful Terminology
+
+1. **Terminology Inspection**:
+   - Inspected `src/tools/shot_pattern_analysis/uncertainty.py` and `gui.py` to confirm the actual computation. The paired difference interval is computed via [`paired_mean_difference()`](file:///home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/uncertainty.py#L51-L79), which generates a sampling-only Monte Carlo interval.
+   - Used the exact provided terminology: `Paired Difference vs. Straight (95% Monte Carlo Interval): Draw: ...; Fade: ...` (not assuming bootstrap).
+2. **Displayed Presentation**:
+   - **Scenario Context**: Discloses Driver tee shot (`400 m hole`, `30 m fairway corridor`, rough outside) vs Approach (`180.0 m fairway start`, `15 m green radius`, rough outside).
+   - **Common Paired Denominator**: Explicitly displays `Common supported pairs: {paired_n}/{total_n}` and clarifies conditional-only status when `paired_n < total_n`.
+   - **Three Pattern Mean SG**: Straight, Draw, Fade formatted with `{:+.3f}` (or `unavailable` if missing).
+   - **Caveats**: Discloses approximate PGA Tour baseline benchmark, carry landing as final lie (no roll/hazards), and Monte Carlo sampling-only interval scope.
+   - **Null/Missing Value Safety**: Missing/non-finite numbers render as `unavailable`, never converted to zeros or empirical claims.
+   - **Layout Integrity**: Embedded `MainWidget` fits cleanly within the `(1000, 760)` launcher size budget.
+
+---
+
+### 3. Exact Test Outcomes & Verification
+
+Environment: `/tmp/shot-pattern-validation-venv-20261009/bin/python` under `QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg`
+
+1. **TDD Red Phase**:
+   - `test_completed_displays_saved_course_scoring_strokes_gained`: **FAILED** as expected (`AssertionError: MatchedStudyWidget must have scoring_label`).
+2. **TDD Green Phase**:
+   - `tests/ui/tools/shot_pattern_analysis/test_matched_gui.py`: **29 passed** in 19.03s.
+3. **Regression Suite**:
+   - `test_matched_gui.py` + `test_embed_adapter.py`: **38 passed** in 33.59s.
+   - `test_matched_runner.py` + `test_scenario_scoring.py`: **20 passed** in 21.69s.
+4. **Code Quality**:
+   - `ruff check`: All checks passed.
+   - `ruff format --check`: 2 files already formatted.
+   - `mypy --follow-imports=silent src/tools/shot_pattern_analysis/matched_gui.py`: `Success: no issues found in 1 source file`.
+
+---
+
+### 4. Remaining Observations & Next Steps
+
+- **Live Work & Freezes Respected**: No running Monte Carlo shards or production simulations were disturbed. Zero scientific source files (`matched_runner.py`, physics engines, calibration, or immutable evidence) were modified.
+- **Ready for Root Inspection**: All changes remain unstaged in the local worktree for root inspection prior to commit.

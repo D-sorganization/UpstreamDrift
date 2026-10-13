@@ -1,0 +1,195 @@
+..........................FFFFFFF.                                       [100%]
+=================================== FAILURES ===================================
+_ test_independent_svg_contract_rejections[<svg xmlns="urn:not-svg" width="1" height="1"/>] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2391/test_independent_svg_contract_0')
+xml = '<svg xmlns="urn:not-svg" width="1" height="1"/>'
+
+    @pytest.mark.parametrize("xml", [
+        '<svg xmlns="urn:not-svg" width="1" height="1"/>',
+        '<?xml-stylesheet href="https://example.invalid/a.css"?><svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><image href="data:text/html;base64,SGk="/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path id="a"/><path id="a"/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1"/>',
+    ])
+    def test_independent_svg_contract_rejections(tmp_path: Path, xml: str) -> None:
+        path = tmp_path / "case.svg"
+        digest = _write_file_and_hash(path, xml.encode())
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+test_vector_inspection.py:482: Failed
+_ test_independent_svg_contract_rejections[<?xml-stylesheet href="https://example.invalid/a.css"?><svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2391/test_independent_svg_contract_1')
+xml = '<?xml-stylesheet href="https://example.invalid/a.css"?><svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'
+
+    @pytest.mark.parametrize("xml", [
+        '<svg xmlns="urn:not-svg" width="1" height="1"/>',
+        '<?xml-stylesheet href="https://example.invalid/a.css"?><svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><image href="data:text/html;base64,SGk="/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path id="a"/><path id="a"/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1"/>',
+    ])
+    def test_independent_svg_contract_rejections(tmp_path: Path, xml: str) -> None:
+        path = tmp_path / "case.svg"
+        digest = _write_file_and_hash(path, xml.encode())
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+test_vector_inspection.py:482: Failed
+_ test_independent_svg_contract_rejections[<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><image href="data:text/html;base64,SGk="/></svg>] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2391/test_independent_svg_contract_2')
+xml = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><image href="data:text/html;base64,SGk="/></svg>'
+
+    @pytest.mark.parametrize("xml", [
+        '<svg xmlns="urn:not-svg" width="1" height="1"/>',
+        '<?xml-stylesheet href="https://example.invalid/a.css"?><svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><image href="data:text/html;base64,SGk="/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path id="a"/><path id="a"/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1"/>',
+    ])
+    def test_independent_svg_contract_rejections(tmp_path: Path, xml: str) -> None:
+        path = tmp_path / "case.svg"
+        digest = _write_file_and_hash(path, xml.encode())
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+test_vector_inspection.py:482: Failed
+_ test_independent_svg_contract_rejections[<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path id="a"/><path id="a"/></svg>] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2391/test_independent_svg_contract_3')
+xml = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path id="a"/><path id="a"/></svg>'
+
+    @pytest.mark.parametrize("xml", [
+        '<svg xmlns="urn:not-svg" width="1" height="1"/>',
+        '<?xml-stylesheet href="https://example.invalid/a.css"?><svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><image href="data:text/html;base64,SGk="/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path id="a"/><path id="a"/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1"/>',
+    ])
+    def test_independent_svg_contract_rejections(tmp_path: Path, xml: str) -> None:
+        path = tmp_path / "case.svg"
+        digest = _write_file_and_hash(path, xml.encode())
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+test_vector_inspection.py:482: Failed
+_ test_independent_svg_contract_rejections[<svg xmlns="http://www.w3.org/2000/svg" width="1"/>] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2391/test_independent_svg_contract_4')
+xml = '<svg xmlns="http://www.w3.org/2000/svg" width="1"/>'
+
+    @pytest.mark.parametrize("xml", [
+        '<svg xmlns="urn:not-svg" width="1" height="1"/>',
+        '<?xml-stylesheet href="https://example.invalid/a.css"?><svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><image href="data:text/html;base64,SGk="/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path id="a"/><path id="a"/></svg>',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1"/>',
+    ])
+    def test_independent_svg_contract_rejections(tmp_path: Path, xml: str) -> None:
+        path = tmp_path / "case.svg"
+        digest = _write_file_and_hash(path, xml.encode())
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+test_vector_inspection.py:482: Failed
+______________________ test_local_style_and_text_content _______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2391/test_local_style_and_text_cont0')
+
+    def test_local_style_and_text_content(tmp_path: Path) -> None:
+        xml = '''<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1">
+        <metadata><title>Not Visible Metadata</title></metadata>
+        <defs><clipPath id="a"/></defs><style>.x { clip-path: url(#a); }</style>
+        <!-- Separate Caption --><text>Visible<tspan> Tail</tspan> After</text></svg>'''
+        path = tmp_path / "local.svg"
+>       result = inspect_svg(path, _write_file_and_hash(path, xml.encode()))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_vector_inspection.py:492:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+vector_inspection.py:494: in inspect_svg
+    ids, embedded_image_count = _validate_svg_resources_and_references(root)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+vector_inspection.py:453: in _validate_svg_resources_and_references
+    total_embedded_images += _validate_svg_element_resources(elem, valid_ids)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+elem = <Element '{http://www.w3.org/2000/svg}style' at 0x72268f0f2b60>
+valid_ids = {'a'}
+
+    def _validate_svg_element_resources(elem: ET.Element, valid_ids: set[str]) -> int:
+        """Check element attributes and tags for external resources or broken local IDs."""
+        tag = elem.tag
+        if "metadata" in tag:
+            return 0
+
+        image_count = 0
+        clean_tag = tag.split("}")[-1] if "}" in tag else tag
+
+        if clean_tag == "script":
+            raise ValueError("Script element rejected in SVG")
+
+        if clean_tag == "link" and (
+            "href" in elem.attrib or "{http://www.w3.org/1999/xlink}href" in elem.attrib
+        ):
+            raise ValueError(f"External link resource rejected: {elem.attrib}")
+
+        if clean_tag == "style" and elem.text:
+            if _EXTERNAL_STYLE_REGEX.search(elem.text):
+>               raise ValueError(
+                    f"External style or font resource rejected: {elem.text.strip()}"
+                )
+E               ValueError: External style or font resource rejected: .x { clip-path: url(#a); }
+
+vector_inspection.py:405: ValueError
+____________ test_pdf_late_warning_capture_and_handler_restoration _____________
+
+sample_pdf_path = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2391/test_pdf_late_warning_capture_0/fixture_plot.pdf'), '50cef327ac93f47ff58caa72caa4d022686f7cdd8b6b8f6beb5a9897fda5fa5f')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x722691289850>
+
+    def test_pdf_late_warning_capture_and_handler_restoration(
+        sample_pdf_path: tuple[Path, str], monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        import logging
+        import warnings
+        original = pypdf.PageObject.extract_text
+        logger = logging.getLogger("pypdf")
+        before = list(logger.handlers)
+
+        def noisy(self: pypdf.PageObject, *args: Any, **kwargs: Any) -> str:
+            warnings.warn("late extraction warning", UserWarning, stacklevel=1)
+            logger.warning("late resource warning")
+            return original(self, *args, **kwargs)
+
+        monkeypatch.setattr(pypdf.PageObject, "extract_text", noisy)
+        result = inspect_pdf(*sample_pdf_path)
+>       assert "late extraction warning" in result["warnings"]
+E       AssertionError: assert 'late extraction warning' in []
+
+test_vector_inspection.py:514: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  pypdf:test_vector_inspection.py:509 late resource warning
+=============================== warnings summary ===============================
+test_vector_inspection.py::test_pdf_late_warning_capture_and_handler_restoration
+  /tmp/p2-vector-review-agy/test_vector_inspection.py:508: UserWarning: late extraction warning
+    warnings.warn("late extraction warning", UserWarning, stacklevel=1)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_vector_inspection.py::test_independent_svg_contract_rejections[<svg xmlns="urn:not-svg" width="1" height="1"/>]
+FAILED test_vector_inspection.py::test_independent_svg_contract_rejections[<?xml-stylesheet href="https://example.invalid/a.css"?><svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>]
+FAILED test_vector_inspection.py::test_independent_svg_contract_rejections[<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><image href="data:text/html;base64,SGk="/></svg>]
+FAILED test_vector_inspection.py::test_independent_svg_contract_rejections[<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><path id="a"/><path id="a"/></svg>]
+FAILED test_vector_inspection.py::test_independent_svg_contract_rejections[<svg xmlns="http://www.w3.org/2000/svg" width="1"/>]
+FAILED test_vector_inspection.py::test_local_style_and_text_content - ValueEr...
+FAILED test_vector_inspection.py::test_pdf_late_warning_capture_and_handler_restoration
+7 failed, 27 passed, 1 warning in 6.87s

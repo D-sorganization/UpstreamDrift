@@ -1,0 +1,236 @@
+{
+  "schema": "matched-delivery-source-transition/1",
+  "status": "independently_accepted",
+  "qualified_scope": "matched-delivery-comparisons",
+  "old_execution": {
+    "source_sha256": {
+      "src/tools/shot_pattern_analysis/core.py": "f8bb33fa6d0f9a786bb52e260430806635b3c4628b8948f8b611c30a84a39478",
+      "src/tools/shot_pattern_analysis/physics.py": "cbc5af5e2e1c78a19da20b56b0396fe2fd03b625761769bbda1a8e3082179b35",
+      "src/tools/shot_pattern_analysis/delivery_geometry.py": "f8938a47b98b6057cb3e48619ab4453109f1865a74f3f45a3b40e8012b0168a9",
+      "src/tools/shot_pattern_analysis/presets.py": "5be2a521220c9dc5474baa020babbb09de037783aee8fb353656c03069ed292a",
+      "src/tools/shot_pattern_analysis/reporting.py": "bf739a50cf287bd47e16f8cb2caaf29bd5a45c60600969dc182eb05c26b18683",
+      "src/tools/shot_pattern_analysis/scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+      "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+      "src/tools/shot_pattern_analysis/scenario_scoring.py": "63b0a5ade8531e136b94ab7a2af2ec7fd166d3e419b26cc77d1cdea9a0dffe8d",
+      "src/tools/shot_pattern_analysis/dispersion_stats.py": "956eec2eefa14c6ae73c3e460d0c97dcee871299ca52fffb66c9621c92a6ce6e",
+      "src/tools/shot_pattern_analysis/range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987",
+      "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+      "src/tools/shot_pattern_analysis/matrix.py": "ad9e540a13b5974e34ac3a2b13ce62109be04c9e2be875489a39a45fa51f72e8",
+      "src/tools/shot_pattern_analysis/provenance.py": "70f67276f3de4d0a0934da93b0a4fc1f71cc000993cef04dde145dcb12166975",
+      "src/tools/shot_pattern_analysis/__main__.py": "267d814e6a603cc2b3f49d9eaae351fc83c694be6afd7f367430ad50eee5bf6f",
+      "src/shared/python/physics/impact_model/models.py": "121c43c4430e13c139727616b5e946c0b943a38fdad8d951fd487c4f976cbb9a",
+      "src/shared/python/physics/impact_model/solver.py": "2c8bce4fad0adc2bf8eafbfa332a8c158665af81b78ef706f972de11c32103e0",
+      "src/shared/python/physics/impact_model/types.py": "48445f0c2baa4ff4ea6c975c82a368561f36fd92ff38b787a482e99abf1dd627",
+      "src/shared/python/physics/ball_simulator.py": "98d1db42577578501187c3b6042b715f3bb2d2ff77caa4807e26af931e2b1858",
+      "src/shared/python/physics/ball_launch_conditions.py": "7a4540b99160799cf2f98b20a8e3fedb6bc0a6f73f4e72ae248c7f95bafcc253",
+      "src/shared/python/physics/ball_properties.py": "0df69e5db7db6d0822851bd48c382d87b01524df07b19e35afaea8aa82b4b6b3",
+      "src/shared/python/core/physics_constants.py": "ed1152072384caf1118f23483ec0076e1a2150332da5f2c32c966a4e67c3ed38",
+      "rust_core/upstream-physics/Cargo.toml": "62b0a0a18d2b85b9b64fe29e3ed951dc5e67779ee3a65c1f7eeeb8c1e7194d5d",
+      "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1",
+      "rust_core/upstream-physics/src/aero_engine.rs": "274675f38957a3bcf7adc5e8b127dae53fcf3ce7ea47cc4bb019c0c7f96558e3",
+      "rust_core/upstream-physics/src/aerodynamics.rs": "29859f3f21cbff7aa5c5113e47748216e07d88f7a4f4050d7a4633dd8613125e",
+      "rust_core/upstream-physics/src/ball_flight.rs": "7d92d7122cdce94f81d930afc70137ab57f62510d481e0ad1c62319bb65f190d",
+      "rust_core/upstream-physics/src/contact.rs": "ea41fdc56a6d5a69baa6a8d9d60feb51064db509eb06c9e0024da2fc9390a765",
+      "rust_core/upstream-physics/src/fsp.rs": "5688801b4d416b5590beb6e5820175c14d236ed95430c1442c29aa8493cf8e5f",
+      "rust_core/upstream-physics/src/lib.rs": "dc76edb8fe8d92b69fd9317f2e1d9d76467b0481270e27a9309f11e2762f7227",
+      "rust_core/upstream-physics/src/rk4.rs": "d9edb9bc960cf48663d837116fd22aa511af8a99f1f65ba6dfc718677476e51b",
+      "rust_core/upstream-physics/src/shaft_fem.rs": "882cedc99f87c73c8c6a7f08a3c0a9b0451586c699f77ba1163702240e391e43",
+      "rust_core/upstream-physics/src/swing_plane.rs": "4630f52c5b1c46b175a80b7b3b23fe67f21e39ce8b13be76c78d2c353af32b6a",
+      "rust_core/upstream-physics/src/wind.rs": "ea7bfb94eb6227bb115212d26b21a79b36f5719a107c5fc91f2e6d8625d9225e",
+      "src/tools/shot_pattern_analysis/club_geometry.py": "1bf352c6922a93abdc3f5b814fc63733dea7349bc0b3e54c80df087204c04190",
+      "src/tools/shot_pattern_analysis/matched_config.py": "4426573fb766fa02fcf2f5d247e2eb19bba97bb85a04d2224af113250d2e4814",
+      "src/tools/shot_pattern_analysis/matched_physics.py": "b18bd47a7b5998f69d417143678ffb8adfd7c6c5417b01d2f1ffb8ab29e6dd99",
+      "src/tools/shot_pattern_analysis/matched_runner.py": "53d1234b296c898a326f8ce12c50008a1a88a2abff72144dcc598c697bb89138",
+      "src/tools/shot_pattern_analysis/matched_export.py": "15725efebaee16b9d938519201d1b316f652ed016045e461ad515c78f8863b58",
+      "src/tools/shot_pattern_analysis/matched_diagnostics.py": "6336d2fa15b75afae3ac6dde3040b8377818802e77d234c73caea3d438c22fc9",
+      "src/tools/shot_pattern_analysis/matched_report_plots.py": "99753f1624d3b33716a4bebaf44517281f3ac662cc1fca12176abbc75752a377",
+      "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",
+      "src/tools/shot_pattern_analysis/nominal_matching.py": "ce027af32499e9d1d1f3456fee79935c5e293a7228db16c62fd16c7d8d00487e",
+      "src/tools/shot_pattern_analysis/density.py": "127d1d249203efbddb3152e668e270dc54be5857e97377a344edc9d543c2d3ce",
+      "src/tools/shot_pattern_analysis/academic_plots.py": "5822f2c2dd701582908f0157f98c093d1164c5ebe68b865e24bd94fe796f889c",
+      "src/shared/python/physics/_contact_types.py": "fbfba3bb17c2bb13501617927587c1ce7ca42b7ec4dfb0f84b139d9f7529f21c",
+      "src/shared/python/physics/contact_reaction_decomposition.py": "d2adf9456f62c0cab140ae1f5925bbee11710ba74f0d8223c1ab262286496d50",
+      "src/shared/python/physics/grip_contact_model.py": "1ec2d236af41a70e7fb15010f1d041a850caba0f07138c45bc9a3225bc7ab76e",
+      "src/shared/python/physics/incremental_contact.py": "209ad846191823dc2736a3cc26fe2722b6753c0e5581a38603c28353b03d196e",
+      "src/shared/python/physics/incremental_contact_kernel.py": "69e782795d60b54360efaf2f27e910b7f3eeb56697673b344bbd7f2a56bdb9c5",
+      "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
+      "src/tools/shot_pattern_analysis/matched_matrix.py": "6298d852fb984df004d0679b46c05fb3bc855fe20287347dcad1ff52b2b804fe"
+    },
+    "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+    "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
+    "cargo_lock_present": false,
+    "contact_backend": {
+      "active_backend": "numba",
+      "numba_version": "0.68.0",
+      "llvmlite_version": "0.50.0",
+      "fastmath": false
+    },
+    "numerical_runtime": {
+      "python": "3.12.13",
+      "numpy": "2.2.6",
+      "scipy": "1.18.1"
+    }
+  },
+  "new_execution": {
+    "source_sha256": {
+      "src/tools/shot_pattern_analysis/core.py": "f8bb33fa6d0f9a786bb52e260430806635b3c4628b8948f8b611c30a84a39478",
+      "src/tools/shot_pattern_analysis/physics.py": "cbc5af5e2e1c78a19da20b56b0396fe2fd03b625761769bbda1a8e3082179b35",
+      "src/tools/shot_pattern_analysis/delivery_geometry.py": "f8938a47b98b6057cb3e48619ab4453109f1865a74f3f45a3b40e8012b0168a9",
+      "src/tools/shot_pattern_analysis/presets.py": "5be2a521220c9dc5474baa020babbb09de037783aee8fb353656c03069ed292a",
+      "src/tools/shot_pattern_analysis/reporting.py": "bf739a50cf287bd47e16f8cb2caaf29bd5a45c60600969dc182eb05c26b18683",
+      "src/tools/shot_pattern_analysis/scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+      "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+      "src/tools/shot_pattern_analysis/course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+      "src/tools/shot_pattern_analysis/scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+      "src/tools/shot_pattern_analysis/dispersion_stats.py": "956eec2eefa14c6ae73c3e460d0c97dcee871299ca52fffb66c9621c92a6ce6e",
+      "src/tools/shot_pattern_analysis/range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987",
+      "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+      "src/tools/shot_pattern_analysis/matrix.py": "ad9e540a13b5974e34ac3a2b13ce62109be04c9e2be875489a39a45fa51f72e8",
+      "src/tools/shot_pattern_analysis/provenance.py": "d9d11feb69179fbf9ead9875ec1a45a08f1f6c0a914c865e53ff1e669faf6609",
+      "src/tools/shot_pattern_analysis/__main__.py": "267d814e6a603cc2b3f49d9eaae351fc83c694be6afd7f367430ad50eee5bf6f",
+      "src/shared/python/physics/impact_model/models.py": "121c43c4430e13c139727616b5e946c0b943a38fdad8d951fd487c4f976cbb9a",
+      "src/shared/python/physics/impact_model/solver.py": "2c8bce4fad0adc2bf8eafbfa332a8c158665af81b78ef706f972de11c32103e0",
+      "src/shared/python/physics/impact_model/types.py": "48445f0c2baa4ff4ea6c975c82a368561f36fd92ff38b787a482e99abf1dd627",
+      "src/shared/python/physics/impact_model/utils.py": "6653a01ae8412b7fc52942267033ad03dc459b2f267ce1c5a3cab7d08a5ed4b3",
+      "src/shared/python/physics/ball_simulator.py": "98d1db42577578501187c3b6042b715f3bb2d2ff77caa4807e26af931e2b1858",
+      "src/shared/python/physics/ball_launch_conditions.py": "7a4540b99160799cf2f98b20a8e3fedb6bc0a6f73f4e72ae248c7f95bafcc253",
+      "src/shared/python/physics/ball_properties.py": "0df69e5db7db6d0822851bd48c382d87b01524df07b19e35afaea8aa82b4b6b3",
+      "src/shared/python/core/physics_constants.py": "ed1152072384caf1118f23483ec0076e1a2150332da5f2c32c966a4e67c3ed38",
+      "rust_core/upstream-physics/Cargo.toml": "62b0a0a18d2b85b9b64fe29e3ed951dc5e67779ee3a65c1f7eeeb8c1e7194d5d",
+      "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1",
+      "rust_core/upstream-physics/src/aero_engine.rs": "274675f38957a3bcf7adc5e8b127dae53fcf3ce7ea47cc4bb019c0c7f96558e3",
+      "rust_core/upstream-physics/src/aerodynamics.rs": "29859f3f21cbff7aa5c5113e47748216e07d88f7a4f4050d7a4633dd8613125e",
+      "rust_core/upstream-physics/src/ball_flight.rs": "7d92d7122cdce94f81d930afc70137ab57f62510d481e0ad1c62319bb65f190d",
+      "rust_core/upstream-physics/src/contact.rs": "ea41fdc56a6d5a69baa6a8d9d60feb51064db509eb06c9e0024da2fc9390a765",
+      "rust_core/upstream-physics/src/fsp.rs": "5688801b4d416b5590beb6e5820175c14d236ed95430c1442c29aa8493cf8e5f",
+      "rust_core/upstream-physics/src/lib.rs": "dc76edb8fe8d92b69fd9317f2e1d9d76467b0481270e27a9309f11e2762f7227",
+      "rust_core/upstream-physics/src/rk4.rs": "d9edb9bc960cf48663d837116fd22aa511af8a99f1f65ba6dfc718677476e51b",
+      "rust_core/upstream-physics/src/shaft_fem.rs": "882cedc99f87c73c8c6a7f08a3c0a9b0451586c699f77ba1163702240e391e43",
+      "rust_core/upstream-physics/src/swing_plane.rs": "4630f52c5b1c46b175a80b7b3b23fe67f21e39ce8b13be76c78d2c353af32b6a",
+      "rust_core/upstream-physics/src/wind.rs": "ea7bfb94eb6227bb115212d26b21a79b36f5719a107c5fc91f2e6d8625d9225e",
+      "src/tools/shot_pattern_analysis/club_geometry.py": "1bf352c6922a93abdc3f5b814fc63733dea7349bc0b3e54c80df087204c04190",
+      "src/tools/shot_pattern_analysis/matched_config.py": "4426573fb766fa02fcf2f5d247e2eb19bba97bb85a04d2224af113250d2e4814",
+      "src/tools/shot_pattern_analysis/matched_physics.py": "b18bd47a7b5998f69d417143678ffb8adfd7c6c5417b01d2f1ffb8ab29e6dd99",
+      "src/tools/shot_pattern_analysis/matched_runner.py": "55ce0984c53f41b8c2b85264cb3222a8426c765eeaab0a08aa54b704f33bbdd5",
+      "src/tools/shot_pattern_analysis/matched_export.py": "9f11922d18df34785286f08ea83bf980b1f3bdeba853ba553e664844986a79da",
+      "src/tools/shot_pattern_analysis/matched_diagnostics.py": "6336d2fa15b75afae3ac6dde3040b8377818802e77d234c73caea3d438c22fc9",
+      "src/tools/shot_pattern_analysis/matched_report_plots.py": "72515aef38a1c72b740f0c70a770a4c7db1124a62b4514bb424af7124d6dd8fc",
+      "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",
+      "src/tools/shot_pattern_analysis/nominal_matching.py": "8ea4b5e4d1f73518972d71fefd42bc5725c95dacb9694507e9c784fc6eed04fa",
+      "src/tools/shot_pattern_analysis/matched_supplement.py": "10058a76f403323850f20ed65d24b44505e07a1938274b36b8d9013924bd39bd",
+      "src/tools/shot_pattern_analysis/density.py": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+      "src/tools/shot_pattern_analysis/academic_plots.py": "095994a4e2238c26c15a76dcb3fa6b5f694403417904ca14adc446bdf82e2cac",
+      "src/shared/python/physics/_contact_types.py": "fbfba3bb17c2bb13501617927587c1ce7ca42b7ec4dfb0f84b139d9f7529f21c",
+      "src/shared/python/physics/contact_reaction_decomposition.py": "d2adf9456f62c0cab140ae1f5925bbee11710ba74f0d8223c1ab262286496d50",
+      "src/shared/python/physics/grip_contact_model.py": "1ec2d236af41a70e7fb15010f1d041a850caba0f07138c45bc9a3225bc7ab76e",
+      "src/shared/python/physics/incremental_contact.py": "209ad846191823dc2736a3cc26fe2722b6753c0e5581a38603c28353b03d196e",
+      "src/shared/python/physics/incremental_contact_kernel.py": "69e782795d60b54360efaf2f27e910b7f3eeb56697673b344bbd7f2a56bdb9c5",
+      "src/shared/python/physics/rigid_contact.py": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f",
+      "src/tools/shot_pattern_analysis/matched_matrix.py": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732"
+    },
+    "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+    "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
+    "cargo_lock_present": false,
+    "contact_backend": {
+      "active_backend": "numba",
+      "numba_version": "0.68.0",
+      "llvmlite_version": "0.50.0",
+      "fastmath": false
+    },
+    "numerical_runtime": {
+      "python": "3.12.13",
+      "numpy": "2.2.6",
+      "scipy": "1.18.1"
+    }
+  },
+  "changed_sources": {
+    "src/shared/python/physics/impact_model/utils.py": {
+      "old_sha256": null,
+      "new_sha256": "6653a01ae8412b7fc52942267033ad03dc459b2f267ce1c5a3cab7d08a5ed4b3",
+      "classification": "unreachable_legacy"
+    },
+    "src/tools/shot_pattern_analysis/academic_plots.py": {
+      "old_sha256": "5822f2c2dd701582908f0157f98c093d1164c5ebe68b865e24bd94fe796f889c",
+      "new_sha256": "095994a4e2238c26c15a76dcb3fa6b5f694403417904ca14adc446bdf82e2cac",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/course_score_vectors.py": {
+      "old_sha256": null,
+      "new_sha256": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/density.py": {
+      "old_sha256": "127d1d249203efbddb3152e668e270dc54be5857e97377a344edc9d543c2d3ce",
+      "new_sha256": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/matched_export.py": {
+      "old_sha256": "15725efebaee16b9d938519201d1b316f652ed016045e461ad515c78f8863b58",
+      "new_sha256": "9f11922d18df34785286f08ea83bf980b1f3bdeba853ba553e664844986a79da",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/matched_matrix.py": {
+      "old_sha256": "6298d852fb984df004d0679b46c05fb3bc855fe20287347dcad1ff52b2b804fe",
+      "new_sha256": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/matched_report_plots.py": {
+      "old_sha256": "99753f1624d3b33716a4bebaf44517281f3ac662cc1fca12176abbc75752a377",
+      "new_sha256": "72515aef38a1c72b740f0c70a770a4c7db1124a62b4514bb424af7124d6dd8fc",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/matched_runner.py": {
+      "old_sha256": "53d1234b296c898a326f8ce12c50008a1a88a2abff72144dcc598c697bb89138",
+      "new_sha256": "55ce0984c53f41b8c2b85264cb3222a8426c765eeaab0a08aa54b704f33bbdd5",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/matched_supplement.py": {
+      "old_sha256": null,
+      "new_sha256": "10058a76f403323850f20ed65d24b44505e07a1938274b36b8d9013924bd39bd",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/nominal_matching.py": {
+      "old_sha256": "ce027af32499e9d1d1f3456fee79935c5e293a7228db16c62fd16c7d8d00487e",
+      "new_sha256": "8ea4b5e4d1f73518972d71fefd42bc5725c95dacb9694507e9c784fc6eed04fa",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/provenance.py": {
+      "old_sha256": "70f67276f3de4d0a0934da93b0a4fc1f71cc000993cef04dde145dcb12166975",
+      "new_sha256": "d9d11feb69179fbf9ead9875ec1a45a08f1f6c0a914c865e53ff1e669faf6609",
+      "classification": "approved_nonprojection"
+    },
+    "src/tools/shot_pattern_analysis/scenario_scoring.py": {
+      "old_sha256": "63b0a5ade8531e136b94ab7a2af2ec7fd166d3e419b26cc77d1cdea9a0dffe8d",
+      "new_sha256": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+      "classification": "approved_nonprojection"
+    }
+  },
+  "evidence_files": {
+    "review_followups/qualified_source_2e0a74f8ca/LEGACY_GEAR_SIGN_TESTS.txt.gz": "dc2204b9c2606fdc7f4dc527a2b7add1fc54babe233c57bd81cfd8c0c24136c5",
+    "review_followups/qualified_source_2e0a74f8ca/producer_catalog.json": "2486f64e5126cc55c92a2d2d2b3bb9e28b3e41dfc60f23d08a5f0099c8df10d4",
+    "review_followups/qualified_source_2e0a74f8ca/LEGACY_GEAR_SIGN_RED.txt.gz": "d019e3ef2cd927eb14c8a9cbba33d9515df72de95471c8d6af869cf2cc0ca698",
+    "review_followups/qualified_source_2e0a74f8ca/candidate_execution.json": "953527b654852fa260726e3f15c559d1e98949a5db52dead6a68e0b11fb0b4a0",
+    "review_followups/qualified_source_2e0a74f8ca/social_driver_density_10k_preview.png": "cba921a1454baeac42b6039ed87513e005b3027530260e10ec7e1610f5aedab1",
+    "review_followups/qualified_source_2e0a74f8ca/check_plot_source_equivalence.py": "dfcf5bb441911dcb854f84a360ff5f3c78348f56aad2d9c00b51c5973c730c62",
+    "review_followups/qualified_source_2e0a74f8ca/presentation_style_density_10k_v3.png": "5e1f06eccf86ec8b4972c7b40aefaf1885fde8bc6144b730b0e6122c6c4696ca",
+    "review_followups/qualified_source_2e0a74f8ca/LEGACY_GEAR_SIGN_REFERENCE.md": "49a3cb4dc71025d16bfeeb21e614a5958525bd75156854376bb48eea78b78a92",
+    "review_followups/qualified_source_2e0a74f8ca/social_presentation_visual_review.json": "012c9e4d32c1df96b3e566787d9ea1a6635a3fc9844947e1dfd0fcded3f7ac49",
+    "review_followups/qualified_source_2e0a74f8ca/presentation_style_overhead_10k_v3.png": "1f8a286b288cfe20a7753c4eb14d6cfbad73ca1742524b274630cc06371fa93d",
+    "review_followups/qualified_source_2e0a74f8ca/LEGACY_GEAR_SIGN_VALIDATION.json": "e78a694cdae5a86d7c18deab3da2c6cb754cd8ed4d2f7fc2321771cc7b71a11f",
+    "review_followups/qualified_source_2e0a74f8ca/INDEPENDENT_SOURCE_TESTS.txt": "ce52154d0386f7e642ba9d7f0c1e2a0af5d24f507aed4848269f5cc119e3a1c0",
+    "review_followups/qualified_source_2e0a74f8ca/social_driver_overhead_10k_preview.png": "fd910fb27f7aef98d899864c1d29efd094c3e965869498b25c3afe2776a4a316",
+    "review_followups/qualified_source_2e0a74f8ca/PLOT_SOURCE_EQUIVALENCE.json": "e362b186991a505c87e53c0535591109cffdea3bf0937d37a2ed25010ba86159",
+    "review_followups/qualified_source_2e0a74f8ca/independent_catalog_review.json": "fd8e995146ae9ddd3d1fd02eb02e6609795da99fc70e884bdd46c19f43d65e01",
+    "review_followups/qualified_source_2e0a74f8ca/BUNDLE_MANIFEST.json": "ef0e659ab8878af98fc32e8b391db075b14bc229faa82f1488ec9e87e9656858",
+    "final_acceptance.json": "d5e1460877723b266f6722d332d55bd8e104eca7fc2aec69a7ccfb0f7ebe35ce",
+    "review_followups/SUPPLEMENT_SOURCE_QUALIFICATION.md": "c16689c9d5259e19a40acfba732c055ececfd9d3c934a0a33d8b419019390007",
+    "review_followups/COURSE_SCORING_REFACTOR_REVIEW.md": "c914d32fd917ee448364b6d4188be2447ec2696f595af79a359cfb7a0396e736",
+    "review_followups/course_scoring_refactor_review.json": "caad7145638ba7bfdf6c8c64a0beacb03e3295448fd7f5abffb61fe43f4b2382",
+    "review_followups/check_course_scoring_refactor.py": "02a7bd8dba746466ffca25d28c6ab3c17a36778890ce026ec236f2991e9e9547",
+    "review_followups/BOUNDS_IMPLEMENTATION_REVIEW.md": "5f1455ddb743ef6b0fab93aa135b2aed489297bfda3d393b21f9d32d7c444a97",
+    "review_followups/bounds_implementation_review.json": "f28a250234ec9bbd2734ee45a890c6a3d960d8c1e426cf31e382e9c3f4274b80",
+    "review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json": "d414750473fde94622d35ce137dee6820a33e71c70e20635dec5c40dd6585117",
+    "review_followups/SUPPLEMENTAL_BOUNDS_PLAN.json": "6dc072b6fcf3a266b14eb5f43f5289b02aa9cccd346ca00f45ac9410d83cb6ca",
+    "review_followups/DRIVER_SPEED_SENSITIVITY_PLAN.json": "128329ebaf182cda57d0298daabef798ffd6b1bba43b3d7049072e4036f7cdc2"
+  }
+}

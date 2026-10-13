@@ -5,10 +5,16 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
+from scripts.research.proximal_distal_energy import audit_uncertainty_stability
 from scripts.research.proximal_distal_energy.audit_uncertainty_stability import (
     build_audit,
+)
+from scripts.research.proximal_distal_energy.release_bundle import (
+    artifact_sha256,
+    artifact_size,
 )
 
 pytestmark = pytest.mark.scientific
@@ -35,3 +41,71 @@ def test_small_sample_conclusions_expose_perturbation_stability() -> None:
     assert set(pareto["membership_counts"]) == set(pareto["point_members"])
     assert ranks["rank_by_fraction_of_largest"]["0.05"] == 6
     assert "cannot quantify population uncertainty" in audit["interpretation"]
+
+
+def test_stability_audit_rejects_changed_study_array_with_unchanged_rank(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A near-identical matrix must not inherit the released study's values."""
+    for name in ("uncertainty_control_study.json", "uncertainty_control_study.npz"):
+        (tmp_path / name).write_bytes(
+            (audit_uncertainty_stability.DATA / name).read_bytes()
+        )
+    array_path = tmp_path / "uncertainty_control_study.npz"
+    with np.load(array_path) as source:
+        arrays = {name: source[name] for name in source.files}
+    arrays["standardized_sensitivity"] = arrays["standardized_sensitivity"].copy()
+    arrays["standardized_sensitivity"][0, 0] = np.nextafter(
+        arrays["standardized_sensitivity"][0, 0], np.inf
+    )
+    np.savez_compressed(array_path, **arrays)
+    manifest = json.loads(
+        (audit_uncertainty_stability.ARTICLE / "release_manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    relative = "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.npz"
+    manifest["artifacts"][relative] = {
+        "sha256": artifact_sha256(array_path),
+        "bytes": artifact_size(array_path),
+    }
+    (tmp_path / "release_manifest.json").write_text(
+        json.dumps(manifest), encoding="utf-8"
+    )
+    monkeypatch.setattr(audit_uncertainty_stability, "DATA", tmp_path)
+    monkeypatch.setattr(audit_uncertainty_stability, "ARTICLE", tmp_path)
+
+    with pytest.raises(ValueError, match="input.*(identity|hash)|hash.*mismatch"):
+        build_audit()
+
+
+def test_stability_audit_rejects_independent_rank_disagreement(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def changed_singular_values(*_args: object, **_kwargs: object) -> np.ndarray:
+        return np.array([1.0, 0.8, 0.7, 0.6, 0.5, 0.3])
+
+    monkeypatch.setattr(
+        audit_uncertainty_stability.np.linalg, "svd", changed_singular_values
+    )
+    with pytest.raises(ValueError, match="singular values disagree"):
+        build_audit()
+
+
+def test_stability_audit_rejects_changed_primary_study(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for name in ("uncertainty_control_study.json", "uncertainty_control_study.npz"):
+        (tmp_path / name).write_bytes(
+            (audit_uncertainty_stability.DATA / name).read_bytes()
+        )
+    record_path = tmp_path / "uncertainty_control_study.json"
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    record["identifiability"]["coupled_parameter_screen"][
+        "standardized_sensitivity_singular_values"
+    ][2] += 1e-10
+    record_path.write_text(json.dumps(record), encoding="utf-8")
+    monkeypatch.setattr(audit_uncertainty_stability, "DATA", tmp_path)
+
+    with pytest.raises(ValueError, match="input.*(identity|hash)|hash.*mismatch"):
+        build_audit()

@@ -1,0 +1,1119 @@
+{
+  "status": "provisional_visual_and_label_checks_pass",
+  "checked_utc": "2026-10-10T08:52:20.863080+00:00",
+  "whole_run_accepted": false,
+  "report_sha256": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+  "scope": "All 72 PW primary supplement cell PNGs: 18 cells, academic/social density/overhead, 12 contact sheets and six full-size inspections.",
+  "files": [
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density.png",
+      "sha256": "133836f8ea3e783821b9d2c1c26f6a4d98f79bdb329fb3bb2bdbdc7b7808b57f"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density_social.png",
+      "sha256": "b5c359ab4efdcbcb9894ccb806da6514328bf89c90bcfe2bfaec48dcdc080196"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead.png",
+      "sha256": "5a8708ddc5a7f583bc4567a235df84e2b7b4293af9e6b929f3fd575b07e31f35"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead_social.png",
+      "sha256": "87337709d6dfaba4d5665ca87dae76786b1dc7145698bc04046ad3638a93ff1f"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_density.png",
+      "sha256": "1b36951a8006413e4e15e8c11fb9accee5b255fb633bcd8f24edf21c21589903"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_density_social.png",
+      "sha256": "eb6dafb41cf8fb2902b2e1fe11e9d6aed326cd5042a01ff6fb5b9a6f9bcd7bef"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_overhead.png",
+      "sha256": "d4efa4d70e13f23aed39a6707ebbd69836d3bb344d4c077eb9c9de6680f883e2"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_overhead_social.png",
+      "sha256": "7dfe46182ba4cc5ecf7b372f3b793ffc1188e157f044979e84f88e7d702c453d"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_density.png",
+      "sha256": "79b4ff77b9009dd30c280963b57885189975a4b6bfd44cae1ddd0d012a59d819"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_density_social.png",
+      "sha256": "96ed47fd0ad286d2d0e049564135fc5ae7120570ce1c2b5219fc61ece78f8dc3"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_overhead.png",
+      "sha256": "66e4428d6253440b9f3f53ab2d3ec3f75d52b4eb5102e1c750d64ba7a23473bf"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_overhead_social.png",
+      "sha256": "ef337c63d78f409946f0d5a22c3e0618a1ecd16c91b120a85d3ee4fd4a9542eb"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_density.png",
+      "sha256": "0bf2d859d4d8b67ce8baa6b7b20674a0f9fb571188521cb20b38cb037913d7e1"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_density_social.png",
+      "sha256": "a34ff9e42c095fd5400f06f394f9aef218f35271624a7721e57178b39c373666"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_overhead.png",
+      "sha256": "ce3f5dc523f1a363584197095c519d5db33f5b1f3da032b55e708ab1f3459b8a"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_overhead_social.png",
+      "sha256": "71f7c662882952338fdc12eed04f9021969e42190b87ab3234c19ca2efc814a3"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_density.png",
+      "sha256": "c045cd81f9f4e5e4b4f807bfed5babb9c6d6b73f5e347c31c5e4904d85703531"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_density_social.png",
+      "sha256": "9b9cf9aafedc4c0ec1bb3dd1abfcb20b1dfe018b6379b7ad19d01f73c7f1d899"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead.png",
+      "sha256": "f5e8977ebded1cb8d25ec9a96cc61712ab34f76f50fc53b73a34265ee9f6a661"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead_social.png",
+      "sha256": "9f35ecb6872f0a6a33fc3e3853b1e91e8a3aefa4ad2edea1167ccf3a864158f9"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_density.png",
+      "sha256": "131708990351580dc4ec9ddcc9c89513b7a0d33639edc4c9c7b735d260aeb11e"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_density_social.png",
+      "sha256": "91b203af3e753358d8e0ff78905913ec862de249d82d1d6246ecf539ea1777aa"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_overhead.png",
+      "sha256": "5b53f2cfe0b24b26799aa9501d5c9f69eeb1df97032b3b2b1e4e02a6a3f02bd3"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_overhead_social.png",
+      "sha256": "dd4eaefc820fee0af3cd9237a741af057515f18f33ad09645790409e1c60d9bb"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_density.png",
+      "sha256": "e4acd30782616c3b4d34f8f07eee4c59152e79cd471cb53249513bb772070f2f"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_density_social.png",
+      "sha256": "700d0a0b5c124d39d527883765f26fad2990afd2f911cc6765813212dbfbf920"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_overhead.png",
+      "sha256": "e0619d1cde2bc27cb97f510b3e0718de06424ec47b6e4ee03b443b67ef36c002"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_overhead_social.png",
+      "sha256": "ada0cfc5ebf6a0847abed04e7936e3e5121c4a7381dc303e59ecd96240db8ef4"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_density.png",
+      "sha256": "a8463a621f0e731c1246e9e9b4a0267c0d5cd3ef55fb01cee13450274ec585cc"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_density_social.png",
+      "sha256": "be165e3ee0e6662ddaa152393fe985aa6390afc6eed2caa9740a3795e18b1d10"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_overhead.png",
+      "sha256": "816570a745a7c92e63903b28bf79ed1ec34bd532ff0b11f7b7c31e63ed0ee34c"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_overhead_social.png",
+      "sha256": "6b5aaf42a7ad006705df36bf71bf26f8461160cb871534fd57c062a7f11d8d1d"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_density.png",
+      "sha256": "17d5a4f80596fa86cccb8f51fd3e6f0bf58feb4fda2741bff1f32fcefff13714"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_density_social.png",
+      "sha256": "9ba6dc7a04731616c206471b21b660795676595d40c948e94ce8aa05480fa346"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_overhead.png",
+      "sha256": "5257db953f9912fee5a78416666f6d8a285c3a0238eea9c5181ed068e51d8ebc"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_overhead_social.png",
+      "sha256": "0dfbb9ab9084cb5607449bb2a446e13e99691a8808a94e1fc6b973ade842ad8d"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_density.png",
+      "sha256": "442b001b18f5f76716ab7f005ab8069d45ab4499a1e624d4dd680d15b2dd3870"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_density_social.png",
+      "sha256": "264914fe92cd773439091907f0cd74deb2ecc578efe9bd465475fe45bae88dd9"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_overhead.png",
+      "sha256": "3f2b894246a44cc77bfc0dbc95d357e041583ac7902339e9f04567d8d467bd36"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_overhead_social.png",
+      "sha256": "3b352c52c055f5aea0d0ba4f7d5e9c07a1c8c8b0f1e38c0dbd97214bce7efa7f"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_density.png",
+      "sha256": "f4c314748017116b47151a52493d98f25781b54b92712a485efbd6c4e9f46f60"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_density_social.png",
+      "sha256": "d8d62caa649aae7c0562f2e5f188579ec164bc33e0790498c2a14b49354f6c25"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_overhead.png",
+      "sha256": "7ad7b4cc1cb1ae346d53deccde23eef820265254515fa10da748543ac7cd16b3"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_overhead_social.png",
+      "sha256": "64170c7820afc5cd85a41a3e315e495609f45c2386bd579fc3da7a5291f15ddd"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_density.png",
+      "sha256": "7c971604b88ac05517c42224c42535f2f6b1887c3ea0643243129ebf96bc762e"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_density_social.png",
+      "sha256": "8b1a16a1d46226855d7ee84414c92533bd9af04f5579af83bb20bbddce416f4e"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_overhead.png",
+      "sha256": "187959d55e3d7380c4f7d0cb232ab43638ed0d8b806b9d91cea3b703141feecf"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_overhead_social.png",
+      "sha256": "f35469ce423a7a83457cf18b8310dab3b7044be0a0844b6b32d60362ff34a7c9"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.png",
+      "sha256": "ca670c1763ad2a55ea26aa8de7416d79b087d55c77e27a5c119640b0333b0473"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png",
+      "sha256": "c5104786a9faec72c222413c9be39f14e4c9ce3e4b1113206bf87e7a90fafc16"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.png",
+      "sha256": "8f61e3cdae7ff3067e53807c5495c69cfe6e10cd319408d88cef8e18320da1c7"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.png",
+      "sha256": "ede4861a70fc2f3d0ea71b813fb77e96c4fc9ffc807671446b3e4c1eaa920026"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_density.png",
+      "sha256": "b8f99c3e5414bf14571a399547a0801d7b99a881eb4911e382986a10bf341407"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_density_social.png",
+      "sha256": "035a2b0b7836d282bcb51bd847c4be340f7caecf0bd9f21d9e8e9315f29afc1e"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_overhead.png",
+      "sha256": "c78e1eff830abcf95d3d1d0d81cdb725ed7bd34186cb23dcab78b47855b365e2"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_overhead_social.png",
+      "sha256": "ac19121f34daec0f8e926150f82752da50ec7ecc5eacaa02df686c81dfa225af"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_density.png",
+      "sha256": "d058f792a9cdb6572e6c34be73eb0b218069ccd76471d3f43c873a90c0a3d2e5"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_density_social.png",
+      "sha256": "7f93e5210b7b5277e73d89c79555152f0e7fee625be8b830cb06238da646fa18"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_overhead.png",
+      "sha256": "568acba9ab970cb4d0cb086cd6e40d485e88a691ae1676343a4272da1df6fbef"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_overhead_social.png",
+      "sha256": "6fd8f27430791d4959e23083ebcd6ddaf98cdf8b35c3f8ebc3658a6c05a239e3"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_density.png",
+      "sha256": "98ad5a749ecf033ccf31af88f9699860b2ba55a6e5162c7255dbe84615ff59a0"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_density_social.png",
+      "sha256": "78bc4c0d232b0d5fb73dec3a99a4cf62bb88e52d2d7a9dc040704e8f52ed12c8"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_overhead.png",
+      "sha256": "52c9012b1f63d742c9a321244a81e0ca48d003994389ed5382a661802a999cbe"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_overhead_social.png",
+      "sha256": "2c072670fd88c7e603dcc12a7a0f8e5c5de0d696d3e77a8403505dd6563a2392"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_density.png",
+      "sha256": "eca10c32589b61608e3d066413240d8f4a81ce647c742e521ee3f98b7963d147"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_density_social.png",
+      "sha256": "e8585abed90bdf0646fde7a9fcfc5c83ab92d516fda724d7a28af91276e3f886"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_overhead.png",
+      "sha256": "218532b541bcfd013d5af11f799be8484b54749448fb2ce2d0458dcff62f6bcc"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_overhead_social.png",
+      "sha256": "836383d825e20e1b2fe78b0f3af7478c0c5f63ffb502d8a6eb92c3cec70c0294"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_density.png",
+      "sha256": "933a7c7654a69ae80dd428633fa49e8e8477c8bfdd13d712361fe481984ce1a4"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_density_social.png",
+      "sha256": "cda06a0bb3e34655813553734962acbd8b52cfc1c0d8631ce31f0324004e2b30"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_overhead.png",
+      "sha256": "215f83adc9a1d53794bf98c54573fc0b3b5b71c0bedfd15d8a6584931a6d1c59"
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_overhead_social.png",
+      "sha256": "6dc360e6ee0e7adf2fd9f5a3f629af503da499e210cf7b3b76e94071e230b7c0"
+    }
+  ],
+  "contact_sheets_inspected": [
+    "contact_01.jpg",
+    "contact_02.jpg",
+    "contact_03.jpg",
+    "contact_04.jpg",
+    "contact_05.jpg",
+    "contact_06.jpg",
+    "contact_07.jpg",
+    "contact_08.jpg",
+    "contact_09.jpg",
+    "contact_10.jpg",
+    "contact_11.jpg",
+    "contact_12.jpg"
+  ],
+  "full_size_pngs_inspected": [
+    "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_density_social.png",
+    "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_density_social.png",
+    "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_density.png",
+    "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_overhead_social.png",
+    "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_density.png",
+    "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_density_social.png"
+  ],
+  "pdf_label_checks": [
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density.png",
+      "pdf_sha256": "1be5fd87080f249e02d02566f75a89171eb4fa6ccbb629ee6f91008a2c7741e2",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined1",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density_social.png",
+      "pdf_sha256": "b9e8e906db8acc29491b6618feec46027de530150bda5a49c9710aeafea6f570",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined1",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead.png",
+      "pdf_sha256": "8cc8f210b9de6775f15e3ec67ce4e7a71f08d9d59fd31a6af7f44b4ee51ae529",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined1",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead_social.png",
+      "pdf_sha256": "cd582fd0c8b2ffa02d95e4eea85949920c13f5c7e47e70a36bb86a616fe38058",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined1",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_density.png",
+      "pdf_sha256": "c7c942307f57cad8b39100fbcdbb51757e54da19a4b156ac1e97064e5394e8e8",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_density_social.png",
+      "pdf_sha256": "8432f2daa9d2396c875c717e40e75105d04e02644efd479858f9f49ec620c2cb",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_overhead.png",
+      "pdf_sha256": "0f66b5ea205594daaaf47ad2e391c0431d59772794dc1ef417364df8a6d2936c",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_overhead_social.png",
+      "pdf_sha256": "0200562a10036a2a89a76e3e988bb555f3f9ccfad48852496c7d1831636a9145",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_density.png",
+      "pdf_sha256": "7342e42e974898ec24629b5016d6d7ccc28b072ea40a2b9f5fdf53ccf827c9c4",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_density_social.png",
+      "pdf_sha256": "a32f4aaac8cb27474725961242aa6d6537d799e1d095f171b11abeffa39158ca",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_overhead.png",
+      "pdf_sha256": "08772cf50cc28cfc4e48059394a9549ad72063c4db42aff93bc0b21455ced716",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_overhead_social.png",
+      "pdf_sha256": "49392cae16cac1a6ebae846d29187c2370dfb310d69df47a8df510d42376a228",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_density.png",
+      "pdf_sha256": "c72218f0d33783e5c0ad39d1f727b1280b9e7aca5e4e55f74fa243e530c97f7e",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_density_social.png",
+      "pdf_sha256": "d7ac45cb47fcb0518221d4d35b28edc542445de412ee86ab1345e8f42d607625",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_overhead.png",
+      "pdf_sha256": "85acd81f88838cc11a94dd0c0bcddcfe0014c7d5dbf3cf63f49dfd03f85e0698",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_overhead_social.png",
+      "pdf_sha256": "e4f64726ba02f65389163562f33ba07441adae321e488eb3361b1bffd3126fde",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_density.png",
+      "pdf_sha256": "ebee495280646d0edbd588b04672eced179c32a2c6bcc11c1720446dc0af8dc2",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_density_social.png",
+      "pdf_sha256": "146f8ca5998d2d55c21a14f18b893cad1fc241feedad8bd932db765af3e4b01d",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead.png",
+      "pdf_sha256": "d79cbe844da690c3fe3a228e29e0489ae48b30649b134b6a533b8c41c316a088",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead_social.png",
+      "pdf_sha256": "ab5497c87a8006062033641bfb6ef0430bfb166ecdd82e391b7d594c87049541",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_density.png",
+      "pdf_sha256": "40f267ba8d6067f734bea9cd92e18aa8f19601ab8216386faf83b53b618aabb4",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_path",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_density_social.png",
+      "pdf_sha256": "8ec57d9a0f09bffa5920a59ddaeb117a64d083d20504b0b9eacfcfe1c81412f8",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_path",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_overhead.png",
+      "pdf_sha256": "5b5d88626e86e137adf783650c4efe082d9c5cf277247f20a25848e2568901af",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_path",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_overhead_social.png",
+      "pdf_sha256": "88b96f7c31b7e050bf51a06c3804646110b85a5d48a1b0fb10b983361d9ce066",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_path",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_density.png",
+      "pdf_sha256": "35568f20306d2efc1e5e729219dc0f8af3c19c69bb9a7c335cacd2f3b4be20cf",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_density_social.png",
+      "pdf_sha256": "88321ebd5a3bc0ac7f66afe22b413cf895eef5644cf9321c4f90507cdf0e81db",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_overhead.png",
+      "pdf_sha256": "e3365eeeecdd67a2fd7c7839e6cac829ceea38aa2ba770746d7b1dacfebbb16f",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_overhead_social.png",
+      "pdf_sha256": "bb6420a643e2fea1d092c6c015151c541503ad635ba4e81ad14758fec332be4d",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_density.png",
+      "pdf_sha256": "e2d7d707354b9b9f294959f97520d7ade8b7ecff839235ffd5e73bef7e8c511f",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_density_social.png",
+      "pdf_sha256": "1374983e675efd17e083f38898d2ebd4f17c11f5525fc30b44ce7da8ba754457",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_overhead.png",
+      "pdf_sha256": "9e98030ac6e9af119d65976eec7998f8cd69a9248dfc269e3df237500ab2f7ea",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_overhead_social.png",
+      "pdf_sha256": "319fb02fe11b7be9cfc21a36e83eed913d883db87bb4d6e532d9497e601a58e6",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_density.png",
+      "pdf_sha256": "bbe7f1c8e455795a898a35d79261f4d4263ad9567cd9ab85aab930982bc3af55",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_density_social.png",
+      "pdf_sha256": "48a651b5dfd44ae52f819d6a3f8a7dafcb6ae9c94293633e748d0c312e37de6a",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_overhead.png",
+      "pdf_sha256": "8159a209a92dcff150b07fda3310dfad3dde1818e6f6c9a15ed118087a7e771d",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_overhead_social.png",
+      "pdf_sha256": "6dea614035347337e0bc539b38243eb18ed41de5164dc1800144e2cfdef1d080",
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_density.png",
+      "pdf_sha256": "57e0f9e5d1501c6c24bb1d241cae81b54ca6caee233718f4eb8d8c8b11dd0459",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined1",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_density_social.png",
+      "pdf_sha256": "b2812650c8ccc085a89924e93a66c753d77102a3e7fe25f67e4bb54daf4afdf9",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined1",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_overhead.png",
+      "pdf_sha256": "e35a34d1a5e4438b11783821de55a329c43618c450995298bbc0c177df87a239",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined1",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_overhead_social.png",
+      "pdf_sha256": "fbc51ac0123f29ba83f29f34f0c5328c77fcad5cc8c88df72ffa72a083db0030",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined1",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_density.png",
+      "pdf_sha256": "fa5ba2a46585982a48c90737c8055d25d6b527a2f5317db42d1e75dfc655037c",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_density_social.png",
+      "pdf_sha256": "e4905c96f0285503796dc1590110b3083e8cbc69f5b83623ea4ed8a88478b8ef",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_overhead.png",
+      "pdf_sha256": "9f5abfb9bf9e33b5ef66ded55942f6c04c629ff5334445c92d7ca76cfad49fec",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_overhead_social.png",
+      "pdf_sha256": "9f85b98716e7e12cfdddc9a5c4242e4357226878f9c67f78b13db9450e9e87c2",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_density.png",
+      "pdf_sha256": "ef52f2d991529a1b4e2dc30844fb1db8488f24ef40e9e87bbf02e4d42cfc4819",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_density_social.png",
+      "pdf_sha256": "f5e077edb309cad8c307fcce4fa1720b6778d1f13c10f8bdd4ea245b70dd89a6",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_overhead.png",
+      "pdf_sha256": "fa74d26887977ed9616bf8ce0b6275b8ddfa56c005375697ae10466a98e9b154",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_overhead_social.png",
+      "pdf_sha256": "97927d69c56baa94bf50c60fe26f7291e659a3bd20f31222ac25631fee09c4a2",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.png",
+      "pdf_sha256": "de801fa659952e0a36edf73d7820775c171c3b3543fc1d4c293d84cdab51aa3b",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png",
+      "pdf_sha256": "bcdaba8184dfb186e049b21774d32c3886e9c8bcc5edeb830007a4e209730f94",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.png",
+      "pdf_sha256": "b9d1ccc9270e112c800b158f2309085f5b2522e61224bb59835a9790737f5c0c",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.png",
+      "pdf_sha256": "0ceaaa726428d1a59cfa76f0d4a2c59bd85bac7a2a514168d38c72078f638dea",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_density.png",
+      "pdf_sha256": "74f8d3abc85899b3f28a7a8bd74b968e4fddf74cae09f50611fe7bf986437487",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_density_social.png",
+      "pdf_sha256": "ae9444a42ac88c41e1b9abd9f78de840444a8761241cd141537fc4d68957c90f",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_overhead.png",
+      "pdf_sha256": "9611a26cfe7cfd7829fe46815ff2db102c88534b9b65ce1ba817628a9cb9a875",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_overhead_social.png",
+      "pdf_sha256": "e63c1fc07fb94a32cdedd0ee76841c49735dac75c98984827d83f930c8983dfe",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_density.png",
+      "pdf_sha256": "291da3e992dcf1d1fdf6f9c6f093f58cd75376267244b45875086016b2be1510",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_path",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_density_social.png",
+      "pdf_sha256": "6c23e928b9414c957f2f14345857729f0193d32986a939e7209e94dcccc44079",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_path",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_overhead.png",
+      "pdf_sha256": "f531584380fcd55faa2518741d6b830c60a77bf115eee4a4a365516e666f1ffb",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_path",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_overhead_social.png",
+      "pdf_sha256": "4e2247e8dc33e71a161a1154cfb07bca18fc6e76a88bcd046ae261807c3b2137",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_path",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_density.png",
+      "pdf_sha256": "dbeb4ee294f5344543ecfb6cc7eb3dd35284aa9d62782b761f72e804b3870a35",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_density_social.png",
+      "pdf_sha256": "aee16b210fd20e62793df5802062cf21fba4b18c042dd4653576e4050c6a7249",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_overhead.png",
+      "pdf_sha256": "365fe523521c4f0e4887b9964bc43e905d9562c33f414ca2a91baa79face5d4d",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_overhead_social.png",
+      "pdf_sha256": "2fec371473672d4a330820fd8fed47fa407cc7177b46b76f9be5332e7a4d3660",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_density.png",
+      "pdf_sha256": "ff5da56af9f444e49bdddbc64e408ad491e02917be0f4a6afa181b6d97b048b8",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_density_social.png",
+      "pdf_sha256": "91b3bd168947b974595b55a5856b056efb93aedf485ef2c72f3c021acb8993e1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_overhead.png",
+      "pdf_sha256": "1349c475e8e5b9e0613fdbd0bd679911af2ff55d4fb8c088c760b80c0804fe47",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_overhead_social.png",
+      "pdf_sha256": "026311349b240c427e5bf0694d96ff8adcaaa122966cd4ed49f94f89b80b592f",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2",
+      "supported_counts": {
+        "Draw": 10000,
+        "Fade": 10000,
+        "Straight": 10000
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_density.png",
+      "pdf_sha256": "be15c76a4ad8627f2200aa94928ed9346e3802486419a46d3655240d76ac38c7",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_strike",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_density_social.png",
+      "pdf_sha256": "a10f4ed715989c071dec73a53cc0f9092c7fa260cdb411325f49d6d93bfe422e",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_strike",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_overhead.png",
+      "pdf_sha256": "0d2550a8c2615cf8cf88fccb66cffec02be8b7eafab3917b8b374961e6bcbede",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_strike",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    },
+    {
+      "path": "figures/cells/pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_overhead_social.png",
+      "pdf_sha256": "a3add0eb22d4625c700014ac6c3578259784a834a691e7f06ac469165a0ed840",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_strike",
+      "supported_counts": {
+        "Draw": 9999,
+        "Fade": 9999,
+        "Straight": 9999
+      },
+      "config_support_labels_checked": true
+    }
+  ],
+  "findings": [],
+  "limitations": [
+    "Live producer: eventual complete pipeline manifest must bind these bytes.",
+    "Contact-sheet review assesses layout; full-size small-text checks cover only the six listed representatives.",
+    "No additional numerical or empirical validation is claimed."
+  ]
+}

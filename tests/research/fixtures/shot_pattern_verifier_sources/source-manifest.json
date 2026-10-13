@@ -1,0 +1,47 @@
+{
+  "scope": "Unit fixture transport of exact historical Git bytes; not live Git retrieval acceptance. Full-history execution remains separately receipted.",
+  "entries": [
+    {
+      "commit": "4fc22c694404217208534b78308d31ea8985e7d3",
+      "path": "src/tools/shot_pattern_analysis/density.py",
+      "filename": "baseline-density.py.gz",
+      "sha256": "127d1d249203efbddb3152e668e270dc54be5857e97377a344edc9d543c2d3ce",
+      "stored_sha256": "75101a1fbdd75acf11e8a08e60f33e854500b446a754c47025c75e369197bfd8"
+    },
+    {
+      "commit": "4fc22c694404217208534b78308d31ea8985e7d3",
+      "path": "src/tools/shot_pattern_analysis/academic_plots.py",
+      "filename": "baseline-academic_plots.py.gz",
+      "sha256": "5822f2c2dd701582908f0157f98c093d1164c5ebe68b865e24bd94fe796f889c",
+      "stored_sha256": "b9968925a4e8f4fb12d9376848233acce935f027b59b09913f77752b250fb00f"
+    },
+    {
+      "commit": "4fc22c694404217208534b78308d31ea8985e7d3",
+      "path": "src/tools/shot_pattern_analysis/matched_report_plots.py",
+      "filename": "baseline-matched_report_plots.py.gz",
+      "sha256": "99753f1624d3b33716a4bebaf44517281f3ac662cc1fca12176abbc75752a377",
+      "stored_sha256": "9a81830d01cd51aa39f7ab3b8196802690514cf05ea0bc33ee3f9fcce9f97317"
+    },
+    {
+      "commit": "ecc82796cec7e9119e2dd2fb0e8bb2582851761f",
+      "path": "src/tools/shot_pattern_analysis/density.py",
+      "filename": "candidate-density.py.gz",
+      "sha256": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+      "stored_sha256": "e89c2386d4d424034bc90813b5ed30cd4847fcb26121180397f6798905d2582b"
+    },
+    {
+      "commit": "ecc82796cec7e9119e2dd2fb0e8bb2582851761f",
+      "path": "src/tools/shot_pattern_analysis/academic_plots.py",
+      "filename": "candidate-academic_plots.py.gz",
+      "sha256": "246b891faaa6e3512ecb9685d6cc6a84e2bea3ccadd1f0030a7afa5671978944",
+      "stored_sha256": "0fc5fc8c56402350351231dc0173625a7afd7452ec78cd4e6b42902854196c99"
+    },
+    {
+      "commit": "ecc82796cec7e9119e2dd2fb0e8bb2582851761f",
+      "path": "src/tools/shot_pattern_analysis/matched_report_plots.py",
+      "filename": "candidate-matched_report_plots.py.gz",
+      "sha256": "72515aef38a1c72b740f0c70a770a4c7db1124a62b4514bb424af7124d6dd8fc",
+      "stored_sha256": "2cb122cb44db9ac56c9f7022eb94b2cc0686a0c7db91cba8de547fbc3c0529f3"
+    }
+  ]
+}

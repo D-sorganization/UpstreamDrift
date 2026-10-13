@@ -1,0 +1,30 @@
+{
+  "status": "component_tests_pass_publication_review_pending",
+  "issue": 11988,
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "ca336daefbd440095832ab57549d1e1bde72949244dbd0bb3fc35a22b2912c43",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "f8dbd72014056d133d64252d0ccda8fb1a66654cc17e39e103bf635b58b93510",
+    "tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py": "e3b142ac1e73f4882837a07d9a05a807c9c82d34d8220f847d419e878145d4fb",
+    "tests/tools/shot_pattern_analysis/test_matched_social_integration.py": "3bd46affddc0c3b4caa6b56658e39d97cac0b13c6b4493ef3cb9c412b2b58ea7",
+    "tests/tools/shot_pattern_analysis/test_social_review_contracts.py": "cd8e01364fb473b25f9842f3a8e4445cdfe8cb39b869bd5149c6e95a8194951b"
+  },
+  "tests": {
+    "root_regressions_and_integration": "11 passed; five independent regressions previously failed",
+    "pipeline_and_pair_component": "18 passed, 2 deselected (slow saved-data rendering; original-plan compatibility owned by Astra)",
+    "ruff": "passed for five changed files",
+    "mypy": "passed for two changed source files"
+  },
+  "limitations": [
+    "Actual production caption/layout render review pending.",
+    "Original-plan compatibility test remains red and is being corrected separately; removed AGY fixture skip rather than suppress the failure.",
+    "No full-study visual or final publication acceptance.",
+    "Canonical marginal tick overlap still tracked."
+  ],
+  "corrections": [
+    "Read actual serialized NoiseSpec, no profile-based parameter inference.",
+    "Label primitive shaft-twist/path correlation and support all nonzero primitive correlations.",
+    "Describe unequal strike-axis SDs separately.",
+    "Reject missing available paths and unavailable artifact claims."
+  ],
+  "snapshot_requirement": "All 54 accepted scientific source hashes and native/runtime fields must remain exact."
+}

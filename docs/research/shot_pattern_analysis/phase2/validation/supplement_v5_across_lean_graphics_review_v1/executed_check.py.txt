@@ -1,0 +1,33 @@
+from pathlib import Path
+import json,hashlib,re,html
+from PIL import Image,ImageDraw,ImageFont
+r=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');b=r/'docs/research/shot_pattern_analysis/phase2';p=b/'supplement_report_v1/figures/comparisons';v=b/'validation/supplement_v5_across_lean_graphics_review_v1';v.mkdir(exist_ok=True)
+h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
+f=b/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json';start=h(f);rows=[x for x in json.loads(f.read_text())['comparisons'] if x['comparison_kind']=='across_lean'];assert len(rows)==56
+out=[];allfiles=[]
+for i,row in enumerate(sorted(rows,key=lambda x:tuple(s['cell'] for s in x['sources'])),1):
+ prefix='across_lean_'+row['sources'][0]['cell']+'_vs_'+row['sources'][1]['cell']+'_'
+ fs=sorted(p.glob(prefix+'*'));assert len(fs)==16,(prefix,len(fs));png=[x for x in fs if x.suffix=='.png'];assert len(png)==6
+ actual=png[0].name.split('_density')[0] if '_density' in png[0].name else png[0].name.split('_overhead')[0]
+ texts={x.name:' '.join(' '.join(html.unescape(t) for t in re.findall(r'<!-- (.*?) -->',x.read_text(),re.S)).split()) for x in fs if x.suffix=='.svg'}
+ for name,t in texts.items():
+  for protocol in row['source_protocols']:assert protocol in t.replace('- ', '-'),(name,protocol)
+  if '_density_' in name:
+   assert f"{row['common_supported_n']:,}/10,000" in t,(name,'n')
+   assert f"{row['target_x_m']:.2f} m" in t,(name,'target')
+   assert 'All Six Populations' in t and 'Fixed-Target Control' in t,name
+  if '_overhead.' in name:assert 'not paired by shot index' in t,name
+ contact=v/f'contact_{i:02d}.jpg'
+ if not contact.exists():
+  canvas=Image.new('RGB',(2400,3150),'white');draw=ImageDraw.Draw(canvas)
+  font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',18)
+  for j,x in enumerate(png):
+   im=Image.open(x);im.load();im.thumbnail((1180,980));xx=j%2*1200;yy=j//2*1050
+   canvas.paste(im,(xx+(1200-im.width)//2,yy+50));draw.text((xx+10,yy+8),x.name.removeprefix(actual),font=font,fill='black')
+  contact=v/f'contact_{i:02d}.jpg';canvas.save(contact,quality=95)
+ out.append({'index':i,'prefix':actual,'source_cells':row['sources'],'protocols':row['source_protocols'],'target_x_m':row['target_x_m'],'common_six_n':row['common_supported_n'],'status':row['status'],'conditioning':row['conditioning'],'assets_sha256':{x.name:h(x) for x in fs},'svg_text':texts,'contact':contact.name,'contact_sha256':h(contact)})
+ allfiles+=fs
+assert len(set(allfiles))==896 and len(list(p.glob('across_lean*')))==896
+assert h(f)==start
+receipt={'scope':'Across-lean component only; live full pipeline not accepted','comparison_json_sha256':start,'pairs':out,'asset_count':896,'png_count':336,'pdf_count':280,'svg_count':280}
+(v/'inventory.json').write_text(json.dumps(receipt,indent=2)+'\n');(v/'executed_check.py.txt').write_bytes(Path(__file__).read_bytes());print('PASS',len(out),h(v/'inventory.json'))

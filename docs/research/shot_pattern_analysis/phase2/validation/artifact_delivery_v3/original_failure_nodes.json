@@ -1,0 +1,213 @@
+{
+  "source_log_sha256": "373391d91bb4a5fc6ffe246a5a72827e582d0cb2b8c827cff7da5f4608708b18",
+  "rows": [
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_initialization",
+      "path": "tests/unit/test_drake_physics_engine.py"
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_load_from_path",
+      "path": "tests/unit/test_drake_physics_engine.py"
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_load_from_string",
+      "path": "tests/unit/test_drake_physics_engine.py"
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_step",
+      "path": "tests/unit/test_drake_physics_engine.py"
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_get_state",
+      "path": "tests/unit/test_drake_physics_engine.py"
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_compute_mass_matrix",
+      "path": "tests/unit/test_drake_physics_engine.py"
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_compute_inverse_dynamics",
+      "path": "tests/unit/test_drake_physics_engine.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/research/test_articulated_ground_posthoc_sensitivity.py::test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs",
+      "path": "tests/research/test_articulated_ground_posthoc_sensitivity.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/research/test_nonlinear_controller_comparison_registration.py::test_registration_is_committed_and_deterministic",
+      "path": "tests/research/test_nonlinear_controller_comparison_registration.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/research/test_uncertainty_stability_audit.py::test_committed_stability_audit_is_fresh",
+      "path": "tests/research/test_uncertainty_stability_audit.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/scripts/test_check_test_layout.py::test_no_legacy_root_test_allowlist_remains",
+      "path": "tests/scripts/test_check_test_layout.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/shared/wave7_model_generation/test_format_utils.py::test_validate_mjcf_malformed_xml",
+      "path": "tests/shared/wave7_model_generation/test_format_utils.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/shared/wave7_python_core/test_logger_utils.py::TestLogExecutionTime::test_rejects_empty_operation_name",
+      "path": "tests/shared/wave7_python_core/test_logger_utils.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/test_build_humanoid_models.py::test_mujoco_check_passes_on_canonical_constants",
+      "path": "tests/test_build_humanoid_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/test_build_humanoid_models.py::test_opensim_check_handles_missing_submodule",
+      "path": "tests/test_build_humanoid_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/tools/test_code_quality_check.py::test_check_magic_numbers",
+      "path": "tests/tools/test_code_quality_check.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/tools/test_code_quality_check.py::test_check_magic_numbers_gravity",
+      "path": "tests/tools/test_code_quality_check.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/toplevel/wave8_toplevel/test_code_quality_check.py::TestCheckMagicNumbers::test_detects_gravity",
+      "path": "tests/toplevel/wave8_toplevel/test_code_quality_check.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/ui/engines/drake/test_drake_embed_adapter.py::test_create_main_widget_returns_qwidget",
+      "path": "tests/ui/engines/drake/test_drake_embed_adapter.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/ui/engines/pinocchio/test_pinocchio_embed_adapter.py::test_create_main_widget_returns_qwidget",
+      "path": "tests/ui/engines/pinocchio/test_pinocchio_embed_adapter.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/engines/physics_engines/drake/test_drake_gui_app.py::TestDrakeSimApp::test_init",
+      "path": "tests/unit/engines/physics_engines/drake/test_drake_gui_app.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros(3), values=np.zeros(4))]",
+      "path": "tests/unit/shared_python/test_signal_toolkit_core.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros((2, 2)), values=np.zeros(4))]",
+      "path": "tests/unit/shared_python/test_signal_toolkit_core.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros(3), values=np.zeros((3, 2, 2)))]",
+      "path": "tests/unit/shared_python/test_signal_toolkit_core.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_core_install_isolation.py::test_config_import_does_not_require_pandas",
+      "path": "tests/unit/test_core_install_isolation.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_gt_returns_filtered_rows",
+      "path": "tests/unit/test_data_processing_core_extended.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_eq_returns_matching_rows",
+      "path": "tests/unit/test_data_processing_core_extended.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_lt_returns_filtered_rows",
+      "path": "tests/unit/test_data_processing_core_extended.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_data_processing_core_extended.py::TestCalculatedAndTransform::test_add_calculated_column_creates_new_column",
+      "path": "tests/unit/test_data_processing_core_extended.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_opensim_physics_engine.py::test_opensim_physics_engine_load_from_string",
+      "path": "tests/unit/test_opensim_physics_engine.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeOperationResponse::test_success_true",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_lists_builtin_themes_and_filters_empty_color_sets",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_lists_custom_themes_and_filters_empty_color_sets",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_lists_all_themes_with_builtin_flags",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_get_active_theme_reports_builtin_status",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_set_active_theme_changes_available_theme",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_set_active_theme_rejects_unknown_theme_with_available_names",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_save_custom_theme_delegates_name_colors_and_apply_flag",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_save_custom_theme_converts_manager_value_error_to_bad_request",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_delete_custom_theme_returns_success_for_existing_theme",
+      "path": "tests/unit/theme/test_api_models.py"
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_delete_custom_theme_returns_not_found_for_missing_theme",
+      "path": "tests/unit/theme/test_api_models.py"
+    }
+  ],
+  "unique_node_count": 41,
+  "failed_count": 34,
+  "error_count": 7
+}

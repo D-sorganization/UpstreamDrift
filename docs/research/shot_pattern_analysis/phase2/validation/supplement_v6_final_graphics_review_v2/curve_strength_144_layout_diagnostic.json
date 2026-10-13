@@ -1,0 +1,1060 @@
+{
+  "schema": "supplement-density-svg-title-legend-clearance/1",
+  "created_utc": "2026-10-11T01:42:37.889990+00:00",
+  "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/curve_strength_144_layout_diagnostic.py",
+  "inventory_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/curve_strength_144/batch_inventory.json",
+  "inventory_sha256": "5751dd826818ef8262a013054aef35167ff98b7aed67e62da4c9f7273f32d0c1",
+  "method": "Matplotlib TextPath with saved SVG DejaVu Sans 10 pt text and exact SVG anchor coordinates; outline intersection is evaluated in SVG point coordinates.",
+  "analyses": [
+    {
+      "index": 144,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_speed2_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_speed2_149p744m_c7069adb5e_density.svg",
+      "svg_sha256": "6c015dabc5839bf59278ea2f852ded4ff3af1085c0fd0f2bcaf2f92b8aa49cf4",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            154.320094,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            179.878281,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            154.97946900000002,
+            139.4015625,
+            250.24665650000003,
+            149.0796875
+          ],
+          "legend_glyph_bounds_pt": [
+            180.65015599999998,
+            91.5058595,
+            321.9798435,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            495.114794,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            496.096044,
+            139.578125,
+            577.2663565,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            91.5058595,
+            512.3689065,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            830.348557,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            831.3298070000001,
+            139.4015625,
+            909.8469945,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            91.682422,
+            829.9626565000001,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 145,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_shaft_strike_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_shaft_strike_149p744m_562ea89c9b_density.svg",
+      "svg_sha256": "ae8db6df406b3ac048c0cb4ef6571746da25eac7517b0fb12cffbf6add599afd",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            182.624853,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            179.878281,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            183.284228,
+            139.4015625,
+            278.5514155,
+            149.0796875
+          ],
+          "legend_glyph_bounds_pt": [
+            180.65015599999998,
+            91.5058595,
+            321.9798435,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            523.419553,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            524.400803,
+            139.578125,
+            605.5711154999999,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            91.5058595,
+            512.3689065,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            858.653316,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            859.6345660000001,
+            139.4015625,
+            938.1517535,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            91.682422,
+            829.9626565000001,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 146,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_combined1_139p903m_e2b33e55d8_density.svg",
+      "svg_sha256": "ea1464b141e7767f9e74e660ffa9773b1e52b0eb4bf9a7225e2ef530f4f9fb11",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            120.999365,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            192.941543,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            121.65874,
+            139.4015625,
+            216.9259275,
+            149.0796875
+          ],
+          "legend_glyph_bounds_pt": [
+            193.713418,
+            91.5058595,
+            335.0431055,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            461.794065,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            383.330606,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            462.775315,
+            139.578125,
+            543.9456275,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            384.008731,
+            91.5058595,
+            525.4321685,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            797.027828,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            764.108731,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            798.009078,
+            139.4015625,
+            876.5262655,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            764.6696685000001,
+            91.682422,
+            843.0259185,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 147,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_combined2_139p903m_8f15070854_density.svg",
+      "svg_sha256": "403b12a586165d12e4b00e44ca411c3976a1649f6c680484b9b5f6b28e152691",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            135.520469,
+            162.916639
+          ],
+          "legend_anchor_pt": [
+            221.98375,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            136.179844,
+            155.31820150000001,
+            231.44703149999998,
+            164.9963265
+          ],
+          "legend_glyph_bounds_pt": [
+            222.75562499999998,
+            91.5058595,
+            364.0853125,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            476.315169,
+            162.916639
+          ],
+          "legend_anchor_pt": [
+            412.372813,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            477.296419,
+            155.494764,
+            558.4667315,
+            163.0588265
+          ],
+          "legend_glyph_bounds_pt": [
+            413.05093800000003,
+            91.5058595,
+            554.4743755,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            811.548931,
+            162.916639
+          ],
+          "legend_anchor_pt": [
+            793.150938,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            812.5301810000001,
+            155.31820150000001,
+            891.0473685000001,
+            163.0588265
+          ],
+          "legend_glyph_bounds_pt": [
+            793.7118755,
+            91.682422,
+            872.0681255,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 148,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_n_6b7044781d_density.svg",
+      "svg_sha256": "da2c4156605147c0c49307cda6e49a1565880b8016607971ae1b1439c65fed6f",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            116.682646,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            184.308105,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            117.342021,
+            142.7980075,
+            212.60920850000002,
+            152.4761325
+          ],
+          "legend_glyph_bounds_pt": [
+            185.07998,
+            134.0741015,
+            326.4096675,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            185.07998,
+            142.7980075,
+            212.60920850000002,
+            143.7522265
+          ],
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            457.477346,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            374.697168,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            458.458596,
+            142.97457,
+            539.6289085000001,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            375.375293,
+            134.0741015,
+            516.7987304999999,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            458.458596,
+            142.97457,
+            516.7987304999999,
+            143.7522265
+          ],
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            792.711109,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            755.475293,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            793.692359,
+            142.7980075,
+            872.2095465,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            756.0362305,
+            134.250664,
+            834.3924804999999,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            793.692359,
+            142.7980075,
+            834.3924804999999,
+            143.7522265
+          ],
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 149,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.svg",
+      "svg_sha256": "283cd54ccc63bcf8259fe73715e10c888e376d396dbaf7a12f413da690e87640",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            134.536305,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            220.015423,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            135.19568,
+            142.7980075,
+            230.46286750000002,
+            152.4761325
+          ],
+          "legend_glyph_bounds_pt": [
+            220.787298,
+            134.0741015,
+            362.1169855,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            220.787298,
+            142.7980075,
+            230.46286750000002,
+            143.7522265
+          ],
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            475.331005,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            410.404485,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            476.312255,
+            142.97457,
+            557.4825675,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            411.08261000000005,
+            134.0741015,
+            552.5060475,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            476.312255,
+            142.97457,
+            552.5060475,
+            143.7522265
+          ],
+          "glyph_path_intersection": true
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            810.564768,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            791.18261,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            811.546018,
+            142.7980075,
+            890.0632055,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            791.7435475,
+            134.250664,
+            870.0997975,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            811.546018,
+            142.7980075,
+            870.0997975,
+            143.7522265
+          ],
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 150,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_shaft_only_139p903m_ca1ea21557_density.svg",
+      "svg_sha256": "85d406712f3635667412d5dc1001cae264b51f817ec2127e9345836e1fb113cd",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            194.030192,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            179.878281,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            194.689567,
+            139.4015625,
+            289.9567545,
+            149.0796875
+          ],
+          "legend_glyph_bounds_pt": [
+            180.65015599999998,
+            91.5058595,
+            321.9798435,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            534.824892,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            535.806142,
+            139.578125,
+            616.9764545,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            91.5058595,
+            512.3689065,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            870.058655,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            871.0399050000001,
+            139.4015625,
+            949.5570925000001,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            91.682422,
+            829.9626565000001,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 151,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_shaft_path_139p903m_7f92e56505_density.svg",
+      "svg_sha256": "c55f6793dccb932c77d75a2c4a4e726e2311d00a014b9ec3e2257039e4ddbdf5",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            193.096249,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            179.878281,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            193.755624,
+            139.4015625,
+            289.0228115,
+            149.0796875
+          ],
+          "legend_glyph_bounds_pt": [
+            180.65015599999998,
+            91.5058595,
+            321.9798435,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            533.890949,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            534.872199,
+            139.578125,
+            616.0425115,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            91.5058595,
+            512.3689065,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            869.124711,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            870.1059610000001,
+            139.4015625,
+            948.6231485000001,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            91.682422,
+            829.9626565000001,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 152,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_shaft_speed1_139p903m_8a544eaff3_density.svg",
+      "svg_sha256": "f988e3e12344ef84aaec60f79edfd247febab9eda1bc44616b6b30ed57988591",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            148.268714,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            179.878281,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            148.928089,
+            139.4015625,
+            244.19527649999998,
+            149.0796875
+          ],
+          "legend_glyph_bounds_pt": [
+            180.65015599999998,
+            91.5058595,
+            321.9798435,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            489.063414,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            490.044664,
+            139.578125,
+            571.2149765,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            91.5058595,
+            512.3689065,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            824.297176,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            825.2784260000001,
+            139.4015625,
+            903.7956135000001,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            91.682422,
+            829.9626565000001,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 153,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_shaft_speed2_139p903m_10cb4dd924_density.svg",
+      "svg_sha256": "2eb238775bbc0dac4c6d59cbbf2aac3c77b9c70cc456f78cde95de8b2c704bde",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            135.520469,
+            153.751705
+          ],
+          "legend_anchor_pt": [
+            221.98375,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            136.179844,
+            146.1532675,
+            231.44703149999998,
+            155.8313925
+          ],
+          "legend_glyph_bounds_pt": [
+            222.75562499999998,
+            91.5058595,
+            364.0853125,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            476.315169,
+            153.751705
+          ],
+          "legend_anchor_pt": [
+            412.372813,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            477.296419,
+            146.32983,
+            558.4667315,
+            153.8938925
+          ],
+          "legend_glyph_bounds_pt": [
+            413.05093800000003,
+            91.5058595,
+            554.4743755,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            811.548931,
+            153.751705
+          ],
+          "legend_anchor_pt": [
+            793.150938,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            812.5301810000001,
+            146.1532675,
+            891.0473685000001,
+            153.8938925
+          ],
+          "legend_glyph_bounds_pt": [
+            793.7118755,
+            91.682422,
+            872.0681255,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 154,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_shaft_strike_139p903m_5700bfef12_density.svg",
+      "svg_sha256": "2d44badb260cde3b0b74986891877b84249271ba97816574c6be641c842fe2d4",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            133.71211,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            179.878281,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            134.371485,
+            139.4015625,
+            229.63867249999998,
+            149.0796875
+          ],
+          "legend_glyph_bounds_pt": [
+            180.65015599999998,
+            91.5058595,
+            321.9798435,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            474.50681,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            475.48805999999996,
+            139.578125,
+            556.6583725,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            91.5058595,
+            512.3689065,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            809.740572,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            810.7218220000001,
+            139.4015625,
+            889.2390095000001,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            91.682422,
+            829.9626565000001,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    },
+    {
+      "index": 155,
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_combined1_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_combined1_139p903m_de627707ad_density.svg",
+      "svg_sha256": "50a707a9ea7f163b10df88df4919cada49a904c3cc72dedd7f797ff7767efe9e",
+      "tests": [
+        {
+          "panel_title": "Straight \u00b7 Curve \u00d71",
+          "legend_label": "50% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            163.159288,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            179.878281,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            163.81866300000002,
+            139.4015625,
+            259.0858505,
+            149.0796875
+          ],
+          "legend_glyph_bounds_pt": [
+            180.65015599999998,
+            91.5058595,
+            321.9798435,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            503.953988,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            504.93523799999997,
+            139.578125,
+            586.1055504999999,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            91.5058595,
+            512.3689065,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        },
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            839.18775,
+            147.0
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            99.104297
+          ],
+          "panel_title_glyph_bounds_pt": [
+            840.1690000000001,
+            139.4015625,
+            918.6861875000001,
+            147.1421875
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            91.682422,
+            829.9626565000001,
+            101.18398450000001
+          ],
+          "bounding_box_intersection_pt": null,
+          "glyph_path_intersection": false
+        }
+      ]
+    }
+  ]
+}

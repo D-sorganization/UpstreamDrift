@@ -1,0 +1,361 @@
+{
+  "scope": "Deterministic fixed-delivery sensitivity; not statistical or empirical uncertainty",
+  "source_unchanged": true,
+  "receipt_sha256": "3bd6acb1118b6cbedd03171744a09a1b810f8a77cd7e4dc72c1d609181edb558",
+  "counts": {
+    "valid": 268,
+    "unsupported": 32
+  },
+  "groups": [
+    {
+      "club": "driver",
+      "parameter_group": "cg_depth",
+      "max_endpoint_displacement_m": 5.144281539731114,
+      "max_abs_spin_change_rpm": 180.44228650061496,
+      "largest_endpoint_case": {
+        "lean_deg": 10.0,
+        "strike": "high",
+        "variant": "cg_depth_x0.8",
+        "nominal": {
+          "carry_x_m": 30.56939742075821,
+          "carry_y_m": -0.0,
+          "carry_m": 30.56939742075821,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 112.64637709189634,
+          "spin_axis_tilt_deg": 180.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 2.511381583620349,
+          "ball_speed_mps": 66.06464245253146,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 35.713678960489325,
+          "carry_y_m": -0.0,
+          "carry_m": 35.713678960489325,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 42.04475906367114,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 2.3914657738171217,
+          "ball_speed_mps": 66.02208212149846,
+          "spin_axis_defined": true
+        }
+      }
+    },
+    {
+      "club": "driver",
+      "parameter_group": "inertia",
+      "max_endpoint_displacement_m": 7.104664870970225,
+      "max_abs_spin_change_rpm": 225.04240856823708,
+      "largest_endpoint_case": {
+        "lean_deg": 5.0,
+        "strike": "high",
+        "variant": "inertia_x0.8",
+        "nominal": {
+          "carry_x_m": 121.68967589527024,
+          "carry_y_m": -0.0,
+          "carry_m": 121.68967589527024,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 1024.476566683771,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 6.622191556143684,
+          "ball_speed_mps": 65.41983062754893,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 114.58501102430002,
+          "carry_y_m": -0.0,
+          "carry_m": 114.58501102430002,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 805.8167957320891,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 6.7913883425398085,
+          "ball_speed_mps": 65.21703828219502,
+          "spin_axis_defined": true
+        }
+      }
+    },
+    {
+      "club": "driver",
+      "parameter_group": "curvature",
+      "max_endpoint_displacement_m": 22.627873891713428,
+      "max_abs_spin_change_rpm": 163.64196210145383,
+      "largest_endpoint_case": {
+        "lean_deg": 5.0,
+        "strike": "low",
+        "variant": "curvature_radii_x0.8",
+        "nominal": {
+          "carry_x_m": 70.16565241004956,
+          "carry_y_m": -0.0,
+          "carry_m": 70.16565241004956,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 1656.1214762295886,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 1.294111957411455,
+          "ball_speed_mps": 66.1617928803985,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 47.53777851833613,
+          "carry_y_m": -0.0,
+          "carry_m": 47.53777851833613,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 1492.4795141281347,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 0.8170818482146333,
+          "ball_speed_mps": 66.23619802034274,
+          "spin_axis_defined": true
+        }
+      }
+    },
+    {
+      "club": "driver",
+      "parameter_group": "newton",
+      "max_endpoint_displacement_m": 11.331130262125711,
+      "max_abs_spin_change_rpm": 393.54823973955513,
+      "largest_endpoint_case": {
+        "lean_deg": 5.0,
+        "strike": "high",
+        "variant": "newton_qp_comparator",
+        "nominal": {
+          "carry_x_m": 121.68967589527024,
+          "carry_y_m": -0.0,
+          "carry_m": 121.68967589527024,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 1024.476566683771,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 6.622191556143684,
+          "ball_speed_mps": 65.41983062754893,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 133.02080615739595,
+          "carry_y_m": -0.0,
+          "carry_m": 133.02080615739595,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 1413.695427605773,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 6.318203330483067,
+          "ball_speed_mps": 65.46096236141683,
+          "spin_axis_defined": true
+        }
+      }
+    },
+    {
+      "club": "seven_iron",
+      "parameter_group": "cg_depth",
+      "max_endpoint_displacement_m": 0.5425700617949537,
+      "max_abs_spin_change_rpm": 97.22491688584341,
+      "largest_endpoint_case": {
+        "lean_deg": 10.0,
+        "strike": "toe",
+        "variant": "cg_depth_x1.2",
+        "nominal": {
+          "carry_x_m": 144.4501006160347,
+          "carry_y_m": -2.7056051184971612,
+          "carry_m": 144.47543689859458,
+          "launch_azimuth_deg": 0.38112726044925427,
+          "spin_rpm": 5050.047538919031,
+          "spin_axis_tilt_deg": 3.566056708205277,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.69999733366275,
+          "ball_speed_mps": 48.7500082571734,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 144.42666902043422,
+          "carry_y_m": -3.2476689821551217,
+          "carry_m": 144.46317897012963,
+          "launch_azimuth_deg": 0.45639886126396734,
+          "spin_rpm": 5041.637665473841,
+          "spin_axis_tilt_deg": 4.279190428614189,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.71425474411974,
+          "ball_speed_mps": 48.7518628784403,
+          "spin_axis_defined": true
+        }
+      }
+    },
+    {
+      "club": "seven_iron",
+      "parameter_group": "inertia",
+      "max_endpoint_displacement_m": 1.763810123395615,
+      "max_abs_spin_change_rpm": 108.86478459238151,
+      "largest_endpoint_case": {
+        "lean_deg": 10.0,
+        "strike": "high",
+        "variant": "inertia_x0.8",
+        "nominal": {
+          "carry_x_m": 142.46477510944874,
+          "carry_y_m": -0.0,
+          "carry_m": 142.46477510944874,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 4697.716512395557,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 19.007933262625528,
+          "ball_speed_mps": 48.24584603051998,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 140.70096498605312,
+          "carry_y_m": -0.0,
+          "carry_m": 140.70096498605312,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 4588.851727803176,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 19.081682227451925,
+          "ball_speed_mps": 47.832691709560144,
+          "spin_axis_defined": true
+        }
+      }
+    },
+    {
+      "club": "seven_iron",
+      "parameter_group": "newton",
+      "max_endpoint_displacement_m": 1.224343541086287,
+      "max_abs_spin_change_rpm": 194.0681492990616,
+      "largest_endpoint_case": {
+        "lean_deg": 10.0,
+        "strike": "toe",
+        "variant": "newton_qp_comparator",
+        "nominal": {
+          "carry_x_m": 144.4501006160347,
+          "carry_y_m": -2.7056051184971612,
+          "carry_m": 144.47543689859458,
+          "launch_azimuth_deg": 0.38112726044925427,
+          "spin_rpm": 5050.047538919031,
+          "spin_axis_tilt_deg": 3.566056708205277,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.69999733366275,
+          "ball_speed_mps": 48.7500082571734,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 144.49401571570857,
+          "carry_y_m": -1.482049410480423,
+          "carry_m": 144.5016160743766,
+          "launch_azimuth_deg": 0.20827961350901608,
+          "spin_rpm": 5041.837273662383,
+          "spin_axis_tilt_deg": 1.950436096224485,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 18.699986034389106,
+          "ball_speed_mps": 48.746749521284265,
+          "spin_axis_defined": true
+        }
+      }
+    },
+    {
+      "club": "pitching_wedge",
+      "parameter_group": "cg_depth",
+      "max_endpoint_displacement_m": 0.1839602522352095,
+      "max_abs_spin_change_rpm": 63.068867178621076,
+      "largest_endpoint_case": {
+        "lean_deg": 0.0,
+        "strike": "high",
+        "variant": "cg_depth_x1.2",
+        "nominal": {
+          "carry_x_m": 72.84374347658401,
+          "carry_y_m": -0.0,
+          "carry_m": 72.84374347658401,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 7367.823997198632,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 33.92547740971366,
+          "ball_speed_mps": 31.476942562664306,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 72.6597832243488,
+          "carry_y_m": -0.0,
+          "carry_m": 72.6597832243488,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 7311.418452333614,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 34.00165150993578,
+          "ball_speed_mps": 31.431339129848023,
+          "spin_axis_defined": true
+        }
+      }
+    },
+    {
+      "club": "pitching_wedge",
+      "parameter_group": "inertia",
+      "max_endpoint_displacement_m": 1.4019534787136934,
+      "max_abs_spin_change_rpm": 68.97269832732036,
+      "largest_endpoint_case": {
+        "lean_deg": 10.0,
+        "strike": "high",
+        "variant": "inertia_x0.8",
+        "nominal": {
+          "carry_x_m": 96.98645454448966,
+          "carry_y_m": -0.0,
+          "carry_m": 96.98645454448966,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 6141.672179624889,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 27.554626471091538,
+          "ball_speed_mps": 37.371921216782056,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 95.58450106577597,
+          "carry_y_m": -0.0,
+          "carry_m": 95.58450106577597,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 6072.699481297569,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 27.5750112458874,
+          "ball_speed_mps": 37.04098457753305,
+          "spin_axis_defined": true
+        }
+      }
+    },
+    {
+      "club": "pitching_wedge",
+      "parameter_group": "newton",
+      "max_endpoint_displacement_m": 0.3250433952696312,
+      "max_abs_spin_change_rpm": 120.33165272956558,
+      "largest_endpoint_case": {
+        "lean_deg": 5.0,
+        "strike": "low",
+        "variant": "newton_qp_comparator",
+        "nominal": {
+          "carry_x_m": 87.01375079030821,
+          "carry_y_m": -0.0,
+          "carry_m": 87.01375079030821,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 7267.219990797409,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 30.29841358588468,
+          "ball_speed_mps": 34.974547839204206,
+          "spin_axis_defined": true
+        },
+        "changed": {
+          "carry_x_m": 86.68870739503858,
+          "carry_y_m": -0.0,
+          "carry_m": 86.68870739503858,
+          "launch_azimuth_deg": -0.0,
+          "spin_rpm": 7156.437255337095,
+          "spin_axis_tilt_deg": 0.0,
+          "trajectory_xy_m": [],
+          "launch_elevation_deg": 30.439630129803895,
+          "ball_speed_mps": 34.89661863380791,
+          "spin_axis_defined": true
+        }
+      }
+    }
+  ]
+}

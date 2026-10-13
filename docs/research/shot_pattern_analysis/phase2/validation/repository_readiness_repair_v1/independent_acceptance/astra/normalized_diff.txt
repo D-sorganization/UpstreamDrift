@@ -1,0 +1,635 @@
+--- original/docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py
+
+@@ -1,9 +1,18 @@
+
++import collections
++import logging
++import hashlib
++import json
+ from pathlib import Path
+-import json, sys, hashlib, collections
++import sys
++from typing import Any
+ ROOT = Path('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
+ sys.path.insert(0, str(ROOT))
+-from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
+-from scripts.research.shot_pattern_analysis.supplement_publication import sha256
++
++def _load_public_apis():
++    from scripts.research.shot_pattern_analysis.supplement_publication import sha256
++    from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
++    return (sha256, reconstruct_pair)
++sha256, reconstruct_pair = _load_public_apis()
+ P = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+ OUT = Path('/tmp/shot-pattern-actual-pair-adapter-review')
+ files = [P / 'supplement_report_v1' / n for n in ['REPORT_SUPPLEMENT.json', 'REPORT_SUPPLEMENT_COMPARISONS.json']]
+@@ -39,10 +48,11 @@
+
+         pair = reconstruct_pair(loaded, rec)
+         assert pair['first']['source_protocol'] == a['protocol_id'] and pair['second']['source_protocol'] == b['protocol_id']
+         rows.append({**rec, 'alias_count': sum((x.get('execution_kind') == 'provenance_alias' for x in [pair['first'], pair['second']])), 'status': 'reconstructed'})
+-    except Exception as e:
+-        failures.append({**rec, 'error': repr(e)})
++    except Exception as exc:
++        logging.exception('Validation record rejected')
++        failures.append({**rec, 'error': repr(exc)})
+ assert before == {str(p): sha256(p) for p in files}
+ assert all((sha256(Path(p)) == h for p, h in manifests.items()))
+ result = {'scope': 'Provisional Actual Ordered-Pair Adapter Preflight', 'parent_final_acceptance': False, 'parent_receipt_available': (P / 'supplement_report_v1/REPORT_SUPPLEMENT_PIPELINE.json').exists(), 'input_sha256': before, 'source_sha256': {str(p.relative_to(ROOT)): sha256(p) for p in [ROOT / 'scripts/research/shot_pattern_analysis/supplement_revision_adapter.py', ROOT / 'scripts/research/shot_pattern_analysis/supplement_publication.py']}, 'unique_bound_cells': len(snapshots), 'comparisons': len(comparisons['comparisons']), 'reconstructed': len(rows), 'counts': dict(collections.Counter((r['comparison_kind'] for r in rows))), 'alias_references': sum((r['alias_count'] for r in rows)), 'failures': failures, 'all_source_manifests_sha256': manifests, 'rows': rows, 'no_statistics_or_rendering_executed': True, 'script_sha256': sha256(Path(__file__))}
+ (OUT / 'review.json').write_text(json.dumps(result, indent=2) + '\n')
+-print(json.dumps({k: result[k] for k in ['comparisons', 'reconstructed', 'unique_bound_cells', 'counts', 'alias_references', 'failures']}, indent=2))
++sys.stdout.write(str(json.dumps({k: result[k] for k in ['comparisons', 'reconstructed', 'unique_bound_cells', 'counts', 'alias_references', 'failures']}, indent=2)) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py
+
+@@ -1,12 +1,20 @@
+
++from decimal import Decimal
++import hashlib
++import json
+ from pathlib import Path
+-import hashlib, json, re, sys
+-from decimal import Decimal
++import re
++import sys
++from typing import Any
+ ROOT = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ P = ROOT / 'docs/research/shot_pattern_analysis/phase2'
+ OUT = Path('/tmp/p2-article-astra-review')
+ sys.path.insert(0, str(ROOT))
+-from scripts.research.shot_pattern_analysis.final_report_inputs import select_representative_interaction_pairs, select_bounds_control_pairs
+-from scripts.research.shot_pattern_analysis.report_synthesis import validate_resolved_selection
++
++def _load_public_apis():
++    from scripts.research.shot_pattern_analysis.final_report_inputs import select_bounds_control_pairs, select_representative_interaction_pairs
++    from scripts.research.shot_pattern_analysis.report_synthesis import validate_resolved_selection
++    return (select_bounds_control_pairs, select_representative_interaction_pairs, validate_resolved_selection)
++select_bounds_control_pairs, select_representative_interaction_pairs, validate_resolved_selection = _load_public_apis()
+
+ def sha(p):
+     return hashlib.sha256(p.read_bytes()).hexdigest()
+@@ -38,7 +46,14 @@
+
+
+ def check(label, token, value):
+     d = Decimal(token)
+-    tol = float(Decimal(10) ** d.as_tuple().exponent) / 2 + abs(float(value)) * 1e-12
++    if not d.is_finite():
++        raise ValueError(f'nonfinite Decimal input: {token!r}')
++    exp = d.as_tuple().exponent
++    if not isinstance(exp, int):
++        raise ValueError(f'non-integer Decimal exponent: {exp!r}')
++    if not Decimal(str(value)).is_finite():
++        raise ValueError('nonfinite expected value')
++    tol = float(Decimal(10) ** exp) / 2 + abs(float(value)) * 1e-12
+     ok = abs(float(token) - value) <= tol
+     result = {'field': label, 'display': token, 'expected': value, 'rounding_tolerance': tol, 'matches_display_precision': ok}
+     rows.append(result)
+@@ -58,28 +73,28 @@
+
+     ns = [int(v.replace(',', '').strip()) for v in fields[2].split('/')]
+     for label, actual, want in [('support', ns[0], stats['supported_n']), ('attempts', ns[1], stats['total_n'])]:
+         check(f'{fields[0]} {pattern} {label}', str(actual), want)
+-    for column, key in [(3, 'lateral_sd_m'), (4, 'downrange_sd_m'), (5, 'target_rmse_m')]:
+-        check(f'{fields[0]} {pattern} {key}', fields[column], stats[key])
++    for column, metric_key in [(3, 'lateral_sd_m'), (4, 'downrange_sd_m'), (5, 'target_rmse_m')]:
++        check(f'{fields[0]} {pattern} {metric_key}', fields[column], stats[metric_key])
+     check(f'{fields[0]} {pattern} absolute_sg', fields[6], score['patterns'][pattern]['mean_strokes_gained'])
+     if pattern != 'Straight':
+         numbers = re.findall('[+-]?\\d+(?:\\.\\d+)?(?:e[+-]?\\d+)?', fields[7])
+         interval = score['paired_benefit_vs_straight'][pattern]
+-        for token, key in zip(numbers, ('estimate', 'lower_95', 'upper_95'), strict=True):
+-            check(f'{fields[0]} {pattern} {key}', token, interval[key])
++        for token, interval_key in zip(numbers, ('estimate', 'lower_95', 'upper_95'), strict=True):
++            check(f'{fields[0]} {pattern} {interval_key}', token, interval[interval_key])
+ if count != 72:
+     raise ValueError(count)
+ control_records = []
+ for effect in controls:
+-    match = next((r for r in pairs if r['comparison_kind'] == 'across_lean' and [(s['protocol_id'], s['cell']) for s in r['sources']] == list(zip(effect['source_protocols'], effect['source_cells']))))
++    match = next((r for r in pairs if r['comparison_kind'] == 'across_lean' and [(s['protocol_id'], s['cell']) for s in r['sources']] == list(zip(effect['source_protocols'], effect['source_cells'], strict=True))))
+     control_records.append(match)
+ nominals = []
+ report = json.loads((P / 'supplement_report_v1/REPORT_SUPPLEMENT.json').read_text())
+ supp = {(r['source_protocol'], r['cell']): r for r in report['unique_cells']}
+ for pair in control_records:
+     for src in pair['sources']:
+-        key = (src['protocol_id'], src['cell'])
+-        if key in supp:
+-            ref = supp[key]
++        cell_key = (src['protocol_id'], src['cell'])
++        if cell_key in supp:
++            ref = supp[cell_key]
+             summary = ref['summary']
+             path = Path(ref['source_root']) / ref['cell'] / 'summary.json'
+         else:
+@@ -92,4 +107,4 @@
+
+ (OUT / 'verified_data.json').write_text(json.dumps(data, indent=2) + '\n')
+ review = {'candidate_sha256': sha(OUT / 'rejected_article.tex'), 'status': 'changes_required', 'checked_pattern_rows': count, 'checked_numeric_fields': len(rows), 'numeric_rounding_mismatches': failures, 'all_field_checks': rows, 'max_selected_nominal_residual_m': max((n['residual_m'] for c in cells for n in c['nominals'].values())), 'course_contexts': [{k: c['course_scoring'].get(k) for k in ['club_id', 'start_lie', 'start_distance_m', 'hole_distance_m', 'fairway_half_width_m', 'green_radius_m']} for c in cells[::8]], 'selected_control_identities': [{k: e[k] for k in ['source_protocols', 'source_cells', 'common_six_n']} for e in controls], 'sources': data['input_sha256']}
+ (OUT / 'candidate_field_audit.json').write_text(json.dumps(review, indent=2) + '\n')
+-print(json.dumps({k: review[k] for k in ['checked_pattern_rows', 'checked_numeric_fields', 'numeric_rounding_mismatches', 'max_selected_nominal_residual_m', 'course_contexts', 'selected_control_identities']}, indent=2))
++sys.stdout.write(str(json.dumps({k: review[k] for k in ['checked_pattern_rows', 'checked_numeric_fields', 'numeric_rounding_mismatches', 'max_selected_nominal_residual_m', 'course_contexts', 'selected_control_identities']}, indent=2)) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py
+
+@@ -1,6 +1,9 @@
+
++import sys
++from decimal import Decimal
++import json
+ from pathlib import Path
+-import json, re
+-from decimal import Decimal
++import re
++from typing import Any
+ p = Path('/tmp/p2-article-astra-review')
+ d = json.loads((p / 'verified_data.json').read_text())
+ s = (p / 'rejected_article.tex').read_text()
+@@ -14,6 +17,7 @@
+
+         continue
+     if len(f) != 6 or f[3] not in ['Draw', 'Fade']:
+         continue
++    assert key is not None
+     e = d['effects'][key]
+     v = e[f[3].lower() + '_minus_straight_change']
+     n = int(f[4].replace(',', ''))
+@@ -21,11 +25,19 @@
+
+     if n != e['common_six_n']:
+         raise ValueError('population')
+     for t, k in zip(tokens, ['estimate', 'lower_95', 'upper_95'], strict=True):
+-        tolerance = float(Decimal(10) ** Decimal(t).as_tuple().exponent) / 2 + 1e-12
++        d_token = Decimal(t)
++        if not d_token.is_finite():
++            raise ValueError(f'nonfinite Decimal input: {t!r}')
++        exp = d_token.as_tuple().exponent
++        if not isinstance(exp, int):
++            raise ValueError(f'non-integer Decimal exponent: {exp!r}')
++        if not Decimal(str(v[k])).is_finite():
++            raise ValueError('nonfinite expected value')
++        tolerance = float(Decimal(10) ** exp) / 2 + 1e-12
+         checks.append({'key': f'E{key + 1:02}', 'pattern': f[3], 'field': k, 'display': t, 'actual': v[k], 'matches': abs(float(t) - v[k]) <= tolerance})
+     if f[3] == 'Fade':
+         key = None
+ if len(checks) != 72:
+     raise ValueError(len(checks))
+ (p / 'candidate_interaction_audit.json').write_text(json.dumps({'checked_fields': len(checks), 'failures': [c for c in checks if not c['matches']], 'checks': checks}, indent=2) + '\n')
+-print('72 interaction fields checked; failures:', sum((not c['matches'] for c in checks)))
++sys.stdout.write('72 interaction fields checked; failures:' + ' ' + str(sum((not c['matches'] for c in checks))) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py
+
+@@ -1,7 +1,10 @@
+
++import sys
++from collections import Counter
++from decimal import Decimal
++import hashlib
++import json
+ from pathlib import Path
+-import json, hashlib, re
+-from decimal import Decimal
+-from collections import Counter
++import re
+ D = Path('/tmp/p2-article-astra-review')
+ R = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ P = R / 'docs/research/shot_pattern_analysis/phase2'
+@@ -26,7 +29,15 @@
+
+     raise ValueError('numeric token inventory')
+ for f in fields:
+     t = f['display']
+-    tolerance = float(Decimal(10) ** Decimal(t).as_tuple().exponent) / 2 + abs(f['value']) * 1e-14
++    d_token = Decimal(t)
++    if not d_token.is_finite():
++        raise ValueError(f'nonfinite Decimal input: {t!r}')
++    exp = d_token.as_tuple().exponent
++    if not isinstance(exp, int):
++        raise ValueError(f'non-integer Decimal exponent: {exp!r}')
++    if not Decimal(str(f['value'])).is_finite():
++        raise ValueError('nonfinite expected value')
++    tolerance = float(Decimal(10) ** exp) / 2 + abs(f['value']) * 1e-14
+     if t != f['display'] or abs(float(t) - f['value']) > tolerance:
+         raise ValueError((t, f))
+ for e in d['effects'] + d['controls']:
+@@ -34,9 +45,9 @@
+
+         v = e[key]
+         if v['lower_95'] < v['upper_95'] and float(f'{v['lower_95']:+.7g}') >= float(f'{v['upper_95']:+.7g}'):
+             raise ValueError('collapsed interval')
+-for p in ['380', '10.0', 'kinetic energy', 'optimal carry', 'decisively', 'negligible']:
++for _p in ['380', '10.0', 'kinetic energy', 'optimal carry', 'decisively', 'negligible']:
+     pass
+ compile_result = json.loads((D / 'builtin_compile.json').read_text())
+-result = {'status': 'numeric_source_repair_verified_compilation_unverified', 'article': str(A), 'article_sha256': sha(A), 'line_count': len(s.splitlines()), 'generated_numeric_tokens_checked': len(tokens), 'candidate_pattern_fields_verified': 576, 'candidate_interaction_fields_verified': 72, 'traceability_source_files_verified': len(trace['source_sha256']), 'historical_section_unchanged': True, 'whole_article_visual_acceptance': False, 'compiler_result': compile_result, 'review_scope': 'All candidate prose and tables, repaired source only; no graphics publication acceptance or empirical validation.', 'evidence_sha256': {p.name: sha(p) for p in D.iterdir() if p.is_file() and p.name not in ['review.json']}}
++result = {'status': 'numeric_source_repair_verified_compilation_unverified', 'article': str(A), 'article_sha256': sha(A), 'line_count': len(s.splitlines()), 'generated_numeric_tokens_checked': len(tokens), 'candidate_pattern_fields_verified': 576, 'candidate_interaction_fields_verified': 72, 'traceability_source_files_verified': len(trace['source_sha256']), 'historical_section_unchanged': True, 'whole_article_visual_acceptance': False, 'compiler_result': compile_result, 'review_scope': 'All candidate prose and tables, repaired source only; no graphics publication acceptance or empirical validation.', 'evidence_sha256': {p.name: sha(p) for p in D.iterdir() if p.is_file() and p.name != 'review.json'}}
+ (D / 'review.json').write_text(json.dumps(result, indent=2) + '\n')
+-print(json.dumps({k: result[k] for k in ['article_sha256', 'line_count', 'generated_numeric_tokens_checked', 'traceability_source_files_verified']}, indent=2))
++sys.stdout.write(str(json.dumps({k: result[k] for k in ['article_sha256', 'line_count', 'generated_numeric_tokens_checked', 'traceability_source_files_verified']}, indent=2)) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py
+
+@@ -1,5 +1,7 @@
+
++import sys
+ from pathlib import Path
+-import json, hashlib
++import hashlib
++import json
+ P = Path('/tmp/p2-article-astra-review')
+ d = json.loads((P / 'verified_data.json').read_text())
+ cells = d['cells']
+@@ -124,4 +126,4 @@
+
+ article.write_text(s)
+ (P / 'generated_numeric_fields.json').write_text(json.dumps(checks, indent=2) + '\n')
+ (P / 'repaired_article.tex').write_text(s)
+-print(hashlib.sha256(s.encode()).hexdigest(), len(checks))
++sys.stdout.write(str(hashlib.sha256(s.encode()).hexdigest()) + ' ' + str(len(checks)) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py
+
+@@ -1,8 +1,9 @@
+
++import sys
+ from pathlib import Path
+ import re
+ p = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex')
+ s = p.read_text()
+-s = re.sub('\\\\begin\\{longtable\\}.*?\\\\end\\{longtable\\}', lambda m: re.sub('\\n\\s*\\n', '\n', m[0]), s, flags=re.S)
++s = re.sub('\\\\begin\\{longtable\\}.*?\\\\end\\{longtable\\}', lambda m: re.sub('\\n\\s*\\n', '\n', m[0]), s, flags=re.DOTALL)
+ s = s.replace('\\date{October 8, 2026}', '\\date{October 10, 2026}')
+ s = s.replace('\\texttt{table9-full-plus-anchor-reconciled-putting/2}', '\\path{table9-full-plus-anchor-reconciled-putting/2}')
+ for name in ['driver_lean0_curve2_rotation2_combined2', 'driver_lean5_curve2_rotation2_combined2', 'pitching_wedge_lean0_curve2_rotation2_combined2', 'pitching_wedge_lean5_curve2_rotation2_combined2']:
+@@ -10,4 +11,4 @@
+
+ s = s.replace('SG units are strokes per modeled opportunity.', 'SG units are strokes per modeled opportunity. Numerical notation such as $2.5$e$-5$ means $2.5\\times10^{-5}$; interval endpoints retain seven significant digits. Display rounding does not add model accuracy.')
+ p.write_text(s)
+ Path('/tmp/p2-article-astra-review/repaired_article.tex').write_text(s)
+-print(len(s.splitlines()))
++sys.stdout.write(str(len(s.splitlines())) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py
+
+@@ -1,5 +1,8 @@
+
++import sys
+ from pathlib import Path
+-import json, re, hashlib
++import hashlib
++import json
++import re
+ P = Path('/tmp/p2-article-astra-review')
+ d = json.loads((P / 'verified_data.json').read_text())
+ s = (P / 'repaired_article.tex').read_text()
+@@ -74,4 +77,4 @@
+
+     raise ValueError(stack)
+ res = {'article_sha256': hashlib.sha256(s.encode()).hexdigest(), 'counts': counts, 'numeric_checks': out, 'historical_section_unchanged': True, 'all_bound_inputs_unchanged': True, 'latex_environment_balance': True, 'compilation': 'pending actual built-in attempt', 'visual_layout_acceptance': False}
+ (P / 'repair_verification.json').write_text(json.dumps(res, indent=2) + '\n')
+-print(json.dumps({k: v for k, v in res.items() if k != 'numeric_checks'}, indent=2))
++sys.stdout.write(str(json.dumps({k: v for k, v in res.items() if k != 'numeric_checks'}, indent=2)) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py
+
+@@ -1,10 +1,17 @@
+
++import sys
++import collections
++from decimal import Decimal
++import hashlib
++import json
+ from pathlib import Path
+-from decimal import Decimal
+-import hashlib, json, re, collections
++import re
++from typing import Any
+ ROOT = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ P = ROOT / 'docs/research/shot_pattern_analysis/phase2'
+ ARTICLE = P.parent / 'shot_pattern_analysis.tex'
+-h = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
++
++def h(p):
++    return hashlib.sha256(p.read_bytes()).hexdigest()
+ trace_path = P / 'validation/selected_headline_traceability_v1/review.json'
+ trace = json.loads(trace_path.read_text())
+ ref_path = P / 'validation/protocol_name_recovery_v6/expected_numeric_hashes.json'
+@@ -56,10 +63,15 @@
+
+ def number(display, want):
+     a = Decimal(display)
+     b = Decimal(str(want))
++    if not a.is_finite() or not b.is_finite():
++        raise ValueError(f'nonfinite Decimal input: display={display!r}, want={want!r}')
++    exp = a.as_tuple().exponent
++    if not isinstance(exp, int):
++        raise ValueError(f'non-integer Decimal exponent: {exp!r}')
+     if a == 0:
+         if b != 0:
+             raise ValueError(('rounded-to-zero', display, want))
+-    elif abs(a - b) > Decimal('0.50000001') * Decimal(10) ** a.as_tuple().exponent + abs(b) * Decimal('1e-14'):
++    elif abs(a - b) > Decimal('0.50000001') * Decimal(10) ** exp + abs(b) * Decimal('1e-14'):
+         raise ValueError(('display precision mismatch', display, want))
+
+ def verify(s):
+@@ -160,4 +172,4 @@
+
+         raise ValueError('input changed during review')
+ result.update(article_sha256=h(ARTICLE), script_sha256=h(Path(__file__)), input_sha256={str(p.relative_to(P)): d for p, d in bindings.items()}, negative_controls_rejected=list(mutations), compiled=False, visual_review=False, full_publication_accepted=False)
+ Path('/tmp/p2-article-root-review/review.json').write_text(json.dumps(result, indent=2) + '\n')
+-print(json.dumps({k: v for k, v in result.items() if k != 'input_sha256'}, indent=2))
++sys.stdout.write(str(json.dumps({k: v for k, v in result.items() if k != 'input_sha256'}, indent=2)) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py
+
+@@ -4,6 +4,7 @@
+
+ import json
+ import os
+ from pathlib import Path
++from typing import Any
+ from PyQt6 import QtCore, QtWidgets
+ from src.tools.shot_pattern_analysis.matched_gui import MatchedStudyWidget
+ from src.tools.shot_pattern_analysis.matched_matrix import matched_matrix_cells
+@@ -31,6 +32,8 @@
+
+         if (widget.width(), widget.height()) != (1000, 760):
+             raise RuntimeError('offscreen widget did not fit 1000×760')
+         scrollbar = widget.controls_scroll.verticalScrollBar()
++        if scrollbar is None:
++            raise RuntimeError('verticalScrollBar is None')
+         views = ((0, 'bounds_gui_main_1000x760.png'), (120, 'bounds_gui_scrolled_1000x760.png'), (scrollbar.maximum(), 'bounds_gui_correlations_1000x760.png'))
+         for position, filename in views:
+             scrollbar.setValue(position)
+--- original/docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py
+
+@@ -1,4 +1,6 @@
+
+ """Reproduce source-qualified configuration checks for every selected pair."""
++import logging
++import sys
+ import hashlib
+ import json
+ from collections import Counter
+@@ -45,15 +47,17 @@
+
+     except ConfigReached:
+         row['status'] = 'configuration_and_nominal_checks_passed'
+     except Exception as exc:
++        logging.exception('Validation record rejected')
+         row.update(status='failed', error=repr(exc))
+     else:
+         raise AssertionError('preflight did not stop at row boundary')
+     results.append(row)
+     if i % 25 == 0:
+-        print(f'{i + 1}/{len(pairs)}', flush=True)
++        sys.stdout.write(str(f'{i + 1}/{len(pairs)}') + '\n')
++        sys.stdout.flush()
+ pairing._primitive_errors_by_pattern = original
+-for p, h in source_hashes.items():
+-    assert sha(Path(p)) == h
++for path_str, h in source_hashes.items():
++    assert sha(Path(path_str)) == h
+ receipt = {'scope': 'All selected source/config/nominal checks, deliberately stops before primitive row read/statistical computations', 'pair_count': len(pairs), 'counts': dict(Counter((p['comparison_kind'] for p in pairs))), 'source_hashes': source_hashes, 'transition_sha256': transition_sha, 'results': results, 'failures': [r for r in results if r['status'] == 'failed']}
+ (OUT / 'preflight.json').write_text(json.dumps(receipt, indent=2) + '\n')
+-print(json.dumps({'pair_count': len(pairs), 'failures': receipt['failures']}, indent=2))
++sys.stdout.write(str(json.dumps({'pair_count': len(pairs), 'failures': receipt['failures']}, indent=2)) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py
+
+@@ -1,25 +1,31 @@
+
++import sys
+ import json
+ from pathlib import Path
++from typing import Any, TypedDict
++from scripts.research.shot_pattern_analysis.build_final_figures import _supported_points
+ from src.tools.shot_pattern_analysis import academic_plots as p
+-from scripts.research.shot_pattern_analysis.build_final_figures import _supported_points
+ root = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/driver_lean0_curve1_rotation1_combined2')
+ points, total = _supported_points(root)
++
++class TickGapRow(TypedDict):
++
++class CaptureResult(TypedDict):
+ results = []
+
+-def capture(fig, stem, *, dpi):
+-    fig.canvas.draw()
+-    renderer = fig.canvas.get_renderer()
++def capture(figure, output_stem, *, dpi):
++    figure.canvas.draw()
++    renderer = figure.canvas.get_renderer()
+     rows = []
+-    for i, ax in enumerate(fig.axes):
++    for i, ax in enumerate(figure.axes):
+         ticks = [t for t in ax.get_xticklabels() if t.get_visible() and t.get_text()]
+         ticks.sort(key=lambda t: t.get_window_extent(renderer).x0)
+-        for a, b in zip(ticks, ticks[1:]):
++        for a, b in zip(ticks, ticks[1:], strict=False):
+             gap = b.get_window_extent(renderer).x0 - a.get_window_extent(renderer).x1
+-            rows.append({'axis': i, 'labels': [a.get_text(), b.get_text()], 'gap_points': gap * 72 / fig.dpi, 'axis_width_points': ax.get_window_extent(renderer).width * 72 / fig.dpi})
+-    results.append({'presentation': str(stem), 'tick_gaps': rows})
++            rows.append({'axis': i, 'labels': [a.get_text(), b.get_text()], 'gap_points': gap * 72 / figure.dpi, 'axis_width_points': ax.get_window_extent(renderer).width * 72 / figure.dpi})
++    results.append({'presentation': str(output_stem), 'tick_gaps': rows})
+     return {}
+ p._save_formats = capture
+ for mode in ('academic', 'social'):
+     p.write_academic_dispersion_figure(points, mode, scenario='Driver · Lean 0° · Curve ×1 · Shaft Twist SD 1°', metadata={'social_club': 'Driver', 'valid_shots_by_pattern': {k: len(v) for k, v in points.items()}, 'total_shots_by_pattern': total}, target_point_m=(178.94875782337786, 0), presentation=mode, dpi=180)
+ Path('/tmp/p2-marginal-gutter-review.json').write_text(json.dumps(results, indent=2))
+-print(json.dumps([{'presentation': r['presentation'], 'right_marginals': [x for x in r['tick_gaps'] if x['axis'] in (2, 5, 8)]} for r in results], indent=2))
++sys.stdout.write(str(json.dumps([{'presentation': r['presentation'], 'right_marginals': [x for x in r['tick_gaps'] if x['axis'] in (2, 5, 8)]} for r in results], indent=2)) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py
+
+@@ -1,4 +1,5 @@
+
+ """Read-only primary graphic hash audit and complete PNG contact sheets."""
++import sys
+ import csv
+ import hashlib
+ import json
+@@ -31,7 +32,7 @@
+
+         ledgers[name] = list(csv.DictReader(f))
+ assert len(ledgers['availability']) == 324
+ assert Counter((x['status'] for x in ledgers['availability'])) == {'completed': 270, 'unavailable': 54}
+-assert set((x['cell'] for x in ledgers['availability'])) == set(m['cell_manifest_sha256'])
++assert {x['cell'] for x in ledgers['availability']} == set(m['cell_manifest_sha256'])
+ assert len(ledgers['comparison_availability']) == 36
+ assert Counter((x['status'] for x in ledgers['comparison_availability'])) == {'completed': 30, 'unavailable': 6}
+ for row in ledgers['facebook_ready']:
+@@ -60,4 +61,4 @@
+
+ assert sha(mfile) == initial
+ receipt = {'scope': 'Byte and inventory checks; visual verdict recorded separately', 'manifest_sha256': initial, 'exit_record': exit_record, 'exit_record_sha256': sha(exit_path), 'source_plan_sha256': m['plan_sha256'], 'outputs_verified': len(m['outputs']), 'pngs': len(pngs), 'extensions': dict(Counter((Path(p).suffix for p in m['outputs']))), 'cell_manifest_count': len(m['cell_manifest_sha256']), 'ledger_rows': {k: len(v) for k, v in ledgers.items()}, 'contact_sheets': 18, 'png_index': index, 'script_sha256': sha(Path(__file__))}
+ (OUT / 'inventory_review.json').write_text(json.dumps(receipt, indent=2) + '\n')
+-print(json.dumps({k: v for k, v in receipt.items() if k != 'png_index'}, indent=2))
++sys.stdout.write(str(json.dumps({k: v for k, v in receipt.items() if k != 'png_index'}, indent=2)) + '\n')
+--- original/docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py
+
+@@ -1,12 +1,13 @@
+
+ """Representative saved-data renderer comparison; run only after source freeze."""
+-from pathlib import Path
+ import argparse
+ import dataclasses
+ import hashlib
+ import json
+ import os
++from pathlib import Path
+ import subprocess
+ import sys
++import unittest.mock
+ import numpy as np
+ MAIN = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+ CANDIDATE = Path('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
+@@ -22,7 +23,7 @@
+
+     return {str(p.relative_to(root)): digest(p) for folder in ['src/tools/shot_pattern_analysis', 'scripts/research/shot_pattern_analysis'] for p in (root / folder).rglob('*.py')}
+
+ def data_value(value):
+-    if dataclasses.is_dataclass(value):
++    if dataclasses.is_dataclass(value) and (not isinstance(value, type)):
+         return data_value(dataclasses.asdict(value))
+     if isinstance(value, np.ndarray):
+         arr = np.asarray(value)
+@@ -118,28 +119,28 @@
+
+             path.write_bytes(b'BASELINE CAPTURE ONLY - NOT A GRAPHIC')
+         else:
+             original_save(fig, path, *args, **kwargs)
+-    Figure.savefig = save
+-    for item in json.loads(pairs_path.read_text()):
+-        current = {'label': item['label']}
+-        directory = out / item['label']
+-        directory.mkdir(parents=True)
+-        if mode == 'baseline':
+-            ledger = module._render_pair_figures(item['pair'], directory)
+-        else:
+-            ledger = module.render_selected_pair_figures(item['pair'], directory, figure_kinds=KINDS)
+-        assert len(ledger) == 7 and {r['figure_kind'] for r in ledger} == KINDS
+-        actual = {str(p.relative_to(directory)) for p in directory.rglob('*') if p.is_file()}
+-        assert actual == {r['relative_path'] for r in ledger}
+-        for record in ledger:
+-            assert record['target_x_m'] == item['expected']['target_x_m']
+-            for key in ['first_cell', 'second_cell', 'first_protocol', 'second_protocol']:
+-                assert record[key] == item['expected'][key]
+-            if record['source_kind'] == 'six_population_common_index_comparison':
+-                assert record['common_supported_n'] == item['expected']['common_supported_n']
+-                assert record['total_n_per_population'] == item['expected']['total_n_per_population']
+-            assert digest(directory / record['relative_path']) == record['sha256']
+-        current['ledger'] = ledger
+-        captures[item['label']] = current
++    with unittest.mock.patch.object(Figure, 'savefig', new=save):
++        for item in json.loads(pairs_path.read_text()):
++            current = {'label': item['label']}
++            directory = out / item['label']
++            directory.mkdir(parents=True)
++            if mode == 'baseline':
++                ledger = module._render_pair_figures(item['pair'], directory)
++            else:
++                ledger = module.render_selected_pair_figures(item['pair'], directory, figure_kinds=KINDS)
++            assert len(ledger) == 7 and {r['figure_kind'] for r in ledger} == KINDS
++            actual = {str(p.relative_to(directory)) for p in directory.rglob('*') if p.is_file()}
++            assert actual == {r['relative_path'] for r in ledger}
++            for record in ledger:
++                assert record['target_x_m'] == item['expected']['target_x_m']
++                for key in ['first_cell', 'second_cell', 'first_protocol', 'second_protocol']:
++                    assert record[key] == item['expected'][key]
++                if record['source_kind'] == 'six_population_common_index_comparison':
++                    assert record['common_supported_n'] == item['expected']['common_supported_n']
++                    assert record['total_n_per_population'] == item['expected']['total_n_per_population']
++                assert digest(directory / record['relative_path']) == record['sha256']
++            current['ledger'] = ledger
++            captures[item['label']] = current
+     (out / 'capture.json').write_text(json.dumps(data_value(captures), indent=2) + '\n')
+
+ def main():
+--- original/docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py
+
+@@ -7,6 +7,7 @@
+
+ import re
+ import sys
+ from pathlib import Path
++from typing import Any
+ from PIL import Image, ImageDraw, ImageFont
+
+ def sha(path):
+@@ -138,6 +139,8 @@
+
+         (args.output / 'batch_inventory.json').write_text(json.dumps({'accepted': False, 'status': 'pending_completed_producer_boundary', 'assets_read': 0, 'script_sha256': sha(Path(__file__))}, indent=2) + '\n')
+         return
+     reference = _load_numeric_parity_reference(args.expected_numeric)
++    if reference is None:
++        raise ValueError(f'expected numeric parity reference could not be loaded from {args.expected_numeric}')
+     _check_numeric_parity_reference(reference, args.report)
+     numeric = {name: sha(args.report / name) for name in reference['artifact_sha256']}
+     if args.group == 'pairs':
+@@ -153,7 +156,8 @@
+
+         records.sort(key=lambda r: (r['source_protocol'], r['cell']))
+         suffixes = [f'{k}.{e}' for k in ('density', 'density_social', 'overhead', 'overhead_social') for e in ('png', 'pdf', 'svg')]
+     args.output.mkdir(parents=True)
+-    reviewed, pending = ([], [])
++    reviewed = []
++    pending = []
+     font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 22)
+     for index, record in enumerate(records[args.offset:args.offset + args.limit], args.offset):
+         stem = pair_comparison_slug(record) if args.group == 'pairs' else _slug(record['cell'])
+--- original/docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py
+
++++ current/docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py
+
+@@ -3,6 +3,8 @@
+
+ from pathlib import Path
+ import pytest
+ spec = importlib.util.spec_from_file_location('review_batch', Path(__file__).with_name('review_batch.py'))
++if spec is None or spec.loader is None:
++    raise RuntimeError('could not load review_batch spec or loader')
+ m = importlib.util.module_from_spec(spec)
+ spec.loader.exec_module(m)
+ PAIR = {'schema': 'matched-explicit-source-pair/1', 'comparison_kind': 'across_lean', 'source_protocols': ['original_control/1', 'original_control/1'], 'sources': [{'protocol_id': 'original_control/1'}, {'protocol_id': 'original_control/1'}], 'target_x_m': 77.40247724866299, 'common_supported_n': 9999, 'total_n_per_population': 10000}
+@@ -86,14 +88,14 @@
+
+     import types
+     figure = types.ModuleType('src.tools.shot_pattern_analysis.matched_supplement_figures')
+     for name in ('_slug', 'pair_comparison_identity', 'pair_comparison_slug'):
+-        setattr(figure, name, lambda *a: None)
++        monkeypatch.setattr(figure, name, lambda *a: None, raising=False)
+     pipeline = types.ModuleType('src.tools.shot_pattern_analysis.matched_supplement_pipeline')
+-    pipeline._report_source_hashes = dict
++    monkeypatch.setattr(pipeline, '_report_source_hashes', dict, raising=False)
+
+-    def forbidden(*args):
++    def forbidden(*args: object):
+         raise AssertionError('live outputs must not be read')
+-    pipeline._check_numeric_parity_reference = forbidden
+-    pipeline._load_numeric_parity_reference = forbidden
++    monkeypatch.setattr(pipeline, '_check_numeric_parity_reference', forbidden, raising=False)
++    monkeypatch.setattr(pipeline, '_load_numeric_parity_reference', forbidden, raising=False)
+     monkeypatch.setitem(sys.modules, figure.__name__, figure)
+     monkeypatch.setitem(sys.modules, pipeline.__name__, pipeline)
+     monkeypatch.setattr(sys, 'argv', ['review_batch.py', '--repo', str(tmp_path), '--report', str(tmp_path / 'live'), '--completion-receipt', str(tmp_path / 'missing_exit'), '--start-receipt', str(tmp_path / 'start'), '--start-sha256', 'unused_while_pending', '--expected-numeric', str(tmp_path / 'missing_hashes'), '--output', str(tmp_path / 'evidence'), '--group', 'pairs'])

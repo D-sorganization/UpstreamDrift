@@ -1,0 +1,128 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+PyQt6 6.11.0 -- Qt runtime 6.11.1 -- Qt compiled 6.11.0
+benchmark: 5.3.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift
+configfile: pyproject.toml
+plugins: qt-4.5.0, anyio-4.15.1, xdist-3.8.0, cov-7.1.0, asyncio-1.4.0, benchmark-5.3.0, hypothesis-6.168.5, platformdirs-4.12.3, timeout-2.4.0, mock-3.16.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 10 items
+
+tests/tools/shot_pattern_analysis/test_matched_report_plots.py .....FFFF [ 90%]
+F                                                                        [100%]
+
+=================================== FAILURES ===================================
+___ test_contrast_luminance_chooses_white_on_dark_green_and_viridis_minimum ____
+
+    def test_contrast_luminance_chooses_white_on_dark_green_and_viridis_minimum() -> None:
+        try:
+            import matplotlib.pyplot as plt
+            from matplotlib.colors import Normalize
+        except (ImportError, OSError) as exc:
+            pytest.skip(f"matplotlib unavailable: {exc}")
+>       from src.tools.shot_pattern_analysis.matched_report_plots import _cell_text_color
+E       ImportError: cannot import name '_cell_text_color' from 'src.tools.shot_pattern_analysis.matched_report_plots' (/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report_plots.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:241: ImportError
+_______________ test_noise_primitive_units_and_correlation_sign ________________
+
+    def test_noise_primitive_units_and_correlation_sign() -> None:
+>       from src.tools.shot_pattern_analysis.matched_report_plots import _derive_delivery_noise
+E       ImportError: cannot import name '_derive_delivery_noise' from 'src.tools.shot_pattern_analysis.matched_report_plots' (/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report_plots.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:262: ImportError
+________ test_target_context_distinguishes_within_lean_and_fixed_target ________
+
+    def test_target_context_distinguishes_within_lean_and_fixed_target() -> None:
+>       from src.tools.shot_pattern_analysis.matched_report_plots import _derive_target_context
+E       ImportError: cannot import name '_derive_target_context' from 'src.tools.shot_pattern_analysis.matched_report_plots' (/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report_plots.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:303: ImportError
+_____ test_sg_context_derives_tee_fairway_approach_and_carry_as_final_lie ______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1932/test_sg_context_derives_tee_fa0')
+
+    def test_sg_context_derives_tee_fairway_approach_and_carry_as_final_lie(tmp_path) -> None:
+>       from src.tools.shot_pattern_analysis.matched_report_plots import (
+            _derive_course_context,
+            _has_carry_as_final_lie,
+            export_matched_matrix_heatmaps,
+        )
+E       ImportError: cannot import name '_derive_course_context' from 'src.tools.shot_pattern_analysis.matched_report_plots' (/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report_plots.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:316: ImportError
+____________ test_layout_visible_captions_and_nonoverlap_at_figsize ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1932/test_layout_visible_captions_a0')
+
+    def test_layout_visible_captions_and_nonoverlap_at_figsize(tmp_path) -> None:
+        try:
+            import matplotlib
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+        except (ImportError, OSError) as exc:
+            pytest.skip(f"matplotlib unavailable: {exc}")
+        from src.tools.shot_pattern_analysis.matched_report_plots import export_matched_matrix_heatmaps
+    
+        cells = _realistic_cells(correlation_sign=-0.6)
+        paths = export_matched_matrix_heatmaps(
+            cells,
+            tmp_path,
+            selection_label=(
+                "FINAL; source=final_v1; delivery=nominal_match; "
+                "contact=incremental_coulomb_energetic; noise SDs=[1.0, 0.5, 0.44704, 0.00635, 0.00635, 0.0, 0.0]"
+            ),
+            metrics=("conditional_sg", "target_hit_fraction"),
+            formats=("png", "svg"),
+        )
+        svg_sg = paths["conditional_sg_svg"].read_text(encoding="utf-8")
+        # Subtitle must contain readable delivery noise and correlation, not raw unlabelled noise SDs
+>       assert "noise SDs=[1.0" not in svg_sg
+E       assert 'noise SDs=[1.0' not in '<?xml versi...s>\n</svg>\n'
+E         
+E         'noise SDs=[1.0' is contained here:
+E           nergetic; noise SDs=[1.0, 0.5, 0.44704, 0.00635, 0.00635, 0.0, 0.0] -->
+E         ?           ++++++++++++++
+E              <g transform="translate(36.170469 45.038437) scale(0.1 -0.1)">
+E               <defs>
+E                <path id="DejaVuSans-2c" d="M 628 4666 ...
+E         
+E         ...Full output truncated (674 lines hidden), use '-vv' to show
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:372: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_contrast_luminance_chooses_white_on_dark_green_and_viridis_minimum
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_noise_primitive_units_and_correlation_sign
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_target_context_distinguishes_within_lean_and_fixed_target
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_context_derives_tee_fairway_approach_and_carry_as_final_lie
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_layout_visible_captions_and_nonoverlap_at_figsize
+=================== 5 failed, 5 passed, 6 warnings in 45.39s ===================

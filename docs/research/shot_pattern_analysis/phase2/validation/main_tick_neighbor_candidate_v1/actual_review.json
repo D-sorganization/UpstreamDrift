@@ -1,0 +1,371 @@
+[
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+    "presentation": "academic",
+    "panels": [
+      {
+        "minimum_neighbor_gap_pt": 23.055049655104668,
+        "xlim": [
+          144.49132941108118,
+          152.18175832485224
+        ],
+        "ticks": [
+          144.8,
+          146.4,
+          148.0,
+          149.6,
+          151.2
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 23.055049655104668,
+        "xlim": [
+          144.49132941108118,
+          152.18175832485224
+        ],
+        "ticks": [
+          144.8,
+          146.4,
+          148.0,
+          149.6,
+          151.2
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 23.055049655104668,
+        "xlim": [
+          144.49132941108118,
+          152.18175832485224
+        ],
+        "ticks": [
+          144.8,
+          146.4,
+          148.0,
+          149.6,
+          151.2
+        ]
+      }
+    ],
+    "png": "seven_iron_lean10_curve1_rotation1_shaft_only_academic.png",
+    "sha256": "373875de16dfe851fda7be2472920e7424b3d3505857d0baab16cc697f6ed2f5"
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+    "presentation": "social",
+    "panels": [
+      {
+        "minimum_neighbor_gap_pt": 18.948752698559403,
+        "xlim": [
+          144.49132941108118,
+          152.18175832485224
+        ],
+        "ticks": [
+          144.0,
+          144.8,
+          145.6,
+          146.4,
+          147.2,
+          148.0,
+          148.8,
+          149.6,
+          150.4,
+          151.2,
+          152.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 18.948752698559403,
+        "xlim": [
+          144.49132941108118,
+          152.18175832485224
+        ],
+        "ticks": [
+          144.0,
+          144.8,
+          145.6,
+          146.4,
+          147.2,
+          148.0,
+          148.8,
+          149.6,
+          150.4,
+          151.2,
+          152.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 18.948752698559403,
+        "xlim": [
+          144.49132941108118,
+          152.18175832485224
+        ],
+        "ticks": [
+          144.0,
+          144.8,
+          145.6,
+          146.4,
+          147.2,
+          148.0,
+          148.8,
+          149.6,
+          150.4,
+          151.2,
+          152.0
+        ]
+      }
+    ],
+    "png": "seven_iron_lean10_curve1_rotation1_shaft_only_social.png",
+    "sha256": "2645be49af8c418e8795d939ae122e8b3aeb9985f838609eed2ff84e4fbb97b6"
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation2_combined2",
+    "presentation": "academic",
+    "panels": [
+      {
+        "minimum_neighbor_gap_pt": 8.26050015297546,
+        "xlim": [
+          -5.920716869126384,
+          183.60190899962572
+        ],
+        "ticks": [
+          -20.0,
+          0.0,
+          20.0,
+          40.0,
+          60.0,
+          80.0,
+          100.0,
+          120.0,
+          140.0,
+          160.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 8.26050015297542,
+        "xlim": [
+          -5.920716869126384,
+          183.60190899962572
+        ],
+        "ticks": [
+          -20.0,
+          0.0,
+          20.0,
+          40.0,
+          60.0,
+          80.0,
+          100.0,
+          120.0,
+          140.0,
+          160.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 8.26050015297542,
+        "xlim": [
+          -5.920716869126384,
+          183.60190899962572
+        ],
+        "ticks": [
+          -20.0,
+          0.0,
+          20.0,
+          40.0,
+          60.0,
+          80.0,
+          100.0,
+          120.0,
+          140.0,
+          160.0
+        ]
+      }
+    ],
+    "png": "driver_lean5_curve2_rotation2_combined2_academic.png",
+    "sha256": "3814419998f697178de17d5fe64971d5cce8c681cc5001004619c06486f87ce8"
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation2_combined2",
+    "presentation": "social",
+    "panels": [
+      {
+        "minimum_neighbor_gap_pt": 28.99859495222124,
+        "xlim": [
+          -5.920716869126384,
+          183.60190899962572
+        ],
+        "ticks": [
+          -20.0,
+          0.0,
+          20.0,
+          40.0,
+          60.0,
+          80.0,
+          100.0,
+          120.0,
+          140.0,
+          160.0,
+          180.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 28.99859495222124,
+        "xlim": [
+          -5.920716869126384,
+          183.60190899962572
+        ],
+        "ticks": [
+          -20.0,
+          0.0,
+          20.0,
+          40.0,
+          60.0,
+          80.0,
+          100.0,
+          120.0,
+          140.0,
+          160.0,
+          180.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 28.99859495222124,
+        "xlim": [
+          -5.920716869126384,
+          183.60190899962572
+        ],
+        "ticks": [
+          -20.0,
+          0.0,
+          20.0,
+          40.0,
+          60.0,
+          80.0,
+          100.0,
+          120.0,
+          140.0,
+          160.0,
+          180.0
+        ]
+      }
+    ],
+    "png": "driver_lean5_curve2_rotation2_combined2_social.png",
+    "sha256": "81bae2da229a64432f90dbe7e28854717c2cf2a43b6cfc9a7fbb860dc7df3cf0"
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+    "presentation": "academic",
+    "panels": [
+      {
+        "minimum_neighbor_gap_pt": 13.865087787803205,
+        "xlim": [
+          71.56065016081128,
+          81.9900905548514
+        ],
+        "ticks": [
+          70.5,
+          72.0,
+          73.5,
+          75.0,
+          76.5,
+          78.0,
+          79.5,
+          81.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 13.865087787803205,
+        "xlim": [
+          71.56065016081128,
+          81.9900905548514
+        ],
+        "ticks": [
+          70.5,
+          72.0,
+          73.5,
+          75.0,
+          76.5,
+          78.0,
+          79.5,
+          81.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 13.865087787803205,
+        "xlim": [
+          71.56065016081128,
+          81.9900905548514
+        ],
+        "ticks": [
+          70.5,
+          72.0,
+          73.5,
+          75.0,
+          76.5,
+          78.0,
+          79.5,
+          81.0
+        ]
+      }
+    ],
+    "png": "pitching_wedge_lean0_curve1_rotation1_shaft_only_academic.png",
+    "sha256": "144ba08e7e56855ce43a554bfbac88a3c1c9293e764a28315bac908d8aa072a2"
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+    "presentation": "social",
+    "panels": [
+      {
+        "minimum_neighbor_gap_pt": 43.69655526491981,
+        "xlim": [
+          71.56065016081128,
+          81.9900905548514
+        ],
+        "ticks": [
+          70.5,
+          72.0,
+          73.5,
+          75.0,
+          76.5,
+          78.0,
+          79.5,
+          81.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 43.69655526491981,
+        "xlim": [
+          71.56065016081128,
+          81.9900905548514
+        ],
+        "ticks": [
+          70.5,
+          72.0,
+          73.5,
+          75.0,
+          76.5,
+          78.0,
+          79.5,
+          81.0
+        ]
+      },
+      {
+        "minimum_neighbor_gap_pt": 43.69655526491981,
+        "xlim": [
+          71.56065016081128,
+          81.9900905548514
+        ],
+        "ticks": [
+          70.5,
+          72.0,
+          73.5,
+          75.0,
+          76.5,
+          78.0,
+          79.5,
+          81.0
+        ]
+      }
+    ],
+    "png": "pitching_wedge_lean0_curve1_rotation1_shaft_only_social.png",
+    "sha256": "a9f0fe681a718561c3d48cdd603b56bc8a69ee5be49e90b9734264f024187b0d"
+  }
+]

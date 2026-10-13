@@ -4,10 +4,13 @@ import json
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_gui_methods import (
     AdvancedGuiMethodsMixin,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class MockGuiClass(AdvancedGuiMethodsMixin):
@@ -47,7 +50,11 @@ def test_apply_config_colors():
     def mock_id2name(model, type, i):
         return ["torso_geom", "thigh_geom"][i]
 
-    with patch("mujoco.mj_id2name", side_effect=mock_id2name):
+    with patch(
+        "src.engines.physics_engines.mujoco.python."
+        "mujoco_humanoid_golf.advanced_gui_methods.mujoco.mj_id2name",
+        side_effect=mock_id2name,
+    ):
         colors = {"shirt": [1, 0, 0, 1], "pants": [0, 1, 0, 1]}
         gui._apply_config_colors(colors)
 
@@ -111,7 +118,11 @@ def test_detect_pelvis_torso_indices():
 
     gui.sim_widget.model.jnt_dofadr = [0, 5, 10]
 
-    with patch("mujoco.mj_name2id", side_effect=mock_name2id):
+    with patch(
+        "src.engines.physics_engines.mujoco.python."
+        "mujoco_humanoid_golf.advanced_gui_methods.mujoco.mj_name2id",
+        side_effect=mock_name2id,
+    ):
         p_idx, t_idx = gui._detect_pelvis_torso_indices()
 
         assert p_idx == 5

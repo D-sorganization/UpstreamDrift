@@ -1,0 +1,1850 @@
+[
+  {
+    "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.004597062764879343,
+      "lower_95": 0.004531382987542545,
+      "upper_95": 0.004658536119213675
+    },
+    "display": [
+      "+0.005",
+      "+0.005",
+      "+0.005"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.00392726220708177,
+      "lower_95": -0.003979629136146112,
+      "upper_95": -0.003872946949009742
+    },
+    "display": [
+      "-0.004",
+      "-0.004",
+      "-0.004"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.003284521591238346,
+      "lower_95": -0.0033180608278863878,
+      "upper_95": -0.003246621472447612
+    },
+    "display": [
+      "-0.003",
+      "-0.003",
+      "-0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.004807287974468413,
+      "lower_95": 0.00475283224220618,
+      "upper_95": 0.004852272327248085
+    },
+    "display": [
+      "+0.005",
+      "+0.005",
+      "+0.005"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation1_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.006898360151654158,
+      "lower_95": 0.0067731612230018745,
+      "upper_95": 0.007017032279616538
+    },
+    "display": [
+      "+0.007",
+      "+0.007",
+      "+0.007"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.004974554162779346,
+      "lower_95": 0.004896244593923064,
+      "upper_95": 0.0050524781280153475
+    },
+    "display": [
+      "+0.005",
+      "+0.005",
+      "+0.005"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.005231411413131985,
+      "lower_95": 0.005175089443873898,
+      "upper_95": 0.005279526549089862
+    },
+    "display": [
+      "+0.005",
+      "+0.005",
+      "+0.005"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.004446443204479829,
+      "lower_95": -0.004485877410246985,
+      "upper_95": -0.004397185510328877
+    },
+    "display": [
+      "-0.004",
+      "-0.004",
+      "-0.004"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.002244169970288575,
+      "lower_95": 0.002163847970830789,
+      "upper_95": 0.0023330506126240384
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.002148384466072487,
+      "lower_95": -0.0022367976047266824,
+      "upper_95": -0.0020716501332243976
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve1_rotation2_combined2",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0012692236203755804,
+      "lower_95": 0.0010572433612425225,
+      "upper_95": 0.001480159210093467
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_positive",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0011342767666689187,
+      "lower_95": 0.0010257185483193106,
+      "upper_95": 0.0012807394649309266
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_positive",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.0011569852919447552,
+      "lower_95": -0.0013256855444161403,
+      "upper_95": -0.0010233485385586147
+    },
+    "display": [
+      "-0.001",
+      "-0.001",
+      "-0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_shaft_speed1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.001678764421434125,
+      "lower_95": -0.0017216641005679423,
+      "upper_95": -0.0016369160413082081
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0023167793708771976,
+      "lower_95": 0.0022674690234283524,
+      "upper_95": 0.0023673207468250996
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_combined1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.001288995120484204,
+      "lower_95": -0.001497564012491467,
+      "upper_95": -0.00108569400273112
+    },
+    "display": [
+      "-0.001",
+      "-0.001",
+      "-0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_strike",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.002345659844274594,
+      "lower_95": -0.00244936157948156,
+      "upper_95": -0.0022392234479517137
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0022369432151410486,
+      "lower_95": -0.002301998608921882,
+      "upper_95": -0.0021692724268694463
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.003078621416768321,
+      "lower_95": 0.0030160014719531674,
+      "upper_95": 0.003140292001762268
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation2_cov_facepath_positive",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0018365456973879137,
+      "lower_95": -0.002104311473552616,
+      "upper_95": -0.0016108016785924607
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.002758910005086196,
+      "lower_95": -0.0027917740690506497,
+      "upper_95": -0.0027242064028041237
+    },
+    "display": [
+      "-0.003",
+      "-0.003",
+      "-0.003"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.007007109636170275,
+      "lower_95": -0.007239932355486673,
+      "upper_95": -0.006790499835360002
+    },
+    "display": [
+      "-0.007",
+      "-0.007",
+      "-0.007"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.00344036033174107,
+      "lower_95": 0.0033868733944542257,
+      "upper_95": 0.0034900099733466933
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.003395374255452628,
+      "lower_95": -0.0034444872149106214,
+      "upper_95": -0.003343045503506767
+    },
+    "display": [
+      "-0.003",
+      "-0.003",
+      "-0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation1_shaft_strike",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0018969260737547692,
+      "lower_95": 0.001626769892941744,
+      "upper_95": 0.002123477513540915
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0012172001672269503,
+      "lower_95": 0.0011674855497550943,
+      "upper_95": 0.0012651844555431903
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation1_shaft_speed2",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.002044809941521305,
+      "lower_95": -0.00211627744541927,
+      "upper_95": -0.0019759322167381865
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation1_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.003714162561158686,
+      "lower_95": 0.0035882667848469046,
+      "upper_95": 0.003864846377540462
+    },
+    "display": [
+      "+0.004",
+      "+0.004",
+      "+0.004"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.004373392544242804,
+      "lower_95": 0.004251510132293852,
+      "upper_95": 0.0044949608811961856
+    },
+    "display": [
+      "+0.004",
+      "+0.004",
+      "+0.004"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve2_rotation2_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.006095418994989556,
+      "lower_95": -0.006448233586653202,
+      "upper_95": -0.005728411533274701
+    },
+    "display": [
+      "-0.006",
+      "-0.006",
+      "-0.006"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_speed1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0013819920374083577,
+      "lower_95": 0.0012699954248562944,
+      "upper_95": 0.0014890339712699625
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.0012549788049861174,
+      "lower_95": -0.0013627320419883002,
+      "upper_95": -0.001144324925457992
+    },
+    "display": [
+      "-0.001",
+      "-0.001",
+      "-0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.006961433719426006,
+      "lower_95": 0.006854072861785508,
+      "upper_95": 0.007062266200146164
+    },
+    "display": [
+      "+0.007",
+      "+0.007",
+      "+0.007"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.006779986374278244,
+      "lower_95": -0.006877716261212314,
+      "upper_95": -0.006676482829554437
+    },
+    "display": [
+      "-0.007",
+      "-0.007",
+      "-0.007"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_shaft_speed2",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0012420741968282147,
+      "lower_95": -0.001280160272788606,
+      "upper_95": -0.0012049372046142347
+    },
+    "display": [
+      "-0.001",
+      "-0.001",
+      "-0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0016601217618791725,
+      "lower_95": 0.0015559764601581565,
+      "upper_95": 0.0017769173533895453
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation2_shaft_strike",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0020337923309724916,
+      "lower_95": 0.0017808582120189174,
+      "upper_95": 0.0022765465434803223
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation1_combined1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0013030185894501774,
+      "lower_95": 0.0011331109519471052,
+      "upper_95": 0.0014827958284467163
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation1_shaft_speed1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.002683636259502565,
+      "lower_95": -0.002762794972644053,
+      "upper_95": -0.0026054724581690276
+    },
+    "display": [
+      "-0.003",
+      "-0.003",
+      "-0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation1_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.005223978272236042,
+      "lower_95": 0.0051154404615846435,
+      "upper_95": 0.00533113969448034
+    },
+    "display": [
+      "+0.005",
+      "+0.005",
+      "+0.005"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.002324386307951198,
+      "lower_95": -0.002464400212046782,
+      "upper_95": -0.0021856004293719393
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation2_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0021411672024966057,
+      "lower_95": 0.0019660910874036864,
+      "upper_95": 0.0023559820094496892
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation2_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0017488984186667296,
+      "lower_95": 0.0015359137940353566,
+      "upper_95": 0.0019609209571105303
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.002094360850455658,
+      "lower_95": -0.002474077195348521,
+      "upper_95": -0.001708161740054033
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0029663816354553963,
+      "lower_95": 0.0025311347701184963,
+      "upper_95": 0.0033995627205461072
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_speed1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.002398936747890001,
+      "lower_95": -0.002444135708849108,
+      "upper_95": -0.0023548539688378286
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.003353889816662199,
+      "lower_95": 0.003299863664249509,
+      "upper_95": 0.0034120590257004394
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0027378745838807436,
+      "lower_95": 0.0026342720107706712,
+      "upper_95": 0.0028377114733377303
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0031957305725434674,
+      "lower_95": 0.003060051008431036,
+      "upper_95": 0.003346374173351912
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.00825954348522537,
+      "lower_95": 0.008170409064705283,
+      "upper_95": 0.008336411385683688
+    },
+    "display": [
+      "+0.008",
+      "+0.008",
+      "+0.008"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.007931465697171911,
+      "lower_95": -0.008002418513175048,
+      "upper_95": -0.007845299782476297
+    },
+    "display": [
+      "-0.008",
+      "-0.008",
+      "-0.008"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.001974931464121476,
+      "lower_95": 0.001622698230536737,
+      "upper_95": 0.002286495553933502
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation2_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.007164080189484952,
+      "lower_95": 0.006883204580414197,
+      "upper_95": 0.007489755477452195
+    },
+    "display": [
+      "+0.007",
+      "+0.007",
+      "+0.007"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_shaft_strike",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0013450870721066638,
+      "lower_95": -0.0014972273029980477,
+      "upper_95": -0.0011673768295139327
+    },
+    "display": [
+      "-0.001",
+      "-0.001",
+      "-0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0039551631214944614,
+      "lower_95": 0.0038639526935040107,
+      "upper_95": 0.004053832505616936
+    },
+    "display": [
+      "+0.004",
+      "+0.004",
+      "+0.004"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.003944881171198358,
+      "lower_95": -0.004048349718555828,
+      "upper_95": -0.003855078206124085
+    },
+    "display": [
+      "-0.004",
+      "-0.004",
+      "-0.004"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0018829328096317784,
+      "lower_95": -0.0019037665349207564,
+      "upper_95": -0.0018604034543610903
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0028135117851527014,
+      "lower_95": 0.002782136830547198,
+      "upper_95": 0.002841027537519041
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0033344402555376775,
+      "lower_95": 0.0032250086060450845,
+      "upper_95": 0.003446566140001304
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation1_combined2",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0013031636831994098,
+      "lower_95": 0.0011311030426419662,
+      "upper_95": 0.0014850271310291024
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_speed1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0012499516123051775,
+      "lower_95": 0.0011567161830992744,
+      "upper_95": 0.0013496907902167223
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_speed1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0027018854353747773,
+      "lower_95": 0.0025150395603951562,
+      "upper_95": 0.0029014987438890677
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.0020511899751747224,
+      "lower_95": -0.0022712619452898556,
+      "upper_95": -0.0018359162635524693
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation2_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0019508292942565298,
+      "lower_95": 0.0016981380654214014,
+      "upper_95": 0.002182590790441389
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0019973206990548053,
+      "lower_95": -0.0022404312577790934,
+      "upper_95": -0.0017603305155128647
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation2_cov_facepath_negative",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.002964881223921774,
+      "lower_95": 0.002721672986315366,
+      "upper_95": 0.0032515837842573476
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_combined2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0018549609044330561,
+      "lower_95": 0.001601836046839251,
+      "upper_95": 0.002086332448748137
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_strike",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.002732081899656234,
+      "lower_95": 0.0025476427257102793,
+      "upper_95": 0.002906501553678867
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation2_cov_facepath_positive",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0012035754182313173,
+      "lower_95": 0.0010858540854274713,
+      "upper_95": 0.0013265086531466883
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation2_shaft_speed1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.002971937169753426,
+      "lower_95": -0.003284530524568946,
+      "upper_95": -0.0027298314194608674
+    },
+    "display": [
+      "-0.003",
+      "-0.003",
+      "-0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0028074145977757836,
+      "lower_95": 0.0026595252202509397,
+      "upper_95": 0.00292334308773877
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.003338254625196231,
+      "lower_95": 0.003229331554219383,
+      "upper_95": 0.003452709665026742
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation1_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0011716056610070421,
+      "lower_95": -0.0013057022842376514,
+      "upper_95": -0.0010295834920904026
+    },
+    "display": [
+      "-0.001",
+      "-0.001",
+      "-0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation1_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0028981211686848864,
+      "lower_95": 0.0027806545563026355,
+      "upper_95": 0.003014172187428503
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation2_shaft_speed1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0017991195694170112,
+      "lower_95": -0.001980478930023219,
+      "upper_95": -0.001617732371385307
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.004022791215327449,
+      "lower_95": 0.003837927845937432,
+      "upper_95": 0.004216036493597093
+    },
+    "display": [
+      "+0.004",
+      "+0.004",
+      "+0.004"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.004035800020399867,
+      "lower_95": -0.00423124660339462,
+      "upper_95": -0.0038609202043660092
+    },
+    "display": [
+      "-0.004",
+      "-0.004",
+      "-0.004"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.0020720637091729012,
+      "lower_95": -0.002388650646496045,
+      "upper_95": -0.0017502817590442554
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation1_cov_facepath_positive",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0012043394477771023,
+      "lower_95": 0.0010822638358794167,
+      "upper_95": 0.0013266250596223488
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_cov_facepath_positive",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.002043005225898495,
+      "lower_95": -0.00229458962725727,
+      "upper_95": -0.0017953127645030452
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0010469558147421583,
+      "lower_95": 0.0010332127670539123,
+      "upper_95": 0.001059062684997039
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_combined1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.001791627792819284,
+      "lower_95": -0.0020529477386466077,
+      "upper_95": -0.001534380090632227
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation2_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.002956297026416938,
+      "lower_95": 0.002781191118286207,
+      "upper_95": 0.0031456748244328603
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation1_cov_facepath_positive",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.00283375480670591,
+      "lower_95": -0.0031733684818428492,
+      "upper_95": -0.0025079763416494586
+    },
+    "display": [
+      "-0.003",
+      "-0.003",
+      "-0.003"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.004266476143975393,
+      "lower_95": -0.004444090669662726,
+      "upper_95": -0.004115008133530793
+    },
+    "display": [
+      "-0.004",
+      "-0.004",
+      "-0.004"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve1_rotation2_shaft_speed2",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0012541916161756888,
+      "lower_95": 0.0010770905010900253,
+      "upper_95": 0.0014704877284147228
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.00255256876498472,
+      "lower_95": 0.0025200337078003718,
+      "upper_95": 0.0025800222645107466
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation2_cov_facepath_positive",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.003093828827023989,
+      "lower_95": -0.0034731653677167224,
+      "upper_95": -0.002678789141396402
+    },
+    "display": [
+      "-0.003",
+      "-0.003",
+      "-0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation2_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0018380777030107237,
+      "lower_95": -0.0019950279740762614,
+      "upper_95": -0.0017095976505096503
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation2_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0028418277683757123,
+      "lower_95": 0.002698059873129751,
+      "upper_95": 0.003027297193130449
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.001822992776630641,
+      "lower_95": 0.0016619141060789432,
+      "upper_95": 0.0019837480583295613
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.001242240766279118,
+      "lower_95": 0.0010738580644239527,
+      "upper_95": 0.0014006359810922705
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation2_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0027457335638278726,
+      "lower_95": -0.002991539982612149,
+      "upper_95": -0.002525867522906249
+    },
+    "display": [
+      "-0.003",
+      "-0.003",
+      "-0.003"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0021857471659876408,
+      "lower_95": 0.002154988572700285,
+      "upper_95": 0.0022147960540337117
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.0020186960394436696,
+      "lower_95": -0.0020452370743776287,
+      "upper_95": -0.0019906470029674673
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve1_rotation2_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0012056605593208716,
+      "lower_95": 0.001031095660810704,
+      "upper_95": 0.0013687778739827768
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation2_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0012307843165106109,
+      "lower_95": 0.0011169056492362874,
+      "upper_95": 0.0013434292891051978
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve2_rotation2_shaft_strike",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0020072140332795755,
+      "lower_95": 0.0017320064560279042,
+      "upper_95": 0.0022823039356140713
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0040690998060372045,
+      "lower_95": 0.004025495063938893,
+      "upper_95": 0.00410659989036165
+    },
+    "display": [
+      "+0.004",
+      "+0.004",
+      "+0.004"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.0039859175132836875,
+      "lower_95": -0.004021094427067832,
+      "upper_95": -0.003942873489305417
+    },
+    "display": [
+      "-0.004",
+      "-0.004",
+      "-0.004"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation1_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0012741376044732133,
+      "lower_95": 0.0012130219023585855,
+      "upper_95": 0.0013345267950852222
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve2_rotation1_shaft_speed1",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.003799479831286723,
+      "lower_95": -0.003881681703186803,
+      "upper_95": -0.0037175022906783973
+    },
+    "display": [
+      "-0.004",
+      "-0.004",
+      "-0.004"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0011935473149743143,
+      "lower_95": 0.0010983750792733843,
+      "upper_95": 0.0012601183947667748
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_strike",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.001336293548411936,
+      "lower_95": 0.0012448676163505897,
+      "upper_95": 0.001423861421474837
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_speed2",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.00175338065268319,
+      "lower_95": -0.0019201011740974457,
+      "upper_95": -0.0016161414594175181
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0022856744994561467,
+      "lower_95": 0.0022388475405834343,
+      "upper_95": 0.0023340940591240512
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.007946856194710679,
+      "lower_95": 0.007768249126548327,
+      "upper_95": 0.008145268329685163
+    },
+    "display": [
+      "+0.008",
+      "+0.008",
+      "+0.008"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.007918017195257027,
+      "lower_95": -0.008123553040460741,
+      "upper_95": -0.007736079550348668
+    },
+    "display": [
+      "-0.008",
+      "-0.008",
+      "-0.008"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve2_rotation1_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.011250058408507424,
+      "lower_95": 0.011093269918012141,
+      "upper_95": 0.011396569357370753
+    },
+    "display": [
+      "+0.011",
+      "+0.011",
+      "+0.011"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation2_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.001808775354512566,
+      "lower_95": 0.0016240548093354506,
+      "upper_95": 0.001996153210071589
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation2_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.002171328517749144,
+      "lower_95": -0.0023063688543188614,
+      "upper_95": -0.0020331678750347922
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation2_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0032211165510939986,
+      "lower_95": 0.0030500243217892516,
+      "upper_95": 0.0034383606720378612
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation2_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.0038694668973822464,
+      "lower_95": -0.00412405587374184,
+      "upper_95": -0.0035982736418814737
+    },
+    "display": [
+      "-0.004",
+      "-0.004",
+      "-0.004"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve1_rotation1_cov_facepath_positive",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0018340487743874533,
+      "lower_95": 0.001655140641481202,
+      "upper_95": 0.0020152899009636626
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation2_combined1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.001835203092301319,
+      "lower_95": 0.0015524084143696208,
+      "upper_95": 0.002079917228683509
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_path",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.001995251458627098,
+      "lower_95": 0.0019059326441923472,
+      "upper_95": 0.0020923768025660323
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_path",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.001993082684096309,
+      "lower_95": -0.0020906760503802226,
+      "upper_95": -0.0019080090041726325
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "driver_lean5_curve2_rotation1_shaft_strike",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0011606334209099218,
+      "lower_95": 0.001006460850662938,
+      "upper_95": 0.0013114013217089202
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.004950520905763873,
+      "lower_95": -0.005004224015645245,
+      "upper_95": -0.004893454203058385
+    },
+    "display": [
+      "-0.005",
+      "-0.005",
+      "-0.005"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.010997688200816435,
+      "lower_95": 0.010874986257837699,
+      "upper_95": 0.01109839786590775
+    },
+    "display": [
+      "+0.011",
+      "+0.011",
+      "+0.011"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation2_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.004807566832783531,
+      "lower_95": 0.004539140852436561,
+      "upper_95": 0.00508535701587255
+    },
+    "display": [
+      "+0.005",
+      "+0.005",
+      "+0.005"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation2_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.005819413217572715,
+      "lower_95": 0.00555800320543106,
+      "upper_95": 0.006119287337019969
+    },
+    "display": [
+      "+0.006",
+      "+0.006",
+      "+0.006"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve2_rotation1_shaft_speed2",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.002757782885230165,
+      "lower_95": -0.002957716674700796,
+      "upper_95": -0.0025846113142088236
+    },
+    "display": [
+      "-0.003",
+      "-0.003",
+      "-0.003"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve2_rotation1_shaft_speed2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.005247474063109997,
+      "lower_95": 0.005088529381837205,
+      "upper_95": 0.00543961433843387
+    },
+    "display": [
+      "+0.005",
+      "+0.005",
+      "+0.005"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0012023688317753442,
+      "lower_95": 0.0010017065164187088,
+      "upper_95": 0.0014010808134801865
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean5_curve2_rotation1_combined2",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.0029279988022915433,
+      "lower_95": 0.002535471730844665,
+      "upper_95": 0.0032965412453730405
+    },
+    "display": [
+      "+0.003",
+      "+0.003",
+      "+0.003"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": 0.0018208786834615317,
+      "lower_95": 0.0016610762647873828,
+      "upper_95": 0.0019892387791487992
+    },
+    "display": [
+      "+0.002",
+      "+0.002",
+      "+0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.00180025433210711,
+      "lower_95": -0.001967325163053433,
+      "upper_95": -0.0016407198631736067
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.002335725136590596,
+      "lower_95": -0.002453279647865232,
+      "upper_95": -0.002223048990725053
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean10_curve1_rotation1_shaft_strike",
+    "pattern": "Draw",
+    "actual": {
+      "estimate": -0.001943829312413973,
+      "lower_95": -0.0021570889776469605,
+      "upper_95": -0.001710140975582979
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation2_shaft_speed1",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": 0.001349819646403353,
+      "lower_95": 0.0013055718776449658,
+      "upper_95": 0.0013933782797820441
+    },
+    "display": [
+      "+0.001",
+      "+0.001",
+      "+0.001"
+    ]
+  },
+  {
+    "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+    "pattern": "Fade",
+    "actual": {
+      "estimate": -0.0022898235654138007,
+      "lower_95": -0.0023102506778781445,
+      "upper_95": -0.0022646597483568665
+    },
+    "display": [
+      "-0.002",
+      "-0.002",
+      "-0.002"
+    ]
+  }
+]

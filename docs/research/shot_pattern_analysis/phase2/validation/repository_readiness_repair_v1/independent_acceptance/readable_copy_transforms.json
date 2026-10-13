@@ -1,0 +1,19 @@
+{
+  "copies": [
+    {
+      "path": "astra/normalized_diff.txt",
+      "raw_archive_member": "normalized_diff.txt",
+      "raw_sha256": "cc3e475e4ac01ea40ec3007d780fa3f96a8d5e57e15bf53532aafafdb59a29d7",
+      "readable_copy_sha256": "51c0abcd585cea09e2b52d325509868631ed0f9c4e630b713b9f720fa4f66419",
+      "transform": "Strip trailing whitespace in standalone readable copy only; raw evidence archive unchanged."
+    },
+    {
+      "path": "astra/red.txt",
+      "raw_archive_member": "red.txt",
+      "raw_sha256": "d31909fb1d976ac4ede2b3ff6224654914032199b3bc299167cc87d598268eae",
+      "readable_copy_sha256": "80b00503f59a68ddad36c32568e412faff0a1a235d85b3ae18e2d78ca1737d0c",
+      "transform": "Strip trailing whitespace in standalone readable copy only; raw evidence archive unchanged."
+    }
+  ],
+  "raw_archive_sha256": "3295758e53b37f20a82650fd68098520b40e2276c4c996e9c363db6f726dcd30"
+}

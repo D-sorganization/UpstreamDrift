@@ -1,0 +1,11 @@
+{
+  "execution_source_commit": "6e1ad2c5e915ffbb56d2f07b77ae9da0acfacb92",
+  "execution_source_sha256": {
+    "src/tools/shot_pattern_analysis/core.py": "964131a3f1c6aece8d52a50ed3749e4656cb288e2ab38a60f028132788403fc7",
+    "src/tools/shot_pattern_analysis/physics.py": "d6a7c96e1bbb3b77ac1c9a86b5023fefbabe2ed19ebf6f39ceeae498ecb6a323",
+    "src/tools/shot_pattern_analysis/reporting.py": "5de968d2db984633e131a287365de46700d2bfc1ea2955c34d9b35b2118dde1c",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "1ff5b5057e9c729e0ca9d9a2c2df050ba3b80138cde3f2b46555e6756293ddcb",
+    "src/tools/shot_pattern_analysis/range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987"
+  },
+  "started_at_utc": "2026-10-09T03:53:40Z"
+}

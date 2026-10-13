@@ -1,0 +1,222 @@
+{
+  "checked_utc": "2026-10-10T08:01:54.488529+00:00",
+  "status": "provisional_visual_and_label_checks_pass",
+  "scope": "40 PNG contact review, three whole-image spot checks, and all40 PDF population/condition labels checked against saved summaries; final manifest reconciliation remains required",
+  "contact_sheets_inspected": [
+    "contact_01.jpg",
+    "contact_02.jpg",
+    "contact_03.jpg"
+  ],
+  "full_size_pngs_inspected": [
+    "details/pitching_wedge_lean0_curve1_rotation2_combined2/density.png",
+    "details/pitching_wedge_lean5_curve2_rotation2_shaft_only/density.png",
+    "details/pitching_wedge_lean10_curve2_rotation1_combined2/overhead.png"
+  ],
+  "findings": [],
+  "limitations": [
+    "Contact thumbnails support layout overview, not every small-text legibility check. Full-size inspections are listed explicitly.",
+    "No new source-data statistical audit or physical acceptance is claimed."
+  ],
+  "pdf_label_checks": [
+    {
+      "path": "details/pitching_wedge_lean0_curve1_rotation1_combined2/density.pdf",
+      "sha256": "6ad8cef3ea43a1192270185cc5b68760c3cb38c9a2f1f9f89fd62bf255ea52d4",
+      "summary_sha256": "e8264d9d5df4c7f8314644037c6e885888d62daa182e295ff551fd77d9ec58c5"
+    },
+    {
+      "path": "details/pitching_wedge_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "4be9667e7ad643290e8ded62bc52465144731fdd777df1dff0c1d516d5e1c2ed",
+      "summary_sha256": "e8264d9d5df4c7f8314644037c6e885888d62daa182e295ff551fd77d9ec58c5"
+    },
+    {
+      "path": "details/pitching_wedge_lean0_curve1_rotation1_shaft_only/density.pdf",
+      "sha256": "1031eeb91e1a490787632efce1e037214614f5ed1121763a78e34f4c746872f8",
+      "summary_sha256": "e8b2e18554af3a47c502ac26285c0ae852fc8b7854915265b0abfe15f8ce5aa3"
+    },
+    {
+      "path": "details/pitching_wedge_lean0_curve1_rotation1_shaft_only/overhead.pdf",
+      "sha256": "f5d355bec0cf512970eea2834bf14217e4f54b908275511b56a462f2ddd4de23",
+      "summary_sha256": "e8b2e18554af3a47c502ac26285c0ae852fc8b7854915265b0abfe15f8ce5aa3"
+    },
+    {
+      "path": "details/pitching_wedge_lean0_curve1_rotation2_combined2/density.pdf",
+      "sha256": "a0ec0481e2370f5de35c64d9c8d72fa7c838771a3f98c2ea67751ba4230dc88d",
+      "summary_sha256": "1aa3c170be4d19ba88b35ecef18e4cdd36e9efa01b418870dbd1d52bcf3d2ae0"
+    },
+    {
+      "path": "details/pitching_wedge_lean0_curve1_rotation2_combined2/overhead.pdf",
+      "sha256": "8205adb611e8e23fb808d435e7771d5d6c5b6ace3802f06723ca27cbf52bb1bc",
+      "summary_sha256": "1aa3c170be4d19ba88b35ecef18e4cdd36e9efa01b418870dbd1d52bcf3d2ae0"
+    },
+    {
+      "path": "details/pitching_wedge_lean0_curve1_rotation2_shaft_only/density.pdf",
+      "sha256": "3ca53aca639b077d9e0b24632f7c5b4d3f5f08de83b80624acbf0fdf4e7512ed",
+      "summary_sha256": "cd6cb4f1302c1922671983a52701b90894628c68c1ad8e26dc08810a6fa70adf"
+    },
+    {
+      "path": "details/pitching_wedge_lean0_curve1_rotation2_shaft_only/overhead.pdf",
+      "sha256": "d78d7c11fbd1dde9c5eea4d7a5eb8dde1d36bd65f7104fb806aeabdc2e7d44a0",
+      "summary_sha256": "cd6cb4f1302c1922671983a52701b90894628c68c1ad8e26dc08810a6fa70adf"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve1_rotation1_combined2/density.pdf",
+      "sha256": "5538b21c38268366b995bd1047cda0f5fa71463921232f07332bbd2ce2ab9399",
+      "summary_sha256": "7557396ff7a9d8156be99be0791559d1864ef3bc1c5de77daac6262ace2def81"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "532b2aa466b21e8d6d1f0c9f22d19027705c6744b498b868f99a1a02e5b09374",
+      "summary_sha256": "7557396ff7a9d8156be99be0791559d1864ef3bc1c5de77daac6262ace2def81"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve1_rotation1_shaft_only/density.pdf",
+      "sha256": "5c18dbe44eb826c6e348c2da3532d6e15534bad5ae27cb31163946ce5ebd8b33",
+      "summary_sha256": "7f3eca37e698bb86b580ab86272d28e088c8864af7be672342d68eff6c6c7597"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve1_rotation1_shaft_only/overhead.pdf",
+      "sha256": "926ff60ec0ffed91526c5615ec46d65af4ba4c5dbbb22f76a794cce07ff4e6d0",
+      "summary_sha256": "7f3eca37e698bb86b580ab86272d28e088c8864af7be672342d68eff6c6c7597"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve1_rotation2_combined2/density.pdf",
+      "sha256": "ff73c33b7a8104582db2f29f4704b73a4dc99931e7a3dbf3b9188147572b0519",
+      "summary_sha256": "ebde87d76274201a144eab3864ee63b5094a9ab810f41b4ab57e5a5ad5a4fa30"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve1_rotation2_combined2/overhead.pdf",
+      "sha256": "6998dab1848a4616379ddc83f5940aaa31e081137a5bb3c212d5c4f6651955ee",
+      "summary_sha256": "ebde87d76274201a144eab3864ee63b5094a9ab810f41b4ab57e5a5ad5a4fa30"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve1_rotation2_shaft_only/density.pdf",
+      "sha256": "4675a87af8f57b441cbd78b3f08b0dae3e273bb9d3f769cf1a944f2ae44e33eb",
+      "summary_sha256": "7540f0e24271c0e1dfc2a38b5898e42714bb5c1e9386edf7930f258db5ddeb30"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve1_rotation2_shaft_only/overhead.pdf",
+      "sha256": "361079f277c8eefe0d38a8b68d30751587f1053402711e66b2a22c18fa9c1eb5",
+      "summary_sha256": "7540f0e24271c0e1dfc2a38b5898e42714bb5c1e9386edf7930f258db5ddeb30"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve2_rotation1_combined2/density.pdf",
+      "sha256": "1ca81f05612bbe7b0805d6e4c644b268a97657fdfc10f0bfd3c5337f863e798f",
+      "summary_sha256": "9b5823be94ea6e0d5da763513de5adaae2fc65cc30946e3cdfc79a295c61fc1e"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve2_rotation1_combined2/overhead.pdf",
+      "sha256": "6fdb78425124e1101a6cc899b4c2485cf164d361ed7b0ec706946217710da834",
+      "summary_sha256": "9b5823be94ea6e0d5da763513de5adaae2fc65cc30946e3cdfc79a295c61fc1e"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve2_rotation1_shaft_only/density.pdf",
+      "sha256": "8ed4f3b6058cf2cb27ee3d54ab1a099493ec712f602c8f3244bf58b1b7a0db21",
+      "summary_sha256": "0b9f1fbcf2388d7e5036cfb85030864c4d58466737fbbc9be5b6c39647a5b81e"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve2_rotation1_shaft_only/overhead.pdf",
+      "sha256": "6664a31c565eee5b9e2335dfe355d83e6843ec7876cd73734a6124d9190e562b",
+      "summary_sha256": "0b9f1fbcf2388d7e5036cfb85030864c4d58466737fbbc9be5b6c39647a5b81e"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve2_rotation2_combined2/density.pdf",
+      "sha256": "fc072e8c62f7e4afb82eba5ac01e1e2868de57cd2995b11a6c2e55221095eb12",
+      "summary_sha256": "adb4265c8a53ade4097af3fe06056a5cc7674aa7800a606ad1e82e8c3b70aac5"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.pdf",
+      "sha256": "ee50fdfa24e89df9546ee481476b5d191939b5cdd7d39f3b2abdb5de7366610e",
+      "summary_sha256": "adb4265c8a53ade4097af3fe06056a5cc7674aa7800a606ad1e82e8c3b70aac5"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve2_rotation2_shaft_only/density.pdf",
+      "sha256": "dcf363e34a3552d73d2b14f2d74680f283ea06d648c0e18279c93e0a1b52f38c",
+      "summary_sha256": "f46a05b5fbae3046e0b8f1175f59a93988a08041ce027e993729dcff46dbcceb"
+    },
+    {
+      "path": "details/pitching_wedge_lean10_curve2_rotation2_shaft_only/overhead.pdf",
+      "sha256": "ab711e05c5d3f1f8803625fdbe388cfe89c9e564c768474d86ebddd4c8d99a82",
+      "summary_sha256": "f46a05b5fbae3046e0b8f1175f59a93988a08041ce027e993729dcff46dbcceb"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve1_rotation1_combined2/density.pdf",
+      "sha256": "78b91b12bb90289adacbdc25f7eaff93e236d14b49255874e7c8b36bab152e56",
+      "summary_sha256": "a967873b2311fea6434f67145daba59e9e434c5ec9ed17ad4fcbc784917eed54"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "eed884520c61a064beb30da8ab5244fbcfc142bfc8defb2ff7a11ec8813000bf",
+      "summary_sha256": "a967873b2311fea6434f67145daba59e9e434c5ec9ed17ad4fcbc784917eed54"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve1_rotation1_shaft_only/density.pdf",
+      "sha256": "994c8c06fdbdec2287331ab44d2eae9dc2b5191531a03b3b07a6ad0d1729560e",
+      "summary_sha256": "eea158d4643f0328eef471b253d7496e01e6943c2aaeead14da1d2795ceeca37"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve1_rotation1_shaft_only/overhead.pdf",
+      "sha256": "0e148e395cba86761b2f0faa8f4dabc94766324983f38ee4fb316a341b5ca3e0",
+      "summary_sha256": "eea158d4643f0328eef471b253d7496e01e6943c2aaeead14da1d2795ceeca37"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve1_rotation2_combined2/density.pdf",
+      "sha256": "859836905177740b91f022b2b67ada37c6808e57e8f14eab02c73e832847311a",
+      "summary_sha256": "03f21c5e25e2dfedd792601fe6d5dfc95d0ecc695d121093f539b7dbc38f1c6b"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve1_rotation2_combined2/overhead.pdf",
+      "sha256": "117e66f8b66d71f71bd4f1d5e096e10ed485699d73e6b08b20a70d95c0293de1",
+      "summary_sha256": "03f21c5e25e2dfedd792601fe6d5dfc95d0ecc695d121093f539b7dbc38f1c6b"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve1_rotation2_shaft_only/density.pdf",
+      "sha256": "d017bc82fd8281713653ad2158dbca83eb893312ccb4c8ccc5255c34e098b1b4",
+      "summary_sha256": "0921ee8bbf4cbaa01210aa28812e1f8cb98968fc98c5720cced673a10b4de232"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve1_rotation2_shaft_only/overhead.pdf",
+      "sha256": "d5c9bf3ee069a07befab9b7acb82695097cf197137910cbd5d3eb0f8e154793f",
+      "summary_sha256": "0921ee8bbf4cbaa01210aa28812e1f8cb98968fc98c5720cced673a10b4de232"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve2_rotation1_combined2/density.pdf",
+      "sha256": "86a655e19f8b625de825a46afeea2c705ae48313ef651997d5fa427b77ca2162",
+      "summary_sha256": "c23e5477ae0d052db95792498dd5997fb161f94c18207c97b5839ffce1848b6a"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve2_rotation1_combined2/overhead.pdf",
+      "sha256": "7efaecdbba4a51cb93d22d5a4cbced5ebb9b24f63e6b18f835864b99e47817f0",
+      "summary_sha256": "c23e5477ae0d052db95792498dd5997fb161f94c18207c97b5839ffce1848b6a"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve2_rotation1_shaft_only/density.pdf",
+      "sha256": "b802287b0d874f0d6582b04b53d9d9ac4eae2d332c00fbcde558ea25e49741d6",
+      "summary_sha256": "a37761a08ddfc84e34341068a8fcc68f34c2c98fdc023b5a62a5ef5d2fb67b4c"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve2_rotation1_shaft_only/overhead.pdf",
+      "sha256": "1e54b7053150d470a2ce5933e46bc0d980f53634e9e9f9856c78759edffd3780",
+      "summary_sha256": "a37761a08ddfc84e34341068a8fcc68f34c2c98fdc023b5a62a5ef5d2fb67b4c"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve2_rotation2_combined2/density.pdf",
+      "sha256": "768dfa7806c7c3efa33477da8d0b21aa52b73fd68df14b397bc9f76da8c523ae",
+      "summary_sha256": "1bdbe8d192de62c013ea817607cfd6aaf3f83397861caf2a0d238494d3b3afd7"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.pdf",
+      "sha256": "01dbabf3a74473461ab256b08934ce16a5bef454e0d53c6125daa080248ad996",
+      "summary_sha256": "1bdbe8d192de62c013ea817607cfd6aaf3f83397861caf2a0d238494d3b3afd7"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve2_rotation2_shaft_only/density.pdf",
+      "sha256": "4ae202c70065057cecd555b41bec856df2ac3c06af89f96129c2bab4fb54cc83",
+      "summary_sha256": "7e9b8b758789771dc0157f909a375ce2537b0b92f101dff7868f6f0a2174c422"
+    },
+    {
+      "path": "details/pitching_wedge_lean5_curve2_rotation2_shaft_only/overhead.pdf",
+      "sha256": "1a8847bd48573adb809419e2e9de24c7fed986799f4bac715d54ed044db87c80",
+      "summary_sha256": "7e9b8b758789771dc0157f909a375ce2537b0b92f101dff7868f6f0a2174c422"
+    }
+  ]
+}

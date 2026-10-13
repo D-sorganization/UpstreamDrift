@@ -1,0 +1,50 @@
+"""Saved-data caption qualification only; no simulation or scoring recomputation."""
+from pathlib import Path
+import hashlib,json,subprocess
+from datetime import datetime,timezone
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib.figure import Figure
+from src.tools.shot_pattern_analysis import matched_supplement_figures as figures
+from src.tools.shot_pattern_analysis.matched_supplement_pipeline import select_explicit_pairs,_load_original_sources
+P=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+W=Path('/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
+O=Path('/tmp/p2-social-context-actual-candidate')
+assert not O.exists();O.mkdir()
+h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
+def sources(w):return {str(f.relative_to(w)):h(f) for b in ['src/tools/shot_pattern_analysis','scripts/research/shot_pattern_analysis'] for f in sorted((w/b).rglob('*.py'))}
+source_before=sources(W);main=P.parents[3];main_before=sources(main)
+report_path=P/'supplement_report_v1/REPORT_SUPPLEMENT.json';r=json.loads(report_path.read_text());bindings={str(report_path):h(report_path)}
+refs=r['unique_cells'];chosen_names=['pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive','pitching_wedge_lean5_curve2_rotation2_combined2','driver_lean5_curve2_rotation2_combined2'];selected=[next(x for x in refs if x['cell']==n) for n in chosen_names]
+_,originals=_load_original_sources(P/'final_v1','original_primary')
+alias_refs=[]
+for a in r['aliases']:
+ assert a['proof_status']=='verified';s=next(x for x in refs if x['cell']==a['alias_of_primary']);alias_refs.append({**s,**a,'cell':a['alias_cell'],'execution_kind':'provenance_alias','summary':s['summary'],'config':a['requested_config'],'_execution':r['execution']})
+pairs=select_explicit_pairs([*originals,*refs,*alias_refs])
+wanted=[('curve_strength','pitching_wedge_lean0_curve1_rotation2_combined2','pitching_wedge_lean0_curve2_rotation2_combined2'),('across_lean','pitching_wedge_lean0_curve2_rotation2_combined2','pitching_wedge_lean5_curve2_rotation2_combined2')]
+selected_pairs=[]
+for kind,a,b in wanted:
+ matches=[v for v in pairs if v['comparison_kind']==kind and v['first']['cell']==a and v['second']['cell']==b and (kind!='across_lean' or v['first']['execution_kind']=='provenance_alias')];assert len(matches)==1,(kind,len(matches));selected_pairs.append(matches[0])
+for ref in selected+[v[k] for v in selected_pairs for k in ['first','second']]:
+ d=Path(ref['source_root'])/ref['cell']
+ for f in [d/'manifest.json',d/'summary.json',d/'shots.csv.gz',d/'flight_samples.json']:bindings[str(f)]=h(f)
+ for file,key in [('manifest.json','source_cell_manifest_sha256'),('shots.csv.gz','source_csv_sha256')]:assert h(d/file)==ref[key]
+original_save=Figure.savefig;captured=[]
+def save(fig,path,*args,**kwargs):
+ if str(path).endswith('.png'):
+  fig.canvas.draw();renderer=fig.canvas.get_renderer();box=fig.bbox
+  texts=[{'text':t.get_text(),'bounds':list(t.get_window_extent(renderer).bounds),'font_pt':t.get_fontsize()} for t in fig.texts if t.get_visible() and t.get_text()]
+  outside=[v for v in texts if v['bounds'][0]<-.5 or v['bounds'][1]<-.5 or v['bounds'][0]+v['bounds'][2]>box.width+.5 or v['bounds'][1]+v['bounds'][3]>box.height+.5]
+  captured.append({'path':str(path),'figure_pixels':[box.width,box.height],'texts':texts,'outside_canvas':outside})
+ return original_save(fig,path,*args,**kwargs)
+Figure.savefig=save
+ledger=[]
+for ref in selected:ledger.extend(figures._render_cell_figures(ref,O));print('CELL',ref['cell'],flush=True)
+for pair in selected_pairs:ledger.extend(figures._render_pair_figures(pair,O));print('PAIR',pair['comparison_kind'],flush=True)
+assert source_before==sources(W) and main_before==sources(main);assert all(h(Path(f))==v for f,v in bindings.items())
+unchanged=[]
+for x in O.rglob('*.png'):
+ if '_social' not in x.stem:
+  prior=P/'supplement_report_v1/figures'/x.relative_to(O)
+  if prior.exists():unchanged.append({'path':str(x.relative_to(O)),'same_bytes':h(x)==h(prior),'prior_sha256':h(prior),'new_sha256':h(x)})
+out={'status':'rendered_pending_independent_visual_review','commit':subprocess.check_output(['git','-C',str(W),'rev-parse','HEAD'],text=True).strip(),'source_sha256':source_before,'main_source_sha256':main_before,'input_sha256':bindings,'selected_cells':chosen_names,'selected_pairs':[{'kind':x['comparison_kind'],'first':x['first']['cell'],'second':x['second']['cell'],'first_protocol':x['first']['source_protocol'],'second_protocol':x['second']['source_protocol'],'first_mode':figures._cell_target_mode(x['first']),'second_mode':figures._cell_target_mode(x['second'])} for x in selected_pairs],'assets':{str(x.relative_to(O)):h(x) for x in O.rglob('*') if x.is_file()},'ledger':ledger,'figure_text_checks':captured,'unchanged_academic_png_checks':unchanged,'utc':datetime.now(timezone.utc).isoformat()};(O/'receipt.json').write_text(json.dumps(out,indent=2)+'\n');print('RECEIPT',h(O/'receipt.json'),flush=True)

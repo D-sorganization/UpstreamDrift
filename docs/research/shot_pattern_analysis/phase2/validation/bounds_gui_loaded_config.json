@@ -1,0 +1,56 @@
+{
+  "schema": "shot-pattern-matched-config/1",
+  "club": {
+    "club_id": "driver",
+    "club_speed_mps": 45.0,
+    "loft_deg": 10.0,
+    "lie_deg": 58.5,
+    "shaft_lean_deg": 5.0,
+    "attack_angle_deg": -0.9,
+    "clubhead_mass_kg": 0.2,
+    "inertia_diagonal_kg_m2": [
+      0.00025,
+      0.0004,
+      0.00045
+    ],
+    "cg_depth_m": 0.035,
+    "face_half_width_m": 0.05,
+    "face_half_height_m": 0.027,
+    "bulge_radius_m": 0.3,
+    "roll_radius_m": 0.3,
+    "cor": 0.83,
+    "friction_coefficient": 0.4,
+    "contact_law": "incremental_coulomb_energetic",
+    "steps_per_compression": 128,
+    "contact_backend": "auto",
+    "dt_s": 0.02,
+    "max_time_s": 12.0,
+    "loft_source": "https://www.titleist.com/golf-clubs/drivers/gt2"
+  },
+  "noise": {
+    "standard_deviations": [
+      2.0,
+      0.5,
+      0.89408,
+      0.00635,
+      0.00635,
+      0.0,
+      0.0
+    ],
+    "correlation": null
+  },
+  "n_shots": 32,
+  "seed": 20261009,
+  "curve_scale": 2.0,
+  "target_x_m": 178.94875782337786,
+  "match_tolerance_m": 0.05,
+  "target_radius_m": 15.0,
+  "match_face_bounds_deg": [
+    -6.0,
+    6.0
+  ],
+  "match_speed_factors": [
+    0.75,
+    1.3
+  ]
+}

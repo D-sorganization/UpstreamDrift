@@ -1,0 +1,67 @@
+{
+  "status": "accepted_precision_candidate",
+  "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "head_before_commit": "1b1a5f17ec86668ed77baffdedd1eaf1a38c192d",
+  "changed_files_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "b2d6ed3f6c8b11b5ea29dabe6defe12253415ba2bc9d3a2a39a637b337c0f53a",
+    "src/tools/shot_pattern_analysis/matched_gui.py": "788b28561c0684111750895dfbebac365ce6962df4f77be805ce50a58031f7f2",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80",
+    "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "tests/research/test_shot_pattern_final_report.py": "a5d9c146285ef9fe54c3b1f217b8f0fc93f0c02eb827ef39c42918c2247646fb",
+    "tests/tools/shot_pattern_analysis/test_matched_interpretation.py": "5cc23826c9976096065a994d4e935a2c6be3047fe19d1221b1695fceaa6dbb14",
+    "tests/tools/shot_pattern_analysis/test_matched_formatting.py": "068966a96e55862b8b38b225c6a89ffe3bb74a5e10780ebf6b5116e17e7f7314",
+    "tests/tools/shot_pattern_analysis/fixtures/matched_precision_affected.json": "52067438f8629409bacb22ea0a0edf468dc6d79401dca6a6efd6551c7dddfbc2"
+  },
+  "protected_13_sources_unchanged_from_worktree_HEAD": {
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "f8dbd72014056d133d64252d0ccda8fb1a66654cc17e39e103bf635b58b93510",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "82fe100f03508400e0c87b8a0c6c6055bb02c2bb7c8d10c80b4e9ef4bd1b6ff0",
+    "src/tools/shot_pattern_analysis/matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "src/tools/shot_pattern_analysis/matched_lean_control.py": "be60d94559eec95279d685b0cb0b9bc030c9ffeb165a2e724b932b6833f82912",
+    "src/tools/shot_pattern_analysis/matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "src/tools/shot_pattern_analysis/matched_report_plots.py": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
+    "src/tools/shot_pattern_analysis/academic_plots.py": "ed1b840b0b19df5c4e73ccb9dfef0c1ca826c5f0d3ff7ff4ac7913396013df54",
+    "src/tools/shot_pattern_analysis/density.py": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+    "src/tools/shot_pattern_analysis/matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+    "src/tools/shot_pattern_analysis/course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+    "src/tools/shot_pattern_analysis/scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "8b80820cb16b2a4f975a3bfcfa960d30500d3aec3d08fabd6a949bf4f9e37694"
+  },
+  "branch_note": "BOUNDS has an older matched_lean_control.py than active MAIN. The candidate changes none of the13 protected files; no branch-wide MAIN-equality claim. Integrate only the8 listed paths.",
+  "review_fixes": [
+    "Portable47-record fixture with original scan and per-summary hashes; no home path or missing-data skip.",
+    "Nonnegative finite absolute tolerance enforced, including for zero values; zero budget permits exact floating-point round-trip.",
+    "Removed silently ignored private digits parameter; report interval delegates to public record formatter.",
+    "New formatter source included in report publication source hashes.",
+    "Removed extraction-orphan GUI imports."
+  ],
+  "checks": {
+    "tests": 94,
+    "exit_code": 0,
+    "new_red_regressions": 7,
+    "ruff": "passed",
+    "mypy": "passed5files",
+    "file_size_budget": "passed",
+    "all_saved_intervals": 696,
+    "all_saved_absolute_means": 1044,
+    "max_relative_width_error": 0.009183864928432164,
+    "max_relative_value_error": 0.0009971237725258974
+  },
+  "limitations": [
+    "Reviewer applied narrow fixes after reviewing AGY candidate; no separate second reviewer of these fixes claimed.",
+    "Initial broad test invocation failed collection because GUI test path was wrong; preserved separately, corrected94-test run passed.",
+    "No Monte Carlo, bootstrap or live production sources changed.",
+    "Supplemental pipeline default still fixed4decimals; explicit follow-up required."
+  ],
+  "evidence_sha256": {
+    "size_budget.txt": "ef0b1774684c7ae18642c51b66ef94157c5104d462152f8413ecf44f0ff09430",
+    "review_red.txt": "06e71c25c9ec6dc4faaa19c3fe4bb1c10e6c2a64f37af2af266e48f6eeecc519",
+    "review_collection_error.txt": "a80cc0dfe3705ca85ffb1b7bda2f8f0c3ded349452773502cc0ed240b410dac7",
+    "ruff.txt": "0be7adce665690956090205e08186f7efd9939d7fe606e4a0d117c570ab71599",
+    "executed_all_saved.py.txt": "35b5b70aea43445e661f0fc0c8f25ffb46dade8355d43dc350c54fd93c85f62f",
+    "all_saved_precision.json": "bde60b345a25b52b1741f91570499fff826f8d33190badc6e9167955d8334193",
+    "all_saved_log.txt": "4eb4a1564056f18c7f6d06c3518b77821b50a6ab6b1888776e45cb7d01f5a559",
+    "mypy.txt": "e317872697c2cbfdefa321527a6efe73290dff3a390b0fa8723b87092eccba6a",
+    "review_green.txt": "bb7d224fe464064591c9219c2b4ea3717d1d94b62cca64490ed6cccdb9173965"
+  }
+}

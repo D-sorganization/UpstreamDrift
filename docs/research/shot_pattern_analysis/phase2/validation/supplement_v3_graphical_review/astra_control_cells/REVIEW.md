@@ -1,0 +1,9 @@
+# Supplemental Control-Cell Graphics Review
+
+Provisional review of all 32 PNGs from eight completed supplemental control cells: four Driver lean-5 cells and four PW lean-5 cells, each with academic/social density and overhead exports. All four contact sheets and six representative original images were inspected. Asset and companion SVG hashes remained stable, as did the report and eight source summary/manifest pairs. Exact scope and hashes are recorded in `review.json`.
+
+No additional clipping, tick collision or population mismatch was found. Driver combined-noise support is 9,974 at shaft-twist SD1 and 9,940 at SD2; PW combined-noise support is 9,999 at both SDs; shaft-only cases have 10,000. Density captions distinguish all supported endpoints from 600 displayed dots. Overhead captions identify six raw flight samples per pattern, unequal display magnification, and no claim of common-index pairing. Academic protocol labels match the source records.
+
+Changes are required for standalone social identification: all 16 control social PNGs omit the protocol and numeric fixed-target distance. PW lean5 curve2 has both within-lean primary and fixed-target control contexts; identical club/lean/curve/noise labels do not distinguish them. The academic companion identifies the exact protocol, but a social image shared alone loses that distinction. Driver speed-bound sensitivity also needs identification, rather than appearing to be the original bounded protocol.
+
+This is a file-level review while publication is still running. Final receipt/manifest reconciliation remains mandatory. No source, live output or numerical result was modified. The first checker equality assertion was corrected to allow the report's additional `cell` identity field; every original source-summary field still compares exactly.

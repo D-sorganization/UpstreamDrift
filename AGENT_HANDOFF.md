@@ -45,6 +45,10 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+Shot-pattern study (straight, draw and fade; #12409, PR #12418):
+
+- Matched phase-two study and article with 2,000-resample intervals and the clubhead-assumption band; consolidates #12278, #12410 and #12411. Start at `docs/research/shot_pattern_analysis/phase2/RESUME_HANDOFF.md`; the pre-consolidation detail is in the archive section of that name.
+
 Grip and club calibration (#12221, #12042, #12117):
 
 - Per-capture grip rotation adopted and refit on the fixed clusters, measured driver cluster, fixed cluster in the static trial: #12221.

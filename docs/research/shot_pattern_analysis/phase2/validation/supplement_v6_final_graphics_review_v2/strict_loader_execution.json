@@ -1,0 +1,14 @@
+{
+  "command": [
+    "env",
+    "PYTHONPATH=/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/strict_loader_command.py"
+  ],
+  "workdir": "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
+  "actual_exit_code": 0,
+  "observed_stdout": "{\"status\": \"passed\", \"pairs\": 384, \"cells\": 26, \"assets\": 6456}",
+  "script_sha256": "2c86e0ae4dd4e8a30a5be73df7cff5b81bd059b1bdf51061466e0deebc8de1d6",
+  "receipt_sha256": "0153d81e1a7c7c91c66c6f0f378081ca8474efdf8a5d2b4a94f15fd16e898bf4",
+  "recorded_utc": "2026-10-11T00:23:50.850042+00:00"
+}

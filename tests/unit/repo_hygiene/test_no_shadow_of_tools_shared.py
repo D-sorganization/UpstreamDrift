@@ -25,9 +25,11 @@ Design-by-contract:
 
 from __future__ import annotations
 
+import json
 import os
+import sys
 from datetime import date
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import pytest
@@ -42,6 +44,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 _VENDOR_SHARED = _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
 _UD_SHARED = _REPO_ROOT / "src" / "shared" / "python"
 _LEDGER_PATH = _REPO_ROOT / "scripts" / "config" / "shadow_modules.yaml"
+_SEAM_RULINGS = _REPO_ROOT / "docs" / "shared_tools" / "seam_rulings.v1.json"
 
 # Names that are not modules and must be ignored on either side.
 _IGNORED_NAMES = frozenset(
@@ -140,7 +143,72 @@ def _unapproved_shadows(
     allowed: set[str],
 ) -> list[str]:
     """Return shadowed module names that are absent from the ledger."""
-    return sorted((vendor_names & ud_names) - allowed)
+    return sorted(
+        name
+        for name in (vendor_names & ud_names) - allowed
+        if not _is_reviewed_split_extension(name)
+    )
+
+
+def _is_reviewed_split_extension(name: str) -> bool:
+    """Accept only a cleaned namespace split's exact reviewed UD-only files."""
+    if not _SEAM_RULINGS.is_file():
+        return False
+    rulings = json.loads(_SEAM_RULINGS.read_text(encoding="utf-8")).get("rulings", {})
+    ruling = rulings.get(name, {})
+    if ruling.get("ruling") != "split" or ruling.get("status") != "cleaned":
+        return False
+    declared = ruling.get("ud_only_paths")
+    if not isinstance(declared, list) or not declared:
+        return False
+    reviewed: set[str] = set()
+    for raw in declared:
+        if not isinstance(raw, str):
+            return False
+        relative = PurePosixPath(raw)
+        if (
+            not raw
+            or relative.is_absolute()
+            or raw != relative.as_posix()
+            or ".." in relative.parts
+            or relative.suffix != ".py"
+            or relative.name == "__init__.py"
+        ):
+            return False
+        reviewed.add(raw)
+    if len(reviewed) != len(declared):
+        return False
+    local = _UD_SHARED / name
+    vendor = _VENDOR_SHARED / name
+    if (
+        not local.is_dir()
+        or not vendor.is_dir()
+        or local.is_symlink()
+        or vendor.is_symlink()
+    ):
+        return False
+    if any(path.is_symlink() for path in local.rglob("*")):
+        return False
+    local_python = {path.relative_to(local).as_posix() for path in local.rglob("*.py")}
+    if local_python != reviewed:
+        return False
+    if any(PurePosixPath(path).name == "__init__.py" for path in local_python):
+        return False
+    provider_names = {
+        path.relative_to(vendor).as_posix()
+        for path in vendor.rglob("*")
+        if path.is_dir()
+    }
+    provider_names.update(
+        (path.parent if path.name == "__init__.py" else path.with_suffix(""))
+        .relative_to(vendor)
+        .as_posix()
+        for path in vendor.rglob("*.py")
+    )
+    local_names = {
+        PurePosixPath(path).with_suffix("").as_posix() for path in local_python
+    }
+    return not bool(local_names & provider_names)
 
 
 # ── ledger well-formedness ───────────────────────────────────────────────────
@@ -213,6 +281,91 @@ def test_no_unapproved_shadows_of_tools_shared() -> None:
         "with a tracking issue and sunset date. See UpstreamDrift issue "
         f"#5623.\n\nUnapproved shadows: {unapproved}"
     )
+
+
+def test_reviewed_disjoint_split_extension_is_not_a_shadow(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A cleaned split retains only its declared UD-only namespace extension."""
+    vendor = tmp_path / "vendor"
+    ud = tmp_path / "ud"
+    (vendor / "signal_toolkit").mkdir(parents=True)
+    (ud / "signal_toolkit").mkdir(parents=True)
+    (vendor / "signal_toolkit" / "core.py").write_text("class Signal: pass\n")
+    (ud / "signal_toolkit" / "signal_processing.py").write_text("PASS = True\n")
+    rulings = tmp_path / "rulings.json"
+    rulings.write_text(
+        json.dumps(
+            {
+                "rulings": {
+                    "signal_toolkit": {
+                        "ruling": "split",
+                        "status": "cleaned",
+                        "ud_only_paths": ["signal_processing.py"],
+                    }
+                }
+            }
+        )
+    )
+    monkeypatch.setattr(sys.modules[__name__], "_VENDOR_SHARED", vendor)
+    monkeypatch.setattr(sys.modules[__name__], "_UD_SHARED", ud)
+    monkeypatch.setattr(sys.modules[__name__], "_SEAM_RULINGS", rulings)
+    assert _unapproved_shadows({"signal_toolkit"}, {"signal_toolkit"}, set()) == []
+
+
+@pytest.mark.parametrize(
+    ("extra_local", "extra_vendor"),
+    [
+        ("__init__.py", None),
+        ("core.py", None),
+        ("new_helper.py", None),
+        ("remove-signal", None),
+        (None, "signal_processing.py"),
+        (None, "signal_processing/__init__.py"),
+    ],
+)
+def test_split_extension_rejects_init_new_or_colliding_modules(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    extra_local: str | None,
+    extra_vendor: str | None,
+) -> None:
+    vendor = tmp_path / "vendor"
+    ud = tmp_path / "ud"
+    (vendor / "signal_toolkit").mkdir(parents=True)
+    (ud / "signal_toolkit").mkdir(parents=True)
+    (vendor / "signal_toolkit" / "core.py").write_text("class Signal: pass\n")
+    (ud / "signal_toolkit" / "signal_processing.py").write_text("PASS = True\n")
+    if extra_local == "remove-signal":
+        (ud / "signal_toolkit" / "signal_processing.py").unlink()
+    elif extra_local is not None:
+        path = ud / "signal_toolkit" / extra_local
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("PASS = False\n")
+    if extra_vendor is not None:
+        path = vendor / "signal_toolkit" / extra_vendor
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("PASS = False\n")
+    rulings = tmp_path / "rulings.json"
+    rulings.write_text(
+        json.dumps(
+            {
+                "rulings": {
+                    "signal_toolkit": {
+                        "ruling": "split",
+                        "status": "cleaned",
+                        "ud_only_paths": ["signal_processing.py"],
+                    }
+                }
+            }
+        )
+    )
+    monkeypatch.setattr(sys.modules[__name__], "_VENDOR_SHARED", vendor)
+    monkeypatch.setattr(sys.modules[__name__], "_UD_SHARED", ud)
+    monkeypatch.setattr(sys.modules[__name__], "_SEAM_RULINGS", rulings)
+    assert _unapproved_shadows({"signal_toolkit"}, {"signal_toolkit"}, set()) == [
+        "signal_toolkit"
+    ]
 
 
 # ── no-growth ratchet behaviour ──────────────────────────────────────────────

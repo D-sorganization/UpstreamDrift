@@ -1,0 +1,636 @@
+{
+  "accepted_hash_inventory": "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/cell_checks.json",
+  "accepted_hash_inventory_sha256": "9c9083eb06e58f231bf641e901d210aa00b71f354f7c7fbe1ce66b58ca29867b",
+  "accepted_review_receipt": "docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_cell_graphics_review_v1/review.json",
+  "accepted_review_receipt_sha256": "19c398c21416cd96f6ab796359d6e38542cbc441418b70549f8da586e44a71f6",
+  "assets": [
+    {
+      "accepted_visual_receipt_sha256": "683fe49296afb355f30cbca96a72dfec8731540b446f3fd6b35232b0a2131f00",
+      "bytes": 974353,
+      "current_child_v2_sha256": "683fe49296afb355f30cbca96a72dfec8731540b446f3fd6b35232b0a2131f00",
+      "name": "driver_lean5_curve2_rotation1_combined2_deedbe331c_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "839e65016d844c6263bea9e82f69fdb3987b4fe5bec29c43d3587b5bb2efe4ef",
+      "bytes": 1132948,
+      "current_child_v2_sha256": "839e65016d844c6263bea9e82f69fdb3987b4fe5bec29c43d3587b5bb2efe4ef",
+      "name": "driver_lean5_curve2_rotation1_combined2_deedbe331c_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "5696aebe8add2f89024f443352d5ccfa96262cb28e2456157356d0a37cd19b20",
+      "bytes": 634048,
+      "current_child_v2_sha256": "5696aebe8add2f89024f443352d5ccfa96262cb28e2456157356d0a37cd19b20",
+      "name": "driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "1828ec2071c6d9c6f03baee127df6f6979d991b44dfcbc82b5c440ea2b403ee0",
+      "bytes": 718438,
+      "current_child_v2_sha256": "1828ec2071c6d9c6f03baee127df6f6979d991b44dfcbc82b5c440ea2b403ee0",
+      "name": "driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "258fe2b1fcbf85b71b9770f91304049be03aafdfce90fbeaf021b839ce0cee4d",
+      "bytes": 652082,
+      "current_child_v2_sha256": "258fe2b1fcbf85b71b9770f91304049be03aafdfce90fbeaf021b839ce0cee4d",
+      "name": "driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "f522576ffc131a07a300ba27e58b7e2f397d3fd59b2248f3117571bf47532063",
+      "bytes": 777296,
+      "current_child_v2_sha256": "f522576ffc131a07a300ba27e58b7e2f397d3fd59b2248f3117571bf47532063",
+      "name": "driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "12a0b2199ddac3345820a7219d1eb2d3f1144355b22a20dca45111a08cd3a88d",
+      "bytes": 669418,
+      "current_child_v2_sha256": "12a0b2199ddac3345820a7219d1eb2d3f1144355b22a20dca45111a08cd3a88d",
+      "name": "driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "97731c76cfd2383ed9841b113a9a0010ab5845e19972f857f229ec13e94eecc9",
+      "bytes": 734488,
+      "current_child_v2_sha256": "97731c76cfd2383ed9841b113a9a0010ab5845e19972f857f229ec13e94eecc9",
+      "name": "driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "3c7caabbbae0a97483bd01ca7c645395b1168ad14e6c147415f9153830a5cea6",
+      "bytes": 911708,
+      "current_child_v2_sha256": "3c7caabbbae0a97483bd01ca7c645395b1168ad14e6c147415f9153830a5cea6",
+      "name": "driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "8f8f6e932f3f9e42f511c21fb4bad5ca863cad44d48acc8baea554d01be84389",
+      "bytes": 1079873,
+      "current_child_v2_sha256": "8f8f6e932f3f9e42f511c21fb4bad5ca863cad44d48acc8baea554d01be84389",
+      "name": "driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "104c1ddfef3ac536e71faeeba15a864cf4a9296c3f3f40d45a73b3d6430a4dc7",
+      "bytes": 569376,
+      "current_child_v2_sha256": "104c1ddfef3ac536e71faeeba15a864cf4a9296c3f3f40d45a73b3d6430a4dc7",
+      "name": "driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "d674f42a001d7efb53ec0d4ec5a31abbbdc5d2b01028c95124847d28b040a60a",
+      "bytes": 649487,
+      "current_child_v2_sha256": "d674f42a001d7efb53ec0d4ec5a31abbbdc5d2b01028c95124847d28b040a60a",
+      "name": "driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "f3df69e5203ddb9bab51ec0056fe20b2a2f3f2da717a5d3858e40c853867518b",
+      "bytes": 679308,
+      "current_child_v2_sha256": "f3df69e5203ddb9bab51ec0056fe20b2a2f3f2da717a5d3858e40c853867518b",
+      "name": "driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "a240ed9a334cc98dae826f065889eeac98c7113aa88c298d51acc1605b4f130b",
+      "bytes": 787572,
+      "current_child_v2_sha256": "a240ed9a334cc98dae826f065889eeac98c7113aa88c298d51acc1605b4f130b",
+      "name": "driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "a3fe23cdd88ff4892edc23041e90a49dad41b1d9cceae5d9f428397ed5851de3",
+      "bytes": 605550,
+      "current_child_v2_sha256": "a3fe23cdd88ff4892edc23041e90a49dad41b1d9cceae5d9f428397ed5851de3",
+      "name": "driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "238beb983c0160fe5371076560c68e7679fbe611c19808a8e8f9348c4eb278c0",
+      "bytes": 662296,
+      "current_child_v2_sha256": "238beb983c0160fe5371076560c68e7679fbe611c19808a8e8f9348c4eb278c0",
+      "name": "driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "133836f8ea3e783821b9d2c1c26f6a4d98f79bdb329fb3bb2bdbdc7b7808b57f",
+      "bytes": 1113128,
+      "current_child_v2_sha256": "133836f8ea3e783821b9d2c1c26f6a4d98f79bdb329fb3bb2bdbdc7b7808b57f",
+      "name": "pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "9cf9698598baa239c89a8c485dc492a903b20ab0cc17d0ead918b2a29a3f8d40",
+      "bytes": 1285577,
+      "current_child_v2_sha256": "9cf9698598baa239c89a8c485dc492a903b20ab0cc17d0ead918b2a29a3f8d40",
+      "name": "pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "5a8708ddc5a7f583bc4567a235df84e2b7b4293af9e6b929f3fd575b07e31f35",
+      "bytes": 611227,
+      "current_child_v2_sha256": "5a8708ddc5a7f583bc4567a235df84e2b7b4293af9e6b929f3fd575b07e31f35",
+      "name": "pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "78fbcbeabeb0fea9bfe79422e94cf73e55e522e0f7dddc0ce6267c66f9184760",
+      "bytes": 691848,
+      "current_child_v2_sha256": "78fbcbeabeb0fea9bfe79422e94cf73e55e522e0f7dddc0ce6267c66f9184760",
+      "name": "pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "1b36951a8006413e4e15e8c11fb9accee5b255fb633bcd8f24edf21c21589903",
+      "bytes": 1093052,
+      "current_child_v2_sha256": "1b36951a8006413e4e15e8c11fb9accee5b255fb633bcd8f24edf21c21589903",
+      "name": "pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "dcc0f2493aa792a87fbb472434ec8c2a3e320e0e5eda26cd4ba25fe447736197",
+      "bytes": 1264774,
+      "current_child_v2_sha256": "dcc0f2493aa792a87fbb472434ec8c2a3e320e0e5eda26cd4ba25fe447736197",
+      "name": "pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "d4efa4d70e13f23aed39a6707ebbd69836d3bb344d4c077eb9c9de6680f883e2",
+      "bytes": 611056,
+      "current_child_v2_sha256": "d4efa4d70e13f23aed39a6707ebbd69836d3bb344d4c077eb9c9de6680f883e2",
+      "name": "pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "d07199dfaaaaf76a48361e303bae71809c438dfa34271bbe871d88f6881dfa6c",
+      "bytes": 689000,
+      "current_child_v2_sha256": "d07199dfaaaaf76a48361e303bae71809c438dfa34271bbe871d88f6881dfa6c",
+      "name": "pitching_wedge_lean0_curve2_rotation1_combined2_494bcd441c_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "79b4ff77b9009dd30c280963b57885189975a4b6bfd44cae1ddd0d012a59d819",
+      "bytes": 1119894,
+      "current_child_v2_sha256": "79b4ff77b9009dd30c280963b57885189975a4b6bfd44cae1ddd0d012a59d819",
+      "name": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "b4f704f9585f7657b54de8682cc0e065853455fb6f2a75b4aff73f447a549528",
+      "bytes": 1356758,
+      "current_child_v2_sha256": "b4f704f9585f7657b54de8682cc0e065853455fb6f2a75b4aff73f447a549528",
+      "name": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "66e4428d6253440b9f3f53ab2d3ec3f75d52b4eb5102e1c750d64ba7a23473bf",
+      "bytes": 648973,
+      "current_child_v2_sha256": "66e4428d6253440b9f3f53ab2d3ec3f75d52b4eb5102e1c750d64ba7a23473bf",
+      "name": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "3d768bfa19eeb09dcd67b9f7cee3f0bddff0556e6f8169fd86d228a1521b579d",
+      "bytes": 798714,
+      "current_child_v2_sha256": "3d768bfa19eeb09dcd67b9f7cee3f0bddff0556e6f8169fd86d228a1521b579d",
+      "name": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_bd52a6240f_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "0bf2d859d4d8b67ce8baa6b7b20674a0f9fb571188521cb20b38cb037913d7e1",
+      "bytes": 1053339,
+      "current_child_v2_sha256": "0bf2d859d4d8b67ce8baa6b7b20674a0f9fb571188521cb20b38cb037913d7e1",
+      "name": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "df4b12f1c534db4aa44c20837e9c0b26bd88caaee63b1e8b7bb46ee66f0af859",
+      "bytes": 1272304,
+      "current_child_v2_sha256": "df4b12f1c534db4aa44c20837e9c0b26bd88caaee63b1e8b7bb46ee66f0af859",
+      "name": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "ce3f5dc523f1a363584197095c519d5db33f5b1f3da032b55e708ab1f3459b8a",
+      "bytes": 628600,
+      "current_child_v2_sha256": "ce3f5dc523f1a363584197095c519d5db33f5b1f3da032b55e708ab1f3459b8a",
+      "name": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "1e296299ec15d036f5bec453be1aff1221a59fcec3a8a7197bfd1f50e15dc0e9",
+      "bytes": 784096,
+      "current_child_v2_sha256": "1e296299ec15d036f5bec453be1aff1221a59fcec3a8a7197bfd1f50e15dc0e9",
+      "name": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_b76ce60de9_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "c045cd81f9f4e5e4b4f807bfed5babb9c6d6b73f5e347c31c5e4904d85703531",
+      "bytes": 684112,
+      "current_child_v2_sha256": "c045cd81f9f4e5e4b4f807bfed5babb9c6d6b73f5e347c31c5e4904d85703531",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "b935bcebae74dc89f90f12d7cd21f0a9dab046cee5c0762e2472fc333d27a3e4",
+      "bytes": 795390,
+      "current_child_v2_sha256": "b935bcebae74dc89f90f12d7cd21f0a9dab046cee5c0762e2472fc333d27a3e4",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "f5e8977ebded1cb8d25ec9a96cc61712ab34f76f50fc53b73a34265ee9f6a661",
+      "bytes": 645008,
+      "current_child_v2_sha256": "f5e8977ebded1cb8d25ec9a96cc61712ab34f76f50fc53b73a34265ee9f6a661",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "fc764bde39df02e1f9306c547f82b982b053cf5ac70f42d4b6241df2a5556e36",
+      "bytes": 706164,
+      "current_child_v2_sha256": "fc764bde39df02e1f9306c547f82b982b053cf5ac70f42d4b6241df2a5556e36",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "131708990351580dc4ec9ddcc9c89513b7a0d33639edc4c9c7b735d260aeb11e",
+      "bytes": 732474,
+      "current_child_v2_sha256": "131708990351580dc4ec9ddcc9c89513b7a0d33639edc4c9c7b735d260aeb11e",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "4421b8e709448f27b046332ccc44629b3bff2e5824a61fb1ea116ea6c45f80f4",
+      "bytes": 861657,
+      "current_child_v2_sha256": "4421b8e709448f27b046332ccc44629b3bff2e5824a61fb1ea116ea6c45f80f4",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "5b53f2cfe0b24b26799aa9501d5c9f69eeb1df97032b3b2b1e4e02a6a3f02bd3",
+      "bytes": 647442,
+      "current_child_v2_sha256": "5b53f2cfe0b24b26799aa9501d5c9f69eeb1df97032b3b2b1e4e02a6a3f02bd3",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "cfc62a670f6ec8a37675c438f5d94c331521eda04b449713eb5d0c9ed458e83d",
+      "bytes": 716889,
+      "current_child_v2_sha256": "cfc62a670f6ec8a37675c438f5d94c331521eda04b449713eb5d0c9ed458e83d",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_path_a7d104bd05_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "e4acd30782616c3b4d34f8f07eee4c59152e79cd471cb53249513bb772070f2f",
+      "bytes": 1123255,
+      "current_child_v2_sha256": "e4acd30782616c3b4d34f8f07eee4c59152e79cd471cb53249513bb772070f2f",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "53e77270f90ab9e3bbbed8e44a7e764d40d79b994bed7ede65c1e25b8d42d575",
+      "bytes": 1272077,
+      "current_child_v2_sha256": "53e77270f90ab9e3bbbed8e44a7e764d40d79b994bed7ede65c1e25b8d42d575",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "e0619d1cde2bc27cb97f510b3e0718de06424ec47b6e4ee03b443b67ef36c002",
+      "bytes": 630574,
+      "current_child_v2_sha256": "e0619d1cde2bc27cb97f510b3e0718de06424ec47b6e4ee03b443b67ef36c002",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "5e300769ecc66385100686a0ddf8c2a6fe9a71c6c5053ff7fdea5026d7ccdc6b",
+      "bytes": 699979,
+      "current_child_v2_sha256": "5e300769ecc66385100686a0ddf8c2a6fe9a71c6c5053ff7fdea5026d7ccdc6b",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1_407789b9fd_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "a8463a621f0e731c1246e9e9b4a0267c0d5cd3ef55fb01cee13450274ec585cc",
+      "bytes": 1132400,
+      "current_child_v2_sha256": "a8463a621f0e731c1246e9e9b4a0267c0d5cd3ef55fb01cee13450274ec585cc",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "d267130873314134c0007a09a3d172c987942f280d6cd68d567399d8ab48d7c5",
+      "bytes": 1284805,
+      "current_child_v2_sha256": "d267130873314134c0007a09a3d172c987942f280d6cd68d567399d8ab48d7c5",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "816570a745a7c92e63903b28bf79ed1ec34bd532ff0b11f7b7c31e63ed0ee34c",
+      "bytes": 626950,
+      "current_child_v2_sha256": "816570a745a7c92e63903b28bf79ed1ec34bd532ff0b11f7b7c31e63ed0ee34c",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "2eba472cfa385c88ba833b538c1512bd2d32ddbb10879c06263dffcd834a910f",
+      "bytes": 696670,
+      "current_child_v2_sha256": "2eba472cfa385c88ba833b538c1512bd2d32ddbb10879c06263dffcd834a910f",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2_3b729bde46_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "17d5a4f80596fa86cccb8f51fd3e6f0bf58feb4fda2741bff1f32fcefff13714",
+      "bytes": 1037129,
+      "current_child_v2_sha256": "17d5a4f80596fa86cccb8f51fd3e6f0bf58feb4fda2741bff1f32fcefff13714",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "025be25d2c9b9f9effffea823a67a447ac5e415fc21e628264d57ae4821b7558",
+      "bytes": 1190826,
+      "current_child_v2_sha256": "025be25d2c9b9f9effffea823a67a447ac5e415fc21e628264d57ae4821b7558",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "5257db953f9912fee5a78416666f6d8a285c3a0238eea9c5181ed068e51d8ebc",
+      "bytes": 627865,
+      "current_child_v2_sha256": "5257db953f9912fee5a78416666f6d8a285c3a0238eea9c5181ed068e51d8ebc",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "055595d83e845b7598e827404b7a12639c19942a0c44d082a41c9511e66ea4aa",
+      "bytes": 703410,
+      "current_child_v2_sha256": "055595d83e845b7598e827404b7a12639c19942a0c44d082a41c9511e66ea4aa",
+      "name": "pitching_wedge_lean0_curve2_rotation1_shaft_strike_714f205b45_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "442b001b18f5f76716ab7f005ab8069d45ab4499a1e624d4dd680d15b2dd3870",
+      "bytes": 1074774,
+      "current_child_v2_sha256": "442b001b18f5f76716ab7f005ab8069d45ab4499a1e624d4dd680d15b2dd3870",
+      "name": "pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "b89daaddb61a6056a65183fe54a5e76b9feef96a91e1106629975804a945c56c",
+      "bytes": 1255509,
+      "current_child_v2_sha256": "b89daaddb61a6056a65183fe54a5e76b9feef96a91e1106629975804a945c56c",
+      "name": "pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "3f2b894246a44cc77bfc0dbc95d357e041583ac7902339e9f04567d8d467bd36",
+      "bytes": 616695,
+      "current_child_v2_sha256": "3f2b894246a44cc77bfc0dbc95d357e041583ac7902339e9f04567d8d467bd36",
+      "name": "pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "e6dd3ec94d5177814a0012f44fdd57957619aeaebc6ac21b9edbdaf9e496b264",
+      "bytes": 699132,
+      "current_child_v2_sha256": "e6dd3ec94d5177814a0012f44fdd57957619aeaebc6ac21b9edbdaf9e496b264",
+      "name": "pitching_wedge_lean0_curve2_rotation2_combined1_1890d65cae_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "f4c314748017116b47151a52493d98f25781b54b92712a485efbd6c4e9f46f60",
+      "bytes": 1123340,
+      "current_child_v2_sha256": "f4c314748017116b47151a52493d98f25781b54b92712a485efbd6c4e9f46f60",
+      "name": "pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "e9f9b1d2eee71aeeb51448ec2d221160e28fd5edaa208f8f2db1f86a218feca3",
+      "bytes": 1301773,
+      "current_child_v2_sha256": "e9f9b1d2eee71aeeb51448ec2d221160e28fd5edaa208f8f2db1f86a218feca3",
+      "name": "pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "7ad7b4cc1cb1ae346d53deccde23eef820265254515fa10da748543ac7cd16b3",
+      "bytes": 614852,
+      "current_child_v2_sha256": "7ad7b4cc1cb1ae346d53deccde23eef820265254515fa10da748543ac7cd16b3",
+      "name": "pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "5fd1b0d145553d5c9feb75d73bcf51bda2111d5611d7b9f80c8ec2f482209125",
+      "bytes": 698318,
+      "current_child_v2_sha256": "5fd1b0d145553d5c9feb75d73bcf51bda2111d5611d7b9f80c8ec2f482209125",
+      "name": "pitching_wedge_lean0_curve2_rotation2_combined2_b76ceaed03_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "7c971604b88ac05517c42224c42535f2f6b1887c3ea0643243129ebf96bc762e",
+      "bytes": 1105298,
+      "current_child_v2_sha256": "7c971604b88ac05517c42224c42535f2f6b1887c3ea0643243129ebf96bc762e",
+      "name": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "3142d422f13ddfe25a4719998b21b0ed5e3a39554106bf9e409f0793db867eeb",
+      "bytes": 1342319,
+      "current_child_v2_sha256": "3142d422f13ddfe25a4719998b21b0ed5e3a39554106bf9e409f0793db867eeb",
+      "name": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "187959d55e3d7380c4f7d0cb232ab43638ed0d8b806b9d91cea3b703141feecf",
+      "bytes": 650951,
+      "current_child_v2_sha256": "187959d55e3d7380c4f7d0cb232ab43638ed0d8b806b9d91cea3b703141feecf",
+      "name": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "dc262f22322619884b04a42157be348ec91d224a94fda4f4a7336e8e8cda2d55",
+      "bytes": 802853,
+      "current_child_v2_sha256": "dc262f22322619884b04a42157be348ec91d224a94fda4f4a7336e8e8cda2d55",
+      "name": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_00747138c9_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "ca670c1763ad2a55ea26aa8de7416d79b087d55c77e27a5c119640b0333b0473",
+      "bytes": 1034013,
+      "current_child_v2_sha256": "ca670c1763ad2a55ea26aa8de7416d79b087d55c77e27a5c119640b0333b0473",
+      "name": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "b6cbeefede9def62152c3018e3005fc612c152610ed1d56236c7bad3d7d53b79",
+      "bytes": 1255547,
+      "current_child_v2_sha256": "b6cbeefede9def62152c3018e3005fc612c152610ed1d56236c7bad3d7d53b79",
+      "name": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "8f61e3cdae7ff3067e53807c5495c69cfe6e10cd319408d88cef8e18320da1c7",
+      "bytes": 611379,
+      "current_child_v2_sha256": "8f61e3cdae7ff3067e53807c5495c69cfe6e10cd319408d88cef8e18320da1c7",
+      "name": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "5fc73c93f1373427f11744811a2e995850da2f7e910ed6fad64370c569c5e31a",
+      "bytes": 760858,
+      "current_child_v2_sha256": "5fc73c93f1373427f11744811a2e995850da2f7e910ed6fad64370c569c5e31a",
+      "name": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "b8f99c3e5414bf14571a399547a0801d7b99a881eb4911e382986a10bf341407",
+      "bytes": 703678,
+      "current_child_v2_sha256": "b8f99c3e5414bf14571a399547a0801d7b99a881eb4911e382986a10bf341407",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "2a2e12b0ee1c4122eaf15c7a155abe08e9c121ed1f14200c45359a8c19845a81",
+      "bytes": 830065,
+      "current_child_v2_sha256": "2a2e12b0ee1c4122eaf15c7a155abe08e9c121ed1f14200c45359a8c19845a81",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "c78e1eff830abcf95d3d1d0d81cdb725ed7bd34186cb23dcab78b47855b365e2",
+      "bytes": 650509,
+      "current_child_v2_sha256": "c78e1eff830abcf95d3d1d0d81cdb725ed7bd34186cb23dcab78b47855b365e2",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "cdd25ac837ed3a205311ebbd175f0bd15ccf74d53959bcfa6cba1fe36ba8c72e",
+      "bytes": 708010,
+      "current_child_v2_sha256": "cdd25ac837ed3a205311ebbd175f0bd15ccf74d53959bcfa6cba1fe36ba8c72e",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_only_8b8ee26662_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "d058f792a9cdb6572e6c34be73eb0b218069ccd76471d3f43c873a90c0a3d2e5",
+      "bytes": 728817,
+      "current_child_v2_sha256": "d058f792a9cdb6572e6c34be73eb0b218069ccd76471d3f43c873a90c0a3d2e5",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "e153c5d831ed683c2237680240e8b68a511c9c7c2f9b685db89885474df84f8b",
+      "bytes": 863266,
+      "current_child_v2_sha256": "e153c5d831ed683c2237680240e8b68a511c9c7c2f9b685db89885474df84f8b",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "568acba9ab970cb4d0cb086cd6e40d485e88a691ae1676343a4272da1df6fbef",
+      "bytes": 648276,
+      "current_child_v2_sha256": "568acba9ab970cb4d0cb086cd6e40d485e88a691ae1676343a4272da1df6fbef",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "6af3efa3b950cb002307f1315632364dd635714ecf8ee96162c812b02930f8c9",
+      "bytes": 716597,
+      "current_child_v2_sha256": "6af3efa3b950cb002307f1315632364dd635714ecf8ee96162c812b02930f8c9",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_path_82da3ac8ca_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "98ad5a749ecf033ccf31af88f9699860b2ba55a6e5162c7255dbe84615ff59a0",
+      "bytes": 1038439,
+      "current_child_v2_sha256": "98ad5a749ecf033ccf31af88f9699860b2ba55a6e5162c7255dbe84615ff59a0",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "4cb1f78b266911734c9f054a856ee894a21799e234df8de2c1d73a13dbb0b3ae",
+      "bytes": 1176242,
+      "current_child_v2_sha256": "4cb1f78b266911734c9f054a856ee894a21799e234df8de2c1d73a13dbb0b3ae",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "52c9012b1f63d742c9a321244a81e0ca48d003994389ed5382a661802a999cbe",
+      "bytes": 630982,
+      "current_child_v2_sha256": "52c9012b1f63d742c9a321244a81e0ca48d003994389ed5382a661802a999cbe",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "2d50e8645c4b1a9b582a39414bd07354e5a6071f41414e350be3dec39ca15870",
+      "bytes": 699019,
+      "current_child_v2_sha256": "2d50e8645c4b1a9b582a39414bd07354e5a6071f41414e350be3dec39ca15870",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1_3f62ad9a4f_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "eca10c32589b61608e3d066413240d8f4a81ce647c742e521ee3f98b7963d147",
+      "bytes": 1141311,
+      "current_child_v2_sha256": "eca10c32589b61608e3d066413240d8f4a81ce647c742e521ee3f98b7963d147",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "af49e66a094d7001c1d6bb055b6bc56dde1f4a89984be3e4775dc9b969d70b0b",
+      "bytes": 1298550,
+      "current_child_v2_sha256": "af49e66a094d7001c1d6bb055b6bc56dde1f4a89984be3e4775dc9b969d70b0b",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "218532b541bcfd013d5af11f799be8484b54749448fb2ce2d0458dcff62f6bcc",
+      "bytes": 630090,
+      "current_child_v2_sha256": "218532b541bcfd013d5af11f799be8484b54749448fb2ce2d0458dcff62f6bcc",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "b0f6629dd53a3983e14915916c60c2d76944e1d2069bf11ee55bbe6e99cf7274",
+      "bytes": 697126,
+      "current_child_v2_sha256": "b0f6629dd53a3983e14915916c60c2d76944e1d2069bf11ee55bbe6e99cf7274",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2_e720cb445f_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "933a7c7654a69ae80dd428633fa49e8e8477c8bfdd13d712361fe481984ce1a4",
+      "bytes": 1010740,
+      "current_child_v2_sha256": "933a7c7654a69ae80dd428633fa49e8e8477c8bfdd13d712361fe481984ce1a4",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "6862607a000c059fa318ac2de5cc235c202b4128a3d64dc765a83b13c53e1605",
+      "bytes": 1166793,
+      "current_child_v2_sha256": "6862607a000c059fa318ac2de5cc235c202b4128a3d64dc765a83b13c53e1605",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "215f83adc9a1d53794bf98c54573fc0b3b5b71c0bedfd15d8a6584931a6d1c59",
+      "bytes": 635250,
+      "current_child_v2_sha256": "215f83adc9a1d53794bf98c54573fc0b3b5b71c0bedfd15d8a6584931a6d1c59",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "fe00c41c4b2abff45666fdeacffc8fd16eecf978d7e0aa942a357c529f489761",
+      "bytes": 706095,
+      "current_child_v2_sha256": "fe00c41c4b2abff45666fdeacffc8fd16eecf978d7e0aa942a357c529f489761",
+      "name": "pitching_wedge_lean0_curve2_rotation2_shaft_strike_9212e249ef_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "4984db44fe03162308f6020ff521762e0f024d6931465ca561da6e7aeb21dc8b",
+      "bytes": 1085450,
+      "current_child_v2_sha256": "4984db44fe03162308f6020ff521762e0f024d6931465ca561da6e7aeb21dc8b",
+      "name": "pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "86a8f1e3f7eb77bcfa4829f7b7f12d455b556c6ed407b7fdf92f5cd96c87ce27",
+      "bytes": 1249522,
+      "current_child_v2_sha256": "86a8f1e3f7eb77bcfa4829f7b7f12d455b556c6ed407b7fdf92f5cd96c87ce27",
+      "name": "pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "3ac8b9d60195ddc0aad7e6aba547878d860304317994b120d1a499908e7cbdfe",
+      "bytes": 615762,
+      "current_child_v2_sha256": "3ac8b9d60195ddc0aad7e6aba547878d860304317994b120d1a499908e7cbdfe",
+      "name": "pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "2b81084b3a500d26993eaf1bc5aade1e9329afe0ccb7a9032d844c93e2181b4d",
+      "bytes": 698114,
+      "current_child_v2_sha256": "2b81084b3a500d26993eaf1bc5aade1e9329afe0ccb7a9032d844c93e2181b4d",
+      "name": "pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "fbe473df466991f3e952645f142d9529cd052092334844567bb8446aca33a738",
+      "bytes": 658725,
+      "current_child_v2_sha256": "fbe473df466991f3e952645f142d9529cd052092334844567bb8446aca33a738",
+      "name": "pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "40459fec805126665936f358b024ecbce9d647a9e2a0fc1b2237adc1be14c845",
+      "bytes": 770099,
+      "current_child_v2_sha256": "40459fec805126665936f358b024ecbce9d647a9e2a0fc1b2237adc1be14c845",
+      "name": "pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "ab66e4ae9dd398aac9ff2cfa78c42acff4dccc6432a9533a4ed1a9fdc1f75c97",
+      "bytes": 649697,
+      "current_child_v2_sha256": "ab66e4ae9dd398aac9ff2cfa78c42acff4dccc6432a9533a4ed1a9fdc1f75c97",
+      "name": "pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "21adbd8ee6a7bc7467496236ed91d0a47feca95548a9b3205482c5408423dc78",
+      "bytes": 706842,
+      "current_child_v2_sha256": "21adbd8ee6a7bc7467496236ed91d0a47feca95548a9b3205482c5408423dc78",
+      "name": "pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "43f7ebe4d683706f04c914268ba6f615ccc0468b39e0c48533d5c9cd9f1204bf",
+      "bytes": 1120235,
+      "current_child_v2_sha256": "43f7ebe4d683706f04c914268ba6f615ccc0468b39e0c48533d5c9cd9f1204bf",
+      "name": "pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "786002b3c1a75b55ab212f2523ada95254319c32f79efa21cec067276714322c",
+      "bytes": 1297658,
+      "current_child_v2_sha256": "786002b3c1a75b55ab212f2523ada95254319c32f79efa21cec067276714322c",
+      "name": "pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "f60e99822b75893eab24e4b53393e62ddc43eda7ea1624eb21fd8c1de0945cab",
+      "bytes": 620401,
+      "current_child_v2_sha256": "f60e99822b75893eab24e4b53393e62ddc43eda7ea1624eb21fd8c1de0945cab",
+      "name": "pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "bb0746c61a600b334b9b042c5da94392b1c93aeb5c3e98127063f970b4f8a235",
+      "bytes": 696658,
+      "current_child_v2_sha256": "bb0746c61a600b334b9b042c5da94392b1c93aeb5c3e98127063f970b4f8a235",
+      "name": "pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "e69cf4b9447a400d8f0a15cb6eff2e64a568994c983c317063580e3dc42016ce",
+      "bytes": 689609,
+      "current_child_v2_sha256": "e69cf4b9447a400d8f0a15cb6eff2e64a568994c983c317063580e3dc42016ce",
+      "name": "pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "d80226f7246e1f8949d4f22d6341b4ca5985dc801b0e82c7e013e833f32c6d57",
+      "bytes": 811537,
+      "current_child_v2_sha256": "d80226f7246e1f8949d4f22d6341b4ca5985dc801b0e82c7e013e833f32c6d57",
+      "name": "pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density_social.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "e8f166540825a36fb77915faf38c37f38949d428759c4d31228a56fd7f23c2e9",
+      "bytes": 647965,
+      "current_child_v2_sha256": "e8f166540825a36fb77915faf38c37f38949d428759c4d31228a56fd7f23c2e9",
+      "name": "pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead.png"
+    },
+    {
+      "accepted_visual_receipt_sha256": "975c94bba0c4644ef4eb50e7d4464a9375629d626a2e42669485e24bdbd1e0ed",
+      "bytes": 706008,
+      "current_child_v2_sha256": "975c94bba0c4644ef4eb50e7d4464a9375629d626a2e42669485e24bdbd1e0ed",
+      "name": "pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead_social.png"
+    }
+  ],
+  "count": 104,
+  "current_child_directory": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/cells",
+  "mismatches": 0,
+  "schema": "shot-pattern-cell-png-accepted-hash-bridge/1"
+}

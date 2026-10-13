@@ -1,0 +1,19 @@
+{
+  "session": 15816,
+  "exit_code": 0,
+  "files": {
+    "README.md": "31a7399d67205c0aa82be6fcb0bbcdad7432fde490e8bfafbc61f32623d44b72",
+    "conftest.py": "b36d377fe475b638c4e6d6cf57b69db2905d1429476244a89328378d0457552e",
+    "green.txt": "457cc9eb2a8b584d44e5d5d6fd5f44e032701418818b52e93bdbeee1e6f3a924",
+    "mypy.ini": "fd02ed832c4df6beef575bac806a5f8e509a9e53919b08dbfe439641da2d88cc",
+    "mypy.txt": "cbe561b9d9a24af18aeb31ee436e7c32a64a04dd0f3d1c738d2f245c6f581dc5",
+    "prompt.txt": "95c29afd7fe7aa93159d6034fc660761041bafaf2bd762efc602f13444bf91b3",
+    "red.txt": "0195c341734f864be610a6bfe954eb0193ea73dbf8e1faf343a52262e825174c",
+    "result.txt": "fd814a5e44cb845054557d0019bae69ddbda5d2d67de2da28a815487d6654ec1",
+    "ruff_check.txt": "af9928562556320a3bf6dd1fe2ce3fd2f308f5e5033f4fad88226ba89d7c665a",
+    "ruff_format.txt": "3ae71eef225a0956e769ca65003ac3c490e5b6aee19abf900ce7da9b4b777c20",
+    "source_hashes.txt": "a7878011e776d9f864490727647e5e94476d9110184ef7f8db778ceb9c6ca6c0",
+    "test_vector_rasterization.py": "d3317e7eeab464f7f0281b2009d22bf2dca8359bd0cee86c100bbda5f68fc7b8",
+    "vector_rasterization.py": "ad534c0f2d0d9a4cdca790aee4d81ed83082e1b55f7709dfdd69efbf80b1d5c2"
+  }
+}

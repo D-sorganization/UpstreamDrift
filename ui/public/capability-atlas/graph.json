@@ -501,6 +501,20 @@
       "id": "render.club_head_and_ball"
     },
     {
+      "feature_id": "reporting.swing_report_dialog",
+      "title": "Swing Report Full/Custom Plot Selection and Package Export",
+      "status": "parity",
+      "pyqt": "src/shared/python/ui/swing_report_dialog.py",
+      "api": "src/api/routes/swing_report.py",
+      "web": "ui/src/components/analysis/swingReport/SwingReportDialog.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Swing Report S6 (#12329) and its web parity (#12330), epic #11419. Both dialogs list the same validated swing-report-v1 plots through the Python ReportViewModel (POST /api/swing-report/view returns its text-only rows, so a withheld quantity never reaches the browser as a number): withheld plots are disabled with a 'Not Validated' label and their reason, advertised plots show their engine-spread uncertainty, Full selects every enabled plot and Custom keeps its own selection. Export writes the S4 package (export_package) to a chosen directory on the desktop and downloads it as a zip on the web (POST /api/swing-report/export). Neither dialog is wired to a launcher tile or page yet.",
+      "id": "reporting.swing_report_dialog"
+    },
+    {
       "feature_id": "settings.desktop_only_tabs",
       "title": "Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance)",
       "status": "exempt",
@@ -890,6 +904,22 @@
       ],
       "notes": "Tracked in #11987 (epic #9546 is closed). Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts.",
       "id": "tools.rate_of_closure"
+    },
+    {
+      "feature_id": "tools.shot_pattern_analysis",
+      "title": "Shot Pattern Analysis Workbench",
+      "status": "exempt",
+      "pyqt": "src/tools/shot_pattern_analysis/gui.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed.",
+      "pending_decision": false,
+      "tiles": [
+        "shot_pattern_analysis"
+      ],
+      "notes": "The GUI runs the canonical CLI in a cancellable managed subprocess. The Python solver delegates impact and flight to shared UpstreamDrift physics.",
+      "id": "tools.shot_pattern_analysis"
     },
     {
       "feature_id": "tools.terrain_engine",
@@ -1609,6 +1639,20 @@
         "monitor_comparison",
         "dispersion",
         "longitudinal_trends"
+      ]
+    },
+    {
+      "id": "shot_pattern_analysis",
+      "title": "Shot Pattern Analysis",
+      "description": "Compare straight, draw, and fade patterns with matched delivery, shaft rotation, strike variation, and covariance. Install: pip install -e '.[gui-tools]'; requires the native upstream-physics wheel.",
+      "path": "src/tools/shot_pattern_analysis/__main__.py",
+      "launch_target": "src/tools/shot_pattern_analysis/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "shot_pattern_analysis",
+        "shot_dispersion",
+        "impact_physics"
       ]
     },
     {
@@ -3144,9 +3188,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
-    "src/config/launcher_manifest.json": "e328a1f5ef14988077d53b83ed0bd7a2e86d0580e1b5e86883457292de0dcf88",
-    "src/config/feature_parity.json": "90f50e54e16a901d070b56dd56218ea92a019ee80ccba8c401f7e790b9dc5b5b",
+    "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
+    "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
+    "src/config/feature_parity.json": "d1f2a8805bec1187742e18ba7f99c2686a21708521e7a878d1ab85c8e585c73e",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

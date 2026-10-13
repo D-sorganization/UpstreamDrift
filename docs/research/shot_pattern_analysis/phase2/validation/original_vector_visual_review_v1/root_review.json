@@ -1,0 +1,15 @@
+{
+  "review_sha256": "0b032d027d47d048603986e5d128f42cf68fdbb7ec2d1f43fc30bb4dceafb8ca",
+  "raw_archive_sha256": "fd31ac818150a010f9257951a15edc3e10e1276102e6a53c7b2df722e1bbd9f4",
+  "records": 24,
+  "verified_references": 96,
+  "unique_files": 72,
+  "root_visual_checks": [
+    "driver_academic_density_review.jpg",
+    "pw_social_overhead_review.jpg"
+  ],
+  "root_visual_observation": "Complete panels, labels, contours/paths and footers retained in both formats. Tool display proportionally resized contact sheets.",
+  "astra_visual_count": 24,
+  "all744_visually_reviewed": false,
+  "publication_accepted": false
+}

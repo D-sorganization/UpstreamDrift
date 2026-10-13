@@ -1,0 +1,224 @@
+.............................F.................                          [100%]
+=================================== FAILURES ===================================
+___________ test_pipeline_writes_separate_tables_figures_and_aliases ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2320/test_pipeline_writes_separate_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7703fafef7a0>
+
+    def test_pipeline_writes_separate_tables_figures_and_aliases(tmp_path, monkeypatch):
+        from src.tools.shot_pattern_analysis import matched_supplement_pipeline as module
+    
+        def ref(name, curve, protocol):
+            config = {
+                "club": {"club_id": "pitching_wedge", "shaft_lean_deg": 0.0},
+                "curve_scale": curve,
+                "noise": {"standard_deviations": [1.0, 0, 0, 0, 0, 0, 0]},
+                "n_shots": 10_000,
+                "seed": 7,
+                "target_x_m": None,
+            }
+            return {
+                "cell": name,
+                "source_protocol": protocol,
+                "execution_kind": "unique",
+                "status": "completed",
+                "source_root": str(tmp_path / protocol),
+                "config": config,
+                "summary": {"status": "completed", "target_x_m": 77.0},
+                "source_plan_sha256": "plan",
+                "source_cell_manifest_sha256": "manifest",
+                "source_csv_sha256": name,
+                "_execution": {"source_sha256": {"source.py": "same"}},
+            }
+    
+        primary = ref(
+            "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+            1.0,
+            "original_primary/1",
+        )
+        supplement_cell = ref(
+            "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+            2.0,
+            "pw-primary-face-bounds/1",
+        )
+        empty_report = {
+            "stage": "final",
+            "planned_cells": 324,
+            "counts": {"not_run": 0},
+            "cells": [],
+            "plan_sha256": "plan",
+            "common_targets_path": str(tmp_path / "common_targets.json"),
+            "common_targets_sha256": "targets",
+            "common_target_provenance": {
+                "acceptance_sha256": "acceptance",
+                "audit_sha256": "audit",
+                "pilot_plan_sha256": "pilot-plan",
+                "common_targets_sha256": "targets",
+            },
+        }
+        monkeypatch.setattr(
+            module,
+            "_load_original_sources",
+            lambda root, protocol: (
+                empty_report,
+                [primary] if protocol == "original_primary" else [],
+            ),
+        )
+        supplement = {
+            "schema": "matched-supplement-report/1",
+            "stage": "final",
+            "execution": {"source_sha256": {"source.py": "same"}},
+            "inventory_sha256": "inventory",
+            "unique_cells": [supplement_cell],
+            "aliases": [],
+            "control_aliases": {
+                "schema": "matched-study-control-aliases/1",
+                "references": [],
+                "status_by_alias": {},
+            },
+            "protocols": {},
+            "protocol_counts": {},
+            "unique_executed_cells": 1,
+            "issue": 12000,
+            "interpretation": "separate supplement",
+        }
+        monkeypatch.setattr(
+            module, "load_supplement_sources", lambda *args, **kwargs: supplement
+        )
+        monkeypatch.setattr(
+            module,
+            "_pair_result",
+            lambda pair, *args: {
+                "comparison_kind": pair["comparison_kind"],
+                "status": "available",
+                "common_supported_n": 10_000,
+                "total_n_per_population": 10_000,
+                "sources": [
+                    {"protocol_id": "a", "cell": "a"},
+                    {"protocol_id": "b", "cell": "b"},
+                ],
+                "patterns": {},
+                "course_scoring_effect_modification": {},
+            },
+        )
+        monkeypatch.setattr(
+            module,
+            "_render_cell_figures",
+            lambda ref, output: [
+                {
+                    "figure_kind": "density",
+                    "cell": ref["cell"],
+                    "relative_path": "figures/cell.png",
+                    "sha256": "cell-plot",
+                }
+            ],
+        )
+        monkeypatch.setattr(
+            module,
+            "_render_pair_figures",
+            lambda pair, output: [
+                {
+                    "figure_kind": "paired-density",
+                    "first_cell": pair["first"]["cell"],
+                    "relative_path": "figures/pair.png",
+                    "sha256": "pair-plot",
+                }
+            ],
+        )
+        monkeypatch.setattr(module, "_sha256", lambda path: "receipt-hash")
+        monkeypatch.setattr(
+            module,
+            "_recheck_source_inputs",
+            lambda *args: None,
+        )
+        monkeypatch.setattr(module, "_recheck_transition_evidence", lambda *args: None)
+        monkeypatch.setattr(
+            module,
+            "write_supplement_artifacts",
+            lambda report, output: {
+                "inventory": output / "REPORT_SUPPLEMENT.csv",
+                "control_aliases": output / "control_aliases.json",
+            },
+        )
+        monkeypatch.setattr(
+            module,
+            "write_supplement_comparisons",
+            lambda results, output: {
+                "csv": output / "REPORT_SUPPLEMENT_COMPARISONS.csv",
+                "json": output / "REPORT_SUPPLEMENT_COMPARISONS.json",
+            },
+        )
+        transition = tmp_path / "transition.json"
+        transition.write_text("{}")
+        output = tmp_path / "supplement-report"
+>       paths = module.build_final_supplement_report(
+            original_primary_root=tmp_path / "primary",
+            original_control_root=tmp_path / "control",
+            protocol_roots={},
+            inventory_path=tmp_path / "inventory.json",
+            output_dir=output,
+            transition_receipt_path=transition,
+            transition_receipt_sha256="receipt-hash",
+        )
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py:802: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py:820: in build_final_supplement_report
+    _verify_figure_assets(output_dir, {"figures": figure_ledger})
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+output_dir = PosixPath('/tmp/pytest-of-dieterolson/pytest-2320/test_pipeline_writes_separate_0/supplement-report')
+ledger = {'figures': [{'figure_kind': 'density', 'cell': 'pitching_wedge_lean0_curve2_rotation1_shaft_only', 'relative_path': '...ell': 'pitching_wedge_lean0_curve1_rotation1_shaft_only', 'relative_path': 'figures/pair.png', 'sha256': 'pair-plot'}]}
+
+    def _verify_figure_assets(output_dir: Path, ledger: dict[str, Any]) -> None:
+        figure_root = (output_dir / "figures").resolve()
+        seen_paths: set[Path] = set()
+        for item in ledger.get("figures", []):
+            if item.get("status") == "unavailable":
+                if not item.get("reason") or any(
+                    key in item for key in ("relative_path", "sha256")
+                ):
+                    raise ValueError(
+                        "unavailable figure must state a reason without artifact claims"
+                    )
+                continue
+            if not isinstance(item.get("relative_path"), str) or not item["relative_path"]:
+                raise ValueError("available figure must identify its artifact path")
+            path = (figure_root / item["relative_path"]).resolve()
+            if path in seen_paths:
+                raise ValueError("duplicate figure artifact path")
+            seen_paths.add(path)
+            if not path.is_relative_to(figure_root) or not path.is_file():
+>               raise ValueError("supplement figure artifact is missing or unsafe")
+E               ValueError: supplement figure artifact is missing or unsafe
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py:540: ValueError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_pipeline_writes_separate_tables_figures_and_aliases
+1 failed, 46 passed, 1 deselected, 6 warnings in 11.06s

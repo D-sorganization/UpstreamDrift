@@ -1,0 +1,229 @@
+.........FF.F............                                                [100%]
+=================================== FAILURES ===================================
+_____________ test_across_lean_pair_reports_paired_sg_interaction ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2025/test_across_lean_pair_reports_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e70f3d79550>
+
+    def test_across_lean_pair_reports_paired_sg_interaction(
+        tmp_path, monkeypatch
+    ) -> None:
+        from types import SimpleNamespace
+    
+        from src.tools.shot_pattern_analysis import matched_lean_control as module
+    
+        monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+        first = _write_cell(
+            tmp_path / "lean0",
+            lean=0,
+            target_request=None,
+            protocol="pw-primary-face-bounds/1",
+        )
+        second = _write_cell(
+            tmp_path / "lean5",
+            lean=5,
+            target_request=77.40247724866299,
+            protocol="pw-control-face-bounds/1",
+        )
+        vectors = [
+            {
+                "Straight": np.array([10.0, 10.0, 10.0, 10.0]),
+                "Draw": np.array([12.0, 12.0, 12.0, 12.0]),
+                "Fade": np.array([9.0, 9.0, 9.0, 9.0]),
+            },
+            {
+                "Straight": np.array([10.0, 10.0, 10.0, 10.0]),
+                "Draw": np.array([15.0, 15.0, 15.0, 15.0]),
+                "Fade": np.array([7.0, 7.0, 7.0, 7.0]),
+            },
+        ]
+        calls = 0
+    
+        def score_vectors(endpoints, **kwargs):
+            nonlocal calls
+            result = SimpleNamespace(
+                scores=vectors[calls],
+                scenario_id="approach_green_rough",
+                baseline={"id": "fixture"},
+                api_evaluated_states=10,
+            )
+            calls += 1
+            return result
+    
+        monkeypatch.setattr(module, "score_course_endpoint_vectors", score_vectors)
+        result = module.analyze_explicit_source_pair(
+            first,
+            second,
+            comparison_kind="across_lean",
+            target_x_m=77.40247724866299,
+        )
+>       assert result["course_scoring_effect_modification"]["Draw"]["estimate"] == 3.0
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'course_scoring_effect_modification'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py:358: KeyError
+___ test_across_lean_pair_uses_same_six_conditional_intersection_for_scoring ___
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2025/test_across_lean_pair_uses_sam0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e70f3d7afc0>
+
+    def test_across_lean_pair_uses_same_six_conditional_intersection_for_scoring(
+        tmp_path, monkeypatch
+    ) -> None:
+        from types import SimpleNamespace
+    
+        from src.tools.shot_pattern_analysis import matched_lean_control as module
+    
+        monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+        first = _write_cell(
+            tmp_path / "lean0",
+            lean=0,
+            target_request=None,
+            protocol="pw-primary-face-bounds/1",
+            invalid=("Draw", 3),
+        )
+        second = _write_cell(
+            tmp_path / "lean5",
+            lean=5,
+            target_request=77.40247724866299,
+            protocol="pw-control-face-bounds/1",
+            invalid=("Fade", 1),
+        )
+        recorded_endpoints: list[dict[str, list[tuple[int, float, float]]]] = []
+        vectors = [
+            {
+                "Straight": np.array([10.0, 10.0]),
+                "Draw": np.array([11.0, 11.0]),
+                "Fade": np.array([9.0, 9.0]),
+            },
+            {
+                "Straight": np.array([10.0, 10.0]),
+                "Draw": np.array([13.0, 13.0]),
+                "Fade": np.array([8.0, 8.0]),
+            },
+        ]
+        calls = 0
+    
+        def score_vectors(endpoints, **kwargs):
+            nonlocal calls
+            recorded_endpoints.append(endpoints)
+            res = SimpleNamespace(
+                scores=vectors[calls],
+                scenario_id="approach_green_rough",
+                baseline={"id": "fixture"},
+                api_evaluated_states=10,
+            )
+            calls += 1
+            return res
+    
+        monkeypatch.setattr(module, "score_course_endpoint_vectors", score_vectors)
+        result = module.analyze_explicit_source_pair(
+            first,
+            second,
+            comparison_kind="across_lean",
+            target_x_m=77.40247724866299,
+        )
+        assert result["status"] == "conditional_only"
+        assert result["common_supported_n"] == 2
+>       assert len(recorded_endpoints) == 2
+E       assert 0 == 2
+E        +  where 0 = len([])
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py:425: AssertionError
+_________ test_across_lean_scoring_failure_records_unavailable_status __________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2025/test_across_lean_scoring_failu0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e70f3d7be90>
+
+    def test_across_lean_scoring_failure_records_unavailable_status(
+        tmp_path, monkeypatch
+    ) -> None:
+        from src.tools.shot_pattern_analysis import matched_lean_control as module
+    
+        monkeypatch.setattr(module, "score_course_endpoints", _stub_scorer)
+        first = _write_cell(
+            tmp_path / "lean0",
+            lean=0,
+            target_request=None,
+            protocol="pw-primary-face-bounds/1",
+        )
+        second = _write_cell(
+            tmp_path / "lean5",
+            lean=5,
+            target_request=77.40247724866299,
+            protocol="pw-control-face-bounds/1",
+        )
+    
+        def failing_scorer(endpoints, **kwargs):
+            raise ValueError(
+                "course state outside published baseline support: simulated test error"
+            )
+    
+        monkeypatch.setattr(module, "score_course_endpoint_vectors", failing_scorer)
+        result = module.analyze_explicit_source_pair(
+            first,
+            second,
+            comparison_kind="across_lean",
+            target_x_m=77.40247724866299,
+        )
+        assert result["status"] == "available"
+>       assert result["course_scoring_effect_modification"] == {
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "status": "unavailable",
+            "reason": "course state outside published baseline support: simulated test error",
+        }
+E       KeyError: 'course_scoring_effect_modification'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py:498: KeyError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+4.15s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_effect_modification_bootstraps_difference_of_within_condition_benefits
+2.99s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rechecks_transition_evidence_after_calculation
+1.95s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rechecks_course_score_helper_source_after_calculation
+1.48s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_reviewed_driver_speed_bound_pair_passes_full_explicit_api
+0.80s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_supports_5_to_10_degrees
+0.80s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rechecks_source_bytes_after_analysis
+0.77s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_curve_strength_pair_reports_paired_sg_interaction
+0.77s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_uses_same_six_conditional_intersection_for_scoring
+0.61s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_rotation_sd_pair_reports_common_index_sg_difference_of_differences
+0.40s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_reports_paired_sg_interaction
+0.32s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_centers_nominal_delivery_and_uses_six_population_intersection
+0.26s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_scoring_failure_records_unavailable_status
+0.18s setup    tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_effect_modification_bootstraps_difference_of_within_condition_benefits
+0.09s setup    tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_rotation_sd_pair_reports_common_index_sg_difference_of_differences
+0.07s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_fewer_than_two_common_shots_marks_unavailable
+0.07s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rejects_centered_input_mismatch
+0.04s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rejects_coherently_rehashed_protected_execution[protected_source]
+0.03s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rejects_unapproved_physical_config_difference
+0.03s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rejects_coherently_rehashed_protected_execution[native_runtime]
+0.03s setup    tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_fewer_than_two_common_shots_marks_unavailable
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_reports_paired_sg_interaction
+FAILED tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_uses_same_six_conditional_intersection_for_scoring
+FAILED tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_scoring_failure_records_unavailable_status
+3 failed, 22 passed, 6 warnings in 19.64s

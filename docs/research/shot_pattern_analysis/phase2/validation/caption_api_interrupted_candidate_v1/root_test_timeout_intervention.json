@@ -1,0 +1,6 @@
+{
+  "at": "2026-10-10T13:51:09.304801+00:00",
+  "pid": 3933902,
+  "reason": "Repeated focused tests time out in PIL PNG encoding; preserve existing timeout, redesign redundant multi-format parity test to inspect plot data/metadata with limited actual exports",
+  "production_pid_untouched": 3402855
+}

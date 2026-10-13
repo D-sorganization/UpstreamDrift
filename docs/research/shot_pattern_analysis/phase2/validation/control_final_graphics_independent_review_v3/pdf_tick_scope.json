@@ -1,0 +1,14 @@
+{
+  "method": "pdftotext -bbox concatenated decimal-word screen; not a general spacing proof",
+  "files_screened": 52,
+  "suspects": [
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.pdf",
+      "concatenated_numeric_words": [
+        "117.0118.5120.0121.5123.0124.5126.0127.5129.0130.5",
+        "117.0118.5120.0121.5123.0124.5126.0127.5129.0130.5",
+        "117.0118.5120.0121.5123.0124.5126.0127.5129.0130.5"
+      ]
+    }
+  ]
+}

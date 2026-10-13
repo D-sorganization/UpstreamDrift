@@ -1,0 +1,58 @@
+# Candidate Review: Phase 2 Final Report Narrative Requirements
+
+**Author**: AGY Gemini 3.8 Flash  
+**Reviewer**: Astra  
+**Branch**: `codex/shot-pattern-report-precision`  
+**Workspace**: `/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift`  
+
+---
+
+## 1. Summary of Changes
+
+Two narrow narrative requirements were implemented using TDD, DbC, LoD, and DRY principles without touching live artifacts, staging, or committing.
+
+1. **Fixed-Target Across-Lean Bounds Controls** (`final_report_inputs.py`, `build_final_report.py`):
+   - Added `parse_cell_condition` and `select_bounds_control_pairs` in `final_report_inputs.py` to extract the qualified across-lean 0°→5° bounds controls from verified supplement comparisons.
+   - Target 1 (Driver): curve 2, shaft SD 2°, profile `combined2`, lean 0°→5°, second protocol `driver-control-speed-bounds/1`, source cells `driver_lean0_curve2_rotation2_combined2 → driver_lean5_curve2_rotation2_combined2`.
+   - Target 2 (Pitching Wedge): curve 1, shaft SD 2°, profile `combined2`, lean 0°→5°, second protocol `pw-control-face-bounds/1`, source cells `pitching_wedge_lean0_curve1_rotation2_combined2 → pitching_wedge_lean5_curve1_rotation2_combined2`.
+   - Implemented strict source matching that rejects distractors with wrong lean, curve, SD, noise profile, or protocol.
+   - Reused `describe_effect_modification` and `render_effect_table`, preserving ordered source cell/protocol identities, common-six counts, total counts, and paired intervals.
+   - Handled absent contrasts with explicit unavailable text (notably Pitching Wedge curve 1 across-lean, which was not part of the curve 2 adapted bounds inventory), strictly avoiding fabrication of marginal or paired means.
+   - Added compact, explicitly named section `### Fixed-Target Across-Lean Bounds Controls` in `build_final_report.py`, clearly separate from the zero-lean interactions section. The narrative states that bounds adapted after the original search, original unavailable cells remain unchanged in the matrix accounting, and rematched speed/face/path prevents causal claims.
+
+2. **Deterministic Head-Assumption Sensitivity Linkage** (`build_final_report.py`):
+   - Added `### Deterministic Head-Assumption Sensitivity` under `## Design and Physical Interpretation`.
+   - Explicitly linked `DESIGN.md#deterministic-head-assumption-sensitivity`, `validation/independent_head_sensitivity_summary.json`, and `validation/independent_head_sensitivity.json`.
+   - Avoided copying unbound numeric displacement summaries (e.g., 22.63 m, 7.10 m) into the executable builder.
+   - Clearly stated that chosen ±20% head parameter perturbations and contact-law comparisons are model sensitivities rather than measured parameter uncertainty.
+   - Clarified that narrow Monte Carlo confidence intervals quantify only random delivery draw sampling error and do not validate impact model accuracy or off-center delivery realism.
+
+---
+
+## 2. Modified Files & Line Budgets
+
+Only owned files and their focused tests were modified:
+
+| File | Lines | Budget | Status |
+| --- | ---: | ---: | --- |
+| `scripts/research/shot_pattern_analysis/build_final_report.py` | 1093 | < 1200 | Passed |
+| `scripts/research/shot_pattern_analysis/final_report_inputs.py` | 491 | < 1200 | Passed |
+| `tests/research/test_shot_pattern_final_report.py` | 870 | < 1200 | Passed |
+
+No changes were made to Astra's concurrent files (`matched_supplement_pipeline.py`, `matched_formatting.py`, or `test_matched_supplement_pipeline.py`). MAIN remains untouched and read-only.
+
+---
+
+## 3. Verification & Artifact Evidence
+
+1. **Red Test Log (`/tmp/p2-report-narrative-red.txt`)**:
+   - Initial test execution demonstrated failure prior to implementation (missing `select_bounds_control_pairs` attribute and missing bounds control narrative).
+2. **Green Test Log (`/tmp/p2-report-narrative-green.txt`)**:
+   - `pytest -o addopts='' -q tests/research/test_shot_pattern_final_report.py tests/research/test_shot_pattern_final_report_assets.py`
+   - Result: 21 passed, 6 warnings in 15.20s.
+3. **Quality & Static Analysis Log (`/tmp/p2-report-narrative-checks.txt`)**:
+   - `ruff check`: All checks passed.
+   - `ruff format --check`: 3 files already formatted.
+   - `mypy --python-version 3.12 --follow-imports=silent`: Success: no issues found in 3 source files.
+
+Candidate files are stable in the working tree and ready for review.

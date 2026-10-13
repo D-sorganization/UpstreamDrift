@@ -1,0 +1,25 @@
+{
+  "source_commit": "0c612812cb22819c81a5cde57e2f915c380f97f0",
+  "source_sha256": "72154f850177d6006163e93e1804b4ca3b1d24504f8455448cadee6acf7cd00b",
+  "source_bytes": 224549,
+  "candidate_sha256": "f587fd8c69a6299fac8db8eca9b461e5fedf2c8f2c43739da4abed08cd06ae64",
+  "candidate_bytes": 162838,
+  "active_before": 76,
+  "active_after": 75,
+  "terminal_records_archived": 68,
+  "archive_days": 0,
+  "state_change": {
+    "issue": 9507,
+    "from": "in_review",
+    "to": "shipped",
+    "evidence_pr": 11522,
+    "merge_sha": "43d63ce98bcb6d4318bf5ab7ba8a6adf87071caf",
+    "scope": "closed completed code implementation; metadata-only recheck, no new runtime/physical acceptance"
+  },
+  "findings": [
+    {
+      "kind": "portfolio_wip_breach",
+      "message": "22 concurrent WIP entries (in_progress) exceeds the 'golf' portfolio cap of 8."
+    }
+  ]
+}

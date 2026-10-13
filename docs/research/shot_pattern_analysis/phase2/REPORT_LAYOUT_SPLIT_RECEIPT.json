@@ -1,0 +1,35 @@
+{
+  "schema": "matched-report-layout-split-receipt/1",
+  "purpose": "Markdown layout split only; no scientific report builder or frozen-data validation was run for this materialization.",
+  "source_archived_report": {
+    "path": "docs/research/shot_pattern_analysis/phase2/archive/report_publication_split_20261011/REPORT.original.md.archive.gz",
+    "encoding": "gzip",
+    "payload_sha256": "ff281f76ee649c44c88afda58701329e7898e8964f9efb6d8aeec73dcd77d79b",
+    "payload_size_bytes": 97532,
+    "storage_sha256": "8fc5374100a76e2cdf4dca5b41c9f32f0d52d6bc75cd330114f2b3696ff91391",
+    "storage_size_bytes": 15242
+  },
+  "historical_scientific_receipt": {
+    "archive_path": "docs/research/shot_pattern_analysis/phase2/archive/report_publication_split_20261011/REPORT_PUBLICATION_RECEIPT.original.json.archive",
+    "original_path": "REPORT_PUBLICATION_RECEIPT.json",
+    "encoding": "identity",
+    "storage_sha256": "ced5c82f3b4d48072eeca22a3190b6606afbef3aca6771363441ac06f0c122d7",
+    "storage_size_bytes": 3077,
+    "payload_sha256": "ced5c82f3b4d48072eeca22a3190b6606afbef3aca6771363441ac06f0c122d7",
+    "payload_size_bytes": 3077
+  },
+  "archive_manifest_sha256": "376a2d9a986745dd4ccec05790f80b27fe3eba57f4b49e679ec7c8e291c540f9",
+  "builder_verification": "The deterministic builder path is covered separately by fixture-based tests; this layout migration used only the byte-preserved archived Markdown.",
+  "output_sha256": {
+    "REPORT.md": "16c413f070452f392fe19b5561567e9ec6c8f847648e52c7f078ef2e2737732b",
+    "REPORT_DRIVER.md": "695cb29c0c1302d7a2eb96a87511ca6e3be110f15d0d7faa3a6a5219b182fbea",
+    "REPORT_SEVEN_IRON.md": "23e12bad29055c0b882da918fc7e6da0934de4e2e491056b0972a567b01a598e",
+    "REPORT_PITCHING_WEDGE.md": "b2a537b4a78a7908624c99a3cda4bedc582240a07269336f2e50d8d62ec23115"
+  },
+  "output_size_bytes": {
+    "REPORT.md": 46250,
+    "REPORT_DRIVER.md": 18547,
+    "REPORT_SEVEN_IRON.md": 15595,
+    "REPORT_PITCHING_WEDGE.md": 21074
+  }
+}
