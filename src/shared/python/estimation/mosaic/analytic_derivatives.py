@@ -111,29 +111,18 @@ class RuntimeComparison:
 # ---------------------------------------------------------------------------
 
 
-def _planar_chain_inverse_dynamics_derivatives(
+def _compute_planar_link_kinematics(
     chain: PlanarChain,
     q: FloatArray,
     v: FloatArray,
     a: FloatArray,
-    pi: FloatArray,
-) -> InverseDynamicsDerivatives:
-    """Analytic inverse dynamics derivatives for planar serial chains."""
+) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray, FloatArray, FloatArray, FloatArray, FloatArray]:
     batch = q.shape[0]
-    n = chain.n_links
-    require(q.shape == (batch, n), "q must be (N, n)", q.shape)
-    require(v.shape == (batch, n), "v must be (N, n)", v.shape)
-    require(a.shape == (batch, n), "a must be (N, n)", a.shape)
-    require(
-        pi.shape == (n * PLANAR_PARAMETERS_PER_BODY,), "pi shape mismatch", pi.shape
-    )
-
-    # Base kinematics
     phi = np.cumsum(q, axis=1)
     omega = np.cumsum(v, axis=1)
     alpha = np.cumsum(a, axis=1)
-    e = np.stack([np.cos(phi), np.sin(phi)], axis=-1)  # (N, n, 2)
-    normal = np.stack([-np.sin(phi), np.cos(phi)], axis=-1)  # (N, n, 2)
+    e = np.stack([np.cos(phi), np.sin(phi)], axis=-1)
+    normal = np.stack([-np.sin(phi), np.cos(phi)], axis=-1)
     lengths = chain.link_lengths[None, :, None]
     step = lengths * e
     origin = np.concatenate([np.zeros((batch, 1, 2)), np.cumsum(step, axis=1)], axis=1)
@@ -141,11 +130,25 @@ def _planar_chain_inverse_dynamics_derivatives(
     origin_acc = np.concatenate(
         [np.zeros((batch, 1, 2)), np.cumsum(acc_step, axis=1)], axis=1
     )
+    net_acc = origin_acc[:, :-1] - chain.gravity
+    acc_hx = alpha[..., None] * normal - (omega**2)[..., None] * e
+    acc_hy = -alpha[..., None] * e - (omega**2)[..., None] * normal
+    return e, normal, origin, net_acc, acc_hx, acc_hy, omega, alpha
 
-    grav = chain.gravity
-    net_acc = origin_acc[:, :-1] - grav  # (N, n, 2)
-    acc_hx = alpha[..., None] * normal - (omega**2)[..., None] * e  # (N, n, 2)
-    acc_hy = -alpha[..., None] * e - (omega**2)[..., None] * normal  # (N, n, 2)
+
+def _compute_planar_regressor_state_derivatives(
+    chain: PlanarChain,
+    q: FloatArray,
+    v: FloatArray,
+    a: FloatArray,
+) -> tuple[FloatArray, FloatArray]:
+    """Compute d_Y_dq and d_Y_dv for planar serial chain."""
+    batch = q.shape[0]
+    n = chain.n_links
+    lengths = chain.link_lengths[None, :, None]
+    e, normal, origin, net_acc, acc_hx, acc_hy, omega, alpha = (
+        _compute_planar_link_kinematics(chain, q, v, a)
+    )
 
     # d_Y_dq and d_Y_dv
     d_Y_dq = np.zeros((batch, n, PLANAR_PARAMETERS_PER_BODY * n, n), dtype=np.float64)
@@ -218,6 +221,28 @@ def _planar_chain_inverse_dynamics_derivatives(
                 d_Y_dv[:, j, col + 2, k] = _cross2(
                     normal[:, i], d_net_acc_vk
                 ) + _cross2(lever, d_acc_hy_vk)
+
+    return d_Y_dq, d_Y_dv
+
+
+def _planar_chain_inverse_dynamics_derivatives(
+    chain: PlanarChain,
+    q: FloatArray,
+    v: FloatArray,
+    a: FloatArray,
+    pi: FloatArray,
+) -> InverseDynamicsDerivatives:
+    """Analytic inverse dynamics derivatives for planar serial chains."""
+    batch = q.shape[0]
+    n = chain.n_links
+    require(q.shape == (batch, n), "q must be (N, n)", q.shape)
+    require(v.shape == (batch, n), "v must be (N, n)", v.shape)
+    require(a.shape == (batch, n), "a must be (N, n)", a.shape)
+    require(
+        pi.shape == (n * PLANAR_PARAMETERS_PER_BODY,), "pi shape mismatch", pi.shape
+    )
+
+    d_Y_dq, d_Y_dv = _compute_planar_regressor_state_derivatives(chain, q, v, a)
 
     # d_tau/dq = d_Y_dq @ pi: (N, n, n)
     d_tau_dq = np.einsum("njck,c->njk", d_Y_dq, pi)
