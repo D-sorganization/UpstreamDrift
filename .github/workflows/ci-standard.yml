@@ -560,7 +560,7 @@ jobs:
       # UI Security and Quality Checks (only when ui/ files change)
       - name: Setup Node for UI audit
         if: steps.ui_changes.outputs.changed == 'true'
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "24"
           cache: "npm"
@@ -2842,7 +2842,7 @@ jobs:
       - name: Fetch pinned Tools packages
         id: tools
         uses: ./.github/actions/fetch-pinned-tools
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           # Node 22 is the vendored Tools web build authority
           # (rate-of-closure-web-distribution.yml pins node-version 22).
@@ -2938,7 +2938,7 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         if: steps.frontend-changes.outputs.skip != 'true'
         with:
           node-version: "24"
