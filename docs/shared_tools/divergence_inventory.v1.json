@@ -13,7 +13,7 @@
   "totals": {
     "identical": 397,
     "diverged": 276,
-    "ud-only": 1687,
+    "ud-only": 1690,
     "tools-only": 808,
     "spelling-only": 123
   },
@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 306,
+      "ud-only": 307,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -693,7 +693,7 @@
     "reporting": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 25,
+      "ud-only": 26,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -854,7 +854,7 @@
     "ui": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 29,
+      "ud-only": 30,
       "tools-only": 9,
       "spelling-only": 0
     },
@@ -14865,7 +14865,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 20291,
+      "ud_bytes": 21970,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14878,6 +14878,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 10464,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/club_observability.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 5634,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15573,7 +15585,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 22717,
+      "ud_bytes": 26069,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16881,7 +16893,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 5816,
+      "ud_bytes": 7207,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -24814,6 +24826,18 @@
       "package": "reporting",
       "subpackage": "swing_report",
       "ud_bytes": 13514,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "reporting/swing_report/view_model.py",
+      "classification": "ud-only",
+      "package": "reporting",
+      "subpackage": "swing_report",
+      "ud_bytes": 4275,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37766,6 +37790,18 @@
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": true,
+      "spelling_only": false
+    },
+    {
+      "path": "ui/swing_report_dialog.py",
+      "classification": "ud-only",
+      "package": "ui",
+      "subpackage": "",
+      "ud_bytes": 5303,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
