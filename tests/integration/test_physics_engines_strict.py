@@ -54,53 +54,33 @@ mock_pydrake.DiagramBuilder = MagicMock()
 # If accessed via attribute:
 mock_pydrake.systems.framework.DiagramBuilder = mock_pydrake.DiagramBuilder
 
-# --- Imports with Patch Context ---
-# Use a context manager so patches apply only during engine imports.
-# NOTE: Do NOT use importlib.reload() here as it can cause numpy to be
-# reloaded, corrupting pandas' C API bindings in later tests.
-
-with patch.dict("sys.modules", module_patches):
-    # Remove cached engine modules to force re-import with our mocks
-    import sys as _sys
-
-    for _mod_name in list(_sys.modules.keys()):
-        if (
-            "opensim_physics_engine" in _mod_name
-            or "myosuite_physics_engine" in _mod_name
-        ):
-            del _sys.modules[_mod_name]
-
-    # Patch availability flags so engines initialize with mock modules
-    with (
-        patch(
-            "src.shared.python.engine_core.engine_availability.OPENSIM_AVAILABLE",
-            True,
-        ),
-        patch(
-            "src.shared.python.engine_core.engine_availability.MYOSUITE_AVAILABLE",
-            True,
-        ),
-    ):
-        from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
-            MyoSuitePhysicsEngine,
-        )
-        from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
-            OpenSimPhysicsEngine,
-        )
-    from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (  # noqa: E402
-        PendulumPhysicsEngine,
-    )
+# Import optional engines against their real availability state. The mocks are
+# bound to the implementation modules during each test, so collecting this file
+# cannot leave fake native bindings in other tests' imported engine modules.
+from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
+    MyoSuitePhysicsEngine,
+)
+from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
+    OpenSimPhysicsEngine,
+)
+from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (  # noqa: E402
+    PendulumPhysicsEngine,
+)
 
 # Inject mock modules into the engine modules so they use our mocks at test time
-import src.engines.physics_engines.myosuite.python.myosuite_physics_engine as _myosuite_mod  # noqa: E402
+import src.engines.physics_engines.myosuite.python._engine_init as _myosuite_init  # noqa: E402
 import src.engines.physics_engines.opensim.python.opensim_physics_engine as _opensim_mod  # noqa: E402
 
 pytestmark = pytest.mark.integration
 
-_opensim_mod.opensim = mock_opensim  # type: ignore[attr-defined]
-_opensim_mod.OPENSIM_AVAILABLE = True  # type: ignore[attr-defined]
-_myosuite_mod.gym = mock_gym  # type: ignore[attr-defined]
-_myosuite_mod.MYOSUITE_AVAILABLE = True  # type: ignore[attr-defined]
+
+@pytest.fixture(autouse=True)
+def _mock_optional_engine_bindings(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Bind strict-test fakes only for each test's lifetime."""
+    monkeypatch.setattr(_opensim_mod, "opensim", mock_opensim)
+    monkeypatch.setattr(_myosuite_init, "gym", mock_gym, raising=False)
+    monkeypatch.setattr(_myosuite_init, "MYOSUITE_AVAILABLE", True)
+
 
 TEST_LINEAR_VAL = 1.0
 TEST_ANGULAR_VAL = 2.0
@@ -226,12 +206,12 @@ class TestOpenSimStrict:
         engine = OpenSimPhysicsEngine()
         engine._model = MagicMock(
             spec=["getNumSpeeds", "getNumCoordinates", "initSystem", "realizeVelocity"]
-        )  # type: ignore
-        engine._state = MagicMock(spec=["getQ", "getU", "getTime"])  # type: ignore
+        )
+        engine._state = MagicMock(spec=["getQ", "getU", "getTime"])
 
         # Provide correct speeds/coords
-        engine._model.getNumSpeeds.return_value = 2  # type: ignore
-        engine._model.getNumCoordinates.return_value = 2  # type: ignore
+        engine._model.getNumSpeeds.return_value = 2
+        engine._model.getNumCoordinates.return_value = 2
 
         # Mock vector interaction for udot input
         # No error raised

@@ -1,0 +1,64 @@
+=== 1. Test Suites ===
+....................................................                     [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+3.12s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_reviewed_driver_speed_bound_pair_passes_full_explicit_api
+3.01s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rechecks_transition_evidence_after_calculation
+2.37s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rechecks_course_score_helper_source_after_calculation
+1.38s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_reviewed_driver_curve_bounds_pass_full_pair_api
+1.11s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rechecks_source_bytes_after_analysis
+0.70s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_centers_nominal_delivery_and_uses_six_population_intersection
+0.41s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_supports_5_to_10_degrees
+0.38s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_rotation_sd_pair_reports_common_index_sg_difference_of_differences
+0.35s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_reports_paired_sg_interaction
+0.31s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_uses_same_six_conditional_intersection_for_scoring
+0.30s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_scoring_failure_records_unavailable_status
+0.29s call     tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_geometry_table_does_not_claim_face_causes_long_left
+0.25s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_curve_strength_pair_reports_paired_sg_interaction
+0.15s setup    tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_effect_modification_bootstraps_difference_of_within_condition_benefits
+0.14s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[wrong_original_protocol]
+0.13s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rejects_coherently_rehashed_protected_execution[native_runtime]
+0.12s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_assets_must_be_in_manifest_and_exist
+0.11s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rejects_centered_input_mismatch
+0.11s teardown tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[lower_speed_change]
+0.10s teardown tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_saved_cell_rejects_coherent_manifest_replacement_during_read
+52 passed, 6 warnings in 31.16s
+
+=== 2. Ruff Check ===
+All checks passed!
+
+=== 3. Ruff Format Check ===
+2 files already formatted
+
+=== 4. Scoped Mypy Check ===
+Success: no issues found in 2 source files
+
+=== 5. Line Count Budget Check (max 1200) ===
+ 1089 src/tools/shot_pattern_analysis/matched_lean_control.py
+ 1177 tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py
+ 2266 total

@@ -1,0 +1,118 @@
+# Pitching Wedge: Resolved Results and Figure Inventory
+
+[Return to the final conditional simulation report](REPORT.md).
+
+## Verified Academic and Social Figures
+
+Figure links below come from source-bound inventories and include their actual protocol and population type. Individual cell densities use individually supported endpoints, while paired densities use the shared six-population supported-index intersection; displayed point overlays and overhead paths are sampled, as labeled in each image. A 95% highest-density region is not a confidence interval for the mean.
+
+- [Pitching Wedge Density (Academic, original_primary, individual supported endpoints)](final_figures_v1/details/pitching_wedge_lean0_curve1_rotation2_combined2/density.png)
+- [Pitching Wedge Overhead (Academic, original_primary, saved illustrative trajectory samples)](final_figures_v1/details/pitching_wedge_lean0_curve1_rotation2_combined2/overhead.png)
+- [Pitching Wedge Density (Social, original_primary, individual supported endpoints)](final_figures_v1/social/details/pitching_wedge_lean0_curve1_rotation2_combined2/density.png)
+- [Pitching Wedge Overhead (Social, original_primary, saved illustrative trajectory samples)](final_figures_v1/social/details/pitching_wedge_lean0_curve1_rotation2_combined2/overhead.png)
+- [Pitching Wedge Density (Academic, original_control, individual supported endpoints)](control_final_figures_v1/details/pitching_wedge_lean0_curve1_rotation2_combined2/density.png)
+- [Pitching Wedge Overhead (Academic, original_control, saved illustrative trajectory samples)](control_final_figures_v1/details/pitching_wedge_lean0_curve1_rotation2_combined2/overhead.png)
+- [Pitching Wedge Density (Social, original_control, individual supported endpoints)](control_final_figures_v1/social/details/pitching_wedge_lean0_curve1_rotation2_combined2/density.png)
+- [Pitching Wedge Overhead (Social, original_control, saved illustrative trajectory samples)](control_final_figures_v1/social/details/pitching_wedge_lean0_curve1_rotation2_combined2/overhead.png)
+- [Pitching Wedge Density (Academic, pw-primary-face-bounds/1, individual supported endpoints)](supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density.png)
+- [Pitching Wedge Density (Social, pw-primary-face-bounds/1, individual supported endpoints)](supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density_social.png)
+- [Pitching Wedge Overhead (Academic, pw-primary-face-bounds/1, saved illustrative trajectories)](supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead.png)
+- [Pitching Wedge Overhead (Social, pw-primary-face-bounds/1, saved illustrative trajectories)](supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead_social.png)
+- [Pitching Wedge Density (Academic, pw-control-face-bounds/1, individual supported endpoints)](supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density.png)
+- [Pitching Wedge Density (Social, pw-control-face-bounds/1, individual supported endpoints)](supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density_social.png)
+- [Pitching Wedge Overhead (Academic, pw-control-face-bounds/1, saved illustrative trajectories)](supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead.png)
+- [Pitching Wedge Overhead (Social, pw-control-face-bounds/1, saved illustrative trajectories)](supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead_social.png)
+- [Pitching Wedge Density (Academic, pw-primary-face-bounds/1 → pw-control-face-bounds/1, six population common index comparison) · Across Lean · pitching_wedge_lean0_curve2_rotation2_combined2 → pitching_wedge_lean5_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_density.png)
+- [Pitching Wedge Density (Social, pw-primary-face-bounds/1 → pw-control-face-bounds/1, six population common index comparison) · Straight · Across Lean · pitching_wedge_lean0_curve2_rotation2_combined2 → pitching_wedge_lean5_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_density_straight_social.png)
+- [Pitching Wedge Density (Social, pw-primary-face-bounds/1 → pw-control-face-bounds/1, six population common index comparison) · Draw · Across Lean · pitching_wedge_lean0_curve2_rotation2_combined2 → pitching_wedge_lean5_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_density_draw_social.png)
+- [Pitching Wedge Density (Social, pw-primary-face-bounds/1 → pw-control-face-bounds/1, six population common index comparison) · Fade · Across Lean · pitching_wedge_lean0_curve2_rotation2_combined2 → pitching_wedge_lean5_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_density_fade_social.png)
+- [Pitching Wedge Overhead (Academic, pw-primary-face-bounds/1 → pw-control-face-bounds/1, saved illustrative trajectory samples) · Across Lean · pitching_wedge_lean0_curve2_rotation2_combined2 → pitching_wedge_lean5_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_overhead.png)
+- [Pitching Wedge Overhead (Social, pw-primary-face-bounds/1 → pw-control-face-bounds/1, saved illustrative trajectory samples) · Across Lean · pitching_wedge_lean0_curve2_rotation2_combined2 → pitching_wedge_lean5_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_overhead_social.png)
+- [Pitching Wedge Density (Academic, original_control/1 → pw-primary-face-bounds/1, six population common index comparison) · Curve Strength · pitching_wedge_lean0_curve1_rotation2_combined2 → pitching_wedge_lean0_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density.png)
+- [Pitching Wedge Density (Social, original_control/1 → pw-primary-face-bounds/1, six population common index comparison) · Straight · Curve Strength · pitching_wedge_lean0_curve1_rotation2_combined2 → pitching_wedge_lean0_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_straight_social.png)
+- [Pitching Wedge Density (Social, original_control/1 → pw-primary-face-bounds/1, six population common index comparison) · Draw · Curve Strength · pitching_wedge_lean0_curve1_rotation2_combined2 → pitching_wedge_lean0_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_draw_social.png)
+- [Pitching Wedge Density (Social, original_control/1 → pw-primary-face-bounds/1, six population common index comparison) · Fade · Curve Strength · pitching_wedge_lean0_curve1_rotation2_combined2 → pitching_wedge_lean0_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_density_fade_social.png)
+- [Pitching Wedge Overhead (Academic, original_control/1 → pw-primary-face-bounds/1, saved illustrative trajectory samples) · Curve Strength · pitching_wedge_lean0_curve1_rotation2_combined2 → pitching_wedge_lean0_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_overhead.png)
+- [Pitching Wedge Overhead (Social, original_control/1 → pw-primary-face-bounds/1, saved illustrative trajectory samples) · Curve Strength · pitching_wedge_lean0_curve1_rotation2_combined2 → pitching_wedge_lean0_curve2_rotation2_combined2](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_77_3b97647710_overhead_social.png)
+- [Pitching Wedge Density (Academic, original_control/1 → pw-primary-face-bounds/1, six population common index comparison) · Curve Strength · pitching_wedge_lean0_curve1_rotation2_shaft_only → pitching_wedge_lean0_curve2_rotation2_shaft_only](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density.png)
+- [Pitching Wedge Density (Social, original_control/1 → pw-primary-face-bounds/1, six population common index comparison) · Straight · Curve Strength · pitching_wedge_lean0_curve1_rotation2_shaft_only → pitching_wedge_lean0_curve2_rotation2_shaft_only](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_straight_social.png)
+- [Pitching Wedge Density (Social, original_control/1 → pw-primary-face-bounds/1, six population common index comparison) · Draw · Curve Strength · pitching_wedge_lean0_curve1_rotation2_shaft_only → pitching_wedge_lean0_curve2_rotation2_shaft_only](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_draw_social.png)
+- [Pitching Wedge Density (Social, original_control/1 → pw-primary-face-bounds/1, six population common index comparison) · Fade · Curve Strength · pitching_wedge_lean0_curve1_rotation2_shaft_only → pitching_wedge_lean0_curve2_rotation2_shaft_only](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_density_fade_social.png)
+- [Pitching Wedge Overhead (Academic, original_control/1 → pw-primary-face-bounds/1, saved illustrative trajectory samples) · Curve Strength · pitching_wedge_lean0_curve1_rotation2_shaft_only → pitching_wedge_lean0_curve2_rotation2_shaft_only](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_overhead.png)
+- [Pitching Wedge Overhead (Social, original_control/1 → pw-primary-face-bounds/1, saved illustrative trajectory samples) · Curve Strength · pitching_wedge_lean0_curve1_rotation2_shaft_only → pitching_wedge_lean0_curve2_rotation2_shaft_only](supplement_report_v1/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only__77e806d784_overhead_social.png)
+- [Pitching Wedge Density (Academic, original_control/1, six population common index comparison) · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_combined2 → pitching_wedge_lean0_curve1_rotation2_combined2](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_density.png)
+- [Pitching Wedge Density (Social, original_control/1, six population common index comparison) · Straight · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_combined2 → pitching_wedge_lean0_curve1_rotation2_combined2](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_density_straight_social.png)
+- [Pitching Wedge Density (Social, original_control/1, six population common index comparison) · Draw · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_combined2 → pitching_wedge_lean0_curve1_rotation2_combined2](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_density_draw_social.png)
+- [Pitching Wedge Density (Social, original_control/1, six population common index comparison) · Fade · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_combined2 → pitching_wedge_lean0_curve1_rotation2_combined2](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_density_fade_social.png)
+- [Pitching Wedge Overhead (Academic, original_control/1, saved illustrative trajectory samples) · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_combined2 → pitching_wedge_lean0_curve1_rotation2_combined2](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_overhead.png)
+- [Pitching Wedge Overhead (Social, original_control/1, saved illustrative trajectory samples) · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_combined2 → pitching_wedge_lean0_curve1_rotation2_combined2](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_overhead_social.png)
+- [Pitching Wedge Density (Academic, original_control/1, six population common index comparison) · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_shaft_only → pitching_wedge_lean0_curve1_rotation2_shaft_only](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_77p_e2b119eb78_density.png)
+- [Pitching Wedge Density (Social, original_control/1, six population common index comparison) · Straight · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_shaft_only → pitching_wedge_lean0_curve1_rotation2_shaft_only](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_77p_e2b119eb78_density_straight_social.png)
+- [Pitching Wedge Density (Social, original_control/1, six population common index comparison) · Draw · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_shaft_only → pitching_wedge_lean0_curve1_rotation2_shaft_only](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_77p_e2b119eb78_density_draw_social.png)
+- [Pitching Wedge Density (Social, original_control/1, six population common index comparison) · Fade · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_shaft_only → pitching_wedge_lean0_curve1_rotation2_shaft_only](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_77p_e2b119eb78_density_fade_social.png)
+- [Pitching Wedge Overhead (Academic, original_control/1, saved illustrative trajectory samples) · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_shaft_only → pitching_wedge_lean0_curve1_rotation2_shaft_only](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_77p_e2b119eb78_overhead.png)
+- [Pitching Wedge Overhead (Social, original_control/1, saved illustrative trajectory samples) · Shaft Rotation SD · pitching_wedge_lean0_curve1_rotation1_shaft_only → pitching_wedge_lean0_curve1_rotation2_shaft_only](supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_shaft_only_77p_e2b119eb78_overhead_social.png)
+
+This resolved selection retains original primary accounting and explicitly identifies the four PW strong-curve face-bounds supplements. Each condition key below maps to one exact cell and protocol. Positive paired SG favors the named curve over Straight; intervals describe Monte Carlo sampling. SG is per identical hypothetical opportunity, not per round.
+
+**Condition Key**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**C17**: `pitching_wedge_lean0_curve1_rotation1_shaft_only`; protocol `original_primary/1`. Shaft twist SD 1°; curve ×1.
+
+**C18**: `pitching_wedge_lean0_curve1_rotation1_combined2`; protocol `original_primary/1`. Shaft twist SD 1°; curve ×1.
+
+**C19**: `pitching_wedge_lean0_curve1_rotation2_shaft_only`; protocol `original_primary/1`. Shaft twist SD 2°; curve ×1.
+
+**C20**: `pitching_wedge_lean0_curve1_rotation2_combined2`; protocol `original_primary/1`. Shaft twist SD 2°; curve ×1.
+
+**C21**: `pitching_wedge_lean0_curve2_rotation1_shaft_only`; protocol `pw-primary-face-bounds/1`. Shaft twist SD 1°; curve ×2.
+
+**C22**: `pitching_wedge_lean0_curve2_rotation1_combined2`; protocol `pw-primary-face-bounds/1`. Shaft twist SD 1°; curve ×2.
+
+**C23**: `pitching_wedge_lean0_curve2_rotation2_shaft_only`; protocol `pw-primary-face-bounds/1`. Shaft twist SD 2°; curve ×2.
+
+**C24**: `pitching_wedge_lean0_curve2_rotation2_combined2`; protocol `pw-primary-face-bounds/1`. Shaft twist SD 2°; curve ×2.
+
+**Paired Course Scoring**
+
+| Condition | Common-Three Scored / Attempted | Draw Δ SG [95%] | Fade Δ SG [95%] |
+| --- | ---: | --- | --- |
+| C17 | 10,000 / 10,000 | +0.004434 [+0.004363, +0.004502] | -0.00445 [-0.004517, -0.00438] |
+| C18 | 9,999 / 10,000 | +9.508e-05 [-6.221e-05, +2.800e-04] | +9.390e-05 [-3.145e-05, +2.411e-04] |
+| C19 | 10,000 / 10,000 | +0.005527 [+0.005466, +0.005576] | -0.005487 [-0.005537, -0.005427] |
+| C20 | 9,999 / 10,000 | +4.844e-04 [+3.075e-04, +6.523e-04] | -3.337e-04 [-5.016e-04, -1.721e-04] |
+| C21 | 10,000 / 10,000 | +0.008878 [+0.008738, +0.009015] | -0.008934 [-0.009068, -0.008798] |
+| C22 | 9,999 / 10,000 | +2.513e-04 [-3.605e-05, +5.326e-04] | +2.919e-04 [+3.620e-05, +5.922e-04] |
+| C23 | 10,000 / 10,000 | +0.011117 [+0.010994, +0.01122] | -0.010966 [-0.011068, -0.010844] |
+| C24 | 9,999 / 10,000 | +0.001046 [+7.406e-04, +0.001332] | -6.272e-04 [-9.681e-04, -2.936e-04] |
+
+**Individual Supported Endpoints**
+
+These individual populations can exceed the common-three scored intersection. Each entry is supported / attempted; no unsupported shots are retried.
+
+| Condition | Straight | Draw | Fade |
+| --- | ---: | ---: | ---: |
+| C17 | 10,000 / 10,000 | 10,000 / 10,000 | 10,000 / 10,000 |
+| C18 | 9,999 / 10,000 | 9,999 / 10,000 | 9,999 / 10,000 |
+| C19 | 10,000 / 10,000 | 10,000 / 10,000 | 10,000 / 10,000 |
+| C20 | 9,999 / 10,000 | 9,999 / 10,000 | 9,999 / 10,000 |
+| C21 | 10,000 / 10,000 | 10,000 / 10,000 | 10,000 / 10,000 |
+| C22 | 9,999 / 10,000 | 9,999 / 10,000 | 9,999 / 10,000 |
+| C23 | 10,000 / 10,000 | 10,000 / 10,000 | 10,000 / 10,000 |
+| C24 | 9,999 / 10,000 | 9,999 / 10,000 | 9,999 / 10,000 |

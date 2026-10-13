@@ -1,0 +1,48 @@
+{
+  "baseline_commit": "e4f4248eb7",
+  "baseline_source_sha256": {
+    "overview.py": "6b5d5d8a1c0733d936a0e1649fbe73f9fc35570a22fef05a6e220e089e7f5f94",
+    "reporting.py": "bf739a50cf287bd47e16f8cb2caaf29bd5a45c60600969dc182eb05c26b18683",
+    "sensitivity.py": "b83b71d41e33f883f8f5765207e7f9e9ae2dd6f139b1d3cb544662011dcd07dc"
+  },
+  "input": "Synthetic forest rows for both delivery modes, three clubs, four SD/curve cells and Draw/Fade; AnalysisConfig(n_shots=3,seed=71) with deterministic FakePhysics; sensitivity preset_configs with the same FakePhysics. Exact construction in test_plot_decomposition.py.",
+  "outputs": {
+    "dispersion.png": {
+      "rgba_sha256": "0b1350acf70ff9f9ba2197e9a09e5f0331db21427dceeac893abe164db22bf26",
+      "size": [
+        1920,
+        1080
+      ]
+    },
+    "dispersion_equal_range.png": {
+      "rgba_sha256": "3dcf7d74f80809624fcc7ae2db7c22ff35f15b5f6870566ad2734c83e8b69e58",
+      "size": [
+        1920,
+        1080
+      ]
+    },
+    "fixed_loft_forest.png": {
+      "rgba_sha256": "ee1923f11e7ea27f6c48f26cf16b2719631296e026a158920bcf9d75d643bf07",
+      "size": [
+        1920,
+        1080
+      ]
+    },
+    "sensitivity.png": {
+      "rgba_sha256": "9b00afc271fe923457321ec7907fd1856430dd36489ecec148c8bef001e447a9",
+      "size": [
+        1920,
+        1080
+      ]
+    },
+    "shaft_rotation_forest.png": {
+      "rgba_sha256": "b040a4766b762edd04e097e8e0b07ff24085f5d400e865a11b38a91a09031fd8",
+      "size": [
+        1920,
+        1080
+      ]
+    }
+  },
+  "rendering": "MPLBACKEND=Agg; each PNG decoded to RGBA bytes",
+  "schema": "shot-pattern-plot-decomposition-rgba/1"
+}

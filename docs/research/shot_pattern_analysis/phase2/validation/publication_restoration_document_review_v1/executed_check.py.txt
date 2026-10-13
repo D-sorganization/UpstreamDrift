@@ -1,0 +1,44 @@
+import ast, datetime, hashlib, json, shutil, subprocess, tempfile
+from pathlib import Path
+from zipfile import ZipFile
+from scripts.research.shot_pattern_analysis.archive_data import verify_archives
+from src.tools.shot_pattern_analysis.matched_report import load_reviewed_common_targets
+phase=Path('docs/research/shot_pattern_analysis/phase2').resolve()
+readme=phase/'data_archives/README.md'
+block=readme.read_text().split('```python\n',1)[1].split('```',1)[0]
+parsed=ast.parse(block)
+bundles=next(ast.literal_eval(n.value) for n in parsed.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='bundles' for t in n.targets))
+old=subprocess.check_output(['git','show','HEAD:docs/research/shot_pattern_analysis/phase2/data_archives/README.md'],text=True)
+assert 'bundle = phase / "data_archives" / dataset' in old
+old_missing=[name for name in ('final_v1','control_final_v1') if not (phase/'data_archives'/name/'archive_manifest.json').exists()]
+assert len(old_missing)==2
+records={}
+for name,dataset in bundles.items():
+ bundle=phase/'data_archives'/name
+ verify_archives(bundle)
+ manifest=json.loads((bundle/'archive_manifest.json').read_text())
+ assert manifest['source_name']==dataset
+ assert all(p.startswith(dataset+'/') for p in manifest['files'])
+ records[name]={'restored_directory':dataset,'files':len(manifest['files']),'manifest_sha256':hashlib.sha256((bundle/'archive_manifest.json').read_bytes()).hexdigest()}
+with tempfile.TemporaryDirectory(prefix='p2-restoration-doc-') as tmp:
+ root=Path(tmp)
+ for relative in ('common_targets.json','FINAL_RUN_ACCEPTANCE.md','validation/independent_control_pilot_audit.json'):
+  dst=root/relative;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(phase/relative,dst)
+ try:load_reviewed_common_targets(root)
+ except FileNotFoundError as exc:
+  assert 'control_pilot_v1/matrix_plan.json' in str(exc)
+  missing_plan_failure=type(exc).__name__
+ else:raise AssertionError('Missing pilot plan was incorrectly accepted')
+ bundle=phase/'data_archives/control_pilot_v1'
+ manifest=json.loads((bundle/'archive_manifest.json').read_text())
+ member='control_pilot_v1/matrix_plan.json';meta=manifest['files'][member]
+ with ZipFile(bundle/meta['archive']) as z:
+  content=z.read(member)
+ assert hashlib.sha256(content).hexdigest()==meta['sha256']
+ p=root/member;p.parent.mkdir();p.write_bytes(content)
+ targets,provenance=load_reviewed_common_targets(root)
+record={'checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'scope':'Archive mappings, full archive byte verification and isolated restoration of the exact pilot plan prerequisite; not a rerun of final simulations or full publication','status':'pass','old_missing_bundle_paths':old_missing,'missing_pilot_plan_negative_control':missing_plan_failure,'bundles':records,'restored_common_targets':targets,'control_target_provenance':provenance,'readme_sha256':hashlib.sha256(readme.read_bytes()).hexdigest(),'script_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+out=phase/'validation/publication_restoration_document_review_v1';out.mkdir(exist_ok=True)
+(out/'validation.json').write_text(json.dumps(record,indent=2)+'\n')
+shutil.copyfile(__file__,out/'executed_check.py.txt')
+print(json.dumps(record,indent=2))

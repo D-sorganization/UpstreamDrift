@@ -1,0 +1,48 @@
+.............................................                            [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+4.50s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_effect_modification_bootstraps_difference_of_within_condition_benefits
+1.73s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rechecks_transition_evidence_after_calculation
+1.69s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_reviewed_driver_speed_bound_pair_passes_full_explicit_api
+1.56s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_supports_5_to_10_degrees
+1.48s call     tests/research/test_shot_pattern_final_report.py::test_final_builder_requires_full_324_and_72_cell_protocols
+1.39s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rechecks_source_bytes_after_analysis
+1.09s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_full_pair_api_rechecks_course_score_helper_source_after_calculation
+0.81s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_centers_nominal_delivery_and_uses_six_population_intersection
+0.56s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_curve_strength_pair_reports_paired_sg_interaction
+0.49s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_reports_paired_sg_interaction
+0.44s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_rotation_sd_pair_reports_common_index_sg_difference_of_differences
+0.34s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_scoring_failure_records_unavailable_status
+0.30s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_across_lean_pair_uses_same_six_conditional_intersection_for_scoring
+0.15s setup    tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_effect_modification_bootstraps_difference_of_within_condition_benefits
+0.07s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rejects_centered_input_mismatch
+0.07s call     tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_explicit_pair_rejects_unapproved_physical_config_difference
+0.07s setup    tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_curve_strength_pair_reports_paired_sg_interaction
+0.07s teardown tests/research/test_shot_pattern_final_report.py::test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distractors
+0.06s teardown tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py::test_reviewed_driver_speed_bound_pair_passes_full_explicit_api
+0.06s setup    tests/research/test_shot_pattern_final_report.py::test_matrix_input_change_is_rejected_before_publication

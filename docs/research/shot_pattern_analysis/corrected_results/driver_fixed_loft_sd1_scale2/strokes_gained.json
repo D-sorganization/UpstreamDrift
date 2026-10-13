@@ -1,0 +1,267 @@
+{
+  "status": "available",
+  "scenario_id": "tee_fairway_rough",
+  "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+  "club_id": "driver",
+  "start_lie": "tee",
+  "start_distance_m": 400.0,
+  "target_x_m": 198.53603557517098,
+  "hole_distance_m": 400.0,
+  "fairway_half_width_m": 15.0,
+  "green_radius_m": null,
+  "source_backed_status": "available",
+  "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+  "api_evaluated_states": 70,
+  "scored_shots": 30000,
+  "interpolation_tolerance_strokes": 1e-12,
+  "baseline": {
+    "id": "broadie-2011-historical-tour-approx",
+    "version": "table9-full-plus-anchor-reconciled-putting/2",
+    "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+    "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+  },
+  "patterns": {
+    "Straight": {
+      "n": 10000,
+      "mean_strokes_gained": -0.27024002791713064,
+      "fairway_fraction": 0.9189
+    },
+    "Draw": {
+      "n": 10000,
+      "mean_strokes_gained": -0.27789610877872695,
+      "fairway_fraction": 0.9273
+    },
+    "Fade": {
+      "n": 10000,
+      "mean_strokes_gained": -0.27767365987912107,
+      "fairway_fraction": 0.9285
+    }
+  },
+  "paired_benefit_vs_straight": {
+    "Draw": {
+      "estimate": -0.007656080861596279,
+      "lower_95": -0.007995926172914586,
+      "upper_95": -0.007274797183258142
+    },
+    "Fade": {
+      "estimate": -0.0074336319619904175,
+      "lower_95": -0.007810566613916542,
+      "upper_95": -0.007028626343519546
+    }
+  },
+  "limitations": [
+    "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+    "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+    "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+  ],
+  "hole_distance_sensitivity_m": {
+    "350": {
+      "status": "available",
+      "scenario": "Historical PGA tee shot on a flat 350 m hole with a 30 m fairway corridor",
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": -0.0668033567101982,
+          "fairway_fraction": 0.9189
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": -0.07195820611661934,
+          "fairway_fraction": 0.9273
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": -0.07168567496527734,
+          "fairway_fraction": 0.9285
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.005154849406421123,
+          "lower_95": -0.0055338446268736255,
+          "upper_95": -0.004722102740706151
+        },
+        "Fade": {
+          "estimate": -0.004882318255079115,
+          "lower_95": -0.005317689149488676,
+          "upper_95": -0.004405477843291784
+        }
+      },
+      "api_evaluated_states": 70
+    },
+    "400": {
+      "status": "available",
+      "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": -0.27024002791713064,
+          "fairway_fraction": 0.9189
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": -0.27789610877872695,
+          "fairway_fraction": 0.9273
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": -0.27767365987912107,
+          "fairway_fraction": 0.9285
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.007656080861596279,
+          "lower_95": -0.007995926172914586,
+          "upper_95": -0.007274797183258142
+        },
+        "Fade": {
+          "estimate": -0.0074336319619904175,
+          "lower_95": -0.007810566613916542,
+          "upper_95": -0.007028626343519546
+        }
+      },
+      "api_evaluated_states": 70
+    },
+    "450": {
+      "status": "available",
+      "scenario": "Historical PGA tee shot on a flat 450 m hole with a 30 m fairway corridor",
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": -0.3181610747120064,
+          "fairway_fraction": 0.9189
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": -0.32487613406641674,
+          "fairway_fraction": 0.9273
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": -0.324725796603931,
+          "fairway_fraction": 0.9285
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.006715059354410318,
+          "lower_95": -0.0069510290254582024,
+          "upper_95": -0.006441254493406659
+        },
+        "Fade": {
+          "estimate": -0.00656472189192461,
+          "lower_95": -0.006827155933808665,
+          "upper_95": -0.006286290135799063
+        }
+      },
+      "api_evaluated_states": 70
+    }
+  },
+  "fairway_width_sensitivity_m": {
+    "20": {
+      "status": "available",
+      "scenario": "Historical PGA tee shot on a flat 400 m hole with a 20 m fairway corridor",
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": -0.3046889990847314,
+          "fairway_fraction": 0.7537
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": -0.310707276536056,
+          "fairway_fraction": 0.7688
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": -0.310441100777733,
+          "fairway_fraction": 0.7702
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.006018277451324622,
+          "lower_95": -0.0065664514922364955,
+          "upper_95": -0.005494409731853012
+        },
+        "Fade": {
+          "estimate": -0.005752101693001601,
+          "lower_95": -0.006227954579991483,
+          "upper_95": -0.0051322541044693075
+        }
+      },
+      "api_evaluated_states": 70
+    },
+    "30": {
+      "status": "available",
+      "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": -0.27024002791713064,
+          "fairway_fraction": 0.9189
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": -0.27789610877872695,
+          "fairway_fraction": 0.9273
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": -0.27767365987912107,
+          "fairway_fraction": 0.9285
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.007656080861596279,
+          "lower_95": -0.007995926172914586,
+          "upper_95": -0.007274797183258142
+        },
+        "Fade": {
+          "estimate": -0.0074336319619904175,
+          "lower_95": -0.007810566613916542,
+          "upper_95": -0.007028626343519546
+        }
+      },
+      "api_evaluated_states": 70
+    },
+    "40": {
+      "status": "available",
+      "scenario": "Historical PGA tee shot on a flat 400 m hole with a 40 m fairway corridor",
+      "patterns": {
+        "Straight": {
+          "n": 10000,
+          "mean_strokes_gained": -0.2575659429720933,
+          "fairway_fraction": 0.98
+        },
+        "Draw": {
+          "n": 10000,
+          "mean_strokes_gained": -0.2661907279427374,
+          "fairway_fraction": 0.9841
+        },
+        "Fade": {
+          "n": 10000,
+          "mean_strokes_gained": -0.2662721778515086,
+          "fairway_fraction": 0.9839
+        }
+      },
+      "paired_benefit_vs_straight": {
+        "Draw": {
+          "estimate": -0.008624784970644133,
+          "lower_95": -0.008878361786875587,
+          "upper_95": -0.008364258346477166
+        },
+        "Fade": {
+          "estimate": -0.008706234879415319,
+          "lower_95": -0.00895459239940525,
+          "upper_95": -0.008409007890044345
+        }
+      },
+      "api_evaluated_states": 70
+    }
+  },
+  "total_api_evaluated_states": 350,
+  "baseline_artifact": "strokes_gained_baseline.json"
+}

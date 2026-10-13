@@ -1,0 +1,31 @@
+{
+  "schema": "independent-selected-headline-traceability-review/1",
+  "checked_utc": "2026-10-10T09:15:54.806227+00:00",
+  "status": "accepted_traceability_only",
+  "publication_accepted": false,
+  "reviewed_input_sha256": {
+    "validation/selected_headline_traceability_v1/review.json": "f4cc8ab15c65167617ecda4be1ae408c47b1039171cb44ffd4a63d5f3cd515cd",
+    "validation/selected_headline_traceability_v1/REVIEW.md": "45bd1365c0e19251bf3ea63fbffd49e6c1a691e4a33f3406fb2d6e659030e8f4",
+    "validation/selected_headline_traceability_v1/executed_check.py.txt": "9f3bbaab49b9bfc5613b0832d703ed1ae77bd0a8860ff50ca21f866189399cfe"
+  },
+  "checked_cells": 24,
+  "checked_pattern_rows": 72,
+  "supplemental_cells": [
+    "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation1_combined2",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation2_combined2"
+  ],
+  "checks": [
+    "Exact inventory, configurations, zero lean, all nominal X/Y residuals <=0.05m and no aim rotation.",
+    "All extracted numeric fields, paired SG objects and recorded scoring contexts equal saved summaries.",
+    "Original summary hashes also match their original manifests, including four unavailable PW records.",
+    "Every SG pattern n equals common-three paired_n and is no greater than its individual geometry support.",
+    "All source and review-document hashes stable before and after."
+  ],
+  "narrative_assessment": "No overclaim found. Signed correlation correctly describes conditional association in right-positive lateral and downrange coordinates. It is not a deterministic every-shot direction rule or measured player effect. Matching nominal endpoints does not equate noisy realized distances or provide a causal distance/curvature decomposition. The six-row Markdown example is explicitly shaft-only Straight, curve1, zero lean; it is not a universal all-pattern result.",
+  "limits": [
+    "No new statistics, bootstrap, simulation or scoring calculation.",
+    "Acceptance applies to extraction and stated scope, not unfinished publication or empirical model qualification."
+  ]
+}

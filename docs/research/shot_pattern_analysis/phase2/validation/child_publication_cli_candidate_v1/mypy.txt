@@ -1,0 +1,2 @@
+scripts/research/shot_pattern_analysis/supplement_revision_adapter.py:177: error: Need type annotation for "results" (hint: "results: list[<type>] = ...")  [var-annotated]
+Found 1 error in 1 file (checked 5 source files)

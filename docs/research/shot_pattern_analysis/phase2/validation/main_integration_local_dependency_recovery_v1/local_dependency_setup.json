@@ -1,0 +1,56 @@
+{
+  "utc": "2026-10-10T19:04:26.424261+00:00",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "/home/dieterolson/Repositories/UpstreamDrift/vendor/ud-tools",
+        "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Cloning into '/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools'...\ndone.\n"
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools",
+        "checkout",
+        "--detach",
+        "86d0f28b1cc5acf61185e07e320c816c2d005512"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Previous HEAD position was 3678409fc Add Input Contracts Surfaced by the UpstreamDrift Shadow Burn-Down (#5362) (#5364)\nHEAD is now at 86d0f28b1 feat(mocap): require compiled actuator profile references (#5475)\n"
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools",
+        "status",
+        "--porcelain"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "86d0f28b1cc5acf61185e07e320c816c2d005512\n",
+      "stderr": ""
+    }
+  ],
+  "no_network_allowed": true
+}

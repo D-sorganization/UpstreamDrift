@@ -1,0 +1,24 @@
+import importlib.util
+import copy
+import json
+from pathlib import Path
+import pytest
+s=importlib.util.spec_from_file_location('restart','/tmp/p2-supplement-report-v5.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+BASE=json.loads((m.PHASE/'validation/supplement_rendering_revision_v4/start.json').read_text())
+@pytest.mark.parametrize('key',['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution'])
+def test_reject_snapshot_tampering(key):
+ actual={k:copy.deepcopy(BASE[k]) for k in m.SNAPSHOT_KEYS}
+ actual[key]={'tampered':True} if isinstance(actual[key],dict) else 'tampered'
+ with pytest.raises(ValueError):m.validate_bound_snapshot(actual,BASE)
+def test_exact_snapshot_accepted():
+ m.validate_bound_snapshot({k:BASE[k] for k in m.SNAPSHOT_KEYS},BASE)
+@pytest.mark.parametrize('change',['value','extra','missing'])
+def test_cli_tampering(change):
+ command=BASE['command'].copy()
+ if change=='value':command[4]='wrong'
+ elif change=='extra':command+=['--other','1']
+ else:command.pop()
+ with pytest.raises(ValueError):m.validate_command(command)
+def test_runtime_backend_tampering():
+ actual=copy.deepcopy(BASE['execution']);actual['runtime']='wrong'
+ with pytest.raises(ValueError):m.validate_execution(actual,BASE['execution'])

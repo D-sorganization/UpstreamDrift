@@ -1,0 +1,945 @@
+{
+  "schema": "provisional-driver-detail-graphics-review/1",
+  "reviewed_utc": "2026-10-10T08:01:57.311696+00:00",
+  "status": "no_defect_found_in_reviewed_files_pending_final_manifest",
+  "scope": "Primary v4 Driver academic detail PNGs only; producer remains live. Not whole-run or final publication acceptance.",
+  "png_readability_and_stability": {
+    "count": 32,
+    "all_decoded": true,
+    "all_hashes_stable_before_after": true
+  },
+  "visual_inspection": {
+    "contact_sheets": [
+      "contact_01.jpg",
+      "contact_02.jpg",
+      "contact_03.jpg",
+      "contact_04.jpg"
+    ],
+    "contact_png_count": 32,
+    "full_size_indices": [
+      1,
+      8,
+      11,
+      14,
+      17,
+      24,
+      26,
+      29
+    ],
+    "observations": [
+      "No clipping, title/legend collision or main/marginal tick collision found in inspected representatives.",
+      "Three physical-pattern panels use common endpoint axes and one probability-density scale within each image; scales are not assumed common across separate images.",
+      "Metadata distinguishes static loft, nominal lean, shaft-rotation SD, path degrees, speed m/s and horizontal/vertical contact metres.",
+      "Density footer distinguishes 600 displayed dots from all supported endpoints used by histogram, HDR and marginals, with achieved sample HDR masses.",
+      "Overhead labels disclose six sampled paths per pattern, valid/attempted counts, raw target-frame coordinates and lateral display magnification.",
+      "Lean5 combined cases correctly retain 9,974 (SD1) or 9,940 (SD2) supported shots per pattern, rather than claiming all 10,000."
+    ]
+  },
+  "files": [
+    {
+      "index": 1,
+      "path": "final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/density.png",
+      "sha256": "8da5050c59493eb740bbf9a221192c17ad9c5b47e076b414a12a2f49362254e6",
+      "pixels": [
+        2896,
+        1701
+      ]
+    },
+    {
+      "index": 2,
+      "path": "final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/overhead.png",
+      "sha256": "c70b71443f64b53e845f02254431fb667ad7cd800288ba4796dab47044b284f9",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "index": 3,
+      "path": "final_figures_v1/details/driver_lean0_curve1_rotation1_shaft_only/density.png",
+      "sha256": "522a29cc499e6ca08c072b83bed2b3c6ab74745ba0212b0d43636730bc676355",
+      "pixels": [
+        2864,
+        1701
+      ]
+    },
+    {
+      "index": 4,
+      "path": "final_figures_v1/details/driver_lean0_curve1_rotation1_shaft_only/overhead.png",
+      "sha256": "67d8f59c7e01672b63a9032475e92245f5501ad29637c09cb821d82a37185ce8",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "index": 5,
+      "path": "final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/density.png",
+      "sha256": "a8f6efdae7ecf618e13960fc0fb0edbbb6d289a0c52963e7f8de5edb11094cc6",
+      "pixels": [
+        2912,
+        1701
+      ]
+    },
+    {
+      "index": 6,
+      "path": "final_figures_v1/details/driver_lean0_curve1_rotation2_combined2/overhead.png",
+      "sha256": "4138ddafa333ec81048bcbe5783047b7a5ebf69881bbda5a490e0ff9f04f8fe3",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "index": 7,
+      "path": "final_figures_v1/details/driver_lean0_curve1_rotation2_shaft_only/density.png",
+      "sha256": "52e1e423fc0dba201ee9d2399bca24b6af1d0147873e60e50155575c57836fbd",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "index": 8,
+      "path": "final_figures_v1/details/driver_lean0_curve1_rotation2_shaft_only/overhead.png",
+      "sha256": "a8d18d57017c6d8be480825204042250eebd4fd67ede9578b7e468f0029b71cf",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "index": 9,
+      "path": "final_figures_v1/details/driver_lean0_curve2_rotation1_combined2/density.png",
+      "sha256": "295a5e7ec25ff02da9893f05648adce7151f481627285e7dd7dbcaea7836235f",
+      "pixels": [
+        2896,
+        1701
+      ]
+    },
+    {
+      "index": 10,
+      "path": "final_figures_v1/details/driver_lean0_curve2_rotation1_combined2/overhead.png",
+      "sha256": "29de9f33c1c15e42970ffad4803ede06584454485e65cb83fc3b0f3970225fe0",
+      "pixels": [
+        3097,
+        1080
+      ]
+    },
+    {
+      "index": 11,
+      "path": "final_figures_v1/details/driver_lean0_curve2_rotation1_shaft_only/density.png",
+      "sha256": "dedcd908492181662049bb8a64f424f54e28851c5cb2ab4c535b33cda7206265",
+      "pixels": [
+        2864,
+        1701
+      ]
+    },
+    {
+      "index": 12,
+      "path": "final_figures_v1/details/driver_lean0_curve2_rotation1_shaft_only/overhead.png",
+      "sha256": "4c3758d9b4a13765a59e8a5f3e747ba7ef7e7976d84d4f4f922e39fc77fcfb6b",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "index": 13,
+      "path": "final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/density.png",
+      "sha256": "02f95f0def4b9a0fc87f3c526604bc67e2d54861f74f79242873f3e12627fc43",
+      "pixels": [
+        2896,
+        1701
+      ]
+    },
+    {
+      "index": 14,
+      "path": "final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+      "sha256": "835d738f24ae3730fd8ad3cc7de81aa0da2c7eb34f4138aa49db5cdfa911a814",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "index": 15,
+      "path": "final_figures_v1/details/driver_lean0_curve2_rotation2_shaft_only/density.png",
+      "sha256": "8de0944eb5fe68bb5e74526cbb52141ab7c945cb583b901375a400eb523c6d47",
+      "pixels": [
+        2896,
+        1701
+      ]
+    },
+    {
+      "index": 16,
+      "path": "final_figures_v1/details/driver_lean0_curve2_rotation2_shaft_only/overhead.png",
+      "sha256": "138d1d676bf7bb83c32f4ee6d8da67873f334b8719d56f469e1ea4bc4f742a69",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "index": 17,
+      "path": "final_figures_v1/details/driver_lean5_curve1_rotation1_combined2/density.png",
+      "sha256": "b4dfa0c6896a98609dccd35ab476437e7b41ecce2eb5369b54eacce88aca928a",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "index": 18,
+      "path": "final_figures_v1/details/driver_lean5_curve1_rotation1_combined2/overhead.png",
+      "sha256": "722e1c8c5149f287ba17ec9c6fa0a4edd77818f8508be3838cea1986e408b954",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 19,
+      "path": "final_figures_v1/details/driver_lean5_curve1_rotation1_shaft_only/density.png",
+      "sha256": "58d351e4ee8a315aa8bb32bd7e61e16d1d515fa22df02ca4131caf417729230c",
+      "pixels": [
+        2852,
+        1701
+      ]
+    },
+    {
+      "index": 20,
+      "path": "final_figures_v1/details/driver_lean5_curve1_rotation1_shaft_only/overhead.png",
+      "sha256": "3006da65bcefc0355663e17d56113d963bff7f7e9735a96fe3777f504bc4a729",
+      "pixels": [
+        3058,
+        1080
+      ]
+    },
+    {
+      "index": 21,
+      "path": "final_figures_v1/details/driver_lean5_curve1_rotation2_combined2/density.png",
+      "sha256": "10a82852c95ce750e55d5feccfb0b76e6453c2fb0ddde198f98cc6579154dde2",
+      "pixels": [
+        2896,
+        1701
+      ]
+    },
+    {
+      "index": 22,
+      "path": "final_figures_v1/details/driver_lean5_curve1_rotation2_combined2/overhead.png",
+      "sha256": "05e4d9ff9337b882197a4b5e5eb1b13a00de5bfdbef05b13b0483241b7f3af8a",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 23,
+      "path": "final_figures_v1/details/driver_lean5_curve1_rotation2_shaft_only/density.png",
+      "sha256": "584ff53459a864e01d11886fbe2a3d583add887d1d91d6ed0454e41d73778468",
+      "pixels": [
+        2884,
+        1701
+      ]
+    },
+    {
+      "index": 24,
+      "path": "final_figures_v1/details/driver_lean5_curve1_rotation2_shaft_only/overhead.png",
+      "sha256": "06008bef374070f49dc870356f1a98e21ade49b20ccb9dd815761dccadd51d82",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 25,
+      "path": "final_figures_v1/details/driver_lean5_curve2_rotation1_combined2/density.png",
+      "sha256": "344bfa138891e0a512f7f74b0dadcb04b9ab0f103d9342554f273e5544e665f6",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "index": 26,
+      "path": "final_figures_v1/details/driver_lean5_curve2_rotation1_combined2/overhead.png",
+      "sha256": "bca65253ffb2b54e1ab2530f268b4c27aa9807165d71512329655398d5b3f832",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 27,
+      "path": "final_figures_v1/details/driver_lean5_curve2_rotation1_shaft_only/density.png",
+      "sha256": "6afb0156c047d52e3e4019c9777979f500437779a66f0e14a556fc188e52a522",
+      "pixels": [
+        2852,
+        1701
+      ]
+    },
+    {
+      "index": 28,
+      "path": "final_figures_v1/details/driver_lean5_curve2_rotation1_shaft_only/overhead.png",
+      "sha256": "c035cc2f9ebd8575891826435abf25dde5ead58adb3cee75a4eaa59f51bdf097",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 29,
+      "path": "final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.png",
+      "sha256": "1968a5a57e32114963696a51e30a90c1b2ddb96ce5df8c1f950a5385ba24056d",
+      "pixels": [
+        2896,
+        1701
+      ]
+    },
+    {
+      "index": 30,
+      "path": "final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/overhead.png",
+      "sha256": "88304bc5a25c651e988c56bb1e33fdeb46d656c8ebfd3c8911e3f0304421f8a0",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 31,
+      "path": "final_figures_v1/details/driver_lean5_curve2_rotation2_shaft_only/density.png",
+      "sha256": "cd7efb12c97b8b94c09baa2ae21fa35a382fde022c9d746c4ac186452884d328",
+      "pixels": [
+        2884,
+        1701
+      ]
+    },
+    {
+      "index": 32,
+      "path": "final_figures_v1/details/driver_lean5_curve2_rotation2_shaft_only/overhead.png",
+      "sha256": "1f78599dd76c73a66270e1d64d6deeba086c823c160c217b700c11572bd7a24d",
+      "pixels": [
+        3057,
+        1080
+      ]
+    }
+  ],
+  "saved_cell_label_checks": [
+    {
+      "cell": "driver_lean0_curve1_rotation1_combined2",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 0.0,
+        "curve_scale": 1.0,
+        "noise": [
+          1.0,
+          0.5,
+          0.89408,
+          0.00635,
+          0.00635,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 178.94875782337786,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "7bf03b58d7349b32112e3961747f882662ffa83a1f22f913d2d29a9a9f1dd373",
+        "manifest.json": "b184a59e08d7918c8cf4d1f8d7762a5612eed3e72be4941291f16059fb140009",
+        "flight_samples.json": "e1783bde8253090ee9ff04e085ece3962ed2f7dd015093d044fc43ca6545d152"
+      },
+      "companion_svg_sha256": {
+        "density": "136fe869f30693a1a5869a42742923b3ff549b0784c0ed7a503e0696c920c59d",
+        "overhead": "d55f40146aa2ec400c0f8f9b77e56c53f78f120f7dc8e061047f5517172fc5a9"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_only",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 0.0,
+        "curve_scale": 1.0,
+        "noise": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 178.94875782337786,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "2ff839ccbc3efed5501e9ce228f57262402e68cb414607881a6f68cd71493a4a",
+        "manifest.json": "9059d5c431f90838d9c62825493842e2703d48208b8635a1baa8ac4ac0e7db40",
+        "flight_samples.json": "81f2461ae42bf6d5e33cc141730b1951282cee3acaaef0965a2b67eef381060b"
+      },
+      "companion_svg_sha256": {
+        "density": "af86a1deddc9b8dc50d1dc1ffb42b6a36a0722a5471f3e35c437edcf16480a87",
+        "overhead": "374d70df1420c900e3f4b3db5c6636697499ee9ebbca89c163b260cc48b02033"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_combined2",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 0.0,
+        "curve_scale": 1.0,
+        "noise": [
+          2.0,
+          0.5,
+          0.89408,
+          0.00635,
+          0.00635,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 178.94875782337786,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "f8c27205ba8dcd6f6597143f54e9418917f6b696961b6a9a6188df2906fa3346",
+        "manifest.json": "8f1cbc232614a0bd538138aae01ee69ce95ab1ef165e080cb5c28c68d6ee5b19",
+        "flight_samples.json": "f1304903884a12c61fdf4471600d310a885214375d14c2695cfc77babca5cb2a"
+      },
+      "companion_svg_sha256": {
+        "density": "0fc06991e94d9a2629c0e0665afdd60419570392232d611d9156a2054c5070de",
+        "overhead": "c3b4f2f36ed689b5335148c8f04a786abac629e975eddc2685cfdb0e4da50e1b"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_shaft_only",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 0.0,
+        "curve_scale": 1.0,
+        "noise": [
+          2.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 178.94875782337786,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "79ec2a67fdc585f466b290dde44213a7080f01ecc9d2445ff12605af25a58e4f",
+        "manifest.json": "5ec8282c7102415247d83c0c7167b06a796008963ee5162c739f387041f39951",
+        "flight_samples.json": "eecc3b2e49289b292ddcd96dc15201af95b941c0ae55bc09c14424faad0cba20"
+      },
+      "companion_svg_sha256": {
+        "density": "f8ad8712814acf62cde2e23ea4d7ae7df9df11c7806ff939e22e05b0aa1477f9",
+        "overhead": "8f48d82dcad063b6c5f673b5fbc97697a732617ae95debaa00224107ec912cef"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_combined2",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 0.0,
+        "curve_scale": 2.0,
+        "noise": [
+          1.0,
+          0.5,
+          0.89408,
+          0.00635,
+          0.00635,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 178.94875782337786,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "fed95852fb12390dd8cbd09191267744f0a5baa5cc939f2f1d61fc7d58490ea5",
+        "manifest.json": "ed8389b34084de2b9136ee40f5ed6c15bf407f08a94a3b4e77deda01fd80e93e",
+        "flight_samples.json": "641e87f3f67da7b1baa3940bfd3537a2fe49061d86ebdd5939be8c3db559969a"
+      },
+      "companion_svg_sha256": {
+        "density": "ee3935e5f4218cb73291cb3213f73aea855f18ac4218ec6aa6b03beb561af3f9",
+        "overhead": "b777428c0d608a6b9cde7e75be038c0b78e969f3c521cd03310c28b4cd504e83"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_only",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 0.0,
+        "curve_scale": 2.0,
+        "noise": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 178.94875782337786,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "62c2eeef023aaf93ab7aec1f98b86e21b3d1cb66ef59fda782029b64340d8f49",
+        "manifest.json": "64403b1d3efecf27dfdbed442c0e193b0ec40736623fa7fb72238cee2aa478ea",
+        "flight_samples.json": "b27bf85025f3f6af40043ca133b0d0b0f8cf069e84ed1ac86602a379c0b0a377"
+      },
+      "companion_svg_sha256": {
+        "density": "76f94172e1fc47de19685b2aa31b839ffbed4b2b50e35de16710f0e9d67e3441",
+        "overhead": "04f9b06010cd0d4606892c357a365db67cbc8d2e8d662baba2e1d1dbded9cc63"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_combined2",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 0.0,
+        "curve_scale": 2.0,
+        "noise": [
+          2.0,
+          0.5,
+          0.89408,
+          0.00635,
+          0.00635,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 178.94875782337786,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "ac47b4ed7e3920a5552df059257ae19e891c2345d6c57721370ce2136301ad40",
+        "manifest.json": "c1cbf8d53589b0b634fe46a9c645737dde5bc2f74abc7f2950fc7cde280c98a5",
+        "flight_samples.json": "40df2781499a88ba199bdd60e5434f5a25d411fcfa24108511b681bbdcbceb40"
+      },
+      "companion_svg_sha256": {
+        "density": "388c32cba682cdd2a694e46e596ef130280bc390168265abce82a2f4e5851912",
+        "overhead": "80649da6ab8d1fbf95f45663c307bbae1a0574d0be660716f85bcbc36dd256f7"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_shaft_only",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 0.0,
+        "curve_scale": 2.0,
+        "noise": [
+          2.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 178.94875782337786,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "ecb0dcf6c73d992bcb75bc6752bcfb5ab37b8f77502e8dbead57a77b4f063c89",
+        "manifest.json": "68ca59d60cbe090e38b6e0f8c7e842f8e79d5063d2e5d4a97efd7704cb7a3b29",
+        "flight_samples.json": "9e5d4a38567915ba7e17fd32235f26340b596b017983646365cc7ed0847cd2be"
+      },
+      "companion_svg_sha256": {
+        "density": "558a7fbd4e93b0d877c558b8ecb91633742b485fe69cb79b0149aec445e93972",
+        "overhead": "030e5d6513c9f09bfc2fd16150e05fd12a9c80ec496273a36dbf5dcb17965bbf"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 5.0,
+        "curve_scale": 1.0,
+        "noise": [
+          1.0,
+          0.5,
+          0.89408,
+          0.00635,
+          0.00635,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 108.02738606179851,
+      "supported_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "4f14138ea57c4856806df37095c4cdfe0bbb2bfcbbd7e0b850eba1a60e356b90",
+        "manifest.json": "de7c91b5d88ed5648f96554352d24c5f7ab4eb0292dccc1a38b04ce71a893acd",
+        "flight_samples.json": "cd6a710d053b33f1755d08410a6502dc3bfe6f60bf86c221d5223378b9043d48"
+      },
+      "companion_svg_sha256": {
+        "density": "2cd795877308e3564f94831ccec0e768d1a3ed3cae285c77349794ab756b5dbe",
+        "overhead": "a2235e2c5e28701eae1d6feb62f6176ba2301959600b4f9bafbd7ef905126d51"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_shaft_only",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 5.0,
+        "curve_scale": 1.0,
+        "noise": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 108.02738606179851,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "a0a04e7ded4b5edc606dd6fc310e0f8e456c313580cd70edfa064ab95fa022ae",
+        "manifest.json": "c5c14ba24c59a3e88313f94b58bfefcbfd11e68023064a316115cbb4c0660e3b",
+        "flight_samples.json": "2d837cdebb6283c549bdd72615abf2ec2ec468d80c37354294faed6342fe5275"
+      },
+      "companion_svg_sha256": {
+        "density": "4ad510aaa07a9df12bf37b8d382f64c8b34130d456fc119502a9f8f5867a2742",
+        "overhead": "8c7bcb3e727a58873d3d73f8e5f98d39aa2ca937d57fda6b816a0ac2a482d032"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_combined2",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 5.0,
+        "curve_scale": 1.0,
+        "noise": [
+          2.0,
+          0.5,
+          0.89408,
+          0.00635,
+          0.00635,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 108.02738606179851,
+      "supported_by_pattern": {
+        "Straight": 9940,
+        "Draw": 9940,
+        "Fade": 9940
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "be043b74b564584893dfd5bbd6700b3ed32eee912589201c32179e3b6bd6e9b7",
+        "manifest.json": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42",
+        "flight_samples.json": "aefb65fbb7cc3b1ff0587695412cd5da33560dc9032d667457e098264d19a3b9"
+      },
+      "companion_svg_sha256": {
+        "density": "337f574c6fb176973cac0c1935972e82f069a36128f6cc8878562563f2b144d9",
+        "overhead": "62fd91ba1ef6da935020f3862b92ffba8fff228b3f4a815e1a2e38bd717e57a1"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_shaft_only",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 5.0,
+        "curve_scale": 1.0,
+        "noise": [
+          2.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 108.02738606179851,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "60b4fcd9a71bc4ac725501e03987e216416fa99b24fb7a934d547b13e27ae418",
+        "manifest.json": "6fa415959704e217db28a5ef8aa1ff748b1edcd68bc0a50345cb1ab45f0d97a3",
+        "flight_samples.json": "738a2a3a886f360e8d55ee669fd42f1091099b3bf1b6ef7da3d8bb2cc20c1543"
+      },
+      "companion_svg_sha256": {
+        "density": "09c753b23190d60f7f81bc57a3309984cc04ee6603c7ba2e681ac62a37e2cc5a",
+        "overhead": "8091b49674d2929831298c20ad071ea331aa0c5229735ef36f05cc4eed32a314"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_combined2",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 5.0,
+        "curve_scale": 2.0,
+        "noise": [
+          1.0,
+          0.5,
+          0.89408,
+          0.00635,
+          0.00635,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 108.02738606179851,
+      "supported_by_pattern": {
+        "Straight": 9974,
+        "Draw": 9974,
+        "Fade": 9974
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "c5c55d4a3563a96f5750477afed8a56f13b636a67213438db2eb04af612f82a2",
+        "manifest.json": "ba6f5a435328d7eb2ad008e30316d466971b14af334196b1a9357cc3c1fefd06",
+        "flight_samples.json": "542614c42ed29d0881d4024f0588636f008d1844c8fca77b764626e925c5ab4e"
+      },
+      "companion_svg_sha256": {
+        "density": "4b72934b44d262c7c219acde80fa3b55ea227b25058eae48848914e00d3e8b42",
+        "overhead": "ad6ac6ea2c6afcf753f436c476438de08d72b39ac2d53d6dd8ebd0344a9f1346"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 5.0,
+        "curve_scale": 2.0,
+        "noise": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 108.02738606179851,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "b558b5e4b2d1a9f6cea67751abeb50f969641ad6f5d97146d4c39c7016a3c5f0",
+        "manifest.json": "009f5e779b1b916376ceabcc13b181089b6fd4d4cc245fe46d2203ca71d27728",
+        "flight_samples.json": "979442921facbab5a0ab4b85bee1abc597dcc0dcad626a0468aeca76e1d34f12"
+      },
+      "companion_svg_sha256": {
+        "density": "8f7e057dd5a27ca5f05ea985eaee773c735fafc85d47420d38872622a028949c",
+        "overhead": "5b2738ad307492751521e4ec18d6933db273da4d65ab478ce610e1b04c48a753"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 5.0,
+        "curve_scale": 2.0,
+        "noise": [
+          2.0,
+          0.5,
+          0.89408,
+          0.00635,
+          0.00635,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 108.02738606179851,
+      "supported_by_pattern": {
+        "Straight": 9940,
+        "Draw": 9940,
+        "Fade": 9940
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "921f4fb57442ada57884d0a22b1744b6f92ee73d07de37d1c5dceede961e87ac",
+        "manifest.json": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+        "flight_samples.json": "5dcaf89cad5a890069c30b8fa7772415e9e82dc87f81ee87761209dfb66b4d16"
+      },
+      "companion_svg_sha256": {
+        "density": "a547f5fad3513b41e891630b90de3ef017f97999575d3f637e21dec8358aab91",
+        "overhead": "2e39e07c9b3df12bed4f96c47b440a3f0371def9b7cb6d54870f20395e4e1809"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_shaft_only",
+      "config": {
+        "loft_deg": 10.0,
+        "shaft_lean_deg": 5.0,
+        "curve_scale": 2.0,
+        "noise": [
+          2.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "target_x_m": 108.02738606179851,
+      "supported_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "paths_shown": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "source_sha256": {
+        "summary.json": "d960a81cc48568ea5b7eb1b48afd53886da1cf12351d6a7fb62f99f1466e9190",
+        "manifest.json": "99082283eb1e8d911f3b9153afcb88ffca44a063263840f039a2b114d98d8e1e",
+        "flight_samples.json": "a4e21e0bb3b21095ef18bb057978b883850df9149be5cdb029da97075323e819"
+      },
+      "companion_svg_sha256": {
+        "density": "9eba84403f24f04f3e0d8ab14f11d186ccdb7a81562b679895a2d7bc668be139",
+        "overhead": "4693d1f8e3c9ac4df598f11b8dd6fd4010eed99dddab8e4a36e5c853cc5116c4"
+      },
+      "saved_counts_match_companion_svg_labels": true
+    }
+  ],
+  "limitations": [
+    "Full-size inspection samples eight of32 PNGs; all32 are contact-screened, decoded and hashed.",
+    "SVG label comparisons supplement PNG visual inspection; final manifest must bind both exact image and source identities.",
+    "No full-run manifest or terminal acceptance claimed; recheck hashes against completed manifest.",
+    "No simulation, bootstrap, production-source edit or output-asset modification."
+  ],
+  "review_harness_note": "Initial SVG substring assertion rejected doubled whitespace before panel parentheses; whitespace-normalized comparison passed without altering figures."
+}

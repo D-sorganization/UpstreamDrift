@@ -1,0 +1,6 @@
+{
+  "initial_result": "failed before acceptance receipt",
+  "reason": "Stale expected source count53; authoritative tracked tree contains60 Python files, including seven previously integrated reporting helpers and the new identity module",
+  "correction": "Require exact file set from committed HEAD and matching hashes; no source or tolerance change",
+  "actual_source_count": 60
+}

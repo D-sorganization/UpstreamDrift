@@ -1,0 +1,21 @@
+{
+  "method": "SHA-256 over shots.csv header plus first 10,000 Straight records for the same face SD and seed",
+  "pairs": {
+    "face_sd_1deg": {
+      "baseline_bundle": "results",
+      "large_curve_bundle": "results_large_curve_sd1",
+      "straight_shots_compared": 10000,
+      "baseline_sha256": "58feb34e3c49d20831fb458141cd1b2b51a3d315ffc440eb68139030b2e936db",
+      "large_curve_sha256": "58feb34e3c49d20831fb458141cd1b2b51a3d315ffc440eb68139030b2e936db",
+      "identical": true
+    },
+    "face_sd_2deg": {
+      "baseline_bundle": "results_sd2",
+      "large_curve_bundle": "results_large_curve_sd2",
+      "straight_shots_compared": 10000,
+      "baseline_sha256": "1c6fed02fbcf8edf31aabd55c93fca6d01b8bb7017ae0cb1f77b6072bcb7f9c3",
+      "large_curve_sha256": "1c6fed02fbcf8edf31aabd55c93fca6d01b8bb7017ae0cb1f77b6072bcb7f9c3",
+      "identical": true
+    }
+  }
+}

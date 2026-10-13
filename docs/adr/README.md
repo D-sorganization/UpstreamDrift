@@ -22,6 +22,9 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0007](0007-motion-pipeline-architecture.md)                            | Motion Pipeline Architecture (CIR)                                                | Proposed | 2026-05-08 |
 | [0012](0012-canonical-pose-interchange.md)                              | Canonical Pose Interchange                                                        | Accepted | 2026-05-09 |
 | [0013](0013-launcher-composability.md)                                  | Launcher Composability — Embeddable-tool contract and IPC layer                   | Accepted | 2026-05-09 |
+| [0014](0014-shared-biomech-models.md)                                   | Shared Biomech Model-Pack Convention                                              | Accepted | 2026-05-11 |
+| [0015](0015-rust-python-callback-pattern.md)                            | Rust Outer-Loop Driver with Python Callbacks                                      | Accepted | 2026-05-12 |
+| [0016](0016-error-handling-discipline.md)                               | Error-Handling Discipline and the Ratchet Pattern                                 | Accepted | 2026-05-21 |
 | [0017](0017-sidekick-agentic-action-layer.md)                           | Sidekick agentic action layer                                                     | Accepted | 2026-05-22 |
 | [0018](0018-standalone-sidekick.md)                                     | Standalone Sidekick Application                                                   | Accepted | 2026-05-23 |
 | [0019](0019-mission-drift-calculators.md)                               | Mission-Drift Calculators                                                         | Accepted | 2026-04-25 |
@@ -68,3 +71,5 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 - **2026-10-07:** ADR-0052 gains an addendum on arrow scale modes, clamping and group toggles (GCV-4, #11710).
 - **2026-10-07:** ADR-0052 gains the Grip Label Table: labels, application points and force/torque halves for `GRIP` wrenches from `grip_wrench.to_overlay_wrenches` (GCV-7, #11713).
 - **2026-10-09:** ADR-0052 records the GCV-9 Simscape per-hand grip channels and the GCV-10 `grip_frame` metadata and `label_variant_hex` shading (GCV-18, #11724).
+
+- **2026-10-12:** [ADR-0014](0014-shared-biomech-models.md) validation references now follow the mirrored test layout for biomechanical model schemas, source-provider resolution and workspace setup. The architecture decision and acceptance status are unchanged.

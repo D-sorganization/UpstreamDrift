@@ -1,0 +1,16 @@
+{
+  "status": "provisional_two_file_visual_pass",
+  "publication_accepted": false,
+  "reviewed_png_sha256": {
+    "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density_social.png": "9cf9698598baa239c89a8c485dc492a903b20ab0cc17d0ead918b2a29a3f8d40",
+    "supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_overhead_social.png": "78fbcbeabeb0fea9bfe79422e94cf73e55e522e0f7dddc0ce6267c66f9184760"
+  },
+  "findings": [],
+  "checks": [
+    "Actual pw-primary-face-bounds/1 protocol and77.40m within-lean nominal target readable.",
+    "Density labels individual9999/10000support and600point overlays; overhead labels6rawpaths perpattern, not paired byshotindex.",
+    "Noise units, shaft-twist SD, shared density axes and overhead magnification explicit.",
+    "No observed clipping, main/marginal tick or footer collision."
+  ],
+  "scope": "One completed actual production cell only; final pipeline receipt/ledger pending."
+}

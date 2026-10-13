@@ -1,0 +1,20 @@
+{
+  "status": "prepared_not_launched_or_accepted",
+  "checked_utc": "2026-10-10T09:54:41.900849+00:00",
+  "wrapper_sha256": "2e2b006afef797bbe453ecf1e61d9e817c2e669ef92fad9dabdff66dd0a9b9a5",
+  "overwrite_negative_control": {
+    "exit_code": 1,
+    "stderr": "Traceback (most recent call last):\n  File \"/tmp/p2-supplement-report-v4.py\", line 128, in <module>\n    main()\n  File \"/tmp/p2-supplement-report-v4.py\", line 85, in main\n    assert not OUT.exists(), 'Preserve and retire superseded v3 output first; never overwrite it.'\n           ^^^^^^^^^^^^^^^^\nAssertionError: Preserve and retire superseded v3 output first; never overwrite it.\n"
+  },
+  "guard_tests": {
+    "red": "16 failed",
+    "green": "16 passed"
+  },
+  "actual_runtime_probe": "Entire matched_source_snapshot equals v6 accepted preflight execution; succeeded from candidate worktree and pinned validation interpreter.",
+  "independent_wrapper_review": "Astra identified and then rechecked repairs to runtime/backend equality and exact CLI argument binding.",
+  "launch_gates_pending": [
+    "Explicit actual-card acceptance",
+    "Intentional v3 retirement, terminal receipt and byte-preserved output inventory",
+    "Fresh successful complete preflight with absent canonical output"
+  ]
+}

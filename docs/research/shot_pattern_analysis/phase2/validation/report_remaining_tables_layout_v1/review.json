@@ -1,0 +1,43 @@
+{
+  "scope": "partial_nine_condition_carry_geometry_absolute_scoring_layout",
+  "accepted": true,
+  "final_report_accepted": false,
+  "pages_visually_inspected": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "selected_conditions": 9,
+  "input_summary_hashes_rechecked": true,
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80",
+    "src/tools/shot_pattern_analysis/matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "scripts/research/shot_pattern_analysis/build_pdf.py": "9f1daaeb2d47cc5ba61b4edabc6dc55c3ceed6130ceed608931a75b469b90a03"
+  },
+  "artifact_sha256": {
+    "executed_preview.py.txt": "823bf25c80768c1f749e0902f2c99d5357d2a8cd28cb7405779bd6fbffe941e3",
+    "inputs.json": "f4b06b34e9d20213f761a9d100c61a5ccb5d556cd95d87be84700c0e3f040a40",
+    "page-1.png": "4a75d3f5d64c788f347965a12ec65fa4b2798217586efc00cbcef72d313f1366",
+    "page-2.png": "9b5ba01d1a182858325f11a0eb794e5aec5b1ff4c93acf80f7dbf0a705cf73e5",
+    "page-3.png": "fbed816b176035f2f6839b00055f253290c68b4d9af1350c7a23563acf616bb5",
+    "page-4.png": "5c7523f533c775ab11d13116d0fbc79668368876cd9e12c6506dd94d304e1cfd",
+    "page-5.png": "ee3d8df357a0bd1629371dfdf5b419b1e6df3275587a92b21e9e495e5b9fbd5f",
+    "page-6.png": "c3d99ab29cae0d9ee1c2a9c3602a78ca7e69191b78c2e87adace1fdbcb6179c7",
+    "page-7.png": "b6992739753f4c766fe4f887e40a3e8dbbb2da09bcc15ff6c17733d36bfd538a",
+    "page-8.png": "ba91f08a62edff00a999c98ab37350b601b44c28ca868b67280253f807f731cf",
+    "preview.md": "003975d074d547fae88c3ec9556295ee2dc9b69e15a612b9b1902887bd91cdb2",
+    "preview.pdf": "b20eae57b517cfca398b972e9a3db79e791dc2c25b95b771cb25ac7d94e72c32"
+  },
+  "findings": [],
+  "limitations": [
+    "Long exact condition identifiers wrap inside tokens, but remain readable; numerical values and counts are intact.",
+    "No complete report, figure inventory, publication receipt or final pagination acceptance is inferred.",
+    "Saved-data descriptions may compute descriptive means; no simulations, bootstraps or source changes were performed."
+  ]
+}

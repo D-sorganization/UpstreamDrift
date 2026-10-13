@@ -1,0 +1,70 @@
+{
+  "status": "factual_additions_verified",
+  "documents_sha256": {
+    "docs/research/shot_pattern_analysis/phase2/DESIGN.md": "79c9dbd3952ede204dea6c70669c693eb89ca3c1a82e2bf35f518478a9a9e8d8",
+    "docs/research/shot_pattern_analysis/shot_pattern_analysis.tex": "a4913d2c23351ce4c0a83185fb4c63895c577b1d3c195b5ebd8a350e00846a8d"
+  },
+  "evidence_sha256": {
+    "docs/research/shot_pattern_analysis/phase2/validation/independent_head_sensitivity.json": "3bd6acb1118b6cbedd03171744a09a1b810f8a77cd7e4dc72c1d609181edb558",
+    "docs/research/shot_pattern_analysis/phase2/validation/independent_head_sensitivity_summary.json": "010e6e47f827e2ee3601f7c7f0942aa02d9328a33be1fda8abc77d236c4a7265"
+  },
+  "variant_counts": {
+    "valid": 268,
+    "unsupported": 32
+  },
+  "total_variants": 300,
+  "maxima_verified": [
+    {
+      "club": "driver",
+      "parameter_group": "cg_depth",
+      "max_endpoint_displacement_m": 5.144281539731114
+    },
+    {
+      "club": "driver",
+      "parameter_group": "inertia",
+      "max_endpoint_displacement_m": 7.104664870970225
+    },
+    {
+      "club": "driver",
+      "parameter_group": "curvature",
+      "max_endpoint_displacement_m": 22.627873891713428
+    },
+    {
+      "club": "driver",
+      "parameter_group": "newton",
+      "max_endpoint_displacement_m": 11.331130262125711
+    },
+    {
+      "club": "seven_iron",
+      "parameter_group": "cg_depth",
+      "max_endpoint_displacement_m": 0.5425700617949537
+    },
+    {
+      "club": "seven_iron",
+      "parameter_group": "inertia",
+      "max_endpoint_displacement_m": 1.763810123395615
+    },
+    {
+      "club": "seven_iron",
+      "parameter_group": "newton",
+      "max_endpoint_displacement_m": 1.224343541086287
+    },
+    {
+      "club": "pitching_wedge",
+      "parameter_group": "cg_depth",
+      "max_endpoint_displacement_m": 0.1839602522352095
+    },
+    {
+      "club": "pitching_wedge",
+      "parameter_group": "inertia",
+      "max_endpoint_displacement_m": 1.4019534787136934
+    },
+    {
+      "club": "pitching_wedge",
+      "parameter_group": "newton",
+      "max_endpoint_displacement_m": 0.3250433952696312
+    }
+  ],
+  "findings": [],
+  "scope": "Read-only numerical/caption review of new deterministic sensitivity additions; not LaTeX compilation or complete document acceptance."
+}

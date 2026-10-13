@@ -1,0 +1,405 @@
+{
+  "status": "provisional_inventory_only",
+  "pngs": [
+    {
+      "index": 1,
+      "page": 1,
+      "path": "details/pitching_wedge_lean0_curve1_rotation1_combined2/density.png",
+      "sha256": "b5b4bad9a76b27b5b7c745ef0f5410164024d203e742af1bcb0ceadd903306ac",
+      "size": [
+        2852,
+        1701
+      ]
+    },
+    {
+      "index": 2,
+      "page": 1,
+      "path": "details/pitching_wedge_lean0_curve1_rotation1_combined2/overhead.png",
+      "sha256": "918071f9f1d9c2d304d0fe96f09d8826b471f6b96fc8bbb59c15071b071a6d90",
+      "size": [
+        3081,
+        1080
+      ]
+    },
+    {
+      "index": 3,
+      "page": 1,
+      "path": "details/pitching_wedge_lean0_curve1_rotation1_shaft_only/density.png",
+      "sha256": "39252a20f2662b859b4d13bf412e7b4e09d3cce55738776bb78a512d6b6e0278",
+      "size": [
+        2852,
+        1701
+      ]
+    },
+    {
+      "index": 4,
+      "page": 1,
+      "path": "details/pitching_wedge_lean0_curve1_rotation1_shaft_only/overhead.png",
+      "sha256": "f415116f47146b49aca5248fe3c632a5b95d09c8ff06c8523f7204a83a660834",
+      "size": [
+        3081,
+        1080
+      ]
+    },
+    {
+      "index": 5,
+      "page": 1,
+      "path": "details/pitching_wedge_lean0_curve1_rotation2_combined2/density.png",
+      "sha256": "ed75c00674bc1a29f9df6092d57a65afeda5cdaec7e74d6c1ad0ccf6a0fc344e",
+      "size": [
+        2899,
+        1701
+      ]
+    },
+    {
+      "index": 6,
+      "page": 1,
+      "path": "details/pitching_wedge_lean0_curve1_rotation2_combined2/overhead.png",
+      "sha256": "74d1f059dbebdaab175e2e54405dd10230107dc1aa1a7aa673ec31275d122ac7",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 7,
+      "page": 1,
+      "path": "details/pitching_wedge_lean0_curve1_rotation2_shaft_only/density.png",
+      "sha256": "df7b020d936bd244cbafbd2e4605270f7f6c46f2197129e923e86599db0facf0",
+      "size": [
+        2867,
+        1701
+      ]
+    },
+    {
+      "index": 8,
+      "page": 1,
+      "path": "details/pitching_wedge_lean0_curve1_rotation2_shaft_only/overhead.png",
+      "sha256": "b6e7aaadafe44d82824f85fef939c0afd797518b07588fac240ee7aadbd5f70d",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 9,
+      "page": 1,
+      "path": "details/pitching_wedge_lean10_curve1_rotation1_combined2/density.png",
+      "sha256": "32739797207b1f3d18a970a63e8dbbf84dca1589a25aa011d72b119700076783",
+      "size": [
+        2868,
+        1701
+      ]
+    },
+    {
+      "index": 10,
+      "page": 1,
+      "path": "details/pitching_wedge_lean10_curve1_rotation1_combined2/overhead.png",
+      "sha256": "5305de6eccfb20bf118d5779e3aa0ba363b5a72c310456287c4f2023cef7739b",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 11,
+      "page": 1,
+      "path": "details/pitching_wedge_lean10_curve1_rotation1_shaft_only/density.png",
+      "sha256": "cf861daa98ac22ec0391f929adeaf2e1c93f97b0d1220b67a84dde7a4b8db747",
+      "size": [
+        2836,
+        1701
+      ]
+    },
+    {
+      "index": 12,
+      "page": 1,
+      "path": "details/pitching_wedge_lean10_curve1_rotation1_shaft_only/overhead.png",
+      "sha256": "a97bb7ff8bef9eaac26a83dad0da7cdc5b48539e854e2813c18af7e06d88f9e1",
+      "size": [
+        3081,
+        1080
+      ]
+    },
+    {
+      "index": 13,
+      "page": 1,
+      "path": "details/pitching_wedge_lean10_curve1_rotation2_combined2/density.png",
+      "sha256": "612a6ad7d0d05ab0dd59e2b563d9d5fde7d471823161c50cb97e57d593f84f7b",
+      "size": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "index": 14,
+      "page": 1,
+      "path": "details/pitching_wedge_lean10_curve1_rotation2_combined2/overhead.png",
+      "sha256": "95c22b9d99e506e64225c7d326a7f7d793fa18f0da68f3477837fd71fd67ac0c",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 15,
+      "page": 1,
+      "path": "details/pitching_wedge_lean10_curve1_rotation2_shaft_only/density.png",
+      "sha256": "3b5442a150b1dbee9184c73d5f7646fea438d5ce8cf84f346cbbbcd6c0fb376a",
+      "size": [
+        2864,
+        1701
+      ]
+    },
+    {
+      "index": 16,
+      "page": 1,
+      "path": "details/pitching_wedge_lean10_curve1_rotation2_shaft_only/overhead.png",
+      "sha256": "99e0a898395b9f1f6c15ed41486f33dccd5998c3921cab7fe0a22b95606531fe",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 17,
+      "page": 2,
+      "path": "details/pitching_wedge_lean10_curve2_rotation1_combined2/density.png",
+      "sha256": "38a3c3109dd45d90e0d180cef7ded0c3f768276849cc659060c9a278df3c80f3",
+      "size": [
+        2868,
+        1701
+      ]
+    },
+    {
+      "index": 18,
+      "page": 2,
+      "path": "details/pitching_wedge_lean10_curve2_rotation1_combined2/overhead.png",
+      "sha256": "46b0a748114ef11e464068e6d2aee1dbcf901cefc39acfc2af36527e9848b884",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 19,
+      "page": 2,
+      "path": "details/pitching_wedge_lean10_curve2_rotation1_shaft_only/density.png",
+      "sha256": "50ad0b19b10dd49236ed8937c2a56dc9cc14d03caf51d8faee0f992fd866b493",
+      "size": [
+        2835,
+        1701
+      ]
+    },
+    {
+      "index": 20,
+      "page": 2,
+      "path": "details/pitching_wedge_lean10_curve2_rotation1_shaft_only/overhead.png",
+      "sha256": "4757bc84e2a09eba28292cc263d82ab21b31ab9419cb0a98578e4cc7b0a90cb3",
+      "size": [
+        3081,
+        1080
+      ]
+    },
+    {
+      "index": 21,
+      "page": 2,
+      "path": "details/pitching_wedge_lean10_curve2_rotation2_combined2/density.png",
+      "sha256": "7d39bb86bf584ba0c329fe2d775308cc04677beb307cb0a2ab728ddba8a6116f",
+      "size": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "index": 22,
+      "page": 2,
+      "path": "details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.png",
+      "sha256": "c2b498b1fc346194a0073c3b935a21ce57a65b0c583fcd39dc49aba1d37a3627",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 23,
+      "page": 2,
+      "path": "details/pitching_wedge_lean10_curve2_rotation2_shaft_only/density.png",
+      "sha256": "29ca2dd461a1a504da08605269be5c4660f887459525242de33035bff6da6546",
+      "size": [
+        2864,
+        1701
+      ]
+    },
+    {
+      "index": 24,
+      "page": 2,
+      "path": "details/pitching_wedge_lean10_curve2_rotation2_shaft_only/overhead.png",
+      "sha256": "3cb3f49a0c0ec9d4eb701bd28387002252e13d7b10b276e3804af4b1a5afd306",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 25,
+      "page": 2,
+      "path": "details/pitching_wedge_lean5_curve1_rotation1_combined2/density.png",
+      "sha256": "807e3e7174b4c31ba43ec6422f54ee173253dc0501519706503344563b2b0d1d",
+      "size": [
+        2868,
+        1701
+      ]
+    },
+    {
+      "index": 26,
+      "page": 2,
+      "path": "details/pitching_wedge_lean5_curve1_rotation1_combined2/overhead.png",
+      "sha256": "b5b5f321fef5d479ddb4640939c5d79e376efa442cde2cfe1f55448b12172741",
+      "size": [
+        3082,
+        1080
+      ]
+    },
+    {
+      "index": 27,
+      "page": 2,
+      "path": "details/pitching_wedge_lean5_curve1_rotation1_shaft_only/density.png",
+      "sha256": "16ca7f590f02d6490dd99ca8ba20644c20af3275802ac45a007fa994a4479414",
+      "size": [
+        2852,
+        1701
+      ]
+    },
+    {
+      "index": 28,
+      "page": 2,
+      "path": "details/pitching_wedge_lean5_curve1_rotation1_shaft_only/overhead.png",
+      "sha256": "363628d2e889c88df17f4c25e1f9a757db483cac9b4aa5365885c2b56947b048",
+      "size": [
+        3081,
+        1080
+      ]
+    },
+    {
+      "index": 29,
+      "page": 2,
+      "path": "details/pitching_wedge_lean5_curve1_rotation2_combined2/density.png",
+      "sha256": "eca314badaf53543a934049606115b60aac4131c4022218ab11bfde2215b0906",
+      "size": [
+        2896,
+        1701
+      ]
+    },
+    {
+      "index": 30,
+      "page": 2,
+      "path": "details/pitching_wedge_lean5_curve1_rotation2_combined2/overhead.png",
+      "sha256": "fbbef10375abf3def4bcd048fa3f568f24938688ffdc063ddebd29461373a329",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 31,
+      "page": 2,
+      "path": "details/pitching_wedge_lean5_curve1_rotation2_shaft_only/density.png",
+      "sha256": "d1bb7de676e9c1afaa672d9dc650cb3c1fbcbb228b42adb138e3b0d7d7b88d61",
+      "size": [
+        2864,
+        1701
+      ]
+    },
+    {
+      "index": 32,
+      "page": 2,
+      "path": "details/pitching_wedge_lean5_curve1_rotation2_shaft_only/overhead.png",
+      "sha256": "7d7b5fb438d981ce79fde8eeecba93fa0dfa1ab26c8be260cddcc10da3f3cee9",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 33,
+      "page": 3,
+      "path": "details/pitching_wedge_lean5_curve2_rotation1_combined2/density.png",
+      "sha256": "ea371758d73c883a7737c10b0bda22edcd21a4cb849391f61a9de24c2cc165c1",
+      "size": [
+        2868,
+        1701
+      ]
+    },
+    {
+      "index": 34,
+      "page": 3,
+      "path": "details/pitching_wedge_lean5_curve2_rotation1_combined2/overhead.png",
+      "sha256": "00a54a7506f7425dd19fd81c751e659a806c3713a156e78c95b1d2c3804a07c7",
+      "size": [
+        3081,
+        1080
+      ]
+    },
+    {
+      "index": 35,
+      "page": 3,
+      "path": "details/pitching_wedge_lean5_curve2_rotation1_shaft_only/density.png",
+      "sha256": "e0c789cd706cbd92d7fd339a06e5877533a0dbb069fd57716f3ddff9fa307b64",
+      "size": [
+        2836,
+        1701
+      ]
+    },
+    {
+      "index": 36,
+      "page": 3,
+      "path": "details/pitching_wedge_lean5_curve2_rotation1_shaft_only/overhead.png",
+      "sha256": "f627179d83e77cef048b398a07f1a6e6f1c9301e7c66352e4fe4a35f33c7c5e4",
+      "size": [
+        3081,
+        1080
+      ]
+    },
+    {
+      "index": 37,
+      "page": 3,
+      "path": "details/pitching_wedge_lean5_curve2_rotation2_combined2/density.png",
+      "sha256": "8c118e4a43cb8091aec4a4c41f5b176cb3c233781065699622db0efbecc2df95",
+      "size": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "index": 38,
+      "page": 3,
+      "path": "details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.png",
+      "sha256": "a4d1b88a7ecea79c9725a7365989fce9f7208b4a2123cab5474015977588a49f",
+      "size": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "index": 39,
+      "page": 3,
+      "path": "details/pitching_wedge_lean5_curve2_rotation2_shaft_only/density.png",
+      "sha256": "63cb1a4110c688a5a5b88d2885ad6a2387183c6f8cbfbb4db253e3e3151b8113",
+      "size": [
+        2848,
+        1701
+      ]
+    },
+    {
+      "index": 40,
+      "page": 3,
+      "path": "details/pitching_wedge_lean5_curve2_rotation2_shaft_only/overhead.png",
+      "sha256": "fc8495ee591c3d3ded0eb40f653efd073c4eb5b24c65c6c31a49d2121a59e57c",
+      "size": [
+        3057,
+        1080
+      ]
+    }
+  ]
+}

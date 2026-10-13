@@ -1,0 +1,60 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_sg_panel_titles_and_unavailable_reasons_fit_their_cells _________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1962/test_sg_panel_titles_and_unava0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b4069c15610>
+
+    def test_sg_panel_titles_and_unavailable_reasons_fit_their_cells(tmp_path, monkeypatch) -> None:
+        _load_api()
+        import matplotlib.pyplot as plt
+        from src.tools.shot_pattern_analysis.matched_report_plots import export_matched_matrix_heatmaps
+    
+        cells = _realistic_cells()
+        cells[-1].update(status="unavailable", reason="nominal landing unreachable within bounds: residual=0.351838 m")
+        captured = []
+        original_close = plt.close
+        monkeypatch.setattr(plt, "close", lambda figure: captured.append(figure))
+        export_matched_matrix_heatmaps(cells, tmp_path, selection_label="Saved Data", metrics=("conditional_sg",), formats=("svg",))
+        figure = captured[-1]
+        try:
+            figure.canvas.draw()
+            renderer = figure.canvas.get_renderer()
+            for axis in figure.axes[:9]:
+                bounds = axis.get_window_extent(renderer)
+                title = axis.title.get_window_extent(renderer)
+>               assert title.x0 >= bounds.x0 - 1 and title.x1 <= bounds.x1 + 1
+E               assert (np.float64(572.3671875000001) >= (np.float64(612.5393258426967) - 1))
+E                +  where np.float64(572.3671875000001) = Bbox([[572.3671875000001, 886.9967447916667], [1028.1328125, 901.3333333333334]]).x0
+E                +  and   np.float64(612.5393258426967) = <matplotlib.transforms.TransformedBbox object at 0x7b405ccf0e30>.x0
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:469: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_panel_titles_and_unavailable_reasons_fit_their_cells
+1 failed, 12 deselected, 6 warnings in 8.96s

@@ -1,0 +1,97 @@
+{
+  "status": "accepted_gui_scoring_component_after_review_repairs",
+  "scope": "Saved Model-Conditional Scoring Display and Offscreen Lifecycle; Not Scientific or Empirical Validation",
+  "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_gui.py": "91cf57e85c39d46643787bcf7c0f16ef52699b276106cb5b1dd94c66dd6256ab",
+    "src/tools/shot_pattern_analysis/README.md": "53854c73b35c025e862b3336e61160b9a1881afd7cb33b1ae41ae004a1fda2ae",
+    "tests/ui/tools/shot_pattern_analysis/test_matched_gui.py": "fba182a31f262e5b3ec2e72e43d620aade39f115194dfe0b1e6d3c9cad5b2be2",
+    "tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py": "5f89b4821212aca59e93b0d39a95be844369797c7626862e21066b1403d92bb9",
+    "src/tools/shot_pattern_analysis/gui.py": "7e43fbcc0c2a532883bbd30b1802624e9636ebe4f5e0cbfe9c74b4f0cbfc2e27"
+  },
+  "changed_files": [
+    "src/tools/shot_pattern_analysis/matched_gui.py",
+    "src/tools/shot_pattern_analysis/README.md",
+    "tests/ui/tools/shot_pattern_analysis/test_matched_gui.py",
+    "tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py"
+  ],
+  "tests": {
+    "pre_repair_existing_suite_passed": 40,
+    "new_precision_red_failed": 6,
+    "new_precision_red_passed": 2,
+    "lifecycle_red_failed": 3,
+    "final_gui_precision_adapter_suite_passed": 51,
+    "final_exit_code": 0
+  },
+  "static_checks": {
+    "ruff": true,
+    "format": true,
+    "mypy_three_files": true,
+    "git_diff_check": true,
+    "tracked_size_budget_1200_lines": true,
+    "changed_file_line_counts": {
+      "src/tools/shot_pattern_analysis/matched_gui.py": 994,
+      "src/tools/shot_pattern_analysis/README.md": 154,
+      "tests/ui/tools/shot_pattern_analysis/test_matched_gui.py": 1045,
+      "tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py": 61
+    }
+  },
+  "saved_results_display_audit": {
+    "status": "passed",
+    "completed_cells": 270,
+    "intervals_checked": 540,
+    "means_checked": 810,
+    "maximum_relative_value_error": 0.0009971237725258974,
+    "maximum_relative_interval_width_error": 0.009183864928432164,
+    "gui_source_sha256": "91cf57e85c39d46643787bcf7c0f16ef52699b276106cb5b1dd94c66dd6256ab"
+  },
+  "offscreen_layout": {
+    "size": [
+      1000,
+      760
+    ],
+    "screenshots_inspected": 4,
+    "all_result_and_score_labels_fit_height_for_width": true,
+    "source_populations": "Individual endpoint counts remain in nominal results; common-three denominator applies to all displayed SG means/differences."
+  },
+  "findings_resolved": [
+    "132 real saved paired intervals collapsed under fixed three-decimal formatting above0.001; error-bounded interval formatting preserves nonzero width.",
+    "Previous completed SG persisted during new-run/failure/cancel lifecycle; now cleared with explicit current-result status."
+  ],
+  "limitations": [
+    "No Monte Carlo or scoring recomputation was performed.",
+    "Four actual saved displays cover driver all-supported, driver conditional,7-iron and wedge; no native GUI was launched.",
+    "This is an implementation review with corrective changes by the reviewer;51tests and saved-data audit provide the acceptance evidence.",
+    "Model and empirical qualification remain unchanged."
+  ],
+  "evidence_files": {
+    "after_repair/all_saved_values_after.json": "a3ad3d7b9710c67ea0afd941c609c465c012156b00261b65dbf31b754e4507e7",
+    "after_repair/driver_lean0_curve1_rotation1_shaft_only.png": "a055545741759fcc9110efefb09c9cad4c7c2a65608694a8b77cdb4ba583a0b0",
+    "after_repair/driver_lean5_curve1_rotation2_cov_facepath_negative.png": "47ab6e518af5cf02505cf5c3802e82ead232771d06542c6319a5ed6f80e712aa",
+    "after_repair/pitching_wedge_lean0_curve1_rotation2_combined2.png": "37eb81914b9f73e8131a083ee557768a2df6a3f6804d17293d1a25b5e26b4349",
+    "after_repair/probe.json": "56ce5c37ca76491a93e4c94933d8e9207562355fdabefad0793c3135bd8a0977",
+    "after_repair/seven_iron_lean0_curve1_rotation2_combined2.png": "dea6220726fc917cacea7b0b07518fbf80dff77c33051eeba906e8781616b3f1",
+    "all_saved_values_executed.py.txt": "d305dd89ba5d359cc39296104aac0a2fc21e76ba7e1bb3dd04a91beabb6438a0",
+    "before_repair/collapsed_saved_intervals.json": "5c4b7db7195ed37f656f10b04c9833d8156d1d3f96c950420246a93d95941eff",
+    "before_repair/driver_lean0_curve1_rotation1_shaft_only.png": "a055545741759fcc9110efefb09c9cad4c7c2a65608694a8b77cdb4ba583a0b0",
+    "before_repair/driver_lean5_curve1_rotation2_cov_facepath_negative.png": "975c8d4effee392d612c03b99a92fb372a4fe5def0eee3e105cb5cf837e29657",
+    "before_repair/pitching_wedge_lean0_curve1_rotation2_combined2.png": "3bf54e6bf50daea9a6d13df53f4793d07b83f685c66a98f70405f4b41c1f93ff",
+    "before_repair/probe.json": "277ac59bf6a65617a714a038a7848da8682b57690470313fb8a7c092523955c5",
+    "before_repair/seven_iron_lean0_curve1_rotation2_combined2.png": "6af3eacf6107d0380b956dbc9e9ef26e677047d642b96f8217652802056d3453",
+    "initial_precision_reproducer.py.txt": "b3cff122280a297d951ba755d25eb3ce83297f468658a030d4aa13c924dc17ad",
+    "offscreen_probe_executed.py.txt": "6915f032dc32c559179d45e80938d85af67822d12df6ab768789bf19702567e7",
+    "p2-gui-sg-all-saved-values.log": "6a6fead688efd6b21bead6f2c750f46ff258385169e2827dd5601ed6a86057f1",
+    "p2-gui-sg-final-format.log": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "p2-gui-sg-final-mypy.log": "8228fcc5ce46d42d01caf3cd941f4e9c5f2bcc372bb5b147a2f0572d2dd675a8",
+    "p2-gui-sg-final-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "p2-gui-sg-final-size.log": "ef0b1774684c7ae18642c51b66ef94157c5104d462152f8413ecf44f0ff09430",
+    "p2-gui-sg-final-tests.log": "860b777b1fed3d9096ec45bfc0c06bdd19e5223061a0e8c695c8d81c49a184d6",
+    "p2-gui-sg-independent-final-probe.log": "c4292af5d52d9b71a13a4531e1907e2827a2fbe8facfe90a1420276789d389f0",
+    "p2-gui-sg-independent-probe.log": "b56cad06b27bf83006ac060bf14cf309f1c3af95902e4a5b2df1623bf77e01c3",
+    "p2-gui-sg-independent-red.log": "6ca72e560776765f9282288f2ffe37f3f71f2609cc1f209ea2e02c96b00d2f8d",
+    "p2-gui-sg-independent-tests.log": "665bb4c075f37f7e2d349d69b463f8daf3f8b8bc0117979ec34140fbab6b94c5",
+    "p2-gui-sg-interval-green.log": "3cb2f6f7d798fe07862237627fa5327f62545c838ce06767d7a50ab78498fcfe",
+    "p2-gui-sg-interval-red.log": "ec8013f935ec3a401cf79f83cc6dc4aaf600dcddef6930a8570417373ceba875",
+    "p2-gui-sg-lifecycle-red.log": "23728f8e38ee7f724e7568f4a3d6002631e32fb264e04dba407b27f65525f216"
+  }
+}

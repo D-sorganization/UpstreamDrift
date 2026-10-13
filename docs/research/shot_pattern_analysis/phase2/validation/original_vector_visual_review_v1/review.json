@@ -1,0 +1,1254 @@
+{
+  "scope": "Predeclared 12 families and 24 vectors; original completed primary/control only",
+  "representative_visual_review_pass": true,
+  "all744_vectors_visually_reviewed": false,
+  "full_publication_accepted": false,
+  "terminal_session": 50213,
+  "terminal_exit": 0,
+  "selection_before_view_sha256": "8c7e3eb5dc2fba6844b8dac20930f0a886adf65b806db88a647d022e6ba7ceb4",
+  "render_receipt_sha256": "40a1e795cbb8e5b470345452443778245aea19d02e5894d18f057fd2f059f464",
+  "records": [
+    {
+      "family": "driver_academic_density",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.pdf",
+        "sha256": "4756ed647aa30fc8fc0ed2951fb6ecf7232ad768c963283ffb6ee6e8da2ece73"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.png",
+        "sha256": "1968a5a57e32114963696a51e30a90c1b2ddb96ce5df8c1f950a5385ba24056d"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_academic_density_pdf.png",
+        "sha256": "10b6eeaea71f07d29c0424a6303e8d38b350336089ef257cbcd21aa6bed8bb8d",
+        "dimensions": [
+          2317,
+          1362
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.pdf",
+          "/tmp/p2-original-vector-visual-review/driver_academic_density_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1158.092,
+          "y1": 680.5568222656,
+          "width": 1158.092,
+          "height": 680.5568222656
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1158.092,
+          "y1": 680.5568222656,
+          "width": 1158.092,
+          "height": 680.5568222656
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_academic_density_review.jpg",
+        "sha256": "6b94bec5189d03ebd8cdcd94faac42aa1c050988668bfe7b2099db67284299cf"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "All three skewed HDR panels, marginals and shared colorbar retained; 9,940 support labels and footer visible; tick gutters clear."
+    },
+    {
+      "family": "driver_academic_density",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.svg",
+        "sha256": "07426ab095e95fcf215d4ba27638210a04b603f0e3826b267b3d4525e08cec48"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.png",
+        "sha256": "1968a5a57e32114963696a51e30a90c1b2ddb96ce5df8c1f950a5385ba24056d"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_academic_density_svg.png",
+        "sha256": "a9b1b7c40212c3b5f2395a6ebeca9eb7a8bf55c0d9ccf07151c22fcf3caefd14",
+        "dimensions": [
+          4632,
+          2722
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean5_curve2_rotation2_combined2/density.svg",
+          "/tmp/p2-original-vector-visual-review/driver_academic_density_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 1158.123719,
+          "width_unit": "pt",
+          "height": 680.556822,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 1158.123719,
+          "height": 680.556822
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_academic_density_review.jpg",
+        "sha256": "6b94bec5189d03ebd8cdcd94faac42aa1c050988668bfe7b2099db67284299cf"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "All three skewed HDR panels, marginals and shared colorbar retained; 9,940 support labels and footer visible; tick gutters clear."
+    },
+    {
+      "family": "driver_academic_overhead",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
+        "sha256": "ca6ee369e6c26392394d9aba5cae9078e8d4c83d38b69cb84476e17acf2d4ef2"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+        "sha256": "835d738f24ae3730fd8ad3cc7de81aa0da2c7eb34f4138aa49db5cdfa911a814"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_academic_overhead_pdf.png",
+        "sha256": "d5925ece71cf241b3dc469ffa225c5d85f63e5b06191d5ce34ce9bc3417e4c47",
+        "dimensions": [
+          2459,
+          865
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
+          "/tmp/p2-original-vector-visual-review/driver_academic_overhead_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1229.37375,
+          "y1": 432.1829882812,
+          "width": 1229.37375,
+          "height": 432.1829882812
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1229.37375,
+          "y1": 432.1829882812,
+          "width": 1229.37375,
+          "height": 432.1829882812
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_academic_overhead_review.jpg",
+        "sha256": "fc26128a4fa9a5255f3a902906a4d96908fa80faeb1faaca44436e4395afe1eb"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Three six-path panels and common target markers intact; raw-path and 4.0 x vertical display qualification visible."
+    },
+    {
+      "family": "driver_academic_overhead",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
+        "sha256": "7c3d11152e9741c38bc41af26817c2dd968a6a421f12cfde5cb169910c7d3c02"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+        "sha256": "835d738f24ae3730fd8ad3cc7de81aa0da2c7eb34f4138aa49db5cdfa911a814"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_academic_overhead_svg.png",
+        "sha256": "17c81faa9161983d76e5f6cc4d772d8fa17d0bf7ca223048f67acf749eb2dc98",
+        "dimensions": [
+          4918,
+          1729
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
+          "/tmp/p2-original-vector-visual-review/driver_academic_overhead_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 1229.385469,
+          "width_unit": "pt",
+          "height": 432.182988,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 1229.385469,
+          "height": 432.182988
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_academic_overhead_review.jpg",
+        "sha256": "fc26128a4fa9a5255f3a902906a4d96908fa80faeb1faaca44436e4395afe1eb"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Three six-path panels and common target markers intact; raw-path and 4.0 x vertical display qualification visible."
+    },
+    {
+      "family": "driver_social_density",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.pdf",
+        "sha256": "99c1292009dc8a0405c2ffd2b59ee9f582f31228e664f23c54085a583527d265"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.png",
+        "sha256": "ad7edad7d99a959d360baded24033c26849e586b9c2b94148c7f014efcd3edb8"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_social_density_pdf.png",
+        "sha256": "8107f6ea8ac69dcf09d171410139d48715e0b5c0609eceb39debd699211b29f2",
+        "dimensions": [
+          1488,
+          2536
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.pdf",
+          "/tmp/p2-original-vector-visual-review/driver_social_density_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 743.5065125,
+          "y1": 1267.632,
+          "width": 743.5065125,
+          "height": 1267.632
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 743.5065125,
+          "y1": 1267.632,
+          "width": 743.5065125,
+          "height": 1267.632
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_social_density_review.jpg",
+        "sha256": "679809ec927c989ccdf6eeb77378884126d7c27864bb2a5c434db0871b0f6eed"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Tall three-panel density card retains target 178.95 m, SD 2 and Curve 2, full noise units, HDR key and footer."
+    },
+    {
+      "family": "driver_social_density",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.svg",
+        "sha256": "2c29f98bbf403e7ac9f77ebe7337130c61605648978abae04fc0abe62172d174"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.png",
+        "sha256": "ad7edad7d99a959d360baded24033c26849e586b9c2b94148c7f014efcd3edb8"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_social_density_svg.png",
+        "sha256": "6022ad864bd3e6b7876d928067f9b75b53d4ed9c1f1a1aadd49ce49a7e1ff44f",
+        "dimensions": [
+          2974,
+          5071
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/density.svg",
+          "/tmp/p2-original-vector-visual-review/driver_social_density_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 743.569637,
+          "width_unit": "pt",
+          "height": 1267.632,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 743.569637,
+          "height": 1267.632
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_social_density_review.jpg",
+        "sha256": "679809ec927c989ccdf6eeb77378884126d7c27864bb2a5c434db0871b0f6eed"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Tall three-panel density card retains target 178.95 m, SD 2 and Curve 2, full noise units, HDR key and footer."
+    },
+    {
+      "family": "driver_social_overhead",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
+        "sha256": "cb393b47aa895e693effdc1e937f137c95aa3ce736396ce9f576a29f92fa958c"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+        "sha256": "6ea7deaf5c9e763a8702cd26a10df16933e4a28408f083d672978fef1530f38e"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_social_overhead_pdf.png",
+        "sha256": "ae1831b0c2f6439a509452a9cb26feaeaa47163e964b425f788ce1c0230273a8",
+        "dimensions": [
+          2199,
+          1280
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.pdf",
+          "/tmp/p2-original-vector-visual-review/driver_social_overhead_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1099.05375,
+          "y1": 639.8833203125,
+          "width": 1099.05375,
+          "height": 639.8833203125
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1099.05375,
+          "y1": 639.8833203125,
+          "width": 1099.05375,
+          "height": 639.8833203125
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_social_overhead_review.jpg",
+        "sha256": "38f95892ece48de8a51f55809c3ef49bc66816ae27591ae28a6ae0ca30fea9f1"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Three path panels, target 178.95 m and sampled-path/6.6 x display qualification visible; no clipping."
+    },
+    {
+      "family": "driver_social_overhead",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
+        "sha256": "b4dd882ea0f7ce8c5d189015e74507585f0b2a73126cfe8cbeca790b2f61ccb9"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
+        "sha256": "6ea7deaf5c9e763a8702cd26a10df16933e4a28408f083d672978fef1530f38e"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_social_overhead_svg.png",
+        "sha256": "e4c2337473a07746e2a3d596fb713dcaef5fbbf927a2090bb30032036477873f",
+        "dimensions": [
+          4396,
+          2560
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/driver_lean0_curve2_rotation2_combined2/overhead.svg",
+          "/tmp/p2-original-vector-visual-review/driver_social_overhead_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 1099.065469,
+          "width_unit": "pt",
+          "height": 639.88332,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 1099.065469,
+          "height": 639.88332
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/driver_social_overhead_review.jpg",
+        "sha256": "38f95892ece48de8a51f55809c3ef49bc66816ae27591ae28a6ae0ca30fea9f1"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Three path panels, target 178.95 m and sampled-path/6.6 x display qualification visible; no clipping."
+    },
+    {
+      "family": "iron_academic_density",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.pdf",
+        "sha256": "7aaac1219c2c09c725a4ad6b508cbdba2b7a93063e69322f4c06290b0815c98c"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+        "sha256": "5f05386740b6f3de8570b01bb4cbc6627c077c78e1462a33b31f1ba6ff648317"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_academic_density_pdf.png",
+        "sha256": "1820cef7bc924d9ce5b90bc5ec940c48f4114706a2874cf9bac02dfe7493bbb6",
+        "dimensions": [
+          2291,
+          1362
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.pdf",
+          "/tmp/p2-original-vector-visual-review/iron_academic_density_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1145.232625,
+          "y1": 680.5568222656,
+          "width": 1145.232625,
+          "height": 680.5568222656
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1145.232625,
+          "y1": 680.5568222656,
+          "width": 1145.232625,
+          "height": 680.5568222656
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_academic_density_review.jpg",
+        "sha256": "565f7e637cbaa0577e9ca4bd97671a33fd7f0a8183a48b64a8e51ae1874a5fdd"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Narrow downrange controls retain separated 117\u2013129 m ticks, slender curved HDRs, all three marginals, colorbar and footnotes."
+    },
+    {
+      "family": "iron_academic_density",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.svg",
+        "sha256": "c94711e67e670c787749321738b33f016391e633de02e936fd6ef44be587990e"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+        "sha256": "5f05386740b6f3de8570b01bb4cbc6627c077c78e1462a33b31f1ba6ff648317"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_academic_density_svg.png",
+        "sha256": "eec17912fa2e80fd641527101d20aaa152fa07c6d16432b7b07386a57f151eab",
+        "dimensions": [
+          4581,
+          2722
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/density.svg",
+          "/tmp/p2-original-vector-visual-review/iron_academic_density_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 1145.242937,
+          "width_unit": "pt",
+          "height": 680.556822,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 1145.242937,
+          "height": 680.556822
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_academic_density_review.jpg",
+        "sha256": "565f7e637cbaa0577e9ca4bd97671a33fd7f0a8183a48b64a8e51ae1874a5fdd"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Narrow downrange controls retain separated 117\u2013129 m ticks, slender curved HDRs, all three marginals, colorbar and footnotes."
+    },
+    {
+      "family": "iron_academic_overhead",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.pdf",
+        "sha256": "2b08d78dde86df136911102cf686d1916518a7ecd2c5ea84eb51b9c2654f3949"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.png",
+        "sha256": "97f0627fb52e30c454b3589d0d64501103b18b63c03882734e11d28eea893822"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_academic_overhead_pdf.png",
+        "sha256": "0dbd02a7e7cc2ba5b6b79bcf113913c3ae2cf7f3848996e0d06439310d741355",
+        "dimensions": [
+          2447,
+          865
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.pdf",
+          "/tmp/p2-original-vector-visual-review/iron_academic_overhead_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1223.014375,
+          "y1": 432.1829882812,
+          "width": 1223.014375,
+          "height": 432.1829882812
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1223.014375,
+          "y1": 432.1829882812,
+          "width": 1223.014375,
+          "height": 432.1829882812
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_academic_overhead_review.jpg",
+        "sha256": "163613a7d445bec33d7a7c1dc04016e429bcc4b3a59d45030f6680b67be1378c"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Control three-pattern path panels intact, 10,000 support and six-path labels visible; 6.3 x display qualification retained."
+    },
+    {
+      "family": "iron_academic_overhead",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.svg",
+        "sha256": "1f2fc9d09519530fe9aca0c592e3fddd0bf00d003ea52553349e7ba1de0b26e0"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.png",
+        "sha256": "97f0627fb52e30c454b3589d0d64501103b18b63c03882734e11d28eea893822"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_academic_overhead_svg.png",
+        "sha256": "e24c67b7a418c7aaaa8c9ba3b54eeea041c28dd81640993d25f34770c03f6d47",
+        "dimensions": [
+          4892,
+          1729
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.svg",
+          "/tmp/p2-original-vector-visual-review/iron_academic_overhead_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 1223.022969,
+          "width_unit": "pt",
+          "height": 432.182988,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 1223.022969,
+          "height": 432.182988
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_academic_overhead_review.jpg",
+        "sha256": "163613a7d445bec33d7a7c1dc04016e429bcc4b3a59d45030f6680b67be1378c"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Control three-pattern path panels intact, 10,000 support and six-path labels visible; 6.3 x display qualification retained."
+    },
+    {
+      "family": "iron_social_density",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.pdf",
+        "sha256": "8dd482a57c3638c206be16de01bfe4bc2a2c4e43ddde3336b35d37b35fd919c8"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
+        "sha256": "d4a64b8f8ab4c20e60932b64197347b37393b20e23a41ed00978b40bf8f63bb5"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_social_density_pdf.png",
+        "sha256": "7e132acc905c096792eb321afdf49451b121b53ec7d45b386c473d044771c1f0",
+        "dimensions": [
+          1472,
+          2536
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.pdf",
+          "/tmp/p2-original-vector-visual-review/iron_social_density_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 735.6481140625,
+          "y1": 1267.632,
+          "width": 735.6481140625,
+          "height": 1267.632
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 735.6481140625,
+          "y1": 1267.632,
+          "width": 735.6481140625,
+          "height": 1267.632
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_social_density_review.jpg",
+        "sha256": "caca90026a6dc26f36f39e61b6abc00466f869556c40ccb47c0664d9a5092c1b"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Target 127.88 m and 9,996 support labels legible; all three panels, contours, marginal histograms and footer intact."
+    },
+    {
+      "family": "iron_social_density",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.svg",
+        "sha256": "4a4c0a5c5410a2c38da42c7f7e1f2578c4c3c6e7c57ba36ae8f7d7809ef6aabe"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
+        "sha256": "d4a64b8f8ab4c20e60932b64197347b37393b20e23a41ed00978b40bf8f63bb5"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_social_density_svg.png",
+        "sha256": "2512212b6d4e1f9655302eaa8b2d66751151ea93d8f62ee9e7f9ed98ea6f0c59",
+        "dimensions": [
+          2943,
+          5071
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/density.svg",
+          "/tmp/p2-original-vector-visual-review/iron_social_density_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 735.68288,
+          "width_unit": "pt",
+          "height": 1267.632,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 735.68288,
+          "height": 1267.632
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_social_density_review.jpg",
+        "sha256": "caca90026a6dc26f36f39e61b6abc00466f869556c40ccb47c0664d9a5092c1b"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Target 127.88 m and 9,996 support labels legible; all three panels, contours, marginal histograms and footer intact."
+    },
+    {
+      "family": "iron_social_overhead",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.pdf",
+        "sha256": "5bdeb39c4fce09d23df875daacfbc8be04399a06bb1804199b8720f5ade3d090"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
+        "sha256": "77feb526c4b519da2814c74102e0cdd3566eb9f584cb4e8cdc4031a77f27c1d6"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_social_overhead_pdf.png",
+        "sha256": "5b228b11eabc358c36c75783e42515294c0ac012a86bd3f660721fd1d00b0abc",
+        "dimensions": [
+          2199,
+          1280
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.pdf",
+          "/tmp/p2-original-vector-visual-review/iron_social_overhead_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1099.2191820829,
+          "y1": 639.8833203125,
+          "width": 1099.2191820829,
+          "height": 639.8833203125
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1099.2191820829,
+          "y1": 639.8833203125,
+          "width": 1099.2191820829,
+          "height": 639.8833203125
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_social_overhead_review.jpg",
+        "sha256": "e280bf75c43394bbbbeedf432a94a50dd111a414e8ccdda3b4e13300053e5cc9"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Target 127.88 m,9,996 support and six displayed paths preserved; 10.3 x magnification explicit."
+    },
+    {
+      "family": "iron_social_overhead",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.svg",
+        "sha256": "b90c50c2ac222a09ddfb502e1d750c60f8045a7e3e1eb210a8a8555a2dbb2d8a"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
+        "sha256": "77feb526c4b519da2814c74102e0cdd3566eb9f584cb4e8cdc4031a77f27c1d6"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_social_overhead_svg.png",
+        "sha256": "b47826131f250d17d43dd9fcb8d225bac988f9ca458a3bc3b1c2ec33ea4264c2",
+        "dimensions": [
+          4397,
+          2560
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.svg",
+          "/tmp/p2-original-vector-visual-review/iron_social_overhead_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 1099.235588,
+          "width_unit": "pt",
+          "height": 639.88332,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 1099.235588,
+          "height": 639.88332
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/iron_social_overhead_review.jpg",
+        "sha256": "e280bf75c43394bbbbeedf432a94a50dd111a414e8ccdda3b4e13300053e5cc9"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Target 127.88 m,9,996 support and six displayed paths preserved; 10.3 x magnification explicit."
+    },
+    {
+      "family": "pw_academic_density",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.pdf",
+        "sha256": "fb20e58ac97d3aacf24264893d25b5c8cf15513b7d38ea16520f93d78f96d66c"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.png",
+        "sha256": "40b0d4a08092ee771a860e2ee35e05a6ffc640e6d1305580ceb7ed0ba866512a"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_academic_density_pdf.png",
+        "sha256": "adfdb59a980fd22e566f3b8df03824219681d75512937f399213e511720d6465",
+        "dimensions": [
+          2319,
+          1362
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.pdf",
+          "/tmp/p2-original-vector-visual-review/pw_academic_density_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1159.232625,
+          "y1": 680.5568222656,
+          "width": 1159.232625,
+          "height": 680.5568222656
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1159.232625,
+          "y1": 680.5568222656,
+          "width": 1159.232625,
+          "height": 680.5568222656
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_academic_density_review.jpg",
+        "sha256": "a54808380244494b1ba2d2319fa359ba50840cd332b85302b2869c685451d428"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Control 9,999 support panels, histogram marginals, shared density scale and HDR footnotes intact; no clipped labels."
+    },
+    {
+      "family": "pw_academic_density",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.svg",
+        "sha256": "006728c5bfd91d2c7132c776ce9bedcee5eeba6c0fc61b4e3861f35b51801112"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.png",
+        "sha256": "40b0d4a08092ee771a860e2ee35e05a6ffc640e6d1305580ceb7ed0ba866512a"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_academic_density_svg.png",
+        "sha256": "6d432378cf049c8191f7e8233473cdf708094f4df8d9c3feb1822c9a516af194",
+        "dimensions": [
+          4637,
+          2722
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/density.svg",
+          "/tmp/p2-original-vector-visual-review/pw_academic_density_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 1159.237938,
+          "width_unit": "pt",
+          "height": 680.556822,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 1159.237938,
+          "height": 680.556822
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_academic_density_review.jpg",
+        "sha256": "a54808380244494b1ba2d2319fa359ba50840cd332b85302b2869c685451d428"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Control 9,999 support panels, histogram marginals, shared density scale and HDR footnotes intact; no clipped labels."
+    },
+    {
+      "family": "pw_academic_overhead",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.pdf",
+        "sha256": "ec0a3d0797120521269655acb6ab41fcc9451a387ac8d6d91a330f63a6b59699"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.png",
+        "sha256": "6126ebb0945c95694b35565e9f654fb4cc4e17d2679712d44c6b8f2d388f3dd2"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_academic_overhead_pdf.png",
+        "sha256": "70e81a468fd394063060f41e9329e1f3411cc47a232c42a6b34f4206fe0b8b4b",
+        "dimensions": [
+          2447,
+          865
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.pdf",
+          "/tmp/p2-original-vector-visual-review/pw_academic_overhead_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1223.014375,
+          "y1": 432.1829882812,
+          "width": 1223.014375,
+          "height": 432.1829882812
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1223.014375,
+          "y1": 432.1829882812,
+          "width": 1223.014375,
+          "height": 432.1829882812
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_academic_overhead_review.jpg",
+        "sha256": "155aa4d7a6feefdb15f77c15950dae70d1fcaf9f19dd303390af17d0ec583e4f"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Three control path panels retain 9,999/10,000 and six-path counts; 9.7 x display qualification visible."
+    },
+    {
+      "family": "pw_academic_overhead",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.svg",
+        "sha256": "e218ef7bd3b0b074f1f0504af389b075456e04cd707d95375652032c12d75e12"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.png",
+        "sha256": "6126ebb0945c95694b35565e9f654fb4cc4e17d2679712d44c6b8f2d388f3dd2"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_academic_overhead_svg.png",
+        "sha256": "701e595fbd46ed6108c2a6e01515f91972a43bc7b46b236a4a1a6e4f692dff38",
+        "dimensions": [
+          4892,
+          1729
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1/details/pitching_wedge_lean10_curve2_rotation2_combined2/overhead.svg",
+          "/tmp/p2-original-vector-visual-review/pw_academic_overhead_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 1223.022969,
+          "width_unit": "pt",
+          "height": 432.182988,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 1223.022969,
+          "height": 432.182988
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_academic_overhead_review.jpg",
+        "sha256": "155aa4d7a6feefdb15f77c15950dae70d1fcaf9f19dd303390af17d0ec583e4f"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Three control path panels retain 9,999/10,000 and six-path counts; 9.7 x display qualification visible."
+    },
+    {
+      "family": "pw_social_density",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.pdf",
+        "sha256": "d32f8f72a2c25c8395c761531e1398d335a5e6185299082ed3c8ea86444a6143"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.png",
+        "sha256": "4618cfb1a033969e4b0807fbfc90855e49d8052ad2e8572315bed0e1bc27e91a"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_social_density_pdf.png",
+        "sha256": "a9d57e098cc18748a7a3c3349ba9ec2db0a725514a8e301d98467879fd00053f",
+        "dimensions": [
+          1472,
+          2536
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.pdf",
+          "/tmp/p2-original-vector-visual-review/pw_social_density_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 735.6481140625,
+          "y1": 1267.632,
+          "width": 735.6481140625,
+          "height": 1267.632
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 735.6481140625,
+          "y1": 1267.632,
+          "width": 735.6481140625,
+          "height": 1267.632
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_social_density_review.jpg",
+        "sha256": "2c658a1f7f8995390a8db24f82f434af9b8cf4e1e8c6de473482171808446db7"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Lean 5 target 90.43 m card retains 9,999 support, full units, all HDR panels/marginals/colorbar and model-conditional footer."
+    },
+    {
+      "family": "pw_social_density",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.svg",
+        "sha256": "ef94ba62e40802a30da9d40cb9b07da5ff3bee997d4ff7e9485a8611b3968091"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.png",
+        "sha256": "4618cfb1a033969e4b0807fbfc90855e49d8052ad2e8572315bed0e1bc27e91a"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_social_density_svg.png",
+        "sha256": "e2d093acd082bc97c62e06c365f72f30ff01264c87775853102688ffb225f027",
+        "dimensions": [
+          2943,
+          5071
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/density.svg",
+          "/tmp/p2-original-vector-visual-review/pw_social_density_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 735.68288,
+          "width_unit": "pt",
+          "height": 1267.632,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 735.68288,
+          "height": 1267.632
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_social_density_review.jpg",
+        "sha256": "2c658a1f7f8995390a8db24f82f434af9b8cf4e1e8c6de473482171808446db7"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Lean 5 target 90.43 m card retains 9,999 support, full units, all HDR panels/marginals/colorbar and model-conditional footer."
+    },
+    {
+      "family": "pw_social_overhead",
+      "format": "pdf",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.pdf",
+        "sha256": "2a306a84370974dce49abbd39ffc7dc361069faeb2b4906eb9d8f514f5b21b4d"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.png",
+        "sha256": "dbf7c64a669a69e9c459968bb59c0542b385196f9c3b7b47a147ffcf767ccd26"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_social_overhead_pdf.png",
+        "sha256": "dcad09efe5a34f086bc5a12398db715b8ece164bd2de8ae93f3cd8f19cd7ab5e",
+        "dimensions": [
+          2186,
+          1280
+        ],
+        "command": [
+          "pdftoppm",
+          "-f",
+          "1",
+          "-singlefile",
+          "-r",
+          "144",
+          "-png",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.pdf",
+          "/tmp/p2-original-vector-visual-review/pw_social_overhead_pdf"
+        ]
+      },
+      "physical_dimensions": {
+        "page_count": 1,
+        "media_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1092.694375,
+          "y1": 639.8833203125,
+          "width": 1092.694375,
+          "height": 639.8833203125
+        },
+        "crop_box": {
+          "x0": 0.0,
+          "y0": 0.0,
+          "x1": 1092.694375,
+          "y1": 639.8833203125,
+          "width": 1092.694375,
+          "height": 639.8833203125
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_social_overhead_review.jpg",
+        "sha256": "acc3bfe7df4543f2d7017e112c325bfa5e8eea07cec7e80bb118b5b12a7e760b"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Lean 5 target 90.43 m,9,999 support and sampled paths retained; 15.0 x vertical-display disclosure visible."
+    },
+    {
+      "family": "pw_social_overhead",
+      "format": "svg",
+      "source": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.svg",
+        "sha256": "f572b67530df82a4f539c494da720cb70c4d8373327cbeb530787d095bb6daab"
+      },
+      "png_sibling": {
+        "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.png",
+        "sha256": "dbf7c64a669a69e9c459968bb59c0542b385196f9c3b7b47a147ffcf767ccd26"
+      },
+      "render": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_social_overhead_svg.png",
+        "sha256": "cb3c5a9f3a1404b8e09553b7d079b3cff32c62cfc4110897d24086c63af4a165",
+        "dimensions": [
+          4371,
+          2560
+        ],
+        "command": [
+          "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "-e",
+          "const sharp=require('sharp'); sharp(process.argv[1],{density:144,limitInputPixels:50000000}).flatten({background:'#fff'}).png().toFile(process.argv[2]).then(x=>console.log(JSON.stringify(x))).catch(e=>{console.error(e);process.exit(1)});",
+          "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/social/details/pitching_wedge_lean5_curve2_rotation2_combined2/overhead.svg",
+          "/tmp/p2-original-vector-visual-review/pw_social_overhead_svg.png"
+        ]
+      },
+      "physical_dimensions": {
+        "viewport": {
+          "width": 1092.702969,
+          "width_unit": "pt",
+          "height": 639.88332,
+          "height_unit": "pt"
+        },
+        "view_box": {
+          "min_x": 0.0,
+          "min_y": 0.0,
+          "width": 1092.702969,
+          "height": 639.88332
+        }
+      },
+      "review_image": {
+        "path": "/tmp/p2-original-vector-visual-review/pw_social_overhead_review.jpg",
+        "sha256": "acc3bfe7df4543f2d7017e112c325bfa5e8eea07cec7e80bb118b5b12a7e760b"
+      },
+      "decision": "pass_representative_visual_check",
+      "observation": "Lean 5 target 90.43 m,9,999 support and sampled paths retained; 15.0 x vertical-display disclosure visible."
+    }
+  ],
+  "additional_full_raster_views": [
+    "iron_academic_density_pdf.png",
+    "pw_social_density_svg.png"
+  ],
+  "method": "Every PDF and SVG raster inspected in uncropped proportional side-by-side review images; two representative standalone rasters also viewed. No pixel-equivalence metric; actual dimensions retained.",
+  "findings": []
+}

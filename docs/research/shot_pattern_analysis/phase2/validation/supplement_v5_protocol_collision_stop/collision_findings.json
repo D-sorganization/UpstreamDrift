@@ -1,0 +1,3005 @@
+{
+  "scope": "Confirmed Protocol-Omitting Pair Filename Collision; Live Parent Not Accepted",
+  "comparison_sha256": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+  "comparison_count": 384,
+  "unique_filename_stems": 344,
+  "collision_groups": 40,
+  "colliding_comparison_records": 80,
+  "counts_by_kind": {
+    "curve_strength": 20,
+    "shaft_rotation_sd": 20
+  },
+  "collisions": {
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "7f8cf74171af868d1aafc01a4e911b38cb59639dcf6bb7a7001056b128fd545a",
+            "source_csv_sha256": "3021fa44d96c9fb4f623cd0d3aac17f9f0f1fd41ec060ba60bcc128ec25742e8"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "f3286f4936c2cb4c98ca8bec44ff03bb0b8c8ea1b44bf7793ee2b31d185638c3",
+            "source_csv_sha256": "036a7f46ec1772977a9b7902f3f158694e1166945f4fd2ec6f454757d90b60ae"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 9999
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "e1664232b9e3745825f8a2185a60fb16949d8d983917890c1ea63896f5854458",
+            "source_csv_sha256": "d10b7409c3cd8d272e52177170fc3fb02d96d7562d9c2abc4ad4f360ce635213"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "5c38765339cef3681e1ed837a241b84ba73fbee6ff0dc3727c30f7007d7e8a15",
+            "source_csv_sha256": "c05f807d789b4631681c44e56bb6aee97b4701fe0d13c1bff0d8290fea1dcabf"
+          }
+        ],
+        "target_x_m": 102.81528887494389,
+        "common_supported_n": 9999
+      }
+    ],
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "5026ad1ea74dfee75263e2156afe7904f18775030d8abb2e0b3a0a4a8cf92e52",
+            "source_csv_sha256": "05cdfac88d6a7472ddf29155c8717c89d1ab9723e2e3802e7480d712e690badc"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "ec0db766d22ebb2de47148101b454bde89d917c44cfcaa2fecb7f6c2fef3ac26",
+            "source_csv_sha256": "99ace15b62771e29b896fb40b2746a7a6d30826f3954385aa8b484f4ac3052dc"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "b7ddb6bdac5def569acefe7be8f93c4e96bf3ebda94b7ec4d68db6808578f5c2",
+            "source_csv_sha256": "ec4ad542089671279fe0a1ed1bafa4fd5bce9d49f553569a743f12cffc0a1cb1"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "6e70d3f805cfbe7908f75f1621e48394de6a940485368f636fa2d0a1d45b4567",
+            "source_csv_sha256": "5bb58f8080f94342e1954338fe00cbebd3a1b0bc4ae3d5dadf5a29f635c0feca"
+          }
+        ],
+        "target_x_m": 102.81528887494389,
+        "common_supported_n": 10000
+      }
+    ],
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "c1d5629718023ab580a002569f007c5bd75a2497ba56ebc101da43f5fcc8631f",
+            "source_csv_sha256": "17427dc8936735af9e98a6c0096d7df2c0aa9127c48c462dbc57c826d2a2f1f5"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "c58671484502324c509ebdb7a755a02a236f04b7f469a228e1f6169b13e779f7",
+            "source_csv_sha256": "44d66a937fefef7938ffa01c829d6189f9f31878995c4968d9d116cfc5731e4c"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 9999
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "b00c9c096c6699b5d51640e46ebc5016ff15db5028388e7e79d0a57b970aff76",
+            "source_csv_sha256": "73610c2437ed3dcd03f5382c386cb4856422b530fa2cb24cae575e524290ce9a"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "8344a6d39430f19c62eb3acac4483467f8ac14dedf2dea3392c0640acf26502a",
+            "source_csv_sha256": "39c8ead88f25e31b10dc866cca6808fc2d242ec44761c07ad5d046bb7af0775d"
+          }
+        ],
+        "target_x_m": 102.81528887494389,
+        "common_supported_n": 9999
+      }
+    ],
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "cae3f8f00632fa7deb0481d1c75d920ff9c1bfa77be62de1cf1b8495a3d57e8f",
+            "source_csv_sha256": "37d6fb51e4575fb274ce3953f99e4699985ce21d6d69150fac4734030524c0b3"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "f370f6e02e1c57a34643e2a16d3e9b678de88cdc40f36e5e9d0013747d347e08",
+            "source_csv_sha256": "67eb6a6fe8a0fa685e195bf3e0b39ea9a2481e6c99cd38738e17f5311ce42c1b"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "153b4f8e9408c7a6ea2be222b388e7716638846a1cf8fb1002e089a312e70c48",
+            "source_csv_sha256": "3603bef4673e5704a2b2168b18c709f5004c1c79b50f642f0fb322a024496634"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "f1500c1ea47b0c9f72febb5b98a2741ed228fdd4192078bb6ad0d5e5c53e8ff4",
+            "source_csv_sha256": "05c00ee4bfda09708af9ed65955a1fb90b1bd5fdbd45ca8eb245a2d56c2d50e8"
+          }
+        ],
+        "target_x_m": 102.81528887494389,
+        "common_supported_n": 10000
+      }
+    ],
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "pw-control-face-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "9f4cd6a600960aad2531ba34b6c7f5113ddc1a5b791eb0c259fee5cf0063c294",
+            "source_csv_sha256": "a2cf64839fb60bbe58e15573c9864017ea4ad9acbd11d2c28ab86b4baae372b4"
+          },
+          {
+            "protocol_id": "pw-control-face-bounds/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+            "source_cell_manifest_sha256": "e69df20a9bf202aaf92ebd49d18f5fc98f7b7cc1764ec9a54028d550889ec73d",
+            "source_csv_sha256": "6574d7883f6668921eb8520ece07d4df2b18713fa9d796b15cda3413e6a6c134"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 9999
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "09d828ebb76bfad208bd496c646fc33c5489974bc1f9f06b4af125e0770f2ff7",
+            "source_csv_sha256": "afc28c0d060c59959090215ec4c80b7b04c59241a0781294ba1f5dafed53f4db"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "54dd648b22afe8ade65c01e571b28596b23080ce1a16034a105183c35b7727b7",
+            "source_csv_sha256": "08ef53cab37566d4e211cc56a7d0c520a995bb6341dd7bf54c144b2818fe2ced"
+          }
+        ],
+        "target_x_m": 90.42961880334346,
+        "common_supported_n": 9999
+      }
+    ],
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "pw-control-face-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "8cc4799d633a54e08d343640fce4db13577c109fe5366272f105ae8b49835246",
+            "source_csv_sha256": "58159a9b885381bf6084f25807c294b74d574b6591e03a1b561b0e5eedc3d342"
+          },
+          {
+            "protocol_id": "pw-control-face-bounds/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+            "source_cell_manifest_sha256": "10a94bc345184717fb58c65ef917acb483c9e3f8939b0d8576dfd8ecc3947211",
+            "source_csv_sha256": "71af414ea07456c222948dbf6552248ffefbe58f67d8bab10eec42c1b0e5d04f"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "636b8030ba8ee0cd73fb70e0aaa063bb967b0c203d24d62b26089bbbbd6d8465",
+            "source_csv_sha256": "e9b53c452d207dff0683398adebad2380599eb032e19f75d0c1a83326fbd4d83"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "a6e8d48e48e254796e4f29366eb8de88ee4dd1624f62689656cd4af3dad6470f",
+            "source_csv_sha256": "1db1a57cbf46d18336e8dbb0a77f18b84d2825d61f362d643fd81c6bb361f702"
+          }
+        ],
+        "target_x_m": 90.42961880334346,
+        "common_supported_n": 10000
+      }
+    ],
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "pw-control-face-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "ed8dc50cd7767fb4536bbe24d18f95a8634fa94833696b5a8a8010c8675e6728",
+            "source_csv_sha256": "d797d2651aff7bedccf76255d909fbae086f6dfec9262d87a554551bd0ac6106"
+          },
+          {
+            "protocol_id": "pw-control-face-bounds/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+            "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+            "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 9999
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "40899a1597015491fa8090cc8e8b2e221c0b9e45d0534a68e7f7ea007d1ff954",
+            "source_csv_sha256": "db5e9a3c453c800a6d66983419134cf4e2bdfa425fa322d4e1eabd5e35ed5c62"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "2901538bfd186c7ede9984cb5892b1352b601620e14eb21b5721236c4e1e0403",
+            "source_csv_sha256": "87d8cce8021009395968efb2f3afa2e700b7e4db4fb73d04878663ac26e19e4d"
+          }
+        ],
+        "target_x_m": 90.42961880334346,
+        "common_supported_n": 9999
+      }
+    ],
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "pw-control-face-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "6a355a0234ff50b3295b6bdc596670651213f39ee4868ebfc01e187f4f4658e9",
+            "source_csv_sha256": "53ab74855a7ac2b598cdc11f4e94cb5dfb6f86e65a79e452093156bb87a8d18c"
+          },
+          {
+            "protocol_id": "pw-control-face-bounds/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+            "source_cell_manifest_sha256": "2530f389663e3ecc37427b07824efeba3f1c44bb673da770cfda2d4c1b07f113",
+            "source_csv_sha256": "6d08de1b4ae073dae57e9fb46909441405a2a6df12dee0e1eb6d763551095f0c"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "ba21c0846b53afc4c5f0d67f1d213a8eb8450984cb6f71bc7d680a9920c4eff9",
+            "source_csv_sha256": "2ce56040156367c7b227ad93ba4b0f9dd7d66e9b2c926403682931ce7222b243"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "e69cccb0c8ce4cdabb0d15f1081ec722b352f04644e1483eee466eb9456f424b",
+            "source_csv_sha256": "0e2564f82a9c03cb6d72de67e8972e78c685cc1c355ac143a6447e886cf9d287"
+          }
+        ],
+        "target_x_m": 90.42961880334346,
+        "common_supported_n": 10000
+      }
+    ],
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "de7c91b5d88ed5648f96554352d24c5f7ab4eb0292dccc1a38b04ce71a893acd",
+            "source_csv_sha256": "d9294b9091a7eeded65374406f22b96d901dd43dfa66c6655784481e4119e192"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "ba6f5a435328d7eb2ad008e30316d466971b14af334196b1a9357cc3c1fefd06",
+            "source_csv_sha256": "7a424782a81a901c464bbb32824f5d6b2fbb3bda064a3de792e085ebe16cdbb2"
+          }
+        ],
+        "target_x_m": 108.02738606179851,
+        "common_supported_n": 9974
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "driver-control-speed-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "driver_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "3b6bed0401c8655030e749ab571ed429c52b2426d8893f4c975d0e9e36c5bb14",
+            "source_csv_sha256": "59bfbd3b425e5d31329b0c85a236596513a9b3493531a6046eb44fb07ca61305"
+          },
+          {
+            "protocol_id": "driver-control-speed-bounds/1",
+            "cell": "driver_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+            "source_cell_manifest_sha256": "b58753e9e89bc47f22d3c37595faf77f796affdfa9d0905b665a8051168a51c4",
+            "source_csv_sha256": "8235000b7ee71a6ec3e56cc71c9539db7a4b83e62c959a0375c51a8d3c05c0ee"
+          }
+        ],
+        "target_x_m": 178.94875782337786,
+        "common_supported_n": 9974
+      }
+    ],
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "c5c14ba24c59a3e88313f94b58bfefcbfd11e68023064a316115cbb4c0660e3b",
+            "source_csv_sha256": "ed6ca446f4376dd9cf8d4c7cffc8057e6ae92c29e2e5784939ea35b29a9fe621"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "009f5e779b1b916376ceabcc13b181089b6fd4d4cc245fe46d2203ca71d27728",
+            "source_csv_sha256": "0d473f0ee950e5a505da17ceb3245b1c7c39e4254a448be69ac92d244e28b993"
+          }
+        ],
+        "target_x_m": 108.02738606179851,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "driver-control-speed-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "driver_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "48d692223b98fd49c21e697ffc607eb473fec74ef68e0f17d22fe15d07cb6167",
+            "source_csv_sha256": "992582783f6e4cf6ba876652fcbc32ad036203071201c2c2661e258baab60767"
+          },
+          {
+            "protocol_id": "driver-control-speed-bounds/1",
+            "cell": "driver_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+            "source_cell_manifest_sha256": "ca113bc8625bc577d72a05c59514582d8241e4ae4b75c68231146e3abd0c7eef",
+            "source_csv_sha256": "cc9e84eabd517de44525ec698008dcbdd76b9873da9f2dc6b76e843b1500409b"
+          }
+        ],
+        "target_x_m": 178.94875782337786,
+        "common_supported_n": 10000
+      }
+    ],
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42",
+            "source_csv_sha256": "ba3b9fc59fb114c6f5d3a23bd16a23e3b85ba4e94ed8e69b606b2654ba9b4feb"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+            "source_csv_sha256": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776"
+          }
+        ],
+        "target_x_m": 108.02738606179851,
+        "common_supported_n": 9940
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "driver-control-speed-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "driver_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "8924f5947a0ecb2acc7eda60d0cad1f54c73c5be9667249c4142c5ab84c91fe1",
+            "source_csv_sha256": "2e1f1ea6c2a4325e80534333934497dbf1d8295479b806d7103a85d27966599b"
+          },
+          {
+            "protocol_id": "driver-control-speed-bounds/1",
+            "cell": "driver_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+            "source_cell_manifest_sha256": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+            "source_csv_sha256": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758"
+          }
+        ],
+        "target_x_m": 178.94875782337786,
+        "common_supported_n": 9940
+      }
+    ],
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "6fa415959704e217db28a5ef8aa1ff748b1edcd68bc0a50345cb1ab45f0d97a3",
+            "source_csv_sha256": "c9dd56786c49ffcfe025f300eb4958e8ab5210263a9f12aebd2884563a8d02a4"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "99082283eb1e8d911f3b9153afcb88ffca44a063263840f039a2b114d98d8e1e",
+            "source_csv_sha256": "f27b377eacc2b6a1c2ce044aa42fc4b8f5117a0687635b9625d957d235744bb9"
+          }
+        ],
+        "target_x_m": 108.02738606179851,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "driver-control-speed-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "driver_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "e2b94ccdad42fcded9b01429b2dc727f21ff0097c8d73e583bbd70758ca5f288",
+            "source_csv_sha256": "287bf772192060e61c8322b4369323dc289df85332e69070415d4035f0e5ae99"
+          },
+          {
+            "protocol_id": "driver-control-speed-bounds/1",
+            "cell": "driver_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+            "source_cell_manifest_sha256": "2663e3b66d3286d8b57d214e00dd984fb225bb7c907046067b470f564c5c4137",
+            "source_csv_sha256": "ea059344175e0334ebc0ed75c9be0fc68058a339e0b249aa44cb8307c1d4d112"
+          }
+        ],
+        "target_x_m": 178.94875782337786,
+        "common_supported_n": 10000
+      }
+    ],
+    "curve_strength_seven_iron_lean10_curve1_rotation1_combined2_vs_seven_iron_lean10_curve2_rotation1_combined2_d7fee1942f": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "79ad0b4f0f10ba28e4afdaa8ea273607d77919470d847e44a0f17d3a68a47b05",
+            "source_csv_sha256": "ff9079037cb572908d6dbaec5e9c933b6d9ee0fa6a16cd4c9d877591f3259a2f"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "135aa3742982b750e637c5bb20f2a6224fb8240fb292bda0268945e9cdf03d57",
+            "source_csv_sha256": "401da8aac9230df364411af6ce20810f4f5f639ea404018688e33572a8ac80f0"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 9996
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "6ea6ec2c1ac66c2690fb63d3583cc023773a46f392137dcc0e78ed512284c545",
+            "source_csv_sha256": "461eab5e4a5206d0cd8fb8df077240a7922e6fa82936c3df3e16832100ac1016"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "3d3f805342ffd4a867d52dcec2089a3929ed8c7de2f120ac67e1787b56da0caf",
+            "source_csv_sha256": "617dab1f1224e14709b932d77155553140998fbbe093cc6a13c048abe0906fe3"
+          }
+        ],
+        "target_x_m": 149.74419150637488,
+        "common_supported_n": 9996
+      }
+    ],
+    "curve_strength_seven_iron_lean10_curve1_rotation1_shaft_only_vs_seven_iron_lean10_curve2_rotation1_shaft_only_8c76ef0599": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "a03949b13caa177a215e427ef78859223eeb434ab7dc4894c1978b3a81d0ed7e",
+            "source_csv_sha256": "f9ddebd2faa25585fed33c8a04f74f706052524e38273e5bd5a35bf2b0fb17bb"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "98940550fda1f064660c48c21fb61dab46ea73392c504229c9897fc2f4fac22c",
+            "source_csv_sha256": "080ac47034827d85cb15a5d949031958f3735419c119de0380e12d5f6644aed6"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "24c949a67a8cf148b9d1b8ff2e4fb58c7113a9aad3d4ba27a6449c80147b25ca",
+            "source_csv_sha256": "ef382cce339cd4ec3bd1042dddb5d65350820eae3fc8e17d1a4c67b27d8b161e"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "4b15a7360c71d117edf6f5619d577db981e8b05ceede4afdb4b06d963a64b981",
+            "source_csv_sha256": "0d85eb4b72d01c19ab8a7aca9056e50a26ced6b413d49c8bede9a3458cc18b22"
+          }
+        ],
+        "target_x_m": 149.74419150637488,
+        "common_supported_n": 10000
+      }
+    ],
+    "curve_strength_seven_iron_lean10_curve1_rotation2_combined2_vs_seven_iron_lean10_curve2_rotation2_combined2_8aa0b1db66": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "d0c6ddd496cc583d77a9fda99b5ad2b9b66d3c4ef3e9b9f64c1ea4c888862fe2",
+            "source_csv_sha256": "b0a4bef2fedcfa24a9d18f3ea3fd71f5aaf31be5597cb4da000e254082e5b36b"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "f15b891ff3c75d52ff4dd095930b7585f50379e212cf925ab69609d8bb9655a9",
+            "source_csv_sha256": "9c8d5b8e3712c83db72a7368dc21cb3398b445741237c7cb4085cfc38d95c7dd"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 9996
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "8f850fff222e1aa304e149623cc4ce8e6a1bb0f08b1b78c04de62c71039c961e",
+            "source_csv_sha256": "65e351475caaa2fd11a1d625325d52ddcd100772981bdc4d87e0c4f033679da0"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "a074eba5384d8b483f66da7a03098df0c4a616dcbbe8bd38fca90d75244898be",
+            "source_csv_sha256": "4995f5a91b78538512bbee5f41cf26aff0d7ec6889e27c9e596ec9f2bc2dd44b"
+          }
+        ],
+        "target_x_m": 149.74419150637488,
+        "common_supported_n": 9996
+      }
+    ],
+    "curve_strength_seven_iron_lean10_curve1_rotation2_shaft_only_vs_seven_iron_lean10_curve2_rotation2_shaft_only_f011e84484": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "c4a1b25ac0618586904f83a5f0b243a24f2ec5a494cf2d95cc05b383955e22be",
+            "source_csv_sha256": "7b6d65dab794097394ad36f6084f1e80d30c92aac4f74bf808443ddf8554dd70"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "8578c51528380927bbf7592fa063a198d424ea29c371e3a842bd795fa0885769",
+            "source_csv_sha256": "2de0e5f886463e343136c04625a459ef4253f251d36552e79cc62443f36e914e"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "7408013d327de3d86fc9e0d069d2cfc149ce951cd5cf43ffb4f73289f03cc5de",
+            "source_csv_sha256": "9ceb013a83d315f06b0cf61ebc0252d5e71f7a66071f5e52762aa533ba700364"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "f4b1f56b15ff9bb75c49cda16432f52e7416ae72be5adce52d79c2621f65a0e3",
+            "source_csv_sha256": "ecd0710b9217a93ffc98186e542b57d1311450f6d38db01faf6a418707215a47"
+          }
+        ],
+        "target_x_m": 149.74419150637488,
+        "common_supported_n": 10000
+      }
+    ],
+    "curve_strength_seven_iron_lean5_curve1_rotation1_combined2_vs_seven_iron_lean5_curve2_rotation1_combined2_1f958664d2": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "7f79a1b955828bca7801e757a50d286d4aa423444eee5d8bef3ebae4f4c5a9d8",
+            "source_csv_sha256": "ece4981c29e67defa503e961c1bf91083f34532563bf73d755fbb6b39524d88d"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "6bcefc70f693664b2b3f1fda332e71e2f9d2f8bd1f517d6302a86e6119c0305e",
+            "source_csv_sha256": "2dc931b15c3347246d9dd69fe70974c8f2224a877006dc3873fa1b978f7e74a2"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 9996
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "d88ee837d511da1d0be3006621a10a18eb76a4d57681ca9fe190937996c2ada1",
+            "source_csv_sha256": "59029b5556eefd2adb09969ab8ed6193339fe9701b0355e220834e5c4db798aa"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "6949d4937f809234bdabff282297e65216150f56a622c70b04b11ef1ca81f507",
+            "source_csv_sha256": "eec9023ce7ee3f25bb2ef2efd19f9a712f8d2ceaf29c27293fc473d9297290f1"
+          }
+        ],
+        "target_x_m": 139.90327962446892,
+        "common_supported_n": 9996
+      }
+    ],
+    "curve_strength_seven_iron_lean5_curve1_rotation1_shaft_only_vs_seven_iron_lean5_curve2_rotation1_shaft_only_0b5b5237dd": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "015d7aa06b8457482f4b5453870da4a31cdcd76aa89c741894cb973d80b5ed65",
+            "source_csv_sha256": "2204e9b8e8dd9e030655c7eab25404538298ca87367b0afb799020d4b591bbb3"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "c625fa953135ff35ce7f072377f48e747c37236453087b18b91d89bd0046b436",
+            "source_csv_sha256": "9ab98121d439d741cbec52556fdbf2275ff06cf765e8b90bd8d571113bd7a4fa"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "8bc491aa8a6b6a423ff8c15b4b0b79676cd4ccb2c0db25428c1380a81616adf7",
+            "source_csv_sha256": "be548f084c71c3e974f4ac1e49fe5f98613ca8ade377cd0954e8e343aa4efe77"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "2c62da1f7f9c354acacc228f330e6057cd0128891ca849858caa84ff36d7e75c",
+            "source_csv_sha256": "cc9bc6c14626c5e3d17c328b64ed1a621f54fb4a6589bb58ac34e1c90a10cbbd"
+          }
+        ],
+        "target_x_m": 139.90327962446892,
+        "common_supported_n": 10000
+      }
+    ],
+    "curve_strength_seven_iron_lean5_curve1_rotation2_combined2_vs_seven_iron_lean5_curve2_rotation2_combined2_c0f3f96e9e": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "14b2177f89da9bc5374870ac7e81bebb59550f4386a597a62fcbc3cbd05e270b",
+            "source_csv_sha256": "4d2c71b33940556c07d187aacfd891a3133e77f69b3a256e115c02ee6f791383"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "b7d3f1dceb12da7a4f0eaa32d146e8663d665d60bc1da66674b7f8fcb089b03c",
+            "source_csv_sha256": "ccc4fd4e8c2e50c7d481d59a0d438a9b60026bc824554df11e3818be5a0d93c4"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 9996
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "c1d65cd124d32f923b83c80ef062b12e021e5d2a67e66f124addcdfc3b4a6e5b",
+            "source_csv_sha256": "89d694a0c50aeb635e4ed4a09a712842422816ba4900b0b1c522df061169fdc8"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "1013d60ebbf3842a9b044222daff999a5a382f400d4606cfba9f7217633bafdd",
+            "source_csv_sha256": "9389fa212e9e251384d008a6459b4e16998179dd9ea266cc11931cfaac1d2709"
+          }
+        ],
+        "target_x_m": 139.90327962446892,
+        "common_supported_n": 9996
+      }
+    ],
+    "curve_strength_seven_iron_lean5_curve1_rotation2_shaft_only_vs_seven_iron_lean5_curve2_rotation2_shaft_only_59d39ec8e1": [
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "ca2418bbfa5c0c01f16f8d79a82620d717889a2fbcb0658e12d4f778cba76056",
+            "source_csv_sha256": "8057c5a08dcadff9a1a549da78557edc7be8384a4315ffd8a1ff6bc16f8de195"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "b1d7a2fa48c7dc9bec742d2049ab1a29e6f1c5c8dc8af5714cacfdc0698d612e",
+            "source_csv_sha256": "15d5e77a6446b15d11bf7913102db06630273d147b557e660d4957ac980572ed"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "curve_strength",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "cab620d429093ddb46d03765dbb04c79c05505536bf6a7855d4a3e7dc4d33a8f",
+            "source_csv_sha256": "66bd271d793da310df18fe6d492051d44022daf277c9b35a5d638eb0a9f8e946"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "1186a4758172f90dce3af8959925531f293dd466277dade30428d1b23b546e86",
+            "source_csv_sha256": "fb064b416fc78332582bb68819cd701d8a71c9659b067ce3ca22f57b79f3e8ea"
+          }
+        ],
+        "target_x_m": 139.90327962446892,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve1_rotation2_combined2_0aec506cff": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "7f8cf74171af868d1aafc01a4e911b38cb59639dcf6bb7a7001056b128fd545a",
+            "source_csv_sha256": "3021fa44d96c9fb4f623cd0d3aac17f9f0f1fd41ec060ba60bcc128ec25742e8"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "c1d5629718023ab580a002569f007c5bd75a2497ba56ebc101da43f5fcc8631f",
+            "source_csv_sha256": "17427dc8936735af9e98a6c0096d7df2c0aa9127c48c462dbc57c826d2a2f1f5"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 9999
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "e1664232b9e3745825f8a2185a60fb16949d8d983917890c1ea63896f5854458",
+            "source_csv_sha256": "d10b7409c3cd8d272e52177170fc3fb02d96d7562d9c2abc4ad4f360ce635213"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "b00c9c096c6699b5d51640e46ebc5016ff15db5028388e7e79d0a57b970aff76",
+            "source_csv_sha256": "73610c2437ed3dcd03f5382c386cb4856422b530fa2cb24cae575e524290ce9a"
+          }
+        ],
+        "target_x_m": 102.81528887494389,
+        "common_supported_n": 9999
+      }
+    ],
+    "shaft_rotation_sd_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve1_rotation2_shaft_only_8cd0bf6ca1": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "5026ad1ea74dfee75263e2156afe7904f18775030d8abb2e0b3a0a4a8cf92e52",
+            "source_csv_sha256": "05cdfac88d6a7472ddf29155c8717c89d1ab9723e2e3802e7480d712e690badc"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "cae3f8f00632fa7deb0481d1c75d920ff9c1bfa77be62de1cf1b8495a3d57e8f",
+            "source_csv_sha256": "37d6fb51e4575fb274ce3953f99e4699985ce21d6d69150fac4734030524c0b3"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "b7ddb6bdac5def569acefe7be8f93c4e96bf3ebda94b7ec4d68db6808578f5c2",
+            "source_csv_sha256": "ec4ad542089671279fe0a1ed1bafa4fd5bce9d49f553569a743f12cffc0a1cb1"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "153b4f8e9408c7a6ea2be222b388e7716638846a1cf8fb1002e089a312e70c48",
+            "source_csv_sha256": "3603bef4673e5704a2b2168b18c709f5004c1c79b50f642f0fb322a024496634"
+          }
+        ],
+        "target_x_m": 102.81528887494389,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_pitching_wedge_lean10_curve2_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_ff331dd394": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "f3286f4936c2cb4c98ca8bec44ff03bb0b8c8ea1b44bf7793ee2b31d185638c3",
+            "source_csv_sha256": "036a7f46ec1772977a9b7902f3f158694e1166945f4fd2ec6f454757d90b60ae"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "c58671484502324c509ebdb7a755a02a236f04b7f469a228e1f6169b13e779f7",
+            "source_csv_sha256": "44d66a937fefef7938ffa01c829d6189f9f31878995c4968d9d116cfc5731e4c"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 9999
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "5c38765339cef3681e1ed837a241b84ba73fbee6ff0dc3727c30f7007d7e8a15",
+            "source_csv_sha256": "c05f807d789b4631681c44e56bb6aee97b4701fe0d13c1bff0d8290fea1dcabf"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "8344a6d39430f19c62eb3acac4483467f8ac14dedf2dea3392c0640acf26502a",
+            "source_csv_sha256": "39c8ead88f25e31b10dc866cca6808fc2d242ec44761c07ad5d046bb7af0775d"
+          }
+        ],
+        "target_x_m": 102.81528887494389,
+        "common_supported_n": 9999
+      }
+    ],
+    "shaft_rotation_sd_pitching_wedge_lean10_curve2_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_9854dead45": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "ec0db766d22ebb2de47148101b454bde89d917c44cfcaa2fecb7f6c2fef3ac26",
+            "source_csv_sha256": "99ace15b62771e29b896fb40b2746a7a6d30826f3954385aa8b484f4ac3052dc"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "f370f6e02e1c57a34643e2a16d3e9b678de88cdc40f36e5e9d0013747d347e08",
+            "source_csv_sha256": "67eb6a6fe8a0fa685e195bf3e0b39ea9a2481e6c99cd38738e17f5311ce42c1b"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "6e70d3f805cfbe7908f75f1621e48394de6a940485368f636fa2d0a1d45b4567",
+            "source_csv_sha256": "5bb58f8080f94342e1954338fe00cbebd3a1b0bc4ae3d5dadf5a29f635c0feca"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "f1500c1ea47b0c9f72febb5b98a2741ed228fdd4192078bb6ad0d5e5c53e8ff4",
+            "source_csv_sha256": "05c00ee4bfda09708af9ed65955a1fb90b1bd5fdbd45ca8eb245a2d56c2d50e8"
+          }
+        ],
+        "target_x_m": 102.81528887494389,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve1_rotation2_combined2_5b77699e49": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "9f4cd6a600960aad2531ba34b6c7f5113ddc1a5b791eb0c259fee5cf0063c294",
+            "source_csv_sha256": "a2cf64839fb60bbe58e15573c9864017ea4ad9acbd11d2c28ab86b4baae372b4"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "ed8dc50cd7767fb4536bbe24d18f95a8634fa94833696b5a8a8010c8675e6728",
+            "source_csv_sha256": "d797d2651aff7bedccf76255d909fbae086f6dfec9262d87a554551bd0ac6106"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 9999
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "09d828ebb76bfad208bd496c646fc33c5489974bc1f9f06b4af125e0770f2ff7",
+            "source_csv_sha256": "afc28c0d060c59959090215ec4c80b7b04c59241a0781294ba1f5dafed53f4db"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "40899a1597015491fa8090cc8e8b2e221c0b9e45d0534a68e7f7ea007d1ff954",
+            "source_csv_sha256": "db5e9a3c453c800a6d66983419134cf4e2bdfa425fa322d4e1eabd5e35ed5c62"
+          }
+        ],
+        "target_x_m": 90.42961880334346,
+        "common_supported_n": 9999
+      }
+    ],
+    "shaft_rotation_sd_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve1_rotation2_shaft_only_41065d8240": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "8cc4799d633a54e08d343640fce4db13577c109fe5366272f105ae8b49835246",
+            "source_csv_sha256": "58159a9b885381bf6084f25807c294b74d574b6591e03a1b561b0e5eedc3d342"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "6a355a0234ff50b3295b6bdc596670651213f39ee4868ebfc01e187f4f4658e9",
+            "source_csv_sha256": "53ab74855a7ac2b598cdc11f4e94cb5dfb6f86e65a79e452093156bb87a8d18c"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "636b8030ba8ee0cd73fb70e0aaa063bb967b0c203d24d62b26089bbbbd6d8465",
+            "source_csv_sha256": "e9b53c452d207dff0683398adebad2380599eb032e19f75d0c1a83326fbd4d83"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "ba21c0846b53afc4c5f0d67f1d213a8eb8450984cb6f71bc7d680a9920c4eff9",
+            "source_csv_sha256": "2ce56040156367c7b227ad93ba4b0f9dd7d66e9b2c926403682931ce7222b243"
+          }
+        ],
+        "target_x_m": 90.42961880334346,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_pitching_wedge_lean5_curve2_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_d4244a2046": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "pw-control-face-bounds/1",
+          "pw-control-face-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "pw-control-face-bounds/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+            "source_cell_manifest_sha256": "e69df20a9bf202aaf92ebd49d18f5fc98f7b7cc1764ec9a54028d550889ec73d",
+            "source_csv_sha256": "6574d7883f6668921eb8520ece07d4df2b18713fa9d796b15cda3413e6a6c134"
+          },
+          {
+            "protocol_id": "pw-control-face-bounds/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+            "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+            "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 9999
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "54dd648b22afe8ade65c01e571b28596b23080ce1a16034a105183c35b7727b7",
+            "source_csv_sha256": "08ef53cab37566d4e211cc56a7d0c520a995bb6341dd7bf54c144b2818fe2ced"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "2901538bfd186c7ede9984cb5892b1352b601620e14eb21b5721236c4e1e0403",
+            "source_csv_sha256": "87d8cce8021009395968efb2f3afa2e700b7e4db4fb73d04878663ac26e19e4d"
+          }
+        ],
+        "target_x_m": 90.42961880334346,
+        "common_supported_n": 9999
+      }
+    ],
+    "shaft_rotation_sd_pitching_wedge_lean5_curve2_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_23b842a20b": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "pw-control-face-bounds/1",
+          "pw-control-face-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "pw-control-face-bounds/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+            "source_cell_manifest_sha256": "10a94bc345184717fb58c65ef917acb483c9e3f8939b0d8576dfd8ecc3947211",
+            "source_csv_sha256": "71af414ea07456c222948dbf6552248ffefbe58f67d8bab10eec42c1b0e5d04f"
+          },
+          {
+            "protocol_id": "pw-control-face-bounds/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+            "source_cell_manifest_sha256": "2530f389663e3ecc37427b07824efeba3f1c44bb673da770cfda2d4c1b07f113",
+            "source_csv_sha256": "6d08de1b4ae073dae57e9fb46909441405a2a6df12dee0e1eb6d763551095f0c"
+          }
+        ],
+        "target_x_m": 77.40247724866299,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "a6e8d48e48e254796e4f29366eb8de88ee4dd1624f62689656cd4af3dad6470f",
+            "source_csv_sha256": "1db1a57cbf46d18336e8dbb0a77f18b84d2825d61f362d643fd81c6bb361f702"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "e69cccb0c8ce4cdabb0d15f1081ec722b352f04644e1483eee466eb9456f424b",
+            "source_csv_sha256": "0e2564f82a9c03cb6d72de67e8972e78c685cc1c355ac143a6447e886cf9d287"
+          }
+        ],
+        "target_x_m": 90.42961880334346,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "de7c91b5d88ed5648f96554352d24c5f7ab4eb0292dccc1a38b04ce71a893acd",
+            "source_csv_sha256": "d9294b9091a7eeded65374406f22b96d901dd43dfa66c6655784481e4119e192"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42",
+            "source_csv_sha256": "ba3b9fc59fb114c6f5d3a23bd16a23e3b85ba4e94ed8e69b606b2654ba9b4feb"
+          }
+        ],
+        "target_x_m": 108.02738606179851,
+        "common_supported_n": 9939
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "driver_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "3b6bed0401c8655030e749ab571ed429c52b2426d8893f4c975d0e9e36c5bb14",
+            "source_csv_sha256": "59bfbd3b425e5d31329b0c85a236596513a9b3493531a6046eb44fb07ca61305"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "driver_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "8924f5947a0ecb2acc7eda60d0cad1f54c73c5be9667249c4142c5ab84c91fe1",
+            "source_csv_sha256": "2e1f1ea6c2a4325e80534333934497dbf1d8295479b806d7103a85d27966599b"
+          }
+        ],
+        "target_x_m": 178.94875782337786,
+        "common_supported_n": 9939
+      }
+    ],
+    "shaft_rotation_sd_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve1_rotation2_shaft_only_4e3d58e5ff": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "c5c14ba24c59a3e88313f94b58bfefcbfd11e68023064a316115cbb4c0660e3b",
+            "source_csv_sha256": "ed6ca446f4376dd9cf8d4c7cffc8057e6ae92c29e2e5784939ea35b29a9fe621"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "6fa415959704e217db28a5ef8aa1ff748b1edcd68bc0a50345cb1ab45f0d97a3",
+            "source_csv_sha256": "c9dd56786c49ffcfe025f300eb4958e8ab5210263a9f12aebd2884563a8d02a4"
+          }
+        ],
+        "target_x_m": 108.02738606179851,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "driver_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "48d692223b98fd49c21e697ffc607eb473fec74ef68e0f17d22fe15d07cb6167",
+            "source_csv_sha256": "992582783f6e4cf6ba876652fcbc32ad036203071201c2c2661e258baab60767"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "driver_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "e2b94ccdad42fcded9b01429b2dc727f21ff0097c8d73e583bbd70758ca5f288",
+            "source_csv_sha256": "287bf772192060e61c8322b4369323dc289df85332e69070415d4035f0e5ae99"
+          }
+        ],
+        "target_x_m": 178.94875782337786,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_driver_lean5_curve2_rotation1_combined2_vs_driver_lean5_curve2_rotation2_combined2_3942571772": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "ba6f5a435328d7eb2ad008e30316d466971b14af334196b1a9357cc3c1fefd06",
+            "source_csv_sha256": "7a424782a81a901c464bbb32824f5d6b2fbb3bda064a3de792e085ebe16cdbb2"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+            "source_csv_sha256": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776"
+          }
+        ],
+        "target_x_m": 108.02738606179851,
+        "common_supported_n": 9939
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "driver-control-speed-bounds/1",
+          "driver-control-speed-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "driver-control-speed-bounds/1",
+            "cell": "driver_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+            "source_cell_manifest_sha256": "b58753e9e89bc47f22d3c37595faf77f796affdfa9d0905b665a8051168a51c4",
+            "source_csv_sha256": "8235000b7ee71a6ec3e56cc71c9539db7a4b83e62c959a0375c51a8d3c05c0ee"
+          },
+          {
+            "protocol_id": "driver-control-speed-bounds/1",
+            "cell": "driver_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+            "source_cell_manifest_sha256": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+            "source_csv_sha256": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758"
+          }
+        ],
+        "target_x_m": 178.94875782337786,
+        "common_supported_n": 9939
+      }
+    ],
+    "shaft_rotation_sd_driver_lean5_curve2_rotation1_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_ca91f64013": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "009f5e779b1b916376ceabcc13b181089b6fd4d4cc245fe46d2203ca71d27728",
+            "source_csv_sha256": "0d473f0ee950e5a505da17ceb3245b1c7c39e4254a448be69ac92d244e28b993"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "driver_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "99082283eb1e8d911f3b9153afcb88ffca44a063263840f039a2b114d98d8e1e",
+            "source_csv_sha256": "f27b377eacc2b6a1c2ce044aa42fc4b8f5117a0687635b9625d957d235744bb9"
+          }
+        ],
+        "target_x_m": 108.02738606179851,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "driver-control-speed-bounds/1",
+          "driver-control-speed-bounds/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "driver-control-speed-bounds/1",
+            "cell": "driver_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+            "source_cell_manifest_sha256": "ca113bc8625bc577d72a05c59514582d8241e4ae4b75c68231146e3abd0c7eef",
+            "source_csv_sha256": "cc9e84eabd517de44525ec698008dcbdd76b9873da9f2dc6b76e843b1500409b"
+          },
+          {
+            "protocol_id": "driver-control-speed-bounds/1",
+            "cell": "driver_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+            "source_cell_manifest_sha256": "2663e3b66d3286d8b57d214e00dd984fb225bb7c907046067b470f564c5c4137",
+            "source_csv_sha256": "ea059344175e0334ebc0ed75c9be0fc68058a339e0b249aa44cb8307c1d4d112"
+          }
+        ],
+        "target_x_m": 178.94875782337786,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_seven_iron_lean10_curve1_rotation1_combined2_vs_seven_iron_lean10_curve1_rotation2_combined2_ba681dda44": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "79ad0b4f0f10ba28e4afdaa8ea273607d77919470d847e44a0f17d3a68a47b05",
+            "source_csv_sha256": "ff9079037cb572908d6dbaec5e9c933b6d9ee0fa6a16cd4c9d877591f3259a2f"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "d0c6ddd496cc583d77a9fda99b5ad2b9b66d3c4ef3e9b9f64c1ea4c888862fe2",
+            "source_csv_sha256": "b0a4bef2fedcfa24a9d18f3ea3fd71f5aaf31be5597cb4da000e254082e5b36b"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 9996
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "6ea6ec2c1ac66c2690fb63d3583cc023773a46f392137dcc0e78ed512284c545",
+            "source_csv_sha256": "461eab5e4a5206d0cd8fb8df077240a7922e6fa82936c3df3e16832100ac1016"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "8f850fff222e1aa304e149623cc4ce8e6a1bb0f08b1b78c04de62c71039c961e",
+            "source_csv_sha256": "65e351475caaa2fd11a1d625325d52ddcd100772981bdc4d87e0c4f033679da0"
+          }
+        ],
+        "target_x_m": 149.74419150637488,
+        "common_supported_n": 9996
+      }
+    ],
+    "shaft_rotation_sd_seven_iron_lean10_curve1_rotation1_shaft_only_vs_seven_iron_lean10_curve1_rotation2_shaft_only_24da986e1c": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "a03949b13caa177a215e427ef78859223eeb434ab7dc4894c1978b3a81d0ed7e",
+            "source_csv_sha256": "f9ddebd2faa25585fed33c8a04f74f706052524e38273e5bd5a35bf2b0fb17bb"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "c4a1b25ac0618586904f83a5f0b243a24f2ec5a494cf2d95cc05b383955e22be",
+            "source_csv_sha256": "7b6d65dab794097394ad36f6084f1e80d30c92aac4f74bf808443ddf8554dd70"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "24c949a67a8cf148b9d1b8ff2e4fb58c7113a9aad3d4ba27a6449c80147b25ca",
+            "source_csv_sha256": "ef382cce339cd4ec3bd1042dddb5d65350820eae3fc8e17d1a4c67b27d8b161e"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "7408013d327de3d86fc9e0d069d2cfc149ce951cd5cf43ffb4f73289f03cc5de",
+            "source_csv_sha256": "9ceb013a83d315f06b0cf61ebc0252d5e71f7a66071f5e52762aa533ba700364"
+          }
+        ],
+        "target_x_m": 149.74419150637488,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_seven_iron_lean10_curve2_rotation1_combined2_vs_seven_iron_lean10_curve2_rotation2_combined2_cd805272b8": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "135aa3742982b750e637c5bb20f2a6224fb8240fb292bda0268945e9cdf03d57",
+            "source_csv_sha256": "401da8aac9230df364411af6ce20810f4f5f639ea404018688e33572a8ac80f0"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "f15b891ff3c75d52ff4dd095930b7585f50379e212cf925ab69609d8bb9655a9",
+            "source_csv_sha256": "9c8d5b8e3712c83db72a7368dc21cb3398b445741237c7cb4085cfc38d95c7dd"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 9996
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "3d3f805342ffd4a867d52dcec2089a3929ed8c7de2f120ac67e1787b56da0caf",
+            "source_csv_sha256": "617dab1f1224e14709b932d77155553140998fbbe093cc6a13c048abe0906fe3"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "a074eba5384d8b483f66da7a03098df0c4a616dcbbe8bd38fca90d75244898be",
+            "source_csv_sha256": "4995f5a91b78538512bbee5f41cf26aff0d7ec6889e27c9e596ec9f2bc2dd44b"
+          }
+        ],
+        "target_x_m": 149.74419150637488,
+        "common_supported_n": 9996
+      }
+    ],
+    "shaft_rotation_sd_seven_iron_lean10_curve2_rotation1_shaft_only_vs_seven_iron_lean10_curve2_rotation2_shaft_only_5dbe4e9418": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "98940550fda1f064660c48c21fb61dab46ea73392c504229c9897fc2f4fac22c",
+            "source_csv_sha256": "080ac47034827d85cb15a5d949031958f3735419c119de0380e12d5f6644aed6"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean10_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "8578c51528380927bbf7592fa063a198d424ea29c371e3a842bd795fa0885769",
+            "source_csv_sha256": "2de0e5f886463e343136c04625a459ef4253f251d36552e79cc62443f36e914e"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "4b15a7360c71d117edf6f5619d577db981e8b05ceede4afdb4b06d963a64b981",
+            "source_csv_sha256": "0d85eb4b72d01c19ab8a7aca9056e50a26ced6b413d49c8bede9a3458cc18b22"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean10_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "f4b1f56b15ff9bb75c49cda16432f52e7416ae72be5adce52d79c2621f65a0e3",
+            "source_csv_sha256": "ecd0710b9217a93ffc98186e542b57d1311450f6d38db01faf6a418707215a47"
+          }
+        ],
+        "target_x_m": 149.74419150637488,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_seven_iron_lean5_curve1_rotation1_combined2_vs_seven_iron_lean5_curve1_rotation2_combined2_04ab7a50c7": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "7f79a1b955828bca7801e757a50d286d4aa423444eee5d8bef3ebae4f4c5a9d8",
+            "source_csv_sha256": "ece4981c29e67defa503e961c1bf91083f34532563bf73d755fbb6b39524d88d"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "14b2177f89da9bc5374870ac7e81bebb59550f4386a597a62fcbc3cbd05e270b",
+            "source_csv_sha256": "4d2c71b33940556c07d187aacfd891a3133e77f69b3a256e115c02ee6f791383"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 9996
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve1_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "d88ee837d511da1d0be3006621a10a18eb76a4d57681ca9fe190937996c2ada1",
+            "source_csv_sha256": "59029b5556eefd2adb09969ab8ed6193339fe9701b0355e220834e5c4db798aa"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve1_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "c1d65cd124d32f923b83c80ef062b12e021e5d2a67e66f124addcdfc3b4a6e5b",
+            "source_csv_sha256": "89d694a0c50aeb635e4ed4a09a712842422816ba4900b0b1c522df061169fdc8"
+          }
+        ],
+        "target_x_m": 139.90327962446892,
+        "common_supported_n": 9996
+      }
+    ],
+    "shaft_rotation_sd_seven_iron_lean5_curve1_rotation1_shaft_only_vs_seven_iron_lean5_curve1_rotation2_shaft_only_b8fe23619a": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "015d7aa06b8457482f4b5453870da4a31cdcd76aa89c741894cb973d80b5ed65",
+            "source_csv_sha256": "2204e9b8e8dd9e030655c7eab25404538298ca87367b0afb799020d4b591bbb3"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "ca2418bbfa5c0c01f16f8d79a82620d717889a2fbcb0658e12d4f778cba76056",
+            "source_csv_sha256": "8057c5a08dcadff9a1a549da78557edc7be8384a4315ffd8a1ff6bc16f8de195"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "8bc491aa8a6b6a423ff8c15b4b0b79676cd4ccb2c0db25428c1380a81616adf7",
+            "source_csv_sha256": "be548f084c71c3e974f4ac1e49fe5f98613ca8ade377cd0954e8e343aa4efe77"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve1_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "cab620d429093ddb46d03765dbb04c79c05505536bf6a7855d4a3e7dc4d33a8f",
+            "source_csv_sha256": "66bd271d793da310df18fe6d492051d44022daf277c9b35a5d638eb0a9f8e946"
+          }
+        ],
+        "target_x_m": 139.90327962446892,
+        "common_supported_n": 10000
+      }
+    ],
+    "shaft_rotation_sd_seven_iron_lean5_curve2_rotation1_combined2_vs_seven_iron_lean5_curve2_rotation2_combined2_dbebb17a4f": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "6bcefc70f693664b2b3f1fda332e71e2f9d2f8bd1f517d6302a86e6119c0305e",
+            "source_csv_sha256": "2dc931b15c3347246d9dd69fe70974c8f2224a877006dc3873fa1b978f7e74a2"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "b7d3f1dceb12da7a4f0eaa32d146e8663d665d60bc1da66674b7f8fcb089b03c",
+            "source_csv_sha256": "ccc4fd4e8c2e50c7d481d59a0d438a9b60026bc824554df11e3818be5a0d93c4"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 9996
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve2_rotation1_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "6949d4937f809234bdabff282297e65216150f56a622c70b04b11ef1ca81f507",
+            "source_csv_sha256": "eec9023ce7ee3f25bb2ef2efd19f9a712f8d2ceaf29c27293fc473d9297290f1"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve2_rotation2_combined2",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "1013d60ebbf3842a9b044222daff999a5a382f400d4606cfba9f7217633bafdd",
+            "source_csv_sha256": "9389fa212e9e251384d008a6459b4e16998179dd9ea266cc11931cfaac1d2709"
+          }
+        ],
+        "target_x_m": 139.90327962446892,
+        "common_supported_n": 9996
+      }
+    ],
+    "shaft_rotation_sd_seven_iron_lean5_curve2_rotation1_shaft_only_vs_seven_iron_lean5_curve2_rotation2_shaft_only_08c60a6b0b": [
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_control/1",
+          "original_control/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "c625fa953135ff35ce7f072377f48e747c37236453087b18b91d89bd0046b436",
+            "source_csv_sha256": "9ab98121d439d741cbec52556fdbf2275ff06cf765e8b90bd8d571113bd7a4fa"
+          },
+          {
+            "protocol_id": "original_control/1",
+            "cell": "seven_iron_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+            "source_cell_manifest_sha256": "b1d7a2fa48c7dc9bec742d2049ab1a29e6f1c5c8dc8af5714cacfdc0698d612e",
+            "source_csv_sha256": "15d5e77a6446b15d11bf7913102db06630273d147b557e660d4957ac980572ed"
+          }
+        ],
+        "target_x_m": 127.88194166336235,
+        "common_supported_n": 10000
+      },
+      {
+        "comparison_kind": "shaft_rotation_sd",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "sources": [
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "2c62da1f7f9c354acacc228f330e6057cd0128891ca849858caa84ff36d7e75c",
+            "source_csv_sha256": "cc9bc6c14626c5e3d17c328b64ed1a621f54fb4a6589bb58ac34e1c90a10cbbd"
+          },
+          {
+            "protocol_id": "original_primary/1",
+            "cell": "seven_iron_lean5_curve2_rotation2_shaft_only",
+            "execution_kind": "unique",
+            "alias_cell": null,
+            "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+            "source_cell_manifest_sha256": "1186a4758172f90dce3af8959925531f293dd466277dade30428d1b23b546e86",
+            "source_csv_sha256": "fb064b416fc78332582bb68819cd701d8a71c9659b067ce3ca22f57b79f3e8ea"
+          }
+        ],
+        "target_x_m": 139.90327962446892,
+        "common_supported_n": 10000
+      }
+    ]
+  },
+  "currently_present_affected_assets": {
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_overhead.pdf": {
+      "sha256": "cbe3ec6b318a946ba80cceb7d7302bc8495d6581f4d6310e3de782c17bd6ccfa"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density_fade_social.png": {
+      "sha256": "ae7856d70c4e301b5be5bbe0d9d8300e6a38caa0b04dc0a69fca011dfaa0b5d7"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density_straight_social.pdf": {
+      "sha256": "a5e31d236f0ded29d4a15915e8dcebba3d3bf49fbedc57634ba717cb429c1005"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_overhead.png": {
+      "sha256": "6ff3554421a9c67739be978840dd3f7b73fa91a24988b3c187ddf45c8e5b5ac0"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_overhead.svg": {
+      "sha256": "984cb5934ee8414f546b3de4f4e6f50e405557fc5ab901420bb62ecf38ac3d4b"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density.png": {
+      "sha256": "a6ec98f95a0d305315f2efac699b927b9d19d92ca6bd6bff0f3e47706d98d9ef"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density_draw_social.png": {
+      "sha256": "cfc36a79379be4b96376212d1b4f1f0ace21caf7c5ae5703622a8ac4e50cb21a"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density_draw_social.svg": {
+      "sha256": "afcc613ec679cb737c823a3b87cb88d3f28dc7b86a9c3d7036efc72af9a8bb6b",
+      "text": "0.03\n0.06\nDensity\nCurve \u00d71  (n=9,999)\n78\n84\n90\n96\n102\n108\n114\n120\nDownrange Endpoint (m)\n\u22126\n\u22124\n\u22122\n0\n2\n4\n6\nLateral Endpoint (m; Right Positive)\n0.1\n0.2\nDensity\n0.03\n0.06\nDensity\nCurve \u00d72  (n=9,999)\n78\n84\n90\n96\n102\n108\n114\n120\nDownrange Endpoint (m)\n\u22126\n\u22124\n\u22122\n0\n2\n4\n6\nLateral Endpoint (m; Right Positive)\n0.1\n0.2\nDensity\n0.000\n0.005\n0.010\n0.015\n0.020\n0.025\n0.030\nEndpoint Probability Density (m\u207b\u00b2)\nPitching Wedge: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 10\u00b0 \u00b7 Shaft Twist\nSD 1\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 102.82 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Combined 2 (Path SD\n0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same Shot\nIndices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density_draw_social.pdf": {
+      "sha256": "8ca90591a23b17d9034e1fa9dfe3e5a77bb4cc3e0cb526944f5c2be4181b7db7"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density.pdf": {
+      "sha256": "2c4d19b1ebfb3377ef5b10d6e4ded3663ab3e4672540ebcafd4aee7c2744fa3f"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density_fade_social.svg": {
+      "sha256": "e5435a5fd8c2fbe126c47ee1baa2cc5a0299f6155acc7a4996eaed9c47eca7fc"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density_straight_social.png": {
+      "sha256": "59297b118d1d9834bb75f663e89dc9ff523f3c26bab88bb36be902325015424c"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density_straight_social.svg": {
+      "sha256": "efd01329954c2c9f721aaf0de410f43a980c35ab6825d93fbc0d40262a522d68"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density.svg": {
+      "sha256": "81b5acdf8991fa4c86aa810c843aaabc64ff80900e2dfdde6398fef51e723cd2"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_density_fade_social.pdf": {
+      "sha256": "9b2e7a48718c256bacad391d9a4bf79442d494bd1030840da45d05773e6e8c05"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b_overhead_social.png": {
+      "sha256": "efd76655a66d9f5034bac4472d8b7fb0b4b3c0904fb0a9b8244d39ff015b4e87"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density.pdf": {
+      "sha256": "f12f1e0c85b6f7f2ab2785fcc965505980f3c88d612bad9af79c885e29117f3d"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density_fade_social.png": {
+      "sha256": "8b6a8b638ea4c2ed9cb4792867239fe9c556c6654ed601b806a780fddac1ffce"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density.svg": {
+      "sha256": "7f5405f83bafb1b04c93cd72fdfd33326933eb9c587924a3af1bc653364d8e9c"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_overhead_social.png": {
+      "sha256": "6c64fad55e03d4f41c33fd69e0641c39c60371bd35567cfc5004ed8c1f42d8f0"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density_straight_social.png": {
+      "sha256": "b0dd3d7f7e48e7f35ece4b89365d954035a082489713d57a1f112aac1389c311"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density_fade_social.svg": {
+      "sha256": "89b7ad6fb7a07cfe393813925cfdd1cb4dae83ab882c22b98f41d5e64f606fa7"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density.png": {
+      "sha256": "5a89b63eae611c1cea3009b8081fbf6592732add09b48a6a3622b275f2dcbf2f"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density_straight_social.pdf": {
+      "sha256": "fbd1e4df9f9fefd4ec53307db9d7ad0130e287569e9f18af2a169256da9f7d60"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_overhead.png": {
+      "sha256": "44ff2e6fa1cc56f462f6eee13b2f255ff9481013a2f89ea3b62df8dc296c8679"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density_straight_social.svg": {
+      "sha256": "30773551f89b2762697ef90a84c264eeb95ce9c81934d6989461ba41366103d9"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density_draw_social.pdf": {
+      "sha256": "1b6c5cce459a17d3c43f2e593b819a1e2c570012dec5fca9a116f5e1de6f5a98"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density_draw_social.png": {
+      "sha256": "99a18cec0a27eba47de7fa47f2966a0982d6defe7e66d1a82ef35a182b932a35"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_overhead.pdf": {
+      "sha256": "fffb2283ea1913f26b0cf7cdd4f149f7aaacffa9de8a25f643a23cbd965280cb"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_overhead.svg": {
+      "sha256": "9afaeb9c8a4e5d576d0679815e0720468ea42f1ac8ee4a4e77af06c969f3627f"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density_draw_social.svg": {
+      "sha256": "0cb05d64deb915c2ecbc054b98fc9afadaf9755bf1d013c9207ca5707faed736",
+      "text": "0.2\n0.4\nDensity\nCurve \u00d71  (n=10,000)\n98\n99\n100\n101\n102\n103\n104\n105\n106\nDownrange Endpoint (m)\n\u22126\n\u22124\n\u22122\n0\n2\n4\n6\nLateral Endpoint (m; Right Positive)\n0.1\n0.2\nDensity\n0.2\n0.4\nDensity\nCurve \u00d72  (n=10,000)\n98\n99\n100\n101\n102\n103\n104\n105\n106\nDownrange Endpoint (m)\n\u22126\n\u22124\n\u22122\n0\n2\n4\n6\nLateral Endpoint (m; Right Positive)\n0.1\n0.2\nDensity\n0.0\n0.2\n0.4\n0.6\n0.8\n1.0\n1.2\n1.4\n1.6\nEndpoint Probability Density (m\u207b\u00b2)\nPitching Wedge: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 10\u00b0 \u00b7 Shaft Twist\nSD 1\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 102.82 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Shaft Only  |\nPopulation: Same Shot Indices Supported in All Six Populations |  Scales:\nShared Within This Figure; Other Pattern Figures May Differ  |  Valid/Total:\nCurve \u00d71 10,000/10,000 valid; Curve \u00d72 10,000/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/10,000; Curve \u00d72 600/10,000. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089_density_fade_social.pdf": {
+      "sha256": "dca6a24b7cc9ac319356bed457f6b35251047b85d25606fa77c1b3e8ae7d499e"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density.png": {
+      "sha256": "1f13d39b69c1d41a9f029ee397e7d46591287aa3831b56edc1a52948cbe9dc0b"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density_draw_social.png": {
+      "sha256": "a8894dd9aa42c5f1ddbd6acf2b8deeae188a506e6ef883a54d49a1a91759cb2f"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density_draw_social.svg": {
+      "sha256": "9db6d2c7e78c0193cd6f61336786b6664def8bd6e2073efbef3423811a0db254",
+      "text": "0.03\n0.06\nDensity\nCurve \u00d71  (n=9,999)\n78\n84\n90\n96\n102\n108\n114\n120\nDownrange Endpoint (m)\n\u221215\n\u221210\n\u22125\n0\n5\n10\nLateral Endpoint (m; Right Positive)\n0.05\n0.10\nDensity\n0.03\n0.06\nDensity\nCurve \u00d72  (n=9,999)\n78\n84\n90\n96\n102\n108\n114\n120\nDownrange Endpoint (m)\n\u221215\n\u221210\n\u22125\n0\n5\n10\nLateral Endpoint (m; Right Positive)\n0.05\n0.10\nDensity\n0.000\n0.002\n0.004\n0.006\n0.008\n0.010\n0.012\n0.014\nEndpoint Probability Density (m\u207b\u00b2)\nPitching Wedge: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 10\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 102.82 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Combined 2 (Path SD\n0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same Shot\nIndices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density_fade_social.png": {
+      "sha256": "b889686e9fe14c139436c158d60a20e2db8acae4f72f10d3c2473c86c0dc3908"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density_fade_social.svg": {
+      "sha256": "02f2e828a9dd2223dcfab976bb493c775e792c89072f42f93720152e96cd2493"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density_straight_social.png": {
+      "sha256": "8438693e629dfa5d1524eec6fd0d1ef0f6bd05cf8c5beb0713caba355442b18f"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_overhead.pdf": {
+      "sha256": "db2a491466c9fb89edbb83ee342cf8febe879ca2d2a8af980a17afcfa80c6626"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density.pdf": {
+      "sha256": "09f20e98df3539a89d59d393b6edec537e00cf46ceae9832291d8450843e4985"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density_straight_social.pdf": {
+      "sha256": "353ac84fa194937990bd99b03e167aec5625d0deb8186719688a9f679705f71d"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density.svg": {
+      "sha256": "9db60b31b3669b817d18d2f092e3ea3dad2735d5d547bb555be2d9e58f3c332f"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_overhead_social.png": {
+      "sha256": "864f535bc4ba61500ffb0fa16cb6457fd35c37688572e8baf732833787b20e4e"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density_straight_social.svg": {
+      "sha256": "6597f0100a35278d656361dc9fd04f657758ba8f8840278512ca9c5c31dd8d1a"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_overhead.svg": {
+      "sha256": "fb0123d27aeb126530b88125c0f23708ac179460060402a090afe5b2c1cd88be"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density_draw_social.pdf": {
+      "sha256": "7a95302fb57bdaa7987ee1538dbe280aa7c5d161cee5f11192bfcc2722b827cb"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_overhead.png": {
+      "sha256": "8afccb8b241d01229d84554f46e64587ce76e9d81bf725769eddb2abb870b227"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44_density_fade_social.pdf": {
+      "sha256": "8c5fa02a087022502e1c04f20c7867f0ffebd1eef75bddbc060697b3f6ba2901"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density_draw_social.png": {
+      "sha256": "1edd73cc6e332661c7fc6d4bc94b7e10d2b4d5eb990979a5a7eab2bdf3f3b79e"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density_straight_social.png": {
+      "sha256": "e48d092f201f50b916da4fed35d92d44819965320c923c87902e0ddf9f405a7e"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density_fade_social.pdf": {
+      "sha256": "5012a6bcc47ea072f1e2c616f0939c7c4b26ae71f2d2681898969d9b3f83fea5"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density_straight_social.svg": {
+      "sha256": "2d0651ee85887ce37d010f216921e5870682a19e644dc1da9b4862361a6f11cb"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density_straight_social.pdf": {
+      "sha256": "1bdc07ec59c7e90248c9643ce29c812f343fa17d6ac6f1cd04747ecd5aa543af"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density_fade_social.svg": {
+      "sha256": "36666aaa9311e7e7409394ccbe714e2e1349d10945cf8f2f870943cc7b1350e5"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density.svg": {
+      "sha256": "6694804407f0bbdf84317fedeb662b05a8c7c1dac315cd31dbea41b36768db0e"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_overhead_social.png": {
+      "sha256": "f2313374e5e2c0810ecb43a61074189eaaea605036ce33f4132a66f52fce073a"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_overhead.png": {
+      "sha256": "2796d033ef221ca76091d805715e842e2081c2650b4a8ba3522097e033501f04"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density_draw_social.svg": {
+      "sha256": "a9d1111e1dbc5452bda1f0937f7c9f019daf330dab26462f7c8aca84292869f4",
+      "text": "0.08\n0.16\nDensity\nCurve \u00d71  (n=10,000)\n92\n94\n96\n98\n100\n102\n104\n106\n108\nDownrange Endpoint (m)\n\u221210\n\u22125\n0\n5\n10\nLateral Endpoint (m; Right Positive)\n0.05\n0.10\nDensity\n0.08\n0.16\nDensity\nCurve \u00d72  (n=10,000)\n92\n94\n96\n98\n100\n102\n104\n106\n108\nDownrange Endpoint (m)\n\u221210\n\u22125\n0\n5\n10\nLateral Endpoint (m; Right Positive)\n0.05\n0.10\nDensity\n0.0\n0.1\n0.2\n0.3\n0.4\nEndpoint Probability Density (m\u207b\u00b2)\nPitching Wedge: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 10\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 102.82 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Shaft Only  |\nPopulation: Same Shot Indices Supported in All Six Populations |  Scales:\nShared Within This Figure; Other Pattern Figures May Differ  |  Valid/Total:\nCurve \u00d71 10,000/10,000 valid; Curve \u00d72 10,000/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/10,000; Curve \u00d72 600/10,000. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density.png": {
+      "sha256": "8437a3b8d8d7d82ebad4e688e58e2e9cbfc8125c1daaeb9708a040a697de9806"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density_fade_social.png": {
+      "sha256": "e42336f169f3a43b283d13772fbc7a15e5c2c6b046c3136d66a4adf3db19c3ec"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_overhead.svg": {
+      "sha256": "31f0d1f77f9b49ea39d50ff1ac8e64678a5358152210c7ce68a02204ed01ab12"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_overhead.pdf": {
+      "sha256": "ebc1dd3511fb1a0bffa704a16668f6ddc1d8c9875d9d0903145b0932e789c270"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density_draw_social.pdf": {
+      "sha256": "e0185ad74aac0997319f0ee98a8d1191bde7bcf9f0f40e61b7813285a0e094dd"
+    },
+    "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8_density.pdf": {
+      "sha256": "23dc9cb74bf76365a05ae616063ff9ba22e679ac7ff9bfe755cf634bed1c486e"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density_straight_social.png": {
+      "sha256": "31faa26111162a4bc6f6d144c240cf4687fc92871de3de1e201cffd3798f8091"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_overhead.pdf": {
+      "sha256": "99698b1b689860ae7ddeef4447c7920771598153eec1ee31731f226b0ff9a583"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_overhead.svg": {
+      "sha256": "629595a51f1a11ea7fb78ba92f33860311b464ce23956a3e4d579f7a2efda116"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_overhead.png": {
+      "sha256": "b123e59270dd84ea2f39a58530d267f56c337afe647e8c20dd40ff7f4c985f3f"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density_straight_social.svg": {
+      "sha256": "f2f84237ce366b89b259709efb718a9ac2ff0fb83cd5679d400aeea86cd6147e"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density_fade_social.png": {
+      "sha256": "a60286ce08195dd15f8350c101ca6ef68252726d211a4c0f4204086da75064b0"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density.png": {
+      "sha256": "c0b3f432b95f50e2b1918aaaa39d9193113e2f8f843d6063c5bcf42951ecbed7"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density.svg": {
+      "sha256": "041a0a3d5cf3921ae8a3ae0db9fce69c98585eef219161cd2108f9a0e3d10ef2"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density_draw_social.svg": {
+      "sha256": "fe8a9844b7c4fee95b380191cc4b09d7680b5709ec1427e11a676b5f452d7b8b",
+      "text": "0.04\n0.08\nDensity\nCurve \u00d71  (n=9,999)\n65\n70\n75\n80\n85\n90\n95\n100\n105\n110\nDownrange Endpoint (m)\n\u22126\n\u22124\n\u22122\n0\n2\n4\n6\nLateral Endpoint (m; Right Positive)\n0.15\n0.30\nDensity\n0.04\n0.08\nDensity\nCurve \u00d72  (n=9,999)\n65\n70\n75\n80\n85\n90\n95\n100\n105\n110\nDownrange Endpoint (m)\n\u22126\n\u22124\n\u22122\n0\n2\n4\n6\nLateral Endpoint (m; Right Positive)\n0.15\n0.30\nDensity\n0.000\n0.005\n0.010\n0.015\n0.020\n0.025\n0.030\n0.035\nEndpoint Probability Density (m\u207b\u00b2)\nPitching Wedge: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Shaft Twist\nSD 1\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 90.43 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Combined 2 (Path SD\n0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same Shot\nIndices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density_draw_social.png": {
+      "sha256": "0f17f36bc091c782485cadbd66fa91b45f374403a839cd843380845d2431a13f"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density_draw_social.pdf": {
+      "sha256": "ce6fd9fa096a6d8cede69aa87a10b4b7baf89dc0e945fc88ec00ca83b34cc0a6"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density.pdf": {
+      "sha256": "d4690476cfa11e8a0030b428b19598b58681c047fd6517538bafa3d135aaf15c"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density_fade_social.pdf": {
+      "sha256": "e0f024cc433ba6e1ab7fa0dacef7df9cc2dfa7d1d95fb9b78ac9bbbffe1eb1ec"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_overhead_social.png": {
+      "sha256": "c61fd57c816f8018e384c864c92e3475c70abdeb0a530cc7c40cdedef8f478c0"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density_fade_social.svg": {
+      "sha256": "b80a28efd510f930447143afb502260df7488da97ea8a004614c40521898a44b"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5_density_straight_social.pdf": {
+      "sha256": "8fedb10efdcec2aa9b7cf5dd30fa91c6f7e73bbad413b926591707a9b211495d"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density_straight_social.png": {
+      "sha256": "e818eec4d66f9e3968a740ccc90fd24c03264a8b52caec27a6ecbf2d03923cdb"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_overhead.pdf": {
+      "sha256": "1a113528af485ece728d6c29902112920630e04a884d326c425324497af56c39"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_overhead_social.png": {
+      "sha256": "775a6901182bfb1ce9571e3a26171ffa6deb65bd7d734a0258fde09c9744ccb1"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density_draw_social.pdf": {
+      "sha256": "d1f7fc96b4595c552b4147bdd4020f08704980130d680f5cf626a3ef18a85dab"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density.svg": {
+      "sha256": "d9241d5ddc2be9f8224d083cbbd93d37ef1475c73600f7c8208aee7f2db9c8aa"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_overhead.png": {
+      "sha256": "8eb921e346247983774da2cdfbf38c5ddff898118abbf1d5bc6b7e05a33d3c27"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density_fade_social.svg": {
+      "sha256": "8c82d6d1e9555f4c7398f58ae7ecc9c16d3b02a8d61dd04a0fd861b47d7be574"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density_straight_social.pdf": {
+      "sha256": "2c42c720f4faff25cf1590fee0aac44a993c95c2660ebd31773190ee66bf89c0"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density.png": {
+      "sha256": "eb92801d78f8f9760e45138e38df12abaf3e80343cfb76f2f6e65b8dfb9b0215"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density_fade_social.pdf": {
+      "sha256": "397bd8ec255343e2dc8739281c3d7ba964cc08d2b3828015a027b9ad97f95b85"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density_draw_social.svg": {
+      "sha256": "dd15ddf5c90556da6c43ea235bcc5f6901992af7b9aed76645f5ff96a3c06411",
+      "text": "0.15\n0.30\nDensity\nCurve \u00d71  (n=10,000)\n86\n87\n88\n89\n90\n91\n92\n93\n94\nDownrange Endpoint (m)\n\u22124\n\u22122\n0\n2\n4\nLateral Endpoint (m; Right Positive)\n0.15\n0.30\nDensity\n0.15\n0.30\nDensity\nCurve \u00d72  (n=10,000)\n86\n87\n88\n89\n90\n91\n92\n93\n94\nDownrange Endpoint (m)\n\u22124\n\u22122\n0\n2\n4\nLateral Endpoint (m; Right Positive)\n0.15\n0.30\nDensity\n0.00\n0.25\n0.50\n0.75\n1.00\n1.25\n1.50\n1.75\nEndpoint Probability Density (m\u207b\u00b2)\nPitching Wedge: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Shaft Twist\nSD 1\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 90.43 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Shaft Only  |\nPopulation: Same Shot Indices Supported in All Six Populations  | Scales:\nShared Within This Figure; Other Pattern Figures May Differ  |  Valid/Total:\nCurve \u00d71 10,000/10,000 valid; Curve \u00d72 10,000/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/10,000; Curve \u00d72 600/10,000. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density_draw_social.png": {
+      "sha256": "b3b7ff198c42b874f8e11f7093de0b9297bb53090fa149df4f83d834ce4e332b"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density.pdf": {
+      "sha256": "28980dc3d2bcb523afe9ec7abff9a01eafe1c0b1e9691e945f4b3f1bfabe791b"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_overhead.svg": {
+      "sha256": "5ded42f1e1d777b8c0dad92e3e015bd8eb7e30a85b0e8f73f4c297fa44e7d87f"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density_fade_social.png": {
+      "sha256": "e3bab98fa9105bf576af5db414b9378abff7028745d9d44cb0bd16cf5fb0bd0e"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df_density_straight_social.svg": {
+      "sha256": "26dccabcf1e9863d0d226da9d9335920014ec281566cf1ef6acb69155c5d4198"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density_straight_social.png": {
+      "sha256": "86cfc6511f8e87facd425b1d6cbff0e2e4442b78656c40ab570c9d9214a7ba57"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density_fade_social.svg": {
+      "sha256": "86bdf339590abba9f4c805ff4430d89c0eaa2d60275d33d3ad3d9977a9760798"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density_fade_social.png": {
+      "sha256": "46f4ae566b6b67bd03682016bc1dd9dd4f9743c051a27cdb28b8481f57b08faf"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_overhead.png": {
+      "sha256": "3b0b22a6ac7b829a5e639cbb70508172e710b11cea2a3defcdc6c61c5bc491f5"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density.svg": {
+      "sha256": "3db979e9e23abdc6a19bffe5d6dda1fb5c95caf63450ab966fc8dc76305c0377"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density.png": {
+      "sha256": "f65e0a2f3d1b59185313fe21d44581f52bdcb49d02b5d801da75d9422a67b683"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density_straight_social.svg": {
+      "sha256": "555c2bd07c26e106d98a46ad767d03d4e399d2351035f569b745d0451949d862"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density_fade_social.pdf": {
+      "sha256": "cb73ef9b723a6b4f5e5fb948e2bea97f615d8447c28880b2f90c0c9c3770d5d0"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density_draw_social.png": {
+      "sha256": "1f7ad6f46d6975c9ac6419c87fe82b2659f266077049db0f38f8083442460064"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density_draw_social.pdf": {
+      "sha256": "2788d51ebb0bc9639d97deab23306318893387482d70f45e952695dcb8b96442"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_overhead.pdf": {
+      "sha256": "383e93961ae01b66340ef0ad4342d604e4035dc1fbaee9fd6d179cf426bfeb89"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density_straight_social.pdf": {
+      "sha256": "9e951b38241dc501c2c9c7666ee3829ee269bebdbf45885e73cfe4fc2a59153b"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density_draw_social.svg": {
+      "sha256": "d1266b0708ad68408209707876263677eddb8aad5186774e80aacfb322413bff",
+      "text": "0.04\n0.08\nDensity\nCurve \u00d71  (n=9,999)\n70\n75\n80\n85\n90\n95\n100\n105\n110\nDownrange Endpoint (m)\n\u221210\n\u22125\n0\n5\n10\nLateral Endpoint (m; Right Positive)\n0.06\n0.12\nDensity\n0.04\n0.08\nDensity\nCurve \u00d72  (n=9,999)\n70\n75\n80\n85\n90\n95\n100\n105\n110\nDownrange Endpoint (m)\n\u221210\n\u22125\n0\n5\n10\nLateral Endpoint (m; Right Positive)\n0.06\n0.12\nDensity\n0.0000\n0.0025\n0.0050\n0.0075\n0.0100\n0.0125\n0.0150\n0.0175\n0.0200\nEndpoint Probability Density (m\u207b\u00b2)\nPitching Wedge: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 90.43 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Combined 2 (Path SD\n0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same Shot\nIndices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_density.pdf": {
+      "sha256": "cfb677500059ef50a79ceaed1a77be90d6cd710f05936145924ebc6ffa0dbfcf"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_overhead.svg": {
+      "sha256": "312ed2f3215bc5a362304da7ad480957be45114078f208a742b40bd45dd6dfef"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5_overhead_social.png": {
+      "sha256": "74a24dc2aab1ba75d35fcdf5d5ca47f389d881ff7362a2b9de231e95081a7d6a"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density_fade_social.png": {
+      "sha256": "c70d9daeee22a3009b11dd816387a2fe237897f4266d37bd2ccfb7c3f057be36"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_overhead_social.png": {
+      "sha256": "3be361df58a6453a69fce99441e8a64cfde29adf6ee4f53e7787f3fd96ccc877"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density.svg": {
+      "sha256": "24b9755c7bcc9d8e6c273f89885f5780f0a745785001c202fbb39bee21e570a4"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density_fade_social.svg": {
+      "sha256": "d14b8a9b975ef3bc1da86852dc68b48822ed814ad0b02f7abae801b810990ce6"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_overhead.png": {
+      "sha256": "353209721ce989c848891f7beecc5fc4ef52e6c6cdf65548299a4ef8b7cdb587"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density_draw_social.svg": {
+      "sha256": "14f9df678f7b96343a38c3afc0a1f4d08f32eb3913e099bf99302873487a5dbe",
+      "text": "0.08\n0.16\nDensity\nCurve \u00d71  (n=10,000)\n80\n82\n84\n86\n88\n90\n92\n94\n96\nDownrange Endpoint (m)\n\u221210\n\u22125\n0\n5\n10\nLateral Endpoint (m; Right Positive)\n0.06\n0.12\nDensity\n0.08\n0.16\nDensity\nCurve \u00d72  (n=10,000)\n80\n82\n84\n86\n88\n90\n92\n94\n96\nDownrange Endpoint (m)\n\u221210\n\u22125\n0\n5\n10\nLateral Endpoint (m; Right Positive)\n0.06\n0.12\nDensity\n0.0\n0.1\n0.2\n0.3\n0.4\nEndpoint Probability Density (m\u207b\u00b2)\nPitching Wedge: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 90.43 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Shaft Only  |\nPopulation: Same Shot Indices Supported in All Six Populations  | Scales:\nShared Within This Figure; Other Pattern Figures May Differ  |  Valid/Total:\nCurve \u00d71 10,000/10,000 valid; Curve \u00d72 10,000/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/10,000; Curve \u00d72 600/10,000. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density.pdf": {
+      "sha256": "8ed2a71ebe397e9c35eca642d6236a88411e74f8655d8ed56eabe2e389ffc3e8"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density_draw_social.png": {
+      "sha256": "a5fe46453bdc73dc31682987c4418a01b531229f02196c209beea6195b4b215d"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density_straight_social.pdf": {
+      "sha256": "defea0a900cd2bcedebf6769f901a2d80b7caa2b290cafab7204f129a772517c"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density_fade_social.pdf": {
+      "sha256": "dff3d73d48c87cf97d202d3fcafc8dda2f0f184009a726f63b13341a65253635"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_overhead.pdf": {
+      "sha256": "77eb10d0b8510c368fe12d9b5201326fcacb600248d9835fbfcfcea5f00480d6"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_overhead.svg": {
+      "sha256": "bc62b546c242e85ecfacc7d383efb4c58f20a8f90e2f5f380cb2f0409d198a6d"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density.png": {
+      "sha256": "cd157ba7288d37cc4add0e6dae3bf4ff735902a6793b6a19e75f14c7e2efef61"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density_draw_social.pdf": {
+      "sha256": "f0317c2249736aa2aa060fe9186fc113180dc18446856b77d62edcbc505a1aef"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density_straight_social.svg": {
+      "sha256": "6c6379fde03ce7e3b47c63dc6a212040fc3653c795fe50a224f57f7256e7b66e"
+    },
+    "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6_density_straight_social.png": {
+      "sha256": "a01b4a1015d7bd17e6eb2e36a57deaaf1cdc716910319ddd6f48e2957c76c823"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density_straight_social.png": {
+      "sha256": "7b77514b8576b9b88aad2e47213f0b793afbaf6121ba9f1d6ab7627b39405bc6"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density_straight_social.svg": {
+      "sha256": "dfcadef112d3ddfd9bba82a51b2fe50e0d6eb270e49fc2269b7851dfc7093eb9"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density_draw_social.png": {
+      "sha256": "a34aba6540905281b672578238276f47547db5c5a6ba62ca4638bff88f494c7f"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_overhead.svg": {
+      "sha256": "5ef14d3701b050f62883a7026d039e555815db7b8a0bb8a6e090c8a58068a28d"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_overhead_social.png": {
+      "sha256": "af126c3cad0bcbd411b25d3c4e11f880c34eeac549d7ff0c2c47f2750bf6a9f6"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density.png": {
+      "sha256": "e5af6e46091322933c4b53eef337763ea9fcbc39b1b59a1b3b8ed9da6ff60850"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density.svg": {
+      "sha256": "9ff02d2e56cd09a357c684285339a57a0134b2c9ab701846951b681dc7349e5b"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_overhead.pdf": {
+      "sha256": "6b97a595c8644ccc28ae4f151c0693e6454f0458b9a204d63359b0b66d9d9fa5"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density_draw_social.svg": {
+      "sha256": "b6042112c2a5c765a75854f28a155c266a90cf39975541c5b7634481ad32745f",
+      "text": "0.01\n0.02\nDensity\nCurve \u00d71  (n=9,974)\n0\n20\n40\n60\n80\n100\n120\n140\n160\nDownrange Endpoint (m)\n\u221210\n\u22125\n0\n5\n10\n15\nLateral Endpoint (m; Right Positive)\n0.06\n0.12\nDensity\n0.01\n0.02\nDensity\nCurve \u00d72  (n=9,974)\n0\n20\n40\n60\n80\n100\n120\n140\n160\nDownrange Endpoint (m)\n\u221210\n\u22125\n0\n5\n10\n15\nLateral Endpoint (m; Right Positive)\n0.06\n0.12\nDensity\n0.0000\n0.0005\n0.0010\n0.0015\n0.0020\n0.0025\n0.0030\n0.0035\n0.0040\nEndpoint Probability Density (m\u207b\u00b2)\nDriver: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Shaft Twist\nSD 1\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 108.03 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Combined 2 (Path SD\n0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same Shot\nIndices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,974/10,000 valid; Curve \u00d72 9,974/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,974; Curve \u00d72 600/9,974. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density.pdf": {
+      "sha256": "114fa1e3b82b89c2815e3a2a4dfc04cb0986872ee58d24264cc1ab7b3d076a8c"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density_draw_social.pdf": {
+      "sha256": "b8bf47a724ffd631b55765a350ea24019093fb7b1368644269b97657406ff0c1"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density_fade_social.svg": {
+      "sha256": "fdc2b1d1755f0028d81ee1428b553ad09179ca82f94583bf40829cdf438f819d"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density_fade_social.png": {
+      "sha256": "f1c32d80eaa9b7d913d72b860505ae1751f78ab9498f7fe99286d2d96d541f76"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_overhead.png": {
+      "sha256": "1d0df33268f1f975e60669affb3406c9e8e0dd6e7bb8525fdbb45ca72bde597f"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density_straight_social.pdf": {
+      "sha256": "f05b5f5a6d1e4347d42f765cafc5c48d1e3108d7a3481b5cbaeb1b00aa27c82e"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a_density_fade_social.pdf": {
+      "sha256": "39af8762e36d805d9ccf9bd8ff300d26f7696ee5a1ebc6d70bab41b2af86d422"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density_straight_social.pdf": {
+      "sha256": "d1957edf1b352649ec70115871ea726d255c2b57e32478f6876c644f0e2a62a6"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density_draw_social.svg": {
+      "sha256": "5947a985f9278194ca579683e7c059faf014405bbaf7fa8ef01291dbd90b4a46",
+      "text": "0.015\n0.030\nDensity\nCurve \u00d71  (n=10,000)\n60\n75\n90\n105\n120\n135\n150\nDownrange Endpoint (m)\n0\n5\n10\n15\nLateral Endpoint (m; Right Positive)\n0.08\n0.16\nDensity\n0.015\n0.030\nDensity\nCurve \u00d72  (n=10,000)\n60\n75\n90\n105\n120\n135\n150\nDownrange Endpoint (m)\n0\n5\n10\n15\nLateral Endpoint (m; Right Positive)\n0.08\n0.16\nDensity\n0.00\n0.01\n0.02\n0.03\n0.04\n0.05\n0.06\n0.07\n0.08\nEndpoint Probability Density (m\u207b\u00b2)\nDriver: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Shaft Twist\nSD 1\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 108.03 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Shaft Only  |\nPopulation: Same Shot Indices Supported in All Six Populations |  Scales:\nShared Within This Figure; Other Pattern Figures May Differ  |  Valid/Total:\nCurve \u00d71 10,000/10,000 valid; Curve \u00d72 10,000/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/10,000; Curve \u00d72 600/10,000. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density_straight_social.png": {
+      "sha256": "b14f4d351adf0c4d1692eb403c98725bfa555977976a55481d0652c2a64f4588"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_overhead.pdf": {
+      "sha256": "02dc00e9f66c36ce5ad5787d8b1202a7cc0ca2f1474b6901cbd0b33032379c46"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density_fade_social.svg": {
+      "sha256": "e98ece328f65c7930eb6ff0bd969dc925e73157cafda71e0ba617a9514b7d217"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density.png": {
+      "sha256": "b1356db09e72c3cb14fdcf69e01ffd7e0958db576f79ff9a6024bccc97ce166e"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density_draw_social.png": {
+      "sha256": "124189b296da7f30ff53e3142d5dfad518c8b2b0f652704c20b0230d7cb21f61"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_overhead_social.png": {
+      "sha256": "0f46484d27b8b76cc4cda9124eb2e74f98e19575f4a517782cc9563dba80c27c"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density_fade_social.pdf": {
+      "sha256": "9f3b1b92d24b7abe7ccd7349351b21770db413ae628ed9f1de2ac6e4ca0fcbb6"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density_fade_social.png": {
+      "sha256": "72ebdfd369dd4bd4f9bfdc341253b707083d090ff6aea9f1eefb80bea7cb5400"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_overhead.svg": {
+      "sha256": "340c060fe96a1a16ea1a66338262eeeaeccc1cadcff4f2ee9e7722c50af6c33a"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_overhead.png": {
+      "sha256": "352df272885eb38955aaf103a306cfb48e7cf43d29ee8209d4504dc7797320ae"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density_straight_social.svg": {
+      "sha256": "26a51300088b02e249e98a1ba563e84d9e66c0f25fdcf9c79a0686e56295eb28"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density_draw_social.pdf": {
+      "sha256": "dd9b990d7f37d35eaea8c13c413613a088dd0f2e1834ff9b02c4b5dcf75263d3"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density.svg": {
+      "sha256": "e44857e9347c569c25db7946796f522589cac15af37974bbdf1f8c956aa81f8d"
+    },
+    "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6_density.pdf": {
+      "sha256": "a0cf67d06221b3d5e6a29fe1a287811f1aaa8895d83a79c1ca5d1364a335ed22"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density_fade_social.png": {
+      "sha256": "97eb534a4051e2481577e0eee9ad492b81faccf6c372c2ca6f1015ba84283135"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density.pdf": {
+      "sha256": "ec124795ec7a1744f72c225a8268e1ef5047e5f4e3a60a13892696423902c796"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density_draw_social.png": {
+      "sha256": "8f10c0e7965b1fb031419b1d329e98ae4feb523bd71669fb087829cf3bdcab2f"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density_fade_social.svg": {
+      "sha256": "2b71e52e4a836fd848b53aa72627fcb2d745823ef375faa45ff3278ada028d44"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density.png": {
+      "sha256": "f2ad1185ede8b387a7d553781e719ca2c26d63e55f3bf87253e65c646f7290c6"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_overhead.svg": {
+      "sha256": "587a9ee1f91a81a8ad28284b989ba18e62146df76a7c64cff8136f9300edbad0"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_overhead.png": {
+      "sha256": "4d7444b22c401c5aee96c154a649a6a5a76834d43169d56d9e9572c1bb4b04e1"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density_straight_social.svg": {
+      "sha256": "8896f230a5843c099a3a2c48dd50ed5d3667ed1cbf726d2aa07e51403597d8c6"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_overhead.pdf": {
+      "sha256": "535d7f1c772a4fc3fe2cb204c184ca4edf56dcdd9291e7d4a9d3ece5705a66cf"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density_draw_social.svg": {
+      "sha256": "ba703b252d0c824234db7e3165c75d6a5c6165c21f0261649ba0f31b43c85300",
+      "text": "0.006\n0.012\nDensity\nCurve \u00d71  (n=9,940)\n0\n20\n40\n60\n80\n100\n120\n140\n160\n180\nDownrange Endpoint (m)\n\u221210\n0\n10\n20\n30\n40\nLateral Endpoint (m; Right Positive)\n0.04\n0.08\nDensity\n0.006\n0.012\nDensity\nCurve \u00d72  (n=9,940)\n0\n20\n40\n60\n80\n100\n120\n140\n160\n180\nDownrange Endpoint (m)\n\u221210\n0\n10\n20\n30\n40\nLateral Endpoint (m; Right Positive)\n0.04\n0.08\nDensity\n0.00000\n0.00025\n0.00050\n0.00075\n0.00100\n0.00125\n0.00150\n0.00175\n0.00200\nEndpoint Probability Density (m\u207b\u00b2)\nDriver: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 108.03 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Combined 2 (Path SD\n0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same Shot\nIndices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,940/10,000 valid; Curve \u00d72 9,940/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,940; Curve \u00d72 600/9,940. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density.svg": {
+      "sha256": "98c3cc341c33dee66df100f85c5acba9bf19a50cbac8c2c8bdb62d520e28ea99"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density_straight_social.png": {
+      "sha256": "08519f79692e1142cae2f1a1ffc3d89d01ba65c87449df6f5e7291b0e2fe568a"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_overhead_social.png": {
+      "sha256": "c93b0db18db8e069b35bf8e37643a7cfbc4a53295ac95271e8901fdd2dfca1b1"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density_draw_social.pdf": {
+      "sha256": "5855e40afd8af9bcb09722dacaecb22a022f087e6eaa80ff5ba2fb2fa7aeb394"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density_fade_social.pdf": {
+      "sha256": "c7bce5ebe152f90f281c212a83fd11420ea984e97a90a54fbe3f555581b630dc"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3_density_straight_social.pdf": {
+      "sha256": "740fef7789844c2e8aef4c36412f5a2844f7b8b5c59ea51e84ee6612d6e197b5"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density_draw_social.png": {
+      "sha256": "755113a9e5e633f3bfbf5f1b71c99ee928e4756a7768f41c0faf955dc45c9175"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_overhead.svg": {
+      "sha256": "6cb10bfb0f9dd154d82bcded124e6d32d40b50508d9ef69d6ee3214afd12f836"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_overhead.pdf": {
+      "sha256": "a612667504e820c797d175c234bf13653a4add2113c6700c527efe71d82aadb4"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density_straight_social.png": {
+      "sha256": "e8a9e4c97354d2fa27becdc72d8357f1a89539885d38701e612f232480db25dc"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density_draw_social.svg": {
+      "sha256": "becfcfde7675063a3d47478c1e9668fd9b3a68bb57c5dbc32a2bc036ef1319f0",
+      "text": "0.008\n0.016\nDensity\nCurve \u00d71  (n=10,000)\n20\n40\n60\n80\n100\n120\n140\n160\nDownrange Endpoint (m)\n0\n10\n20\n30\n40\nLateral Endpoint (m; Right Positive)\n0.15\n0.30\nDensity\n0.008\n0.016\nDensity\nCurve \u00d72  (n=10,000)\n20\n40\n60\n80\n100\n120\n140\n160\nDownrange Endpoint (m)\n0\n10\n20\n30\n40\nLateral Endpoint (m; Right Positive)\n0.15\n0.30\nDensity\n0.0000\n0.0025\n0.0050\n0.0075\n0.0100\n0.0125\n0.0150\n0.0175\n0.0200\nEndpoint Probability Density (m\u207b\u00b2)\nDriver: Shot Dispersion\nDraw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 5\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0\nProtocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: original_primary/1  |\nMatched Target: 108.03 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Within-Lean Nominal Target)  |  Delivery Noise: Shaft Only  |\nPopulation: Same Shot Indices Supported in All Six Populations |  Scales:\nShared Within This Figure; Other Pattern Figures May Differ  |  Valid/Total:\nCurve \u00d71 10,000/10,000 valid; Curve \u00d72 10,000/10,000 valid\nModel-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/10,000; Curve \u00d72 600/10,000. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.\nSimulated-Sample Highest-Density Regions\n50% HDR\n80% HDR\n95% HDR\nTarget"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density_fade_social.pdf": {
+      "sha256": "a32517dc7c648a4f278e68cfbe8ccc8625e30e404f6ae88525740128b2de9514"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density_fade_social.png": {
+      "sha256": "96503e839c8c147629eac63b17934e08983500ff885368719dfd910004c9781a"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density.pdf": {
+      "sha256": "93826c97df753bc72c2d93b0f0edb7cdd40700fa2cf2a9bc5b2e106f94d2a093"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density_straight_social.svg": {
+      "sha256": "db8ad8cc9b1d436ff3fbc81f4a5fff148977ac087d6d5eaf32a33760feba0f2a"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density_straight_social.pdf": {
+      "sha256": "bae2c020ebfe3c65fafb05704eb61537354ea6ad673b3bed960fc7716d2e7424"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density_draw_social.pdf": {
+      "sha256": "2ef625ec38c2ad15cae7eab54f2b0e639e1e64a3d8f3197eec9d7c6d58afc376"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density.png": {
+      "sha256": "8ac3cbdb4aabb0ce76a67bed1fc819580a6b56ab552502c3d427a9603b9a322d"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density.svg": {
+      "sha256": "0d8543dd27fc63971f2e0deea0758afba0226d9a142a800a520d44dd7bf21b9d"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_overhead.png": {
+      "sha256": "f66a750e4d9aa6f32b508a13e1d5380354265e2483fe83052383457675f6c712"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_overhead_social.png": {
+      "sha256": "3f1c785246e1546b809196d6d0aadfb9798599cdd803c7de977ec0175b313f49"
+    },
+    "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67_density_fade_social.svg": {
+      "sha256": "953f3a5a85f5ed8bd58333a1e5239b96972ab2667cf56bd9e99b159bc8f5ee55"
+    }
+  },
+  "parent_final_acceptance": false
+}

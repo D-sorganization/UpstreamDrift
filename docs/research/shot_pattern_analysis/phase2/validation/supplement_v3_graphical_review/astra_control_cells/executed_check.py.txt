@@ -1,0 +1,30 @@
+from pathlib import Path
+import json,hashlib,re
+from datetime import datetime,timezone
+p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');o=p/'validation/supplement_v3_graphical_review/astra_control_cells';h=lambda x:hashlib.sha256(x.read_bytes()).hexdigest();a=json.loads((o/'inventory.json').read_text());rp=p/'supplement_report_v1/REPORT_SUPPLEMENT.json';assert h(rp)==a['report_sha256'];report=json.loads(rp.read_text());refs={r['cell']:r for r in report['unique_cells'] if r['config']['club']['shaft_lean_deg']==5};assert len(refs)==8
+checks=[];missing=[];bound={str(rp):h(rp)}
+for row in a['files']:
+ x=p/row['path'];assert h(x)==row['sha256'];ref=next(r for cell,r in refs.items() if x.name.startswith(cell+'_'));src=Path(ref['source_root'])/ref['cell'];s=ref['summary'];c=ref['config'];n=c['noise']['standard_deviations'];social='_social' in x.stem;density='_density' in x.stem
+ for filename,key in [('summary.json','source_summary_sha256'),('manifest.json','source_cell_manifest_sha256')]:
+  assert h(src/filename)==ref[key];bound[str(src/filename)]=h(src/filename)
+ assert all(s[k]==v for k,v in json.loads((src/'summary.json').read_text()).items());assert c==s['config'];assert c['target_x_m']==s['target_x_m']
+ svg=x.with_suffix('.svg');bound[str(svg)]=h(svg);t=re.sub(r'\s+',' ',' '.join(re.findall(r'<!--(.*?)-->',svg.read_text(),re.S)))
+ if social:
+  for token in ['Lean 5°','Curve ×2',f'Shaft Twist SD {n[0]:g}°','Not Calibrated Player Precision']:
+   assert token in t,(x.name,token)
+  assert ref['source_protocol'] not in t and f"{s['target_x_m']:.2f}" not in t;missing.append(row['path'])
+  if n[1]:
+   for token in ['Path SD 0.5°','Speed SD 2 mph','Strike SD 0.25 in']:assert token in t
+  else:assert 'Shaft Only' in t
+ else:
+  for token in [ref['cell'],ref['source_protocol'],'lean deg: 5.0','curve scale: 2.0',f'shaft rotation sd deg: {n[0]:.1f}']:assert token in t,(x.name,token)
+ for name,st in s['summary'].items():
+  count=st['supported_n']
+  if density:
+   assert f'{name} (n={count:,})' in t and f'{name} 600/{count:,}' in t and f'{name} {count:,}/10,000 valid' in t
+  else:
+   assert f'{name} 6' in t and 'Not Paired by Shot Index' in t and 'no aim-line rotation' in t
+ checks.append({'asset':row['path'],'source_cell':ref['cell'],'protocol':ref['source_protocol'],'source_summary_sha256':ref['source_summary_sha256'],'supported_n':{k:v['supported_n'] for k,v in s['summary'].items()},'target_x_m':s['target_x_m'],'population_caption_verified':True,'standalone_protocol_and_target_omitted':social})
+assert all(h(Path(x))==v for x,v in bound.items());assert all(h(p/r['path'])==r['sha256'] for r in a['files'])
+record={'schema':'independent-supplement-control-cell-graphics-review/1','utc':datetime.now(timezone.utc).isoformat(),'status':'provisional_changes_required_standalone_identity','whole_pipeline_accepted':False,'report_sha256':a['report_sha256'],'files':a['files'],'contact_sheets_reviewed':4,'full_size_reviewed_indices':[9,10,16,21,26,27],'checks':checks,'bound_inputs_unchanged':bound,'findings':[{'affected_png_count':16,'paths':missing,'description':'Social control-cell cards omit supplemental protocol and numeric fixed-target distance; identical club/lean/curve/noise labels can also describe within-lean primary conditions. Academic companions retain exact protocol identity. Qualify these social files only with attached source context until standalone captions identify the protocol/target.'}],'limits':['Producer still live: final receipt and output manifest reconciliation remain required.','All 32 PNGs decoded and viewed in contact sheets; six representative originals inspected at available display resolution.','No numerical recalculation, bootstrap, simulation, or production-source/output mutation.']}
+(o/'review.json').write_text(json.dumps(record,indent=2)+'\n');(o/'executed_check.py.txt').write_text(Path(__file__).read_text());print(h(o/'review.json'))

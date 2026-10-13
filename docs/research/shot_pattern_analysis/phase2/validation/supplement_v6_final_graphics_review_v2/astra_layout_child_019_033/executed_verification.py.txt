@@ -1,0 +1,28 @@
+from pathlib import Path
+import hashlib,json
+P=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+V=P/'validation/supplement_v6_final_graphics_review_v2'; C=V/'layout_child_png_contacts'; O=V/'astra_layout_child_019_033'; O.mkdir(exist_ok=True)
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+expected={'inventory.json':'8c914bfb4f82c179490bee0f79222c6eeb3242ab5eda3607759c05c54026fff6','colorbar_native_inventory.json':'eada37be2e5fd529620075b2572abb7afca6d1aaff43c305127128b6eec33209'}
+checked={}
+def check(p,h):
+ p=Path(p);actual=sha(p)
+ if actual!=h:raise ValueError(f'Hash mismatch: {p}')
+ checked[str(p)]=actual
+for n,h in expected.items():check(C/n,h)
+rows=[r for r in json.loads((C/'inventory.json').read_text())['contacts'] if 19<=r['index']<=33]
+if [r['index'] for r in rows]!=list(range(19,34)):raise ValueError('Index inventory mismatch')
+for r in rows:
+ for k in ['baseline_png','child_png','contact']:check(r[k],r[k+'_sha256'])
+ check(Path(r['baseline_png']).with_suffix('.svg'),r['baseline_svg_sha256'])
+for r in json.loads((C/'colorbar_native_inventory.json').read_text())['entries']:
+ if r['index'] in [19,20]:check(r['contact'],r['sha256'])
+decisions=[]
+for r in rows:
+ decisions.append({**r,'decision':'accepted_png_visual','full_size_child_inspected':r['index'] in [19,21,25,33], 'native_colorbar_crop_inspected':r['index'] in [19,20], 'observations': ['Child legend and panel titles are visibly separated; six panels and axis labels remain legible.','Ordered SD1/SD2 conditions, target, common-six counts, 600-dot qualification, covariance units where applicable and model-conditional caveat remain present.','No clipping, glyph collision or new visual defect observed in the complete image/contact.']+(['Native right-edge crop confirms Fade title clears the colorbar.'] if r['index'] in [19,20] else [])})
+for p,h in checked.items():check(p,h)
+receipt={'schema':'independent-child-png-visual-review/1','reviewer':'Astra','accepted':True,'scope':'Only 15 replacement academic-density PNGs, indices19–33. All15 before/after contacts, two native colorbar crops and four full-size child originals visually inspected.','full_publication_accepted':False,'vector_visual_acceptance':False,'numeric_recomputation_performed':False,'inventory_hashes':expected,'checked_files_sha256':checked,'pre_post_hashes_unchanged':True,'decisions':decisions,'limitations':['This receipt does not replace strict parent/child provenance validation or numerical parity evidence.','PDF/SVG native rendering is reviewed separately.','Contact crop truncation is intentional and was not treated as clipping of the complete output.']}
+(O/'review.json').write_text(json.dumps(receipt,indent=2)+'\n')
+(O/'REVIEW.md').write_text('# Independent Child PNG Review: Indices 19–33\n\nAccepted the 15 assigned replacement academic-density PNGs for visual presentation. Inspected all 15 before/after contacts, native colorbar crops 19 and 20, and full-size originals 19, 21, 25 and 33. Legend/title and Fade-title/colorbar separation are visible; labels, six panels, shared scales and conditional population disclosures remain readable. No new visual defect found.\n\nEvery selected contact, baseline PNG/SVG and child PNG was checked against its pinned inventory hash and rehashed after review. This is scoped PNG acceptance, not whole-publication, native-vector or empirical validation. Exact paths and decisions are in `review.json`.\n')
+(O/'executed_verification.py.txt').write_bytes(Path(__file__).read_bytes())
+print(json.dumps({'receipt':str(O/'review.json'),'sha256':sha(O/'review.json'),'accepted_pngs':len(rows),'checked_files':len(checked)}))

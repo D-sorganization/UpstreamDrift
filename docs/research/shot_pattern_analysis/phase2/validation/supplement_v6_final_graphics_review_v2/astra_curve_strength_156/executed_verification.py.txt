@@ -1,0 +1,28 @@
+import json,hashlib
+from pathlib import Path
+P=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');V=P/'validation/supplement_v6_final_graphics_review_v2';B=V/'curve_strength_156';D=V/'astra_curve_strength_156';N=P/'supplement_report_v1'
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def req(ok,msg):
+ if not ok:raise ValueError(msg)
+x=json.loads((B/'batch_inventory.json').read_text());C=V/'curve_strength_156_command.json';c=json.loads(C.read_text());req(c['exit_code']==0,'command failed');req(c['batch_inventory_sha256']==sha(B/'batch_inventory.json'),'inventory binding')
+G=V/'all_density_layout_diagnostic.json';req(sha(G)=='25ba5afe85802c43a9118cd0df9bc517d556a46123b5862db5498e1519c05cae','diagnostic binding');g=json.loads(G.read_text());affected={Path(r['matching_png_path']).name for r in g['collisions']}
+
+expanded={}
+for name,expected in [('all_density_clearance_diagnostic.json','3a58936c43f37be5d373def6385e782a475d32046cbc3b37d4f7ff618a80ab9b'),('all_density_colorbar_diagnostic.json','b35e1294f484f94d36ab4591ce04e3e5f5cda941f428b85995e18234a4b2cddc')]:
+ req(sha(V/name)==expected,'expanded diagnostic');expanded[name]=expected
+ affected.update(Path(r['matching_png_path']).name for r in json.loads((V/name).read_text())['crowded'])
+records=json.loads((N/'REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];assets={};contacts={};decisions=[];full={(157,'density.png'),(158,'overhead_social.png'),(159,'density_draw_social.png'),(163,'density.png')}
+for s in x['selected']:
+ i=s['index'];req(156<=i<=163 and s['record'] in records,'identity');req(s['record']['comparison_kind']=='curve_strength','kind')
+ for f,h in s['asset_sha256'].items():
+  req(sha(N/f)==h,'asset '+f);assets[f]=h
+  if not f.endswith('.png'):continue
+  kind=f.removeprefix('figures/comparisons/'+s['stem']+'_');j=1 if kind in ['density_straight_social.png','density_draw_social.png'] else 2 if kind in ['density_fade_social.png','density.png'] else 3;contact=f'contact_{i:03d}_{j}.jpg';contacts[contact]=sha(B/contact);hold=Path(f).name in affected
+  decisions.append(dict(path=f,sha256=h,index=i,kind=kind,decision='pending_collision_replacement' if hold else 'accepted',contact_inspected=str((B/contact).relative_to(P)),full_size_inspected=(i,kind) in full,sources=s['record']['sources'],target_x_m=s['record']['target_x_m'],common_supported_n=s['record']['common_supported_n'],observation='Crowded legend versus first-row titles; pending measured spacing qualification under #12243.' if hold else 'Explicit varied curve strength, fixed lean/shaft-twist SD, ordered protocols, targets, all-six support and sampled/raw-flight labels are readable. No clipping or text overlap observed.'))
+for f,h in x['numeric_sha256'].items():req(sha(N/f)==h,'numeric '+f)
+for f,h in assets.items():req(sha(N/f)==h,'post asset '+f)
+for f,h in contacts.items():req(sha(B/f)==h,'post contact '+f)
+req(len(assets)==128 and len(decisions)==48 and len(contacts)==24,'closed scope')
+pending=sum(d['decision']!='accepted' for d in decisions);D.mkdir(exist_ok=True)
+r=dict(accepted=pending==0,scope='Curve Strength Batch 156 PNG Visual Review Only',full_publication_accepted=False,batch_inventory_sha256=sha(B/'batch_inventory.json'),command_receipt_sha256=sha(C),producer_sources=x['producer_sources'],completion_boundary=x['completion_boundary'],numeric_sha256=x['numeric_sha256'],diagnostic_sha256=sha(G),expanded_diagnostic_sha256=expanded,asset_sha256=assets,contact_sha256=contacts,png_decisions=decisions,accepted_png_count=48-pending,pending_png_count=pending,all_contacts_actually_viewed=True,full_size_png_count=4,prior_visual_reuse_claimed=False,limitations=['PDF/SVG bytes verified; no vector visual acceptance claimed.','Other batches and known issue #12243 remain outside this acceptance.'])
+(D/'review.json').write_text(json.dumps(r,indent=2)+'\n');(D/'executed_verification.py.txt').write_text(Path(__file__).read_text());(D/'REVIEW.md').write_text(f'# Curve-Strength Batch 156 Independent Review\n\nViewed all 24 contacts and four original PNGs spanning seven iron lean 5, SD 2°, covariance, shaft-only, path, speed and strike noise. {pending} academic density PNGs remain held under the bound spacing diagnostics and issue #12243; {48-pending} PNGs pass scoped visual review. All 128 asset hashes, seven numeric hashes and ordered identities checked. No vector or full-publication acceptance.\n');print(json.dumps(dict(review_sha256=sha(D/'review.json'),accepted=48-pending,pending=pending)))

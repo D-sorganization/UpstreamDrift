@@ -1,0 +1,18 @@
+{
+  "schema": "standalone-reference-relocation/1",
+  "sources": [
+    {
+      "old_path": "docs/research/proximal_distal_energy_transfer/nonlinear_controller_registration_amendment_20261011.tex",
+      "new_path": "docs/research/nonlinear_controller_registration_amendment_20261011/nonlinear_controller_registration_amendment_20261011.tex",
+      "sha256": "c55026eed581fcfbeb8c9c490cdfebd0199b82ab0a61ad5ab526b3bb5b8ee883",
+      "bytes": 3732
+    },
+    {
+      "old_path": "docs/research/proximal_distal_energy_transfer/uncertainty_stability_audit_reference.tex",
+      "new_path": "docs/research/uncertainty_stability_audit_reference/uncertainty_stability_audit_reference.tex",
+      "sha256": "9175bf17092e753b4d2d96d6857250a84dd19605bbb5d92f1c03655ed83fa0e3",
+      "bytes": 4402
+    }
+  ],
+  "scope": "Byte-exact standalone source relocation, no qualification renewal"
+}

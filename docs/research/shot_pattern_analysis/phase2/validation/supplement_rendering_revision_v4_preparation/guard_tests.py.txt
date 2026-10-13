@@ -1,0 +1,32 @@
+import copy
+import importlib.util
+import json
+from pathlib import Path
+import pytest
+spec=importlib.util.spec_from_file_location('wrapper','/tmp/p2-supplement-report-v4.py')
+w=importlib.util.module_from_spec(spec);spec.loader.exec_module(w)
+
+def command():
+ return json.loads(Path('/tmp/p2-supplement-report-v3-start.json').read_text())['command']
+
+def test_intended_command_is_accepted():
+ w.validate_command(command())
+
+@pytest.mark.parametrize('flag',['--original-primary','--original-control','--pw-primary-face-bounds','--pw-control-face-bounds','--driver-control-speed-bounds','--inventory','--transition-receipt','--transition-sha256','--output-dir'])
+def test_changed_actual_input_or_target_rejected(flag):
+ cmd=command();cmd[cmd.index(flag)+1]='unbound-alternative'
+ with pytest.raises(ValueError):w.validate_command(cmd)
+
+def test_duplicate_argument_rejected():
+ cmd=command()+['--original-primary','unbound-alternative']
+ with pytest.raises(ValueError):w.validate_command(cmd)
+
+@pytest.mark.parametrize('field',['numerical_runtime','contact_backend','source_sha256','native_binary_sha256'])
+def test_changed_execution_rejected(field):
+ expected={'numerical_runtime':{'python':'3.12.13','numpy':'2.2.6'},'contact_backend':{'active_backend':'numba'},'source_sha256':{'physics.py':'a'},'native_binary_sha256':'b'}
+ actual=copy.deepcopy(expected);actual[field]='different'
+ with pytest.raises(ValueError):w.validate_execution(actual,expected)
+
+def test_matching_execution_accepted():
+ expected={'source_sha256':{'physics.py':'a'},'numerical_runtime':{'python':'3.12.13'}}
+ w.validate_execution(copy.deepcopy(expected),expected)

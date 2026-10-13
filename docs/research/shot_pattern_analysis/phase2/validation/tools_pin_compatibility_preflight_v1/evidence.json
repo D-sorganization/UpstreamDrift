@@ -1,0 +1,370 @@
+{
+  "pins": [
+    "3678409fc51024150ab28970b72e3b468935f345",
+    "86d0f28b1cc5acf61185e07e320c816c2d005512"
+  ],
+  "object_repositories": [
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools",
+    "/home/dieterolson/Repositories/UpstreamDrift/vendor/ud-tools"
+  ],
+  "provider_files": [
+    {
+      "path": "src/shared/__init__.py",
+      "old_sha256": "32c4858e22cc2c967b42150fa550562a2c839c2cebcaab91cabdf6f4da020022",
+      "new_sha256": "32c4858e22cc2c967b42150fa550562a2c839c2cebcaab91cabdf6f4da020022",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/__init__.py",
+      "old_sha256": "e6d455b7aa83a9bac0b8411c2bc8759159694420f1582c14a772837afd82e50b",
+      "new_sha256": "e6d455b7aa83a9bac0b8411c2bc8759159694420f1582c14a772837afd82e50b",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/ai/__init__.py",
+      "old_sha256": "d6af1675742657928fc0dac4735a669d797be4a385c4bbc1b86d1e568d9dae47",
+      "new_sha256": "d6af1675742657928fc0dac4735a669d797be4a385c4bbc1b86d1e568d9dae47",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/__init__.py",
+      "old_sha256": "11a5a992c941ce0076f875f72825e0b2641ed123b3d3f0af1408e87e8d2e8e09",
+      "new_sha256": "11a5a992c941ce0076f875f72825e0b2641ed123b3d3f0af1408e87e8d2e8e09",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/_scoring_statistics.py",
+      "old_sha256": "d1af19f7d129cee19e11817e7f8d20b69f56be9701aece3903bace5ffe782af7",
+      "new_sha256": "d1af19f7d129cee19e11817e7f8d20b69f56be9701aece3903bace5ffe782af7",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/comparison.py",
+      "old_sha256": "22e58e62cfb958f473ad31b84b641d25809645c30ded0cf800e25ed941b12ad0",
+      "new_sha256": "22e58e62cfb958f473ad31b84b641d25809645c30ded0cf800e25ed941b12ad0",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/conformance_bundle.py",
+      "old_sha256": "37a9e277f6365611a2f08431857b5172f8297109fcccf7a0ab2d2a842552972a",
+      "new_sha256": "37a9e277f6365611a2f08431857b5172f8297109fcccf7a0ab2d2a842552972a",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/contract_v2.py",
+      "old_sha256": "8bfdc3112b384cbae747a0ad0d42b721d1571512ad5e9a014a3e9f8e49b08062",
+      "new_sha256": "8bfdc3112b384cbae747a0ad0d42b721d1571512ad5e9a014a3e9f8e49b08062",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/corpus.py",
+      "old_sha256": "8cbb3af03317bbf0eb5ae14817fee498bba57c2fedfff7149d09c3d6bedb0c15",
+      "new_sha256": "8cbb3af03317bbf0eb5ae14817fee498bba57c2fedfff7149d09c3d6bedb0c15",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/dataset_reference.py",
+      "old_sha256": "a5bcceec4bdddeaf6a570147bcc4f8d9a4c37006b17227f59ccf0d5b36c4d15c",
+      "new_sha256": "a5bcceec4bdddeaf6a570147bcc4f8d9a4c37006b17227f59ccf0d5b36c4d15c",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/dataset_reference_contract.py",
+      "old_sha256": "da80a2659bfddce3427329bbeb1a895b4c8db3c7ae4985adbc73f4555eb067d8",
+      "new_sha256": "da80a2659bfddce3427329bbeb1a895b4c8db3c7ae4985adbc73f4555eb067d8",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/dataset_reference_operations.py",
+      "old_sha256": "770e809c8e5af31da64af2f6546657ae583f7992742324f7c7481193b9426650",
+      "new_sha256": "770e809c8e5af31da64af2f6546657ae583f7992742324f7c7481193b9426650",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/dataset_reference_verification.py",
+      "old_sha256": "263724db970b9ddecf69f7fddc231091aacee050c155feb60d1d3224c928a255",
+      "new_sha256": "263724db970b9ddecf69f7fddc231091aacee050c155feb60d1d3224c928a255",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/dispersion.py",
+      "old_sha256": "f2468189375c1b694b12b7de82f8c6212143882e330c9dc78988b17916e6dedd",
+      "new_sha256": "f2468189375c1b694b12b7de82f8c6212143882e330c9dc78988b17916e6dedd",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/flexible_analysis.py",
+      "old_sha256": "bbe551197e6c7eb4732250f4562147f1ecefec740f9c7a5cd5a4e95ad9068c55",
+      "new_sha256": "bbe551197e6c7eb4732250f4562147f1ecefec740f9c7a5cd5a4e95ad9068c55",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/gspro_connect.py",
+      "old_sha256": "adc3ccbccc0a3f3aad4071388bc902f5f97b4a39a63c9837638444a4e26f137f",
+      "new_sha256": "adc3ccbccc0a3f3aad4071388bc902f5f97b4a39a63c9837638444a4e26f137f",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/importer.py",
+      "old_sha256": "aec6a5c30132cbaae0d8b0e4fd8336a95408ad657d49c170146ec298bdad0392",
+      "new_sha256": "aec6a5c30132cbaae0d8b0e4fd8336a95408ad657d49c170146ec298bdad0392",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/longitudinal.py",
+      "old_sha256": "7f3a0c6c19113409546c208f455162a0dabd9b4ff0b820c36f6f4357da35877d",
+      "new_sha256": "7f3a0c6c19113409546c208f455162a0dabd9b4ff0b820c36f6f4357da35877d",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/longitudinal_statistics.py",
+      "old_sha256": "3cb533117550785fef11a53c4ecd7f976cf98e7b4a891cd2d246b045f696bbef",
+      "new_sha256": "3cb533117550785fef11a53c4ecd7f976cf98e7b4a891cd2d246b045f696bbef",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/longitudinal_types.py",
+      "old_sha256": "d66eab20afefc6aeba48be7d3f398ca4e67505843e5e2cf4cbdec7eff22e2b77",
+      "new_sha256": "d66eab20afefc6aeba48be7d3f398ca4e67505843e5e2cf4cbdec7eff22e2b77",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/modeling.py",
+      "old_sha256": "2553a75ce475a202e63e1f532dd5576f0cf51449a5b2cea8dc063a35f37c89a6",
+      "new_sha256": "2553a75ce475a202e63e1f532dd5576f0cf51449a5b2cea8dc063a35f37c89a6",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/multivariate.py",
+      "old_sha256": "32ada2c2f6ab49b285bf193eb3d9d5900993f1011fa1b613d1468837d0c3241c",
+      "new_sha256": "32ada2c2f6ab49b285bf193eb3d9d5900993f1011fa1b613d1468837d0c3241c",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/outcome_proxy.py",
+      "old_sha256": "2c8f3aea3e89cb97ae1e8bc5566fd53bb5233866e1856c25b03e823602cb26fb",
+      "new_sha256": "2c8f3aea3e89cb97ae1e8bc5566fd53bb5233866e1856c25b03e823602cb26fb",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/player_covariation.py",
+      "old_sha256": "cc4533d7076e434b1964196d3f54737d8982ea107d94b03aa5836cb622e92102",
+      "new_sha256": "cc4533d7076e434b1964196d3f54737d8982ea107d94b03aa5836cb622e92102",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/player_covariation_core.py",
+      "old_sha256": "14126920042837530dbd7c312b7c2c80de3bc97a4b581ae4b8792628d18a9509",
+      "new_sha256": "14126920042837530dbd7c312b7c2c80de3bc97a4b581ae4b8792628d18a9509",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/player_covariation_types.py",
+      "old_sha256": "4dbb54b58c6a5fa21a5f9225fad77a24b6f79390649e8b031e5ad15bf0a61e8d",
+      "new_sha256": "4dbb54b58c6a5fa21a5f9225fad77a24b6f79390649e8b031e5ad15bf0a61e8d",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/profiles.py",
+      "old_sha256": "4ece989e90027956a139c0729487ba3a17c780225c37d2bf981387b914e38e43",
+      "new_sha256": "4ece989e90027956a139c0729487ba3a17c780225c37d2bf981387b914e38e43",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/relationships.py",
+      "old_sha256": "5c5c56862f973f0a1d1ceb87dc12d5032d3ada2831a65c40d62215c3c04641a9",
+      "new_sha256": "5c5c56862f973f0a1d1ceb87dc12d5032d3ada2831a65c40d62215c3c04641a9",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/schema.py",
+      "old_sha256": "eebda18c48aab27b40c2740406f80142d716d1ecb292d3d89f1eeb5d15c34c37",
+      "new_sha256": "eebda18c48aab27b40c2740406f80142d716d1ecb292d3d89f1eeb5d15c34c37",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/strokes_gained.py",
+      "old_sha256": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1",
+      "new_sha256": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/strokes_gained_types.py",
+      "old_sha256": "bf224159d8d3432f87e438ca0944ebde6cadd6052813a2dfeb52bcf68f043e2d",
+      "new_sha256": "bf224159d8d3432f87e438ca0944ebde6cadd6052813a2dfeb52bcf68f043e2d",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/treatment.py",
+      "old_sha256": "7452d1630c13b6ee0411a6d67c7bb9414f16197015910125f5a4b4334055cae3",
+      "new_sha256": "7452d1630c13b6ee0411a6d67c7bb9414f16197015910125f5a4b4334055cae3",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/launch_monitor/trends.py",
+      "old_sha256": "ddf42c11b779d4b52e55bccbafde57dda926cc7af1cb6cef562819e1a98a71bf",
+      "new_sha256": "ddf42c11b779d4b52e55bccbafde57dda926cc7af1cb6cef562819e1a98a71bf",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/logging_pkg/__init__.py",
+      "old_sha256": "f71cc33d4aab3a1198e2046f8cb652f949771ebcca4b5c0cb7f8e826c731872e",
+      "new_sha256": "f71cc33d4aab3a1198e2046f8cb652f949771ebcca4b5c0cb7f8e826c731872e",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/logging_pkg/logger_utils.py",
+      "old_sha256": "4cd72a2b54ba30a47f76cd18325b83166666517554a8bdfab58b4d563cc168dd",
+      "new_sha256": "4cd72a2b54ba30a47f76cd18325b83166666517554a8bdfab58b4d563cc168dd",
+      "equal": true
+    },
+    {
+      "path": "src/shared/python/logging_pkg/logging_config.py",
+      "old_sha256": "f87179d03ab2565ba0c270cca604f07d52904bff569af9dff5301f94d29e5de3",
+      "new_sha256": "f87179d03ab2565ba0c270cca604f07d52904bff569af9dff5301f94d29e5de3",
+      "equal": true
+    }
+  ],
+  "study_imports": [
+    {
+      "caller": "src/tools/shot_pattern_analysis/_embed_adapter.py",
+      "line": 7,
+      "provider": "src.shared.python.launcher_embed",
+      "names": [
+        "EmbedCapabilities",
+        "register_embeddable_tool"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/gui.py",
+      "line": 15,
+      "provider": "src.shared.python.core.process_safety",
+      "names": [
+        "managed_popen"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/gui.py",
+      "line": 16,
+      "provider": "src.shared.python.logging_pkg.logging_config",
+      "names": [
+        "get_logger"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/matched_export.py",
+      "line": 18,
+      "provider": "src.shared.python.physics.incremental_contact",
+      "names": [
+        "contact_backend_info"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/matched_physics.py",
+      "line": 15,
+      "provider": "src.shared.python.physics.ball_simulator",
+      "names": [
+        "BallFlightSimulator"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/matched_physics.py",
+      "line": 16,
+      "provider": "src.shared.python.physics.incremental_contact",
+      "names": [
+        "solve_incremental_contact"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/matched_physics.py",
+      "line": 17,
+      "provider": "src.shared.python.physics.rigid_contact",
+      "names": [
+        "RigidContactInput",
+        "solve_rigid_contact"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/physics.py",
+      "line": 11,
+      "provider": "src.shared.python.physics.ball_launch_conditions",
+      "names": [
+        "LaunchConditions"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/physics.py",
+      "line": 12,
+      "provider": "src.shared.python.physics.ball_simulator",
+      "names": [
+        "BallFlightSimulator"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/physics.py",
+      "line": 13,
+      "provider": "src.shared.python.physics.impact_model",
+      "names": [
+        "ImpactSolverAPI",
+        "PreImpactState"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/reporting.py",
+      "line": 15,
+      "provider": "src.shared.python.physics.ball_launch_conditions",
+      "names": [
+        "EnvironmentalConditions"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/reporting.py",
+      "line": 16,
+      "provider": "src.shared.python.physics.ball_properties",
+      "names": [
+        "BallProperties"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/reporting.py",
+      "line": 17,
+      "provider": "src.shared.python.physics.impact_model",
+      "names": [
+        "ImpactParameters"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/scoring.py",
+      "line": 14,
+      "provider": "src.tools.launch_monitor_model",
+      "names": [
+        "CourseStateColumnsV1",
+        "ExpectedStrokesBaselineV2",
+        "ExpectedStrokesStateV2",
+        "StrokesGainedRequestV1",
+        "analyze_source_backed_strokes_gained",
+        "baseline_table_sha256"
+      ]
+    },
+    {
+      "caller": "src/tools/shot_pattern_analysis/scoring_cache.py",
+      "line": 16,
+      "provider": "src.tools.launch_monitor_model",
+      "names": [
+        "CourseStateColumnsV1",
+        "ExpectedStrokesBaselineV2",
+        "StrokesGainedRequestV1",
+        "analyze_source_backed_strokes_gained"
+      ]
+    }
+  ],
+  "changed_provider_files": [],
+  "scope": "Read-only fixed Git objects; source comparison only, no runtime acceptance",
+  "non_launch_monitor_shared_imports": [
+    [
+      "src/shared/python/launch_monitor/gspro_connect.py",
+      19,
+      "shared.python.contracts"
+    ]
+  ]
+}

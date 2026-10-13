@@ -1,0 +1,21 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import json,hashlib,subprocess,shutil
+p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');fig=p/'control_final_figures_v1';out=p/'validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details'
+h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest();rows=json.loads((out/'inventory.json').read_text())['files'];checks=[]
+for row in rows:
+ f=fig/row['path'];assert h(f)==row['sha256']
+ source=p/'control_final_v1'/f.parent.name;summary=source/'summary.json';d=json.loads(summary.read_text());flight=source/'flight_samples.json';t=json.loads(flight.read_text())
+ assert d['config']['target_x_m']==d['target_x_m']==t['target_x_m']==127.88194166336235
+ text=' '.join(subprocess.check_output(['pdftotext',str(f.with_suffix('.pdf')),'-'],text=True).split())
+ config=d['config'];club=config['club'];assert f.parent.name in text
+ assert f"static loft deg: {club['loft_deg']}" in text
+ assert f"nominal shaft lean deg: {club['shaft_lean_deg']}" in text
+ assert f"curve scale: {config['curve_scale']}" in text
+ counts={name:int(s['supported_n']) for name,s in d['summary'].items()}
+ for name,n in counts.items():assert f'{name} {n:,}/10,000 valid' in text,(f,name)
+ checks.append({'path':row['path'],'pdf_sha256':h(f.with_suffix('.pdf')),'summary_sha256':h(summary),'flight_samples_sha256':h(flight),'target_x_m':d['target_x_m'],'supported_counts':counts,'labels_match':True})
+r={'checked_utc':datetime.now(timezone.utc).isoformat(),'status':'provisional_visual_and_label_checks_pass','whole_run_accepted':False,'scope':'48 control 7-iron PNGs on eight contact sheets; four full-size inspections; all48 PDF config/support labels checked against saved summaries and exact fixed-target identity.','contact_sheets_inspected':[f'contact_{n:02}.jpg' for n in range(1,9)],'full_size_pngs_inspected':['details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png','details/seven_iron_lean5_curve2_rotation1_shaft_only/density.png','details/seven_iron_lean10_curve2_rotation2_combined2/density.png','details/seven_iron_lean5_curve2_rotation2_combined2/overhead.png'],'files':rows,'pdf_label_checks':checks,'findings':[],'limitations':['Final producer manifest reconciliation remains required.','Contact thumbnails establish layout overview, not every small-text detail. Full-size inspections are listed separately.','This does not repeat numerical/statistical audits or establish empirical accuracy.']}
+(out/'review.json').write_text(json.dumps(r,indent=2)+'\n')
+shutil.copy('/tmp/p2-control-seven-review.py',out/'contact_sheet_script.py.txt');shutil.copy(__file__,out/'label_check_script.py.txt')
+print('Checked all48 label sets and same127.88194166336235m target; receipt',h(out/'review.json'))

@@ -1,0 +1,322 @@
+{
+  "checked_utc": "2026-10-10T13:24:06.265470+00:00",
+  "scope": "12 completed PW zero-lean curve-strength pairs only; no full pipeline acceptance",
+  "accepted": false,
+  "pairs": 12,
+  "assets_rehashed": 192,
+  "pngs_inspected_in_contacts": 72,
+  "contacts_inspected": [
+    "contact_01.jpg",
+    "contact_02.jpg",
+    "contact_03.jpg",
+    "contact_04.jpg",
+    "contact_05.jpg",
+    "contact_06.jpg",
+    "contact_07.jpg",
+    "contact_08.jpg",
+    "contact_09.jpg",
+    "contact_10.jpg",
+    "contact_11.jpg",
+    "contact_12.jpg"
+  ],
+  "full_size_representatives": [
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_draw_social.png",
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_overhead_social.png"
+  ],
+  "semantic_checks": "SVG protocol strings, target and common-six counts agree with comparison JSON; overhead unpaired-path disclosure present",
+  "density_social_visual": "No new defect in inspected cards; headings, marginals, density scales and support counts legible",
+  "academic_density_visual": "Known cramped row gap in narrow distributions; long covariance captions expand export width",
+  "overhead_visual": "Long covariance captions expand academic export width and visibly clip at fixed-width social right edge; acceptance withheld",
+  "png_dimensions": {
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density.png": [
+      4511,
+      2297
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_draw_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_fade_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_straight_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_overhead.png": [
+      4502,
+      1791
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density.png": [
+      4471,
+      2237
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_draw_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_fade_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_straight_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_overhead.png": [
+      4502,
+      1791
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density.png": [
+      6449,
+      2262
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_draw_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_fade_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_straight_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_overhead.png": [
+      6450,
+      1791
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density.png": [
+      6379,
+      2285
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_draw_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_fade_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_straight_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_overhead.png": [
+      6418,
+      1791
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density.png": [
+      4321,
+      2457
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_draw_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_fade_social.png": [
+      3003,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_straight_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_overhead.png": [
+      4502,
+      1791
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density.png": [
+      4321,
+      2457
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_draw_social.png": [
+      3003,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_fade_social.png": [
+      3003,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_straight_social.png": [
+      3003,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_overhead.png": [
+      4502,
+      1791
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density.png": [
+      4471,
+      2375
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_draw_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_fade_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_straight_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_overhead.png": [
+      4502,
+      1791
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density.png": [
+      4471,
+      2246
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_draw_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_fade_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_straight_social.png": [
+      3027,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_overhead.png": [
+      4502,
+      1791
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density.png": [
+      4498,
+      2344
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_draw_social.png": [
+      3016,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_fade_social.png": [
+      3051,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_straight_social.png": [
+      3051,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_overhead.png": [
+      4502,
+      1791
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density.png": [
+      4538,
+      2442
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_draw_social.png": [
+      3107,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_fade_social.png": [
+      3083,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_straight_social.png": [
+      3107,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_overhead.png": [
+      4502,
+      1858
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.png": [
+      4525,
+      2369
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.png": [
+      3107,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.png": [
+      3107,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.png": [
+      3107,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.png": [
+      4502,
+      1858
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead_social.png": [
+      1920,
+      1080
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density.png": [
+      6436,
+      2397
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_draw_social.png": [
+      3083,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_fade_social.png": [
+      3067,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_straight_social.png": [
+      3067,
+      3976
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_overhead.png": [
+      6450,
+      1793
+    ],
+    "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_overhead_social.png": [
+      1920,
+      1080
+    ]
+  },
+  "inventory_sha256": "70443ea4eaf9c7d2b1bee7b0ea5d2c78b3df02dde4080e9545a9833fa5bc7cc6",
+  "numeric_or_source_changes": false
+}

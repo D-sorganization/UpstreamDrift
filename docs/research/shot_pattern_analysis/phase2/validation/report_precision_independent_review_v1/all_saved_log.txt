@@ -1,0 +1,1 @@
+{'intervals': 696, 'absolute_means': 1044, 'failures': [], 'max_relative_width_error': 0.009183864928432164, 'max_relative_value_error': 0.0009971237725258974, 'scope': 'All saved original/control/supplement per-cell paired SG and absolute means; no simulation or bootstrap.'}

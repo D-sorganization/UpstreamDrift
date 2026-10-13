@@ -1,0 +1,3089 @@
+{
+  "scope": "All selected source/config/nominal checks, deliberately stops before primitive row read/statistical computations",
+  "pair_count": 384,
+  "counts": {
+    "across_lean": 56,
+    "curve_strength": 164,
+    "shaft_rotation_sd": 164
+  },
+  "source_hashes": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_lean_control.py": "2b111750073259d21837bab6ab0cc0c87d0c335e5f678593183e82198a8b50a8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py": "e3a953b09ecacdfda742239fadb7ecf36b6876e3a713321f9c24171dd36daacf"
+  },
+  "transition_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
+  "results": [
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve1_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "first_protocol": "pw-control-face-bounds/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "first_protocol": "pw-control-face-bounds/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-control-face-bounds/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "first_protocol": "pw-control-face-bounds/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve1_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve2_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve2_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve2_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean0_curve2_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean5_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean5_curve2_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean5_curve2_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "seven_iron_lean5_curve2_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "driver_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve1_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "driver_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve1_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "driver_lean0_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "driver_lean0_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "driver_lean0_curve2_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve2_rotation1_combined2",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "driver_lean0_curve2_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve2_rotation1_shaft_only",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "driver_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve2_rotation2_combined2",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "across_lean",
+      "first": "driver_lean0_curve2_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation1_combined1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation1_shaft_path",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_combined1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_path",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_strike",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation1_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean5_curve1_rotation2_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation1_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean10_curve1_rotation2_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation1_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation1_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation1_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation1_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation1_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation1_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation1_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation1_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation1_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean0_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation1_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation1_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation2_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean0_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation2_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation2_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation2_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation2_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean0_curve1_rotation2_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation1_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation1_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation1_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation1_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation1_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation1_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation1_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation1_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean5_curve1_rotation2_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation1_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation1_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation1_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation1_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation1_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation1_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation1_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation1_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "seven_iron_lean10_curve1_rotation2_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation1_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean0_curve2_rotation1_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation1_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation1_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean0_curve2_rotation1_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation1_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation1_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation1_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation1_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation2_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean0_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation2_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation2_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation2_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation2_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation2_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean0_curve1_rotation2_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve2_rotation1_combined2",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve2_rotation1_shaft_only",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve2_rotation2_combined2",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "curve_strength",
+      "first": "driver_lean5_curve1_rotation2_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve1_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve1_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve1_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve1_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean0_curve1_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve2_rotation1_combined1",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_combined1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve2_rotation1_shaft_path",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_path",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_speed1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_speed2",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second": "pitching_wedge_lean0_curve2_rotation2_shaft_strike",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "first_protocol": "pw-control-face-bounds/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "first_protocol": "pw-control-face-bounds/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "pw-control-face-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve1_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean5_curve2_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean5_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve1_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "pitching_wedge_lean10_curve2_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "pitching_wedge_lean10_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve1_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve1_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve1_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve1_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve1_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve1_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve1_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve1_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve1_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean0_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve1_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve1_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean0_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve1_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve1_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve1_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve2_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve2_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean0_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve2_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean0_curve2_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean0_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve1_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve1_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve1_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve1_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve1_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve1_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve1_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve1_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve1_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean5_curve2_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean5_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve1_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve1_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve1_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve1_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve1_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve1_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve1_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve1_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_combined2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_combined2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_only",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "seven_iron_lean10_curve2_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "seven_iron_lean10_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve1_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve1_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean0_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve1_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve1_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve1_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve1_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean0_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve1_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve1_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve1_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve1_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve1_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve1_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve1_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve1_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve2_rotation1_combined1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_combined1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve2_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean0_curve2_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve2_rotation1_cov_facepath_negative",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_cov_facepath_negative",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve2_rotation1_cov_facepath_positive",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_cov_facepath_positive",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve2_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve2_rotation1_shaft_path",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_path",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve2_rotation1_shaft_speed1",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_speed1",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve2_rotation1_shaft_speed2",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_speed2",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean0_curve2_rotation1_shaft_strike",
+      "first_protocol": "original_primary/1",
+      "second": "driver_lean0_curve2_rotation2_shaft_strike",
+      "second_protocol": "original_primary/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_combined2",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve1_rotation2_combined2",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve1_rotation1_shaft_only",
+      "first_protocol": "original_control/1",
+      "second": "driver_lean5_curve1_rotation2_shaft_only",
+      "second_protocol": "original_control/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_combined2",
+      "first_protocol": "driver-control-speed-bounds/1",
+      "second": "driver_lean5_curve2_rotation2_combined2",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "first": "driver_lean5_curve2_rotation1_shaft_only",
+      "first_protocol": "driver-control-speed-bounds/1",
+      "second": "driver_lean5_curve2_rotation2_shaft_only",
+      "second_protocol": "driver-control-speed-bounds/1",
+      "status": "configuration_and_nominal_checks_passed"
+    }
+  ],
+  "failures": []
+}

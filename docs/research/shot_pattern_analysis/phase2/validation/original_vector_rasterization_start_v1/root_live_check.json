@@ -1,0 +1,9 @@
+{
+  "session": 79084,
+  "pid": 554678,
+  "process_cmdline": "/tmp/shot-pattern-validation-venv-20261009/bin/python /tmp/p2-original-vector-rasterization/run.py ",
+  "start_ticks": "52536506",
+  "start_sha256": "9b82636a4d44e334716e3380cd6da02705b37750646435d5e7b7e664c1a0a662",
+  "live_checked": true,
+  "accepted": false
+}

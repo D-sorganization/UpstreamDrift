@@ -1,0 +1,34 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import json,hashlib,math,shutil
+p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');out=p/'validation/selected_headline_traceability_v1';out.mkdir(exist_ok=True)
+h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
+rows=[];bindings={};cells=[]
+for club in ('driver','seven_iron','pitching_wedge'):
+ for curve in (1,2):
+  for sd in (1,2):
+   for profile in ('shaft_only','combined2'):
+    name=f'{club}_lean0_curve{curve}_rotation{sd}_{profile}';original=p/'final_v1'/name;original_summary=json.loads((original/'summary.json').read_text());bindings[str((original/'summary.json').relative_to(p))]=h(original/'summary.json');status=original_summary['status'];root=original;protocol='original_primary/1'
+    if status=='unavailable':
+     assert club=='pitching_wedge' and curve==2
+     root=p/'supplement_final_v1/pw_primary_face'/name;protocol='pw-primary-face-bounds/1'
+    m=json.loads((root/'manifest.json').read_text());r=json.loads((root/'summary.json').read_text());assert r['status']=='completed'
+    assert h(root/'summary.json')==m['files_sha256']['summary.json'];assert r['config']['n_shots']==10000 and r['config']['club']['shaft_lean_deg']==0
+    assert r['config']['curve_scale']==curve and r['config']['noise']['standard_deviations'][0]==sd
+    assert r['aim_adjustment_applied'] is False
+    for f in ('manifest.json','summary.json'):bindings[str((root/f).relative_to(p))]=h(root/f)
+    target=r['target_x_m'];nominals=r['nominals'];counts={k:v['supported_n'] for k,v in r['summary'].items()};scoring=r['course_scoring'];assert 0<scoring['paired_n']<=min(counts.values())
+    cells.append({'cell':name,'source_protocol':protocol,'original_status':status,'source_root':str(root.relative_to(p)),'target_x_m':target,'config':r['config'],'nominals':nominals,'course_scoring_context':{k:scoring[k] for k in ('scenario_id','start_lie','start_distance_m','target_x_m','hole_distance_m','fairway_half_width_m','green_radius_m','conditioning','paired_n','total_n')}})
+    for pattern in ('Straight','Draw','Fade'):
+     d=r['summary'][pattern];n=nominals[pattern];s=d['statistics'];assert n['residual_m']<=r['config']['match_tolerance_m']
+     assert math.hypot(n['outcome']['carry_x_m']-target,n['outcome']['carry_y_m'])<=r['config']['match_tolerance_m']
+     benefit=None if pattern=='Straight' else scoring['paired_benefit_vs_straight'][pattern]
+     rows.append({'cell':name,'club':club,'curve':curve,'shaft_twist_sd_deg':sd,'profile':profile,'source_protocol':protocol,'pattern':pattern,'supported_n':d['supported_n'],'attempted_n':d['total_n'],'target_x_m':target,'mean_downrange_m':target+s['mean_downrange_error_m'],'downrange_sd_m':d['downrange_sd_m'],'lateral_sd_m':d['lateral_sd_m'],'target_rmse_m':d['target_rmse_m'],'lateral_downrange_correlation':s['corr_lateral_downrange_error'],'conditional_mean_downrange_error_m':s['conditional_mean_downrange_error_m'],'quadrant_fractions':s['quadrant_fractions'],'mean_sg_strokes':scoring['patterns'][pattern]['mean_strokes_gained'],'scoring_paired_n':scoring['paired_n'],'paired_sg_vs_straight':benefit})
+assert len(cells)==24 and len(rows)==72
+assert all(h(p/rel)==digest for rel,digest in bindings.items())
+r={'checked_utc':datetime.now(timezone.utc).isoformat(),'status':'saved_summary_traceability_pass_not_publication_acceptance','scope':'24 explicitly selected zero-lean cells: all three clubs, curves1/2, shaft-twistSD1/2, shaft-only and combined2. This is not the full factorial study.','source_sha256':bindings,'cells':cells,'rows':rows,'limitations':['No Monte Carlo, scoring or interval calculation repeated. Values copied from hash-verified accepted saved summaries.','Downrange mean uses target plus saved downrange error; it is not radial carry.','Nominal X/Y matching does not force noisy shots to equal distance or isolate curvature causally.','SG uses the recorded common-three population and hypothetical course geometry. Geometry uses individual supported populations.','PW curve2 uses the separately identified face-bounds supplement; original unavailable records are retained.','This traceability check does not accept unfinished graphical/pipeline outputs.']}
+(out/'review.json').write_text(json.dumps(r,indent=2)+'\n')
+lines=['# Selected Headline Traceability Review','','This independent reading checks 24 zero-lean cells against immutable saved summaries. It does not qualify the unfinished publication or replace the full factorial results. Four PW curve-2 cells use the separately labeled face-bounds supplement; their original unavailable records remain unchanged.','','All nominal patterns match the physical target within the unchanged 0.05 m criterion, with no aim rotation. The noisy downrange distributions have nonzero SD; matching the nominal landing therefore does not mean every shot travels the same distance. Correlation below uses right-positive lateral position and downrange position: positive indicates right-long/left-short association; negative indicates right-short/left-long association. These are model-conditional associations, not measured player tendencies.','','## Shaft-Only Straight Reference at Zero Lean','','| Club | Shaft-Twist SD (°) | Target (m) | Mean Downrange (m) | Downrange SD (m) | Lateral SD (m) | Lateral–Downrange Correlation |','| --- | ---: | ---: | ---: | ---: | ---: | ---: |']
+for row in rows:
+ if row['curve']==1 and row['profile']=='shaft_only' and row['pattern']=='Straight':lines.append(f"| {row['club']} | {row['shaft_twist_sd_deg']} | {row['target_x_m']:.3f} | {row['mean_downrange_m']:.3f} | {row['downrange_sd_m']:.3f} | {row['lateral_sd_m']:.3f} | {row['lateral_downrange_correlation']:+.4f} |")
+lines+=['','## Populations and Scoring','','The machine-readable record includes all 72 pattern rows, exact values and paired SG intervals. Each row distinguishes individual-supported geometry from the common-three scoring denominator. Club, curve, SD, profile, source protocol, target, nominal face/path/speed and scoring context are explicit. Any later headline must select a row/contrast with its population and context; this review does not pool tee-shot and approach opportunities or interpret sampling intervals as model validation.','','Source hashes were checked before and after extraction. No source or simulation output was changed.'];(out/'REVIEW.md').write_text('\n'.join(lines)+'\n');shutil.copy(__file__,out/'executed_check.py.txt');print('\n'.join(lines[8:18]));print('receipt',h(out/'review.json'))

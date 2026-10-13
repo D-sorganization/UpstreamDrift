@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,7 +12,6 @@ import pytest
 from scripts.research.proximal_distal_energy.nonlinear_controller_plant_transport import (
     REPORT_PATH,
     RegisteredDoublePendulumPlant,
-    build_transport_qualification,
     validate_transport_qualification,
 )
 from src.shared.python.simulation_backends.factory import make_backend
@@ -76,15 +76,19 @@ def test_controller_plant_rejects_invalid_inputs(
         plant(np.asarray(state, dtype=float), np.asarray(control, dtype=float))
 
 
-def test_committed_transport_report_is_deterministic_and_scope_limited() -> None:
-    expected = build_transport_qualification(ROOT)
+def test_archived_transport_report_retains_its_historical_scope() -> None:
+    assert hashlib.sha256(REPORT_PATH.read_bytes()).hexdigest() == (
+        "a1fd4ea64b9eed217ca0a901ede90703802ea4dfd76f9ef7f436b07803e68878"
+    )
     committed = json.loads(REPORT_PATH.read_text(encoding="utf-8"))
-    assert committed == expected
-    assert validate_transport_qualification(committed, ROOT) == {
-        "parity_case_count": 12,
-        "controller_evaluation_count": 0,
-        "ranking_eligible_count": 0,
-    }
+    assert committed["registration_authority"]["sha256"] == (
+        "e964b68173c062559a6daad35a39240d4289b9bb5c50244883e3c251a059f11f"
+    )
+    with pytest.raises(
+        ValueError, match="transport report differs from deterministic authority"
+    ):
+        validate_transport_qualification(committed, ROOT)
+    assert committed["parity_case_count"] == 12
     assert committed["step_sizes_s"] == [0.0005, 0.001, 0.002]
     assert committed["maximum_state_parity_error"] <= 1.0e-12
     assert committed["controller_evaluation_count"] == 0

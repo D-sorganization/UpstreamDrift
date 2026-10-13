@@ -1,0 +1,1091 @@
+{
+  "status": "passed",
+  "completed_cells": 270,
+  "intervals_checked": 540,
+  "means_checked": 810,
+  "maximum_relative_value_error": 0.0009971237725258974,
+  "maximum_relative_interval_width_error": 0.009183864928432164,
+  "gui_source_sha256": "91cf57e85c39d46643787bcf7c0f16ef52699b276106cb5b1dd94c66dd6256ab",
+  "sources": [
+    {
+      "cell": "driver_lean0_curve1_rotation1_combined1",
+      "summary_sha256": "ead3766a4dd6c2122528e29bf8b365409fea5d8832a869fc2feade1236315f89"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_combined2",
+      "summary_sha256": "7bf03b58d7349b32112e3961747f882662ffa83a1f22f913d2d29a9a9f1dd373"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_cov_facepath_negative",
+      "summary_sha256": "63950000bdab652484bd486d4e834426c44346fdfb5933f9f5ac85cca7e09a56"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_cov_facepath_positive",
+      "summary_sha256": "b236f7d9e4cca273f1b48fdd2b009e17fa7d2ddbb783f8cc90e764a84e666594"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_only",
+      "summary_sha256": "2ff839ccbc3efed5501e9ce228f57262402e68cb414607881a6f68cd71493a4a"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_path",
+      "summary_sha256": "a3a49641d9f91f52749abd55c0d9202566785e0e3638d40a9c98c171fa725982"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_speed1",
+      "summary_sha256": "d99db156247c29f329d34b0fea5c258e2fe43281c938aec2b54b68c88b5559e5"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_speed2",
+      "summary_sha256": "b55cde9c2781645e1b37401187deb66c2020525aff2ea4dfa4cabe7d4cf8ebb1"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_strike",
+      "summary_sha256": "bd0f39b536812d6988641fca7b957a5ed722a9e046abbf9a150f088f1fdbf829"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_combined1",
+      "summary_sha256": "bbb3145f9b9f3767af40b0ee7add7e3d92597f49264ce626fcad79fdbf975753"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_combined2",
+      "summary_sha256": "f8c27205ba8dcd6f6597143f54e9418917f6b696961b6a9a6188df2906fa3346"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_cov_facepath_negative",
+      "summary_sha256": "b42f3024fd69f4325dcb02a687d8d536b7ac9bbaa9dd1fae379b514843f5d488"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_cov_facepath_positive",
+      "summary_sha256": "01654bd134a942325889d22020a4847a53981f44e138c0d8de0432fadb13dba7"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_shaft_only",
+      "summary_sha256": "79ec2a67fdc585f466b290dde44213a7080f01ecc9d2445ff12605af25a58e4f"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_shaft_path",
+      "summary_sha256": "228d208f474e47fb21b7f07c4278b40953d700b2bf802cfbb79f07ba4ffeef91"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_shaft_speed1",
+      "summary_sha256": "df4cc74151c4548efab94e6860cda9363a5166881b63206943ddd01061786ef9"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_shaft_speed2",
+      "summary_sha256": "36367a72306c2ec757cf76d70aec042136a5260e658be618b6bf52fc85eb0c43"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_shaft_strike",
+      "summary_sha256": "3573d9ed458b1f7572a03e95fb7b66f9154a482ec260f311bed2c3380b2f70e1"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_combined1",
+      "summary_sha256": "05d30862d37650e2150149846c65d7a8c670a1978eb9a196f8f390a5f196b560"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_combined2",
+      "summary_sha256": "fed95852fb12390dd8cbd09191267744f0a5baa5cc939f2f1d61fc7d58490ea5"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_cov_facepath_negative",
+      "summary_sha256": "d67985959b34854804284c7e264435fddd4392aff3a8ff82d9c701b3a78e553b"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_cov_facepath_positive",
+      "summary_sha256": "ec0b67495d12596319d0cf106f160bece4955a55cda9ceff06ec3717e7e4201d"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_only",
+      "summary_sha256": "62c2eeef023aaf93ab7aec1f98b86e21b3d1cb66ef59fda782029b64340d8f49"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_path",
+      "summary_sha256": "e50cc66253e87b0a70b203214cf0a1e7c2ac9b6952a9858dd89b0b9088f23755"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_speed1",
+      "summary_sha256": "907193c00158e2289adedca1ddf90ee5cea140942744278dea036fd05b463d9a"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_speed2",
+      "summary_sha256": "cec862532c4db052e27f7f87026447ca1170ffadf90541885381747b627f8604"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_strike",
+      "summary_sha256": "6e96d09249751e2d6ca1d87b841160aee8b3fae45e78f5ffdd3a645d8f1a3c5d"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_combined1",
+      "summary_sha256": "c8ffa6500c4c1c98e66777d539a3cd5e980f45af126ffab872cd527a67212588"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_combined2",
+      "summary_sha256": "ac47b4ed7e3920a5552df059257ae19e891c2345d6c57721370ce2136301ad40"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_cov_facepath_negative",
+      "summary_sha256": "a38ea09ecb122a21d341b686515cf1cc347f82120a83066a2ac74e676c26b282"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_cov_facepath_positive",
+      "summary_sha256": "dd90188d622cbd216d41d338d42e028879b2e6cd7dc4c6572660931ca6c7a091"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_shaft_only",
+      "summary_sha256": "ecb0dcf6c73d992bcb75bc6752bcfb5ab37b8f77502e8dbead57a77b4f063c89"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_shaft_path",
+      "summary_sha256": "2d17409a9508ebda51b14e6ee062326ff3bbb8c47c6b10739caee027217b8227"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_shaft_speed1",
+      "summary_sha256": "d8d2cc8083be1acdf73a1ab254e4db2b7146c5f20214af4642899706ec2cb734"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_shaft_speed2",
+      "summary_sha256": "56bbda09ed3f26044e4967959be326c862a5114e790f37cd840162251c53663a"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_shaft_strike",
+      "summary_sha256": "a3ba97322efb093a0e6ab99597abaafabe52970c50b74f1b6297a7ab549ef56f"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_combined1",
+      "summary_sha256": "8ac79d2f92e1398a98be2a2bfbe842eb67f7cfb3ea0d3dcb13605869a093d251"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_combined2",
+      "summary_sha256": "4f14138ea57c4856806df37095c4cdfe0bbb2bfcbbd7e0b850eba1a60e356b90"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_cov_facepath_negative",
+      "summary_sha256": "100812e6a3b83fe1660fa9985e88522ab1e270f11ce86481fc3832d4e3a657ee"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_cov_facepath_positive",
+      "summary_sha256": "ab6655e8106a5bd023049b363208e75021b786869b8636759fce2bf81adaeee8"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_shaft_only",
+      "summary_sha256": "a0a04e7ded4b5edc606dd6fc310e0f8e456c313580cd70edfa064ab95fa022ae"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_shaft_path",
+      "summary_sha256": "d5a7f293c7d4c971d8d7f5dd774fb755924e1c5a0979d69d754ecee3befda786"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_shaft_speed1",
+      "summary_sha256": "eebeaaa03c452f7c58128c1f14b77987efa3840873403914319cd97c0c550953"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_shaft_speed2",
+      "summary_sha256": "0a47963ab778226b38bd4c3797883f0611ca5286d42ea64e17f1056051804608"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation1_shaft_strike",
+      "summary_sha256": "efad949d94af1b2c49a1a8092f17daa44ac2646ec8e1a6170e5685965bfe5490"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_combined1",
+      "summary_sha256": "a03188f5afa5b58e1a3183c20887da885e2e56d2e19c18a54dbc673410a31e58"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_combined2",
+      "summary_sha256": "be043b74b564584893dfd5bbd6700b3ed32eee912589201c32179e3b6bd6e9b7"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+      "summary_sha256": "b02d092662c6c1b8ecb91f2a281010cd2f98211c769fa8b50895c5fa69a34013"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_cov_facepath_positive",
+      "summary_sha256": "dd324ceab790474f0277cb043781b5e2029446a28b50040efd0f7420bea4cc4b"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_shaft_only",
+      "summary_sha256": "60b4fcd9a71bc4ac725501e03987e216416fa99b24fb7a934d547b13e27ae418"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_shaft_path",
+      "summary_sha256": "9cd880c755a426f1759789a4ff454e600cbcbfd5cf6a4323c8f7d81e3aac2651"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_shaft_speed1",
+      "summary_sha256": "85c8a159d9e035edd0d611ac0332f444f61098a06e4eab3b3bf834ccd36b67a1"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_shaft_speed2",
+      "summary_sha256": "41c27c624664fdd138354f2d0d3d316d1e2e620941853c8cb326df4bcf45ac53"
+    },
+    {
+      "cell": "driver_lean5_curve1_rotation2_shaft_strike",
+      "summary_sha256": "8dae391e19d16c53ece7bba4c2948cbc0910a927b33c42400c9223b3e01707e2"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_combined1",
+      "summary_sha256": "a7f654bdeb6bae1b9bffed7f47295d93e5349752f144951b9750971eba0e4c3d"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_combined2",
+      "summary_sha256": "c5c55d4a3563a96f5750477afed8a56f13b636a67213438db2eb04af612f82a2"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+      "summary_sha256": "0f8e6dc052cdc3472256c777dce6c8cf8bc0a109fe4031615e3d32108ab9d494"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_cov_facepath_positive",
+      "summary_sha256": "404690d28b79126197a367bc488184feabc7fe2627dcd50d56d1032497b09551"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_only",
+      "summary_sha256": "b558b5e4b2d1a9f6cea67751abeb50f969641ad6f5d97146d4c39c7016a3c5f0"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_path",
+      "summary_sha256": "1297f8f52e9de59b4c028c4613fc8ec10a408b4139e26c2bad77a209b14be5e9"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_speed1",
+      "summary_sha256": "438371a2d372d9ad737f20c036ac4e3eb11b8988aff3b6faa04df824fac1517b"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_speed2",
+      "summary_sha256": "527b8766e670d18057a66d02dca8dfa6434fc2b9031f1b1dffe9098c56fd51ba"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation1_shaft_strike",
+      "summary_sha256": "714f7a4d19e1f2349b5b75e2ff62acec6ab93420c174892fc71580bd62a9d7a0"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_combined1",
+      "summary_sha256": "64a32593686b82a981f25dea560db2ae8ae3e90a3b08ee0c360a61fc5e6a0ddb"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "summary_sha256": "921f4fb57442ada57884d0a22b1744b6f92ee73d07de37d1c5dceede961e87ac"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_cov_facepath_negative",
+      "summary_sha256": "bf8d1b4db1de1cc22e7ae25d9f0921399b5fc6622dc5001e52edc80cb9af587a"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_cov_facepath_positive",
+      "summary_sha256": "727073ab2b642ff53d93e22fe6e4332f9dd763e0ac7fcf234fabe4953557920e"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_shaft_only",
+      "summary_sha256": "d960a81cc48568ea5b7eb1b48afd53886da1cf12351d6a7fb62f99f1466e9190"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_shaft_path",
+      "summary_sha256": "25e9448c51ea760f1ce3ca2b43b30fdcbf7ee11eca04e626a7167bf82796c269"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_shaft_speed1",
+      "summary_sha256": "a69f5351ef297293d83b55661b0799a88dab86ccd69e6b38c0325a8ee83df66e"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_shaft_speed2",
+      "summary_sha256": "6b393782e0bdf6a552581165e3a7bbd1c947fca99029749b1ae7d42f999e2c4f"
+    },
+    {
+      "cell": "driver_lean5_curve2_rotation2_shaft_strike",
+      "summary_sha256": "e6de5680d11bb6f8671d23a329f1a678170bacb90551252d14ba068d7312e8a2"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_combined1",
+      "summary_sha256": "b36dc5841fa48d6edad6285f4ea1323658d82d8f44554218b02c3484b4b38cb6"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+      "summary_sha256": "e8264d9d5df4c7f8314644037c6e885888d62daa182e295ff551fd77d9ec58c5"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative",
+      "summary_sha256": "dffeeb25340cde15728f7d212225b6eb3f536f432f21b371a320a5d38a95d134"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive",
+      "summary_sha256": "00907c91696ccbf95b26da29c18b53c4514741261d516f87a4873f0dd280b889"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "summary_sha256": "e8b2e18554af3a47c502ac26285c0ae852fc8b7854915265b0abfe15f8ce5aa3"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_path",
+      "summary_sha256": "781a04ec6affe6fadd66fe552f92fab5d2bfdb2f418e5e0561786173b3c10b95"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_speed1",
+      "summary_sha256": "9ee018fc6b3ef8121a0944afb34c06d69549643afa301950c4dbf2da2f2dd708"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_speed2",
+      "summary_sha256": "6e39c036ccc4264e4a3a569c74b3a6e6ca40c4b550c56eae0bdd173fb6725ac4"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_strike",
+      "summary_sha256": "544ee38deb0f93315b6e18b7f6ef7fa6758562caf0686b80acd1fb9591580e7e"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_combined1",
+      "summary_sha256": "e8726bb2bc0c34ff3a5a0c3aebe5c01084e787a1af0c77eb669589c7e761a8cf"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "summary_sha256": "1aa3c170be4d19ba88b35ecef18e4cdd36e9efa01b418870dbd1d52bcf3d2ae0"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative",
+      "summary_sha256": "989424ff0faa95e422c53e3457e0df94f78d5e7b36b7607490d0a7d3419cdd4b"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_positive",
+      "summary_sha256": "edd15d9c9dfc05691a69bdec496bc1d52a21902fdd1b78ac2aae6413ca01fbaa"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+      "summary_sha256": "cd6cb4f1302c1922671983a52701b90894628c68c1ad8e26dc08810a6fa70adf"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_path",
+      "summary_sha256": "f23b8743c64846595ad096f080a88d9802789371aaa5bf71e6401bb661bd2d77"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_speed1",
+      "summary_sha256": "7bc14cd2f1b96f63344554beb6f3317292943b5ae7369c363a904166212b88a6"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_speed2",
+      "summary_sha256": "05a156a464fc5e1bdff8d835b0db85f84f1d577f01bc7becfb3e44a34f597e2c"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_strike",
+      "summary_sha256": "036300c90688d8d2cf4b325768b0ab87f586c6963150abc44feffe50281dd9d4"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_combined1",
+      "summary_sha256": "6e2b03250c8527993d12cff5d8be1f59c8cc861b8c7591610b147c0b8471ac48"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_combined2",
+      "summary_sha256": "7557396ff7a9d8156be99be0791559d1864ef3bc1c5de77daac6262ace2def81"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_cov_facepath_negative",
+      "summary_sha256": "445e2f597fd039f600b9c73a30a2033b6f74fb8bcd6ce1cbc2cb5605f743a6ca"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_cov_facepath_positive",
+      "summary_sha256": "baa725b5c347637c2396e350684405ea7b6b4a4e9021f0771ec040c6134e59d8"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+      "summary_sha256": "7f3eca37e698bb86b580ab86272d28e088c8864af7be672342d68eff6c6c7597"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_path",
+      "summary_sha256": "a0b4a725f529a1f1d7f5d3237b6dcc171e45fbc458bcc8ed8c8a1e3485803a40"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_speed1",
+      "summary_sha256": "a11bf21aae2936d7dc035a8c39d144554bc99f39e8991ca21c464a5edd220ba7"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_speed2",
+      "summary_sha256": "1734bb22ed41d1a2c7543a404fb5843aeb06291e14dbaeb2d796da094bac5dd1"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_strike",
+      "summary_sha256": "0e5310ba31fffec7cc922d32ed90e952618074d3029dc569604c6834244b4ac6"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation2_combined1",
+      "summary_sha256": "ced477d1d4b3257b5ca264daedfe3112365beb15d1618abd1552945138153306"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation2_combined2",
+      "summary_sha256": "ebde87d76274201a144eab3864ee63b5094a9ab810f41b4ab57e5a5ad5a4fa30"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative",
+      "summary_sha256": "6726590caa068c8ae08aa95eb5a8c706a26b60c47045239372249b13aa6a0ae3"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive",
+      "summary_sha256": "7db925410b3165bddc90b35e845bc606588896fa2110cd729e65525077da333f"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_only",
+      "summary_sha256": "7540f0e24271c0e1dfc2a38b5898e42714bb5c1e9386edf7930f258db5ddeb30"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_path",
+      "summary_sha256": "549a2d4307840db6bc11613c6493ee93293e54f5d49a2d22bb6500bb5b5e3221"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_speed1",
+      "summary_sha256": "cf04e4c3c0d6da386c604d298ca63697ef44622e1621c1632eee735bb30a77f3"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_speed2",
+      "summary_sha256": "a35827b8daedf5517ccf8f1cc85de042e3c1cb48ca82a071e85e9cd3683b0699"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_strike",
+      "summary_sha256": "7a72cdc2f9929e8a37765faece4b62a72af70af864f6119d07ac9134b8817831"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_combined1",
+      "summary_sha256": "77bc8e293e14e19f5956137b60903f9e5719e59b474a28a54343afa7d1d39fdc"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+      "summary_sha256": "9b5823be94ea6e0d5da763513de5adaae2fc65cc30946e3cdfc79a295c61fc1e"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_cov_facepath_negative",
+      "summary_sha256": "3e31a9dfd01909ce0d6fc6d45f76759e5e988c212cf30426ca930892688ad89f"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_cov_facepath_positive",
+      "summary_sha256": "4d5d0b6e9ba7d58c065f0564346326dc403e6181455de4a626a33468de1ab7f7"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+      "summary_sha256": "0b9f1fbcf2388d7e5036cfb85030864c4d58466737fbbc9be5b6c39647a5b81e"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_path",
+      "summary_sha256": "807494928a4eb4c040c9531cfcdc2f150fd61c815c84fdbea129307822931a3f"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_speed1",
+      "summary_sha256": "b171e508198033883eb0e813cfd2158bf8ddcd4a36e2ba78cf2286bf3cf5399a"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_speed2",
+      "summary_sha256": "9fd964f233163646005e5226a2a9d14781edd2e00d9b439b9993983dc3da98d8"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_strike",
+      "summary_sha256": "17f519a52cac9f4b5488186dc774fd154745dbbf85505879aebe10f68b64f41e"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation2_combined1",
+      "summary_sha256": "ceb98a6254ba5f32447faba1e8b34c210a790b88326e9ba03c16ed0210c90ad8"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+      "summary_sha256": "adb4265c8a53ade4097af3fe06056a5cc7674aa7800a606ad1e82e8c3b70aac5"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation2_cov_facepath_negative",
+      "summary_sha256": "bcfb1176cb0b22f77c3600d6d9aa022e73733a9d596b4150ba337c878000d698"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation2_cov_facepath_positive",
+      "summary_sha256": "1fbab52a8f12e2d1f5906e8bc3f49991dc0c830d61c5d88e614bc7a031f966b9"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+      "summary_sha256": "f46a05b5fbae3046e0b8f1175f59a93988a08041ce027e993729dcff46dbcceb"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_path",
+      "summary_sha256": "85405faf906d5dcac87671870115228dbfa14743807a547d567fe5eaa008dd96"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_speed1",
+      "summary_sha256": "4a6345450e2126fe2ee31610e458ccccfce2797ea7485359a70c87ae3a2d8332"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_speed2",
+      "summary_sha256": "c6dfff2ce806c6ab7a2a565388cffd4d332c2518867656b0f819b0271545e6e0"
+    },
+    {
+      "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_strike",
+      "summary_sha256": "88f27adbccca6fb0ceeba903ae4c6ff5437da818f582d7d037e5bfcfcba18639"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_combined1",
+      "summary_sha256": "dc31e10e378942eafdec529c69a7ca2d35641b6ffbf5a4a344a4294eec55d99a"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_combined2",
+      "summary_sha256": "a967873b2311fea6434f67145daba59e9e434c5ec9ed17ad4fcbc784917eed54"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative",
+      "summary_sha256": "e9f56289278003dd0a9a48951b309f7c4716ba30481a150f2b4e6c5d1439023f"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive",
+      "summary_sha256": "0b02f22f5f33137295d5fa4b56c9d48a4fe2bbbe4566ac06d0cc64b7468a4258"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+      "summary_sha256": "eea158d4643f0328eef471b253d7496e01e6943c2aaeead14da1d2795ceeca37"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_path",
+      "summary_sha256": "3f4e6087be47f0d26c952f8f80c6cc4df0d994262529ca3352a5b8aa19b85799"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_speed1",
+      "summary_sha256": "19dbd4d022cb4a8f2926233c2676bf7aacc817828b05f82df02ec2ccc23c9f93"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_speed2",
+      "summary_sha256": "9f3c8dad9ecb0a5108ce3c8c7214da8da4c7ff709c08cf40c975308f60ea725b"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_strike",
+      "summary_sha256": "06998bc2ad13b476e4bace5987bae7731b6976aa9d0882dcf6e13367cc4a14c5"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation2_combined1",
+      "summary_sha256": "64400fa8db10d70661b42585c6f3c8e813b345f20101eb2d707dc224ac925402"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation2_combined2",
+      "summary_sha256": "03f21c5e25e2dfedd792601fe6d5dfc95d0ecc695d121093f539b7dbc38f1c6b"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative",
+      "summary_sha256": "9d41dec1725d34fd0233861eb1447f9313f68d2081057380d6243f442c9997f6"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive",
+      "summary_sha256": "5a8b9ba4c7824869ddd0f89262ea730be5b9818909a19e2a45dd8f61c3ca5098"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_only",
+      "summary_sha256": "0921ee8bbf4cbaa01210aa28812e1f8cb98968fc98c5720cced673a10b4de232"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_path",
+      "summary_sha256": "95dc331ae3e7580bea9ea39fe521443be82d230a03543212204a677bb059e251"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_speed1",
+      "summary_sha256": "d1e3e9323c76e7a32acc399bb85c72261ca1034a9b54c1a5dd71c7e2ca8694c5"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_speed2",
+      "summary_sha256": "856cbee292c6460a36fb67912f4f5d61da28fb7c9b7651d941d0b59bfd76e182"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve1_rotation2_shaft_strike",
+      "summary_sha256": "d86ed9573d2bafaf529692f2bed2bdb1d76860d9955bf19e282231b6d1519a4b"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_combined1",
+      "summary_sha256": "5da71c8489e15780ddc8b32fb9e7d1739d8165f0d40423c748e8ff78cdbf3763"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+      "summary_sha256": "c23e5477ae0d052db95792498dd5997fb161f94c18207c97b5839ffce1848b6a"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_negative",
+      "summary_sha256": "58dd70519e7606a413a6ecb63cea34cd0719e8fb91eeb4bed033f505ab8403c1"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive",
+      "summary_sha256": "933effb90453ba32f0d6565165e64e2db738944bbf4dbbc2065d318aabb4d476"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+      "summary_sha256": "a37761a08ddfc84e34341068a8fcc68f34c2c98fdc023b5a62a5ef5d2fb67b4c"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_path",
+      "summary_sha256": "7c6d723288d0ad49968a4e7be6dfe8e6e853edd5eb55dcb6d8a9d8d8ee88e0a0"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_speed1",
+      "summary_sha256": "42e95ff360534ccc0dc38ab9e7d940f5897140ff1eec6388762ecc54f522b126"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_speed2",
+      "summary_sha256": "69839a101bda2f8ee6bd4ea4b9bae1e2baeb5507396cb406f0748f1463ffa91b"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_strike",
+      "summary_sha256": "bdc14d174914b0fde4eddd3fb458bc8c74a45707a6011038013e51cf1fddc493"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined1",
+      "summary_sha256": "4ca3b6ee5efadfdb25f84f8d797e7f0cb5721e11e2b00474a11822f3b3d91372"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "summary_sha256": "1bdbe8d192de62c013ea817607cfd6aaf3f83397861caf2a0d238494d3b3afd7"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_cov_facepath_negative",
+      "summary_sha256": "f41ad127fa7211d94b840bd6edb2eabc3effd3fda56120dc93010842550e0870"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_cov_facepath_positive",
+      "summary_sha256": "9ffb2fc55acb40e843556af428452e617c21a4e74c47a2bbf0498106ab444b45"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+      "summary_sha256": "7e9b8b758789771dc0157f909a375ce2537b0b92f101dff7868f6f0a2174c422"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_path",
+      "summary_sha256": "7968ba11894329925a05dbb99e3d8c3a6f17fb52071c2c930253e0b46ba09154"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_speed1",
+      "summary_sha256": "fadffe809b86f4b40dc49567423100aa500b3084a7f75c660ceed6c6c73ff1ac"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_speed2",
+      "summary_sha256": "3790ef4ce69c61a24753ba82888165ee2f5d5b3aeac62b2728ac10174da95344"
+    },
+    {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_strike",
+      "summary_sha256": "037f270996f6ddbd990ef94f4949ea39f0dd3e25400b19ebfc26dd7f743ffeec"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_combined1",
+      "summary_sha256": "f50b7310ff6f5a59b7d979e70ed70bd25a73b7e2c3adcd8ee564d1f922cba801"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+      "summary_sha256": "e590a55c6d3fadb01c78ea7daca1f2b4628b3fa26713357ba601aa2be15af5f9"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_cov_facepath_negative",
+      "summary_sha256": "e99069d540825b06a161800b4257bd466b39f032e7617feb284a977750580cf7"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_cov_facepath_positive",
+      "summary_sha256": "c1523cb61d9304051f00b3a1f3e91cc7a8e6d09dc9ff2010099b879dc5228b8d"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "summary_sha256": "668eec6793d12f4054d749129b95441096f9b9913072cb7b504c9f45feb52d2c"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_path",
+      "summary_sha256": "f85960e51681b6810d61a8c87ddc252f2162f7a7af178d1d8a53d5605ff1b0d3"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_speed1",
+      "summary_sha256": "d8cde212d37a83ecb484164ab90b9db1d6772227772c6637c3d1cb6666651538"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+      "summary_sha256": "69a58727882ac42b7e6f596da89ae04cd71b4c40460b06ce01d365c5a5d5b3e5"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_strike",
+      "summary_sha256": "cd1a6d301cfefd6d5bec7776d531cc8b6b374067b03ddc9fc10c7aaae425bf55"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_combined1",
+      "summary_sha256": "493ad03e523d64fdeb6197ef5d863c8e16d174c83f12b6b9f9be1f82fb34a6ac"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+      "summary_sha256": "e8b22b7760cd10a57e5556a397878d4b2bb863b784b5f5e2db7bc500647af587"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_cov_facepath_negative",
+      "summary_sha256": "2c4798c6f01cdd0afe313cc5043c8460f77082b62098f1191b26589a3a510255"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_cov_facepath_positive",
+      "summary_sha256": "b0d9045ca08b366e6e26977396a12722b7625731e4685798de5f29913155ac45"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+      "summary_sha256": "78694b4ec7ec6ecb5ce604761356e182a34b3b7d11c633ea96277bfac575d5f4"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_shaft_path",
+      "summary_sha256": "a2449947584f645ff9a6265451477017cc167b3600cb560122f2c1053385df67"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_shaft_speed1",
+      "summary_sha256": "6510a650f46680f313759bb15c0ba9e3a9cffd696373e08a903e159b0591977c"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+      "summary_sha256": "22d8e887a1de80fc56de7b0af5c27510f22d4ce85c443a788e3e03a6a595e76b"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_shaft_strike",
+      "summary_sha256": "6cb661e7b76e8623edddf3ca3fb03d25edb6b0c1e8d983cbf41d7c0d22e16b3e"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_combined1",
+      "summary_sha256": "ddbaf0efaedeaff3d569dd71f0b306d60f7636db56270181d4f09fd9556fe9aa"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+      "summary_sha256": "ed54b0b5a29aa492c268f340c10686acb4e83a4123ffc243e7cc1c1159fca928"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+      "summary_sha256": "45f775882bf2e7bb45cd05486b2947a1f6fc5b93ae18e8baa44c669a9ba19cde"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+      "summary_sha256": "97cb29f545e9e0d7063bc2b3e8a475f187197d9816b52cef0e6577ae5ab7602e"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "summary_sha256": "f1bf6e9e13eb7fb79e5d74da2daffb8fbda5d187ec5f67087123d626a11caf7d"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_path",
+      "summary_sha256": "9425d7efd24f495ffb4a7afae2e0eb13f9e28d921e2688991967295ba9df27b3"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+      "summary_sha256": "1514a25f850245bc6779cc3848700c1fc89b6d42d8dea2168504e3bee2147a3c"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+      "summary_sha256": "6492d97f5b4974f9a75868ebfec101cf43c77347132637925fa116b8cba2b27e"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_strike",
+      "summary_sha256": "c65b7172824ca96b6a08331bbe804a3fb48d79d6411519ee6b6faa8441f728fa"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_combined1",
+      "summary_sha256": "ad1f8be9f2cf7b29f0888171bb81df4c9fcc74697195f0084914d319b67052d4"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+      "summary_sha256": "8e7abd16acea1f477cb28a487634d815bb53324e22dc9ac399098b93b1b9fc7b"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_cov_facepath_negative",
+      "summary_sha256": "faf31be34cfe8108b9665c4a0c9e8790d6aae8a64c5530a2707c0c236495729f"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_cov_facepath_positive",
+      "summary_sha256": "c11eadc20b6fa166409d7194d8c0be54c11d9514cdeefd994ec4a169653a20f3"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_shaft_only",
+      "summary_sha256": "2b262a83dc3b373544cadb0bac2c9fc51ab0f527d69b1d7d932a3b895beafdcf"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_shaft_path",
+      "summary_sha256": "02a9a08dc4e4ce4f033d65128073442a705d25a3d474613c7aceae4e8f9114dc"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+      "summary_sha256": "6e48f98913167c54b0ebcab606387ff93ad44f5f58977b7bcc15c85fa54d6bb9"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+      "summary_sha256": "81f8c79d74950ad0daba225ee07b5c1ca2ddc5256b26f1a387b4be9207876682"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_shaft_strike",
+      "summary_sha256": "aa067a81d865fac3a6b0b59a9a4bcd069d98d13f9ab56a9ee07744f668d595bd"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_combined1",
+      "summary_sha256": "ccf01a884e80fc1c54a3bed3dd38d0421e0d575df7ed016eee53e1dc56737cf8"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_combined2",
+      "summary_sha256": "3b34e9f60ed1c328546850ec38b66caa18bf279af9d157043098f5782027071a"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_cov_facepath_negative",
+      "summary_sha256": "d86c29ebeb42dee7afae2dae8bcea031ab4673b6a5a45fbf548ed3a30f3df0be"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_cov_facepath_positive",
+      "summary_sha256": "6e3308432319eee8c78df748953f06610450e171ce743ef0968b67f6a296bc90"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+      "summary_sha256": "e3df4aa95b97c484d67278c8a8512925c8af6ec99609b7f2b0ebdf72e7201b9f"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_shaft_path",
+      "summary_sha256": "7b00c0e1e4d7836bbabdc6fb0afe5fb844f2436c6d807caf145e53b339b82331"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_shaft_speed1",
+      "summary_sha256": "fe3bbbb078769249aa796a3ed0599c700331038b8c8042a963448f52f63021bf"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_shaft_speed2",
+      "summary_sha256": "6f15097be7ef59eda391551ad4bb10a9982989a03218168227f003e07556b65b"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation1_shaft_strike",
+      "summary_sha256": "1732e0ab467a096fb3f857022bfb7a2a393df5e4c32dafefe61aaffdb3289c46"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation2_combined1",
+      "summary_sha256": "57629504cc91b1115ed91362602b7d70f14df1720a522b395ac703b814c62891"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation2_combined2",
+      "summary_sha256": "99c7761a9afc972addc9688b082011adc750469acedf7e7a5bc2e9db5fbef855"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+      "summary_sha256": "1c52319bf8d6d5493de048a0c405a058192594a17f46c3dc3291614fab979fb6"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation2_cov_facepath_positive",
+      "summary_sha256": "6e91109e41c93bcf24886cd8c90eaa010eb0adf802ed5d16407621c76a3d6330"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation2_shaft_only",
+      "summary_sha256": "9d5685f7b8854d0e90a6e29f1bf1036ada0e84be32bafa89d1b217022f59e6ee"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation2_shaft_path",
+      "summary_sha256": "b6ae0a6a089acf39881ad46d5ab831a53af57812151969a19cf43af71e91048e"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation2_shaft_speed1",
+      "summary_sha256": "e12d08b2f676b634592a99b50c663bd5a0f67d48e0c20fe09e2d0927d1926f52"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation2_shaft_speed2",
+      "summary_sha256": "831911feee713a9ee701a8b96a72f428a842208966ce37b1467b6619052d28d3"
+    },
+    {
+      "cell": "seven_iron_lean10_curve1_rotation2_shaft_strike",
+      "summary_sha256": "1dc8817681d9dc2741fd27729720ef97a07395b8d7d91aff01b4556a65266ddb"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_combined1",
+      "summary_sha256": "bbd08b65db1eaf1282e78159202833d57822220cafbfd716ca431b29df1fb964"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_combined2",
+      "summary_sha256": "7f66608811e5e988f6a696511eb9d262e6057b1d15ce45297ea9d37921773a6a"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_cov_facepath_negative",
+      "summary_sha256": "7708e91b5da9429e124d3cbe581732a237d38614caecd4067a0593d70e827c23"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_cov_facepath_positive",
+      "summary_sha256": "a3fc3ae988aa9fa361d9a1c5e538daec37ed555e5f9172880ae73cb46e01c355"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+      "summary_sha256": "43efcacdc317f40454ad3c279523c80b874414833c08fab6e5251d3de048a5f1"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_shaft_path",
+      "summary_sha256": "964ed4968388c9d5434af43a0c3354437fe5c0e0e91201998700e3414c902ba8"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_shaft_speed1",
+      "summary_sha256": "f87a3777f37db4074fc85680a7e9702c0ec16a1b234ac24d7248cda5138418b3"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_shaft_speed2",
+      "summary_sha256": "7d5e28eb5fc2410518f6351d720143a30fc8abece617e6c66d250d7c59071e59"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation1_shaft_strike",
+      "summary_sha256": "0e056a2f519ad54745db0d03a6d136e36d465affdeb8a9fbfc3614d6b76035ca"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation2_combined1",
+      "summary_sha256": "6b53754d39c4e532400d832f80b017bda8d8f41fdf414e353b49e608c9178ed3"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation2_combined2",
+      "summary_sha256": "f470ce287a983e1ba11151d62c196d389857581fec1faa0c19160d8ade9be4be"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation2_cov_facepath_negative",
+      "summary_sha256": "2397efe744290a771005c8be0a20447b71cc746b643b03a3d728ca3e64fd05e3"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation2_cov_facepath_positive",
+      "summary_sha256": "1a1ce91b6d609f85605b626a1332ef8e550d4a4169997275e364793be28e7d4d"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation2_shaft_only",
+      "summary_sha256": "c822ac9009fb94eef8ef8c0822928b96cc16d980855e477e6a807b48cae561fd"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation2_shaft_path",
+      "summary_sha256": "61aa4168bf463fac498224bfb99fb56493a87d4f7ca67a77b902e98751ad1c13"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation2_shaft_speed1",
+      "summary_sha256": "22d00c8c32cd0de6f3ab72e7751f6faf3a67f22d4eb370ccea3eb7c1aa30c862"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation2_shaft_speed2",
+      "summary_sha256": "751735afd92a990f06b2b666475ba64495a8ee8821343e914cd3ac5ad96cc675"
+    },
+    {
+      "cell": "seven_iron_lean10_curve2_rotation2_shaft_strike",
+      "summary_sha256": "ceb12a6a9201e4b91937ac6f3199cc72516574717fdb9aba9f313e445be266fa"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_combined1",
+      "summary_sha256": "dabb925688d0e962367a496334dd82c30fd5fff2be6d0c51d53c7faac5a1d80e"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_combined2",
+      "summary_sha256": "9a4ca9cdd7314cdbdb909ef8335d395ef3706443dc816fd46ee1726c329474e6"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_cov_facepath_negative",
+      "summary_sha256": "fc412b623df38d4f4b9b5e8b0bb348649677241f8d2298fe24ccaa083ec36741"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_cov_facepath_positive",
+      "summary_sha256": "b0deb4783d1c874e884ce47f6480de93da8bc77a7894e882a61fe8de2f695f0b"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+      "summary_sha256": "e7b77fd7dc39369a783a92d823fa1f199a9d10936ded4d886f27c35e4a67de97"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_shaft_path",
+      "summary_sha256": "75dcbda9ad3b6c9d1256d9a3336bd57a8fd290c8680f8fc9f86afae3395e6a2d"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_shaft_speed1",
+      "summary_sha256": "439a8f1e40dd3f29da3bb9b88fc56767a57d88afdf31783b760e2a955c0c13d8"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_shaft_speed2",
+      "summary_sha256": "cea59bc84f98411365e9d3b1fe1bd9d9eb8c2e9b466b9f7214130882e03c897a"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation1_shaft_strike",
+      "summary_sha256": "dd9ad97562111350418039c799a7b1fc9e256a3961dcb012273c9139bf7b2110"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation2_combined1",
+      "summary_sha256": "d275d247ba2a34acffa5ced86d7d9a91451d3d29a4c81fbb1d31a349188c7789"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation2_combined2",
+      "summary_sha256": "5e9df5e5cc0aead155c55d7776ee149e5281374ae0c452b5ba3dea9814052552"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation2_cov_facepath_negative",
+      "summary_sha256": "06b1c9400a0f81a42a827efffc8d4d0c777b7d205ee9c36263a4a628358595b8"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation2_cov_facepath_positive",
+      "summary_sha256": "55f1c9a601f9d09d9e404ee1f6fcebef9881d3fef84b3ff7e06fb11ca1832e9d"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation2_shaft_only",
+      "summary_sha256": "1ca55aad51bc97e15af7441e4b456f427b70d2960fd88579dc12fb0e91b7f010"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation2_shaft_path",
+      "summary_sha256": "b1659b1db3c76f1b372cab38c2463dc558bdddbd186a8d227b7851f489f92dca"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation2_shaft_speed1",
+      "summary_sha256": "6f7cf49e87bad7d6973a380e388860732e3cb8a56f17abfcadcb366187beaabf"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation2_shaft_speed2",
+      "summary_sha256": "b1e09dc0631c1615235a13f6962978ac5aa904e247baa5d31dd53e59ac2b2cef"
+    },
+    {
+      "cell": "seven_iron_lean5_curve1_rotation2_shaft_strike",
+      "summary_sha256": "6691448a26e0cd751df08518aff690d9cab659d90ccabcc310ee381b86285d36"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_combined1",
+      "summary_sha256": "a90fcb0b9428d9916767fd42c841106829bdbd819c9bdfcbf960c85742a56777"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_combined2",
+      "summary_sha256": "6768edaf46f89c7716cbf12c175b9be34b2235922230eeda41e3fb21fd16ce9e"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_cov_facepath_negative",
+      "summary_sha256": "6ac3c10b7f85a371794becfac34d2f899618f4455c627dc0533bcb2ee01a92e5"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_cov_facepath_positive",
+      "summary_sha256": "8ad776db34c95f23be3270996240613577a92d66c707115a227c4992ba5e3955"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+      "summary_sha256": "8f8da03df136660b3f90d5d045e07e2508e3707f3361234729f09262047e26a1"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_shaft_path",
+      "summary_sha256": "aac162d6fae39fba3fe6919fc1f26ee9ea1722dfd55fe2fc6c3c1c53091c56eb"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_shaft_speed1",
+      "summary_sha256": "01071cfed54b0318c714d8d2477b2ef9eeb478cff5a441852c48df1ee68e66d6"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_shaft_speed2",
+      "summary_sha256": "48a136d46bd825a414163bffaa26ca390b10323292073ee8b7d42c89b694f2db"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation1_shaft_strike",
+      "summary_sha256": "204ab6d2f774dcdd2c3c42ad373ac24ce4dce3fc5598ea2536d5da14715793e4"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation2_combined1",
+      "summary_sha256": "ee59d3c4e6b804ab3e2e7924a07e5fad9aa28a583fa035d581366d05b0520455"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation2_combined2",
+      "summary_sha256": "2fcb2355d4448897e433fcea35ed09f12a103a82f4f2faed8ed41eebbd4235a7"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation2_cov_facepath_negative",
+      "summary_sha256": "8a3a58c9d64315fac09327d366868ee31fd7abaf2369567ae8155f1decaad246"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation2_cov_facepath_positive",
+      "summary_sha256": "d549005044243af4a5f3fc2522dd040e9056e810094ecc70227e2ecefd4e1c8a"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation2_shaft_only",
+      "summary_sha256": "2cbe7fc9eaeae069e7cfa91f3702f31849675307057eb545585091e76ea1f888"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation2_shaft_path",
+      "summary_sha256": "3c426f089d3e291dc8eba9d5c04bbf323881a59fb9d8053e4e5dadfe38c8574c"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation2_shaft_speed1",
+      "summary_sha256": "52c811987442e09bec026fc6abbcf4db45add237f1a716ad4b3e6b081dc7b606"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation2_shaft_speed2",
+      "summary_sha256": "8bf56c5ec10389801803cc81241d342ad27b158a737f93b66d52452dfbf4c63c"
+    },
+    {
+      "cell": "seven_iron_lean5_curve2_rotation2_shaft_strike",
+      "summary_sha256": "741adbedf42d020ec4f053d0d0cee3d2c87d4e4f209bfc5ecf66ee5a1c1974fc"
+    }
+  ]
+}

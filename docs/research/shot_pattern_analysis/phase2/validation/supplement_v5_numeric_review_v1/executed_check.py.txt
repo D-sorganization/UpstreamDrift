@@ -1,0 +1,25 @@
+from pathlib import Path
+import json,hashlib,collections
+from datetime import datetime,timezone
+M=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');W=Path('/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift');b=M/'docs/research/shot_pattern_analysis/phase2';n=b/'supplement_report_v1';o=b/'presentation_preview_rejected_supplement_v3/supplement_report_v1';v=b/'validation/supplement_v5_numeric_review_v1';v.mkdir(exist_ok=True)
+def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+files=sorted(p.name for p in o.iterdir() if p.is_file());before={str(p):h(p) for name in files for p in [n/name,o/name]}
+checks={name:{'old_sha256':h(o/name),'new_sha256':h(n/name),'bytes_equal':(o/name).read_bytes()==(n/name).read_bytes()} for name in files};assert all(x['bytes_equal'] for x in checks.values())
+p=json.loads((n/'REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons'];counts=dict(collections.Counter(x['comparison_kind'] for x in p));assert counts=={'across_lean':56,'curve_strength':164,'shaft_rotation_sd':164}
+selected=[]
+for club in ['driver','seven_iron','pitching_wedge']:
+ for profile in ['shaft_only','combined2']:
+  for kind,a,z in [('shaft_rotation_sd',f'{club}_lean0_curve1_rotation1_{profile}',f'{club}_lean0_curve1_rotation2_{profile}'),('curve_strength',f'{club}_lean0_curve1_rotation2_{profile}',f'{club}_lean0_curve2_rotation2_{profile}')]:
+   matches=[x for x in p if x['comparison_kind']==kind and [s['cell'] for s in x['sources']]==[a,z]];assert len(matches)==1
+   x=matches[0];selected.append({'kind':kind,'sources':[a,z],'common_supported_n':x['common_supported_n'],'effects':x['course_scoring_effect_modification']})
+qualified=json.loads((b/'validation/across_lean_interaction_review_v1/actual_control_effects.json').read_text())['results'];fixed=[]
+for row in qualified:
+ x=row['pair_result'];found=[q for q in p if q['comparison_kind']==x['comparison_kind'] and q['sources']==x['sources']];assert len(found)==1 and found[0]==x
+ fixed.append({'club':row['club'],'entire_pair_equal_to_independent_qualification':True,'common_supported_n':x['common_supported_n']})
+a=json.loads((b/'validation/supplement_rendering_revision_v4/start.json').read_text());c=json.loads((b/'validation/supplement_rendering_revision_v5/start.json').read_text());keys=['candidate_commit','worktree','source_sha256','review_sha256','native_path','native_sha256','vendor_gitlink','input_sha256','producer_sha256','execution','command'];assert all(a[k]==c[k] for k in keys)
+for name,s in c['source_sha256'].items():assert h(W/name)==s
+for name,s in c['input_sha256'].items():assert h(Path(name))==s
+assert h(Path(c['native_path']))==c['native_sha256']
+for name,s in before.items():assert h(Path(name))==s
+r={'schema':'independent-supplement-v5-numeric-review/1','status':'numeric_parity_pass_publication_incomplete','publication_accepted':False,'utc':datetime.now(timezone.utc).isoformat(),'files':checks,'pair_counts':counts,'total_pairs':len(p),'all_seven_files_byte_identical':True,'all_effects_populations_and_aliases_preserved':True,'selected_draft_interactions':selected,'fixed_target_independent_checks':fixed,'v5_start_sha256':h(b/'validation/supplement_rendering_revision_v5/start.json'),'v4_start_sha256':h(b/'validation/supplement_rendering_revision_v4/start.json'),'source52_input9_native_rechecked':True,'snapshot_and_command_equal_to_accepted_v4':True,'draft_sha256':h(b/'review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md'),'limitations':['Producer still live; no final pipeline receipt exists.','Numerical parity does not establish complete graphic or final publication acceptance.']}
+(v/'numeric_review.json').write_text(json.dumps(r,indent=2)+'\n');(v/'executed_check.py.txt').write_bytes(Path(__file__).read_bytes());print(h(v/'numeric_review.json'))

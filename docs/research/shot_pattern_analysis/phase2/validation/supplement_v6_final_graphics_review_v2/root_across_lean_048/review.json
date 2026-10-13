@@ -1,0 +1,1465 @@
+{
+  "scope": "PNG visual component review only; not whole publication or vector acceptance",
+  "status": "accepted",
+  "reviewer": "root",
+  "utc": "2026-10-11T00:43:40.739432+00:00",
+  "batch_inventory_sha256": "2bd25010fcf0987721d7486837061c9c9325896c8ef143355bee78fd58b33b17",
+  "command_receipt_sha256": "cb680f682d4fc33a0ec05a747285e588788b37820b59b563987812c5126c5354",
+  "all_128_assets_rehashed": true,
+  "inspected_contacts": [
+    {
+      "path": "contact_048_1.jpg",
+      "sha256": "a45679e83eda6c668e6fa732cf454534460b62f9ff97851166aab988e08e351d"
+    },
+    {
+      "path": "contact_048_2.jpg",
+      "sha256": "473fe0ad77b5cb41aa811a2c6d49e2f847d17a6e008afdd766aa85d86fcc6a6c"
+    },
+    {
+      "path": "contact_048_3.jpg",
+      "sha256": "6c327394a309169b7d64cdb57ba1f8fc9535e469decd1bfccca41f9563f9719b"
+    },
+    {
+      "path": "contact_049_1.jpg",
+      "sha256": "3fc2b99ce3b952d098a52c195ede6081700acc54b6b0657f22a2331cf2d40fe5"
+    },
+    {
+      "path": "contact_049_2.jpg",
+      "sha256": "2cf7d4e6c004314a032de4005d82c3ab1f1dcd3a6b9854f6252f7dec6fe8d462"
+    },
+    {
+      "path": "contact_049_3.jpg",
+      "sha256": "7b10ec3f323ddda53428def4126d94857b139261efdb5c313482f5fc759a43e4"
+    },
+    {
+      "path": "contact_050_1.jpg",
+      "sha256": "9ca373336df0a90b57a269a22cd37c8edcf0a2208e28ef7aac68ec2b146c0341"
+    },
+    {
+      "path": "contact_050_2.jpg",
+      "sha256": "e3d7c9480a3d5ab8fa40687d6d3c740654e86a9db9a0e95ca97ca6cec5173b51"
+    },
+    {
+      "path": "contact_050_3.jpg",
+      "sha256": "9e4454a3a551416b352a340ea672e2c5fdafa48e57f6d8ad7b9dd5dd3bf6eb2b"
+    },
+    {
+      "path": "contact_051_1.jpg",
+      "sha256": "cc99035822f10873f820d465d4ff55c1cf44562e8e0b40bc14196d7d0cdad726"
+    },
+    {
+      "path": "contact_051_2.jpg",
+      "sha256": "8e6a63fb59aadf7e944d07961994e1112980888b779f1e19300bee18b335172f"
+    },
+    {
+      "path": "contact_051_3.jpg",
+      "sha256": "7ab4e448b889d29cf33a775e2c35643e22b1130ed0404cc402da0841baf3fa5b"
+    },
+    {
+      "path": "contact_052_1.jpg",
+      "sha256": "2f0e9d7cc1b34a437c9bf9e852be505ff1b749aabe9538c9245dd15eac50c49a"
+    },
+    {
+      "path": "contact_052_2.jpg",
+      "sha256": "bcf079010ca582ae6f8c4550489d9677345030a29115175b7f599fe89e77e208"
+    },
+    {
+      "path": "contact_052_3.jpg",
+      "sha256": "91f15ec5afacd03496e30fb6607cadeffede14e0af5691edaef5c1f7818de46a"
+    },
+    {
+      "path": "contact_053_1.jpg",
+      "sha256": "fe7d0225ab69fd93985d79a15a2dcf75fdd14fd62117ca28e05cda0e5c56c612"
+    },
+    {
+      "path": "contact_053_2.jpg",
+      "sha256": "959f3a00d9cd16344b7d30ec7ba734773629b9292b1bd6f832e349fdd6e4d09f"
+    },
+    {
+      "path": "contact_053_3.jpg",
+      "sha256": "12254a2da66591b04bae97755647c6a49f7d7a355f1f8d6ea112827873e0cbad"
+    },
+    {
+      "path": "contact_054_1.jpg",
+      "sha256": "bb725fd546aa74594d0c2170e693560e083304eca3c9ecdc129ae0aa65259611"
+    },
+    {
+      "path": "contact_054_2.jpg",
+      "sha256": "8ee3d636f8152fba4548e7723d013ac8bf56990eaef5b05a5f4fbb1b42e28d71"
+    },
+    {
+      "path": "contact_054_3.jpg",
+      "sha256": "e69ae8d34320e6f98a869e4f6ebdab5a658d9f74ba5186c1692a8cb9c6880f31"
+    },
+    {
+      "path": "contact_055_1.jpg",
+      "sha256": "e21ac9745cb9a0973992c35afc712c2457c7e5b4e884bad3b4bb845b6c2dd523"
+    },
+    {
+      "path": "contact_055_2.jpg",
+      "sha256": "9fbbed8de9e970ef5d4b47bee4233f8a90fb5ce2ae1dc79c243e938caf70884f"
+    },
+    {
+      "path": "contact_055_3.jpg",
+      "sha256": "f183633f7e23bc44745a72eecc8b55016a629db161f77c80bddd70f635de102d"
+    }
+  ],
+  "additional_full_size_views": [
+    "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_density.png",
+    "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_overhead_social.png"
+  ],
+  "assets": [
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_combined2_77p4_3df02b0e4f_density_straight_social.png",
+      "sha256": "50f8419b26993ada7ae6bf2697ad9b0caaec093b7b3f25c58a4d314058bb974d",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f3286f4936c2cb4c98ca8bec44ff03bb0b8c8ea1b44bf7793ee2b31d185638c3",
+          "source_csv_sha256": "036a7f46ec1772977a9b7902f3f158694e1166945f4fd2ec6f454757d90b60ae"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_combined2_77p4_3df02b0e4f_density_draw_social.png",
+      "sha256": "4e06061e7239c82484f8045ca0cd93b43fdce613019d7da9ffe1a0c4fe356608",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f3286f4936c2cb4c98ca8bec44ff03bb0b8c8ea1b44bf7793ee2b31d185638c3",
+          "source_csv_sha256": "036a7f46ec1772977a9b7902f3f158694e1166945f4fd2ec6f454757d90b60ae"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_combined2_77p4_3df02b0e4f_density_fade_social.png",
+      "sha256": "cab1e051697e63fc806dbaa91141f9c427f5a8bbba9b51a52ab89789b7979a67",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f3286f4936c2cb4c98ca8bec44ff03bb0b8c8ea1b44bf7793ee2b31d185638c3",
+          "source_csv_sha256": "036a7f46ec1772977a9b7902f3f158694e1166945f4fd2ec6f454757d90b60ae"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_combined2_77p4_3df02b0e4f_density.png",
+      "sha256": "b8bb5f0cff9641938eda38d64fd00a1b7bd4fd035e81052ad0be3e531b3d0bd2",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f3286f4936c2cb4c98ca8bec44ff03bb0b8c8ea1b44bf7793ee2b31d185638c3",
+          "source_csv_sha256": "036a7f46ec1772977a9b7902f3f158694e1166945f4fd2ec6f454757d90b60ae"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_combined2_77p4_3df02b0e4f_overhead.png",
+      "sha256": "3e524e3d49cf0832985224e7fee9928dc040fe4521bcbd7cf9e2ee2ed091b1ce",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f3286f4936c2cb4c98ca8bec44ff03bb0b8c8ea1b44bf7793ee2b31d185638c3",
+          "source_csv_sha256": "036a7f46ec1772977a9b7902f3f158694e1166945f4fd2ec6f454757d90b60ae"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_combined2_77p4_3df02b0e4f_overhead_social.png",
+      "sha256": "2205a67a4972e5d84de6f01a8e956b3baa2be1229f8154c00b85da26468a07f8",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f3286f4936c2cb4c98ca8bec44ff03bb0b8c8ea1b44bf7793ee2b31d185638c3",
+          "source_csv_sha256": "036a7f46ec1772977a9b7902f3f158694e1166945f4fd2ec6f454757d90b60ae"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_combined2_6def5f7fef_density_straight_social.png",
+      "sha256": "ae5e882471dfec3c280ac3bd43187a841ef69c6c6d761390d0d589e6b59f7aaf",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "e69df20a9bf202aaf92ebd49d18f5fc98f7b7cc1764ec9a54028d550889ec73d",
+          "source_csv_sha256": "6574d7883f6668921eb8520ece07d4df2b18713fa9d796b15cda3413e6a6c134"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_combined2_6def5f7fef_density_draw_social.png",
+      "sha256": "5ea096e693708ea0cd76f40bde27683bb4d1610228bca9063067d6845df000ce",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "e69df20a9bf202aaf92ebd49d18f5fc98f7b7cc1764ec9a54028d550889ec73d",
+          "source_csv_sha256": "6574d7883f6668921eb8520ece07d4df2b18713fa9d796b15cda3413e6a6c134"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_combined2_6def5f7fef_density_fade_social.png",
+      "sha256": "22a869ea7fa4f285b8fe7d80c9ce9f19ae838425016b266fc0d96148b61d31d9",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "e69df20a9bf202aaf92ebd49d18f5fc98f7b7cc1764ec9a54028d550889ec73d",
+          "source_csv_sha256": "6574d7883f6668921eb8520ece07d4df2b18713fa9d796b15cda3413e6a6c134"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_combined2_6def5f7fef_density.png",
+      "sha256": "2e7ae7320ed18a5f14ed8ec6ff02809ee878a0d8c36a67e9543132fee3c0d169",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "e69df20a9bf202aaf92ebd49d18f5fc98f7b7cc1764ec9a54028d550889ec73d",
+          "source_csv_sha256": "6574d7883f6668921eb8520ece07d4df2b18713fa9d796b15cda3413e6a6c134"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_combined2_6def5f7fef_overhead.png",
+      "sha256": "e3388265128317fef2b19d4bdbc3b089a1d61eb61f525b69c3839336f168785a",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "e69df20a9bf202aaf92ebd49d18f5fc98f7b7cc1764ec9a54028d550889ec73d",
+          "source_csv_sha256": "6574d7883f6668921eb8520ece07d4df2b18713fa9d796b15cda3413e6a6c134"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_combined2_6def5f7fef_overhead_social.png",
+      "sha256": "21cd7f468bf8d2ba20ab4a54df7f2962c0177baf18cf889810ccabe14c825038",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "e69df20a9bf202aaf92ebd49d18f5fc98f7b7cc1764ec9a54028d550889ec73d",
+          "source_csv_sha256": "6574d7883f6668921eb8520ece07d4df2b18713fa9d796b15cda3413e6a6c134"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_shaft_only_77_1f522f722f_density_straight_social.png",
+      "sha256": "83214f38fdcf4cf0fbbd60d0398d052a1fcf219953a0fd457b62600a2fb0971d",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ec0db766d22ebb2de47148101b454bde89d917c44cfcaa2fecb7f6c2fef3ac26",
+          "source_csv_sha256": "99ace15b62771e29b896fb40b2746a7a6d30826f3954385aa8b484f4ac3052dc"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_shaft_only_77_1f522f722f_density_draw_social.png",
+      "sha256": "e73cf92432ce880186afe075340d5e7a664317c3cbd3798f4674c707aa9f8872",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ec0db766d22ebb2de47148101b454bde89d917c44cfcaa2fecb7f6c2fef3ac26",
+          "source_csv_sha256": "99ace15b62771e29b896fb40b2746a7a6d30826f3954385aa8b484f4ac3052dc"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_shaft_only_77_1f522f722f_density_fade_social.png",
+      "sha256": "23f7c4bdce038d74f2eb8484ee3afca3d1f2adf81f6340d82a229ce954de5b7c",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ec0db766d22ebb2de47148101b454bde89d917c44cfcaa2fecb7f6c2fef3ac26",
+          "source_csv_sha256": "99ace15b62771e29b896fb40b2746a7a6d30826f3954385aa8b484f4ac3052dc"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_shaft_only_77_1f522f722f_density.png",
+      "sha256": "c04730d74c000ef15073644aa1f39c087e4c951a72566d22fbaf5a0aebcd3168",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ec0db766d22ebb2de47148101b454bde89d917c44cfcaa2fecb7f6c2fef3ac26",
+          "source_csv_sha256": "99ace15b62771e29b896fb40b2746a7a6d30826f3954385aa8b484f4ac3052dc"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_shaft_only_77_1f522f722f_overhead.png",
+      "sha256": "cb5dd395e85deb668a3d34fb64bc0e0c4f691e72e5789854441d9496a79f0925",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ec0db766d22ebb2de47148101b454bde89d917c44cfcaa2fecb7f6c2fef3ac26",
+          "source_csv_sha256": "99ace15b62771e29b896fb40b2746a7a6d30826f3954385aa8b484f4ac3052dc"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation1_shaft_only_77_1f522f722f_overhead_social.png",
+      "sha256": "bd6066c0a314c47ddef95291c2e564ccf6318c9784b03f2281ce519f53db80a7",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ec0db766d22ebb2de47148101b454bde89d917c44cfcaa2fecb7f6c2fef3ac26",
+          "source_csv_sha256": "99ace15b62771e29b896fb40b2746a7a6d30826f3954385aa8b484f4ac3052dc"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_shaft_on_536753b3bb_density_straight_social.png",
+      "sha256": "5c3fe6f762dc1215eaa0630fa740564561b146502fa04d264876e64c94a28fa0",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "10a94bc345184717fb58c65ef917acb483c9e3f8939b0d8576dfd8ecc3947211",
+          "source_csv_sha256": "71af414ea07456c222948dbf6552248ffefbe58f67d8bab10eec42c1b0e5d04f"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_shaft_on_536753b3bb_density_draw_social.png",
+      "sha256": "8c979a0f837d6658f5f53e89375eacf53699b406db3fc3a4db9291ac6cca7816",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "10a94bc345184717fb58c65ef917acb483c9e3f8939b0d8576dfd8ecc3947211",
+          "source_csv_sha256": "71af414ea07456c222948dbf6552248ffefbe58f67d8bab10eec42c1b0e5d04f"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_shaft_on_536753b3bb_density_fade_social.png",
+      "sha256": "c32e9fe3c57575913e074ae3aa543aea37de4b377a7d22116ff613b025ad63d2",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "10a94bc345184717fb58c65ef917acb483c9e3f8939b0d8576dfd8ecc3947211",
+          "source_csv_sha256": "71af414ea07456c222948dbf6552248ffefbe58f67d8bab10eec42c1b0e5d04f"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_shaft_on_536753b3bb_density.png",
+      "sha256": "fab8ccdc1c89b8a28ea382d7e197f715c82cd7f6ebf1239feb5cd553519622bc",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "10a94bc345184717fb58c65ef917acb483c9e3f8939b0d8576dfd8ecc3947211",
+          "source_csv_sha256": "71af414ea07456c222948dbf6552248ffefbe58f67d8bab10eec42c1b0e5d04f"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_shaft_on_536753b3bb_overhead.png",
+      "sha256": "41bf2d52c3bf6b4a40e4e5f006745bb812284fd971b87f1b7888e929a5bc6ff4",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "10a94bc345184717fb58c65ef917acb483c9e3f8939b0d8576dfd8ecc3947211",
+          "source_csv_sha256": "71af414ea07456c222948dbf6552248ffefbe58f67d8bab10eec42c1b0e5d04f"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation1_shaft_on_536753b3bb_overhead_social.png",
+      "sha256": "51bd2070c1a40c15b9a5829e1e7d6ef0267e8a2de6c4d7a49fdbfcea1cad8d3b",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "10a94bc345184717fb58c65ef917acb483c9e3f8939b0d8576dfd8ecc3947211",
+          "source_csv_sha256": "71af414ea07456c222948dbf6552248ffefbe58f67d8bab10eec42c1b0e5d04f"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_combined2_77p4_dca7cbaeb9_density_straight_social.png",
+      "sha256": "a97f9894e26af3e9cccc9cca2b6cd11df98835bb5f8907fea06315e89cbb5949",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c58671484502324c509ebdb7a755a02a236f04b7f469a228e1f6169b13e779f7",
+          "source_csv_sha256": "44d66a937fefef7938ffa01c829d6189f9f31878995c4968d9d116cfc5731e4c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_combined2_77p4_dca7cbaeb9_density_draw_social.png",
+      "sha256": "df2fbf039061876b94d52cd4e06e1812e224520a47948875133ac81f060bee0d",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c58671484502324c509ebdb7a755a02a236f04b7f469a228e1f6169b13e779f7",
+          "source_csv_sha256": "44d66a937fefef7938ffa01c829d6189f9f31878995c4968d9d116cfc5731e4c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_combined2_77p4_dca7cbaeb9_density_fade_social.png",
+      "sha256": "4c169da47700164beaf8d2c37c92ded3e5499218efad1d8633a150f9e04dc14c",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c58671484502324c509ebdb7a755a02a236f04b7f469a228e1f6169b13e779f7",
+          "source_csv_sha256": "44d66a937fefef7938ffa01c829d6189f9f31878995c4968d9d116cfc5731e4c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_combined2_77p4_dca7cbaeb9_density.png",
+      "sha256": "664295db578db85c2b70eaab5198d7f917b9e9bf852bd51353a6050ea1659d4d",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c58671484502324c509ebdb7a755a02a236f04b7f469a228e1f6169b13e779f7",
+          "source_csv_sha256": "44d66a937fefef7938ffa01c829d6189f9f31878995c4968d9d116cfc5731e4c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_combined2_77p4_dca7cbaeb9_overhead.png",
+      "sha256": "9963aca2260d159b001b713af1cce3228bb40ef6b963e5c4e5f75635d533cc98",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c58671484502324c509ebdb7a755a02a236f04b7f469a228e1f6169b13e779f7",
+          "source_csv_sha256": "44d66a937fefef7938ffa01c829d6189f9f31878995c4968d9d116cfc5731e4c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_combined2_77p4_dca7cbaeb9_overhead_social.png",
+      "sha256": "0efdce7f7a8f1620a03c3edac48299a9b2a404c001f5b48343b1565fb29d455b",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c58671484502324c509ebdb7a755a02a236f04b7f469a228e1f6169b13e779f7",
+          "source_csv_sha256": "44d66a937fefef7938ffa01c829d6189f9f31878995c4968d9d116cfc5731e4c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_density_straight_social.png",
+      "sha256": "565871404830a2d55e5595bb7da16063a822f688a2baca756f0d5829b99b014d",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_density_draw_social.png",
+      "sha256": "fc839586afb5ddcb05102c83387c5919aae3cdd0bfbff283d966dc886d70818b",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_density_fade_social.png",
+      "sha256": "7346d9d08147fa7ac03f3640f4f2c83e436276447b2b9fd3404fbcdab7d318a7",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_density.png",
+      "sha256": "bb06dc942e723be5eb0d8f046832d0e6628d508d4555ec01043cd98b34e3f190",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_overhead.png",
+      "sha256": "4ba95989e5baaba2e8d75cd1ca4f87b79a2410222efe6b3382d13851224115d8",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_a199058302_overhead_social.png",
+      "sha256": "4cd5acb422de9a917d4e9ff1ce85ad5b3db290b8e9f97e09920fa3866d25517a",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_shaft_only_77_3128bdd18d_density_straight_social.png",
+      "sha256": "baff2c98da5424af736307136283c7cf93e06a9c4e410beb5a3d89e85d8186ad",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f370f6e02e1c57a34643e2a16d3e9b678de88cdc40f36e5e9d0013747d347e08",
+          "source_csv_sha256": "67eb6a6fe8a0fa685e195bf3e0b39ea9a2481e6c99cd38738e17f5311ce42c1b"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_shaft_only_77_3128bdd18d_density_draw_social.png",
+      "sha256": "27bfd5f14247b9a5dad0a07d296c50a60c14464b7c63304df777d364e1a9fa9c",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f370f6e02e1c57a34643e2a16d3e9b678de88cdc40f36e5e9d0013747d347e08",
+          "source_csv_sha256": "67eb6a6fe8a0fa685e195bf3e0b39ea9a2481e6c99cd38738e17f5311ce42c1b"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_shaft_only_77_3128bdd18d_density_fade_social.png",
+      "sha256": "da8054dbc46441b2e8fe22ab86107921d9431f2020e7ed7cfec210c1fe5328f1",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f370f6e02e1c57a34643e2a16d3e9b678de88cdc40f36e5e9d0013747d347e08",
+          "source_csv_sha256": "67eb6a6fe8a0fa685e195bf3e0b39ea9a2481e6c99cd38738e17f5311ce42c1b"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_shaft_only_77_3128bdd18d_density.png",
+      "sha256": "09ed17289419c949fd91339f47e0573ea2182dbd03af8c87adfcd5dc597ecf78",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f370f6e02e1c57a34643e2a16d3e9b678de88cdc40f36e5e9d0013747d347e08",
+          "source_csv_sha256": "67eb6a6fe8a0fa685e195bf3e0b39ea9a2481e6c99cd38738e17f5311ce42c1b"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_shaft_only_77_3128bdd18d_overhead.png",
+      "sha256": "8ec2648b8933220249025a548228b054230d99bc54caac035e6476c1429b268e",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f370f6e02e1c57a34643e2a16d3e9b678de88cdc40f36e5e9d0013747d347e08",
+          "source_csv_sha256": "67eb6a6fe8a0fa685e195bf3e0b39ea9a2481e6c99cd38738e17f5311ce42c1b"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_original_control_1_pitching_wedge_lean10_curve2_rotation2_shaft_only_77_3128bdd18d_overhead_social.png",
+      "sha256": "92d6ee612117d6c7e536c2680ddaa5512d04e3fce6b36dabe43bfd4d6817ed51",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "f370f6e02e1c57a34643e2a16d3e9b678de88cdc40f36e5e9d0013747d347e08",
+          "source_csv_sha256": "67eb6a6fe8a0fa685e195bf3e0b39ea9a2481e6c99cd38738e17f5311ce42c1b"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_shaft_on_40453bafde_density_straight_social.png",
+      "sha256": "a1c674864ab3fbf32b05d5bf47136be7fbd2bd82183cdb7fb50f97bb980e53da",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "2530f389663e3ecc37427b07824efeba3f1c44bb673da770cfda2d4c1b07f113",
+          "source_csv_sha256": "6d08de1b4ae073dae57e9fb46909441405a2a6df12dee0e1eb6d763551095f0c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_shaft_on_40453bafde_density_draw_social.png",
+      "sha256": "ba0ec75676219e6f1e4890531f562131af9027046b74ce0b72b638a8e7b4fac9",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "2530f389663e3ecc37427b07824efeba3f1c44bb673da770cfda2d4c1b07f113",
+          "source_csv_sha256": "6d08de1b4ae073dae57e9fb46909441405a2a6df12dee0e1eb6d763551095f0c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_shaft_on_40453bafde_density_fade_social.png",
+      "sha256": "bbc2779a8d0f99983927e93c06cd0738f86f3aa0b268c07233eaba234f0c086f",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "2530f389663e3ecc37427b07824efeba3f1c44bb673da770cfda2d4c1b07f113",
+          "source_csv_sha256": "6d08de1b4ae073dae57e9fb46909441405a2a6df12dee0e1eb6d763551095f0c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_shaft_on_40453bafde_density.png",
+      "sha256": "919f5211b57721d1c9a3d0bc38b84e703124128d968e2f2cc8d1836bab51d4d5",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "2530f389663e3ecc37427b07824efeba3f1c44bb673da770cfda2d4c1b07f113",
+          "source_csv_sha256": "6d08de1b4ae073dae57e9fb46909441405a2a6df12dee0e1eb6d763551095f0c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_shaft_on_40453bafde_overhead.png",
+      "sha256": "dbecbab477120cf2ca6c19a8e73b7d273af50562e563e27aca11591911a493b8",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "2530f389663e3ecc37427b07824efeba3f1c44bb673da770cfda2d4c1b07f113",
+          "source_csv_sha256": "6d08de1b4ae073dae57e9fb46909441405a2a6df12dee0e1eb6d763551095f0c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    },
+    {
+      "path": "figures/comparisons/across_lean_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation2_shaft_only_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_shaft_on_40453bafde_overhead_social.png",
+      "sha256": "1cd2f8d4f8a051bd135fd0daac8c95ad77ea35ffbd8f349205d00c0a6e1e9355",
+      "ordered_sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+          "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "2530f389663e3ecc37427b07824efeba3f1c44bb673da770cfda2d4c1b07f113",
+          "source_csv_sha256": "6d08de1b4ae073dae57e9fb46909441405a2a6df12dee0e1eb6d763551095f0c"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "Actual visual inspection of all three two-chart contact sheets for this record"
+    }
+  ],
+  "findings": [],
+  "observations": [
+    "All 24 contacts (indices 48\u201355) and 48 PNGs visually inspected; two index-53 originals inspected full size.",
+    "Titles, wrapped protocol text, valid counts, legends, density bars, panel labels and footnotes remain readable without clipping or overlap.",
+    "Social comparisons label common-six support, conditional simulation and pattern-dependent scale limits. Academic panels retain physical aspect.",
+    "Overhead plots explicitly disclose six saved paths per pattern, not paired by shot index, and 6x lateral display magnification."
+  ],
+  "reuse_claim": "None; all batch PNGs actually viewed."
+}

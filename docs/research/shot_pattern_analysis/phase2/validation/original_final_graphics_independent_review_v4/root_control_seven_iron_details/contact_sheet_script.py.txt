@@ -1,0 +1,20 @@
+from pathlib import Path
+from PIL import Image,ImageOps,ImageDraw
+import json,hashlib
+p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');source=p/'control_final_figures_v1'
+out=p/'validation/original_final_graphics_independent_review_v4/root_control_seven_iron_details';out.mkdir(exist_ok=True)
+files=sorted((source/'details').glob('seven_iron*/*.png'));assert len(files)==48
+rows=[]
+for f in files:
+ with Image.open(f) as im:
+  im.load();rows.append({'path':str(f.relative_to(source)),'sha256':hashlib.sha256(f.read_bytes()).hexdigest(),'pixels':list(im.size)})
+for k in range(0,len(files),6):
+ canvas=Image.new('RGB',(1800,1600),'#eeeeee');draw=ImageDraw.Draw(canvas)
+ for n,f in enumerate(files[k:k+6]):
+  x=(n%2)*900;y=(n//2)*533
+  with Image.open(f) as im:
+   thumb=ImageOps.contain(im.convert('RGB'),(890,490));canvas.paste(thumb,(x+(900-thumb.width)//2,y+38))
+  draw.text((x+5,y+5),f'{k+n+1}: {f.parent.name}/{f.name}',fill='black')
+ canvas.save(out/f'contact_{k//6+1:02}.jpg',quality=93)
+(out/'inventory.json').write_text(json.dumps({'files':rows},indent=2)+'\n')
+print('48 PNGs inventoried; 8 contact sheets prepared.')

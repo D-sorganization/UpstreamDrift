@@ -1,0 +1,9 @@
+{
+  "stopped_utc": "2026-10-10T14:36:52.004122+00:00",
+  "pid": 3402855,
+  "start_ticks": "49898956",
+  "signal": "SIGTERM",
+  "reason": "Confirmed protocol-omitting figure stems:384 comparisons map to344 names;40 groups cannot preserve both identities. Stop known-invalid rendering; retain all numerical data and partial graphics.",
+  "finding_sha256": "381ef215d750e2c142a99b27d930771605bceb52fdf642cfaf3e09b2a2be1afa",
+  "status": "intentional_stop_requested_wait_for_wrapper_terminal"
+}

@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "-m",
+    "pytest",
+    "-o",
+    "addopts=",
+    "-q",
+    "tests/research/test_shot_pattern_vector_rasterization.py"
+  ],
+  "exit_code": 0,
+  "source_sha256": "0bff9dc885094f3d320cb97f69766cb70b4a9d9a3cdfb70cf52a06396300f736",
+  "test_sha256": "23d3b0a84f6c649f46586cc8b0039fe7bfaa7eeece7591d7f47eddc7aa277a3a"
+}

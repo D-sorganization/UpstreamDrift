@@ -1,0 +1,20 @@
+from pathlib import Path
+import hashlib,json,datetime
+from pypdf import PdfReader
+phase=Path('docs/research/shot_pattern_analysis/phase2');fig=phase/'final_figures_v1'
+out=phase/'validation/original_final_graphics_independent_review_v4/root_seven_iron_details'
+index=json.loads((out/'inventory.json').read_text())['pngs']
+checks=[]
+for item in index:
+ png=fig/item['path'];assert hashlib.sha256(png.read_bytes()).hexdigest()==item['sha256']
+ pdf=png.with_suffix('.pdf');reader=PdfReader(pdf);assert len(reader.pages)==1
+ text=' '.join(reader.pages[0].extract_text().split())
+ summary_path=phase/'final_v1'/png.parent.name/'summary.json';d=json.loads(summary_path.read_text());cfg=d['config']
+ for token in (png.parent.name,'Matched Raw Landing',f"static loft deg: {cfg['club']['loft_deg']}",f"nominal shaft lean deg: {cfg['club']['shaft_lean_deg']}",f"curve scale: {cfg['curve_scale']}",f"attempts per pattern: {cfg['n_shots']}"):
+  assert token in text,(pdf,token)
+ for pattern,stats in d['summary'].items():
+  assert f"{pattern} {stats['supported_n']:,}/{stats['total_n']:,} valid" in text,(pdf,pattern)
+ checks.append({'path':str(pdf.relative_to(fig)),'sha256':hashlib.sha256(pdf.read_bytes()).hexdigest(),'summary_sha256':hashlib.sha256(summary_path.read_bytes()).hexdigest()})
+record={'checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'status':'provisional_visual_and_label_checks_pass','scope':'48 PNG contact review, five whole-image spot checks across this and the earlier spot-check receipt, plus all48 PDF population/condition labels checked against saved summaries; final manifest reconciliation remains required','contact_sheets_inspected':['contact_01.jpg','contact_02.jpg','contact_03.jpg'],'full_size_pngs_inspected':['details/seven_iron_lean0_curve2_rotation2_combined2/density.png','details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png','details/seven_iron_lean5_curve2_rotation1_combined2/overhead.png','details/seven_iron_lean10_curve1_rotation1_shaft_only/density.png','details/seven_iron_lean10_curve1_rotation1_shaft_only/overhead.png'],'findings':[],'limitations':['Contact thumbnails support layout overview, not every small-text legibility check. Full-size inspections are listed explicitly.','No new source-data statistical audit or physical acceptance is claimed.'],'pdf_label_checks':checks}
+(out/'review.json').write_text(json.dumps(record,indent=2)+'\n')
+print('48 PDF label checks passed; all PNG hashes unchanged.')

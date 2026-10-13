@@ -1,0 +1,22 @@
+{
+  "session_id": 74572,
+  "worker_pid": 264954,
+  "exit_code": 0,
+  "candidate_files": 18,
+  "files_sha256": {
+    "mypy_red.txt": "07c77a531bddd05a60cae2b1dbf6f9e2786f22898eaea1326135908e46c978d6",
+    "ruff_check_green_v2.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "pre_repair_hashes.json": "f455ffdaa9eb38418d610cf6f799fa45ca2fa095f32aeb3442da41ea622f7d5d",
+    "ruff_format_red.txt": "3b8bec30964eddb46215e6e2fcd5fece5cd8629f6c752fcc2bcecd1cd903c920",
+    "worker_stop.json": "da6be8e4f45cc526cc531820c3bbc699d874a509b3bc87a47a3775da3e4d4045",
+    "repair_receipt_v2.json": "0f6f5c0b623a216d9f8f6367defff444fd877ca56100453446342e677254c4b0",
+    "pytest_green_v2.txt": "3e98214f5ac32cf221d968678c8b9f3fced216d4c73188dd37518cb41c794644",
+    "post_repair_hashes_v2.json": "78437fe5802fcbc643ddee30f053112f1caf3a1f69f65c2f69bed08d428b37c9",
+    "ruff_check_red.txt": "b24ab7b2ecc67bb430f02ee11704127d509f71286bf1bc23c3aab6a6e1d133ed",
+    "mypy_green_v2.txt": "88fe827c636a04c691d60cb768a7ac3077b3f88379842e946f181a3ad3f821ea",
+    "ruff_format_green_v2.txt": "ff581aaa8f1b2a77e28a682a7cae7b738f926730737e49664d06c810bcd5aa03",
+    "worker_result.txt": "59c25ed83f660d43d179c5661ee96558582dc3bb55e76a7b9f0080f2d5b1925e",
+    "candidate_helpers.zip": "11f43abca35ca87e15210515eddce33e744c6194e708e5cef8b293e05bbf9b0f"
+  },
+  "scope": "Unaccepted AGY candidate. Worker checks report60passes; root found implementation-mirroring tests. Independent review and test improvements required. No pytest-red execution log supplied; do not infer TDD chronology."
+}

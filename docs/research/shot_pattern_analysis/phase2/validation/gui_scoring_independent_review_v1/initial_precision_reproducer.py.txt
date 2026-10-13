@@ -1,0 +1,19 @@
+"""Real saved intervals must retain their numerical span in the public formatter."""
+import re
+import pytest
+from src.tools.shot_pattern_analysis.matched_gui import format_matched_course_scoring
+
+@pytest.mark.parametrize('estimate,low,high', [
+    (0.004597062764879343,0.004531382987542545,0.004658536119213675),
+    (-0.00392726220708177,-0.003979629136146112,-0.003872946949009742),
+    (-0.003284521591238346,-0.0033180608278863878,-0.003246621472447612),
+])
+def test_real_saved_interval_preserves_span_and_numeric_accuracy(estimate,low,high):
+    text=format_matched_course_scoring({'status':'available','club_id':'pitching_wedge','paired_n':10000,'total_n':10000,'paired_benefit_vs_straight':{'Draw':{'estimate':estimate,'lower_95':low,'upper_95':high}}})
+    line=text.split('Paired Difference vs. Straight',1)[1]
+    match=re.search(r'Draw: ([+-][\deE.+-]+) \[([+-][\deE.+-]+), ([+-][\deE.+-]+)\]',line)
+    assert match is not None
+    actual=tuple(float(v) for v in match.groups())
+    assert actual[1]<actual[2], 'Nonzero saved uncertainty must not display as a zero-width interval'
+    for rendered,saved in zip(actual,(estimate,low,high),strict=True):
+        assert abs(rendered-saved)<=abs(saved)*0.01, (rendered,saved)

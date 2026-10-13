@@ -1,0 +1,140 @@
+F..........                                                              [100%]
+=================================== FAILURES ===================================
+_____________ test_reviewed_driver_curve_bounds_pass_full_pair_api _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1967/test_reviewed_driver_curve_bou0')
+
+    def test_reviewed_driver_curve_bounds_pass_full_pair_api(tmp_path: Path) -> None:
+        first,second = _pair(tmp_path)
+>       result = analyze_explicit_source_pair(first,second,comparison_kind='curve_strength',
+                                             target_x_m=77.40247724866299)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+first_source = {'cell': 'driver_lean5_curve1_rotation1_shaft_only', 'source_root': '/tmp/pytest-of-dieterolson/pytest-1967/test_reviewed_driver_curve_bou0/original', 'source_protocol': 'original_control/1', 'execution_kind': 'unique', ...}
+second_source = {'cell': 'driver_lean5_curve2_rotation1_shaft_only', 'source_root': '/tmp/pytest-of-dieterolson/pytest-1967/test_reviewed_driver_curve_bou0/supplement', 'source_protocol': 'driver-control-speed-bounds/1', 'execution_kind': 'unique', ...}
+comparison_kind = 'curve_strength', target_x_m = 77.40247724866299
+transition_receipt_path = None, transition_receipt_sha256 = None
+
+    def analyze_explicit_source_pair(
+        first_source: dict,
+        second_source: dict,
+        *,
+        comparison_kind: str,
+        target_x_m: float,
+        transition_receipt_path: Path | None = None,
+        transition_receipt_sha256: str | None = None,
+    ) -> dict:
+        """Pair two validated source cells without conflating their protocols.
+    
+        Delivered values are centered on each pattern's saved nominal and club
+        preset before the underlying Gaussian errors are compared. Comparisons use
+        only the intersection supported in all six pattern-by-source populations.
+        """
+        if comparison_kind not in (
+            "across_lean",
+            "curve_strength",
+            "shaft_rotation_sd",
+            "speed_bound",
+        ):
+            raise ValueError("unknown explicit source comparison kind")
+        if not math.isfinite(target_x_m) or target_x_m <= 0:
+            raise ValueError("comparison target must be finite and positive")
+        directory_a, config_a, summary_a, plan_a = _reload_explicit_source(first_source)
+        directory_b, config_b, summary_b, plan_b = _reload_explicit_source(second_source)
+        scoring_sources = _paired_scoring_source_hashes()
+        execution_a = plan_a.get("execution")
+        execution_b = plan_b.get("execution")
+        if not isinstance(execution_a, dict) or not isinstance(execution_b, dict):
+            raise ValueError("paired source plans must bind execution snapshots")
+        transition_sha = _execution_transition(
+            execution_a,
+            execution_b,
+            transition_receipt_path,
+            transition_receipt_sha256,
+        )
+        differences = _config_differences(
+            _comparison_config(config_a), _comparison_config(config_b)
+        )
+        if differences - _PAIR_ALLOWED_CONFIG_DIFFERENCES:
+            raise ValueError(
+                f"source config differences are not allowed: {sorted(differences)}"
+            )
+        if comparison_kind == "across_lean":
+            expected_differences = {
+                "club.shaft_lean_deg",
+                "target_x_m",
+                "match_face_bounds_deg",
+                "match_speed_factors",
+            }
+        elif comparison_kind == "curve_strength":
+            expected_differences = {"curve_scale", "target_x_m", "match_face_bounds_deg"}
+        elif comparison_kind == "shaft_rotation_sd":
+            expected_differences = {"noise.standard_deviations[0]", "target_x_m"}
+        else:
+            expected_differences = {
+                "match_speed_factors",
+                "target_x_m",
+                "match_face_bounds_deg",
+            }
+        if not differences.issubset(expected_differences):
+>           raise ValueError(
+                f"source config differences are not valid for {comparison_kind}: {sorted(differences)}"
+            )
+E           ValueError: source config differences are not valid for curve_strength: ['curve_scale', 'match_face_bounds_deg', 'match_speed_factors']
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_lean_control.py:600: ValueError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.46s setup    tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_reviewed_driver_curve_bounds_pass_full_pair_api
+0.12s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[wrong_lean]
+0.08s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[lower_speed_change]
+0.07s teardown tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[no_fixed_target]
+0.07s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[target_change]
+0.06s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[no_fixed_target]
+0.06s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[face_widening]
+0.06s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[wrong_club]
+0.05s setup    tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[no_fixed_target]
+0.04s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[speed_widening]
+0.04s call     tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[wrong_original_protocol]
+0.04s teardown tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[wrong_lean]
+0.03s teardown tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[lower_speed_change]
+0.03s teardown tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[target_change]
+0.03s setup    tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[face_widening]
+0.03s teardown tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[speed_widening]
+0.02s setup    tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[lower_speed_change]
+0.02s setup    tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[speed_widening]
+0.02s teardown tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[wrong_original_protocol]
+0.02s setup    tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_unreviewed_driver_curve_bound_changes_fail_closed[wrong_lean]
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py::test_reviewed_driver_curve_bounds_pass_full_pair_api

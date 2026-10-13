@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-004",
+  "title": "Add Explicit Geometric Face\u2013Loft and Shaft-Lean Sensitivity",
+  "body": "## Problem\n\nFixed delivered loft excluded closure-related loft changes and could not investigate long-left/short-right patterns.\n\n## Acceptance Criteria\n\nImplement assumed shaft-axis geometry around each pattern nominal; matched baseline loft; separate axis and fixed-club pitch sensitivity.\n\n## Validation\n\ntests/tools/shot_pattern_analysis/test_delivery_geometry.py; test_physics.py; test_core.py\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11843,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11843",
+  "issue_number": 11843,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11843"
+}

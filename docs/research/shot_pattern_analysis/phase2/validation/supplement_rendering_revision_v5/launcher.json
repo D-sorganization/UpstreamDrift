@@ -1,0 +1,20 @@
+{
+  "status": "running_wrapper_preflight_passed",
+  "pid": 3402685,
+  "process_group": 3402685,
+  "session_id": 3402685,
+  "command": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "/tmp/p2-supplement-report-v5.py"
+  ],
+  "cwd": "/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift",
+  "log": "/tmp/p2-supplement-report-v5.log",
+  "started_utc": "2026-10-10T11:01:20.212139+00:00",
+  "wrapper_sha256": "a9ce9321c2ca2aeed346f6089625683c60321d2d83e29d8d2ff43029fee74961",
+  "preflight_sha256": "8b48721d50d6bfcb580a4c7b2e77c9860eb9b470a0de7c7e6b1c9898b53ef340",
+  "tracking": "Owned detached POSIX session; monitor this PID identity and wrapper exit.json, not a terminal handle",
+  "scientific_scope": "Same saved-data pipeline; no Monte Carlo rerun",
+  "pipeline_pid": 3402855,
+  "wrapper_start_ticks": "49898651",
+  "pipeline_start_ticks": "49898956"
+}

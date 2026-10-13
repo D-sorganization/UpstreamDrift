@@ -1,0 +1,8 @@
+{
+  "number": 11972,
+  "state": "OPEN",
+  "title": "Match Nominal Shot Landings and Model Static Loft with Physical Shaft Lean",
+  "url": "https://github.com/D-sorganization/UpstreamDrift/issues/11972",
+  "local_id": "P2-001",
+  "acceptance": "Implement bounded zero-error raw landing matching with no output aiming rotation; document static club lofts and physically pitch face/shaft at 0/5/10 degrees. Preserve infeasible conditions explicitly. Tests must prove raw endpoint tolerance and no silent range/bound changes."
+}

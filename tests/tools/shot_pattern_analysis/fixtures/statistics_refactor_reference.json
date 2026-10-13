@@ -1,0 +1,1011 @@
+{
+  "provenance": {
+    "kind": "Synthetic Pre-Refactor Numerical Characterization",
+    "numpy_version": "2.2.6",
+    "source_sha256": {
+      "density.py": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+      "dispersion_stats.py": "956eec2eefa14c6ae73c3e460d0c97dcee871299ca52fffb66c9621c92a6ce6e"
+    }
+  },
+  "cases": {
+    "density": [
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Straight": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                2,
+                0
+              ]
+            ],
+            "Draw": [
+              [
+                0,
+                1
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                2,
+                1
+              ]
+            ],
+            "Fade": [
+              [
+                0,
+                -1
+              ],
+              [
+                1,
+                -1
+              ],
+              [
+                2,
+                -1
+              ]
+            ]
+          },
+          "bins": 4
+        },
+        "output": {
+          "x_edges_m": [
+            -0.1,
+            0.45000000000000007,
+            1.0,
+            1.55,
+            2.1
+          ],
+          "y_edges_m": [
+            -1.1,
+            -0.55,
+            0.0,
+            0.55,
+            1.1
+          ],
+          "x_limits_m": [
+            -0.1,
+            2.1
+          ],
+          "y_limits_m": [
+            -1.1,
+            1.1
+          ],
+          "bin_resolution_m": [
+            0.55,
+            0.55
+          ],
+          "density_vmax_per_m2": 1.1019283746556472,
+          "patterns": {
+            "Straight": {
+              "n": 3,
+              "density_per_m2": [
+                [
+                  0.0,
+                  0.0,
+                  1.1019283746556472,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.1019283746556472,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.1019283746556472,
+                  0.0
+                ]
+              ],
+              "hdr_density_thresholds": {
+                "0.5": 1.1019283746556472,
+                "0.8": 1.1019283746556472,
+                "0.95": 1.1019283746556472
+              },
+              "hdr_achieved_mass": {
+                "0.5": 1.0,
+                "0.8": 1.0,
+                "0.95": 1.0
+              },
+              "maximum_bin_probability": 0.3333333333333333
+            },
+            "Draw": {
+              "n": 3,
+              "density_per_m2": [
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.1019283746556472
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.1019283746556472
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.1019283746556472
+                ]
+              ],
+              "hdr_density_thresholds": {
+                "0.5": 1.1019283746556472,
+                "0.8": 1.1019283746556472,
+                "0.95": 1.1019283746556472
+              },
+              "hdr_achieved_mass": {
+                "0.5": 1.0,
+                "0.8": 1.0,
+                "0.95": 1.0
+              },
+              "maximum_bin_probability": 0.3333333333333333
+            },
+            "Fade": {
+              "n": 3,
+              "density_per_m2": [
+                [
+                  1.1019283746556472,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  1.1019283746556472,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  1.1019283746556472,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "hdr_density_thresholds": {
+                "0.5": 1.1019283746556472,
+                "0.8": 1.1019283746556472,
+                "0.95": 1.1019283746556472
+              },
+              "hdr_achieved_mass": {
+                "0.5": 1.0,
+                "0.8": 1.0,
+                "0.95": 1.0
+              },
+              "maximum_bin_probability": 0.3333333333333333
+            }
+          }
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Constant": [
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "bins": [
+            4,
+            5
+          ],
+          "target_point_m": [
+            1,
+            2
+          ],
+          "constant_axis_half_width_m": 0.25,
+          "region_masses": [
+            0.95,
+            0.5,
+            0.8
+          ]
+        },
+        "output": {
+          "x_edges_m": [
+            0.75,
+            0.875,
+            1.0,
+            1.125,
+            1.25
+          ],
+          "y_edges_m": [
+            1.75,
+            1.85,
+            1.95,
+            2.05,
+            2.15,
+            2.25
+          ],
+          "x_limits_m": [
+            0.75,
+            1.25
+          ],
+          "y_limits_m": [
+            1.75,
+            2.25
+          ],
+          "bin_resolution_m": [
+            0.125,
+            0.10000000000000009
+          ],
+          "density_vmax_per_m2": 80.00000000000011,
+          "patterns": {
+            "Constant": {
+              "n": 3,
+              "density_per_m2": [
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  80.00000000000011,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "hdr_density_thresholds": {
+                "0.95": 80.00000000000011,
+                "0.5": 80.00000000000011,
+                "0.8": 80.00000000000011
+              },
+              "hdr_achieved_mass": {
+                "0.95": 1.0,
+                "0.5": 1.0,
+                "0.8": 1.0
+              },
+              "maximum_bin_probability": 1.0
+            }
+          }
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Unequal": [
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                -1
+              ]
+            ],
+            "Other": [
+              [
+                3,
+                0
+              ]
+            ]
+          },
+          "bins": [
+            5,
+            4
+          ],
+          "target_point_m": [
+            8,
+            -3
+          ],
+          "padding_fraction": 0.125,
+          "region_masses": [
+            0.3,
+            0.7
+          ]
+        },
+        "output": {
+          "x_edges_m": [
+            -1.0,
+            1.0,
+            3.0,
+            5.0,
+            7.0,
+            9.0
+          ],
+          "y_edges_m": [
+            -3.625,
+            -2.0625,
+            -0.5,
+            1.0625,
+            2.625
+          ],
+          "x_limits_m": [
+            -1.0,
+            9.0
+          ],
+          "y_limits_m": [
+            -3.625,
+            2.625
+          ],
+          "bin_resolution_m": [
+            2.0,
+            1.5625
+          ],
+          "density_vmax_per_m2": 0.32,
+          "patterns": {
+            "Unequal": {
+              "n": 4,
+              "density_per_m2": [
+                [
+                  0.0,
+                  0.0,
+                  0.16,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.08,
+                  0.0,
+                  0.08
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "hdr_density_thresholds": {
+                "0.3": 0.16,
+                "0.7": 0.08
+              },
+              "hdr_achieved_mass": {
+                "0.3": 0.5,
+                "0.7": 1.0
+              },
+              "maximum_bin_probability": 0.5
+            },
+            "Other": {
+              "n": 1,
+              "density_per_m2": [
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.32,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "hdr_density_thresholds": {
+                "0.3": 0.32,
+                "0.7": 0.32
+              },
+              "hdr_achieved_mass": {
+                "0.3": 1.0,
+                "0.7": 1.0
+              },
+              "maximum_bin_probability": 1.0
+            }
+          }
+        }
+      }
+    ],
+    "dispersion": [
+      {
+        "inputs": {
+          "points": [
+            [
+              9,
+              -1
+            ],
+            [
+              10,
+              0
+            ],
+            [
+              11,
+              1
+            ],
+            [
+              12,
+              2
+            ]
+          ],
+          "target_x_m": 10,
+          "nominal_point": [
+            10.5,
+            0.25
+          ]
+        },
+        "output": {
+          "n": 4,
+          "coordinate_convention": "x downrange, y right; target=(target_x_m, 0)",
+          "covariance_convention": "unbiased sample covariance (ddof=1), m^2",
+          "mean_downrange_error_m": 0.5,
+          "mean_lateral_error_m": 0.5,
+          "downrange_variance_m2": 1.6666666666666665,
+          "lateral_variance_m2": 1.6666666666666665,
+          "covariance_downrange_lateral_m2": 1.6666666666666665,
+          "corr_lateral_downrange_error": 1.0,
+          "corr_lateral_radial_carry": 0.9992820057481705,
+          "median_radial_target_error_m": 1.4142135623730951,
+          "p95_radial_target_error_m": 2.6162950903902256,
+          "principal_axis_eigenvalues_m2": [
+            3.333333333333333,
+            0.0
+          ],
+          "principal_axis_orientation_deg": 45.0,
+          "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
+          "quadrant_fractions": {
+            "left_long": 0.0,
+            "left_short": 0.25,
+            "right_long": 0.5,
+            "right_short": 0.0
+          },
+          "quadrant_fraction_convention": "strictly left/right and long/short; axis-aligned endpoints enter no quadrant; fractions use all endpoints as denominator",
+          "conditional_mean_downrange_error_m": {
+            "left": -1.0,
+            "right": 1.5
+          },
+          "interpretation_limit": "Descriptive endpoint covariance only; face variation alone does not calibrate two-dimensional player precision.",
+          "nominal_mean_offset_m": [
+            0.0,
+            0.25
+          ],
+          "nominal_rmse_m": 1.6007810593582121
+        }
+      },
+      {
+        "inputs": {
+          "points": [
+            [
+              100,
+              0
+            ],
+            [
+              100,
+              0
+            ]
+          ],
+          "target_x_m": 100
+        },
+        "output": {
+          "n": 2,
+          "coordinate_convention": "x downrange, y right; target=(target_x_m, 0)",
+          "covariance_convention": "unbiased sample covariance (ddof=1), m^2",
+          "mean_downrange_error_m": 0.0,
+          "mean_lateral_error_m": 0.0,
+          "downrange_variance_m2": 0.0,
+          "lateral_variance_m2": 0.0,
+          "covariance_downrange_lateral_m2": 0.0,
+          "corr_lateral_downrange_error": null,
+          "corr_lateral_radial_carry": null,
+          "median_radial_target_error_m": 0.0,
+          "p95_radial_target_error_m": 0.0,
+          "principal_axis_eigenvalues_m2": [
+            0.0,
+            0.0
+          ],
+          "principal_axis_orientation_deg": null,
+          "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
+          "quadrant_fractions": {
+            "left_long": 0.0,
+            "left_short": 0.0,
+            "right_long": 0.0,
+            "right_short": 0.0
+          },
+          "quadrant_fraction_convention": "strictly left/right and long/short; axis-aligned endpoints enter no quadrant; fractions use all endpoints as denominator",
+          "conditional_mean_downrange_error_m": {
+            "left": null,
+            "right": null
+          },
+          "interpretation_limit": "Descriptive endpoint covariance only; face variation alone does not calibrate two-dimensional player precision."
+        }
+      },
+      {
+        "inputs": {
+          "points": [
+            [
+              1,
+              0
+            ],
+            [
+              -1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              -1
+            ]
+          ],
+          "target_x_m": 0
+        },
+        "output": {
+          "n": 4,
+          "coordinate_convention": "x downrange, y right; target=(target_x_m, 0)",
+          "covariance_convention": "unbiased sample covariance (ddof=1), m^2",
+          "mean_downrange_error_m": 0.0,
+          "mean_lateral_error_m": 0.0,
+          "downrange_variance_m2": 0.6666666666666666,
+          "lateral_variance_m2": 0.6666666666666666,
+          "covariance_downrange_lateral_m2": 0.0,
+          "corr_lateral_downrange_error": 0.0,
+          "corr_lateral_radial_carry": null,
+          "median_radial_target_error_m": 1.0,
+          "p95_radial_target_error_m": 1.0,
+          "principal_axis_eigenvalues_m2": [
+            0.6666666666666666,
+            0.6666666666666666
+          ],
+          "principal_axis_orientation_deg": null,
+          "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
+          "quadrant_fractions": {
+            "left_long": 0.0,
+            "left_short": 0.0,
+            "right_long": 0.0,
+            "right_short": 0.0
+          },
+          "quadrant_fraction_convention": "strictly left/right and long/short; axis-aligned endpoints enter no quadrant; fractions use all endpoints as denominator",
+          "conditional_mean_downrange_error_m": {
+            "left": 0.0,
+            "right": 0.0
+          },
+          "interpretation_limit": "Descriptive endpoint covariance only; face variation alone does not calibrate two-dimensional player precision."
+        }
+      },
+      {
+        "inputs": {
+          "points": [
+            [
+              98,
+              -2
+            ],
+            [
+              101,
+              0
+            ],
+            [
+              102,
+              3
+            ],
+            [
+              104,
+              -1
+            ],
+            [
+              95,
+              2
+            ]
+          ],
+          "target_x_m": 100,
+          "nominal_point": [
+            99,
+            1
+          ]
+        },
+        "output": {
+          "n": 5,
+          "coordinate_convention": "x downrange, y right; target=(target_x_m, 0)",
+          "covariance_convention": "unbiased sample covariance (ddof=1), m^2",
+          "mean_downrange_error_m": 0.0,
+          "mean_lateral_error_m": 0.4,
+          "downrange_variance_m2": 12.5,
+          "lateral_variance_m2": 4.3,
+          "covariance_downrange_lateral_m2": -1.0,
+          "corr_lateral_downrange_error": -0.1363988678940947,
+          "corr_lateral_radial_carry": -0.1333407388411098,
+          "median_radial_target_error_m": 3.605551275463989,
+          "p95_radial_target_error_m": 5.132752970831135,
+          "principal_axis_eigenvalues_m2": [
+            12.620189569201838,
+            4.179810430798161
+          ],
+          "principal_axis_orientation_deg": -6.853480502039872,
+          "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
+          "quadrant_fractions": {
+            "left_long": 0.2,
+            "left_short": 0.2,
+            "right_long": 0.2,
+            "right_short": 0.2
+          },
+          "quadrant_fraction_convention": "strictly left/right and long/short; axis-aligned endpoints enter no quadrant; fractions use all endpoints as denominator",
+          "conditional_mean_downrange_error_m": {
+            "left": 1.0,
+            "right": -1.5
+          },
+          "interpretation_limit": "Descriptive endpoint covariance only; face variation alone does not calibrate two-dimensional player precision.",
+          "nominal_mean_offset_m": [
+            1.0,
+            -0.6
+          ],
+          "nominal_rmse_m": 3.847076812334269
+        }
+      }
+    ],
+    "density_errors": [
+      {
+        "inputs": {
+          "points_by_pattern": {}
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "points_by_pattern must contain at least one pattern",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "": [
+              [
+                0,
+                0
+              ]
+            ],
+            "Good": [
+              [
+                1,
+                2
+              ]
+            ]
+          }
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "pattern names must be non-empty strings",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Good": []
+          }
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "pattern 'Good' needs at least one (x, y) point",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Good": [
+              [
+                "bad",
+                2
+              ]
+            ]
+          }
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "pattern 'Good' points must be finite (x, y) pairs",
+          "cause_type": "ValueError"
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Good": [
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "target_point_m": [
+            1
+          ]
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "target_point_m must be a finite (x, y) pair",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Good": [
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "padding_fraction": -1
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "padding_fraction must be finite and non-negative",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Good": [
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "constant_axis_half_width_m": 0
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "constant_axis_half_width_m must be finite and positive",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Good": [
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "bins": 3
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "each bin count must be an integer >= 4",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Good": [
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "bins": "bad"
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "bins must be an integer or a pair of integers",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Good": [
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "region_masses": [
+            0.5,
+            0.5
+          ]
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "region_masses must be unique probabilities in (0, 1)",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points_by_pattern": {
+            "Good": [
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "region_masses": [
+            "bad"
+          ]
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "region_masses must be probabilities in (0, 1)",
+          "cause_type": "ValueError"
+        }
+      }
+    ],
+    "dispersion_errors": [
+      {
+        "inputs": {
+          "points": [],
+          "target_x_m": "bad"
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "target_x_m must be finite",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points": [],
+          "target_x_m": 0
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "points must contain at least two (x, y) pairs",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points": [
+            [
+              "bad",
+              0
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "target_x_m": 0
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "points must be finite (x, y) pairs",
+          "cause_type": "ValueError"
+        }
+      },
+      {
+        "inputs": {
+          "points": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              4
+            ]
+          ],
+          "target_x_m": 0,
+          "nominal_point": [
+            1
+          ]
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "nominal_point must be a finite (x, y) pair",
+          "cause_type": null
+        }
+      },
+      {
+        "inputs": {
+          "points": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              4
+            ]
+          ],
+          "target_x_m": 0,
+          "nominal_point": [
+            "bad",
+            0
+          ]
+        },
+        "error": {
+          "type": "ValueError",
+          "message": "nominal_point must be a finite (x, y) pair",
+          "cause_type": "ValueError"
+        }
+      }
+    ]
+  }
+}

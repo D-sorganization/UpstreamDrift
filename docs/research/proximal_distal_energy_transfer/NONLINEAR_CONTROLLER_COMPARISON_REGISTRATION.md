@@ -9,10 +9,14 @@ inference, or coaching recommendation.
 
 ## Current Parent Authorities
 
-The committed
-[`nonlinear_controller_comparison_registration.json`](data/nonlinear_controller_comparison_registration.json)
+The current
+[`nonlinear_controller_comparison_registration_20261011.json`](data/nonlinear_controller_comparison_registration_20261011.json)
 digest-binds three current authorities: trajectory-varying control authority,
 bounded event reachability, and channel-specific event-topology robustness.
+The prior [`nonlinear_controller_comparison_registration.json`](data/nonlinear_controller_comparison_registration.json)
+remains fixed for historical qualifications; the separately recorded
+[`authority amendment`](../nonlinear_controller_registration_amendment_20261011/nonlinear_controller_registration_amendment_20261011.tex)
+requires fresh qualification under the current source and environment digests.
 The prospective comparison separately fixes the analytical ODE plant, four
 state coordinates, two torque coordinates, scaling, a 1 ms integration step,
 a 400-step horizon, actuator bounds, the positive transverse delivery guard,

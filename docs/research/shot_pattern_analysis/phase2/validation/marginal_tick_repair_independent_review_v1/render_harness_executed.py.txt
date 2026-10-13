@@ -1,0 +1,73 @@
+"""Independent saved-data review; no simulation or producer source mutation."""
+import hashlib
+import json
+from pathlib import Path
+import numpy as np
+from PIL import Image
+from scripts.research.shot_pattern_analysis.build_final_figures import _supported_points, _cell_metadata, _social_metadata
+from src.tools.shot_pattern_analysis import academic_plots as p
+from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
+from src.tools.shot_pattern_analysis.provenance import manifest_files_match
+MAIN=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+PHASE=MAIN/'docs/research/shot_pattern_analysis/phase2'
+DATA=PHASE/'final_v1'
+OUT=Path('/tmp/p2-marginal-repair-actual-v1')
+assert not OUT.exists()
+OUT.mkdir()
+sha=lambda x:hashlib.sha256(x.read_bytes()).hexdigest()
+source_paths=list(Path('src/tools/shot_pattern_analysis').glob('*.py'))+[Path('scripts/research/shot_pattern_analysis/build_final_figures.py'),Path(__file__)]
+sources={str(x.resolve()):sha(x) for x in source_paths}
+execution=matched_source_snapshot()
+accepted=json.loads((PHASE/'source_transition_supplement.json').read_text())['new_execution']
+assert {k:v for k,v in execution.items() if k!='source_sha256'}=={k:v for k,v in accepted.items() if k!='source_sha256'}
+assert set(execution['source_sha256'])==set(accepted['source_sha256'])
+assert all(v==execution['source_sha256'][k] for k,v in accepted['source_sha256'].items() if k!='src/tools/shot_pattern_analysis/academic_plots.py')
+inputs={}; rows=[]; artifacts={}; previews={}
+save_original=p._save_formats
+current={}
+def save(fig,stem,*,dpi):
+    fig.canvas.draw(); renderer=fig.canvas.get_renderer(); issues=[]; gaps=[]; cross=[]
+    estimate=current['estimate']; marg={n:np.sum(v.density_per_m2,axis=0)*np.diff(estimate.x_edges_m)[0] for n,v in estimate.patterns.items()}
+    limit=max(float(np.max(v)) for v in marg.values())*1.05
+    for panel,name in enumerate(current['points']):
+        main,right=fig.axes[panel*3+1:panel*3+3]
+        np.testing.assert_array_equal(right.patches[0].get_data().values,marg[name]);np.testing.assert_array_equal(right.get_xlim(),[0,limit])
+        ticks=[t for t in right.get_xticklabels() if t.get_visible() and t.get_text()]
+        ticks.sort(key=lambda t:t.get_window_extent(renderer).x0)
+        for left,next_ in zip(ticks,ticks[1:]):
+            gap=(next_.get_window_extent(renderer).x0-left.get_window_extent(renderer).x1)*72/fig.dpi
+            gaps.append({'panel':name,'labels':[left.get_text(),next_.get_text()],'gap_pt':gap})
+            if gap<4-1e-8:issues.append('Neighboring marginal tick gutter below 4 pt')
+        for a in main.get_xticklabels():
+            for b in ticks:
+                if a.get_visible() and a.get_text() and a.get_window_extent(renderer).overlaps(b.get_window_extent(renderer)):
+                    issues.append('Main and marginal ticks overlap')
+        cross.append({'panel':name,'main_tick_labels':[t.get_text() for t in main.get_xticklabels()],'marginal_tick_labels':[t.get_text() for t in ticks]})
+    for text in fig.texts:
+        box=text.get_window_extent(renderer)
+        if box.x0<0 or box.y0<0 or box.x1>fig.bbox.width or box.y1>fig.bbox.height:issues.append('Figure caption outside canvas')
+    rows.append({'cell':current['cell'],'presentation':current['mode'],'gaps':gaps,'tick_labels':cross,'issues':issues,'supported_counts':{k:len(v) for k,v in current['points'].items()},'total_counts':current['total'],'density_data_and_limits_exact':True})
+    result=save_original(fig,stem,dpi=dpi)
+    for path in result.values():artifacts[str(path.relative_to(OUT))]=sha(path)
+    png=result['png']
+    with Image.open(png) as image:
+        preview=OUT/(png.stem+'_1080px.png');image.resize((1080,round(image.height*1080/image.width)),Image.Resampling.LANCZOS).save(preview);previews[str(preview.relative_to(OUT))]=sha(preview)
+    return result
+p._save_formats=save
+for club in ('driver','seven_iron','pitching_wedge'):
+    name=f'{club}_lean0_curve1_rotation1_combined2';directory=DATA/name
+    assert manifest_files_match(directory/'manifest.json')
+    for file in ('manifest.json','summary.json','shots.csv.gz'):inputs[str(directory/file)]=sha(directory/file)
+    cell=json.loads((directory/'summary.json').read_text());cell['cell']=name
+    points,total=_supported_points(directory);valid={k:len(v) for k,v in points.items()}
+    estimate=p.shared_histogram_density(points,bins=64,target_point_m=(cell['target_x_m'],0),region_masses=(.5,.8,.95))
+    for mode in ('academic','social'):
+        if mode=='social':scenario,metadata=_social_metadata(cell,valid,total)
+        else:scenario=f'{name} — {club} — combined2; shaft rotation SD 1°; curve ×1; Matched Raw Landing';metadata=_cell_metadata(cell,valid,total)
+        current={'cell':name,'mode':mode,'estimate':estimate,'points':points,'total':total}
+        p.write_academic_dispersion_figure(points,OUT/f'{club}_{mode}',scenario=scenario,metadata=metadata,target_point_m=(cell['target_x_m'],0),presentation=mode,dpi=180)
+        print(f'Rendered {club} {mode}',flush=True)
+assert all(sha(Path(k))==v for k,v in inputs.items());assert all(sha(Path(k))==v for k,v in sources.items());assert execution==matched_source_snapshot()
+receipt={'status':'visual_review_pending','execution':execution,'sources':sources,'inputs':inputs,'measurements':rows,'artifacts':artifacts,'previews':previews,'scope':'Saved-Data Marginal Tick Repair Review; Not Final-Set Acceptance'}
+(OUT/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps({'issues':[x for r in rows for x in r['issues']],'assets':len(artifacts),'previews':len(previews)}))

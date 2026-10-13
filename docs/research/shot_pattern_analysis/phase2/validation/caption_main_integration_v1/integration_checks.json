@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "checked_utc": "2026-10-10T10:57:05.965287+00:00",
+  "tests": {
+    "count": 74,
+    "seconds": 102.4,
+    "exit_code": 0,
+    "log_sha256": "f10708cf3327b3f7c496e6685ba457f591c2c605bb4c8a5e0f0cb22b4a97301f",
+    "suites": [
+      "tests/research/test_shot_pattern_final_figures.py",
+      "tests/tools/shot_pattern_analysis/test_matched_pair_social.py",
+      "tests/tools/shot_pattern_analysis/test_matched_social_integration.py",
+      "tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py",
+      "tests/research/test_shot_pattern_final_report_assets.py"
+    ]
+  },
+  "ruff_check": {
+    "exit_code": 0,
+    "files": 6
+  },
+  "ruff_format_check": {
+    "exit_code": 0,
+    "files": 6
+  },
+  "mypy": {
+    "exit_code": 0,
+    "source_files": 3,
+    "python_version": "3.12",
+    "follow_imports": "silent"
+  },
+  "qualification_limit": "Caption integration only; supplemental final pipeline and narrative acceptance remain pending."
+}

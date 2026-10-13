@@ -1,0 +1,26 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import json, hashlib, subprocess, shutil
+p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');fig=p/'supplement_report_v1';out=p/'validation/supplement_v3_graphical_review/root_pw_primary_cells'
+h=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
+inventory=json.loads((out/'inventory.json').read_text())['files'];report=fig/'REPORT_SUPPLEMENT.json';rh=h(report);refs={x['cell']:x for x in json.loads(report.read_text())['unique_cells'] if x['source_protocol']=='pw-primary-face-bounds/1'};assert len(refs)==18
+checks=[]
+for row in inventory:
+ f=fig/row['path'];assert h(f)==row['sha256'];matches=[(name,r) for name,r in refs.items() if f.name.startswith(name+'_')];assert len(matches)==1
+ name,ref=matches[0];config=ref['config'];summary=ref['summary'];pdf=f.with_suffix('.pdf');t=' '.join(subprocess.check_output(['pdftotext',str(pdf),'-'],text=True).split());social='_social' in f.stem
+ assert config['club']['shaft_lean_deg']==0 and config['curve_scale']==2
+ if social:
+  assert 'Pitching Wedge' in t and 'Lean 0°' in t and 'Curve ×2' in t
+  assert f"Shaft Twist SD {config['noise']['standard_deviations'][0]:g}°" in t
+ else:
+  assert name in t and 'pw-primary-face-bounds/1' in t
+ counts={k:int(v['supported_n']) for k,v in summary['summary'].items()}
+ if '_density' in f.stem:
+  for pattern,n in counts.items():assert f'{pattern} {n:,}/10,000 valid' in t,(f,pattern)
+  assert 'Highest-Density Regions' in t and '95% HDR' in t
+ else:
+  assert 'Raw' in t and 'Not Paired by Shot Index' in t and 'magnification' in t
+ checks.append({'path':row['path'],'pdf_sha256':h(pdf),'cell':name,'supported_counts':counts,'config_support_labels_checked':True})
+assert h(report)==rh
+r={'status':'provisional_visual_and_label_checks_pass','checked_utc':datetime.now(timezone.utc).isoformat(),'whole_run_accepted':False,'report_sha256':rh,'scope':'All 72 PW primary supplement cell PNGs: 18 cells, academic/social density/overhead, 12 contact sheets and six full-size inspections.','files':inventory,'contact_sheets_inspected':[f'contact_{n:02}.jpg' for n in range(1,13)],'full_size_pngs_inspected':[inventory[i]['path'] for i in (9,17,40,47,52,69)],'pdf_label_checks':checks,'findings':[],'limitations':['Live producer: eventual complete pipeline manifest must bind these bytes.','Contact-sheet review assesses layout; full-size small-text checks cover only the six listed representatives.','No additional numerical or empirical validation is claimed.']}
+(out/'review.json').write_text(json.dumps(r,indent=2)+'\n');shutil.copy(__file__,out/'executed_label_check.py.txt');print(h(out/'review.json'))

@@ -1,0 +1,52 @@
+..............................                                           [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+2.54s call     tests/research/test_shot_pattern_final_report.py::test_supplement_loader_return_cannot_rebind_old_data_to_new_receipt
+0.29s call     tests/research/test_shot_pattern_final_report.py::test_final_builder_requires_full_324_and_72_cell_protocols
+0.24s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_missing_data_instead_of_inventing_claims
+0.02s teardown tests/research/test_shot_pattern_final_report.py::test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_numbers_change_with_actual_input
+0.01s setup    tests/research/test_shot_pattern_final_report.py::test_compact_comparison_table_does_not_wrap_full_optimizer_failure
+0.01s call     tests/research/test_shot_pattern_final_report.py::test_verified_original_figures_require_both_presentations
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_actual_numeric_ranges_and_study_sd
+0.01s teardown tests/research/test_shot_pattern_final_report.py::test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distractors
+0.01s setup    tests/research/test_shot_pattern_final_report.py::test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distractors
+0.01s setup    tests/research/test_shot_pattern_final_report.py::test_verified_original_figures_require_both_presentations
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_missing_data_instead_of_inventing_claims
+0.01s setup    tests/research/test_shot_pattern_final_report.py::test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity
+0.01s teardown tests/research/test_shot_pattern_final_report.py::test_matrix_input_change_is_rejected_before_publication
+0.01s teardown tests/research/test_shot_pattern_final_report.py::test_final_builder_requires_full_324_and_72_cell_protocols
+0.01s teardown tests/research/test_shot_pattern_final_report.py::test_final_publication_receipt_binds_report_and_supplement
+0.01s teardown tests/research/test_shot_pattern_final_report.py::test_f5_figure_population_prose_distinguishes_individual_and_paired_densities
+0.01s setup    tests/research/test_shot_pattern_final_report.py::test_bounds_control_rejects_wrong_first_protocol_and_duplicate_identity
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_actual_numeric_ranges_and_study_sd
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity

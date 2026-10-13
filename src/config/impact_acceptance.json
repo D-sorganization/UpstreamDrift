@@ -8,9 +8,9 @@
     "recorded_on": "2026-09-04"
   },
   "reconciled_against": {
-    "upstreamdrift": "cdb3c84e8abf3b3fab6adb54ebcfbadd8b12a193",
-    "tools": "6b6e4be55e7086a33db43b36d2632765be619bde",
-    "reconciled_on": "2026-10-11"
+    "upstreamdrift": "53b10400b2f4ecbdd464ea5ddfc33a41ce73f28c",
+    "tools": "21c83f86350af7ba613937e9653a9eda0fb713b2",
+    "reconciled_on": "2026-10-12"
   },
   "release_claim": "code_verified_only",
   "predictive_accuracy_claim": false,

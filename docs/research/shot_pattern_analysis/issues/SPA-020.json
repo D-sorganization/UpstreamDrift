@@ -1,0 +1,8 @@
+{
+  "local_id": "SPA-020",
+  "title": "Make Generated Rust Lockfile Presence Explicit in Clean-Clone Provenance",
+  "body": "After preserving a generated ignored root Cargo.lock outside the repository to satisfy root-clutter policy, a focused test exposed that source_snapshot unconditionally reads it. A clean clone has no such tracked file and the CLI would fail before simulation.\n\n## Acceptance Criteria\n\nTreat only the generated lockfile as optional, recording its presence or absence explicitly. Keep all tracked scientific source files and native binary mandatory and hash-verified. Retain the original frozen experiment lockfile inside the existing source snapshot archive. Add a failing clean-clone-style test without Cargo.lock, then verify provenance, matrix, CLI and root-clutter contracts.\n\n## Validation\n\nPost-format focused lane produced FileNotFoundError in test_matrix after ignored build-artifact cleanup. Red\u2013green absence/presence regression required; no saved flight rows or archived source bytes may change.\n\n## Handoff\n\nBranch `codex/shot-pattern-analysis`; keep open until merged implementing PR. This correction makes clean checkout execution robust without weakening required scientific source receipts.",
+  "publication_status": "published",
+  "github_issue_number": 11936,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11936"
+}

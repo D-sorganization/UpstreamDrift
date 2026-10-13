@@ -1,0 +1,16 @@
+{
+  "scope": "Merge actual main capacity repair while preserving both previously governed metadata corrections. No record omitted, scientific acceptance or limit changed.",
+  "parents": [
+    "b3397ea39a",
+    "8a22fd99a86f76e0fd1e42989a4e0ae1843a76df"
+  ],
+  "entry_count": 76,
+  "incoming_state_correction": 10783,
+  "retained_branch_state_correction": 9507,
+  "all_other_entry_titles_and_fields_equal": true,
+  "ours_sha256": "f587fd8c69a6299fac8db8eca9b461e5fedf2c8f2c43739da4abed08cd06ae64",
+  "main_sha256": "9d8a0467e3a1ab346a04235a4157eb634ff643c2c700e2a390441dec2adb8adc",
+  "combined_sha256": "44de5b999e520c7a6361fe6a806097a9e68bf12500ab11376fea822a7a11fd78",
+  "tool": "shared_scripts.changes_fragment.apply_devlog_entry",
+  "fragment": "changes/9507-metadata-only-completed-checkout-reconci.md"
+}

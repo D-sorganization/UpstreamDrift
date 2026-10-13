@@ -1,0 +1,2897 @@
+{
+  "status": "rendered_pending_independent_visual_review",
+  "commit": "14f27706e4e9e52ca1324a7a2bac59e86ab33ef9",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/__init__.py": "7cb68928d3d01ff739e073100fe00336b71980fdffef3576abd2cf25acc25f4f",
+    "src/tools/shot_pattern_analysis/__main__.py": "267d814e6a603cc2b3f49d9eaae351fc83c694be6afd7f367430ad50eee5bf6f",
+    "src/tools/shot_pattern_analysis/_embed_adapter.py": "e47723b0915516bb5e6daf982ee4264b4d1056699b7a346435998e98455f733d",
+    "src/tools/shot_pattern_analysis/academic_plots.py": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb",
+    "src/tools/shot_pattern_analysis/club_geometry.py": "1bf352c6922a93abdc3f5b814fc63733dea7349bc0b3e54c80df087204c04190",
+    "src/tools/shot_pattern_analysis/comparison.py": "43560828f6534feb03563da14dc0d43d42126e6aac30c7d73755bc08b61a94cb",
+    "src/tools/shot_pattern_analysis/core.py": "f8bb33fa6d0f9a786bb52e260430806635b3c4628b8948f8b611c30a84a39478",
+    "src/tools/shot_pattern_analysis/course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+    "src/tools/shot_pattern_analysis/delivery_geometry.py": "f8938a47b98b6057cb3e48619ab4453109f1865a74f3f45a3b40e8012b0168a9",
+    "src/tools/shot_pattern_analysis/density.py": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+    "src/tools/shot_pattern_analysis/dispersion_stats.py": "956eec2eefa14c6ae73c3e460d0c97dcee871299ca52fffb66c9621c92a6ce6e",
+    "src/tools/shot_pattern_analysis/gui.py": "7e43fbcc0c2a532883bbd30b1802624e9636ebe4f5e0cbfe9c74b4f0cbfc2e27",
+    "src/tools/shot_pattern_analysis/matched_config.py": "4426573fb766fa02fcf2f5d247e2eb19bba97bb85a04d2224af113250d2e4814",
+    "src/tools/shot_pattern_analysis/matched_diagnostics.py": "6336d2fa15b75afae3ac6dde3040b8377818802e77d234c73caea3d438c22fc9",
+    "src/tools/shot_pattern_analysis/matched_export.py": "9f11922d18df34785286f08ea83bf980b1f3bdeba853ba553e664844986a79da",
+    "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "src/tools/shot_pattern_analysis/matched_gui.py": "788b28561c0684111750895dfbebac365ce6962df4f77be805ce50a58031f7f2",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80",
+    "src/tools/shot_pattern_analysis/matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "src/tools/shot_pattern_analysis/matched_matrix.py": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732",
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369",
+    "src/tools/shot_pattern_analysis/matched_physics.py": "b18bd47a7b5998f69d417143678ffb8adfd7c6c5417b01d2f1ffb8ab29e6dd99",
+    "src/tools/shot_pattern_analysis/matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "src/tools/shot_pattern_analysis/matched_report_plots.py": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
+    "src/tools/shot_pattern_analysis/matched_runner.py": "55ce0984c53f41b8c2b85264cb3222a8426c765eeaab0a08aa54b704f33bbdd5",
+    "src/tools/shot_pattern_analysis/matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+    "src/tools/shot_pattern_analysis/matched_supplement.py": "10058a76f403323850f20ed65d24b44505e07a1938274b36b8d9013924bd39bd",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "9254d7aede64f5aed19bd32f7cd5a8fb1b1899f6e18d000ba2096b228fc18246",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "f836132f5e850ea58d54c166b405487f8e4508746be466e30122d0ce5c1cdd59",
+    "src/tools/shot_pattern_analysis/matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "src/tools/shot_pattern_analysis/matrix.py": "ad9e540a13b5974e34ac3a2b13ce62109be04c9e2be875489a39a45fa51f72e8",
+    "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",
+    "src/tools/shot_pattern_analysis/nominal_matching.py": "8ea4b5e4d1f73518972d71fefd42bc5725c95dacb9694507e9c784fc6eed04fa",
+    "src/tools/shot_pattern_analysis/numerics.py": "65201b8b1923a908bda0213c4291e741f9ab73b2a95298c48415ea52e1208139",
+    "src/tools/shot_pattern_analysis/overview.py": "6b5d5d8a1c0733d936a0e1649fbe73f9fc35570a22fef05a6e220e089e7f5f94",
+    "src/tools/shot_pattern_analysis/physics.py": "cbc5af5e2e1c78a19da20b56b0396fe2fd03b625761769bbda1a8e3082179b35",
+    "src/tools/shot_pattern_analysis/presets.py": "5be2a521220c9dc5474baa020babbb09de037783aee8fb353656c03069ed292a",
+    "src/tools/shot_pattern_analysis/provenance.py": "d9d11feb69179fbf9ead9875ec1a45a08f1f6c0a914c865e53ff1e669faf6609",
+    "src/tools/shot_pattern_analysis/range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987",
+    "src/tools/shot_pattern_analysis/reporting.py": "bf739a50cf287bd47e16f8cb2caaf29bd5a45c60600969dc182eb05c26b18683",
+    "src/tools/shot_pattern_analysis/scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+    "src/tools/shot_pattern_analysis/scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+    "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "src/tools/shot_pattern_analysis/sensitivity.py": "b83b71d41e33f883f8f5765207e7f9e9ae2dd6f139b1d3cb544662011dcd07dc",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+    "scripts/research/shot_pattern_analysis/__init__.py": "28e6733b9df7726a4cd66427361aaef98a645c51888ca7115fa07b9b3db7d1a5",
+    "scripts/research/shot_pattern_analysis/archive_data.py": "5f0c483dd31e11517e5d5dbeb464f499df56c94aedcab6bbf049f65537a57969",
+    "scripts/research/shot_pattern_analysis/build_final_figures.py": "daecb84c22a758e013c2ebdd27d2e0617999ccf693bba117637640a2bf764ac1",
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "13f0b30d8c9b4c75f5e6cbf3b769ebc6f832cf6f737088d85692dcca5d08a180",
+    "scripts/research/shot_pattern_analysis/build_pdf.py": "9f1daaeb2d47cc5ba61b4edabc6dc55c3ceed6130ceed608931a75b469b90a03",
+    "scripts/research/shot_pattern_analysis/build_pilot_preview.py": "21003bf72774972c47adb12b4843131a171763cd0c42e7fa7e694d81a80e4a68",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "084f580b117bb4a8b3049a7bb497eeef84d4cd70bf269a908ba0bf5e78de1b75"
+  },
+  "main_source_sha256": {
+    "src/tools/shot_pattern_analysis/__init__.py": "7cb68928d3d01ff739e073100fe00336b71980fdffef3576abd2cf25acc25f4f",
+    "src/tools/shot_pattern_analysis/__main__.py": "267d814e6a603cc2b3f49d9eaae351fc83c694be6afd7f367430ad50eee5bf6f",
+    "src/tools/shot_pattern_analysis/_embed_adapter.py": "e47723b0915516bb5e6daf982ee4264b4d1056699b7a346435998e98455f733d",
+    "src/tools/shot_pattern_analysis/academic_plots.py": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb",
+    "src/tools/shot_pattern_analysis/club_geometry.py": "1bf352c6922a93abdc3f5b814fc63733dea7349bc0b3e54c80df087204c04190",
+    "src/tools/shot_pattern_analysis/comparison.py": "43560828f6534feb03563da14dc0d43d42126e6aac30c7d73755bc08b61a94cb",
+    "src/tools/shot_pattern_analysis/core.py": "f8bb33fa6d0f9a786bb52e260430806635b3c4628b8948f8b611c30a84a39478",
+    "src/tools/shot_pattern_analysis/course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+    "src/tools/shot_pattern_analysis/delivery_geometry.py": "f8938a47b98b6057cb3e48619ab4453109f1865a74f3f45a3b40e8012b0168a9",
+    "src/tools/shot_pattern_analysis/density.py": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+    "src/tools/shot_pattern_analysis/dispersion_stats.py": "956eec2eefa14c6ae73c3e460d0c97dcee871299ca52fffb66c9621c92a6ce6e",
+    "src/tools/shot_pattern_analysis/gui.py": "7e43fbcc0c2a532883bbd30b1802624e9636ebe4f5e0cbfe9c74b4f0cbfc2e27",
+    "src/tools/shot_pattern_analysis/matched_config.py": "4426573fb766fa02fcf2f5d247e2eb19bba97bb85a04d2224af113250d2e4814",
+    "src/tools/shot_pattern_analysis/matched_diagnostics.py": "6336d2fa15b75afae3ac6dde3040b8377818802e77d234c73caea3d438c22fc9",
+    "src/tools/shot_pattern_analysis/matched_export.py": "9f11922d18df34785286f08ea83bf980b1f3bdeba853ba553e664844986a79da",
+    "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "src/tools/shot_pattern_analysis/matched_gui.py": "788b28561c0684111750895dfbebac365ce6962df4f77be805ce50a58031f7f2",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80",
+    "src/tools/shot_pattern_analysis/matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "src/tools/shot_pattern_analysis/matched_matrix.py": "af547eb668d33f2e606bbab7f4a9b69749d7c79d61d2d381bfc0924cc3216732",
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "8b80820cb16b2a4f975a3bfcfa960d30500d3aec3d08fabd6a949bf4f9e37694",
+    "src/tools/shot_pattern_analysis/matched_physics.py": "b18bd47a7b5998f69d417143678ffb8adfd7c6c5417b01d2f1ffb8ab29e6dd99",
+    "src/tools/shot_pattern_analysis/matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "src/tools/shot_pattern_analysis/matched_report_plots.py": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
+    "src/tools/shot_pattern_analysis/matched_runner.py": "55ce0984c53f41b8c2b85264cb3222a8426c765eeaab0a08aa54b704f33bbdd5",
+    "src/tools/shot_pattern_analysis/matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+    "src/tools/shot_pattern_analysis/matched_supplement.py": "10058a76f403323850f20ed65d24b44505e07a1938274b36b8d9013924bd39bd",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "82fe100f03508400e0c87b8a0c6c6055bb02c2bb7c8d10c80b4e9ef4bd1b6ff0",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "f836132f5e850ea58d54c166b405487f8e4508746be466e30122d0ce5c1cdd59",
+    "src/tools/shot_pattern_analysis/matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "src/tools/shot_pattern_analysis/matrix.py": "ad9e540a13b5974e34ac3a2b13ce62109be04c9e2be875489a39a45fa51f72e8",
+    "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",
+    "src/tools/shot_pattern_analysis/nominal_matching.py": "8ea4b5e4d1f73518972d71fefd42bc5725c95dacb9694507e9c784fc6eed04fa",
+    "src/tools/shot_pattern_analysis/numerics.py": "65201b8b1923a908bda0213c4291e741f9ab73b2a95298c48415ea52e1208139",
+    "src/tools/shot_pattern_analysis/overview.py": "6b5d5d8a1c0733d936a0e1649fbe73f9fc35570a22fef05a6e220e089e7f5f94",
+    "src/tools/shot_pattern_analysis/physics.py": "cbc5af5e2e1c78a19da20b56b0396fe2fd03b625761769bbda1a8e3082179b35",
+    "src/tools/shot_pattern_analysis/presets.py": "5be2a521220c9dc5474baa020babbb09de037783aee8fb353656c03069ed292a",
+    "src/tools/shot_pattern_analysis/provenance.py": "d9d11feb69179fbf9ead9875ec1a45a08f1f6c0a914c865e53ff1e669faf6609",
+    "src/tools/shot_pattern_analysis/range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987",
+    "src/tools/shot_pattern_analysis/reporting.py": "bf739a50cf287bd47e16f8cb2caaf29bd5a45c60600969dc182eb05c26b18683",
+    "src/tools/shot_pattern_analysis/scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+    "src/tools/shot_pattern_analysis/scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+    "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "src/tools/shot_pattern_analysis/sensitivity.py": "b83b71d41e33f883f8f5765207e7f9e9ae2dd6f139b1d3cb544662011dcd07dc",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+    "scripts/research/shot_pattern_analysis/__init__.py": "28e6733b9df7726a4cd66427361aaef98a645c51888ca7115fa07b9b3db7d1a5",
+    "scripts/research/shot_pattern_analysis/archive_data.py": "5f0c483dd31e11517e5d5dbeb464f499df56c94aedcab6bbf049f65537a57969",
+    "scripts/research/shot_pattern_analysis/build_final_figures.py": "daecb84c22a758e013c2ebdd27d2e0617999ccf693bba117637640a2bf764ac1",
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "13f0b30d8c9b4c75f5e6cbf3b769ebc6f832cf6f737088d85692dcca5d08a180",
+    "scripts/research/shot_pattern_analysis/build_pdf.py": "9f1daaeb2d47cc5ba61b4edabc6dc55c3ceed6130ceed608931a75b469b90a03",
+    "scripts/research/shot_pattern_analysis/build_pilot_preview.py": "21003bf72774972c47adb12b4843131a171763cd0c42e7fa7e694d81a80e4a68",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "084f580b117bb4a8b3049a7bb497eeef84d4cd70bf269a908ba0bf5e78de1b75"
+  },
+  "input_sha256": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/manifest.json": "3521529d68c7e40f4c42274eda09aaef221af30fa5dc51efe0ceabed54443fa5",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/summary.json": "ea661a6020921ab5cfc054cf384e1ea7a6d9ab97a0d0f810adaffb412bbe16e2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/shots.csv.gz": "62e6ab23e45afe6a274b50197cb96d34e062e6146cce7670fa6ad2359c70b237",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/flight_samples.json": "eaa7b6fc79f2a96b2f6bb6ef6f0d5454ad5afafed24a29c1e6e5bbaea9e8353b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/manifest.json": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/summary.json": "a107158ee7f608276495532f38de4580013feae92fc8836af61e330b8559f4f3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/shots.csv.gz": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/flight_samples.json": "490170bcd02f316167ae9055447a0130954a0c8b23b0086d6473e2df08a57a83",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/manifest.json": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/summary.json": "038055a639246c267964e62b2f5f73683b3502b733a4246c0ab7f7740dabae4c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/shots.csv.gz": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/flight_samples.json": "604e34264a019397d44c2168faf160ec54506f7fe8f4f664ee57b1c31db628e4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/manifest.json": "6bf25068c94cb66458250bd7c72a84a88fc1dbd11855e007d2c99021d4120849",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/summary.json": "1aa3c170be4d19ba88b35ecef18e4cdd36e9efa01b418870dbd1d52bcf3d2ae0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/shots.csv.gz": "9d089f3b70b0cb5ddeeabe1ff309cfec960c5ed78368d4b764f3dea2315a3eee",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/flight_samples.json": "c81eabe096f3c65619b0428e14fa31b455fd0482b16657e8572db679a3160899",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/manifest.json": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/summary.json": "078878c32284aa822aabf3fee2068e46907c68050ab546697a588ce1314b756b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/shots.csv.gz": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/flight_samples.json": "ee10819771352d7ceb86694a1284d4a505a2a3073b31f49ed434160f64a56dfb"
+  },
+  "selected_cells": [
+    "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+    "pitching_wedge_lean5_curve2_rotation2_combined2",
+    "driver_lean5_curve2_rotation2_combined2"
+  ],
+  "selected_pairs": [
+    {
+      "kind": "curve_strength",
+      "first": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "first_mode": "Within-Lean Nominal Target",
+      "second_mode": "Fixed-Target Control (Alias)"
+    },
+    {
+      "kind": "across_lean",
+      "first": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "first_mode": "Fixed-Target Control (Alias)",
+      "second_mode": "Fixed-Target Control"
+    }
+  ],
+  "assets": {
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_straight_social.png": "565871404830a2d55e5595bb7da16063a822f688a2baca756f0d5829b99b014d",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.pdf": "dcff2161b88e35b749cb34e24e3dc0e75132d05b9e06e84909c8dad5410489ee",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.pdf": "ff47de41190678ab37eb15b3cd856c7520b2d5e56fb0b83b31fe2ec932b9aaf7",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_straight_social.pdf": "5c1952632af3356ea6f8a5e754b4630697c9c1bb4aac2f5978204cc24d3c3109",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.svg": "d088ecaac5fe8f2ba8afc33e74e679cb5fc9dc82788bb712be6ed1eb1f0b5de8",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.svg": "32955dbbfa59994d28be748fa2eb786b55a597d80eea0db119a630c8abb105d1",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.svg": "be0de20f816b6ea2df615e4f0dfa331fac78c44e3d10a82af5a43cefaf09651e",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.png": "848d24888d62503533dfedf93fe37be2864fbc52d5e4a40035bda95fa2ea6827",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.svg": "0275642be41ca9968ce5a228feab3e591f2daee9f7ba3346fe4bd378feb38f38",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.png": "d0a93814ba1778cb3263684c2908e79821aeb969862d72d1440e5b2a82521e1b",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_fade_social.pdf": "60ff44437ca40baa585543ccb67519303f1cbfda299ab1c50a1150bdc38dde9d",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.svg": "79f928d91d66d57cf734e5c90ca8fc0957d008e10d202a70afa04861bfbdf1fc",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.png": "7e1d6d0c8eebdad00aa178f7590a580096acd405a099cf80e6b8007263cd5546",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.png": "541c1199e26f04e757299977af2cb3b5a81477c85ddf38b0ab822e162603e981",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.png": "fc839586afb5ddcb05102c83387c5919aae3cdd0bfbff283d966dc886d70818b",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead_social.png": "c35f49e4a7f111ff9818f196ae3ca3ce8078fde16f59a58c3c23072fbd52ea23",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.svg": "3e3ee9e017d7fb063d270fefc754d8af6207c12d902165d7839dcc5b20b55161",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.png": "21c069ac34945498e826898c5c5cd3726a8806486e02db6a24169b1287c7ac06",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.png": "45687b0d7dc007a03568b336e53154a0daf44b05f7888024e70beb4eda1b1f34",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.pdf": "99a48566d97346280e3fbd0e2afed5c48928091bc900ad70a5f455e738348f4d",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_straight_social.svg": "3052f704cf2636e8f3c306d98cdc9027b78e27700576524a232a117e6c947f4d",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.svg": "565bd6e14a97bb40779a14df99fc1ce28e64f254347d61ae83670ca93f5fae74",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.pdf": "5f02eb2cd1408e712943dc183380d8a4eb6982ad7719d544e3541a040977a759",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.pdf": "2fcd7063e38c8958cf4695ef54dab9b243c95351d7f1d35f6e2d1a34680a9d93",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_fade_social.png": "7346d9d08147fa7ac03f3640f4f2c83e436276447b2b9fd3404fbcdab7d318a7",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.pdf": "05bbbe10ab42e4b4299b84b0dd9fb1b7db46ca597273eb63406e9087057ed433",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.svg": "e8e5c454d6118d61c83ffeaf8c44ff4517c8b4a5251b513511191ad44b615935",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.pdf": "daae2a9c9bdbd8214830fb5a6f55a2176c82b2edd0c97f67f4229f6e2735f130",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.png": "638f9c813901f96409e9b7f1d5e36fab73d0a045ebad56ff8299044f7b637a0a",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_fade_social.svg": "198a9c0e57c7f7c81285ed95e0537040389d8cc7653664f8495e8dd1a8eda39b",
+    "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead_social.png": "611eb4e857e63a388c8e9c663daaa409b9c15242935de0bbc73391e9efafd00a",
+    "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.pdf": "cb0711d7ef7a296587a71736ba8786032941489bf47b8af8d82b773b6d32d4c3",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.pdf": "dc9e7beb61ef7135b6b808786a1e60f9e727fb56daf6c5b5c77c03b99ab81ec0",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png": "bb0746c61a600b334b9b042c5da94392b1c93aeb5c3e98127063f970b4f8a235",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.pdf": "2cb4b19769ef170a3ccf8ab52364f2b6d1008b92ef80c9192da1bac5d464ca13",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png": "b6cbeefede9def62152c3018e3005fc612c152610ed1d56236c7bad3d7d53b79",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.png": "ca670c1763ad2a55ea26aa8de7416d79b087d55c77e27a5c119640b0333b0473",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png": "43f7ebe4d683706f04c914268ba6f615ccc0468b39e0c48533d5c9cd9f1204bf",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.pdf": "5cbf462c526e663bd2b6a47e951ab19f6cb7b5ebfc784c432796174ace093e3c",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.pdf": "e37598d29510f1dd2acc71af392ce59d4e2f3e435409914e90cbf0e61b6211e5",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png": "d674f42a001d7efb53ec0d4ec5a31abbbdc5d2b01028c95124847d28b040a60a",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.pdf": "d79acde7b0c3d8ca6e8420e4bf7b13ae1e5306ff0db352bf53e55041e4bedbf2",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.svg": "bc6c6ea8c9fba75cc22c7c12770c9677c0451a2d21fe8e33f634c6dddabd4c8c",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png": "f60e99822b75893eab24e4b53393e62ddc43eda7ea1624eb21fd8c1de0945cab",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.pdf": "577529462f433b9f4b65d2ce65cd127b50402740f24f40767b153b9ee4219cf2",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.pdf": "9b8acf64f4dfa8ae159c97dd30f63e202255a72c655b2669d0465218413a7cb0",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.svg": "2442e749483c899fb06201d50b658b2a5037b6b324cbd39aacc0fb330d04b1dc",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.svg": "457fdc5e227acf81474d497b19a001698a9af974390e40ccea775adfb693bec3",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png": "104c1ddfef3ac536e71faeeba15a864cf4a9296c3f3f40d45a73b3d6430a4dc7",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.pdf": "3c9bef306b22a4a8743cd46f20e9b2e481c551e93f7c4efe21e83e7ecf4a1dd7",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.png": "5fc73c93f1373427f11744811a2e995850da2f7e910ed6fad64370c569c5e31a",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.pdf": "96271336e65b28af23f1637dd76dfb44fbe026f2e294b04f4ef360baa7d404f7",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.svg": "d2cb901dcf6eff87d43788bab50fb5f97e1a1c228ae19be3c962606882f888c3",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.svg": "afda662732bcc501776ffb050bbd9af8ca16a560f1d38588de86df8ac544f3df",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.svg": "08d7a538d0c1e577a8f6f9db3c640a9bd2da24760eb2592f63afc2d780c3c472",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.svg": "e7069ad55a6394b48f764f4dd86fb85cf2de69f6220ef466f532a7425746071f",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.svg": "8c7b0cd873443a35cf842b8b6928888a5bf6b816f7efdfdddeb8a39123e15b7a",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png": "786002b3c1a75b55ab212f2523ada95254319c32f79efa21cec067276714322c",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.png": "8f61e3cdae7ff3067e53807c5495c69cfe6e10cd319408d88cef8e18320da1c7",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.svg": "e45f1b3e6b16343b90b10eb04b8b75956d2947d92d26c59885d9b73bc847f78d",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.svg": "a2594293a424f74e700127fdac79e6edb22f3f9211da5d83520a5557ebf8037b",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.pdf": "6236d2d6afe4fa6992143e5fdadcb2bcf5eb1240319646acf41fe3db5b161640",
+    "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.svg": "183c674e45c5634aa0d9e544fbe187b09af9596ef473d11f26e681b6d2d03ede",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png": "3c7caabbbae0a97483bd01ca7c645395b1168ad14e6c147415f9153830a5cea6",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.svg": "77cde92b7eb726d5164f399fd4d2150f674136b98f3bee255b88a3e0101ed9cb",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.pdf": "ca29394aee04ab1351a187f140984b07a40511baeef7963ffdaf12af3df38c1b",
+    "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.pdf": "56fa6f4be04c651abf29d425456e91d9c28e88438deddaf592c52cc471a85771",
+    "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png": "8f8f6e932f3f9e42f511c21fb4bad5ca863cad44d48acc8baea554d01be84389"
+  },
+  "ledger": [
+    {
+      "figure_kind": "density_png",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.png",
+      "sha256": "ca670c1763ad2a55ea26aa8de7416d79b087d55c77e27a5c119640b0333b0473"
+    },
+    {
+      "figure_kind": "density_pdf",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.pdf",
+      "sha256": "577529462f433b9f4b65d2ce65cd127b50402740f24f40767b153b9ee4219cf2"
+    },
+    {
+      "figure_kind": "density_svg",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.svg",
+      "sha256": "a2594293a424f74e700127fdac79e6edb22f3f9211da5d83520a5557ebf8037b"
+    },
+    {
+      "figure_kind": "density_social_png",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png",
+      "sha256": "b6cbeefede9def62152c3018e3005fc612c152610ed1d56236c7bad3d7d53b79"
+    },
+    {
+      "figure_kind": "density_social_pdf",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.pdf",
+      "sha256": "56fa6f4be04c651abf29d425456e91d9c28e88438deddaf592c52cc471a85771"
+    },
+    {
+      "figure_kind": "density_social_svg",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.svg",
+      "sha256": "2442e749483c899fb06201d50b658b2a5037b6b324cbd39aacc0fb330d04b1dc"
+    },
+    {
+      "figure_kind": "overhead_png",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.png",
+      "sha256": "8f61e3cdae7ff3067e53807c5495c69cfe6e10cd319408d88cef8e18320da1c7"
+    },
+    {
+      "figure_kind": "overhead_pdf",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.pdf",
+      "sha256": "dc9e7beb61ef7135b6b808786a1e60f9e727fb56daf6c5b5c77c03b99ab81ec0"
+    },
+    {
+      "figure_kind": "overhead_svg",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.svg",
+      "sha256": "bc6c6ea8c9fba75cc22c7c12770c9677c0451a2d21fe8e33f634c6dddabd4c8c"
+    },
+    {
+      "figure_kind": "overhead_social_png",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.png",
+      "sha256": "5fc73c93f1373427f11744811a2e995850da2f7e910ed6fad64370c569c5e31a"
+    },
+    {
+      "figure_kind": "overhead_social_pdf",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.pdf",
+      "sha256": "6236d2d6afe4fa6992143e5fdadcb2bcf5eb1240319646acf41fe3db5b161640"
+    },
+    {
+      "figure_kind": "overhead_social_svg",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-primary-face-bounds/1",
+      "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.svg",
+      "sha256": "77cde92b7eb726d5164f399fd4d2150f674136b98f3bee255b88a3e0101ed9cb"
+    },
+    {
+      "figure_kind": "density_png",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png",
+      "sha256": "43f7ebe4d683706f04c914268ba6f615ccc0468b39e0c48533d5c9cd9f1204bf"
+    },
+    {
+      "figure_kind": "density_pdf",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.pdf",
+      "sha256": "d79acde7b0c3d8ca6e8420e4bf7b13ae1e5306ff0db352bf53e55041e4bedbf2"
+    },
+    {
+      "figure_kind": "density_svg",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.svg",
+      "sha256": "e7069ad55a6394b48f764f4dd86fb85cf2de69f6220ef466f532a7425746071f"
+    },
+    {
+      "figure_kind": "density_social_png",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png",
+      "sha256": "786002b3c1a75b55ab212f2523ada95254319c32f79efa21cec067276714322c"
+    },
+    {
+      "figure_kind": "density_social_pdf",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.pdf",
+      "sha256": "96271336e65b28af23f1637dd76dfb44fbe026f2e294b04f4ef360baa7d404f7"
+    },
+    {
+      "figure_kind": "density_social_svg",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9999,
+        "Draw": 9999,
+        "Fade": 9999
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.svg",
+      "sha256": "183c674e45c5634aa0d9e544fbe187b09af9596ef473d11f26e681b6d2d03ede"
+    },
+    {
+      "figure_kind": "overhead_png",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png",
+      "sha256": "f60e99822b75893eab24e4b53393e62ddc43eda7ea1624eb21fd8c1de0945cab"
+    },
+    {
+      "figure_kind": "overhead_pdf",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.pdf",
+      "sha256": "2cb4b19769ef170a3ccf8ab52364f2b6d1008b92ef80c9192da1bac5d464ca13"
+    },
+    {
+      "figure_kind": "overhead_svg",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.svg",
+      "sha256": "08d7a538d0c1e577a8f6f9db3c640a9bd2da24760eb2592f63afc2d780c3c472"
+    },
+    {
+      "figure_kind": "overhead_social_png",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png",
+      "sha256": "bb0746c61a600b334b9b042c5da94392b1c93aeb5c3e98127063f970b4f8a235"
+    },
+    {
+      "figure_kind": "overhead_social_pdf",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.pdf",
+      "sha256": "5cbf462c526e663bd2b6a47e951ab19f6cb7b5ebfc784c432796174ace093e3c"
+    },
+    {
+      "figure_kind": "overhead_social_svg",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "pw-control-face-bounds/1",
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "target_x_m": 77.40247724866299,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.svg",
+      "sha256": "e45f1b3e6b16343b90b10eb04b8b75956d2947d92d26c59885d9b73bc847f78d"
+    },
+    {
+      "figure_kind": "density_png",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9940,
+        "Draw": 9940,
+        "Fade": 9940
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png",
+      "sha256": "3c7caabbbae0a97483bd01ca7c645395b1168ad14e6c147415f9153830a5cea6"
+    },
+    {
+      "figure_kind": "density_pdf",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9940,
+        "Draw": 9940,
+        "Fade": 9940
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.pdf",
+      "sha256": "ca29394aee04ab1351a187f140984b07a40511baeef7963ffdaf12af3df38c1b"
+    },
+    {
+      "figure_kind": "density_svg",
+      "presentation": "academic",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9940,
+        "Draw": 9940,
+        "Fade": 9940
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.svg",
+      "sha256": "afda662732bcc501776ffb050bbd9af8ca16a560f1d38588de86df8ac544f3df"
+    },
+    {
+      "figure_kind": "density_social_png",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9940,
+        "Draw": 9940,
+        "Fade": 9940
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png",
+      "sha256": "8f8f6e932f3f9e42f511c21fb4bad5ca863cad44d48acc8baea554d01be84389"
+    },
+    {
+      "figure_kind": "density_social_pdf",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9940,
+        "Draw": 9940,
+        "Fade": 9940
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.pdf",
+      "sha256": "3c9bef306b22a4a8743cd46f20e9b2e481c551e93f7c4efe21e83e7ecf4a1dd7"
+    },
+    {
+      "figure_kind": "density_social_svg",
+      "presentation": "social",
+      "source_kind": "individual_supported_endpoints",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "individually supported endpoints by physical pattern",
+      "valid_n_by_pattern": {
+        "Straight": 9940,
+        "Draw": 9940,
+        "Fade": 9940
+      },
+      "total_n_by_pattern": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "saved_trajectory_samples_by_pattern": null,
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.svg",
+      "sha256": "457fdc5e227acf81474d497b19a001698a9af974390e40ccea775adfb693bec3"
+    },
+    {
+      "figure_kind": "overhead_png",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png",
+      "sha256": "104c1ddfef3ac536e71faeeba15a864cf4a9296c3f3f40d45a73b3d6430a4dc7"
+    },
+    {
+      "figure_kind": "overhead_pdf",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.pdf",
+      "sha256": "9b8acf64f4dfa8ae159c97dd30f63e202255a72c655b2669d0465218413a7cb0"
+    },
+    {
+      "figure_kind": "overhead_svg",
+      "presentation": "academic",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.svg",
+      "sha256": "8c7b0cd873443a35cf842b8b6928888a5bf6b816f7efdfdddeb8a39123e15b7a"
+    },
+    {
+      "figure_kind": "overhead_social_png",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png",
+      "sha256": "d674f42a001d7efb53ec0d4ec5a31abbbdc5d2b01028c95124847d28b040a60a"
+    },
+    {
+      "figure_kind": "overhead_social_pdf",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.pdf",
+      "sha256": "e37598d29510f1dd2acc71af392ce59d4e2f3e435409914e90cbf0e61b6211e5"
+    },
+    {
+      "figure_kind": "overhead_social_svg",
+      "presentation": "social",
+      "source_kind": "saved_illustrative_trajectories",
+      "source_protocol": "driver-control-speed-bounds/1",
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "target_x_m": 178.94875782337786,
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "valid_n_by_pattern": null,
+      "total_n_by_pattern": null,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      },
+      "relative_path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.svg",
+      "sha256": "d2cb901dcf6eff87d43788bab50fb5f97e1a1c228ae19be3c962606882f888c3"
+    },
+    {
+      "figure_kind": "density_png",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.png",
+      "sha256": "541c1199e26f04e757299977af2cb3b5a81477c85ddf38b0ab822e162603e981"
+    },
+    {
+      "figure_kind": "density_pdf",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.pdf",
+      "sha256": "05bbbe10ab42e4b4299b84b0dd9fb1b7db46ca597273eb63406e9087057ed433"
+    },
+    {
+      "figure_kind": "density_svg",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.svg",
+      "sha256": "be0de20f816b6ea2df615e4f0dfa331fac78c44e3d10a82af5a43cefaf09651e"
+    },
+    {
+      "figure_kind": "density_straight_social_png",
+      "presentation": "social",
+      "physical_pattern": "Straight",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.png",
+      "sha256": "848d24888d62503533dfedf93fe37be2864fbc52d5e4a40035bda95fa2ea6827"
+    },
+    {
+      "figure_kind": "density_straight_social_pdf",
+      "presentation": "social",
+      "physical_pattern": "Straight",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.pdf",
+      "sha256": "99a48566d97346280e3fbd0e2afed5c48928091bc900ad70a5f455e738348f4d"
+    },
+    {
+      "figure_kind": "density_straight_social_svg",
+      "presentation": "social",
+      "physical_pattern": "Straight",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.svg",
+      "sha256": "32955dbbfa59994d28be748fa2eb786b55a597d80eea0db119a630c8abb105d1"
+    },
+    {
+      "figure_kind": "density_draw_social_png",
+      "presentation": "social",
+      "physical_pattern": "Draw",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.png",
+      "sha256": "21c069ac34945498e826898c5c5cd3726a8806486e02db6a24169b1287c7ac06"
+    },
+    {
+      "figure_kind": "density_draw_social_pdf",
+      "presentation": "social",
+      "physical_pattern": "Draw",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.pdf",
+      "sha256": "2fcd7063e38c8958cf4695ef54dab9b243c95351d7f1d35f6e2d1a34680a9d93"
+    },
+    {
+      "figure_kind": "density_draw_social_svg",
+      "presentation": "social",
+      "physical_pattern": "Draw",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.svg",
+      "sha256": "3e3ee9e017d7fb063d270fefc754d8af6207c12d902165d7839dcc5b20b55161"
+    },
+    {
+      "figure_kind": "density_fade_social_png",
+      "presentation": "social",
+      "physical_pattern": "Fade",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.png",
+      "sha256": "7e1d6d0c8eebdad00aa178f7590a580096acd405a099cf80e6b8007263cd5546"
+    },
+    {
+      "figure_kind": "density_fade_social_pdf",
+      "presentation": "social",
+      "physical_pattern": "Fade",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.pdf",
+      "sha256": "cb0711d7ef7a296587a71736ba8786032941489bf47b8af8d82b773b6d32d4c3"
+    },
+    {
+      "figure_kind": "density_fade_social_svg",
+      "presentation": "social",
+      "physical_pattern": "Fade",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.svg",
+      "sha256": "d088ecaac5fe8f2ba8afc33e74e679cb5fc9dc82788bb712be6ed1eb1f0b5de8"
+    },
+    {
+      "figure_kind": "overhead_png",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 77.40247724866299,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Curve \u00d71": 6,
+        "Draw \u00b7 Curve \u00d71": 6,
+        "Fade \u00b7 Curve \u00d71": 6,
+        "Straight \u00b7 Curve \u00d72": 6,
+        "Draw \u00b7 Curve \u00d72": 6,
+        "Fade \u00b7 Curve \u00d72": 6
+      },
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.png",
+      "sha256": "638f9c813901f96409e9b7f1d5e36fab73d0a045ebad56ff8299044f7b637a0a"
+    },
+    {
+      "figure_kind": "overhead_pdf",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 77.40247724866299,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Curve \u00d71": 6,
+        "Draw \u00b7 Curve \u00d71": 6,
+        "Fade \u00b7 Curve \u00d71": 6,
+        "Straight \u00b7 Curve \u00d72": 6,
+        "Draw \u00b7 Curve \u00d72": 6,
+        "Fade \u00b7 Curve \u00d72": 6
+      },
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.pdf",
+      "sha256": "daae2a9c9bdbd8214830fb5a6f55a2176c82b2edd0c97f67f4229f6e2735f130"
+    },
+    {
+      "figure_kind": "overhead_svg",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 77.40247724866299,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Curve \u00d71": 6,
+        "Draw \u00b7 Curve \u00d71": 6,
+        "Fade \u00b7 Curve \u00d71": 6,
+        "Straight \u00b7 Curve \u00d72": 6,
+        "Draw \u00b7 Curve \u00d72": 6,
+        "Fade \u00b7 Curve \u00d72": 6
+      },
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.svg",
+      "sha256": "565bd6e14a97bb40779a14df99fc1ce28e64f254347d61ae83670ca93f5fae74"
+    },
+    {
+      "figure_kind": "overhead_social_png",
+      "presentation": "social",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "curve_strength",
+      "first_cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "first_protocol": "original_primary/1",
+      "second_protocol": "pw-primary-face-bounds/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 77.40247724866299,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Curve \u00d71": 6,
+        "Draw \u00b7 Curve \u00d71": 6,
+        "Fade \u00b7 Curve \u00d71": 6,
+        "Straight \u00b7 Curve \u00d72": 6,
+        "Draw \u00b7 Curve \u00d72": 6,
+        "Fade \u00b7 Curve \u00d72": 6
+      },
+      "relative_path": "comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead_social.png",
+      "sha256": "c35f49e4a7f111ff9818f196ae3ca3ce8078fde16f59a58c3c23072fbd52ea23"
+    },
+    {
+      "figure_kind": "density_png",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.png",
+      "sha256": "45687b0d7dc007a03568b336e53154a0daf44b05f7888024e70beb4eda1b1f34"
+    },
+    {
+      "figure_kind": "density_pdf",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.pdf",
+      "sha256": "ff47de41190678ab37eb15b3cd856c7520b2d5e56fb0b83b31fe2ec932b9aaf7"
+    },
+    {
+      "figure_kind": "density_svg",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.svg",
+      "sha256": "79f928d91d66d57cf734e5c90ca8fc0957d008e10d202a70afa04861bfbdf1fc"
+    },
+    {
+      "figure_kind": "density_straight_social_png",
+      "presentation": "social",
+      "physical_pattern": "Straight",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_straight_social.png",
+      "sha256": "565871404830a2d55e5595bb7da16063a822f688a2baca756f0d5829b99b014d"
+    },
+    {
+      "figure_kind": "density_straight_social_pdf",
+      "presentation": "social",
+      "physical_pattern": "Straight",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_straight_social.pdf",
+      "sha256": "5c1952632af3356ea6f8a5e754b4630697c9c1bb4aac2f5978204cc24d3c3109"
+    },
+    {
+      "figure_kind": "density_straight_social_svg",
+      "presentation": "social",
+      "physical_pattern": "Straight",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_straight_social.svg",
+      "sha256": "3052f704cf2636e8f3c306d98cdc9027b78e27700576524a232a117e6c947f4d"
+    },
+    {
+      "figure_kind": "density_draw_social_png",
+      "presentation": "social",
+      "physical_pattern": "Draw",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.png",
+      "sha256": "fc839586afb5ddcb05102c83387c5919aae3cdd0bfbff283d966dc886d70818b"
+    },
+    {
+      "figure_kind": "density_draw_social_pdf",
+      "presentation": "social",
+      "physical_pattern": "Draw",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.pdf",
+      "sha256": "dcff2161b88e35b749cb34e24e3dc0e75132d05b9e06e84909c8dad5410489ee"
+    },
+    {
+      "figure_kind": "density_draw_social_svg",
+      "presentation": "social",
+      "physical_pattern": "Draw",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.svg",
+      "sha256": "0275642be41ca9968ce5a228feab3e591f2daee9f7ba3346fe4bd378feb38f38"
+    },
+    {
+      "figure_kind": "density_fade_social_png",
+      "presentation": "social",
+      "physical_pattern": "Fade",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_fade_social.png",
+      "sha256": "7346d9d08147fa7ac03f3640f4f2c83e436276447b2b9fd3404fbcdab7d318a7"
+    },
+    {
+      "figure_kind": "density_fade_social_pdf",
+      "presentation": "social",
+      "physical_pattern": "Fade",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_fade_social.pdf",
+      "sha256": "60ff44437ca40baa585543ccb67519303f1cbfda299ab1c50a1150bdc38dde9d"
+    },
+    {
+      "figure_kind": "density_fade_social_svg",
+      "presentation": "social",
+      "physical_pattern": "Fade",
+      "source_kind": "six_population_common_index_comparison",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000,
+      "conditioning": "same shot indices supported in all six populations",
+      "target_x_m": 77.40247724866299,
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_fade_social.svg",
+      "sha256": "198a9c0e57c7f7c81285ed95e0537040389d8cc7653664f8495e8dd1a8eda39b"
+    },
+    {
+      "figure_kind": "overhead_png",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 77.40247724866299,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Lean 0\u00b0": 6,
+        "Draw \u00b7 Lean 0\u00b0": 6,
+        "Fade \u00b7 Lean 0\u00b0": 6,
+        "Straight \u00b7 Lean 5\u00b0": 6,
+        "Draw \u00b7 Lean 5\u00b0": 6,
+        "Fade \u00b7 Lean 5\u00b0": 6
+      },
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.png",
+      "sha256": "d0a93814ba1778cb3263684c2908e79821aeb969862d72d1440e5b2a82521e1b"
+    },
+    {
+      "figure_kind": "overhead_pdf",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 77.40247724866299,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Lean 0\u00b0": 6,
+        "Draw \u00b7 Lean 0\u00b0": 6,
+        "Fade \u00b7 Lean 0\u00b0": 6,
+        "Straight \u00b7 Lean 5\u00b0": 6,
+        "Draw \u00b7 Lean 5\u00b0": 6,
+        "Fade \u00b7 Lean 5\u00b0": 6
+      },
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.pdf",
+      "sha256": "5f02eb2cd1408e712943dc183380d8a4eb6982ad7719d544e3541a040977a759"
+    },
+    {
+      "figure_kind": "overhead_svg",
+      "presentation": "academic",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 77.40247724866299,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Lean 0\u00b0": 6,
+        "Draw \u00b7 Lean 0\u00b0": 6,
+        "Fade \u00b7 Lean 0\u00b0": 6,
+        "Straight \u00b7 Lean 5\u00b0": 6,
+        "Draw \u00b7 Lean 5\u00b0": 6,
+        "Fade \u00b7 Lean 5\u00b0": 6
+      },
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.svg",
+      "sha256": "e8e5c454d6118d61c83ffeaf8c44ff4517c8b4a5251b513511191ad44b615935"
+    },
+    {
+      "figure_kind": "overhead_social_png",
+      "presentation": "social",
+      "physical_pattern": null,
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "comparison_kind": "across_lean",
+      "first_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "second_cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "first_protocol": "pw-primary-face-bounds/1",
+      "second_protocol": "pw-control-face-bounds/1",
+      "conditioning": "saved raw trajectories, not paired by shot index",
+      "target_x_m": 77.40247724866299,
+      "saved_trajectory_samples_by_pattern": {
+        "Straight \u00b7 Lean 0\u00b0": 6,
+        "Draw \u00b7 Lean 0\u00b0": 6,
+        "Fade \u00b7 Lean 0\u00b0": 6,
+        "Straight \u00b7 Lean 5\u00b0": 6,
+        "Draw \u00b7 Lean 5\u00b0": 6,
+        "Fade \u00b7 Lean 5\u00b0": 6
+      },
+      "relative_path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead_social.png",
+      "sha256": "611eb4e857e63a388c8e9c663daaa409b9c15242935de0bbc73391e9efafd00a"
+    }
+  ],
+  "figure_text_checks": [
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.png",
+      "figure_pixels": [
+        1650.0,
+        980.0000000000001
+      ],
+      "texts": [
+        {
+          "text": "Shot-Endpoint Density Conditional on Supported Airborne Shots",
+          "bounds": [
+            99.0,
+            920.694140625,
+            911.0,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Cell: pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+          "bounds": [
+            99.0,
+            897.5960937500001,
+            584.640625,
+            17.00390625
+          ],
+          "font_pt": 12.0
+        },
+        {
+          "text": "source: pw-primary-face-bounds/1  |  cell: pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive  |  club: pitching_wedge  |  lean deg: 0.0\n|  curve scale: 2.0  |  shaft rotation sd deg: 2.0  |  figure scope: one-cell supported population  |  conditioning: individually supported\nendpoints by physical pattern  |  Valid/Total: Straight 9,999/10,000 valid; Draw 9,999/10,000 valid; Fade 9,999/10,000 valid",
+          "bounds": [
+            99.0,
+            817.7838867187501,
+            949.21875,
+            49.51611328125
+          ],
+          "font_pt": 9.0
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. HDR mass is sample-derived from simulated endpoints. Colored Dots Shown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999; density, HDR,\nand marginals use every valid endpoint. Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. Bin resolution: 0.549 \u00d7 0.325 m. Achieved HDR Mass By Pattern (Discrete Ties May\nExceed Request): Straight 50.5%/80.8%/95.6%  |  Draw 50.5%/80.4%/95.0%  |  Fade 50.5%/80.2%/95.4%",
+          "bounds": [
+            99.0,
+            20.318291558159725,
+            1299.109375,
+            46.09025065104167
+          ],
+          "font_pt": 8.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png",
+      "figure_pixels": [
+        1080.0,
+        1800.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Shot Dispersion",
+          "bounds": [
+            86.4,
+            1747.994140625,
+            467.109375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Pitching Wedge \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0",
+          "bounds": [
+            86.4,
+            1711.6565755208333,
+            561.375,
+            18.337565104166742
+          ],
+          "font_pt": 13.0
+        },
+        {
+          "text": "Protocol: pw-primary-face-bounds/1  |  Matched Target: 77.40 m downrange\n(Within-Lean Nominal Target)  |  Delivery Noise: Covariance Profile (Path SD\n0.5\u00b0, Speed SD 1 mph, Strike SD 0.25 in on Each Axis, Shaft Twist\u2013Path\nCorrelation r = -0.6, Shaft Twist\u2013Speed Correlation r = +0.2, Path\u2013Speed\nCorrelation r = -0.12, Path\u2013Horizontal Strike Correlation r = +0.24,\nSpeed\u2013Vertical Strike Correlation r = +0.244949)  |  Population: Individually\nSupported Endpoints by Physical Pattern  |  Valid/Total: Straight 9,999/10,000\nvalid; Draw 9,999/10,000 valid; Fade 9,999/10,000 valid",
+          "bounds": [
+            86.4,
+            1555.2474609375,
+            591.484375,
+            142.00911458333326
+          ],
+          "font_pt": 10.5
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999. Density, HDR, and marginals\nuse every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            86.4,
+            32.4,
+            617.53125,
+            50.433675130208336
+          ],
+          "font_pt": 9.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.png",
+      "figure_pixels": [
+        1800.0,
+        600.0
+      ],
+      "texts": [
+        {
+          "text": "Raw Overhead Flight-Trajectory Comparison",
+          "bounds": [
+            108.0,
+            565.994140625,
+            619.578125,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Cell: pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive; Raw Simulator Flight Samples",
+          "bounds": [
+            108.0,
+            537.99609375,
+            851.28125,
+            17.00390625
+          ],
+          "font_pt": 12.0
+        },
+        {
+          "text": "source: pw-primary-face-bounds/1  |  cell: pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive  |  club: pitching_wedge  |  lean deg: 0.0\n|  curve scale: 2.0  |  shaft rotation sd deg: 2.0  |  figure scope: Saved Raw Flight Samples  |  Population: Saved Raw Trajectories; Not Paired\nby Shot Index  |  Paths shown: Straight 6; Draw 6; Fade 6",
+          "bounds": [
+            108.0,
+            484.48388671875,
+            949.21875,
+            49.51611328125
+          ],
+          "font_pt": 9.0
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. Raw trajectories; no aim-line rotation. Vertical display magnification: 8.9\u00d7 versus downrange. Only the displayed\npaths are plotted; paths are sampled from supported airborne shots.",
+          "bounds": [
+            108.0,
+            10.745849609375,
+            1153.96875,
+            33.0107421875
+          ],
+          "font_pt": 9.0
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead_social.png",
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Sample Flight Paths",
+          "bounds": [
+            96.0,
+            861.494140625,
+            527.4375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Pitching Wedge \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 Raw Flight Samples",
+          "bounds": [
+            96.0,
+            813.0555555555555,
+            732.109375,
+            19.444444444444457
+          ],
+          "font_pt": 14.0
+        },
+        {
+          "text": "Protocol: pw-primary-face-bounds/1  |  Matched Target: 77.40 m downrange (Within-Lean Nominal Target)  |  Delivery Noise: Covariance Profile\n(Path SD 0.5\u00b0, Speed SD 1 mph, Strike SD 0.25 in on Each Axis, Shaft Twist\u2013Path Correlation r = -0.6, Shaft Twist\u2013Speed Correlation r = +0.2,\nPath\u2013Speed Correlation r = -0.12, Path\u2013Horizontal Strike Correlation r = +0.24, Speed\u2013Vertical Strike Correlation r = +0.244949)  |  Population:\nSaved Raw Trajectories; Not Paired by Shot Index  |  figure scope: Saved Raw Flight Samples  |  Paths shown: Straight 6; Draw 6; Fade 6",
+          "bounds": [
+            96.0,
+            732.5316840277778,
+            1007.484375,
+            68.46831597222217
+          ],
+          "font_pt": 10.0
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Raw trajectories; no aim-line rotation. Vertical display magnification: 14.7\u00d7 versus downrange. Paths\nShown: Straight 6; Draw 6; Fade 6. Samples from supported airborne shots.",
+          "bounds": [
+            96.0,
+            17.77316623263889,
+            1253.859375,
+            34.234157986111114
+          ],
+          "font_pt": 10.0
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png",
+      "figure_pixels": [
+        1650.0,
+        980.0000000000001
+      ],
+      "texts": [
+        {
+          "text": "Shot-Endpoint Density Conditional on Supported Airborne Shots",
+          "bounds": [
+            99.0,
+            920.694140625,
+            911.0,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Cell: pitching_wedge_lean5_curve2_rotation2_combined2",
+          "bounds": [
+            99.0,
+            897.5960937500001,
+            491.640625,
+            17.00390625
+          ],
+          "font_pt": 12.0
+        },
+        {
+          "text": "source: pw-control-face-bounds/1  |  cell: pitching_wedge_lean5_curve2_rotation2_combined2  |  club: pitching_wedge  |  lean deg: 5.0  |  curve\nscale: 2.0  |  shaft rotation sd deg: 2.0  |  figure scope: one-cell supported population  |  conditioning: individually supported endpoints by\nphysical pattern  |  Valid/Total: Straight 9,999/10,000 valid; Draw 9,999/10,000 valid; Fade 9,999/10,000 valid",
+          "bounds": [
+            99.0,
+            817.7838867187501,
+            925.15625,
+            49.51611328125
+          ],
+          "font_pt": 9.0
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. HDR mass is sample-derived from simulated endpoints. Colored Dots Shown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999; density, HDR,\nand marginals use every valid endpoint. Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. Bin resolution: 0.696 \u00d7 0.318 m. Achieved HDR Mass By Pattern (Discrete Ties May\nExceed Request): Straight 51.4%/80.4%/95.6%  |  Draw 50.1%/80.4%/95.0%  |  Fade 51.3%/80.0%/95.7%",
+          "bounds": [
+            99.0,
+            20.318291558159725,
+            1299.109375,
+            46.09025065104167
+          ],
+          "font_pt": 8.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png",
+      "figure_pixels": [
+        1080.0,
+        1800.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Shot Dispersion",
+          "bounds": [
+            86.4,
+            1747.994140625,
+            467.109375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Pitching Wedge \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0",
+          "bounds": [
+            86.4,
+            1711.6565755208333,
+            561.375,
+            18.337565104166742
+          ],
+          "font_pt": 13.0
+        },
+        {
+          "text": "Protocol: pw-control-face-bounds/1  |  Matched Target: 77.40 m downrange\n(Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD\n2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Individually Supported\nEndpoints by Physical Pattern  |  Valid/Total: Straight 9,999/10,000 valid;\nDraw 9,999/10,000 valid; Fade 9,999/10,000 valid",
+          "bounds": [
+            86.4,
+            1607.756005859375,
+            589.5,
+            89.50056966145826
+          ],
+          "font_pt": 10.5
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999. Density, HDR, and marginals\nuse every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            86.4,
+            32.4,
+            617.53125,
+            50.433675130208336
+          ],
+          "font_pt": 9.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png",
+      "figure_pixels": [
+        1800.0,
+        600.0
+      ],
+      "texts": [
+        {
+          "text": "Raw Overhead Flight-Trajectory Comparison",
+          "bounds": [
+            108.0,
+            565.994140625,
+            619.578125,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Cell: pitching_wedge_lean5_curve2_rotation2_combined2; Raw Simulator Flight Samples",
+          "bounds": [
+            108.0,
+            537.99609375,
+            758.28125,
+            17.00390625
+          ],
+          "font_pt": 12.0
+        },
+        {
+          "text": "source: pw-control-face-bounds/1  |  cell: pitching_wedge_lean5_curve2_rotation2_combined2  |  club: pitching_wedge  |  lean deg: 5.0  |  curve\nscale: 2.0  |  shaft rotation sd deg: 2.0  |  figure scope: Saved Raw Flight Samples  |  Population: Saved Raw Trajectories; Not Paired by Shot\nIndex  |  Paths shown: Straight 6; Draw 6; Fade 6",
+          "bounds": [
+            108.0,
+            484.48388671875,
+            925.15625,
+            49.51611328125
+          ],
+          "font_pt": 9.0
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. Raw trajectories; no aim-line rotation. Vertical display magnification: 9.7\u00d7 versus downrange. Only the displayed\npaths are plotted; paths are sampled from supported airborne shots.",
+          "bounds": [
+            108.0,
+            10.745849609375,
+            1153.96875,
+            33.0107421875
+          ],
+          "font_pt": 9.0
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png",
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Sample Flight Paths",
+          "bounds": [
+            96.0,
+            861.494140625,
+            527.4375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Pitching Wedge \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 Raw Flight Samples",
+          "bounds": [
+            96.0,
+            813.0555555555555,
+            732.109375,
+            19.444444444444457
+          ],
+          "font_pt": 14.0
+        },
+        {
+          "text": "Protocol: pw-control-face-bounds/1  |  Matched Target: 77.40 m downrange (Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0,\nSpeed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Saved Raw Trajectories; Not Paired by Shot Index  |  figure scope: Saved Raw\nFlight Samples  |  Paths shown: Straight 6; Draw 6; Fade 6",
+          "bounds": [
+            96.0,
+            749.6487630208334,
+            1002.375,
+            51.35123697916663
+          ],
+          "font_pt": 10.0
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Raw trajectories; no aim-line rotation. Vertical display magnification: 16.1\u00d7 versus downrange. Paths\nShown: Straight 6; Draw 6; Fade 6. Samples from supported airborne shots.",
+          "bounds": [
+            96.0,
+            17.77316623263889,
+            1253.859375,
+            34.234157986111114
+          ],
+          "font_pt": 10.0
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png",
+      "figure_pixels": [
+        1650.0,
+        980.0000000000001
+      ],
+      "texts": [
+        {
+          "text": "Shot-Endpoint Density Conditional on Supported Airborne Shots",
+          "bounds": [
+            99.0,
+            920.694140625,
+            911.0,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Cell: driver_lean5_curve2_rotation2_combined2",
+          "bounds": [
+            99.0,
+            897.5960937500001,
+            406.640625,
+            17.00390625
+          ],
+          "font_pt": 12.0
+        },
+        {
+          "text": "source: driver-control-speed-bounds/1  |  cell: driver_lean5_curve2_rotation2_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 2.0 |\nshaft rotation sd deg: 2.0  |  figure scope: one-cell supported population  |  conditioning: individually supported endpoints by physical pattern\n|  Valid/Total: Straight 9,940/10,000 valid; Draw 9,940/10,000 valid; Fade 9,940/10,000 valid",
+          "bounds": [
+            99.0,
+            817.7838867187501,
+            913.0,
+            49.51611328125
+          ],
+          "font_pt": 9.0
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. HDR mass is sample-derived from simulated endpoints. Colored Dots Shown/Valid: Straight 600/9,940; Draw 600/9,940; Fade 600/9,940; density, HDR,\nand marginals use every valid endpoint. Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. Bin resolution: 3.98 \u00d7 1.93 m. Achieved HDR Mass By Pattern (Discrete Ties May\nExceed Request): Straight 50.7%/80.3%/95.3%  |  Draw 50.3%/80.1%/95.0%  |  Fade 50.8%/80.1%/95.1%",
+          "bounds": [
+            99.0,
+            20.318291558159725,
+            1299.109375,
+            46.09025065104167
+          ],
+          "font_pt": 8.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png",
+      "figure_pixels": [
+        1080.0,
+        1800.0
+      ],
+      "texts": [
+        {
+          "text": "Driver: Shot Dispersion",
+          "bounds": [
+            86.4,
+            1747.994140625,
+            331.0,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Driver \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0",
+          "bounds": [
+            86.4,
+            1711.6565755208333,
+            465.015625,
+            18.337565104166742
+          ],
+          "font_pt": 13.0
+        },
+        {
+          "text": "Protocol: driver-control-speed-bounds/1  |  Matched Target: 178.95 m downrange\n(Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD\n2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Individually Supported\nEndpoints by Physical Pattern  |  Valid/Total: Straight 9,940/10,000 valid;\nDraw 9,940/10,000 valid; Fade 9,940/10,000 valid",
+          "bounds": [
+            86.4,
+            1607.756005859375,
+            613.5,
+            89.50056966145826
+          ],
+          "font_pt": 10.5
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Straight 600/9,940; Draw 600/9,940; Fade 600/9,940. Density, HDR, and marginals\nuse every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            86.4,
+            32.4,
+            617.53125,
+            50.433675130208336
+          ],
+          "font_pt": 9.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png",
+      "figure_pixels": [
+        1800.0,
+        600.0
+      ],
+      "texts": [
+        {
+          "text": "Raw Overhead Flight-Trajectory Comparison",
+          "bounds": [
+            108.0,
+            565.994140625,
+            619.578125,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Cell: driver_lean5_curve2_rotation2_combined2; Raw Simulator Flight Samples",
+          "bounds": [
+            108.0,
+            537.99609375,
+            673.28125,
+            17.00390625
+          ],
+          "font_pt": 12.0
+        },
+        {
+          "text": "source: driver-control-speed-bounds/1  |  cell: driver_lean5_curve2_rotation2_combined2  |  club: driver  |  lean deg: 5.0  |  curve scale: 2.0 |\nshaft rotation sd deg: 2.0  |  figure scope: Saved Raw Flight Samples  |  Population: Saved Raw Trajectories; Not Paired by Shot Index  |  Paths\nshown: Straight 6; Draw 6; Fade 6",
+          "bounds": [
+            108.0,
+            484.48388671875,
+            911.734375,
+            49.51611328125
+          ],
+          "font_pt": 9.0
+        },
+        {
+          "text": "Illustrative Simulation \u2022 Assumed Head Properties \u2022 Carry Only. Raw trajectories; no aim-line rotation. Vertical display magnification: 4.1\u00d7 versus downrange. Only the displayed\npaths are plotted; paths are sampled from supported airborne shots.",
+          "bounds": [
+            108.0,
+            10.745849609375,
+            1153.96875,
+            33.0107421875
+          ],
+          "font_pt": 9.0
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png",
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
+      "texts": [
+        {
+          "text": "Driver: Sample Flight Paths",
+          "bounds": [
+            96.0,
+            861.494140625,
+            391.328125,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Driver \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 Raw Flight Samples",
+          "bounds": [
+            96.0,
+            813.0555555555555,
+            645.671875,
+            19.444444444444457
+          ],
+          "font_pt": 14.0
+        },
+        {
+          "text": "Protocol: driver-control-speed-bounds/1  |  Matched Target: 178.95 m downrange (Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD\n0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Saved Raw Trajectories; Not Paired by Shot Index  |  figure scope: Saved\nRaw Flight Samples  |  Paths shown: Straight 6; Draw 6; Fade 6",
+          "bounds": [
+            96.0,
+            749.6487630208334,
+            1007.484375,
+            51.35123697916663
+          ],
+          "font_pt": 10.0
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Raw trajectories; no aim-line rotation. Vertical display magnification: 6.8\u00d7 versus downrange. Paths\nShown: Straight 6; Draw 6; Fade 6. Samples from supported airborne shots.",
+          "bounds": [
+            96.0,
+            17.77316623263889,
+            1244.859375,
+            34.234157986111114
+          ],
+          "font_pt": 10.0
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.png",
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
+      "texts": [
+        {
+          "text": "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
+          "bounds": [
+            96.0,
+            850.6614583333334,
+            943.5625,
+            22.33854166666663
+          ],
+          "font_pt": 16.0
+        },
+        {
+          "text": "curve_strength \u00b7 Target 77.402 m \u00b7 Density uses all 9,999/10,000 shots common to six populations; 600 evenly spaced dots per panel",
+          "bounds": [
+            96.0,
+            820.5,
+            813.578125,
+            13.0
+          ],
+          "font_pt": 8.5
+        },
+        {
+          "text": "Curve \u00d71: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 original_primary/1",
+          "bounds": [
+            96.0,
+            802.5,
+            938.140625,
+            12.0
+          ],
+          "font_pt": 7.7
+        },
+        {
+          "text": "Curve \u00d72: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
+          "bounds": [
+            96.0,
+            784.9308268229166,
+            982.953125,
+            11.569173177083371
+          ],
+          "font_pt": 7.7
+        },
+        {
+          "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching.",
+          "bounds": [
+            96.0,
+            766.4970703125,
+            1026.0,
+            14.0029296875
+          ],
+          "font_pt": 9.0
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.png",
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Shot Dispersion",
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Straight: Varying Curve Strength in Panels \u00b7 Fixed: Lean 0\u00b0 \u00b7 Shaft\nTwist SD 2\u00b0",
+          "bounds": [
+            86.4,
+            1247.3397352430557,
+            671.53125,
+            43.90440538194434
+          ],
+          "font_pt": 13.0
+        },
+        {
+          "text": "Protocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: pw-primary-face-bounds/1  |\nMatched Target: 77.40 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Fixed-Target Control (Alias))  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid",
+          "bounds": [
+            86.4,
+            1111.536886935764,
+            600.171875,
+            125.00284830729174
+          ],
+          "font_pt": 10.5
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            616.734375,
+            50.43367513020833
+          ],
+          "font_pt": 9.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.png",
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Shot Dispersion",
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Draw: Varying Curve Strength in Panels \u00b7 Fixed: Lean 0\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0",
+          "bounds": [
+            86.4,
+            1247.6217447916667,
+            699.546875,
+            43.62239583333326
+          ],
+          "font_pt": 13.0
+        },
+        {
+          "text": "Protocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: pw-primary-face-bounds/1  |\nMatched Target: 77.40 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Fixed-Target Control (Alias))  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid",
+          "bounds": [
+            86.4,
+            1111.818896484375,
+            600.171875,
+            125.00284830729174
+          ],
+          "font_pt": 10.5
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            616.734375,
+            50.43367513020833
+          ],
+          "font_pt": 9.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.png",
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Shot Dispersion",
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Fade: Varying Curve Strength in Panels \u00b7 Fixed: Lean 0\u00b0 \u00b7 Shaft Twist\nSD 2\u00b0",
+          "bounds": [
+            86.4,
+            1247.6217447916667,
+            694.484375,
+            43.62239583333326
+          ],
+          "font_pt": 13.0
+        },
+        {
+          "text": "Protocol: Curve \u00d71: original_primary/1 \u00b7 Curve \u00d72: pw-primary-face-bounds/1  |\nMatched Target: 77.40 m downrange (Curve \u00d71: Within-Lean Nominal Target \u00b7\nCurve \u00d72: Fixed-Target Control (Alias))  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Curve \u00d71\n9,999/10,000 valid; Curve \u00d72 9,999/10,000 valid",
+          "bounds": [
+            86.4,
+            1111.818896484375,
+            600.171875,
+            125.00284830729174
+          ],
+          "font_pt": 10.5
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Curve \u00d71 600/9,999; Curve \u00d72 600/9,999. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            616.734375,
+            50.43367513020833
+          ],
+          "font_pt": 9.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.png",
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
+      "texts": [
+        {
+          "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
+          "bounds": [
+            96.0,
+            846.2815755208334,
+            736.84375,
+            22.21842447916663
+          ],
+          "font_pt": 15.64
+        },
+        {
+          "text": "Curve Strength \u00b7 Target 77.402 m",
+          "bounds": [
+            96.0,
+            824.9303385416666,
+            213.390625,
+            14.069661458333371
+          ],
+          "font_pt": 9.200000000000001
+        },
+        {
+          "text": "Curve \u00d71: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 original_primary/1",
+          "bounds": [
+            96.0,
+            802.5,
+            938.078125,
+            12.0
+          ],
+          "font_pt": 7.82
+        },
+        {
+          "text": "Curve \u00d72: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
+          "bounds": [
+            96.0,
+            780.3907877604166,
+            982.890625,
+            11.609212239583371
+          ],
+          "font_pt": 7.82
+        },
+        {
+          "text": "Saved paths (not paired by shot index): Curve \u00d71 Straight 6, Draw 6, Fade 6 \u00b7 Curve \u00d72 Straight 6, Draw 6, Fade 6",
+          "bounds": [
+            96.0,
+            753.3907877604166,
+            652.578125,
+            11.609212239583371
+          ],
+          "font_pt": 7.82
+        },
+        {
+          "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
+          "bounds": [
+            96.0,
+            730.5,
+            713.921875,
+            12.0
+          ],
+          "font_pt": 7.82
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead_social.png",
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
+      "texts": [
+        {
+          "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
+          "bounds": [
+            96.0,
+            844.8277994791666,
+            780.71875,
+            23.67220052083337
+          ],
+          "font_pt": 17.0
+        },
+        {
+          "text": "Curve Strength \u00b7 Target 77.402 m",
+          "bounds": [
+            96.0,
+            824.6634114583334,
+            234.140625,
+            14.336588541666629
+          ],
+          "font_pt": 10.0
+        },
+        {
+          "text": "Curve \u00d71: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d71 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 original_primary/1",
+          "bounds": [
+            96.0,
+            802.5,
+            1002.734375,
+            13.0
+          ],
+          "font_pt": 8.5
+        },
+        {
+          "text": "Curve \u00d72: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
+          "bounds": [
+            96.0,
+            780.0,
+            1052.53125,
+            13.0
+          ],
+          "font_pt": 8.5
+        },
+        {
+          "text": "Saved paths (not paired by shot index): Curve \u00d71 Straight 6, Draw 6, Fade 6 \u00b7 Curve \u00d72 Straight 6, Draw 6, Fade 6",
+          "bounds": [
+            96.0,
+            753.0,
+            698.375,
+            13.0
+          ],
+          "font_pt": 8.5
+        },
+        {
+          "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
+          "bounds": [
+            96.0,
+            730.5,
+            748.796875,
+            13.0
+          ],
+          "font_pt": 8.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.png",
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
+      "texts": [
+        {
+          "text": "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
+          "bounds": [
+            96.0,
+            850.6614583333334,
+            943.5625,
+            22.33854166666663
+          ],
+          "font_pt": 16.0
+        },
+        {
+          "text": "across_lean \u00b7 Target 77.402 m \u00b7 Density uses all 9,999/10,000 shots common to six populations; 600 evenly spaced dots per panel",
+          "bounds": [
+            96.0,
+            820.5,
+            790.578125,
+            13.0
+          ],
+          "font_pt": 8.5
+        },
+        {
+          "text": "Lean 0\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
+          "bounds": [
+            96.0,
+            802.9308268229166,
+            972.765625,
+            11.569173177083371
+          ],
+          "font_pt": 7.7
+        },
+        {
+          "text": "Lean 5\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-control-face-bounds/1",
+          "bounds": [
+            96.0,
+            784.9308268229166,
+            966.71875,
+            11.569173177083371
+          ],
+          "font_pt": 7.7
+        },
+        {
+          "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching.",
+          "bounds": [
+            96.0,
+            766.4970703125,
+            1026.0,
+            14.0029296875
+          ],
+          "font_pt": 9.0
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_straight_social.png",
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Shot Dispersion",
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Straight: Varying Across Lean in Panels \u00b7 Fixed: Curve \u00d72 \u00b7 Shaft\nTwist SD 2\u00b0",
+          "bounds": [
+            86.4,
+            1247.3397352430557,
+            654.53125,
+            43.90440538194434
+          ],
+          "font_pt": 13.0
+        },
+        {
+          "text": "Protocol: Lean 0\u00b0: pw-primary-face-bounds/1 \u00b7 Lean 5\u00b0: pw-control-face-\nbounds/1  |  Matched Target: 77.40 m downrange (Lean 0\u00b0: Fixed-Target Control\n(Alias) \u00b7 Lean 5\u00b0: Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Lean 0\u00b0 9,999/10,000\nvalid; Lean 5\u00b0 9,999/10,000 valid",
+          "bounds": [
+            86.4,
+            1111.536886935764,
+            606.25,
+            125.00284830729174
+          ],
+          "font_pt": 10.5
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Lean 0\u00b0 600/9,999; Lean 5\u00b0 600/9,999. Density, HDR, and marginals use every valid\nendpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            630.265625,
+            50.43367513020833
+          ],
+          "font_pt": 9.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_draw_social.png",
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Shot Dispersion",
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Draw: Varying Across Lean in Panels \u00b7 Fixed: Curve \u00d72 \u00b7 Shaft Twist SD\n2\u00b0",
+          "bounds": [
+            86.4,
+            1247.6217447916667,
+            716.546875,
+            43.62239583333326
+          ],
+          "font_pt": 13.0
+        },
+        {
+          "text": "Protocol: Lean 0\u00b0: pw-primary-face-bounds/1 \u00b7 Lean 5\u00b0: pw-control-face-\nbounds/1  |  Matched Target: 77.40 m downrange (Lean 0\u00b0: Fixed-Target Control\n(Alias) \u00b7 Lean 5\u00b0: Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Lean 0\u00b0 9,999/10,000\nvalid; Lean 5\u00b0 9,999/10,000 valid",
+          "bounds": [
+            86.4,
+            1111.818896484375,
+            606.25,
+            125.00284830729174
+          ],
+          "font_pt": 10.5
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Lean 0\u00b0 600/9,999; Lean 5\u00b0 600/9,999. Density, HDR, and marginals use every valid\nendpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            630.265625,
+            50.43367513020833
+          ],
+          "font_pt": 9.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density_fade_social.png",
+      "figure_pixels": [
+        1080.0,
+        1350.0
+      ],
+      "texts": [
+        {
+          "text": "Pitching Wedge: Shot Dispersion",
+          "bounds": [
+            86.4,
+            1304.744140625,
+            467.109375,
+            25.005859375
+          ],
+          "font_pt": 18.0
+        },
+        {
+          "text": "Fade: Varying Across Lean in Panels \u00b7 Fixed: Curve \u00d72 \u00b7 Shaft Twist SD\n2\u00b0",
+          "bounds": [
+            86.4,
+            1247.6217447916667,
+            711.484375,
+            43.62239583333326
+          ],
+          "font_pt": 13.0
+        },
+        {
+          "text": "Protocol: Lean 0\u00b0: pw-primary-face-bounds/1 \u00b7 Lean 5\u00b0: pw-control-face-\nbounds/1  |  Matched Target: 77.40 m downrange (Lean 0\u00b0: Fixed-Target Control\n(Alias) \u00b7 Lean 5\u00b0: Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path\nSD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  | Population: Same\nShot Indices Supported in All Six Populations  |  Scales: Shared Within This\nFigure; Other Pattern Figures May Differ  |  Valid/Total: Lean 0\u00b0 9,999/10,000\nvalid; Lean 5\u00b0 9,999/10,000 valid",
+          "bounds": [
+            86.4,
+            1111.818896484375,
+            606.25,
+            125.00284830729174
+          ],
+          "font_pt": 10.5
+        },
+        {
+          "text": "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Lean 0\u00b0 600/9,999; Lean 5\u00b0 600/9,999. Density, HDR, and marginals use every valid\nendpoint. Shared axes and density scale; contours are simulated-sample HDR.",
+          "bounds": [
+            86.4,
+            24.299999999999997,
+            630.265625,
+            50.43367513020833
+          ],
+          "font_pt": 9.5
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.png",
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
+      "texts": [
+        {
+          "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
+          "bounds": [
+            96.0,
+            846.2815755208334,
+            736.84375,
+            22.21842447916663
+          ],
+          "font_pt": 15.64
+        },
+        {
+          "text": "Across Lean \u00b7 Target 77.402 m",
+          "bounds": [
+            96.0,
+            824.9303385416666,
+            193.953125,
+            12.777777777777828
+          ],
+          "font_pt": 9.200000000000001
+        },
+        {
+          "text": "Lean 0\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
+          "bounds": [
+            96.0,
+            802.8907877604166,
+            972.703125,
+            11.609212239583371
+          ],
+          "font_pt": 7.82
+        },
+        {
+          "text": "Lean 5\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-control-face-bounds/1",
+          "bounds": [
+            96.0,
+            780.3907877604166,
+            966.65625,
+            11.609212239583371
+          ],
+          "font_pt": 7.82
+        },
+        {
+          "text": "Saved paths (not paired by shot index): Lean 0\u00b0 Straight 6, Draw 6, Fade 6 \u00b7 Lean 5\u00b0 Straight 6, Draw 6, Fade 6",
+          "bounds": [
+            96.0,
+            753.3907877604166,
+            632.203125,
+            11.609212239583371
+          ],
+          "font_pt": 7.82
+        },
+        {
+          "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
+          "bounds": [
+            96.0,
+            730.5,
+            713.921875,
+            12.0
+          ],
+          "font_pt": 7.82
+        }
+      ],
+      "outside_canvas": []
+    },
+    {
+      "path": "/tmp/p2-social-context-actual-candidate/comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead_social.png",
+      "figure_pixels": [
+        1600.0,
+        900.0
+      ],
+      "texts": [
+        {
+          "text": "Saved Raw Flight Paths by Pattern and Matched Condition",
+          "bounds": [
+            96.0,
+            844.8277994791666,
+            780.71875,
+            23.67220052083337
+          ],
+          "font_pt": 17.0
+        },
+        {
+          "text": "Across Lean \u00b7 Target 77.402 m",
+          "bounds": [
+            96.0,
+            824.6634114583334,
+            212.640625,
+            13.8888888888888
+          ],
+          "font_pt": 10.0
+        },
+        {
+          "text": "Lean 0\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-primary-face-bounds/1",
+          "bounds": [
+            96.0,
+            802.5,
+            1042.328125,
+            13.0
+          ],
+          "font_pt": 8.5
+        },
+        {
+          "text": "Lean 5\u00b0: Pitching Wedge \u00b7 Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis) \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 2\u00b0 \u00b7 pw-control-face-bounds/1",
+          "bounds": [
+            96.0,
+            780.0,
+            1037.265625,
+            13.0
+          ],
+          "font_pt": 8.5
+        },
+        {
+          "text": "Saved paths (not paired by shot index): Lean 0\u00b0 Straight 6, Draw 6, Fade 6 \u00b7 Lean 5\u00b0 Straight 6, Draw 6, Fade 6",
+          "bounds": [
+            96.0,
+            753.0,
+            677.96875,
+            13.0
+          ],
+          "font_pt": 8.5
+        },
+        {
+          "text": "Illustrative Simulation | Assumed Head Properties | Carry Only \u00b7 Lateral display magnified 6\u00d7; physical axis limits are shared.",
+          "bounds": [
+            96.0,
+            730.5,
+            748.796875,
+            13.0
+          ],
+          "font_pt": 8.5
+        }
+      ],
+      "outside_canvas": []
+    }
+  ],
+  "unchanged_academic_png_checks": [
+    {
+      "path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_overhead.png",
+      "same_bytes": true,
+      "prior_sha256": "d0a93814ba1778cb3263684c2908e79821aeb969862d72d1440e5b2a82521e1b",
+      "new_sha256": "d0a93814ba1778cb3263684c2908e79821aeb969862d72d1440e5b2a82521e1b"
+    },
+    {
+      "path": "comparisons/across_lean_pitching_wedge_lean0_curve2_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_7840cdefd3_density.png",
+      "same_bytes": true,
+      "prior_sha256": "45687b0d7dc007a03568b336e53154a0daf44b05f7888024e70beb4eda1b1f34",
+      "new_sha256": "45687b0d7dc007a03568b336e53154a0daf44b05f7888024e70beb4eda1b1f34"
+    },
+    {
+      "path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density.png",
+      "same_bytes": true,
+      "prior_sha256": "ca670c1763ad2a55ea26aa8de7416d79b087d55c77e27a5c119640b0333b0473",
+      "new_sha256": "ca670c1763ad2a55ea26aa8de7416d79b087d55c77e27a5c119640b0333b0473"
+    },
+    {
+      "path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png",
+      "same_bytes": true,
+      "prior_sha256": "43f7ebe4d683706f04c914268ba6f615ccc0468b39e0c48533d5c9cd9f1204bf",
+      "new_sha256": "43f7ebe4d683706f04c914268ba6f615ccc0468b39e0c48533d5c9cd9f1204bf"
+    },
+    {
+      "path": "cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png",
+      "same_bytes": true,
+      "prior_sha256": "f60e99822b75893eab24e4b53393e62ddc43eda7ea1624eb21fd8c1de0945cab",
+      "new_sha256": "f60e99822b75893eab24e4b53393e62ddc43eda7ea1624eb21fd8c1de0945cab"
+    },
+    {
+      "path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png",
+      "same_bytes": true,
+      "prior_sha256": "104c1ddfef3ac536e71faeeba15a864cf4a9296c3f3f40d45a73b3d6430a4dc7",
+      "new_sha256": "104c1ddfef3ac536e71faeeba15a864cf4a9296c3f3f40d45a73b3d6430a4dc7"
+    },
+    {
+      "path": "cells/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_overhead.png",
+      "same_bytes": true,
+      "prior_sha256": "8f61e3cdae7ff3067e53807c5495c69cfe6e10cd319408d88cef8e18320da1c7",
+      "new_sha256": "8f61e3cdae7ff3067e53807c5495c69cfe6e10cd319408d88cef8e18320da1c7"
+    },
+    {
+      "path": "cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png",
+      "same_bytes": true,
+      "prior_sha256": "3c7caabbbae0a97483bd01ca7c645395b1168ad14e6c147415f9153830a5cea6",
+      "new_sha256": "3c7caabbbae0a97483bd01ca7c645395b1168ad14e6c147415f9153830a5cea6"
+    }
+  ],
+  "utc": "2026-10-10T09:55:43.844519+00:00"
+}

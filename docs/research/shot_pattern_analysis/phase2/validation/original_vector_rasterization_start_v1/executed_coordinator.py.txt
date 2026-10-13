@@ -1,0 +1,96 @@
+"""Sequential native diagnostics of exactly the previously audited originals."""
+from pathlib import Path
+import hashlib
+import json
+import os
+import sys
+import time
+
+ROOT = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+sys.path.insert(0, str(ROOT))
+from scripts.research.shot_pattern_analysis.vector_rasterization import render_vector
+
+OUT = Path('/tmp/p2-original-vector-rasterization')
+PHASE = ROOT / 'docs/research/shot_pattern_analysis/phase2'
+PRIOR = Path('/tmp/p2-original-vector-diagnostics/review.json')
+PRIOR_SHA = '61067a594fc050a3b22af3df10dd19f2867aae3e8b2800fa52d83950855c9ebb'
+TOOLS_FILE = Path('/tmp/p2-vector-raster-astra/native_tools.json')
+SOURCES = [ROOT / 'scripts/research/shot_pattern_analysis' / name for name in ('vector_inspection.py', 'vector_rasterization.py')]
+
+def sha(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+def unique(items):
+    result = {}
+    for key, value in items:
+        require(key not in result, f'Duplicate key: {key}')
+        result[key] = value
+    return result
+
+def load(path):
+    return json.loads(path.read_text(), object_pairs_hook=unique)
+
+require(sha(PRIOR) == PRIOR_SHA, 'Prior inventory receipt changed')
+prior = load(PRIOR)
+require(prior['format_diagnostics_pass'] and prior['attempted'] == 744, 'Prior scope mismatch')
+inventory = prior['manifests']
+sources = {str(path): sha(path) for path in SOURCES}
+tools = load(TOOLS_FILE)
+rows = []
+for dataset, item in inventory.items():
+    base = PHASE / dataset
+    manifest = base / 'figure_manifest.json'
+    require(sha(manifest) == item['manifest_sha256'], 'Manifest drift')
+    outputs = load(manifest)['outputs']
+    actual = {str(path.relative_to(base)) for path in base.rglob('*') if path.is_file() and path.suffix.lower() in ('.pdf', '.svg')}
+    require(actual == set(item['expected_vectors']), 'Closed inventory mismatch')
+    seen = set()
+    for name, expected in item['expected_vectors'].items():
+        path = (base / name).resolve()
+        require(path.is_relative_to(base.resolve()) and path not in seen, 'Unsafe/duplicate source')
+        seen.add(path)
+        require(outputs.get(name) == expected and sha(path) == expected, 'Source/manifest hash mismatch')
+        rows.append({'dataset': dataset, 'relative_path': name, 'path': str(path), 'sha256': expected})
+require(len(rows) == 744, 'Expected 744 files')
+start = {'pid': os.getpid(), 'script_sha256': sha(Path(__file__)), 'sources': sources, 'prior_sha256': PRIOR_SHA, 'tool_config_sha256': sha(TOOLS_FILE), 'tools': tools, 'inventory': rows, 'manifests': {key: value['manifest_sha256'] for key, value in inventory.items()}, 'visual_approval': False}
+(OUT / 'start.json').write_text(json.dumps(start, indent=2) + '\n')
+print('START', os.getpid(), len(rows), flush=True)
+began = time.time()
+results = []
+errors = []
+for index, row in enumerate(rows):
+    destination = OUT / 'rasters' / row['dataset'] / (row['relative_path'] + '.raster')
+    try:
+        record = render_vector(Path(row['path']), row['sha256'], destination, tool_paths=tools)
+        entry = dict(row, diagnostic_path=str(destination / 'raster_diagnostics.json'), diagnostic_sha256=sha(destination / 'raster_diagnostics.json'), success=record['success'], dimensions=record['output_dimensions'], output_png_sha256=record['output_png_sha256'], output_png_path=record['output_png_path'], warnings=record['inspection'].get('warnings', []), stderr=record['stderr'], original_viewport=record['original_viewport'], target_max_dimensions=record['target_max_dimensions'])
+        if record['output_dimensions']:
+            dimensions = record['output_dimensions']
+            entry['actual_pixel_aspect'] = dimensions['width'] / dimensions['height']
+        results.append(entry)
+        if not record['success']:
+            errors.append(dict(row, error=record['error']))
+    except Exception as exc:
+        errors.append(dict(row, error_type=type(exc).__name__, error=str(exc)))
+    if (index + 1) % 25 == 0:
+        print('PROGRESS', index + 1, 'errors', len(errors), flush=True)
+for row in rows:
+    require(sha(Path(row['path'])) == row['sha256'], 'Final source drift')
+for entry in results:
+    require(sha(Path(entry['diagnostic_path'])) == entry['diagnostic_sha256'], 'Diagnostic drift')
+    if entry['success']:
+        require(sha(Path(entry['output_png_path'])) == entry['output_png_sha256'], 'Raster drift')
+for path, expected in sources.items():
+    require(sha(Path(path)) == expected, 'Helper source changed')
+for dataset, item in inventory.items():
+    require(sha(PHASE / dataset / 'figure_manifest.json') == item['manifest_sha256'], 'Final manifest drift')
+require(sha(PRIOR) == PRIOR_SHA and sha(TOOLS_FILE) == start['tool_config_sha256'], 'Evidence/config drift')
+(OUT / 'results.json').write_text(json.dumps(results, indent=2) + '\n')
+review = {'scope': 'Completed original primary/control native vector rasterization diagnostics only', 'rasterization_pass': not errors and len(results) == 744, 'visual_approval': False, 'full_publication_accepted': False, 'attempted': len(rows), 'diagnostic_records': len(results), 'errors': errors, 'warning_files': [dict(dataset=r['dataset'], relative_path=r['relative_path'], warnings=r['warnings']) for r in results if r['warnings']], 'start_sha256': sha(OUT / 'start.json'), 'results_sha256': sha(OUT / 'results.json'), 'script_sha256': sha(Path(__file__)), 'sources': sources, 'elapsed_seconds': time.time() - began, 'final_hash_checks_pass': True, 'limits': 'Decoded pixels and metadata are not visual acceptance. SVG uses proportional viewport fit; no pixel equivalence or equal native DPI claim.'}
+(OUT / 'review.json').write_text(json.dumps(review, indent=2) + '\n')
+print('DONE', len(results), 'errors', len(errors), flush=True)
+sys.exit(0 if review['rasterization_pass'] else 1)

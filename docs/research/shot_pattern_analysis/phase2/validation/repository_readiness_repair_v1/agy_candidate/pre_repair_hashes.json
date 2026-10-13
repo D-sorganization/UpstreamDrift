@@ -1,0 +1,19 @@
+{
+  "docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py": "f48d1f1a09f58f42caba1a3e25c037a298f26cdbe9d685467c996ad3281bc13d",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py": "18a6b0053e9a759092064e3794d4e2d89655a70b46667609d237cf527a3a2a15",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py": "a07bf932040bac481a6787b2266944764edb05fa8f684832f1ba1ba451f821e4",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py": "0810981c15488c50a6964c271acc4dd1cfc57cf50c74516356d922cb4ee362c4",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py": "0f8b8a04bb802f4b7ce03307ff3e87cd17a4bf2c12d720ae534c55393903fd40",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py": "9d26ca8e6dd725e27ee5b9870c4fc7d87abb974a3c4d38a820f38e35469936a1",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py": "b62daad7f04ac5b210c445ae88b15aa415b5c7799d6b5bb69a8e97b96e83378d",
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py": "93c7bc9dc9e8a34183430c0b0e79db5d9168effe20b74b96352f63e5e5414862",
+  "docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py": "fce344be4d476cd3d1df1b287bb2ef1582ed72f2ad05efb3adf4cdf60ae47267",
+  "docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py": "b6ea4a0d2db2ff14d4c846367e7f4b264041b539ee9a82a0b27706b5d7d839a5",
+  "docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py": "e227f1f6380122ccc5cf9128648ba6c2ce8aaf81cd129e394c3dab371b4b49bf",
+  "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py": "4f0ce2c8a3841a7349b531f60c84019e989fa33ac919b024c0fec4b95b0c4467",
+  "docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py": "c03cddb56cc40a3c0af1e53a7b8f7a5017ed56b12950560799405f8260ec0e46",
+  "docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_numeric_review_v1/verify_numeric.py": "525bf05316cbeebc31a52cfb2ccb9940d7dca468362f437704c2ecd95d1d6cb3",
+  "docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py": "7965f518b09a31903a13e38ed7de3f831805f6e34e05b688cf1ec19a8e600b5e",
+  "docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py": "1ea312446bc5b0a83cccc6aaad807b0ba154463de1c96913a4cb103eeceadc7e",
+  "tests/research/test_independent_supplement_audit.py": "8cfc112e97a16ec95cdb7910d0e6994093cb5e1f78bbf985b6c86a021f856f1e"
+}

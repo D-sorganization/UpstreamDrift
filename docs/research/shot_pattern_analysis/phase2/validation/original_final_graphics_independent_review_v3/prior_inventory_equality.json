@@ -1,0 +1,14 @@
+{
+  "status": "unchanged_source_inputs_and_csv_inventories",
+  "old_manifest_sha256": "051c96073df007bf8fb35af6a100541b2499a49276c9cb95f7decab6a69848d0",
+  "new_manifest_sha256": "f4929abc3c34a7eb6005f92616d05bf08e2e4ec607a6bdaacce34b5111ecb41f",
+  "same_plan_and_all_324_cell_manifest_hashes": true,
+  "identical_csv_sha256": {
+    "availability.csv": "badb4dced298b107ddfa0dbc747039ebc05961ae1d91ea51a78f14dc211bf42c",
+    "comparison_availability.csv": "0a0da6920e8944b21fe39fef4267d2a1c35603e378c8deb64ba7927f8614754f",
+    "facebook_overhead.csv": "07828be9099b140664ce21b26330df40b40ea33e903437ec082fe9c498065b8d",
+    "facebook_pattern_density.csv": "20aa16c3c9867d5e0d6e5b90e7686c4202174f8ed2fa9f96960d42644ed706bc",
+    "facebook_ready.csv": "e3836f972a3b8124e1ba4330b869e2dcf1348569c99ed49ebd9e1157f6e9b95d"
+  },
+  "scope": "Exact original source identities and figure-inventory CSV equality; PNG/SVG/PDF changes are expected after renderer repairs and require separate visual review."
+}

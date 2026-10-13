@@ -1,0 +1,127 @@
+.....FF.......................................                           [100%]
+=================================== FAILURES ===================================
+___________ test_common_targets_are_bound_to_accepted_control_pilot ____________
+
+    def test_common_targets_are_bound_to_accepted_control_pilot():
+        from pathlib import Path
+    
+        from src.tools.shot_pattern_analysis.matched_report import (
+            load_reviewed_common_targets,
+        )
+    
+        phase2 = (
+            Path(__file__).resolve().parents[3]
+            / "docs/research/shot_pattern_analysis/phase2"
+        )
+>       targets, sources = load_reviewed_common_targets(phase2)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_report.py:166: in load_reviewed_common_targets
+    plan_bytes = pilot_plan_path.read_bytes()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_pilot_v1/matrix_plan.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_pilot_v1/matrix_plan.json'
+
+/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+___ test_markdown_comparison_table_keeps_population_scope_and_unavailable_sg ___
+
+    def test_markdown_comparison_table_keeps_population_scope_and_unavailable_sg():
+        from src.tools.shot_pattern_analysis.matched_supplement_pipeline import (
+            render_comparison_markdown,
+        )
+    
+        rendered = render_comparison_markdown(
+            [
+                {
+                    "comparison_kind": "curve_strength",
+                    "status": "conditional_only",
+                    "common_supported_n": 19,
+                    "total_n_per_population": 20,
+                    "sources": [
+                        {"protocol_id": "primary", "cell": "a"},
+                        {"protocol_id": "supplement", "cell": "b"},
+                    ],
+                    "patterns": {
+                        pattern: {
+                            "radial_error_difference_m": {
+                                "estimate": 0.1,
+                                "lower_95": 0.0,
+                                "upper_95": 0.2,
+                            },
+                            "course_sg_difference": {
+                                "estimate": 0.03,
+                                "lower_95": 0.01,
+                                "upper_95": 0.05,
+                            },
+                        }
+                        for pattern in ("Straight", "Draw", "Fade")
+                    },
+                    "course_scoring_effect_modification": {
+                        "status": "unavailable",
+                        "reason": "outside baseline",
+                        "Draw": {
+                            "estimate": 0.02,
+                            "lower_95": 0.0,
+                            "upper_95": 0.04,
+                        },
+                    },
+                }
+            ]
+        )
+        assert "19 / 20" in rendered
+        assert "Unavailable" in rendered
+        assert "results do not isolate a causal curvature effect" in rendered
+        assert "Paired Pattern SG Change" in rendered
+>       assert "+0.0300" in rendered
+E       AssertionError: assert '+0.0300' in '# Supplemental Matched-Condition Comparisons\n\nThese are paired simulation contrasts on shot IDs supported in all si... saved Monte Carlo samples; they are not independent experimental replications or multiplicity-adjusted discoveries.\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py:260: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_common_targets_are_bound_to_accepted_control_pilot
+FAILED tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_markdown_comparison_table_keeps_population_scope_and_unavailable_sg
+2 failed, 44 passed, 6 warnings in 42.46s

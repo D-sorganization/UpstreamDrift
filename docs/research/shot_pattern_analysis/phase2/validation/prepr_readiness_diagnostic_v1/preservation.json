@@ -1,0 +1,13 @@
+{
+  "source_head": "b231eed2f80486b7a7243015870a973334d067b1",
+  "originals": [
+    {
+      "name": "p2-prepr-readiness-20261010-safe.txt",
+      "sha256": "ee1e413f82ba8f039a7166e8571ba59f6f6b8578d30d359d9cec24cd57f589e1",
+      "bytes": 129058
+    }
+  ],
+  "archive_sha256": "e91169544184f540035357925648f445db4363f2facd973a66f68bd0c6222d83",
+  "readable_copy_transform": "UTF-8 text, normalized newlines, trailing whitespace stripped; originals unchanged in ZIP",
+  "status": "diagnostic only; not publication acceptance"
+}

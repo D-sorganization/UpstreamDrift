@@ -1,0 +1,11 @@
+{
+  "session": 69662,
+  "model": "gemini-3.8-flash-high",
+  "worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "branch": "codex/shot-pattern-report-precision",
+  "base": "1b1a5f17ec",
+  "prompt": "/tmp/p2-report-precision-agy.txt",
+  "log": "/tmp/p2-report-precision-agy.log",
+  "scope": "Pure shared formatting; preserve GUI behavior; report/effect/absolute-SG display only; no MAIN writes or statistics changes",
+  "status": "Running; inspect live handle before acting"
+}

@@ -1,0 +1,36 @@
+{
+  "accepted_component": true,
+  "full_publication_accepted": false,
+  "visual_approval": false,
+  "source_sha256": {
+    "/tmp/p2-vector-review-agy/vector_inspection.py": "268742868c39d6d642c32ad9eae1fdda364bf66cf03ebb3a767f7d218699b51a",
+    "/tmp/p2-vector-review-agy/test_vector_inspection.py": "e0db9db8a5758556b4040ffb25c239784b0a7a976e48a9e6710a0ac39014e491"
+  },
+  "independent_tdd": {
+    "red_failures": 7,
+    "red_passes": 27,
+    "final_green": 37
+  },
+  "static_checks": [
+    "Ruff",
+    "Ruff format",
+    "Mypy Python3.12 follow-imports=silent"
+  ],
+  "completed_primary_sample_pass": true,
+  "sample_exit": 0,
+  "evidence_sha256": {
+    "red.txt": "024d2f1845102b35e45874bbae95b56fd82b4df2be83a00e4f26eae5da42eaac",
+    "green_initial.txt": "0d5882ab9240511335fa97e2cadd5845d7473b8adfc6cfa8a3c486f2805ee0b0",
+    "green.txt": "3ffb016be9022f3bcaf1d6de795bf748ae16d276485293d560ad8a266e1671cc",
+    "ruff.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "format.txt": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "mypy.txt": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+    "completed_sample.json": "bdd57dc25ed7452d549c567a0a9ca9f68fcc4833157f627cf3bf36d710d218ae",
+    "completed_sample.txt": "b438e63e3b4a79e116d9bacd94728a86292520f10f5237f775b3cf00c5f66126",
+    "inspect_completed_sample.py": "1b0c258026814df5a081046bdea55a5cbc25139a4f61b88f9a8a63f61f96fb2e",
+    "REVIEW.md": "a7cc96e52042c6805f44ba41f721c635010feb410e61d067d42af5d22fd066bc",
+    "provisional_probes.json": "3fe2d84e8321e668ebd89c3fc701e13551c531b00f3ad7c375141abb7d145547",
+    "probe.py": "ef6fd009ec2b2e4cc6748386cb79e827a127346770037e700d083f7290c4ef1c"
+  },
+  "initial_agy_tdd_verified": false
+}

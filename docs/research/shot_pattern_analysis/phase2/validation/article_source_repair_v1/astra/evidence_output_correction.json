@@ -1,0 +1,11 @@
+{
+  "status": "evidence_output_sequencing_correction",
+  "original_review_sha256": "e7ba794cc9efceb4e93be8ad9e54fa9dcb86112f8b8b8bbf0d882c2991bb46a1",
+  "original_review_unchanged": true,
+  "file": "final_check.txt",
+  "original_bound_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "correct_final_sha256": "20d32840eb984db0f4f5767dcfbcd0edd9c5c858e3f5ee4ab785619c450dc9b8",
+  "size_bytes": 199,
+  "cause": "Shell stdout redirection created/truncated final_check.txt before final_check.py enumerated its evidence hashes; successful stdout was written after review.json was emitted. This is an output sequencing error, not an article or input-data change.",
+  "article_sha256": "4da27a01c2c1f5046233b912cdc57a0422535f8eb2c8f496d7a45bab4964ba10"
+}

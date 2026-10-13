@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/p2-render-real-pair.py", line 31, in <module>
+    assert row['common_supported_n'] is None
+           ~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'common_supported_n'

@@ -1,0 +1,12 @@
+{
+  "scope": "Operational Review Harness Qualification Only",
+  "checked_at": "2026-10-10T15:46:32.449180+00:00",
+  "agent_receipt_sha256": "17f2a888f0114630e7e0f9cb0b87f8555bccacb438c97b0b6882149d9e34b3ef",
+  "root_test_result": {
+    "passed": 22,
+    "seconds": 0.57,
+    "exit_code": 0
+  },
+  "root_review": "Confirmed actual --output-dir launch schema, pinned start binding, source and artifact hashes, pending-before-read behavior. No production execution. All preserved evidence hashes verified.",
+  "v6_accepted": false
+}

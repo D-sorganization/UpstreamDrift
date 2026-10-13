@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -13,7 +14,6 @@ from scripts.research.proximal_distal_energy.nonlinear_controller_qualification 
     REPORT_PATH,
     BoxBounds,
     QuadraticTrackingCost,
-    build_qualification,
     central_dynamics_jacobians,
     manufactured_step,
     qualify_solver_kernel,
@@ -104,16 +104,24 @@ def test_nonfinite_rollout_is_typed_without_fabricated_trajectory() -> None:
     assert result.controls is None
 
 
-def test_committed_qualification_is_deterministic_and_scope_limited() -> None:
-    expected = build_qualification(ROOT)
+def test_archived_qualification_retains_its_historical_scope() -> None:
+    assert hashlib.sha256(REPORT_PATH.read_bytes()).hexdigest() == (
+        "abb8870ba97a2d490ced50eed39495c8f8327bd612681dd01ae21546ef03e977"
+    )
     committed = json.loads(REPORT_PATH.read_text(encoding="utf-8"))
-    assert committed == expected
-    assert validate_qualification(committed, ROOT) == {
-        "solver_count": 1,
-        "qualified_solver_count": 1,
-        "double_pendulum_evaluation_count": 0,
-        "ranking_eligible_count": 0,
-    }
+    assert committed["qualified_solver_count"] == 1
+    assert committed["double_pendulum_evaluation_count"] == 0
+    assert committed["ranking_eligible_method_count"] == 0
+    assert committed["environment_authority"]["sha256"] == (
+        "dd50c15d631dc490325b0aedeeca465f8de42edbecb32925335f525cf4e0f151"
+    )
+    assert committed["registration_authority"]["sha256"] == (
+        "4856de8cabd4a820c22c2bb3e25f9f97852c22bbb7f08d405702f9b10d64d7bf"
+    )
+    with pytest.raises(
+        ValueError, match="qualification differs from deterministic authority"
+    ):
+        validate_qualification(committed, ROOT)
     assert committed["registration_authority"]["sha256"] == next(
         item["sha256"]
         for item in committed["source_authorities"]

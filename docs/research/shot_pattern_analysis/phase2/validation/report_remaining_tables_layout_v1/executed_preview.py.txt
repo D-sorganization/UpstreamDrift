@@ -1,0 +1,12 @@
+from pathlib import Path
+import sys,json,hashlib
+r=Path.cwd();sys.path.insert(0,str(r));p=r/'docs/research/shot_pattern_analysis/phase2';out=p/'validation/report_remaining_tables_layout_v1';out.mkdir(exist_ok=True)
+from src.tools.shot_pattern_analysis.matched_interpretation import describe_saved_cell,describe_scoring,render_cell_table,render_geometry_table,render_scoring_table
+from src.tools.shot_pattern_analysis.matched_report import load_validated_cell
+from scripts.research.shot_pattern_analysis.build_pdf import render_markdown_to_pdf
+cells=[];scores=[];inputs={}
+for club in ('driver','seven_iron','pitching_wedge'):
+ for lean in (0,5,10):
+  name=f'{club}_lean{lean}_curve1_rotation2_combined2';root=p/'final_v1'/name;cells.append(describe_saved_cell(root));scores.append((name,describe_scoring(load_validated_cell(root))));inputs[name]=hashlib.sha256((root/'summary.json').read_bytes()).hexdigest()
+parts=['# Partial Remaining Table Layout Preview','','This diagnostic covers existing nine-condition geometry and scoring tables only. It does not establish final report or publication acceptance.','','## Carry and Dispersion','',render_cell_table(cells),'','## Delivered Geometry and Endpoint Quadrants','',render_geometry_table(cells),'','## Absolute Scoring','',render_scoring_table(scores)]
+source=out/'preview.md';source.write_text('\n'.join(parts)+'\n');render_markdown_to_pdf(source,out/'preview.pdf');(out/'inputs.json').write_text(json.dumps(inputs,indent=2)+'\n');(out/'executed_preview.py.txt').write_bytes(Path(__file__).read_bytes());print('Rendered nine-condition layout preview from validated saved data only')

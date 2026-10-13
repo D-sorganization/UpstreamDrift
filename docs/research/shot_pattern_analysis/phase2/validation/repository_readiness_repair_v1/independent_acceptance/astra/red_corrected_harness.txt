@@ -1,0 +1,151 @@
+....................................F.FFF.FFF.FF............             [100%]
+=================================== FAILURES ===================================
+_______________ test_nonfinite_expected_rejected[nan-candidate] ________________
+
+site = 'candidate', value = nan
+
+    @pytest.mark.parametrize("site", ["candidate", "root", "interactions", "final"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_expected_rejected(site: str, value: float) -> None:
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py:76: Failed
+______________ test_nonfinite_expected_rejected[nan-interactions] ______________
+
+site = 'interactions', value = nan
+
+    @pytest.mark.parametrize("site", ["candidate", "root", "interactions", "final"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_expected_rejected(site: str, value: float) -> None:
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py:76: Failed
+_________________ test_nonfinite_expected_rejected[nan-final] __________________
+
+site = 'final', value = nan
+
+    @pytest.mark.parametrize("site", ["candidate", "root", "interactions", "final"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_expected_rejected(site: str, value: float) -> None:
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py:76: Failed
+_______________ test_nonfinite_expected_rejected[inf-candidate] ________________
+
+site = 'candidate', value = inf
+
+    @pytest.mark.parametrize("site", ["candidate", "root", "interactions", "final"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_expected_rejected(site: str, value: float) -> None:
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py:76: Failed
+______________ test_nonfinite_expected_rejected[inf-interactions] ______________
+
+site = 'interactions', value = inf
+
+    @pytest.mark.parametrize("site", ["candidate", "root", "interactions", "final"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_expected_rejected(site: str, value: float) -> None:
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py:76: Failed
+_________________ test_nonfinite_expected_rejected[inf-final] __________________
+
+site = 'final', value = inf
+
+    @pytest.mark.parametrize("site", ["candidate", "root", "interactions", "final"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_expected_rejected(site: str, value: float) -> None:
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py:76: Failed
+_______________ test_nonfinite_expected_rejected[-inf-candidate] _______________
+
+site = 'candidate', value = -inf
+
+    @pytest.mark.parametrize("site", ["candidate", "root", "interactions", "final"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_expected_rejected(site: str, value: float) -> None:
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py:76: Failed
+_____________ test_nonfinite_expected_rejected[-inf-interactions] ______________
+
+site = 'interactions', value = -inf
+
+    @pytest.mark.parametrize("site", ["candidate", "root", "interactions", "final"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_expected_rejected(site: str, value: float) -> None:
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py:76: Failed
+_________________ test_nonfinite_expected_rejected[-inf-final] _________________
+
+site = 'final', value = -inf
+
+    @pytest.mark.parametrize("site", ["candidate", "root", "interactions", "final"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_expected_rejected(site: str, value: float) -> None:
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_validation_helper_contracts.py:76: Failed
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_validation_helper_contracts.py::test_nonfinite_expected_rejected[nan-candidate]
+FAILED tests/research/test_validation_helper_contracts.py::test_nonfinite_expected_rejected[nan-interactions]
+FAILED tests/research/test_validation_helper_contracts.py::test_nonfinite_expected_rejected[nan-final]
+FAILED tests/research/test_validation_helper_contracts.py::test_nonfinite_expected_rejected[inf-candidate]
+FAILED tests/research/test_validation_helper_contracts.py::test_nonfinite_expected_rejected[inf-interactions]
+FAILED tests/research/test_validation_helper_contracts.py::test_nonfinite_expected_rejected[inf-final]
+FAILED tests/research/test_validation_helper_contracts.py::test_nonfinite_expected_rejected[-inf-candidate]
+FAILED tests/research/test_validation_helper_contracts.py::test_nonfinite_expected_rejected[-inf-interactions]
+FAILED tests/research/test_validation_helper_contracts.py::test_nonfinite_expected_rejected[-inf-final]
+9 failed, 51 passed, 7 warnings in 7.13s

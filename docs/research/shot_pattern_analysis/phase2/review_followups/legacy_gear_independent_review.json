@@ -1,0 +1,18 @@
+{
+  "issue": 12006,
+  "status": "physical_sign_accepted_pending_complete_patch_gates",
+  "scope": "Legacy right-handed additive gear contribution only; not empirical or conservation qualification",
+  "reviewed_file_sha256": {
+    "src/shared/python/physics/impact_model/utils.py": "6653a01ae8412b7fc52942267033ad03dc459b2f267ce1c5a3cab7d08a5ed4b3",
+    "tests/unit/physics/test_legacy_gear_flight_direction.py": "8b0780cf2f9b4d8db887d9d8d8e7abe64bd7f888b651f01cc3277a20ef2f671b",
+    "tests/unit/physics/test_impact_physics_value_assertions.py": "433e5093a1fed5cd44ee43fe56dffdbc98ae4fadd379f5f8da343d0b731c915b"
+  },
+  "independent_test_log_sha256": "47c80f53a42f331329ab3fb7954d0c145554d9470fa602254f204afd6d6e43fc",
+  "independent_tests": 9,
+  "exit_code": 0,
+  "reason": "Positive toe offset yields positive Z spin; spin cross forward velocity points left. Public solver/native-flight regression confirms direction. High-face term unchanged.",
+  "remaining": [
+    "Complete legacy test-suite update and committed repair",
+    "Snapshot coverage extension and explicit matched-path reachability qualification"
+  ]
+}

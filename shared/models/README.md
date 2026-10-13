@@ -132,7 +132,7 @@ columns as JSON).
 Run the test suite:
 
 ```bash
-python3 -m pytest tests/test_golf_humanoid_dimensions.py -v
+python3 -m pytest tests/shared_models/test_golf_humanoid_dimensions.py -v
 ```
 
 The test checks:

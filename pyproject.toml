@@ -104,6 +104,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Pandoc is an external CLI; this extra supplies the Python PDF renderer.
+shot-pattern-report = ["reportlab>=4,<5", "pypdf>=6,<7", "matplotlib>=3.10.8,<4"]
+# Optional JIT for the profiled incremental contact loop; Python reference remains available.
+shot-pattern-acceleration = ["numba>=0.68,<0.69"]
 # Default extras policy:
 #   extras_default = "core"
 # The runtime dependencies list above is the canonical core dependency set.
@@ -375,6 +379,7 @@ matched_swing_browser = "src.tools.matched_swing_browser._embed_adapter"
 impact_parameters = "src.tools.impact_parameters_panel._embed_adapter"
 grip_wrench_plots = "src.tools.grip_wrench_plots._embed_adapter"
 ground_reaction_plots = "src.tools.ground_reaction_plots._embed_adapter"
+shot_pattern_analysis = "src.tools.shot_pattern_analysis._embed_adapter"
 necromatcher = "src.tools.necromatcher._embed_adapter"
 
 [project.urls]

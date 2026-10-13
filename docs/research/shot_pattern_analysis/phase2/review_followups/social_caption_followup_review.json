@@ -1,0 +1,47 @@
+{
+  "status": "caption_contracts_pass_final_visual_review_pending",
+  "issue": 11988,
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "82fe100f03508400e0c87b8a0c6c6055bb02c2bb7c8d10c80b4e9ef4bd1b6ff0",
+    "tests/tools/shot_pattern_analysis/test_matched_social_integration.py": "6022c5b0d27f0199495aa85e17c3541e88c918fbf144f278d28768adbf6790a7"
+  },
+  "tests": {
+    "overhead_scope": "1 red regression; then12 targeted tests passed",
+    "source_label": "1 red regression; then12 targeted tests passed",
+    "ruff_and_format": "passed"
+  },
+  "changes": [
+    "Overhead figure_scope is Saved Raw Flight Samples.",
+    "Academic scenario uses neutral Cell label; source_protocol retains provenance.",
+    "Removed ungrounded hardcoded supplemental/final stage from per-cell metadata."
+  ],
+  "v3": {
+    "assets": 28,
+    "outside_canvas_text": 0,
+    "independent_pngs_reviewed": 10,
+    "remaining_at_review": [
+      "tick overlap",
+      "academic overhead scope",
+      "ungrounded supplemental stage/label"
+    ]
+  },
+  "v4": {
+    "assets": 12,
+    "outside_canvas_text": 0,
+    "scope_fix_included": true,
+    "remaining_at_render": [
+      "tick overlap",
+      "ungrounded supplemental stage/label"
+    ]
+  },
+  "v5": {
+    "status": "running",
+    "session": 8573,
+    "script": "/tmp/p2-render-production-cell-review-v5.py",
+    "output": "/tmp/p2-production-cell-review-v5"
+  },
+  "limitations": [
+    "No final publication acceptance; v5 actual review and canonical tick spacing remain.",
+    "No numerical model edits or simulations performed for these changes."
+  ]
+}

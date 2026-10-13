@@ -1,0 +1,3 @@
+src/tools/shot_pattern_analysis/matched_supplement_figures.py:423: error: "FigureCanvasBase" has no attribute "get_renderer"  [attr-defined]
+src/tools/shot_pattern_analysis/matched_supplement_figures.py:660: error: "FigureCanvasBase" has no attribute "get_renderer"  [attr-defined]
+Found 2 errors in 1 file (checked 1 source file)

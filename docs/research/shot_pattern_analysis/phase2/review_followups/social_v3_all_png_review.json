@@ -1,0 +1,108 @@
+{
+  "all_ledger_artifact_hashes_verified": 28,
+  "findings": [
+    "Known canonical marginal tick overlap on Draw social density.",
+    "Stale academic overhead figure_scope label.",
+    "Original-primary preview uses hard-coded supplemental-stage wording."
+  ],
+  "limits": [
+    "PDF/SVG bytes verified but not separately visually rendered.",
+    "Component driver pair/cell only; no all-club or complete-study visual acceptance.",
+    "No physical simulation or source edits."
+  ],
+  "pngs": [
+    {
+      "observations": [
+        "Common-six count 9939/10000, sampled dots and shared-scale/HDR meaning legible; no caption or legend collision."
+      ],
+      "path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density.png",
+      "sha256": "2651068b3618d7ab4e6cc2da40ad551d2c796af6710f70578f60b2a3ff15193d",
+      "visually_inspected": true
+    },
+    {
+      "observations": [
+        "Common-six count 9939/10000, sampled dots and shared-scale/HDR meaning legible; no caption or legend collision."
+      ],
+      "path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_straight_social.png",
+      "sha256": "54cefe8829fa0a36f56ab20047a5528c688726ede289b930cf286b52a7abf05e",
+      "visually_inspected": true
+    },
+    {
+      "observations": [
+        "Common-six count 9939/10000, sampled dots and shared-scale/HDR meaning legible; no caption or legend collision.",
+        "Known main-axis 175 and marginal 0.00 tick overlap remains."
+      ],
+      "path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_draw_social.png",
+      "sha256": "1fd356eb06119f726ff3094dade7c0dba99ba24a4afa2a19b13c6bf704bfc3ec",
+      "visually_inspected": true
+    },
+    {
+      "observations": [
+        "Common-six count 9939/10000, sampled dots and shared-scale/HDR meaning legible; no caption or legend collision."
+      ],
+      "path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_fade_social.png",
+      "sha256": "253f2501a4d57001597de3be5b7056b96011e837b556321f3c8ad87b25ddaa49",
+      "visually_inspected": true
+    },
+    {
+      "observations": [
+        "Six saved paths per condition and physical pattern; unpaired sample status and 6x lateral display magnification disclosed; axes and line-style legend legible."
+      ],
+      "path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead.png",
+      "sha256": "04d413e456bc724ccb6831147e7273e70bcf9ae724084af34efbdca98381fa50",
+      "visually_inspected": true
+    },
+    {
+      "observations": [
+        "Six saved paths per condition and physical pattern; unpaired sample status and 6x lateral display magnification disclosed; axes and line-style legend legible."
+      ],
+      "path": "comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead_social.png",
+      "sha256": "b8986e60c4357b137d228177e1eda2f53270088b3a1dc336184e9c735c61d062",
+      "visually_inspected": true
+    },
+    {
+      "observations": [
+        "Individual supported counts 9974/10000 per pattern, 600 displayed dots and full-data HDR/marginals stated; metadata and footer fit.",
+        "Original-primary preview is called Supplement Cell/Final Supplemental Analysis; should use neutral or source-derived provenance caption."
+      ],
+      "path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.png",
+      "sha256": "ff1ce5dfec3cfdc64b8c552e8f9d467e95c570012dd26f80ebeefc310d5889ae",
+      "visually_inspected": true
+    },
+    {
+      "observations": [
+        "Individual supported counts 9974/10000 per pattern, 600 displayed dots and full-data HDR/marginals stated; metadata and footer fit."
+      ],
+      "path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.png",
+      "sha256": "32c4b83cd93ec515c6bd43082ce663f2dc7580ae54ac88a82bd7175adfaf4ad1",
+      "visually_inspected": true
+    },
+    {
+      "observations": [
+        "Six saved raw paths per physical pattern are clear; endpoint support counts are not misused as line counts; academic 12.6x/social 20.9x magnification disclosed.",
+        "Original-primary preview is called Supplement Cell/Final Supplemental Analysis; should use neutral or source-derived provenance caption.",
+        "Known stale figure_scope one-cell supported population conflicts with raw-trajectory scope."
+      ],
+      "path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.png",
+      "sha256": "950dd0fb05ae4368af0b75509fcf27e068d77034f50514d2d1504494dcf0d6d7",
+      "visually_inspected": true
+    },
+    {
+      "observations": [
+        "Six saved raw paths per physical pattern are clear; endpoint support counts are not misused as line counts; academic 12.6x/social 20.9x magnification disclosed."
+      ],
+      "path": "cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.png",
+      "sha256": "2cea978728802d5e66fd3edb5bb706756cb7e716efc6e466d89602c85dbc0df6",
+      "visually_inspected": true
+    }
+  ],
+  "render_receipt_sha256": "8d3fd135987828c62e4772638468be70b302ef9e2963de2eae5c406f40068ab8",
+  "render_root": "/tmp/p2-production-social-review-v3",
+  "render_source_sha256": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py": "4940bc4b0e91719f8b8e59bf2ccd6e14a2bec214a0e08ddbff2f107020203450",
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "8b80820cb16b2a4f975a3bfcfa960d30500d3aec3d08fabd6a949bf4f9e37694"
+  },
+  "schema": "independent-complete-component-png-review/1",
+  "scope": "All 10 v3 component PNGs, not final study acceptance",
+  "status": "changes_required"
+}

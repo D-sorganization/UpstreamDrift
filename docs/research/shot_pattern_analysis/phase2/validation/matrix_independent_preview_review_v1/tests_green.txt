@@ -1,0 +1,52 @@
+..............                                                           [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+28.61s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_layout_visible_captions_and_nonoverlap_at_figsize
+10.50s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_panel_titles_and_unavailable_reasons_fit_their_cells[False]
+9.88s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_report_exports_supported_metric_heatmaps_and_marks_unavailable_cells
+8.00s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_panel_titles_and_unavailable_reasons_fit_their_cells[True]
+4.95s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_context_derives_tee_fairway_approach_and_carry_as_final_lie
+2.20s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_metric_extraction_distinguishes_physics_support_and_conditional_sg
+0.79s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_matrix_annotation_contrast_across_entire_palettes
+0.64s setup    tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_metric_extraction_distinguishes_physics_support_and_conditional_sg
+0.04s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_noise_primitive_units_and_correlation_sign
+0.03s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_matrix_caption_rejects_mixed_noise_profiles
+0.03s teardown tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_conditional_sg_annotation_uses_common_paired_population
+0.02s setup    tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_matrix_caption_rejects_mixed_noise_profiles
+0.02s setup    tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_context_derives_tee_fairway_approach_and_carry_as_final_lie
+0.02s teardown tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_matrix_caption_rejects_mixed_noise_profiles
+0.02s setup    tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_noise_primitive_units_and_correlation_sign
+0.02s setup    tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_matrix_annotation_contrast_across_entire_palettes
+0.01s setup    tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_layout_visible_captions_and_nonoverlap_at_figsize
+0.01s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_contrast_luminance_chooses_white_on_dark_green_and_viridis_minimum
+0.01s teardown tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_layout_visible_captions_and_nonoverlap_at_figsize
+0.01s setup    tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_contrast_luminance_chooses_white_on_dark_green_and_viridis_minimum

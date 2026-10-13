@@ -1,0 +1,59 @@
+[
+  {
+    "command": [
+      "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+      "-m",
+      "docs.research.shot_pattern_analysis.phase2.validation.independent_final_audit",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+      "--output",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/independent_supplement_final_pw_primary_face.json",
+      "--supplement-stage",
+      "final",
+      "--alias-references",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_final_aliases.json",
+      "--supplement-acceptance",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_acceptance.json"
+    ],
+    "started": "2026-10-10T02:06:05.966040+00:00",
+    "finished": "2026-10-10T02:06:53.967790+00:00",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+      "-m",
+      "docs.research.shot_pattern_analysis.phase2.validation.independent_final_audit",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face",
+      "--output",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/independent_supplement_final_pw_control_face.json",
+      "--supplement-stage",
+      "final",
+      "--alias-references",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_final_aliases.json",
+      "--supplement-acceptance",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_acceptance.json"
+    ],
+    "started": "2026-10-10T02:06:53.971552+00:00",
+    "finished": "2026-10-10T02:07:07.423263+00:00",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+      "-m",
+      "docs.research.shot_pattern_analysis.phase2.validation.independent_final_audit",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed",
+      "--output",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/independent_supplement_final_driver_control_speed.json",
+      "--supplement-stage",
+      "final",
+      "--alias-references",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_final_aliases.json",
+      "--supplement-acceptance",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_acceptance.json"
+    ],
+    "started": "2026-10-10T02:07:07.424207+00:00",
+    "finished": "2026-10-10T02:07:26.791946+00:00",
+    "exit_code": 0
+  }
+]

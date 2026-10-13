@@ -74,8 +74,13 @@ def _builder() -> ModuleType:
 # ------------------------------------------------------------------ pure XML
 def test_builder_rejects_a_tree_without_a_root() -> None:
     builder = _builder()
+
+    class EmptyTree:
+        def getroot(self) -> None:
+            return None
+
     with pytest.raises(ValueError, match="no root element"):
-        builder.write_model(builder.ET.ElementTree(), ROOT / "unused.osim")
+        builder.write_model(EmptyTree(), ROOT / "unused.osim")
 
 
 @pytest.mark.parametrize("name", sorted(MODELS))

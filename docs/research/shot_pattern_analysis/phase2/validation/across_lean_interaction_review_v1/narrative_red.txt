@@ -1,0 +1,97 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_bounds_control_missing_relative_effect_is_explicitly_unavailable[None] __
+
+scoring_failure = None
+
+    @pytest.mark.parametrize("scoring_failure", [None, "course state outside baseline support"])
+    def test_bounds_control_missing_relative_effect_is_explicitly_unavailable(scoring_failure):
+        from scripts.research.shot_pattern_analysis.final_report_inputs import (
+            select_bounds_control_pairs,
+        )
+    
+        # The old real producer emitted supported across-lean pairs without relative
+        # scoring fields. Geometry availability must not imply scoring availability.
+        pair = _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_combined2",
+            second_cell="driver_lean5_curve2_rotation2_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+            common_n=9940,
+        )
+        pair.pop("course_scoring_effect_modification")
+        if scoring_failure:
+            pair["course_scoring_effect_modification"] = {
+                "status": "unavailable", "reason": scoring_failure,
+            }
+        effects, unavailable = select_bounds_control_pairs([pair])
+>       assert effects == []
+E       AssertionError: assert [{'comparison...: 10000, ...}] == []
+E         
+E         Left contains one more item: {'comparison_kind': 'across_lean', 'status': 'conditional_only', 'common_six_n': 9940, 'total_n_per_population': 10000, ...}
+E         Use -v to get more diff
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:937: AssertionError
+_ test_bounds_control_missing_relative_effect_is_explicitly_unavailable[course state outside baseline support] _
+
+scoring_failure = 'course state outside baseline support'
+
+    @pytest.mark.parametrize("scoring_failure", [None, "course state outside baseline support"])
+    def test_bounds_control_missing_relative_effect_is_explicitly_unavailable(scoring_failure):
+        from scripts.research.shot_pattern_analysis.final_report_inputs import (
+            select_bounds_control_pairs,
+        )
+    
+        # The old real producer emitted supported across-lean pairs without relative
+        # scoring fields. Geometry availability must not imply scoring availability.
+        pair = _make_source_pair(
+            first_cell="driver_lean0_curve2_rotation2_combined2",
+            second_cell="driver_lean5_curve2_rotation2_combined2",
+            second_protocol="driver-control-speed-bounds/1",
+            common_n=9940,
+        )
+        pair.pop("course_scoring_effect_modification")
+        if scoring_failure:
+            pair["course_scoring_effect_modification"] = {
+                "status": "unavailable", "reason": scoring_failure,
+            }
+        effects, unavailable = select_bounds_control_pairs([pair])
+>       assert effects == []
+E       AssertionError: assert [{'comparison...: 10000, ...}] == []
+E         
+E         Left contains one more item: {'comparison_kind': 'across_lean', 'status': 'conditional_only', 'common_six_n': 9940, 'total_n_per_population': 10000, ...}
+E         Use -v to get more diff
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:937: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.23s setup    tests/research/test_shot_pattern_final_report.py::test_bounds_control_missing_relative_effect_is_explicitly_unavailable[None]
+
+(5 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_final_report.py::test_bounds_control_missing_relative_effect_is_explicitly_unavailable[None]
+FAILED tests/research/test_shot_pattern_final_report.py::test_bounds_control_missing_relative_effect_is_explicitly_unavailable[course state outside baseline support]

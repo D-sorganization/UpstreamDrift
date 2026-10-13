@@ -1,0 +1,1323 @@
+{
+  "status": "active",
+  "recorded_at_utc": "2026-10-12T15:25:47.928343+00:00",
+  "checkpoint": "0a323cf18ad1fe6f2a727fa62dcbed530ca49a64",
+  "branch": "codex/shot-pattern-safe-followup",
+  "source_commit": "0a323cf18ad1fe6f2a727fa62dcbed530ca49a64",
+  "integration": "Remote PR0252eb9671 and actual conflicting main8e9b4b974b reconciled; protected Tools8a11691b pins and installed runtime verified. Final publication and integration gate in progress; no frozen rows rerun.",
+  "fixture_repair": {
+    "commit": "ef0f14a36b",
+    "change": "Include copied research scripts in frozen fixture source hashes",
+    "verification": "Previously red origin/runtime test + four drift tests pass; both verifier modules subsequently exit0 with exact Tools pin initialized",
+    "production_changes": false
+  },
+  "dependency_pin": "8a11691b4e9aee7d04dfc39628a8269ca561b07d",
+  "preservation": {
+    "simulation_rerun": false,
+    "desktop_pdf_sha256": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+    "pages": 39,
+    "replay_ids_per_pattern": 100,
+    "selected_cells": 5,
+    "native_axis_contract": "horizontal lateral x; vertical downrange y"
+  },
+  "incomplete_gate_attempts": [
+    {
+      "reason": "Stopped before final summary because dependency checkout was empty; not acceptance"
+    },
+    {
+      "reason": "Inherited runtime had Deprecated3.0.0 despite locked1.3.1; mypy failed parsing third-party Python3.12 syntax with target3.11. Stopped affected tests before final summary. A separate environment now installs exact Deprecated1.3.1 and wrapt2.2.1.",
+      "receipt": "incomplete-runtime-mismatch.txt.gz",
+      "receipt_sha256": "440baeeb1cb697716f1a1573c8a9e83efd25c07434fe6e56eccc809e14ca0078"
+    }
+  ],
+  "current_validation": "Complete stable-source canonical RM-6 passes eight gates with Semgrep available: 7597 passed,377 skipped,43 deselected,1 known expected pass,21 subtests. Exact CI scan:209 rules/280 files/zero findings. Complete publication computational/PDF inspection, sixteen historical-path tests and both title checkers pass. Protected updated CI/merge remains pending. Publication #5016 is live at9002c8a2:53 exact checks,four browser cells and root-agent visual review pass;39-page PDF hash matches. Whole-site post-deploy workflow status is separate.",
+  "development_log_blocker": {
+    "issue": 11935,
+    "status": "CLOSED 2026-10-12T02:35:48Z; merged #12337 at d8a6e303",
+    "modified_in_this_branch": false,
+    "current_validator": "PASS after remote/main reconciliation; earlier blocked receipt remains historical"
+  },
+  "affinedrift": {
+    "pr": 5005,
+    "source_review_commit": "6f0d81eb",
+    "audit_commit": "f5ee7c1d",
+    "full_gates": "Initial publication5005 protected merged ace2a1ac; mobile repair5016 armed after all eight local gates and independent review",
+    "public_routes": "Initial live53 checks PASS; all nine assets/PDF exact. Final mobile repair deployment verification pending.",
+    "pushed_commit": "5b658b733c4591f318687540e0ca4e571ee25d8a",
+    "canonical_pre_pr": "PASS after actual main conflict reconciliation",
+    "ci_run": "https://github.com/D-sorganization/AffineDrift/actions/runs/38203470000",
+    "merge_queue_sha": "eabbb3233a3644f11324d5dc39252db8589d71cc",
+    "live_verification": {
+      "revision": "ace2a1ac49ec179f982f4457b0e3a2ccb3c16a84",
+      "checks_passed": 53,
+      "assets": 9,
+      "pdf": "39 pages, exact accepted SHA256",
+      "browser_automated_cells_passed": 4,
+      "axe_serious_critical": 0,
+      "manual_visual": "Desktop coherent; mobile headline narrow/word-splitting FAIL, Sol repair in progress",
+      "overall": "Publication visual acceptance pending mobile repair"
+    },
+    "mobile_repair": {
+      "pr": 5016,
+      "head": "3b318ae4be86778383e7ec258b3c9d933816a240",
+      "status": "Protected auto-merge armed; local regression Chromium and Mobile Chrome PASS; final live verification pending"
+    }
+  },
+  "protected_merge": "pending",
+  "overall_complete": false,
+  "premerge_mypy": {
+    "receipt": "premerge-mypy-pass.txt.gz",
+    "receipt_sha256": "618056f891f0c162bc6367e6cfaa5ad84ce251dd76033a4025f43820e0973d14",
+    "result": "PASS",
+    "source_files": 60,
+    "scope": "Before9c9000merge; not postmerge acceptance"
+  },
+  "postmerge_focused_validation": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "first_test_attempt": "Timeout during Numba compilation after four passes; not completed, no assertion failure observed",
+    "non_numba_subset": "Timed out in Matplotlib SVG export; not completed",
+    "scientific_review": "Astra found no scientific parameter/results/tolerance change",
+    "contact": "Static checks2PASS; numerical node timed out during Numba compilation before/after standalone warmup; exact logs preserved, no acceptance"
+  },
+  "postmerge_pre_pr_attempt": {
+    "result": "FAILED MYPY; affected-tests stopped before summary after source repair began",
+    "mypy_errors": 7,
+    "checked_source_files": 148,
+    "receipt": "postmerge-writer-api-red-incomplete.txt.gz",
+    "receipt_sha256": "e23d5c022c10cbbba4e3a0a3ee305f9b65b9f73f12fba69bd5be243fe160dd77",
+    "not_full_acceptance": true
+  },
+  "writer_api_repair": {
+    "red": "Two legacy writer calls raised TypeError",
+    "green": "Four compatibility tests pass; scoped mypy4files PASS; Ruff and format PASS",
+    "review": "Astra accepted compatibility defaults/pass-through/mixed-input rejection; no science changes",
+    "receipt": "writer_api_compatibility.txt",
+    "canonical_postfix": "pending clean CI pre-PR"
+  },
+  "dry_postmerge_attempt": "Stopped without summary when writer source repair began; no pass claimed. Approved baseline bytes remain unchanged; rerun after final source commit.",
+  "postfix_overlay_gate": {
+    "mypy": "PASS148sourcefiles",
+    "affected_tests": "Stopped before summary after runtime provenance comparison showed inherited packages differ from CI dev lock",
+    "full_acceptance": false,
+    "receipt": "postfix-overlay-mypy-pass-incomplete.txt.gz",
+    "receipt_sha256": "cbc346ac9ed65b1a432ed32a796b264c51fe3263b0b2c803255f6335ca4b088f",
+    "next": "Complete clean requirements-dev.lock environment and rerun canonical gate"
+  },
+  "full_repository_dry": {
+    "result": "PASS",
+    "exit_code": 0,
+    "source_commit": "17ad207777",
+    "approved_baseline_changed": false,
+    "new_exemptions": false,
+    "receipt": "postfix-full-repository-dry-pass.txt.gz",
+    "receipt_sha256": "9fe02c3bbe89873a210c087021b8ff9e8e40823d9a0c4a20585dfbb86dfd0199",
+    "historical_quarantine_count": 594
+  },
+  "clean_ci_local_gates": {
+    "source_commit": "17ad20777773f3ae69a42bcfd28a5179a5af1135",
+    "runtime_provenance": "ci-runtime-provenance.json",
+    "requirements_dev_lock_pins": "126/126 match",
+    "contact_node": {
+      "result": "PASS",
+      "receipt": "contact-ci-runtime.txt.gz",
+      "receipt_sha256": "1174b2f119e5b311ff29604fc149964615ecc4e82b7202eac2bfc9955ee10472"
+    },
+    "architecture": {
+      "result": "PASS",
+      "receipt": "safe-postfix-architecture.txt.gz",
+      "receipt_sha256": "24f59f08c1073c345aea1209c2a64562fd0ec07acba984576df1d1ce5ed2ddb0"
+    },
+    "file_size": {
+      "result": "PASS",
+      "receipt": "safe-postfix-file-size.txt.gz",
+      "receipt_sha256": "398a0868ee37384c154d5e896a42583088d7201e69e82470b6a4b4621603810f"
+    },
+    "rust_wheel": {
+      "result": "BUILD AND PROBE PASS",
+      "receipt": "upstream-ci-rust-build-v2.txt.gz",
+      "probe": "upstream-ci-rust-probe.txt.gz"
+    },
+    "generated_ignored_cargo_lock_sha256": "a986247a943e2f3a4b3881f5e259d7abf9c3b783679ec33e97d5db569fd2a8df",
+    "complete_pre_pr": "Latest full canonical attempt after remote merge was interrupted on prior source at 24% with six failures; final-source complete pre-PR pending protocol amendment, not acceptance."
+  },
+  "canonical_pre_pr_diagnostics": {
+    "command": "/tmp/shot-upstream-ci-venv/bin/python -u /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main",
+    "environment": "Clean CI 126/126 dev-lock runtime; next invocation PYTHONPATH and MYPYPATH own worktree only; absolute central wrapper; headless variables; actionlint 1.7.7 and shellcheck 0.10.0.",
+    "pre_guard_collection_failure": {
+      "result": "INCOMPLETE; SIGINT exit 130 after pypdf collection failure, before consistency phase finished",
+      "source_commit": "2fd7099fd1",
+      "receipt": "clean-ci-prepr-collection-failure-incomplete.txt.gz",
+      "receipt_sha256": "4a8a716bd6c8381039d20aac11c205a0b506ac05f87dd63f25fba6074374070c"
+    },
+    "post_guard_two_failures": {
+      "result": "INCOMPLETE; SIGINT exit 130 after 577 passed, 2 failed, 12 skipped, 38 deselected; consistency phase not completed",
+      "source_commit": "cc75f1ee0b",
+      "failures": [
+        "root clutter: eight tracked AGENT_HANDOFF sidecars",
+        "feature parity matrix stale versus official generator"
+      ],
+      "receipt": "clean-ci-prepr-post-guard-interrupted-two-failures.txt.gz",
+      "receipt_sha256": "87bfe44ff057da57b1768b19bd5d24aed84284875ea76ce2107ae617efdc96a2"
+    },
+    "vector_guard_focused": {
+      "source_commit": "cc75f1ee0b",
+      "clean_ci_collection": {
+        "result": "PASS; 5 numeric collected, target module skipped for missing optional pypdf",
+        "receipt": "vector-collection-clean-ci-green.txt.gz",
+        "receipt_sha256": "697ba1c21c5eec0a50cbec698e0b819df7fa6ea111736f072ebf5d674119624c"
+      },
+      "report_extra": {
+        "result": "PASS; two render-preparation tests",
+        "python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+        "packages": {
+          "pypdf": "6.20.0",
+          "reportlab": "4.5.1",
+          "matplotlib": "3.11.2"
+        },
+        "contract": "pyproject.toml [project.optional-dependencies].shot-pattern-report",
+        "receipt": "vector-render-preparation-report-extra-green.txt.gz",
+        "receipt_sha256": "40d0e730215df83cccbd8710acc6a5fdb5902793a6d4b9bac1a62c8131fefabd"
+      },
+      "ruff": {
+        "result": "PASS check and format",
+        "receipt": "vector-render-preparation-ruff-green.txt.gz",
+        "receipt_sha256": "9ee2323b64e5a8f96fac022e416007e216e88198e8515ee8446bc7ab4daa04f1"
+      }
+    },
+    "feature_parity_repair": {
+      "commit": "88b7584775",
+      "action": "Official generator refreshed stale padded Markdown formatting; no registry changes",
+      "generator_check": "PASS",
+      "focused_tests": "3 PASS"
+    },
+    "next": "Finish nonlinear registration amendment, refresh integrity records, rerun complete canonical pre-PR on final reconciled source. #11935 development-log policy is now resolved.",
+    "root_clutter_repair": {
+      "commit": "5fab697b635d0fded7805880796a2cc6284dc4e4",
+      "action": "Relocated eight byte-identical handoff sidecars from repository root to archive, updated manifest and link contracts",
+      "focused_tests": "5 PASS",
+      "document_title_case": "1 document checked, 0 violations",
+      "handoff_links": "PASS",
+      "ruff": "PASS"
+    },
+    "repaired_policy_block": {
+      "result": "INCOMPLETE; mypy PASS 148, SIGINT exit 130 before pytest target resolution finished because separately required development-log validator remains red",
+      "source_commit": "0800153985",
+      "receipt": "clean-ci-prepr-repaired-stopped-policy-block.txt.gz",
+      "receipt_sha256": "2db39715f2fb0b71c505dd8dd39ac33accd917a7b73aefc4c7aa6cdee6aaa3cc"
+    },
+    "final_focused": {
+      "result": "PASS 67 tests, 7 warnings in 51.46s",
+      "scope": "writer legacy API, supplement publication revision, numeric evidence, independent supplement audit, handoff compaction, feature-parity matrix",
+      "command": "/tmp/shot-upstream-ci-venv/bin/python -m pytest -q -o addopts= tests/research/test_shot_pattern_writer_legacy_api.py tests/research/test_supplement_publication_revision.py tests/research/test_numeric_evidence.py tests/research/test_independent_supplement_audit.py tests/docs/test_agent_handoff_compaction.py tests/config/feature_parity/test_matrix_freshness.py -p no:pytestqt",
+      "receipt": "clean-ci-focused-final-green.txt.gz",
+      "receipt_sha256": "2387095391254f803f1819811995c5a7f3def2ded96bb18661be1d2065365acc"
+    }
+  },
+  "remote_pr_head_observed": {
+    "commit": "7375b888e21db3d2fb5d0a10547166dd8230ab1a",
+    "observation": "Remote incorporated additional main merges. Successor preserves both histories through ordinary local merge; sole generated divergence-inventory conflict regenerated officially. No successor push.",
+    "required_before_push": "Finish provider integration and complete canonical gate; recheck protected queue/head state."
+  },
+  "latest_local_reconciliation": {
+    "remote_pr": "99f8d6f8816",
+    "main": "ba57e27033",
+    "post_remote_incomplete_prepr": {
+      "result": "INTERRUPTED exit 130 after 1494 passed, 150 skipped, 6 failed at 24%; not acceptance",
+      "receipt": "prepr-after-remote-merge-incomplete-six-failures.txt.gz",
+      "receipt_sha256": "3f89c2587e732de66575b34e9dd06078d1b3fd67e3843496b8d7843dd28aacfe"
+    },
+    "myosuite": "required gitlink 33f3ded946 initialized; two replay nodes PASS",
+    "rust": "merged rust_core/upstream-physics source byte-identical to prior qualified wheel source"
+  },
+  "root_layout_migration": {
+    "commit": "392d98bfdf",
+    "moved_test_files": 28,
+    "collection_mapping": "all 429 collected test IDs preserved",
+    "regression": "8 passed",
+    "scoped_migrated_tests": "387 passed, 31 skipped, 11 inherited direct-suite engine failures deselected; not full suite acceptance",
+    "receipts": {
+      "root-tests-before-collection.txt.gz": {
+        "source": "/tmp/shot-safe-root-tests-before-collection.txt",
+        "source_sha256": "1958c8d25e80a2131362bd5643eafcb6da4d789c55fc29fbf3ddeb5c64998804",
+        "receipt_sha256": "b06fb654ad0b4aa63ccd555b8507528fff674f50f676cfb3f7629df069c2e22f"
+      },
+      "root-tests-after-collection.txt.gz": {
+        "source": "/tmp/shot-safe-root-tests-after-collection.txt",
+        "source_sha256": "7a3434c117cf83c7baa89dc77a5d15b1cb929337dd52e295baea26692300da0d",
+        "receipt_sha256": "b60f8764a410191683c2c4b965d50270e1566c9fa5399328807ae9a222f08cdf"
+      },
+      "root-layout-regression.txt.gz": {
+        "source": "/tmp/shot-safe-layout-regression.txt",
+        "source_sha256": "f434621bbd944ecaf196b5c5c449494c9ea9abf23c7435e72c17f08e4e94aa44",
+        "receipt_sha256": "c7c670e008550f803c52dd9e75b1f9adb0b164a3dcb5fd358b27ded7406dd0b6"
+      },
+      "root-migrated-tests-all.txt.gz": {
+        "source": "/tmp/shot-safe-migrated-tests.txt",
+        "source_sha256": "a3b60bfb8c7ff118769bd02a2b08afcbadf416ff16ef10ac3246f771b65d9d62",
+        "receipt_sha256": "b9c719a1a8b7c86249102dee3022767ea52951b1af5b870345e17006d017461a"
+      },
+      "root-migrated-tests-scoped-green.txt.gz": {
+        "source": "/tmp/shot-safe-migrated-tests-scoped-green.txt",
+        "source_sha256": "f313889fcb770991af3dc7f9f9efa2c3da8f25ec9158939f31bb4365386acdd8",
+        "receipt_sha256": "31e1036621259127238a295e042996b1cb6ccebbd914755978f6bff701de7a00"
+      },
+      "root-migration-proof.json.gz": {
+        "source": "/tmp/shot-safe-root-tests-migration-proof.json",
+        "source_sha256": "a4dd53994bc8fd9c787f6df4c1ef803ac1a5bf64f69716361a70e24a9e340178",
+        "receipt_sha256": "3dfa1721319438eae2255ea6db87e377f195fd4450df0b41d41f904f72c28ab1"
+      }
+    }
+  },
+  "stability_repair": {
+    "commit": "0504feab4c",
+    "input_contract": "primary study JSON and NPZ exact release-manifest SHA/bytes; published singular values reported; four threshold ranks independently recomputed and checked",
+    "historical_study_output_changed": false,
+    "focused": "11 passed (audit, results chapter, release bundle)",
+    "receipt": {
+      "source": "/tmp/shot-safe-stability-repair-focused.txt",
+      "source_sha256": "5e8dac5c2d2bc4e8330640fab86a1c2c97734759e02689ccddc524a8f0e15906",
+      "receipt_sha256": "ab56dc48acccec75e3608063da85f494ac00c5d83eb16a8de45045e989e42b66"
+    },
+    "red_and_compile_limitations": "stability-red-and-tool-limitations.json",
+    "latex_compilation": "UNAVAILABLE: uncached Tectonic bundle fetch failed; no compilation success claim",
+    "manifest_refresh": "Only audit source SHA/bytes and its CHECKSUMS line changed; prior bytes preserved outside artifact glob",
+    "immutable_input_followup": "662c1f06a2; published JSON and NPZ SHA/byte identities independently pinned; changed NPZ plus refreshed manifest is rejected, and SVD rank disagreement rejected",
+    "final_focused": {
+      "result": "12 passed, 1 Hypothesis warning",
+      "receipt": {
+        "source": "/tmp/shot-safe-final-integrity-focused.txt",
+        "source_sha256": "f15d14be0d5ae5726d3e3163ebaa63010884596dd7a7f2b94bc0dec68db962b9",
+        "receipt_sha256": "6e97e9368f34de789f05e1a58e19c6218da08b501afaa58a9dbd5206fe27e952"
+      }
+    }
+  },
+  "next_required": "Finish provider compatibility retirement and merged Tools Signal dependency; refresh only reviewed current integration inventories; run full canonical pre-PR on final source; complete protected integrations and verify live article/PDF. Never rerun frozen simulations.",
+  "final_integrity_refresh": {
+    "release_manifest_before": {
+      "path": "/tmp/shot-final-integrity-before-release_manifest.json",
+      "sha256": "f376258d2228d285f547ec9e735efe5934c72acdb2679469a93c7e56eecabdab"
+    },
+    "checksums_before": {
+      "path": "/tmp/shot-final-integrity-before-CHECKSUMS.sha256",
+      "sha256": "42fef62fe3f19f55f5963dcf0b7d17b2f3f6abb64974f6c5c6a4feb715e89932"
+    },
+    "claim_manifest_before": {
+      "path": "/tmp/shot-final-integrity-before-data-claim_evidence_manifest.json",
+      "sha256": "4b1cf756b0aa53a54e249787f4bbd4974b04b4906fc6a554f6ef0083465b5c15"
+    },
+    "action": "Official release_bundle builder/checksum_lines then claim_evidence_integrity builder; no qualification or historical report rewrite",
+    "claim_validation": {
+      "result": "PASS 328 claims, 430 local artifacts, 78 external URLs",
+      "receipt": {
+        "source": "/tmp/shot-safe-final-claim-integrity-validate.txt",
+        "source_sha256": "efbb6b36561f40c240329de46b754afe97556941cdde0d4b6e1f6462e337e776",
+        "receipt_sha256": "75667734d992bf3c2eb1e8c8026a6475ee7d43b26e975b92d23638e8bcc518f5"
+      }
+    }
+  },
+  "latest_full_canonical_attempt": {
+    "source_commit": "0543d781e5",
+    "result": "FAIL exit 1; complete run, no acceptance",
+    "pytest": "36 failed, 7180 passed, 365 skipped, 42 deselected, 1 xpassed, 21 subtests passed",
+    "mypy": "PASS 154 sources",
+    "consistency": "PASS",
+    "receipt": {
+      "receipt": "canonical-full-post-engine-fix-failed.txt.gz",
+      "receipt_sha256": "ba16036eaaafeb677e4ae0d978e2305b064b23c17ab9ddbaa019129c28478bf6",
+      "source_sha256": "dc1ffde336cc80058ec378e2c4b394c09a0e8bff2900b4fa7d49c804363c33f4"
+    },
+    "environment_correction": "For the next canonical invocation PYTHONPATH contains only the own UpstreamDrift root. The absolute central wrapper loads its own infrastructure without leaking Repository_Management into child-process source resolution."
+  },
+  "nonlinear_registration_amendment": {
+    "commit": "b1cf07cbce",
+    "status": "Implemented and Astra reviewed; immutable historical registration retained; separate dated amendment captures three authority digest changes, unchanged protocol and zero outcomes/rankings; historical qualification explicitly rejected against current sources."
+  },
+  "adapter_golden_repair": {
+    "commit": "e76404f611",
+    "status": "Astra approved; historical fixture unchanged; exact full historical-source receipts qualify Python 3.11/3.12 with NumPy 2.2.6 and explicit SciPy versions. 11 tests pass in each of three qualified environments; unknown combinations fail closed.",
+    "receipts": {
+      "adapter-python311-green": {
+        "receipt": "adapter-python311-green.txt.gz",
+        "sha256": "2725bf6ffee4200dabadbbd00e12963ccd59a4cc3edf81733d2895ef937704f0",
+        "raw_sha256": "43b93840e91a81820c61f22165ee4223839f01ad620d16c6c9ae67a84f5482fe"
+      },
+      "adapter-python312-ci-green": {
+        "receipt": "adapter-python312-ci-green.txt.gz",
+        "sha256": "ea217a72d472f3b0d1f4b2209b7759df5cbc1dae220db97ce1d73f6336ff6f7e",
+        "raw_sha256": "86bbaddf173e6a7d687389030c72badce2692cc814b6f505f43f19eb73171e03"
+      },
+      "adapter-python312-scipy118-green": {
+        "receipt": "adapter-python312-scipy118-green.txt.gz",
+        "sha256": "fcd2441a7c5c4578f856f1546d6fb7fbf454780cc640240afe74cfa0f2550367",
+        "raw_sha256": "783ae0a5df834a12df5e3ee683e38705dcef5a52b31dd253e995fb626c9a6745"
+      },
+      "adapter-python311-red": {
+        "receipt": "adapter-python311-red.txt.gz",
+        "sha256": "9e132fd1dcf9032648f19b01263888a086afa8c94b95737695b56118c7bc73a8",
+        "raw_sha256": "12d48196f129fc57b857cce335efb529006e1fc0fb919706479580e0c4d22122"
+      }
+    }
+  },
+  "gravity_literal_repair": {
+    "commit": "05745b52cc",
+    "status": "Astra approved; full decimal literals detected without prefix false positives; TDD red captured and checker suites pass.",
+    "red": {
+      "receipt": "gravity-literal-red.txt.gz",
+      "receipt_sha256": "6e35ec5274312519a822c9f3452a82823aad353da9d04ded5a7bedc1676fbed3",
+      "source_sha256": "91bb88096a2adaea78885fc12735799a68015c2ac6e288d5f110cfb33eba2d8d"
+    },
+    "green": {
+      "receipt": "gravity-literal-green.txt.gz",
+      "receipt_sha256": "717bc5d979bc2ee790a1b15f0dc1ea5898f177f61a445fe2ec6b685b46112b2d",
+      "source_sha256": "2966879a57d1fe445a9dc3ad0b8a13b40725ae57adca1cbc3a4ca95ba75ecf28"
+    }
+  },
+  "document_title_case": {
+    "baseline": "2511 tracked documents, 2497 pre-existing violations; full audit fails truthfully",
+    "changed": "289 changed documents, zero violations; scoped audit passes",
+    "baseline_receipt": {
+      "receipt": "document-title-case-baseline-failed.txt.gz",
+      "receipt_sha256": "e32db0974400e107a9d411db2e1d84b720bef72376c3a6f2019d9ccf8c0d01f2",
+      "source_sha256": "72817bfc096f89ed96ac0077c974a4b5b15addb68287b979c31eb22849d31437"
+    },
+    "changed_receipt": {
+      "receipt": "document-title-case-changed-pass.txt.gz",
+      "receipt_sha256": "fbdf80306895b54d9f7a961472199056681020ea087bb67822ede9c79e2fae15",
+      "source_sha256": "b23a75bb07a83220f85f78fd0bef51601bbd496c48cf7b4576148112eb617cb2"
+    }
+  },
+  "data_processing_bridge": {
+    "commit": "cdc8b8b708600d2a484af7d9768b9db1ddbfd672",
+    "review": "Astra approved; duplicate retired via whole-module aliases to pinned Tools; no vendor implementation change. All three legacy import spellings retain class/exception identity. Provider sum-of-squares R\u00b2, rejected-query rollback, source provenance, exports, warnings and missing vendor failure covered.",
+    "focused": "99 passed",
+    "ruff": "PASS",
+    "mypy": "PASS 5 files",
+    "receipts": {
+      "data-provider-red": {
+        "receipt": "data-provider-red.txt.gz",
+        "sha256": "812f8057c9559fd28e62bf212f7bf71056f1b8b1d32bf2e6410fa59e185b6406",
+        "raw_sha256": "f220e56e578bcdd9448c5dfc560290807310ce6c35076b8ef38e1a1050bbeab4"
+      },
+      "data-provider-green": {
+        "receipt": "data-provider-green.txt.gz",
+        "sha256": "8e5bad9ade7c823f7d7c6db70a782a0c8b0710835f60cd548defb78053f628ee",
+        "raw_sha256": "dea8d28e8fd7861118173c2cba1f4b946a6b1d3701ab932e2c63a81a0c3ffd09"
+      },
+      "data-provider-ruff": {
+        "receipt": "data-provider-ruff.txt.gz",
+        "sha256": "8b7ab2b7741b4ed1d9cee58681afcf3cb8d2d0e572db5c358d0d5c18e259de78",
+        "raw_sha256": "cd7f41cf1ad5ba8b6263217889865f18d2b85df5ad631a05d6d321f51fd1b7b2"
+      },
+      "data-provider-mypy": {
+        "receipt": "data-provider-mypy.txt.gz",
+        "sha256": "4337d733a8d4c92559eda908b8795345f5d98ec33cdc7e0cd36f0723daefa27b",
+        "raw_sha256": "e317872697c2cbfdefa321527a6efe73290dff3a390b0fa8723b87092eccba6a"
+      }
+    }
+  },
+  "latest_remote_reconciliation": {
+    "remote": "0252eb9671d4d446ca758595c51885a47deb2148",
+    "main": "8e9b4b974b98d0f1006514a121b3b0807ed42d9c",
+    "result": "Actual conflict reconciled; independently generated context/divergence/atlas match existing local bytes; no additional source changes; context check PASS",
+    "push": "not yet pushed"
+  },
+  "previously_failing_node_recheck": {
+    "result": "33 passed together; three Signal optimized-mode nodes not part of this diagnostic because upstream provider fix has not merged. Not full acceptance.",
+    "receipt": {
+      "receipt": "previous-failures-33-green-diagnostic.txt.gz",
+      "sha256": "45996c0bd4cb8703c7053d47b14faffe44d03ff0e6e7e3dee38c3e42bfb180de",
+      "raw_sha256": "f269e08f5746691ffa47183a8c0115107741663606c605dc6edf23fec921f6f0"
+    }
+  },
+  "tools_signal_dependency": {
+    "issue": 5569,
+    "local_commit": "0c43d91539",
+    "review": "Astra approved source/test fix",
+    "local_gates": "339 affected tests pass; Ruff, mypy, consistency collection, fragment, import and workflow gates pass; nine manual gates pass with unapproved publication preserved. Canonical RM-6 EXIT1 only inherited 76 development-log findings identical on Tools main.",
+    "status": "Tools PR #5573 open at e5e2c92acc7cd95b1188295ef758a3090f69c6b6; corrected full local gate and Astra review PASS; Detect Secrets and divergence ledger CI PASS; protected merge pending",
+    "receipt": {
+      "receipt": "tools-signal-source-gates-green-log-policy-failed.txt.gz",
+      "sha256": "ccb63bc6b778d8aa3184930b9a767e4778356829fa1e93c99504517d7f7864a0",
+      "raw_sha256": "6e003c0f27e0336bc25835de8d63e1b83cfaa9dac2549bd856f320a07a2da5f1"
+    },
+    "baseline_findings": {
+      "receipt": "tools-log-baseline-76-findings.txt.gz",
+      "sha256": "278df3621cd2da8af9efc7f00b6b86ad4a7acc549e84052ca877ff5bee698f2e",
+      "raw_sha256": "3f07ea9ec2202a482e5e77c3e83d84db713e183d29a041063f6572a8ae4999b8"
+    },
+    "candidate_commit": "0436d983018181efb235df52ba4a16f0406ef948"
+  },
+  "signal_provider_bridge_experiment": {
+    "source_commit": "cf60b1738d",
+    "result": "REJECTED and fully reverted; direct canonical core loader passed two fresh-process orders but failed bare-first identity because package initialization constructs distinct classes before the shim. No unsafe bridge committed, no vendor or pin change.",
+    "receipt": "signal-core-bridge-rejected.txt.gz",
+    "receipt_sha256": "09ca63e31bad1f02a4d81962641bee5a6d00ce764ba94f7d8427eefa08a7db26",
+    "raw_sha256": "eede45fa1704ed834ea62f44dea95218200d9a450adf5eac9e0f1d46952f08f4",
+    "next": "Use a properly reviewed provider consumption boundary preserving local fitting behavior and all import identities after the governed Tools dependency can merge."
+  },
+  "new_remote_context_checks": {
+    "agent_context": "PASS with documented pinned-provider PYTHONPATH; initial bare environment had no agent_context module and is not acceptance",
+    "development_log": "PASS; 21-entry pre-existing portfolio WIP warning",
+    "manual_governance": "PASS structurally:63 QMD,0 registered calculations, release blocked-inventory-required; no release approval"
+  },
+  "signal_provider_candidate": {
+    "pin": "0436d983018181efb235df52ba4a16f0406ef948",
+    "status": "Paired local candidate only; Tools provider is not yet merged/published. Unified gitlink, Cargo and Python dependency pins are staged. No successor push or final acceptance.",
+    "implementation": "Retired all27 overlapping files (26Python plus py.typed), retained UD-only signal_processing.py on canonical split seam. Eight deleted embedded test files preserved byte-identically in provider.",
+    "review": "Astra approved candidate seam, fitting compatibility, alias fix and test-contract corrections. No formula or tolerance change.",
+    "tests": "557 passed,27 existing vendor-contract skips; all3 fresh-process import orders and original3 optimized-mode regressions pass. Four stale solver_status tests use the existing success bool; equal saturation bounds/zero rates now assert exact constant outputs, retaining invalid negative cases.",
+    "runtime": "Initial optimized subprocesses loaded old shared files attributed to upstream-drift editable installation. Installed declared Tools candidate without dependency changes; installed core matches candidate source byte-for-byte. Final runtime must be reinstalled from protected published pin.",
+    "registered_boundary": "Read project-task-native-replay contract and native provider/admission/private loader; only Signal redirect changed.63 portable tests passed,122 SDK-dependent skips. Recorded specific code review; no native availability, physical qualification or reuse of old pin-specific acceptance claimed.",
+    "receipts": {
+      "signal-boundary-red": {
+        "receipt": "signal-boundary-red.txt.gz",
+        "sha256": "dcd73a720ead3f79977e25ccd8e2d6b82f510294d092b2f40bb2a2cf953f9cae",
+        "raw_sha256": "0f18ba33f332be868fe3d122e27215be5c4f7ff114e768a1985f20f3421d1c31"
+      },
+      "signal-boundary-old-pin": {
+        "receipt": "signal-boundary-old-pin.txt.gz",
+        "sha256": "9c872f528a67a17c53715110a9eed13b464281cf166b09a0477ed5e87a82698a",
+        "raw_sha256": "70f59dfeb86524ecfe7f27bba2bc763bd1ac9c0de58ecec53d93fc6fa8673628"
+      },
+      "signal-boundary-candidate-green": {
+        "receipt": "signal-boundary-candidate-green.txt.gz",
+        "sha256": "99e2386825b7875c5aa6f6e2c7119ed3e6b0567e200d22cad7124e0fab9863a4",
+        "raw_sha256": "9accec04b7a501d91a4ad5eceed71cec28a3ea16ec3d8c1350df20f6b9b5e06f"
+      },
+      "signal-consumers-stale-runtime-and-api-failed": {
+        "receipt": "signal-consumers-stale-runtime-and-api-failed.txt.gz",
+        "sha256": "19e77b9a0be7ae4cf87dcfa600e43b294f079613cbd13e53a63553756dcab001",
+        "raw_sha256": "87e6f78cd8e55b6a9ab6a7e810857256330df652fe96aa3ae2704b197be3addc"
+      },
+      "signal-consumers-candidate-green": {
+        "receipt": "signal-consumers-candidate-green.txt.gz",
+        "sha256": "c5958af56b2acf85f6d2fbb9319949ec7292d090d3c4203d01be8f0f4e2ee2e1",
+        "raw_sha256": "59ce6cba0d6c19649ea245e7cd95e941ffa7332007454ecd87e502d41191d77b"
+      },
+      "signal-wide-contract-tests-failed": {
+        "receipt": "signal-wide-contract-tests-failed.txt.gz",
+        "sha256": "376c2a9aa695bb53b770c37a9982bc345527c9c4f2707537a6dc7f0eb6ea5ef7",
+        "raw_sha256": "e3967e093e8a699d73f414c813f25f417858643d68870339c14797556ce8e8a7"
+      },
+      "signal-wide-candidate-green": {
+        "receipt": "signal-wide-candidate-green.txt.gz",
+        "sha256": "c00884ce6bf24b251082cfe9fbccbdefb5d479af11f64a10408ce07b07635d66",
+        "raw_sha256": "9b49991754d6bfe3131a0fc4f9a92e8030218a62057922c3b22f9f3793733456"
+      },
+      "signal-candidate-runtime-install": {
+        "receipt": "signal-candidate-runtime-install.txt.gz",
+        "sha256": "98eed1643e4775141ecaa8eb56e2701838ea31f638ed82146f64b91f2cfecc06",
+        "raw_sha256": "f317eda0eeb7f4209e7ada9bc8894dfd5f36fc3dc0ec962a5b96f9431aba91c2"
+      },
+      "signal-registered-boundary": {
+        "receipt": "signal-registered-boundary.txt.gz",
+        "sha256": "012d6f29864f7a20978f7b5612d05928fed47e44728864083351d9186b39a298",
+        "raw_sha256": "96a55b3c5bd193c6fe3455dd0aa90d025952802468fb3e8e0e7a2bd8e3ff254c"
+      },
+      "signal-context-check-green": {
+        "receipt": "signal-context-check-green.txt.gz",
+        "sha256": "cc0a7147cfa2fe8bb1ea7d77d7996bc107d0d9d2ebfbc71796c709540d0d2976",
+        "raw_sha256": "9bf5d597ef1cce6c355e1727229cc29f9433e59b89ec5ce3fdd64387b7217581"
+      }
+    }
+  },
+  "previous_remote_reconciliation": {
+    "remote": "7375b888e21db3d2fb5d0a10547166dd8230ab1a",
+    "local_parent": "9b40f1f0e7",
+    "incoming_changes": "Native wrist compatibility, finalized path audit connections, central-impact claim bounds, and replay contract documentation from already merged main PRs. Existing current-state SPEC rows retained.",
+    "focused": "63 passed, 15 skipped; native OpenSim requirements remain explicit",
+    "receipt": {
+      "receipt": "remote-7375-focused-green.txt.gz",
+      "sha256": "5259c7290ab6bf97e9376d3e86b696fd1fbf271c5b68e1a29ce5a11ac2b79a5b",
+      "raw_sha256": "c58829a9255c783758d45c905592868925436ea096ec209c319e369d4a2e7225"
+    },
+    "first_target_resolution_attempt": {
+      "receipt": "remote-7375-first-target-path-error.txt.gz",
+      "sha256": "dc8b4641ec84638ec016e4b01815e6beb1e138560d439f046f93affebddd6546",
+      "raw_sha256": "b2186ee8ce8285b33a239d330ce5502e2959a288ec83a57eed818832e1cb66e5"
+    },
+    "inventory": "Official generator applied to combined source; no new rule allowance or scientific approval."
+  },
+  "candidate_full_prepr_20261012": {
+    "head": "95909ac61a",
+    "exit_code": 1,
+    "tests": {
+      "passed": 7456,
+      "failed": 2,
+      "skipped": 377,
+      "deselected": 42,
+      "xpassed": 1,
+      "subtests_passed": 21
+    },
+    "duration_seconds": 1141.15,
+    "remaining": [
+      "Owned ignored root Cargo.lock preserved outside repository; no allowlist change",
+      "Impact acceptance pin reconciliation requires final published Tools capability probes and served bundle",
+      "Six unit markers/five bare type-ignore policy findings corrected with focused checks pending"
+    ],
+    "receipt": {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/candidate_full_prepr_20261012.txt.gz",
+      "sha256": "b50bb0d385f149068dbf6ebb01d6da2f20f8dc560362d77ccad3176f4de41a63",
+      "uncompressed_sha256": "b4732dad8ebb09b73912f918f2a77ba3806483aebf2e1e16f3b821728d36b8f0"
+    },
+    "acceptance": "Candidate diagnostic only; final published provider pin and complete gate remain required",
+    "follow_up": {
+      "policy": "Official policy/fragment validator PASS; six unit markers and five bare ignores corrected without assertion changes",
+      "focused_tests": "124 passed",
+      "root_clutter": "Generated ignored Cargo.lock preserved at /tmp/shot-candidate-generated-Cargo.lock; original root-clutter test PASS",
+      "receipts": [
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-candidate-policy-fix-focused.txt.gz",
+          "sha256": "1683d6c7965f4a9b0c6a96d841945787a942b3506fa1cde80578a9ada109e450",
+          "uncompressed_sha256": "90eba088f4d978ec8158c38a78e228519be792bb04e65c71d46ec5b85a302d83"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-candidate-policy-fragments-green.txt.gz",
+          "sha256": "70dbb8096c563d6cd5fd682760d0d312720d552222ad5fd1d9059ecaf82ee287",
+          "uncompressed_sha256": "c26de83abdc9496cd1301470918ec39ecca1cf389ef0ae1c6504da1800d1c431"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-candidate-root-clutter-test-green.txt.gz",
+          "sha256": "43566ca0b542be0b8e0ca54d3756187c4b5761e6f131330610b74c6e54f9f708",
+          "uncompressed_sha256": "eff9d4c2fb312c7b793ec36d47cdff2fdb9eae66be7fdf03aa1f6939c5a2d4eb"
+        }
+      ]
+    }
+  },
+  "main_reconciliation_8e9b4b974b": {
+    "main": "8e9b4b974b98d0f1006514a121b3b0807ed42d9c",
+    "reason": "Real merge-tree conflicts, not freshness-only update",
+    "source": "Merged Necromatcher #11359 preserved; no source conflicts. Incoming launcher arrays only reformatted; shot-pattern native-only tile retained.",
+    "resolution": "Current-state handoff with Necromatcher turnover pointer; specific launcher-atlas review after 88 actual focused passes. Signal project-task-native-replay review retained unchanged. Official context, capability atlas and divergence regeneration.",
+    "checks": "88 passed; agent_context check PASS; manual governance structurally PASS with release blocked/inventory required",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-8e9-merge-preview.txt.gz",
+        "sha256": "40fe1d576215082065aa5e0b81049c01142dcdb765df472cb8b95cf7404359ac",
+        "uncompressed_sha256": "b44b4de1a6e5f6ccbba84d6c9d09788c6c03571d203630037bf9dc107dc64bf7"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-8e9-focused.txt.gz",
+        "sha256": "adb3654a70765850a1acb129d98093859002dbee91098e7766fbfa87b696d69d",
+        "uncompressed_sha256": "7f1daf055839fbf6385faff01e15c9aa31b7ec284afba76097f7c4af082cc783"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-8e9-context-check.txt.gz",
+        "sha256": "cc0a7147cfa2fe8bb1ea7d77d7996bc107d0d9d2ebfbc71796c709540d0d2976",
+        "uncompressed_sha256": "9bf5d597ef1cce6c355e1727229cc29f9433e59b89ec5ce3fdd64387b7217581"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-8e9-manual-governance.txt.gz",
+        "sha256": "b676571e3fec9bed6e04a4c7a56fd2e48beba45e7d5e2ff114ca2c37cb800fde",
+        "uncompressed_sha256": "631fbce346bd2d8e16b8fd430a959280d9c3c21c54f696f45eca1074dc2338fe"
+      }
+    ]
+  },
+  "latest_combined_gate": {
+    "source": "0a323cf18ad1fe6f2a727fa62dcbed530ca49a64",
+    "status": "PASS all eight canonical gates with Semgrep available",
+    "passes": 7597,
+    "skipped": 377,
+    "deselected": 43,
+    "xpassed": 1,
+    "subtests": 21,
+    "exact_ci_scan": {
+      "rules": 209,
+      "files": 280,
+      "findings": 0
+    },
+    "selection": "Unmodified canonical affected-test selection; historical fixture consumers and new strict historical-path resolver tests included. Earlier whole-research failure remains preserved; no whole research-suite pass is claimed.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-isolation-final-prepr.txt.gz",
+        "sha256": "2a3c8a3bbaf2099ab41001ea85ddaf531dadc51156afcefea083c6987dfc6da4",
+        "uncompressed_sha256": "998e5e993969983ab2cae558aa788a16fcb98c929e1ef45437411b0086840473"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-isolation-semgrep.txt.gz",
+        "sha256": "cfa2e768870ae20cb291886b42973f3f5195c3434b75b23cd11ece2fce48fa4a",
+        "uncompressed_sha256": "98a78feece9340c758f00813457fff586459ae120f1baee35fd948723f7a58aa"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/history-free-verifier-test.txt.gz",
+        "sha256": "1b2dee11f711bc6068195ec6d4f8cbdece8fe323d85eb069f386765c8dd52925",
+        "scope": "Twelve unit verifier cases in isolated history-free checkout; no production Git fallback added."
+      }
+    ]
+  },
+  "development_log_reconciliation": {
+    "review": "Astra approved exact public-API candidate and byte preservation",
+    "plan": "docs/development/provenance/shot-pattern-devlog-reconciliation/plan.json",
+    "qualification": "Metadata-only; no new fleet-runtime, scientific or physical acceptance"
+  },
+  "published_tools": {
+    "pr": 5573,
+    "merged_at": "2026-10-12T08:38:08Z",
+    "sha": "8a11691b4e9aee7d04dfc39628a8269ca561b07d",
+    "queue_ci": 38222319843,
+    "status": "Protected merge PASS; three published pins agree; installed exact Git package verified, all 19 shipped Signal files match, all 126 development pins unchanged; Rust, served-bundle, capability and 80 focused installed-provider checks PASS",
+    "served_assets": 76,
+    "javascript_assets": 5,
+    "served_bytes": 2801426,
+    "acceptance_metadata": "PASS29 tests after28 capability probes; exact protected published source bound to served receipt",
+    "impact_reconciliation": {
+      "source": "53b10400b2",
+      "before_metadata": {
+        "passed": 28,
+        "deselected": 1
+      },
+      "after_metadata": {
+        "passed": 29
+      },
+      "review": "Astra approved three metadata fields, exact published pins, served receipt, historical evidence preservation and unchanged claim boundaries",
+      "runtime_install": "PASS exact Git direct_url commit and source-byte equality; original count-based diagnostic replaced by exact declared shipped-file-set equality"
+    }
+  },
+  "historical_fixture_security": {
+    "trigger": "CI security-scans found ten exec-detected findings on6ce959f227; preceding canonical gate advisory-skipped Semgrep",
+    "repair": "Test-only fixed-path and independent fixed-current/compressed/raw SHA bounds; reject changed source or redirected fixture before AST extraction. Ten exact-rule local false-positive classifications for required historical parity execution; no scanner config/threshold changes. No Python sandbox or scientific qualification claimed.",
+    "focused_tests": 36,
+    "new_boundary_cases": 12,
+    "existing_parity_cases": 24,
+    "semgrep": "1.180.0; CI p/python,p/security-audit,p/owasp-top-ten configs;205 rules across six repaired files:0 findings",
+    "full_gate": "Complete stable-source canonical passes with Semgrep available; separate CI209-rule/277-file scan has zero findings.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-security-red.txt.gz",
+        "sha256": "773b6fe21aff129c2df9ae7e4434c97cfd2153e8109d455e660df705409b04c2",
+        "uncompressed_sha256": "eeb5334fc22522c79cf01c0d6f407312a5bb6504d8999c1cfab885a7ca1dc77d"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-semgrep-red.json.gz",
+        "sha256": "8421c6c077e6f80dce220dac261273e49fbcc91edf6a8ac696d8c71774eee051",
+        "uncompressed_sha256": "df914f39fab67ce344ce406c2cbb56b66c4f56a8d0a6a27b7484187ec80749c2"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-semgrep-red.log.gz",
+        "sha256": "e79cba9c628aebd894bd3a7a3063166edb879e5feacb88575b0762deb9ed506a",
+        "uncompressed_sha256": "f12a65cecd84cd66173ba6c92bfdcc0faa2ed49f64f62f5e86c90334bbecef92"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-semgrep-green.json.gz",
+        "sha256": "9e5212eac655e2acd1bf00ae89d809154c6e053ee1544372a24242d54ff3e9aa",
+        "uncompressed_sha256": "7257b40b816c9f309c727010ae8b491f04ae9b08ee358da400d7cd6500699b42"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-semgrep-green.log.gz",
+        "sha256": "fb9135609f3b4d95cccf686af88ce8347cbb054638a9ed91e7714cc6e4d90643",
+        "uncompressed_sha256": "18133ed7518bfdf602a24753b92e72477b8b7aa7c9f1844b00c879a4a85e2a27"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-security-red.txt.gz",
+        "sha256": "04cd8378093d636feb6507821c22631abeb27cdcf84c682beb33d33d0d5a4040",
+        "uncompressed_sha256": "3b589a6db08752f071a1e46d9926c8aa136e1584737118777a189783dd7529f8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-security-green.txt.gz",
+        "sha256": "b51d0f1188dcc4bf2cfa2143915713db298ff3562151c0ecaec61667c89c5065",
+        "uncompressed_sha256": "5764813b4c8d429b333c0d7d3aeddf755ea3613c1b2a33161be815525ecb27be"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-security-mypy.txt.gz",
+        "sha256": "b63e7a6232ab20178cda6ffd08adacc728d5c6c9429bada47e52d0a44bcc03fd",
+        "uncompressed_sha256": "ab35ee42183d4d6d3ba483825ab037d18a5a15622d03be01d82220b1564851ff"
+      }
+    ]
+  },
+  "postpush_governance_repairs": {
+    "source": "6ce959f22737387c904d30a14a198ad101ff634c",
+    "ci": "Python3.11/3.12, frontend, sharedprovider, Rust quality and wheel parity green; security and ADR-index/architecture gates failed. All findings repaired locally; no bypass.",
+    "adr": "Index records mirrored ADR0014 validation test references; docs governance passes.",
+    "architecture": "CLI parsing/header and exact SVD/rank helper extraction: main96lines/build_audit97lines; no budget change. Migrated Drake test import corrected;9focusedtests pass,3missing-Drake skips.",
+    "release": "Official builder changes only audit source hash/size and matching checksum;10release/audit checks pass, exact published audit JSON preserved. Astra approved narrow identity refresh; no claim/approval/publication report renewal.",
+    "interrupted_local_gate": "4d262bf4ea run stopped after5percent when additionalCIrepair required. Exit143; not acceptance. Final repaired-source complete gate pending.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-security-canonical-prepr.txt.gz",
+        "sha256": "eb79cb38a21e7a9f4a555aac776a787840d8a9c1d417652d6eb98ba178f5e4c3",
+        "uncompressed_sha256": "7b58d0bc82568d494372ad356259549ce126f64cbffc5052b687c9dc779dd6b7"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-docs-governance-red.txt.gz",
+        "sha256": "a48baa6a6687df40e797097ea20ec300e99ebaf70ede3fb3345cb9fd27f31567",
+        "uncompressed_sha256": "c5a7d9c07945551e1037a0111fa2ec7b86976eaac56e18d41a90b83bf8178e7d"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-repo-structure-red.txt.gz",
+        "sha256": "1dc640e573150a2ce681e47457b2354f6e3d60f762083872b6984ae465af09a2",
+        "uncompressed_sha256": "76f2b42efad5f284e7cde1d2ca4c5a5b7278480d65c7234eef6979563c072cf0"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-doc-governance-red.txt.gz",
+        "sha256": "127a8ea4c41dd45cb411af2bab95526cfab1f9e233dee721762682f6a5868a96",
+        "uncompressed_sha256": "6e95993a11f0d803f67817f6be56d615e30ba124f9649ea7a832a9f905563eb1"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-docs-quality-red.txt.gz",
+        "sha256": "12e8326c707e7f6ad088070d897443112fedebfa94ba070508c3858de4e958d5",
+        "uncompressed_sha256": "46e31c88e5d7145d3aa406c170975cd040dcfb0c2f620cba119b935064d6efc1"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-function-extraction-red.txt.gz",
+        "sha256": "dd2bae9b28ce1f76165507fd32d8096c7ad8545f550929a25ddfa957ce031935",
+        "uncompressed_sha256": "4f309bf8279a85b5b68fb3e23c8af3112ad262d4feab9c2b092c2b896286aa53"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-function-extraction-green.txt.gz",
+        "sha256": "ade4ecaf0f63c4fcb244df009d2d67cc49bb8cbf1226643e89bd38ad6d2f5607",
+        "uncompressed_sha256": "ecdb1a06aa39b482329675587dfa80d3339d1337560e19d202021408558a14c2"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-function-extraction-architecture-green.txt.gz",
+        "sha256": "14bbaf1ed8dee012e9fae94fcc322e04f23a2aab4856de845d3487ba315f4dc1",
+        "uncompressed_sha256": "3c081fa5abadb66a3f6b464ddae560051ed351f328cf602d107008e723857355"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-refactor-release-integrity-green.txt.gz",
+        "sha256": "87cd593bff12213011d15842744b0bf0daeaa5d48d1f914ccaa479ae8fccca19",
+        "uncompressed_sha256": "f3b3b070d48cc7172a36fc0701cdd254ec440cb96e430c70a9e55f4cb35a028c"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-refactor-release-integrity-corrected-green.txt.gz",
+        "sha256": "72b20d3c40a0ef2646541dfb0efc1c12214d783d760d6b6503b9f78f4772f544",
+        "uncompressed_sha256": "8cb5b3a2f555fa7443333651f0b047d5a02a3ab5a5fa3a7c15150f527a970c18"
+      }
+    ],
+    "final_gate": "Complete stable-source canonical passes. Original failed and interrupted evidence remains preserved."
+  },
+  "fixture_consumer_scope": {
+    "organization": "Trusted fixture helper and its security cases share one dedicated test module; no test runner/configuration/marker/threshold changes. Seven source fixture keys and all seven historical consumer modules are explicitly covered.",
+    "review": "Astra reviewed organization as defensible only with all actual consumers tested and broad failures preserved/reported. No whole research suite pass claimed.",
+    "tests": "76 historical cases and2 registry cases PASS",
+    "regression": "Initial four-key loader missed three existing callers; all seven fixed reviewed source paths now resolve by exact source identity. Initial wrong-module failures are preserved.",
+    "broad_gate": "240548ac9c run selected entire research directory for standalone non-test helper; still completing. Original producer/fixture equality failures are unchanged baseline and remain open, not waived.",
+    "followup": "https://github.com/D-sorganization/UpstreamDrift/issues/12398",
+    "qualification": "No original scientific artifact rewritten; unknown producer environments not inferred from locks. Numerical equality and all acceptance limits unchanged.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-shared-loader-red.txt.gz",
+        "sha256": "20a71d88a94b7db5bf1c342f9f0ad58b9f48b06cbf76e064fefd38c16a962180",
+        "uncompressed_sha256": "ac7faba9410437b452fbcf3327deb7472b525514134143440c259a6e9b8f153b"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-all-callers-green.txt.gz",
+        "sha256": "985f827faaa5334991e42496e37e3981ad73e77358943fb3960681a186784ba2",
+        "uncompressed_sha256": "bf094de43321082ee236ae6ea243bfac0e52fa26128762cf5c3151bf57b8bdea"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-loader-mypy.txt.gz",
+        "sha256": "b1e8cc1d5424cb065ea6f9ece4e303d0192d317a5db044d5cde52d591d933a5c",
+        "uncompressed_sha256": "8228fcc5ce46d42d01caf3cd941f4e9c5f2bcc372bb5b147a2f0572d2dd675a8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-all-callers-semgrep-green.txt.gz",
+        "sha256": "6760dab79f145eb2295c88cb68b840d8976e7253fe11a0125fc9729092edbf08",
+        "uncompressed_sha256": "203ecd7726b7c9f336ac2b827360eda44ae1e0fdf80bf310436f4978403d80f3"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-cohesive-all-consumers-green.txt.gz",
+        "sha256": "7a0ab1eb366f9b29263257973769c292391d6d0d67a722ac345651465671592e",
+        "uncompressed_sha256": "f9879f5d1c2df073cc75e3730f32234fbf17825d80fd269addd912012dee8fa0"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-historical-consumer-coverage.json.gz",
+        "sha256": "1a6a76382661b35166218daa9329d1f70c40dcb0d5a41d8713cc6a36cc51d573",
+        "uncompressed_sha256": "2e91d4864a2f1be240e36bdd581507aaae2e0248b3a6a2c7a27b38e562eb45e2"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-bounded_event_reachability-delta.json.gz",
+        "sha256": "60a306b37385f6700e2565e220f0eb0a252914ee998584db53692798576dc601",
+        "uncompressed_sha256": "56553ac606529e42ba35ec1dd119a00177c558e31bcb6866feca8c4e56aec4df"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-forward_two_arm_study-delta.json.gz",
+        "sha256": "e00227645ba151dcabb0283897cf5195779315102bafdb7a871b7b87dda76146",
+        "uncompressed_sha256": "15c9704e5ebf9e725c2d79d0c18e8a681394f6bb8f491510502ccaf7cb32fb88"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-baseline-static-diagnostics.txt.gz",
+        "sha256": "76db35d51e240b3874dad26e1c7a4ccdb066c4488e951dff7c216c6a14cafeb5",
+        "uncompressed_sha256": "b84c6f5581f5b56b8a4b41d30991e2ec255db684790d8d699cd1a6c1211f8ef9"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-registry-counter-baseline-comparison.json.gz",
+        "sha256": "e797ec4efe2ffbb8a929337cecf0d8131168b0508db5cfeff24088e212eb981b",
+        "uncompressed_sha256": "dc17fb9faa9181bc92c29dac48aa43c390db92f369ab85d485793a801ed63f4e"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-claim-registry-focused-red.txt.gz",
+        "sha256": "d992fa57579ab500ce3ceab6a182a1f2e0b81a5b5648ae8990a05b42412cfd74",
+        "uncompressed_sha256": "0d81ab4e6f3a5779dbdee8790a5b07f62a76f421409b8e22263ae310f2f4aca7"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-claim-registry-focused-green.txt.gz",
+        "sha256": "a49757f0f1a655587fbe8be4d04d1df93896d2939ee6678df1ae8320f7400b40",
+        "uncompressed_sha256": "bb9623fc057abb4ab26a6964572305929f9f7ea7c8d61ed1779baec7783a552f"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-unrelated-research-replay-followup.md.gz",
+        "sha256": "a87263d450d5877b5facc860cf375adef7f0487639e602cf94da9b3022883bad",
+        "uncompressed_sha256": "c5491f004cd3f8300ffbb723732b51d1e47a73220e57eefb54ec0a20f8cc50be"
+      }
+    ]
+  },
+  "broader_research_gate": {
+    "status": "FAIL, retained complete receipt; not final-source acceptance",
+    "collected_source": "240548ac9c",
+    "source_changes_during_run": "Historical fixture consumer and registry test fixes committed as e0c35960b0 while this pre-existing collection continued. Final acceptance requires a fresh stable-source run.",
+    "summary": "26 failed, 8555 passed, 395 skipped, 43 deselected, 1 xpassed, 21 subtests passed",
+    "failed_nodes": [
+      "tests/research/test_bounded_event_reachability_evidence.py::test_registered_report_is_reproducible_and_source_current",
+      "tests/research/test_bounded_event_reachability_evidence.py::test_registered_arrays_exactly_match_recomputed_full_precision_evidence",
+      "tests/research/test_claim_numeric_registry.py::test_complete_registry_has_executable_numeric_traceability",
+      "tests/research/test_constraint_internal_force_diagnostics_evidence.py::test_registered_report_is_deterministic_and_source_bound",
+      "tests/research/test_forward_two_arm_evidence.py::test_committed_evidence_matches_executable_study",
+      "tests/research/test_historical_preflight_refactor.py::test_saved_preflight_exact_receipt_and_failure_order[success]",
+      "tests/research/test_historical_preflight_refactor.py::test_saved_preflight_exact_receipt_and_failure_order[source_change]",
+      "tests/research/test_historical_preflight_refactor.py::test_saved_preflight_exact_receipt_and_failure_order[audit_hash]",
+      "tests/research/test_historical_preflight_refactor.py::test_saved_preflight_exact_receipt_and_failure_order[comparison_change]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[complete]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[conditional]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[insufficient]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[unavailable]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[unavailable_scoring]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[corrupt_manifest]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_final_cell_audit_preserves_exact_values_failures_and_partial_maxima[wrong_summary]",
+      "tests/research/test_historical_saved_audits_refactor.py::test_pilot_audit_preserves_counts_maxima_hashes_and_failure_collection",
+      "tests/research/test_moving_base_flexible_evidence.py::test_committed_artifacts_match_executable_study",
+      "tests/research/test_shaft_contribution_evidence.py::test_outputs_replay_with_declared_numerical_tolerance",
+      "tests/research/test_transmission_stability_audit.py::test_committed_transmission_stability_audit_is_fresh",
+      "tests/research/wave6_research/test_differentiable.py::TestContactDifferentiableEngine::test_apply_phase_smoothing",
+      "tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py::test_academic_and_social_overhead_covariance_caption_containment_and_separation",
+      "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[pitching_wedge_shaft_only_narrow-pitching_wedge-77.402-2.0-2.0]",
+      "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_shaft_only_narrow-seven_iron-148.5-4.0-4.0]",
+      "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_combined_noise-seven_iron-148.5-5.0-3.8]",
+      "tests/tools/shot_pattern_analysis/test_social_summary.py::test_social_summary_writes_exact_facebook_preview_dimensions"
+    ],
+    "receipt": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-final-repaired-source-canonical-prepr.txt.gz",
+    "sha256": "3eb5b850b00fc6c598018839ed6fc25d97ad3548d19d5a58097dc0c90870f279",
+    "uncompressed_sha256": "9869852102c1f55755b34982316277b53be9214b43f97c41d365682700991888",
+    "remaining_science_followup": "#12398; includes moving-base, transmission and differentiable-engine failures; no acceptance renewal or tolerance change",
+    "plot_state_pollution": "Moving-base figure test reproducibly leaked axes.labelsize=9/savefig.bbox=tight into five later shot plot assertions; isolated with rc_context, no rendering-source or expected-value change",
+    "security": "Available auto-config Semgrep found eight further findings; repairs are in progress, original scan output retained"
+  },
+  "postpush_unit_and_auto_scan_repairs": {
+    "status": "Astra-reviewed focused repairs and complete stable-source canonical pass; protected CI/merge remains pending.",
+    "auto_scan": "Eight findings repaired through fixed reviewed source trust and registered literal imports/whitelists; immutable copied verifier restored to original declared bytes in deterministic gzip; original altered preimage preserved",
+    "historical_verifier_scope": "Explicit historical candidate reproduces84comparisons; current-source freshness fails closed, no current science qualification renewed",
+    "focused": "13provider/import tests,8figure-state/shotassertions,40structuraltests,14release/reference/audittests pass",
+    "setup_error": "First release/reference command selected nonexistent test_open_research_release.py, collected none/exit4; corrected command uses actualtest_proximal_distal_release_bundle.py and14pass. Original output preserved.",
+    "structural": "Astra-approved exact ownership/alias classification, no shadow-ledger expansion;51focused cases and all7original CIunit failingnodes pass. Other focused structural40 and release/reference14pass.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-auto-import-security-red.txt.gz",
+        "sha256": "e3816d879c99e87f2dea3b38ad3f08f4ffaf74c35c96e09abb55e2dfe6496b7e",
+        "input_sha256": "7ddbe97b6f71f33be03fe69c7424f1cc8488366c5a8a5c4ac5143677d6e1bc4d"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-auto-import-security-green.txt.gz",
+        "sha256": "39777e277f766e46816e14e3cde3da092d22a7f720213d303d0b8918c425437b",
+        "input_sha256": "91ff7b9625ea933c0e4892bef288f064f301ea53d2c95e2886cf091e7d5fdd70"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-auto-import-security-semgrep-green.txt.gz",
+        "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+        "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-plot-moving-base-contamination-repro.txt.gz",
+        "sha256": "a1f42eddd3b46cbe1e7ac9e54309fc13ee709b1e21a536c89d59f87842fb5291",
+        "input_sha256": "27c33664e4dd18f54f79f693ee01d137b1aec1d60c867a141cc1ee8bceb2c913"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-plot-moving-base-isolation-root-green.txt.gz",
+        "sha256": "093fdd4dd0fed434bb140261f37391e98ad75402f749e034ef14bd1975a7b86d",
+        "input_sha256": "de90b0063ea9225fa8eb47eaf3038de0cfe784eb2ec8db0f5166e31cbabc8bc1"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-ci-final-6ce.tsv.gz",
+        "sha256": "0b526266413b1ac2efe0e24b2a77bedb9c382f18298254e6b569bef45e6b642d",
+        "input_sha256": "f49a3560b5b2db6ab3f938558cf306285a6be6ae73adb0172656289d5387dd46"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-unit-job-direct-red.txt.gz",
+        "sha256": "acd64bd9feb01de096ea13b97ede96d6bd14c64d4f66be8ff30f0a930b26cea6",
+        "input_sha256": "9b29e6e5a76a956ac65553530cdf7a1c6759b4ee9a647a5219bdc0914a5e9b0f"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-unit-structural-focused-green.txt.gz",
+        "sha256": "7550edf46e6a2cecb2c31cfd4431741b3e988f824fd26809fc984ddcc56fe15f",
+        "input_sha256": "38d3bce8636cca387b6630d27f08d687527b372d8b9e378568730e3b180cb8f0"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-unit-reference-integrity-green.txt.gz",
+        "sha256": "3f884280593b030c22886f4b7537b760da2441d4a6ef8793e903dff36a901a78",
+        "input_sha256": "170ecafe41bee5e928cd3ef4903b06ce9d167b717b42710f685d0a36fc5123d8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-unit-reference-integrity-corrected-green.txt.gz",
+        "sha256": "d8358fb32fd10e9d14669605d6c2e27f6afe7be26939e9c7e26803e6abcf6eee",
+        "input_sha256": "1eda7523896342d6c8a1f61830a6bffb87335548339f773c696fae2c9f8bb502"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-reference-link-integrity-delta.json.gz",
+        "sha256": "c4c16d22796c9420cf57b824c7179140958308777eb8d0835841819bc6b5e3f9",
+        "input_sha256": "1d99a9aee3d6b20ab4f91e59567923c6d8c7884e6576492e2140854a16746c4c"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-source-verifier-trust-red.txt.gz",
+        "sha256": "5584d57d507a60eb521a53a9e09383173ed55ebe53b9bb593325ba8d38ebc5cb",
+        "input_sha256": "23a4db63556c80f7c0adee77cc795c0f6e3a35f2d89a46479869c3e9c8d0d5b1"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-source-verifier-trust-green.txt.gz",
+        "sha256": "c532ba8fe7ac81f083b9d4d5f64d186b9b8984e33d04ed2e2d78d7bb02785418",
+        "input_sha256": "cc6183784986563732449da76c20d255d80e871969e581f44c086944b72225f7"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-plot-source-trusted-historical-green.json.gz",
+        "sha256": "1d8780b1875464e3fdef9679c5b62355aceabb729e59b343ed3a66f21503e838",
+        "input_sha256": "85bf16984785f078692f26a0ca86986cdb707c7bbf415ddada9fa4d570800511"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-course-scoring-trusted-green.json.gz",
+        "sha256": "73bb915a6c9ee5f0b9515165e39fb28f424db020ea8ac92ac9de5d6db8415dff",
+        "input_sha256": "befbcbc21116fdb65dff1bbc9e2eed79d7cfe730dee2c88477bfc8318576e62a"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-source-verifier-semgrep-green.txt.gz",
+        "sha256": "2e4437a76e73608e3369bf401862849e95cddb54e1fb3739b1b11403ef6d17f4",
+        "input_sha256": "1718c4803388fb008bc47260f8549c75ebc87c3af7e64da68309fb5fe90ff30d"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-qualified-bundle-post-nosec-preimage.py.gz",
+        "sha256": "60dfd58c2204b393c967d0e42332f3e8f7da8b97acfd6973088810b521c5afe9",
+        "input_sha256": "60dfd58c2204b393c967d0e42332f3e8f7da8b97acfd6973088810b521c5afe9"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-qualified-bundle-preimage-integrity.json.gz",
+        "sha256": "d502d79af02a375e7f6c80661772f19c50013f8891901458bcfbc207d37fb643",
+        "input_sha256": "30bc5597fb28696a120a41d0a70b1bfc48d27a786e8edce7bf22a570e5788dcd"
+      }
+    ],
+    "final_receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-seam-structural-guards-red.txt.gz",
+        "sha256": "692cb3ba09ead578590a0ff3918a2c9afb04c2dfafe120e858a99cb49cc24be0",
+        "uncompressed_sha256": "285cb33f25ffd8f33cd9863072137857bae1979b5ee7e40f8b668010d4a2b752"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-seam-structural-guards-tdd-red.txt.gz",
+        "sha256": "51a490effd65926c29c9f3068dee6a9f684bd82cb46c63652a27c71d8ccfcce6",
+        "uncompressed_sha256": "bf6077c53a285a76283a71e87314444d05bb759d2a99d61972b91843e67c3854"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-seam-structural-guards-green.txt.gz",
+        "sha256": "c1ce02fe7b2199216757c9a8f6119620ad513159c3d7cc162bf84de73e9799bd",
+        "uncompressed_sha256": "0fd0ef2e2d46707ee5af24444efbb90b2801376e2a3cd4f98ebee4529f022821"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-exact-seven-ci-unit-nodes-green.txt.gz",
+        "sha256": "4f573870ff8455a77272a0298134cd1ab08c02254101d894067e198b73ad669b",
+        "uncompressed_sha256": "92e43ab6431757bf939f9ebee3425f2e5aa4d67a34e89fdc0e3ae649ada95b35"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-root-unit-structural-mypy.txt.gz",
+        "sha256": "b1e8cc1d5424cb065ea6f9ece4e303d0192d317a5db044d5cde52d591d933a5c",
+        "uncompressed_sha256": "8228fcc5ce46d42d01caf3cd941f4e9c5f2bcc372bb5b147a2f0572d2dd675a8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-root-unit-structural-title.txt.gz",
+        "sha256": "58ea822d72b7e21775597436693052f681aa6e3d42dd9c2a26ff653178361069",
+        "uncompressed_sha256": "5b4773ab82564ecfc54da8eb3afbb1420338aab00497a2b40dae89c0bf79b740"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-size-budget-without-new-waivers.txt.gz",
+        "sha256": "7452830fe937955d9320e8ad96743b82a444759ae692b856c7385a21f13547b3",
+        "uncompressed_sha256": "65c5a3f15eec3fd998951fdc1b815bdda291fb7f6a727390432501a2233e9140"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-12278-pre-final-gate-remote.json.gz",
+        "sha256": "8ee526b93a0a5af9a762ba380ef164c090cbd35412627a10b46073d36e3b19ea",
+        "uncompressed_sha256": "c31661a478c62251a98a26399a159b9382cfe7c147a9df9b832adbd3a4bb4813"
+      }
+    ]
+  },
+  "remote_reconciliation_pending": {
+    "head": "47df000da36fd7ae73fef5de623f4cb5feadd320",
+    "commits": [
+      "1bafd5c4b6",
+      "9beff1c905",
+      "7bf9515aa1",
+      "47df000da3"
+    ],
+    "plan": "Rebase onto actual advanced PR head without force; preserve useful ADR index and blocked manual pointers, remove two unnecessary size-budget exceptions (766/46250 bytes vs51200), restore original reviewed canonical heading and its truthful provenance. Then run full canonical on stable committed source.",
+    "status": "Complete: ordinary rebase retains remote47df in ancestry; final combined source36ab82a1be passes complete canonical. No force push, size-budget waiver, or scientific acceptance change.",
+    "rebased_source_before_final_metadata_commit": "7a1defd5e57e72e133f1637d206505c9a54d32ac",
+    "result": "Useful ADR0014/15/16indexrows, manualblockers and officialmonolithinventory retained; redundant duplicatepointers removed; two unnecessarysizewaiversremoved with original51200-bytebudget PASS; Ifheading/provenancerestoredexacte0/7bb3560a hash; Astraapproved.",
+    "budget_receipt": {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-remote-reconciled-size-budget-green.txt.gz",
+      "sha256": "7452830fe937955d9320e8ad96743b82a444759ae692b856c7385a21f13547b3"
+    }
+  },
+  "main_reconciliation": {
+    "main_commit": "51f563776a",
+    "combined_source": "36ab82a1be0e0967b8cd3045386adb25a92db34e",
+    "scope": "Actual conflicts in two generated divergence inventories; official regeneration preserves all six incoming swing-report files, two tests and fragment byte-for-byte.32 exporter tests and inventory check pass. Astra approved combined resolution. Both main51f and remote47df retained in ancestry."
+  },
+  "protected_ci_integrity_followup": {
+    "source_commit": "0e525333207a3c1ecb64c5932c1dd487519a92c0",
+    "status": "Astra-reviewed repairs pass focused checks and complete stable-source canonical. Updated protected CI/merge pending; predecessor red logs preserved.",
+    "claim_manifest": "Only three reviewed artifact entries/five SHA-or-size leaves refreshed via official content-integrity builder; original gzip and field delta retained. Claims/references/counts/scientific scope unchanged. Complete computational publication qualification command passes with PDF inspection.",
+    "archive_title": "Inline code workflow if: key satisfies repo title checker; former archive gzip preserved, prior capitalization receipt retained historically. No original raw evidence or record fields changed.",
+    "spec_paths": "Current OpenSim reference corrected; exact immutable historical fitting row resolves only with original Git identity and independently pinned published provider identity.16TDD cases pass; no blanket historical exemption or implementation equivalence claim.",
+    "scientific_approval": "No renewal; frozen evidence/acceptance limits unchanged."
+  },
+  "protected_ci_unit_followup": {
+    "source_commit": "0e525333207a3c1ecb64c5932c1dd487519a92c0",
+    "original_result": "3 failed/27392 passed/1163 skipped/8 expected failures; complete original job log retained.",
+    "diagnosis": "One claim-manifest identity failure repaired by prior metadata follow-up. Two plot-verifier tests assumed unavailable historical Git objects in fetch-depth1 CI.",
+    "repair": "Function-scoped unit transport accepts only six literal commit/path requests and repository cwd; validates compressed and raw hashes before returning original archived Git bytes. No ambient fallback. Production Git retrieval/source authentication/AST/numerical assertions unchanged.",
+    "validation": "17 focused verifier/integrity cases pass, including wrong commit/path/cwd/command and corrupt stored/raw data. Separately, production full-history retrieval reproduces84 exact comparisons and3 source projections. Astra independently verified all6 original Git blob identities and deterministic archives.",
+    "scope": "Unit-test portability only; no live Git retrieval claim from injected unit transport and no scientific qualification renewed.",
+    "status": "Focused and history-free unit checks and complete stable-source canonical pass; protected updated CI pending."
+  },
+  "latest_main_capacity_reconciliation": {
+    "main": "8a22fd99a86f76e0fd1e42989a4e0ae1843a76df",
+    "tool": "shared_scripts.changes_fragment.apply_devlog_entry",
+    "scope": "Only retain already-completed9507 correction alongside incoming already-completed10783 correction; all76 parsed entry titles/fields conserved except these independently evidenced state updates.",
+    "archive": "Both branch and main archives are byte-identical:SHA25673675e99cd33bd54b3ec8804c29bc5b8adabbc4636ab57ca4c3f6493fa84f85d. No duplicate move.",
+    "validation": "Official development-log validator passes; existing22-entry portfolio WIP warning retained. Both original active logs are lossless gzip; detailed merge proof committed.",
+    "gate": "Complete stable-source canonical passes; protected updated CI pending."
+  },
+  "latest_main_native_receipt_reconciliation": {
+    "main": "21b24c2f57c6a64dd6023c9db0879724b1339ce8",
+    "byte_exact_incoming_files": [
+      {
+        "path": "changes/11792-passive-observation-receipt-12342.md",
+        "sha256": "b980244424522fb144347a78b50ea48719d01513e1196e2190acb681335ffc4c"
+      },
+      {
+        "path": "docs/agent_context/catalog.json",
+        "sha256": "87874f6a0652763603718813ab973f0e3e9a0bc892fd1a90889c8c74264dd285"
+      },
+      {
+        "path": "docs/development/feedback_controls/F07_PASSIVE_READINESS_TURNOVER.md",
+        "sha256": "245e65d8c27ad490a39666fe00dd070ffa351709b733a7ae4b30e8c01d377b7d"
+      },
+      {
+        "path": "manuals/upstreamdrift/chapters/33-native-passive-readiness.qmd",
+        "sha256": "339a1bdb641bd782b33ca6e0834413e7b122e0f9aa0e9e84a0fa542aa54fd810"
+      },
+      {
+        "path": "src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py",
+        "sha256": "0f26aa69dd3faf3df8599ee15f721c9be2ff73dfd9307b65355e78aef74024f1"
+      },
+      {
+        "path": "src/engines/physics_engines/opensim/python/tour_matching/native_moco_runner.py",
+        "sha256": "4d38ad2c562cb272ca9ee2fb4ca62b336d426794beb017519248e00bef7dd637"
+      },
+      {
+        "path": "src/engines/physics_engines/opensim/python/tour_matching/native_passive_receipt.py",
+        "sha256": "36c80227c33bbd40640df643e0325035092c190a7da7e96053d70079cfde7d9c"
+      },
+      {
+        "path": "tests/opensim/test_native_passive_receipt.py",
+        "sha256": "35d60f55b69dbf1eeb8e0ab1f5113a9dd51d62ad6843ed72d319b5f2f017e849"
+      }
+    ],
+    "maps": "Regenerated with exact pinned Tools CLI; check passes; no review renewal.",
+    "registry": "Only the incoming UP-D1-native-passive-readiness-inventory blocker resolution is combined; all other consumer registry content is unchanged.",
+    "tests": "27 incoming passive-receipt cases pass; local source-contract tests only, no physical acceptance.",
+    "manual_governance": "63 QMD structural sources pass; inventory and release remain blocked.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-native-receipt-tests.txt.gz",
+        "sha256": "b7f708cf8d3f2e1059fe7af7db88053ed59bee914c01a9a34d8cc01bba97299e"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-main-native-manual-governance.txt.gz",
+        "sha256": "b676571e3fec9bed6e04a4c7a56fd2e48beba45e7d5e2ff114ca2c37cb800fde"
+      }
+    ],
+    "gate": "Astra-preservation review and complete stable-source canonical pass; protected updated CI pending.",
+    "independent_review": "Astra independently verifies eight exact incoming files, both log hashes, single registry resolution and generated catalog preservation; no scientific feature qualification or boundary-review renewal."
+  },
+  "protected_ci_suite_marker_followup": {
+    "failed_head": "6bdfa8cea2a4a8967f5dbfba40d23511f221f84a",
+    "run": 38259075783,
+    "job": 114845096127,
+    "scope": "Only rightful unit suite classification: module marker on new path-provenance tests and decorators on two new gravity-literal tests. Assertions, production source, suite baseline, numerical tolerances and selection policy unchanged.",
+    "validation": "Actual ratchet red10 source-level test functions -> green; explicit unit lane22 cases passes, Ruff/format passes. Full combined canonical/protected CI pending.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-repo-structure-failed.log.gz",
+        "sha256": "407088f8c970d3c5f81192afd1d547aa37d6bfb46be173bc70f7da22b260c193",
+        "uncompressed_sha256": "624ec8b5b0fcc68d0e0b578669067832bb9f486258d36af55ddddfb7145c17f6"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-marker-red.txt.gz",
+        "sha256": "3804bc3227cd2a33976966d612c4f8e5b2296a59a0e672ab67a692b4b208cfc0",
+        "uncompressed_sha256": "c7d48837a3ff7ad1ba7795fb35d725357a8878d653e8a009a8ff5b57c075e1d5"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-marker-green.txt.gz",
+        "sha256": "c4748dd688e3b57ce96642de24f1e1be045f14e675ea66ef72daef5bae40c121",
+        "uncompressed_sha256": "a0ec2cf9cefdab32b1006612107f39556c111ba9fe766711fb238c976280ed81"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-marker-unit-tests.txt.gz",
+        "sha256": "9216777e5ca4e2ca4d96a50a59a342b2fa3270bd05a5880965de950076df2203",
+        "uncompressed_sha256": "0853b90c4f95a9ab32e4860ebe6482ee8d8ff40b20d271dfab6c6e76b921a58b"
+      }
+    ],
+    "status": "Ten new source-level test functions are correctly classified as unit tests; red/green drift gate and 22 unit cases pass, followed by all eight stable-source canonical gates. Updated protected CI remains pending."
+  },
+  "protected_ci_contract_enum_followup": {
+    "failed_source": "6bdfa8cea2a4a8967f5dbfba40d23511f221f84a",
+    "run": 38259075783,
+    "job": 114845096204,
+    "full_unit_summary": "1 failed,27427 passed,1163 skipped,8 xfailed; ContractLevel isinstance failed on foreign module enum. Earlier failures retained.",
+    "repair_source": "133a7ec5a2",
+    "scope": "UD-owned compatibility bridge normalizes incoming level into its local enum and mirrors into each receiving module own enum; no vendor/production contracts implementation, type assertions, numerical criteria or original evidence changed.",
+    "tdd": "Both directions reproduce foreign-enum identity failure before repair and pass afterward. Sol70 related cases on Python3.12 and30 onPython3.11; root focused run exits0.",
+    "independent_review": "Astra approves allthreelevels with correctOFF enablement, and invalidinputs rejectbeforestate mutation.",
+    "status": "Two direction-specific red/green enum regressions, focused cross-version checks, Astra review and all eight stable-source canonical gates pass. Updated full protected CI/merge remains pending.",
+    "receipts": [
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-native-main-full-unit-failed.log.gz",
+        "sha256": "24f57a4c46d5a579bd62bb377d13393761da1eeb189455c779ce82ad0426535d",
+        "uncompressed_sha256": "3e422c27ddf1365a2d9adbb6e2c7e2d5af3979ed24ad81457353f7719c12de0e"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-root-green.txt.gz",
+        "sha256": "e0ecaac061118c95ae9720b21cff9361d9b8c2a5bde3499ed132e5839ca0c444",
+        "uncompressed_sha256": "9752a1b6afee5cb51174e6ccb94daad76555e28e4438a98d22604a43a6580c67"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-baseline-red-reproduced.txt.gz",
+        "sha256": "e7ed6c6c0ff79d2361f4a45b55bbb318f3ef4c4bfab3244b31eff895170420d5",
+        "uncompressed_sha256": "efff407ecb1569cfb3a106c69a5e828a2627f2267e4370a2e6ea5a4e374984e8"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-fixed-py312-green.txt.gz",
+        "sha256": "83e0205cfa2c61d85c2906901973c60f32d7942544b57da981edce3e8b5a8134",
+        "uncompressed_sha256": "7cba81462ca0fe6c2710626fcf958bb1ae686264135d2fa7d88562da43a4444e"
+      },
+      {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-fixed-py311-green.txt.gz",
+        "sha256": "71db7b096d88ac9716bba65ee16e2bab69ca2c5261082c6f92a89365c8312f04",
+        "uncompressed_sha256": "fc0530f227c37098b50a6b4888012137f15107117ad57cb3832617d3ee04dc8f"
+      }
+    ],
+    "tdd_provenance": "Baseline RED is a new explicit reproduction, not an original raw log: bb416 committed regression tests with only alias bridge byte-restored from a3a00181a21b4dc517607d3ec2d8acfd1021d5fb, two failures exit1. Fixed bb416 source70PASS Python3.12 and30PASS Python3.11. Original red was tool output only. Provider files and root worktree were not modified by the baseline reproduction.",
+    "test_state_isolation_followup": {
+      "failed_canonical_source": "52d8f78e474ac20e04855204f1c8c778a80c2308",
+      "canonical_result": "7/8gatesPASS; affectedtests7failed/7590passed/377skip/43deselect/1knownxpass/21subtests. ExactCIscan209rules280fileszero findings.",
+      "cause": "New canonical selection includes older first alias-sync test that setsWARNwithoutrestoring. Reportingpreconditiontests thenrightfullyfail.",
+      "repair_source": "a4b891d769",
+      "scope": "Existing alias-sync test now snapshots currentlevel and restores in finally, matching newregressions. All assertion ASTs preserved; bridge/reporting implementation unchanged.",
+      "focused_red_green": "Exactaliasmodule+reportingmodule sequence7failed33passed before restoration ->40passed afterward.",
+      "preceding_protected_pass": "Remotea3 CIStandardSUCCESS and fullunit27450passed1163skip8xfail; order-dependentidentityproblem reproducedbynewtests.",
+      "receipts": [
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-identity-final-prepr.txt.gz",
+          "sha256": "7b4ee8a6e3f17e4beba94841aaca63037403161ab11eaf9956e0adfcbc2d605c",
+          "uncompressed_sha256": "ba0f67c62dd36d0ee84eaf7d8642d93f8761e6d8afa4fa07bbd4a83890cc9b9b"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-identity-semgrep.txt.gz",
+          "sha256": "cfa2e768870ae20cb291886b42973f3f5195c3434b75b23cd11ece2fce48fa4a",
+          "uncompressed_sha256": "98a78feece9340c758f00813457fff586459ae120f1baee35fd948723f7a58aa"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-reporting-red.txt.gz",
+          "sha256": "87b2768d22df67176520ecacf2338aea8035d18f7196b0e9ad13ce2b6f5089d9",
+          "uncompressed_sha256": "1cc2ac262c6c6610dbbed58afa160e82e0a086f42bd16cfd2c6625b4b9d30cb8"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-contract-alias-reporting-green.txt.gz",
+          "sha256": "ef66d03d5e0ec23d1ad701a6fd405c71a7015e8dc255886ed43a9579bd0e5218",
+          "uncompressed_sha256": "cb3b6c2b6cd75cd94f01b160029dd45a53438b2ec870459488c580920d299d1c"
+        },
+        {
+          "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-classification-full-unit-pass.log.gz",
+          "sha256": "567c56f7faf4843af6a338630bf367646b6d0692f5535df189561e57e0e1e625",
+          "uncompressed_sha256": "1140120e918389447a8b2f55131666162c28ab6511ebc30d768084a7cbaa7e5f"
+        }
+      ],
+      "status": "Root assertion-preservation review,40-case red/green sequence and all eight combined canonical gates PASS; updated protectedCIpending."
+    },
+    "preceding_full_unit_pass": {
+      "source": "a3a00181a21b4dc517607d3ec2d8acfd1021d5fb",
+      "run": 38262719295,
+      "job": 114857528791,
+      "status": "PASS27450tests,1163skips,8expectedfailures; confirms order-dependent failure, not proof of final bridge repair. CIStandard alsoSUCCESS. Own auto-merge temporarily disabled before queue while deterministic preventive fix is verified.",
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/shot-suite-classification-full-unit-pass.log.gz",
+      "sha256": "567c56f7faf4843af6a338630bf367646b6d0692f5535df189561e57e0e1e625"
+    }
+  },
+  "final_live_publication": {
+    "status": "PASS full deployment workflow and final article-specific live acceptance:53checks,fourbrowsercells,root-agentvisualreview and exact39-pagePDF.",
+    "revision": "9002c8a2f94050e013762c08de053abab48711ee",
+    "run": 38255088410,
+    "pages_step": "SUCCESS",
+    "http_checks": 53,
+    "viewport_theme_cells": 4,
+    "serious_critical_axe_violations": 0,
+    "root_agent_visual_review": "PASS allfourcells; desktopdark preview omission disproved by originalpixelcounts and readable directcrop; priorattempts andcorrection retained.",
+    "pdf_pages": 39,
+    "pdf_sha256": "fd5506da87f5e619a550fb8cc871a0e8195b6fb98965a99809e3238a0f01508b",
+    "additional_verification_archive": {
+      "browser_download_url": "https://github.com/D-sorganization/UpstreamDrift/releases/download/shot-pattern-phase2-research-2026-10-10/shot-pattern-live-verification-20261012-9002c8a2f940.tar.gz",
+      "digest": "sha256:59b5c0d1fd9a2c0aa9b0a0c5a73f6f97055b770c8f1febca61c742a02ae3496d",
+      "name": "shot-pattern-live-verification-20261012-9002c8a2f940.tar.gz",
+      "size": 4805381
+    },
+    "original_payloads": "All21 frozenpayloads andtwoearlierverificationassets preserved; additional live-verification archive and final deployment supplement bring totalreleaseassets to25 without overwrite.",
+    "affine_issue_5004": "Closed completed with merged5005/5016implementation andlinkedliveacceptance evidence.",
+    "remaining_scientific_gates": "Upstream11984,12120,12398 remainopen; no empirical/physical/scientificqualificationrenewal.",
+    "workflow_status": "SUCCESS including manifest/every-public-page live verification and evidence upload.",
+    "final_deployment_supplement": {
+      "browser_download_url": "https://github.com/D-sorganization/UpstreamDrift/releases/download/shot-pattern-phase2-research-2026-10-10/shot-pattern-live-final-acceptance-20261012-9002c8a2f940.tar.gz",
+      "digest": "sha256:6862dd91a5dcf8d693d7b4a42906e865ee7b206fbd2321c167e61e70156b4007",
+      "name": "shot-pattern-live-final-acceptance-20261012-9002c8a2f940.tar.gz",
+      "size": 16932
+    }
+  },
+  "post_f6dd_main_reconciliation": {
+    "schema_version": "shot-pattern-post-f6dd-reconciliation/1",
+    "recorded_at_utc": "2026-10-12T15:55:38.503580+00:00",
+    "source_commit": "1532baa27c9402d78e6efda90b121f6a851813a2",
+    "incoming_main_commit": "f6ddaffc66965740be47f43f9540b8b86ebd924f",
+    "canonical_pre_pr": "PASS all eight gates; 7629 passed, 377 skipped, 43 deselected, 1 xpassed, 21 subtests",
+    "ci_semgrep": "PASS; 209 rules, 280 targets, zero findings",
+    "manual_governance": "PASS; 64 QMD sources, zero registered calculations, release blocked",
+    "agent_context": "PASS",
+    "divergence_inventory": "PASS official --check",
+    "document_titles": "PASS two changed documents",
+    "preservation": "Astra approved; incoming analytic paths byte-identical, all 82 incoming blockers retained and own shot-pattern blocker added, calculations/release unchanged",
+    "receipts": {
+      "post-f6dd-canonical-prepr": {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/post-f6dd-canonical-prepr.gz",
+        "source_sha256": "dfdbc29ff0d5c4aac8c7a53cc26e6a528ea4fadc5204f1f0b35685d760423afb",
+        "gzip_sha256": "320e31e24a9528e03a4c46e0d7733125cc60a62a566d81dc63251c1cdf870aae",
+        "bytes": 102653
+      },
+      "post-f6dd-ci-semgrep": {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/post-f6dd-ci-semgrep.gz",
+        "source_sha256": "98a78feece9340c758f00813457fff586459ae120f1baee35fd948723f7a58aa",
+        "gzip_sha256": "2d0b5b329a7a9f69b11dcfc9bfe79aa541cf1cc94523b30c7e748ccb9d77c887",
+        "bytes": 1736
+      },
+      "post-f6dd-preservation": {
+        "path": "docs/research/shot_pattern_analysis/phase2/validation/safe_followup_v1/post-f6dd-preservation.gz",
+        "source_sha256": "a7f335c2f1e062b01068a57f4a87f41e6f1250e1532663f17896fffbcc714166",
+        "gzip_sha256": "dcea46e23df736bc150a996702403a8af13f1a3f9eae6c6524a48a9086314e3c",
+        "bytes": 1200
+      }
+    },
+    "protected_pr": "#12278 pending ordinary push and merge queue; no protected merge claimed"
+  }
+}

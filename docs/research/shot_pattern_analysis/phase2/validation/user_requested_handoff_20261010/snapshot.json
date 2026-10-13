@@ -1,0 +1,25 @@
+{
+  "observed_utc": "2026-10-10T21:01:47.801736+00:00",
+  "request": "Stop goal pursuit after committing handoff; credit conservation",
+  "processes": {
+    "51305": {
+      "state": "S",
+      "start_ticks": "51478244"
+    },
+    "51475": {
+      "state": "R",
+      "start_ticks": "51478653"
+    }
+  },
+  "terminal_receipt_present": false,
+  "provisional_filename_counts": {
+    ".png": 1968,
+    ".svg": 1658,
+    ".pdf": 1658
+  },
+  "provisional_total": 5284,
+  "expected_total": 6456,
+  "acceptance": "No supplemental final graphic acceptance; filename counts are not verification",
+  "study_parent_commit": "8484339ba740a133ce701564f6225b35061272a9",
+  "process_policy": "Existing detached export left running; no additional agent work or monitoring after pause"
+}

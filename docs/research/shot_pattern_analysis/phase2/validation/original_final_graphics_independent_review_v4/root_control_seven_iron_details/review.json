@@ -1,0 +1,1040 @@
+{
+  "checked_utc": "2026-10-10T08:37:15.910465+00:00",
+  "status": "provisional_visual_and_label_checks_pass",
+  "whole_run_accepted": false,
+  "scope": "48 control 7-iron PNGs on eight contact sheets; four full-size inspections; all48 PDF config/support labels checked against saved summaries and exact fixed-target identity.",
+  "contact_sheets_inspected": [
+    "contact_01.jpg",
+    "contact_02.jpg",
+    "contact_03.jpg",
+    "contact_04.jpg",
+    "contact_05.jpg",
+    "contact_06.jpg",
+    "contact_07.jpg",
+    "contact_08.jpg"
+  ],
+  "full_size_pngs_inspected": [
+    "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+    "details/seven_iron_lean5_curve2_rotation1_shaft_only/density.png",
+    "details/seven_iron_lean10_curve2_rotation2_combined2/density.png",
+    "details/seven_iron_lean5_curve2_rotation2_combined2/overhead.png"
+  ],
+  "files": [
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_combined2/density.png",
+      "sha256": "39e39984cc91df0464feea8359fbe2ed6b8df2dc1c0210772e526f63d4c3d542",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_combined2/overhead.png",
+      "sha256": "f484314da03bf04ad76261123273dd3d654cca57cff9b954496f8a706c02c3c5",
+      "pixels": [
+        3066,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_shaft_only/density.png",
+      "sha256": "7802edf78d659261d51fc79153066921044069f74d81f729cd7320f602234c72",
+      "pixels": [
+        2867,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_shaft_only/overhead.png",
+      "sha256": "355c05e0b6879eb0778e6c8c7e9830ef9bf989e0fdb58cb6f0a887f87366666a",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_combined2/density.png",
+      "sha256": "a47b2928c6154d3fbb570f5ac846b41e4de5967eecc0bb7d4b2725350b92a6f7",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_combined2/overhead.png",
+      "sha256": "e2504a4f094dac630d5e6c04dd3250d9fc3f54585a1b6c43ebcac6c9dd9ba9db",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_shaft_only/density.png",
+      "sha256": "497146716e87be2bddc0ad0de970d3cf5ea7ca96f8f8e73a97ceaeb8307d2c1f",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_shaft_only/overhead.png",
+      "sha256": "48ff8df31168b34a9152a8bad97780eebf9cedb2b786a5621f0fde95ea57f634",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_combined2/density.png",
+      "sha256": "c3709484c723b3a4fa73876dab816eea8858ca96cd3f2bc7dfb621797bf8b469",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_combined2/overhead.png",
+      "sha256": "d461df4f114ad9d4a63ef120698bfec31219a3b2dcc28461f55a49793cc17a22",
+      "pixels": [
+        3065,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_shaft_only/density.png",
+      "sha256": "a2bf55128fcb754b615b7519492f3f6257f56a125ab990e3907abed6413bb827",
+      "pixels": [
+        2848,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_shaft_only/overhead.png",
+      "sha256": "c4ea75880cd77022645c533b3630f72eae72a5da86832cff4ccc6451f8ef4d6d",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
+      "sha256": "8b67a2679f7a69ad2ad31c80ee53dacc9b48c06fceda0c6d3d6acea061b11641",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
+      "sha256": "e38bd4c1f680d042d283d5ee5088d74bd5380f64624274d534715f95c2d7d2de",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_shaft_only/density.png",
+      "sha256": "f300c69ab0176505d421f95ac142a5b54661f143f3ddedcccc3eb41e0330bfc2",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_shaft_only/overhead.png",
+      "sha256": "f547295079171e15f0af88c258b8ea28aa4b08c4c3e2ccc589c02c5cc451a314",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_combined2/density.png",
+      "sha256": "c88c2b44129f69b16ae89e2597e8a3c46fa084231d9489753cb00402d19ece4e",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_combined2/overhead.png",
+      "sha256": "f19cfcf36387722f72c743181e8301e7fdef022a751ac79edb5bdf081f7c0d14",
+      "pixels": [
+        3062,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.png",
+      "sha256": "2b79ec5f81f270dbbb61d876d395bf2d0616e076d8fe6fb31f1e2f5a948b80f6",
+      "pixels": [
+        2848,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/overhead.png",
+      "sha256": "cdebe39104dead04ba2149d8bc3940de2adb23613b3b4e06d1958e76605a9636",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_combined2/density.png",
+      "sha256": "d8e435548f79a9765b3f481ec2a57dac1443bcca3b477bab198262cc73d0b8ab",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_combined2/overhead.png",
+      "sha256": "06888b02e8fa39a828320ec1f5f19d9098509c8266c23d31002c2821650cacb1",
+      "pixels": [
+        3075,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_shaft_only/density.png",
+      "sha256": "a070666e8f99dcf9177e00168db53b47080326c5d5fb6caea8c70f58222a1b6c",
+      "pixels": [
+        2864,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_shaft_only/overhead.png",
+      "sha256": "ad9a20ec01663221140b11910c92754208aaded374394f2d15787cfe29d742b6",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_combined2/density.png",
+      "sha256": "6e6fc00af96a493cac003b76656a7514c330a2d7e0b00101f4f5edfb21f3b4c1",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_combined2/overhead.png",
+      "sha256": "eed74be286abff2eb446c516a83fb5c2f5de7d668641423ffd7c8615173d1b62",
+      "pixels": [
+        3060,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_shaft_only/density.png",
+      "sha256": "714f648e9bcbdc6f7a28410da21800a56eda5d34cd44fb45d01b5116d5dc5b95",
+      "pixels": [
+        2848,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_shaft_only/overhead.png",
+      "sha256": "acab961d38247fabaeba205a2bd279d56cbae3a25a279e73aa08ff126792a7fc",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_combined2/density.png",
+      "sha256": "8581224c7b63ef398d2549f0d7cf40a252cd295e6e98385924edde82f89e330d",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_combined2/overhead.png",
+      "sha256": "5706efe54c7d8cf6ac680fc04ac2d71abd976c94bab62de531da48bb2ecc443e",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+      "sha256": "5f05386740b6f3de8570b01bb4cbc6627c077c78e1462a33b31f1ba6ff648317",
+      "pixels": [
+        2864,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.png",
+      "sha256": "97f0627fb52e30c454b3589d0d64501103b18b63c03882734e11d28eea893822",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_combined2/density.png",
+      "sha256": "766c633f1e67d52668c97e1a5dc3dd46de013e43d261a503f92ba9b4258e1f76",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_combined2/overhead.png",
+      "sha256": "b6dd7b488200231d63d0cabec607293d271c3884982144f1ab931ee9478009e7",
+      "pixels": [
+        3064,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_shaft_only/density.png",
+      "sha256": "f84c27901ae2f967d6a71f8d45b237ef2d28a28e6f92583d528c96a6125b9365",
+      "pixels": [
+        2867,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_shaft_only/overhead.png",
+      "sha256": "a2a4b69ee338145ee5b37c90790ff67ae45594b1c4e60b0729203d58c0677d5e",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_combined2/density.png",
+      "sha256": "2d4b3ccc4157798355d144dac47a295f3dc128621cde2072dffc9daad2b92bfa",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_combined2/overhead.png",
+      "sha256": "749a41b84cfb690f564e4db8e2c3749a0c093f5a5920d5d6c88599068a5d55f1",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_shaft_only/density.png",
+      "sha256": "b27eecbc24738cdaf059efbff831d7dd466e9c277dc33602df96bfb0e19c726c",
+      "pixels": [
+        2864,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_shaft_only/overhead.png",
+      "sha256": "013b6e4698f5ab47a652ac9b892c59f096350238ebb5304d5a7b23a4bbbee41e",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_combined2/density.png",
+      "sha256": "e76824f203421cd16888ce80d932f1267e981632f3e3fa0b07bf12d42913f418",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_combined2/overhead.png",
+      "sha256": "7a84a1f2907ac9462baa5c5e50e4fbeb48e766e531da145eef199d1bf6b18c17",
+      "pixels": [
+        3062,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_shaft_only/density.png",
+      "sha256": "d60b3b39a8f43c0f9da5ebb52c40e53c54be377e84b033c33e23089856728544",
+      "pixels": [
+        2848,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_shaft_only/overhead.png",
+      "sha256": "ca1389488162c65dace665f5a8951292414ea8c6a1d53b7ea66bae58e35be142",
+      "pixels": [
+        3057,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_combined2/density.png",
+      "sha256": "f334e98853fd08c8bf4682fc6bef64a915ae2d9a492a096ebd43193214029fca",
+      "pixels": [
+        2880,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_combined2/overhead.png",
+      "sha256": "16544c46445466b6b5ef6958703fc0efff6f6cc6370d17bfccda39fb40eacdfe",
+      "pixels": [
+        3073,
+        1080
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_shaft_only/density.png",
+      "sha256": "dd15a75e6bde58074c4b6eb6e8a6715692427c627d83e27d48f22b30ba93778c",
+      "pixels": [
+        2864,
+        1701
+      ]
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_shaft_only/overhead.png",
+      "sha256": "97c7ace3f37cc7ff65970187b7bfd25952134e10e46e619f8b4dd0bb6ffdcf7e",
+      "pixels": [
+        3057,
+        1080
+      ]
+    }
+  ],
+  "pdf_label_checks": [
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_combined2/density.png",
+      "pdf_sha256": "750701dbf61daa422cb151c59c11346af13836a9716446f418d9bc84d211ce6e",
+      "summary_sha256": "9a16aa139d2a8d47c287f7077e22a2d8765d315e795a714cb316f24221e970c9",
+      "flight_samples_sha256": "021fe3df425c463ed2d7ed59aa6651886558fc5cc3b8b4b7c3c9a3d226af29c2",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_combined2/overhead.png",
+      "pdf_sha256": "017b06e25876eeeb0908cc2ea2cca0b191d228694ca08240e22f408969870427",
+      "summary_sha256": "9a16aa139d2a8d47c287f7077e22a2d8765d315e795a714cb316f24221e970c9",
+      "flight_samples_sha256": "021fe3df425c463ed2d7ed59aa6651886558fc5cc3b8b4b7c3c9a3d226af29c2",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_shaft_only/density.png",
+      "pdf_sha256": "f3390938da26564f6335794d5ec2b920fb36b8a48f3436542f6cb564218a23a6",
+      "summary_sha256": "aedd40edc04b09ecc5f273f14236a901133f93bda95a9b3255005b25cab4353d",
+      "flight_samples_sha256": "f5a983706ce5358d34ae154174470da96614f9582c4c10db9eaccf508adb4bbb",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_shaft_only/overhead.png",
+      "pdf_sha256": "0940bd87e3079497e6354ef962fa50f5608ab55214098bf56a9d3b14aadf067b",
+      "summary_sha256": "aedd40edc04b09ecc5f273f14236a901133f93bda95a9b3255005b25cab4353d",
+      "flight_samples_sha256": "f5a983706ce5358d34ae154174470da96614f9582c4c10db9eaccf508adb4bbb",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_combined2/density.png",
+      "pdf_sha256": "eb539f9cd3ce111d30ee68c91193f80916800fe599d830bb5cef3fd612e3e1d4",
+      "summary_sha256": "dcd274eb486fb99c0c917d355bd2473618def6db4edc3aabf85c5f26f9920ffa",
+      "flight_samples_sha256": "92a7a9441c53f76e72c4a194f4fc0753ec8466974c109ea1ab3b8c1d1024fd28",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_combined2/overhead.png",
+      "pdf_sha256": "7ae84194613b0c43b308a34f0ce31e00200d52c24e45b2a6019ff828e7f4c157",
+      "summary_sha256": "dcd274eb486fb99c0c917d355bd2473618def6db4edc3aabf85c5f26f9920ffa",
+      "flight_samples_sha256": "92a7a9441c53f76e72c4a194f4fc0753ec8466974c109ea1ab3b8c1d1024fd28",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_shaft_only/density.png",
+      "pdf_sha256": "b9ab5daa4cc42e73b2ca66d803fb017a8f4bd425200a880c2abbda83a9132244",
+      "summary_sha256": "5b27e5c7887e990c43ce262198db6e4382042e3d0a73e87f85a8cbb9f60f0359",
+      "flight_samples_sha256": "27499e8348b0743ba22a70ee54dc9e04d0612fa970818e4f389a3593c0630ac1",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_shaft_only/overhead.png",
+      "pdf_sha256": "ce2dcff010373c3bb646d37ddcf0996eecae74ffc1a030b07046c032f40a5540",
+      "summary_sha256": "5b27e5c7887e990c43ce262198db6e4382042e3d0a73e87f85a8cbb9f60f0359",
+      "flight_samples_sha256": "27499e8348b0743ba22a70ee54dc9e04d0612fa970818e4f389a3593c0630ac1",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_combined2/density.png",
+      "pdf_sha256": "37e4743675c4aae24395ea8c266810e8e5ac7a0407ea93d67ffd3e7146bbe06c",
+      "summary_sha256": "3b4b6c8ad332ba4ec5ae1a39689a170784195b68fbd2ddb5ba6d1b58e02baeb0",
+      "flight_samples_sha256": "eb43d6a12b847385b03b29b0fc453b17a5f50f915389de20cd0062723eb6bf1e",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_combined2/overhead.png",
+      "pdf_sha256": "68adf2773249b82a123b688ecbc86e47b8b42a83b01d9f9caaf5d5414b8fe662",
+      "summary_sha256": "3b4b6c8ad332ba4ec5ae1a39689a170784195b68fbd2ddb5ba6d1b58e02baeb0",
+      "flight_samples_sha256": "eb43d6a12b847385b03b29b0fc453b17a5f50f915389de20cd0062723eb6bf1e",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_shaft_only/density.png",
+      "pdf_sha256": "81d4b0ead35105028d603c3395a27a1ca25ebc4ef155bf9667b5a7458bf54357",
+      "summary_sha256": "c920b29512baa380649971310044e6b68b31252ea4eac740328934a35d047336",
+      "flight_samples_sha256": "12f176bf299a3257695ec46d7bbb94bb33e90acce1aca6f236bb27bbf1460501",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_shaft_only/overhead.png",
+      "pdf_sha256": "986b9945244f81a7861a8d4a29f0eadda2a974723788c0c9fe08ee37b9531927",
+      "summary_sha256": "c920b29512baa380649971310044e6b68b31252ea4eac740328934a35d047336",
+      "flight_samples_sha256": "12f176bf299a3257695ec46d7bbb94bb33e90acce1aca6f236bb27bbf1460501",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
+      "pdf_sha256": "ce0e14e119d7b39a7804bf45cc27cde2e61146e8c61ab145e361640e9c1788af",
+      "summary_sha256": "d56bd918661d8ba07e012906748eecf22ef04f2ac29cd0eba3160de659da347e",
+      "flight_samples_sha256": "550a7b921db140f68272b73915596b8f9b17d800f9b6b40efef2aebf0eb4e913",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
+      "pdf_sha256": "58cf55184133b15a058591e5b3166b95d2354261c40982fe68e2f27e4fa53fc2",
+      "summary_sha256": "d56bd918661d8ba07e012906748eecf22ef04f2ac29cd0eba3160de659da347e",
+      "flight_samples_sha256": "550a7b921db140f68272b73915596b8f9b17d800f9b6b40efef2aebf0eb4e913",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_shaft_only/density.png",
+      "pdf_sha256": "16c077eb1147b76dffcfe09ed2a98c361047d0b1df75490ffbe139261ea4fe6a",
+      "summary_sha256": "be3f25709db3f21c5871e78c0e1cfc9291106fe2b0f0b4ee91354abf0165a044",
+      "flight_samples_sha256": "9f832a69abf5ce583ac6713a54e3f217a4f0b093fba816938b26878715fae9b4",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_shaft_only/overhead.png",
+      "pdf_sha256": "e4c3206fb3c52df1598ce01d076bad1fa41bb346f81839c7d89fa534c6b81352",
+      "summary_sha256": "be3f25709db3f21c5871e78c0e1cfc9291106fe2b0f0b4ee91354abf0165a044",
+      "flight_samples_sha256": "9f832a69abf5ce583ac6713a54e3f217a4f0b093fba816938b26878715fae9b4",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_combined2/density.png",
+      "pdf_sha256": "45d1c2be146f1c1d5788b3e8a2136f627d86341e9a9d1970930b52a4d3eca790",
+      "summary_sha256": "45d9e11e73204e7122ff10361ebfac0be83d3cb2a5edde198baad26aa18f0d07",
+      "flight_samples_sha256": "25e0adf5d957f9a89e9aba38f0d64b83dafa484eb56faa1c47120eca59d95cf5",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_combined2/overhead.png",
+      "pdf_sha256": "f5fe9e84703b0b5a6c261c0960e151a530e50941f537aa8cffa4d819a54dd8c7",
+      "summary_sha256": "45d9e11e73204e7122ff10361ebfac0be83d3cb2a5edde198baad26aa18f0d07",
+      "flight_samples_sha256": "25e0adf5d957f9a89e9aba38f0d64b83dafa484eb56faa1c47120eca59d95cf5",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.png",
+      "pdf_sha256": "c059b949db9600bfd0eceab3b99c17a76530ce6f527d7a7ea21e4a6e57c45756",
+      "summary_sha256": "891b42c7382e798b45adda441c3f8b44b43e771036342bd7424a5f63487fa56b",
+      "flight_samples_sha256": "3e4b03aa4feb94477535d911be4d71c21fbf826b9b1acdf73bb96d486e89ed0f",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/overhead.png",
+      "pdf_sha256": "c793c5de3c1a0546ba4fdef6a15c1c708b3454f71aa3ec19707d50df3f37b3ad",
+      "summary_sha256": "891b42c7382e798b45adda441c3f8b44b43e771036342bd7424a5f63487fa56b",
+      "flight_samples_sha256": "3e4b03aa4feb94477535d911be4d71c21fbf826b9b1acdf73bb96d486e89ed0f",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_combined2/density.png",
+      "pdf_sha256": "01b670a55d07ab842d4123a13c7dfd535b945076f524e6ef9ee85e3246049970",
+      "summary_sha256": "a63ac8f1651dc8ed1f4a14b0391cee62c8cb54ee7a432e0fde9d3a3e8232da78",
+      "flight_samples_sha256": "db52b225bdb9489d97474a52e97dc8316d625106c02cb5bdf3eaac5dff343301",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_combined2/overhead.png",
+      "pdf_sha256": "74ea55198a4bc3919478c3f0abf647e7cfc8e6f627ba537ed5b3be59ee985b77",
+      "summary_sha256": "a63ac8f1651dc8ed1f4a14b0391cee62c8cb54ee7a432e0fde9d3a3e8232da78",
+      "flight_samples_sha256": "db52b225bdb9489d97474a52e97dc8316d625106c02cb5bdf3eaac5dff343301",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_shaft_only/density.png",
+      "pdf_sha256": "9e947ccb2bd28aeacc2dc7f5a3d707ffd6cad0ce1134103fee402ec19f141a95",
+      "summary_sha256": "63a36cd84de50d2d9a5d137d9723b47905f4749c62fa2ef82c6bea58f3b554d1",
+      "flight_samples_sha256": "c1fca74ab9787361e20b0bdf49867ea8d66dc91b4b1bf24776bc18f5a5bd566e",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_shaft_only/overhead.png",
+      "pdf_sha256": "4980d976e756b329865291ec009d2331f43c33337d9760fbd084428d27c1c95b",
+      "summary_sha256": "63a36cd84de50d2d9a5d137d9723b47905f4749c62fa2ef82c6bea58f3b554d1",
+      "flight_samples_sha256": "c1fca74ab9787361e20b0bdf49867ea8d66dc91b4b1bf24776bc18f5a5bd566e",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_combined2/density.png",
+      "pdf_sha256": "e0608743f8ceeea12f01b47a1e56037047c8c85f204ffadf293c7e078e5ca476",
+      "summary_sha256": "0d69f8c67750705448bcbd411acb9624e206ee28781367bd4500aa11022cf1d1",
+      "flight_samples_sha256": "69a0e242c0b4a81cc50b26e7aa76bda5a48eecf7521a83d0826cf04be97b795e",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_combined2/overhead.png",
+      "pdf_sha256": "237527838bd80213c2ac64bb750b8d4a4cfed053d6b6caa4ea7ef8d8c3c547a8",
+      "summary_sha256": "0d69f8c67750705448bcbd411acb9624e206ee28781367bd4500aa11022cf1d1",
+      "flight_samples_sha256": "69a0e242c0b4a81cc50b26e7aa76bda5a48eecf7521a83d0826cf04be97b795e",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_shaft_only/density.png",
+      "pdf_sha256": "3a7c34b3eb4d060d1cd0648cbcd2f3f723012dd67f959e12c27504282319e204",
+      "summary_sha256": "9b41838dac687ef0ec77ae81d69d268bdc7a3f3bdee0ceae250c92149bd15a77",
+      "flight_samples_sha256": "d664b27e32074b8717b37a24cef5b2d61dcf1e476ed097421a60d3807cf3102f",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_shaft_only/overhead.png",
+      "pdf_sha256": "a8c3c61cfe0d0e83542981f619e624703574d371d02f742ecbe22748003f29b9",
+      "summary_sha256": "9b41838dac687ef0ec77ae81d69d268bdc7a3f3bdee0ceae250c92149bd15a77",
+      "flight_samples_sha256": "d664b27e32074b8717b37a24cef5b2d61dcf1e476ed097421a60d3807cf3102f",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_combined2/density.png",
+      "pdf_sha256": "046896b262e0ac8473206b0fa4c91b27037c719715d4ecd1994fbb9f6026d871",
+      "summary_sha256": "5df4941cfd8aed96bcfe131f8b76906b370f56e22fc8e613a592b0055a14de7e",
+      "flight_samples_sha256": "f9796507683cca159e94826ffea025968d14e2c82556aa4aaf00f16590265b40",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_combined2/overhead.png",
+      "pdf_sha256": "2b40eabc728244272f2ea3640d6661bdfe9f5645feecee7bafb66ed76bc926bb",
+      "summary_sha256": "5df4941cfd8aed96bcfe131f8b76906b370f56e22fc8e613a592b0055a14de7e",
+      "flight_samples_sha256": "f9796507683cca159e94826ffea025968d14e2c82556aa4aaf00f16590265b40",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+      "pdf_sha256": "0f64c1341401fbfb79cb5ce0bcdfa9731ac92989dcca5d3fd89602054b715b8d",
+      "summary_sha256": "c3011dd8c72e3acc7ae3211e6825b3dd3c32e8822445da5bd56d233e93f788b7",
+      "flight_samples_sha256": "57e2876ec1465104c3ed84ed31d423f4f2bea6a8fa43156d6d6a4c898cd76c2c",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.png",
+      "pdf_sha256": "6a4410184272bcfc73fdc384f107212d4464cb4abf743db1037429a06e4cde3f",
+      "summary_sha256": "c3011dd8c72e3acc7ae3211e6825b3dd3c32e8822445da5bd56d233e93f788b7",
+      "flight_samples_sha256": "57e2876ec1465104c3ed84ed31d423f4f2bea6a8fa43156d6d6a4c898cd76c2c",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_combined2/density.png",
+      "pdf_sha256": "89b44302cf66f687c3a961bbb6f6d2281e00be76db579793032bbfcee9e90f07",
+      "summary_sha256": "da992100dd34bba291543d7d71f56253ef2a30827e3dd656b40197a1ac35d39c",
+      "flight_samples_sha256": "7a2a68507a1a1f4399e7aa0e20f26a04a69d129af28bcfdccfff4ecd5cd84d5c",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_combined2/overhead.png",
+      "pdf_sha256": "3b678dc7284b2fc5c88be4d38b9e380a4431f690234cf060e7cc47f114f451d5",
+      "summary_sha256": "da992100dd34bba291543d7d71f56253ef2a30827e3dd656b40197a1ac35d39c",
+      "flight_samples_sha256": "7a2a68507a1a1f4399e7aa0e20f26a04a69d129af28bcfdccfff4ecd5cd84d5c",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_shaft_only/density.png",
+      "pdf_sha256": "9ca5026d579725db045944e235778ce8226d18fac7a57ceafe7036541d03ffa2",
+      "summary_sha256": "22567f4cd4dc5fa0508c38ef7bbc22da9491c12a420c12264000c8dee01c452a",
+      "flight_samples_sha256": "59943ae51fb6e6be02cec59ff8cc5b4964cff691231106a168ad02697b71e072",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_shaft_only/overhead.png",
+      "pdf_sha256": "41920fa0799f37c4223d5dde07e406c2eaebae1ca6f7a8d6e1de2d09666a586e",
+      "summary_sha256": "22567f4cd4dc5fa0508c38ef7bbc22da9491c12a420c12264000c8dee01c452a",
+      "flight_samples_sha256": "59943ae51fb6e6be02cec59ff8cc5b4964cff691231106a168ad02697b71e072",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_combined2/density.png",
+      "pdf_sha256": "224461040a86cb972e2fb0020e0b572ec21d06be5ce0e56a8a620ee174ffd895",
+      "summary_sha256": "8864a66db93d445c1eb5b0700643bbe46088eb8bd6d50eba7139e9ba20a2443a",
+      "flight_samples_sha256": "b22f8a128e9a0195103bc610469e5e720f409d57ea2cbbdc0c04e3bfd5886e4a",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_combined2/overhead.png",
+      "pdf_sha256": "e9f226d6ee3f32efb145b92213d5c9c90ee88bda0bbf8d706828a020db444d7b",
+      "summary_sha256": "8864a66db93d445c1eb5b0700643bbe46088eb8bd6d50eba7139e9ba20a2443a",
+      "flight_samples_sha256": "b22f8a128e9a0195103bc610469e5e720f409d57ea2cbbdc0c04e3bfd5886e4a",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_shaft_only/density.png",
+      "pdf_sha256": "63cf5281d1fbc6b451f659111e7a4506c1b40f43b52fb7eefe6965e27b0ff3b6",
+      "summary_sha256": "a54c66779d457f3d11ec4d1cdc47ad46367e24c12b0b87855141c6acc4087c9e",
+      "flight_samples_sha256": "6603675c5bd511673b50bc3a549bf650afb4bc357a38978b6c2e8453dd8a168a",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_shaft_only/overhead.png",
+      "pdf_sha256": "b05c7afdadee8978271dfcd9b514b232b3989d3e840ee0c53b0ea11f5f7b6291",
+      "summary_sha256": "a54c66779d457f3d11ec4d1cdc47ad46367e24c12b0b87855141c6acc4087c9e",
+      "flight_samples_sha256": "6603675c5bd511673b50bc3a549bf650afb4bc357a38978b6c2e8453dd8a168a",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_combined2/density.png",
+      "pdf_sha256": "be294f0d111d0c34a1d29f834c1cc5068faf8e659d502f3f422b08093394ab37",
+      "summary_sha256": "2282b3b9d7b97a918a586ac0b2f70817de8964dbfd99c77456afa9f5d83405a2",
+      "flight_samples_sha256": "cd3828dc700fd6b9947d2982e07a39d88336b3fb96247a3ea5fe0a670a63dca5",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_combined2/overhead.png",
+      "pdf_sha256": "c8b03695bd969ac7dc3444a08da857248477106fb244e2a74216a4181f456434",
+      "summary_sha256": "2282b3b9d7b97a918a586ac0b2f70817de8964dbfd99c77456afa9f5d83405a2",
+      "flight_samples_sha256": "cd3828dc700fd6b9947d2982e07a39d88336b3fb96247a3ea5fe0a670a63dca5",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_shaft_only/density.png",
+      "pdf_sha256": "5fccc270bbb03bf959476f56f7068033ddf83d66e76a7c2fafe24b60c05fd645",
+      "summary_sha256": "7e983c0db786b64519cbdbf61139feeffa7c4971f273525d82ba659e576ebb74",
+      "flight_samples_sha256": "c168a2a1b29d8036555fb5c13a1816b6c6d93d705c912a1a2851b71cf0418bee",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_shaft_only/overhead.png",
+      "pdf_sha256": "99d5a794fb7c4aa3b884e2e68bea7e8eb735de951ac6056cd7bbf9b90ab99b86",
+      "summary_sha256": "7e983c0db786b64519cbdbf61139feeffa7c4971f273525d82ba659e576ebb74",
+      "flight_samples_sha256": "c168a2a1b29d8036555fb5c13a1816b6c6d93d705c912a1a2851b71cf0418bee",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_combined2/density.png",
+      "pdf_sha256": "204d9c2903753252c3d4f940bd38eb5ccaf9bb12b850605627efe0d229e1c9e4",
+      "summary_sha256": "1013f7423dbc501e946066b49e850eb9f12d1fe33da78bd66eea355a79f12e9c",
+      "flight_samples_sha256": "494eccc066dc044da85be295841c09121be98400233ef797a2327959b4ee045b",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_combined2/overhead.png",
+      "pdf_sha256": "caec5a0aa786934478c3d282d4430b3a4565415c9b67af44144d720ca99a8afe",
+      "summary_sha256": "1013f7423dbc501e946066b49e850eb9f12d1fe33da78bd66eea355a79f12e9c",
+      "flight_samples_sha256": "494eccc066dc044da85be295841c09121be98400233ef797a2327959b4ee045b",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 9996,
+        "Draw": 9996,
+        "Fade": 9996
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_shaft_only/density.png",
+      "pdf_sha256": "c610439a58c6d3dbb1731134609305b65ad31fd9852f96ae1fd1ff46625bdae2",
+      "summary_sha256": "3716c51c9cba4a01c37bc63e1c237b874f3e3b7b2e8b7ca87956c7c979c64dcb",
+      "flight_samples_sha256": "b77533583decec7a5d910097fd3f47dc705bdf10093f8d7bf8bdfbf745a13a3f",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_shaft_only/overhead.png",
+      "pdf_sha256": "97893096f381e80c6e00a5bb418938ab85e6e0f93388dcb88c679c3f4093ee00",
+      "summary_sha256": "3716c51c9cba4a01c37bc63e1c237b874f3e3b7b2e8b7ca87956c7c979c64dcb",
+      "flight_samples_sha256": "b77533583decec7a5d910097fd3f47dc705bdf10093f8d7bf8bdfbf745a13a3f",
+      "target_x_m": 127.88194166336235,
+      "supported_counts": {
+        "Straight": 10000,
+        "Draw": 10000,
+        "Fade": 10000
+      },
+      "labels_match": true
+    }
+  ],
+  "findings": [],
+  "limitations": [
+    "Final producer manifest reconciliation remains required.",
+    "Contact thumbnails establish layout overview, not every small-text detail. Full-size inspections are listed separately.",
+    "This does not repeat numerical/statistical audits or establish empirical accuracy."
+  ]
+}

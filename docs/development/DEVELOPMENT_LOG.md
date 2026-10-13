@@ -97,19 +97,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** MOSAIC model-aware multi-trial matching kernels, methods reference and DIME (#11421) audit
 - **Next step:** Merge PR; start MOSAIC-01/02/13 (benchmark freeze, Pinocchio regressor provider, DIME defect remediation).
 
-### DL-#9507 · Cone-Mode Sparse Checkout in Sidekick Wheel Smoke Job
-
-- **State:** in_review
-- **Owner:** claude
-- **Issue:** #9507
-- **Branch:** `claude/issue-9507`
-- **Paths:** `.github/workflows/package-standalone-sidekick.yml`, `tests/unit/packaging/test_standalone_sidekick_workflows.py`
-- **Started:** 2026-10-04
-- **Last verified:** 2026-10-05 (`43d63ce9`; collated from changes/9507-fail-fast-with-an-explicit-incomplete-ch.md)
-- **Summary:** `smoke-test-wheel` used non-cone sparse checkout, which leaves `core.sparseCheckout=true` in `.git/config` and poisons later jobs on reused self-hosted runners. Switched to cone mode on `tests/fixtures` and added a guard test over all workflows.
-- **Next step:** Merge the PR and confirm no runner reports tracked files missing after a Sidekick packaging run.
-- **PR:** #11522
-
 ### DL-#10950 · Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
 - **State:** in_progress
@@ -1182,6 +1169,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
 
 ## Shipped (Last 90 Days)
+
+### DL-#9507 · Cone-Mode Sparse Checkout in Sidekick Wheel Smoke Job
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #9507
+- **Branch:** `claude/issue-9507`
+- **Paths:** `.github/workflows/package-standalone-sidekick.yml`, `tests/unit/packaging/test_standalone_sidekick_workflows.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-12 (`0c612812`; collated from changes/9507-metadata-only-completed-checkout-reconci.md)
+- **Summary:** `smoke-test-wheel` used non-cone sparse checkout, which leaves `core.sparseCheckout=true` in `.git/config` and poisons later jobs on reused self-hosted runners. Switched to cone mode on `tests/fixtures` and added a guard test over all workflows.
+- **Next step:** Implementation completed in merged #11522 (43d63ce98bcb6d4318bf5ab7ba8a6adf87071caf), issue #9507 closed completed. Metadata-only reconciliation: 24 checkout/workflow contract tests pass on 0c612812cb; no new fleet-runtime, scientific or physical qualification is claimed. Continue routine runner monitoring.
+- **PR:** #11522, #12278
 
 ### DL-#10783 · Enforce the Deferred Validation Catalog
 

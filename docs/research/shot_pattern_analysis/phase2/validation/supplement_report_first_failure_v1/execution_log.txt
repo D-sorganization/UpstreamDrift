@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py", line 852, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py", line 833, in main
+    paths = build_final_supplement_report(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py", line 654, in build_final_supplement_report
+    _pair_result(pair, transition_path, transition_receipt_sha256)
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_pipeline.py", line 276, in _pair_result
+    return analyze_explicit_source_pair(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_lean_control.py", line 600, in analyze_explicit_source_pair
+    raise ValueError(
+ValueError: source config differences are not valid for curve_strength: ['curve_scale', 'match_face_bounds_deg', 'match_speed_factors']

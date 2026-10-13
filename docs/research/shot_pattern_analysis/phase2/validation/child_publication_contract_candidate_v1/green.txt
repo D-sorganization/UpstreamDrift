@@ -1,0 +1,48 @@
+.........                                                                [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.33s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+0.23s setup    tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.20s call     tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.16s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[source]
+0.14s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+0.10s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+0.10s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]
+0.09s call     tests/research/test_supplement_publication_revision.py::test_parent_mutation_during_render_rejected_without_receipt
+0.07s call     tests/research/test_supplement_publication_revision.py::test_wrong_renderer_scope_rejected
+0.06s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+0.04s teardown tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+0.03s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_wrong_renderer_scope_rejected
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_parent_mutation_during_render_rejected_without_receipt
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+0.01s teardown tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[source]
+0.01s teardown tests/research/test_supplement_publication_revision.py::test_wrong_renderer_scope_rejected
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+0.01s setup    tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]

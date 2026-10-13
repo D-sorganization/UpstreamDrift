@@ -1,0 +1,4106 @@
+{
+  "candidate_sha256": "6b586441c0f094b9f077e49203f17fdf782d0f26c1d0727dd344fd3c080306ad",
+  "status": "changes_required",
+  "checked_pattern_rows": 72,
+  "checked_numeric_fields": 576,
+  "numeric_rounding_mismatches": [],
+  "all_field_checks": [
+    {
+      "field": "C01 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Straight lateral_sd_m",
+      "display": "6.177",
+      "expected": 6.176572604807982,
+      "rounding_tolerance": 0.0005000000061765726,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Straight downrange_sd_m",
+      "display": "4.672",
+      "expected": 4.671676588003134,
+      "rounding_tolerance": 0.0005000000046716766,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Straight target_rmse_m",
+      "display": "7.764",
+      "expected": 7.763961079304683,
+      "rounding_tolerance": 0.0005000000077639611,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Straight absolute_sg",
+      "display": "-0.396",
+      "expected": -0.39573704643186763,
+      "rounding_tolerance": 0.0005000000003957371,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Draw lateral_sd_m",
+      "display": "5.996",
+      "expected": 5.996120650129013,
+      "rounding_tolerance": 0.0005000000059961207,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Draw downrange_sd_m",
+      "display": "5.219",
+      "expected": 5.2191965000034894,
+      "rounding_tolerance": 0.0005000000052191965,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Draw target_rmse_m",
+      "display": "7.973",
+      "expected": 7.972825916781493,
+      "rounding_tolerance": 0.000500000007972826,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Draw absolute_sg",
+      "display": "-0.396",
+      "expected": -0.39566243087251535,
+      "rounding_tolerance": 0.0005000000003956625,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Draw estimate",
+      "display": "+7.462e-05",
+      "expected": 7.461555935228152e-05,
+      "rounding_tolerance": 5.000000074615559e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Draw lower_95",
+      "display": "-7.104e-05",
+      "expected": -7.104046933162085e-05,
+      "rounding_tolerance": 5.00000007104047e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Draw upper_95",
+      "display": "+2.190e-04",
+      "expected": 0.00021896077539046698,
+      "rounding_tolerance": 5.0000000218960774e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Fade lateral_sd_m",
+      "display": "6.266",
+      "expected": 6.2655868454054415,
+      "rounding_tolerance": 0.0005000000062655869,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Fade downrange_sd_m",
+      "display": "4.182",
+      "expected": 4.1819165375706735,
+      "rounding_tolerance": 0.0005000000041819165,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Fade target_rmse_m",
+      "display": "7.549",
+      "expected": 7.549276425956231,
+      "rounding_tolerance": 0.0005000000075492764,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Fade absolute_sg",
+      "display": "-0.396",
+      "expected": -0.395668786899609,
+      "rounding_tolerance": 0.0005000000003956688,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Fade estimate",
+      "display": "+6.826e-05",
+      "expected": 6.825953225868763e-05,
+      "rounding_tolerance": 5.000000068259532e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Fade lower_95",
+      "display": "-5.228e-05",
+      "expected": -5.2277181705243884e-05,
+      "rounding_tolerance": 5.000000052277182e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C01 Fade upper_95",
+      "display": "+1.705e-04",
+      "expected": 0.00017049843183190757,
+      "rounding_tolerance": 5.000000017049843e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Straight lateral_sd_m",
+      "display": "6.686",
+      "expected": 6.686240045688186,
+      "rounding_tolerance": 0.00050000000668624,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Straight downrange_sd_m",
+      "display": "8.561",
+      "expected": 8.561098472397347,
+      "rounding_tolerance": 0.0005000000085610985,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Straight target_rmse_m",
+      "display": "11.181",
+      "expected": 11.180931262816891,
+      "rounding_tolerance": 0.0005000000111809313,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Straight absolute_sg",
+      "display": "-0.413",
+      "expected": -0.412594479734598,
+      "rounding_tolerance": 0.0005000000004125944,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Draw lateral_sd_m",
+      "display": "6.534",
+      "expected": 6.53382253721597,
+      "rounding_tolerance": 0.0005000000065338225,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Draw downrange_sd_m",
+      "display": "8.863",
+      "expected": 8.86317338677017,
+      "rounding_tolerance": 0.0005000000088631734,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Draw target_rmse_m",
+      "display": "11.337",
+      "expected": 11.336595648017727,
+      "rounding_tolerance": 0.0005000000113365956,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Draw absolute_sg",
+      "display": "-0.4126",
+      "expected": -0.4125675679611443,
+      "rounding_tolerance": 5.000000041256757e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Draw estimate",
+      "display": "+2.691e-05",
+      "expected": 2.6911773453713884e-05,
+      "rounding_tolerance": 5.000000026911774e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Draw lower_95",
+      "display": "-1.642e-04",
+      "expected": -0.00016417507301096237,
+      "rounding_tolerance": 5.0000000164175073e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Draw upper_95",
+      "display": "+2.204e-04",
+      "expected": 0.00022037368523597208,
+      "rounding_tolerance": 5.0000000220373685e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Fade lateral_sd_m",
+      "display": "6.777",
+      "expected": 6.776975122432951,
+      "rounding_tolerance": 0.0005000000067769752,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Fade downrange_sd_m",
+      "display": "8.290",
+      "expected": 8.289745467620078,
+      "rounding_tolerance": 0.0005000000082897455,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Fade target_rmse_m",
+      "display": "11.018",
+      "expected": 11.017547247533296,
+      "rounding_tolerance": 0.0005000000110175472,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Fade absolute_sg",
+      "display": "-0.4126",
+      "expected": -0.4125523042814373,
+      "rounding_tolerance": 5.0000000412552305e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Fade estimate",
+      "display": "+4.218e-05",
+      "expected": 4.2175453160651455e-05,
+      "rounding_tolerance": 5.000000042175453e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Fade lower_95",
+      "display": "-1.739e-04",
+      "expected": -0.00017391896152132183,
+      "rounding_tolerance": 5.000000017391896e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C02 Fade upper_95",
+      "display": "+2.646e-04",
+      "expected": 0.0002645740815497581,
+      "rounding_tolerance": 5.000000026457408e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Straight lateral_sd_m",
+      "display": "12.011",
+      "expected": 12.011096457705813,
+      "rounding_tolerance": 0.0005000000120110964,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Straight downrange_sd_m",
+      "display": "9.781",
+      "expected": 9.7808204779109,
+      "rounding_tolerance": 0.0005000000097808205,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Straight target_rmse_m",
+      "display": "15.648",
+      "expected": 15.648356812869938,
+      "rounding_tolerance": 0.0005000000156483569,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Straight absolute_sg",
+      "display": "-0.443",
+      "expected": -0.4428029451003738,
+      "rounding_tolerance": 0.0005000000004428029,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Draw lateral_sd_m",
+      "display": "11.660",
+      "expected": 11.66031561273983,
+      "rounding_tolerance": 0.0005000000116603156,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Draw downrange_sd_m",
+      "display": "10.817",
+      "expected": 10.816896446993193,
+      "rounding_tolerance": 0.0005000000108168964,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Draw target_rmse_m",
+      "display": "16.090",
+      "expected": 16.0898718704335,
+      "rounding_tolerance": 0.0005000000160898718,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Draw absolute_sg",
+      "display": "-0.440",
+      "expected": -0.4399103226451643,
+      "rounding_tolerance": 0.0005000000004399104,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Draw estimate",
+      "display": "+0.00289",
+      "expected": 0.002892622455209583,
+      "rounding_tolerance": 5.000000002892623e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Draw lower_95",
+      "display": "+0.00246",
+      "expected": 0.002462300702968206,
+      "rounding_tolerance": 5.0000000024623015e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Draw upper_95",
+      "display": "+0.00338",
+      "expected": 0.0033783187780881603,
+      "rounding_tolerance": 5.000000003378319e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Fade lateral_sd_m",
+      "display": "12.210",
+      "expected": 12.209993380222379,
+      "rounding_tolerance": 0.0005000000122099934,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Fade downrange_sd_m",
+      "display": "8.808",
+      "expected": 8.808344902273516,
+      "rounding_tolerance": 0.0005000000088083449,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Fade target_rmse_m",
+      "display": "15.190",
+      "expected": 15.189582774573323,
+      "rounding_tolerance": 0.0005000000151895828,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Fade absolute_sg",
+      "display": "-0.444",
+      "expected": -0.4440280649786603,
+      "rounding_tolerance": 0.0005000000004440281,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Fade estimate",
+      "display": "-0.001225",
+      "expected": -0.0012251198782864715,
+      "rounding_tolerance": 5.000000012251198e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Fade lower_95",
+      "display": "-0.00162",
+      "expected": -0.001619667175215034,
+      "rounding_tolerance": 5.000000001619667e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C03 Fade upper_95",
+      "display": "-8.629e-04",
+      "expected": -0.0008628541516474099,
+      "rounding_tolerance": 5.000000086285415e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Straight lateral_sd_m",
+      "display": "12.133",
+      "expected": 12.133243037945892,
+      "rounding_tolerance": 0.0005000000121332431,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Straight downrange_sd_m",
+      "display": "12.236",
+      "expected": 12.235794648954176,
+      "rounding_tolerance": 0.0005000000122357946,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Straight target_rmse_m",
+      "display": "17.746",
+      "expected": 17.74611621717349,
+      "rounding_tolerance": 0.0005000000177461162,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Straight absolute_sg",
+      "display": "-0.458",
+      "expected": -0.45770648703298283,
+      "rounding_tolerance": 0.0005000000004577065,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Draw lateral_sd_m",
+      "display": "11.804",
+      "expected": 11.803807076631044,
+      "rounding_tolerance": 0.0005000000118038071,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Draw downrange_sd_m",
+      "display": "13.072",
+      "expected": 13.072287286144004,
+      "rounding_tolerance": 0.0005000000130722873,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Draw target_rmse_m",
+      "display": "18.160",
+      "expected": 18.160426909185944,
+      "rounding_tolerance": 0.000500000018160427,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Draw absolute_sg",
+      "display": "-0.4555",
+      "expected": -0.455511326715009,
+      "rounding_tolerance": 5.000000045551133e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Draw estimate",
+      "display": "+0.002195",
+      "expected": 0.002195160317973801,
+      "rounding_tolerance": 5.000000021951603e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Draw lower_95",
+      "display": "+0.001695",
+      "expected": 0.001694900809112219,
+      "rounding_tolerance": 5.000000016949008e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Draw upper_95",
+      "display": "+0.002636",
+      "expected": 0.00263646030502905,
+      "rounding_tolerance": 5.000000026364603e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Fade lateral_sd_m",
+      "display": "12.328",
+      "expected": 12.328406521358025,
+      "rounding_tolerance": 0.0005000000123284065,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Fade downrange_sd_m",
+      "display": "11.461",
+      "expected": 11.460933608817461,
+      "rounding_tolerance": 0.0005000000114609337,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Fade target_rmse_m",
+      "display": "17.313",
+      "expected": 17.313026904710938,
+      "rounding_tolerance": 0.0005000000173130269,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Fade absolute_sg",
+      "display": "-0.459",
+      "expected": -0.4586341843484078,
+      "rounding_tolerance": 0.0005000000004586342,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Fade estimate",
+      "display": "-9.277e-04",
+      "expected": -0.0009276973154250246,
+      "rounding_tolerance": 5.0000000927697315e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Fade lower_95",
+      "display": "-0.001382",
+      "expected": -0.001382424571512692,
+      "rounding_tolerance": 5.000000013824246e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C04 Fade upper_95",
+      "display": "-5.147e-04",
+      "expected": -0.0005146905618213765,
+      "rounding_tolerance": 5.000000051469056e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Straight lateral_sd_m",
+      "display": "6.177",
+      "expected": 6.176572604807982,
+      "rounding_tolerance": 0.0005000000061765726,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Straight downrange_sd_m",
+      "display": "4.672",
+      "expected": 4.671676588003134,
+      "rounding_tolerance": 0.0005000000046716766,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Straight target_rmse_m",
+      "display": "7.764",
+      "expected": 7.763961079304683,
+      "rounding_tolerance": 0.0005000000077639611,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Straight absolute_sg",
+      "display": "-0.396",
+      "expected": -0.39573704643186763,
+      "rounding_tolerance": 0.0005000000003957371,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Draw lateral_sd_m",
+      "display": "5.713",
+      "expected": 5.712558401234075,
+      "rounding_tolerance": 0.0005000000057125584,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Draw downrange_sd_m",
+      "display": "5.800",
+      "expected": 5.799741094895614,
+      "rounding_tolerance": 0.0005000000057997411,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Draw target_rmse_m",
+      "display": "8.168",
+      "expected": 8.167596397228294,
+      "rounding_tolerance": 0.0005000000081675964,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Draw absolute_sg",
+      "display": "-0.3954",
+      "expected": -0.39541202937439573,
+      "rounding_tolerance": 5.000000039541203e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Draw estimate",
+      "display": "+3.250e-04",
+      "expected": 0.0003250170574719388,
+      "rounding_tolerance": 5.0000000325017055e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Draw lower_95",
+      "display": "+1.042e-04",
+      "expected": 0.00010419990359491727,
+      "rounding_tolerance": 5.00000001041999e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Draw upper_95",
+      "display": "+5.513e-04",
+      "expected": 0.0005512859618879582,
+      "rounding_tolerance": 5.000000055128596e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Fade lateral_sd_m",
+      "display": "6.285",
+      "expected": 6.28531663983826,
+      "rounding_tolerance": 0.0005000000062853167,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Fade downrange_sd_m",
+      "display": "3.764",
+      "expected": 3.7637652284664687,
+      "rounding_tolerance": 0.0005000000037637652,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Fade target_rmse_m",
+      "display": "7.340",
+      "expected": 7.339791258680892,
+      "rounding_tolerance": 0.0005000000073397912,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Fade absolute_sg",
+      "display": "-0.3955",
+      "expected": -0.3955026594141381,
+      "rounding_tolerance": 5.0000000395502664e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Fade estimate",
+      "display": "+2.344e-04",
+      "expected": 0.00023438701772961358,
+      "rounding_tolerance": 5.000000023438702e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Fade lower_95",
+      "display": "+5.011e-05",
+      "expected": 5.011171232938114e-05,
+      "rounding_tolerance": 5.0000000501117125e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C05 Fade upper_95",
+      "display": "+4.290e-04",
+      "expected": 0.0004289664606828679,
+      "rounding_tolerance": 5.000000042896646e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Straight lateral_sd_m",
+      "display": "6.686",
+      "expected": 6.686240045688186,
+      "rounding_tolerance": 0.00050000000668624,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Straight downrange_sd_m",
+      "display": "8.561",
+      "expected": 8.561098472397347,
+      "rounding_tolerance": 0.0005000000085610985,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Straight target_rmse_m",
+      "display": "11.181",
+      "expected": 11.180931262816891,
+      "rounding_tolerance": 0.0005000000111809313,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Straight absolute_sg",
+      "display": "-0.413",
+      "expected": -0.412594479734598,
+      "rounding_tolerance": 0.0005000000004125944,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Draw lateral_sd_m",
+      "display": "6.312",
+      "expected": 6.311645417461133,
+      "rounding_tolerance": 0.0005000000063116454,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Draw downrange_sd_m",
+      "display": "9.186",
+      "expected": 9.186078527135207,
+      "rounding_tolerance": 0.0005000000091860786,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Draw target_rmse_m",
+      "display": "11.476",
+      "expected": 11.47553453960882,
+      "rounding_tolerance": 0.0005000000114755345,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Draw absolute_sg",
+      "display": "-0.412",
+      "expected": -0.4120318816277051,
+      "rounding_tolerance": 0.0005000000004120319,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Draw estimate",
+      "display": "+5.626e-04",
+      "expected": 0.0005625981068929291,
+      "rounding_tolerance": 5.0000000562598103e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Draw lower_95",
+      "display": "+2.392e-04",
+      "expected": 0.00023922180285302648,
+      "rounding_tolerance": 5.00000002392218e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Draw upper_95",
+      "display": "+8.978e-04",
+      "expected": 0.000897767091841708,
+      "rounding_tolerance": 5.000000089776709e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Fade lateral_sd_m",
+      "display": "6.824",
+      "expected": 6.823700727269076,
+      "rounding_tolerance": 0.0005000000068237007,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Fade downrange_sd_m",
+      "display": "8.048",
+      "expected": 8.047891414535528,
+      "rounding_tolerance": 0.0005000000080478915,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Fade target_rmse_m",
+      "display": "10.854",
+      "expected": 10.854134175877237,
+      "rounding_tolerance": 0.0005000000108541342,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Fade absolute_sg",
+      "display": "-0.4125",
+      "expected": -0.4124998637094484,
+      "rounding_tolerance": 5.0000000412499864e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Fade estimate",
+      "display": "+9.462e-05",
+      "expected": 9.461602514953083e-05,
+      "rounding_tolerance": 5.0000000946160255e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Fade lower_95",
+      "display": "-2.218e-04",
+      "expected": -0.00022182231653632132,
+      "rounding_tolerance": 5.0000000221822316e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C06 Fade upper_95",
+      "display": "+4.419e-04",
+      "expected": 0.000441863460349558,
+      "rounding_tolerance": 5.0000000441863456e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Straight lateral_sd_m",
+      "display": "12.011",
+      "expected": 12.011096457705813,
+      "rounding_tolerance": 0.0005000000120110964,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Straight downrange_sd_m",
+      "display": "9.781",
+      "expected": 9.7808204779109,
+      "rounding_tolerance": 0.0005000000097808205,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Straight target_rmse_m",
+      "display": "15.648",
+      "expected": 15.648356812869938,
+      "rounding_tolerance": 0.0005000000156483569,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Straight absolute_sg",
+      "display": "-0.443",
+      "expected": -0.4428029451003738,
+      "rounding_tolerance": 0.0005000000004428029,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Draw lateral_sd_m",
+      "display": "11.152",
+      "expected": 11.152078487827708,
+      "rounding_tolerance": 0.0005000000111520785,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Draw downrange_sd_m",
+      "display": "11.868",
+      "expected": 11.86789759927028,
+      "rounding_tolerance": 0.0005000000118678976,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Draw target_rmse_m",
+      "display": "16.493",
+      "expected": 16.49330461743,
+      "rounding_tolerance": 0.0005000000164933047,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Draw absolute_sg",
+      "display": "-0.435",
+      "expected": -0.43500529005348315,
+      "rounding_tolerance": 0.0005000000004350053,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Draw estimate",
+      "display": "+0.0078",
+      "expected": 0.0077976550468906,
+      "rounding_tolerance": 5.000000000779766e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Draw lower_95",
+      "display": "+0.00713",
+      "expected": 0.007132512276517505,
+      "rounding_tolerance": 5.0000000071325125e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Draw upper_95",
+      "display": "+0.00852",
+      "expected": 0.00851800983301036,
+      "rounding_tolerance": 5.00000000851801e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Fade lateral_sd_m",
+      "display": "12.276",
+      "expected": 12.276440002086922,
+      "rounding_tolerance": 0.00050000001227644,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Fade downrange_sd_m",
+      "display": "7.940",
+      "expected": 7.940087422632808,
+      "rounding_tolerance": 0.0005000000079400874,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Fade target_rmse_m",
+      "display": "14.735",
+      "expected": 14.734709521994512,
+      "rounding_tolerance": 0.0005000000147347096,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Fade absolute_sg",
+      "display": "-0.444",
+      "expected": -0.4442634843522772,
+      "rounding_tolerance": 0.0005000000004442635,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Fade estimate",
+      "display": "-0.00146",
+      "expected": -0.0014605392519033656,
+      "rounding_tolerance": 5.000000001460539e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Fade lower_95",
+      "display": "-0.001974",
+      "expected": -0.00197428365531585,
+      "rounding_tolerance": 5.000000019742836e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C07 Fade upper_95",
+      "display": "-9.630e-04",
+      "expected": -0.0009630426997952468,
+      "rounding_tolerance": 5.0000000963042697e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Straight lateral_sd_m",
+      "display": "12.133",
+      "expected": 12.133243037945892,
+      "rounding_tolerance": 0.0005000000121332431,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Straight downrange_sd_m",
+      "display": "12.236",
+      "expected": 12.235794648954176,
+      "rounding_tolerance": 0.0005000000122357946,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Straight target_rmse_m",
+      "display": "17.746",
+      "expected": 17.74611621717349,
+      "rounding_tolerance": 0.0005000000177461162,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Straight absolute_sg",
+      "display": "-0.458",
+      "expected": -0.45770648703298283,
+      "rounding_tolerance": 0.0005000000004577065,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Draw lateral_sd_m",
+      "display": "11.336",
+      "expected": 11.335707195015662,
+      "rounding_tolerance": 0.0005000000113357072,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Draw downrange_sd_m",
+      "display": "13.932",
+      "expected": 13.93172338051918,
+      "rounding_tolerance": 0.0005000000139317234,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Draw target_rmse_m",
+      "display": "18.533",
+      "expected": 18.53340515242226,
+      "rounding_tolerance": 0.0005000000185334052,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Draw absolute_sg",
+      "display": "-0.451",
+      "expected": -0.4510241768394719,
+      "rounding_tolerance": 0.0005000000004510242,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Draw estimate",
+      "display": "+0.00668",
+      "expected": 0.006682310193510924,
+      "rounding_tolerance": 5.00000000668231e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Draw lower_95",
+      "display": "+0.00594",
+      "expected": 0.00593805307697459,
+      "rounding_tolerance": 5.000000005938054e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Draw upper_95",
+      "display": "+0.00744",
+      "expected": 0.007437961717395396,
+      "rounding_tolerance": 5.000000007437962e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Fade lateral_sd_m",
+      "display": "12.407",
+      "expected": 12.406660225564066,
+      "rounding_tolerance": 0.0005000000124066602,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Fade downrange_sd_m",
+      "display": "10.774",
+      "expected": 10.773573077704155,
+      "rounding_tolerance": 0.0005000000107735731,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Fade target_rmse_m",
+      "display": "16.882",
+      "expected": 16.882402021006754,
+      "rounding_tolerance": 0.0005000000168824021,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Fade absolute_sg",
+      "display": "-0.4585",
+      "expected": -0.45854119895517526,
+      "rounding_tolerance": 5.00000004585412e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Fade estimate",
+      "display": "-8.347e-04",
+      "expected": -0.0008347119221924334,
+      "rounding_tolerance": 5.000000083471192e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Fade lower_95",
+      "display": "-0.001478",
+      "expected": -0.0014784010680460502,
+      "rounding_tolerance": 5.00000001478401e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C08 Fade upper_95",
+      "display": "-2.621e-04",
+      "expected": -0.0002621467109694824,
+      "rounding_tolerance": 5.000000026214671e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Straight lateral_sd_m",
+      "display": "2.559",
+      "expected": 2.559371412944812,
+      "rounding_tolerance": 0.0005000000025593715,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Straight downrange_sd_m",
+      "display": "1.164",
+      "expected": 1.1643573695007479,
+      "rounding_tolerance": 0.0005000000011643574,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Straight target_rmse_m",
+      "display": "2.812",
+      "expected": 2.812496828557215,
+      "rounding_tolerance": 0.0005000000028124969,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Straight absolute_sg",
+      "display": "+0.537",
+      "expected": 0.5365351568180409,
+      "rounding_tolerance": 0.0005000000005365351,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Draw lateral_sd_m",
+      "display": "2.598",
+      "expected": 2.597918240508229,
+      "rounding_tolerance": 0.0005000000025979182,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Draw downrange_sd_m",
+      "display": "1.086",
+      "expected": 1.0857871108112649,
+      "rounding_tolerance": 0.0005000000010857871,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Draw target_rmse_m",
+      "display": "2.816",
+      "expected": 2.8163878863716283,
+      "rounding_tolerance": 0.0005000000028163879,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Draw absolute_sg",
+      "display": "+0.536",
+      "expected": 0.5360295507163176,
+      "rounding_tolerance": 0.0005000000005360296,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Draw estimate",
+      "display": "-5.056e-04",
+      "expected": -0.0005056061017231564,
+      "rounding_tolerance": 5.00000005056061e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Draw lower_95",
+      "display": "-5.137e-04",
+      "expected": -0.0005136910470865477,
+      "rounding_tolerance": 5.000000051369104e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Draw upper_95",
+      "display": "-4.968e-04",
+      "expected": -0.0004968345325920594,
+      "rounding_tolerance": 5.000000049683453e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Fade lateral_sd_m",
+      "display": "2.513",
+      "expected": 2.5133009234993087,
+      "rounding_tolerance": 0.0005000000025133009,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Fade downrange_sd_m",
+      "display": "1.242",
+      "expected": 1.2420391766463097,
+      "rounding_tolerance": 0.0005000000012420391,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Fade target_rmse_m",
+      "display": "2.804",
+      "expected": 2.804190603068028,
+      "rounding_tolerance": 0.0005000000028041906,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Fade absolute_sg",
+      "display": "+0.538",
+      "expected": 0.537582112632783,
+      "rounding_tolerance": 0.0005000000005375821,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Fade estimate",
+      "display": "+0.001047",
+      "expected": 0.0010469558147421583,
+      "rounding_tolerance": 5.000000010469558e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Fade lower_95",
+      "display": "+0.0010332",
+      "expected": 0.0010332127670539123,
+      "rounding_tolerance": 5.0000001033212765e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C09 Fade upper_95",
+      "display": "+0.001059",
+      "expected": 0.001059062684997039,
+      "rounding_tolerance": 5.000000010590626e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Straight support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Straight lateral_sd_m",
+      "display": "2.551",
+      "expected": 2.5510394938758996,
+      "rounding_tolerance": 0.0005000000025510395,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Straight downrange_sd_m",
+      "display": "5.090",
+      "expected": 5.090247206765963,
+      "rounding_tolerance": 0.0005000000050902472,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Straight target_rmse_m",
+      "display": "6.215",
+      "expected": 6.214551041298364,
+      "rounding_tolerance": 0.000500000006214551,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Straight absolute_sg",
+      "display": "+0.182",
+      "expected": 0.1818424087435613,
+      "rounding_tolerance": 0.0005000000001818424,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Draw support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Draw lateral_sd_m",
+      "display": "2.588",
+      "expected": 2.5878543657888167,
+      "rounding_tolerance": 0.0005000000025878544,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Draw downrange_sd_m",
+      "display": "5.074",
+      "expected": 5.073755657494101,
+      "rounding_tolerance": 0.0005000000050737557,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Draw target_rmse_m",
+      "display": "6.217",
+      "expected": 6.217336558925598,
+      "rounding_tolerance": 0.0005000000062173366,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Draw absolute_sg",
+      "display": "+0.181",
+      "expected": 0.181097411358938,
+      "rounding_tolerance": 0.0005000000001810974,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Draw estimate",
+      "display": "-7.450e-04",
+      "expected": -0.000744997384623318,
+      "rounding_tolerance": 5.0000000744997384e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Draw lower_95",
+      "display": "-8.996e-04",
+      "expected": -0.0008996071841677639,
+      "rounding_tolerance": 5.000000089960718e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Draw upper_95",
+      "display": "-5.795e-04",
+      "expected": -0.0005794542262540843,
+      "rounding_tolerance": 5.0000000579454224e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Fade support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Fade lateral_sd_m",
+      "display": "2.509",
+      "expected": 2.5093950720708116,
+      "rounding_tolerance": 0.000500000002509395,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Fade downrange_sd_m",
+      "display": "5.107",
+      "expected": 5.107223101205872,
+      "rounding_tolerance": 0.0005000000051072231,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Fade target_rmse_m",
+      "display": "6.211",
+      "expected": 6.211295131663287,
+      "rounding_tolerance": 0.0005000000062112952,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Fade absolute_sg",
+      "display": "+0.1827",
+      "expected": 0.1827357705298169,
+      "rounding_tolerance": 5.000000018273577e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Fade estimate",
+      "display": "+8.934e-04",
+      "expected": 0.0008933617862555983,
+      "rounding_tolerance": 5.000000089336178e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Fade lower_95",
+      "display": "+7.090e-04",
+      "expected": 0.0007089665616960485,
+      "rounding_tolerance": 5.000000070896656e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C10 Fade upper_95",
+      "display": "+0.001078",
+      "expected": 0.001077775678132865,
+      "rounding_tolerance": 5.000000010777756e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Straight lateral_sd_m",
+      "display": "5.104",
+      "expected": 5.103730096978897,
+      "rounding_tolerance": 0.0005000000051037301,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Straight downrange_sd_m",
+      "display": "2.330",
+      "expected": 2.329545896846365,
+      "rounding_tolerance": 0.0005000000023295459,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Straight target_rmse_m",
+      "display": "5.617",
+      "expected": 5.616764998139133,
+      "rounding_tolerance": 0.000500000005616765,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Straight absolute_sg",
+      "display": "+0.295",
+      "expected": 0.2950795995978442,
+      "rounding_tolerance": 0.0005000000002950796,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Draw lateral_sd_m",
+      "display": "5.178",
+      "expected": 5.177839343469152,
+      "rounding_tolerance": 0.0005000000051778394,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Draw downrange_sd_m",
+      "display": "2.175",
+      "expected": 2.1747825494679485,
+      "rounding_tolerance": 0.0005000000021747826,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Draw target_rmse_m",
+      "display": "5.622",
+      "expected": 5.622395134058794,
+      "rounding_tolerance": 0.0005000000056223951,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Draw absolute_sg",
+      "display": "+0.2946",
+      "expected": 0.2945804420432429,
+      "rounding_tolerance": 5.000000029458044e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Draw estimate",
+      "display": "-4.992e-04",
+      "expected": -0.0004991575546013074,
+      "rounding_tolerance": 5.000000049915755e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Draw lower_95",
+      "display": "-5.776e-04",
+      "expected": -0.0005776302928350938,
+      "rounding_tolerance": 5.000000057763029e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Draw upper_95",
+      "display": "-4.544e-04",
+      "expected": -0.000454438117389022,
+      "rounding_tolerance": 5.000000045443812e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Fade lateral_sd_m",
+      "display": "5.015",
+      "expected": 5.014651587152055,
+      "rounding_tolerance": 0.0005000000050146516,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Fade downrange_sd_m",
+      "display": "2.483",
+      "expected": 2.4828871930008485,
+      "rounding_tolerance": 0.0005000000024828872,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Fade target_rmse_m",
+      "display": "5.602",
+      "expected": 5.60235281437927,
+      "rounding_tolerance": 0.0005000000056023528,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Fade absolute_sg",
+      "display": "+0.296",
+      "expected": 0.29614655510069665,
+      "rounding_tolerance": 0.0005000000002961466,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Fade estimate",
+      "display": "+0.001067",
+      "expected": 0.0010669555028524154,
+      "rounding_tolerance": 5.000000010669555e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Fade lower_95",
+      "display": "+9.861e-04",
+      "expected": 0.0009860655573140106,
+      "rounding_tolerance": 5.0000000986065555e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C11 Fade upper_95",
+      "display": "+0.001182",
+      "expected": 0.0011823456196609781,
+      "rounding_tolerance": 5.000000011823456e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Straight support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Straight lateral_sd_m",
+      "display": "4.993",
+      "expected": 4.9926311514380535,
+      "rounding_tolerance": 0.0005000000049926312,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Straight downrange_sd_m",
+      "display": "5.448",
+      "expected": 5.448351128297243,
+      "rounding_tolerance": 0.0005000000054483511,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Straight target_rmse_m",
+      "display": "7.853",
+      "expected": 7.853130500425296,
+      "rounding_tolerance": 0.0005000000078531305,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Straight absolute_sg",
+      "display": "+0.0722",
+      "expected": 0.07221941702596886,
+      "rounding_tolerance": 5.000000007221942e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Draw support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Draw lateral_sd_m",
+      "display": "5.063",
+      "expected": 5.063341708741055,
+      "rounding_tolerance": 0.0005000000050633417,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Draw downrange_sd_m",
+      "display": "5.387",
+      "expected": 5.386764964058746,
+      "rounding_tolerance": 0.0005000000053867649,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Draw target_rmse_m",
+      "display": "7.858",
+      "expected": 7.857712012906325,
+      "rounding_tolerance": 0.000500000007857712,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Draw absolute_sg",
+      "display": "+0.0714",
+      "expected": 0.07141414461952926,
+      "rounding_tolerance": 5.000000007141415e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Draw estimate",
+      "display": "-8.053e-04",
+      "expected": -0.000805272406439605,
+      "rounding_tolerance": 5.00000008052724e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Draw lower_95",
+      "display": "-0.001038",
+      "expected": -0.0010375654126761375,
+      "rounding_tolerance": 5.000000010375654e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Draw upper_95",
+      "display": "-5.918e-04",
+      "expected": -0.0005917861027988725,
+      "rounding_tolerance": 5.00000005917861e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Fade support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Fade lateral_sd_m",
+      "display": "4.909",
+      "expected": 4.908739483756113,
+      "rounding_tolerance": 0.0005000000049087394,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Fade downrange_sd_m",
+      "display": "5.513",
+      "expected": 5.512515105681582,
+      "rounding_tolerance": 0.0005000000055125152,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Fade target_rmse_m",
+      "display": "7.844",
+      "expected": 7.844029814145005,
+      "rounding_tolerance": 0.0005000000078440298,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Fade absolute_sg",
+      "display": "+0.0733",
+      "expected": 0.07333031849710539,
+      "rounding_tolerance": 5.000000007333032e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Fade estimate",
+      "display": "+0.00111",
+      "expected": 0.0011109014711365183,
+      "rounding_tolerance": 5.000000001110902e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Fade lower_95",
+      "display": "+8.442e-04",
+      "expected": 0.0008441733823956837,
+      "rounding_tolerance": 5.000000084417338e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C12 Fade upper_95",
+      "display": "+0.001355",
+      "expected": 0.0013554839330177611,
+      "rounding_tolerance": 5.000000013554839e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Straight lateral_sd_m",
+      "display": "2.559",
+      "expected": 2.559371412944812,
+      "rounding_tolerance": 0.0005000000025593715,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Straight downrange_sd_m",
+      "display": "1.164",
+      "expected": 1.1643573695007479,
+      "rounding_tolerance": 0.0005000000011643574,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Straight target_rmse_m",
+      "display": "2.812",
+      "expected": 2.812496828557215,
+      "rounding_tolerance": 0.0005000000028124969,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Straight absolute_sg",
+      "display": "+0.537",
+      "expected": 0.5365351568180409,
+      "rounding_tolerance": 0.0005000000005365351,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Draw lateral_sd_m",
+      "display": "2.629",
+      "expected": 2.628667038342244,
+      "rounding_tolerance": 0.000500000002628667,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Draw downrange_sd_m",
+      "display": "1.006",
+      "expected": 1.0060550780177888,
+      "rounding_tolerance": 0.0005000000010060551,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Draw target_rmse_m",
+      "display": "2.815",
+      "expected": 2.8152917520271976,
+      "rounding_tolerance": 0.0005000000028152917,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Draw absolute_sg",
+      "display": "+0.536",
+      "expected": 0.5361373400096866,
+      "rounding_tolerance": 0.0005000000005361373,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Draw estimate",
+      "display": "-3.978e-04",
+      "expected": -0.00039781680835424563,
+      "rounding_tolerance": 5.0000000397816804e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Draw lower_95",
+      "display": "-4.106e-04",
+      "expected": -0.0004105793744515264,
+      "rounding_tolerance": 5.000000041057937e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Draw upper_95",
+      "display": "-3.851e-04",
+      "expected": -0.0003851088886991594,
+      "rounding_tolerance": 5.000000038510889e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Fade lateral_sd_m",
+      "display": "2.460",
+      "expected": 2.4600953225618256,
+      "rounding_tolerance": 0.0005000000024600953,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Fade downrange_sd_m",
+      "display": "1.319",
+      "expected": 1.3191247103477812,
+      "rounding_tolerance": 0.0005000000013191247,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Fade target_rmse_m",
+      "display": "2.792",
+      "expected": 2.7922027594238137,
+      "rounding_tolerance": 0.0005000000027922028,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Fade absolute_sg",
+      "display": "+0.539",
+      "expected": 0.5390877255830255,
+      "rounding_tolerance": 0.0005000000005390878,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Fade estimate",
+      "display": "+0.0025526",
+      "expected": 0.00255256876498472,
+      "rounding_tolerance": 5.0000002552568764e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Fade lower_95",
+      "display": "+0.00252",
+      "expected": 0.0025200337078003718,
+      "rounding_tolerance": 5.000000002520034e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C13 Fade upper_95",
+      "display": "+0.00258",
+      "expected": 0.0025800222645107466,
+      "rounding_tolerance": 5.000000002580023e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Straight support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Straight lateral_sd_m",
+      "display": "2.551",
+      "expected": 2.5510394938758996,
+      "rounding_tolerance": 0.0005000000025510395,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Straight downrange_sd_m",
+      "display": "5.090",
+      "expected": 5.090247206765963,
+      "rounding_tolerance": 0.0005000000050902472,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Straight target_rmse_m",
+      "display": "6.215",
+      "expected": 6.214551041298364,
+      "rounding_tolerance": 0.000500000006214551,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Straight absolute_sg",
+      "display": "+0.182",
+      "expected": 0.1818424087435613,
+      "rounding_tolerance": 0.0005000000001818424,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Draw support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Draw lateral_sd_m",
+      "display": "2.619",
+      "expected": 2.6194612986131744,
+      "rounding_tolerance": 0.0005000000026194613,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Draw downrange_sd_m",
+      "display": "5.058",
+      "expected": 5.05770690954295,
+      "rounding_tolerance": 0.0005000000050577069,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Draw target_rmse_m",
+      "display": "6.219",
+      "expected": 6.219282461177282,
+      "rounding_tolerance": 0.0005000000062192825,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Draw absolute_sg",
+      "display": "+0.1805",
+      "expected": 0.18048668882315286,
+      "rounding_tolerance": 5.000000018048669e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Draw estimate",
+      "display": "-0.001356",
+      "expected": -0.0013557199204084474,
+      "rounding_tolerance": 5.000000013557199e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Draw lower_95",
+      "display": "-0.00165",
+      "expected": -0.001651328160000656,
+      "rounding_tolerance": 5.000000001651328e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Draw upper_95",
+      "display": "-0.001025",
+      "expected": -0.0010252767808334937,
+      "rounding_tolerance": 5.000000010252767e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Fade support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Fade lateral_sd_m",
+      "display": "2.463",
+      "expected": 2.463403845347204,
+      "rounding_tolerance": 0.0005000000024634038,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Fade downrange_sd_m",
+      "display": "5.125",
+      "expected": 5.124679649311225,
+      "rounding_tolerance": 0.0005000000051246797,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Fade target_rmse_m",
+      "display": "6.208",
+      "expected": 6.2077468761993755,
+      "rounding_tolerance": 0.0005000000062077469,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Fade absolute_sg",
+      "display": "+0.184",
+      "expected": 0.18381734020768278,
+      "rounding_tolerance": 0.0005000000001838174,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Fade estimate",
+      "display": "+0.001975",
+      "expected": 0.001974931464121476,
+      "rounding_tolerance": 5.000000019749314e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Fade lower_95",
+      "display": "+0.001623",
+      "expected": 0.001622698230536737,
+      "rounding_tolerance": 5.000000016226982e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C14 Fade upper_95",
+      "display": "+0.002286",
+      "expected": 0.002286495553933502,
+      "rounding_tolerance": 5.000000022864955e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Straight lateral_sd_m",
+      "display": "5.104",
+      "expected": 5.103730096978897,
+      "rounding_tolerance": 0.0005000000051037301,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Straight downrange_sd_m",
+      "display": "2.330",
+      "expected": 2.329545896846365,
+      "rounding_tolerance": 0.0005000000023295459,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Straight target_rmse_m",
+      "display": "5.617",
+      "expected": 5.616764998139133,
+      "rounding_tolerance": 0.000500000005616765,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Straight absolute_sg",
+      "display": "+0.295",
+      "expected": 0.2950795995978442,
+      "rounding_tolerance": 0.0005000000002950796,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Draw lateral_sd_m",
+      "display": "5.236",
+      "expected": 5.236491489112475,
+      "rounding_tolerance": 0.0005000000052364915,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Draw downrange_sd_m",
+      "display": "2.018",
+      "expected": 2.018161193234632,
+      "rounding_tolerance": 0.0005000000020181613,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Draw target_rmse_m",
+      "display": "5.618",
+      "expected": 5.618187284976655,
+      "rounding_tolerance": 0.0005000000056181873,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Draw absolute_sg",
+      "display": "+0.295",
+      "expected": 0.29479132816823905,
+      "rounding_tolerance": 0.0005000000002947913,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Draw estimate",
+      "display": "-2.883e-04",
+      "expected": -0.00028827142960523414,
+      "rounding_tolerance": 5.000000028827143e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Draw lower_95",
+      "display": "-4.426e-04",
+      "expected": -0.00044262025569419695,
+      "rounding_tolerance": 5.0000000442620254e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Draw upper_95",
+      "display": "-1.306e-04",
+      "expected": -0.00013058616003233314,
+      "rounding_tolerance": 5.000000013058616e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Fade lateral_sd_m",
+      "display": "4.911",
+      "expected": 4.911326236285962,
+      "rounding_tolerance": 0.0005000000049113262,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Fade downrange_sd_m",
+      "display": "2.635",
+      "expected": 2.635411337785102,
+      "rounding_tolerance": 0.0005000000026354113,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Fade target_rmse_m",
+      "display": "5.581",
+      "expected": 5.580586712186744,
+      "rounding_tolerance": 0.0005000000055805867,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Fade absolute_sg",
+      "display": "+0.2977",
+      "expected": 0.29766123362948876,
+      "rounding_tolerance": 5.000000029766124e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Fade estimate",
+      "display": "+0.002582",
+      "expected": 0.0025816340316445357,
+      "rounding_tolerance": 5.00000002581634e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Fade lower_95",
+      "display": "+0.002453",
+      "expected": 0.002452822708401985,
+      "rounding_tolerance": 5.000000024528226e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C15 Fade upper_95",
+      "display": "+0.002736",
+      "expected": 0.0027363617926215254,
+      "rounding_tolerance": 5.000000027363617e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Straight support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Straight lateral_sd_m",
+      "display": "4.993",
+      "expected": 4.9926311514380535,
+      "rounding_tolerance": 0.0005000000049926312,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Straight downrange_sd_m",
+      "display": "5.448",
+      "expected": 5.448351128297243,
+      "rounding_tolerance": 0.0005000000054483511,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Straight target_rmse_m",
+      "display": "7.853",
+      "expected": 7.853130500425296,
+      "rounding_tolerance": 0.0005000000078531305,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Straight absolute_sg",
+      "display": "+0.0722",
+      "expected": 0.07221941702596886,
+      "rounding_tolerance": 5.000000007221942e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Draw support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Draw lateral_sd_m",
+      "display": "5.120",
+      "expected": 5.1203401651420615,
+      "rounding_tolerance": 0.0005000000051203401,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Draw downrange_sd_m",
+      "display": "5.328",
+      "expected": 5.327758593716028,
+      "rounding_tolerance": 0.0005000000053277586,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Draw target_rmse_m",
+      "display": "7.857",
+      "expected": 7.856973197837385,
+      "rounding_tolerance": 0.0005000000078569732,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Draw absolute_sg",
+      "display": "+0.0712",
+      "expected": 0.07116655271349691,
+      "rounding_tolerance": 5.000000007116655e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Draw estimate",
+      "display": "-0.001053",
+      "expected": -0.0010528643124719517,
+      "rounding_tolerance": 5.000000010528643e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Draw lower_95",
+      "display": "-0.001428",
+      "expected": -0.0014284417050673154,
+      "rounding_tolerance": 5.000000014284416e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Draw upper_95",
+      "display": "-6.655e-04",
+      "expected": -0.0006655062897350165,
+      "rounding_tolerance": 5.000000066550629e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Fade support",
+      "display": "9996",
+      "expected": 9996,
+      "rounding_tolerance": 0.500000009996,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Fade lateral_sd_m",
+      "display": "4.812",
+      "expected": 4.812413043933132,
+      "rounding_tolerance": 0.0005000000048124131,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Fade downrange_sd_m",
+      "display": "5.579",
+      "expected": 5.579262975021733,
+      "rounding_tolerance": 0.000500000005579263,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Fade target_rmse_m",
+      "display": "7.831",
+      "expected": 7.831219847293977,
+      "rounding_tolerance": 0.0005000000078312198,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Fade absolute_sg",
+      "display": "+0.0745",
+      "expected": 0.07451321929029243,
+      "rounding_tolerance": 5.000000007451322e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Fade estimate",
+      "display": "+0.002294",
+      "expected": 0.0022938022643235758,
+      "rounding_tolerance": 5.000000022938023e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Fade lower_95",
+      "display": "+0.00193",
+      "expected": 0.0019305516115089587,
+      "rounding_tolerance": 5.000000001930552e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C16 Fade upper_95",
+      "display": "+0.002645",
+      "expected": 0.0026454744396299298,
+      "rounding_tolerance": 5.000000026454745e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Straight lateral_sd_m",
+      "display": "1.102",
+      "expected": 1.1019152415584275,
+      "rounding_tolerance": 0.0005000000011019152,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Straight downrange_sd_m",
+      "display": "1.145",
+      "expected": 1.1451148674494898,
+      "rounding_tolerance": 0.0005000000011451148,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Straight target_rmse_m",
+      "display": "1.589",
+      "expected": 1.5894576612309668,
+      "rounding_tolerance": 0.0005000000015894576,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Straight absolute_sg",
+      "display": "+0.569",
+      "expected": 0.5690509508919609,
+      "rounding_tolerance": 0.000500000000569051,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Draw lateral_sd_m",
+      "display": "1.120",
+      "expected": 1.1202677608246725,
+      "rounding_tolerance": 0.0005000000011202677,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Draw downrange_sd_m",
+      "display": "1.092",
+      "expected": 1.0916255530148038,
+      "rounding_tolerance": 0.0005000000010916256,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Draw target_rmse_m",
+      "display": "1.564",
+      "expected": 1.5644527857295916,
+      "rounding_tolerance": 0.0005000000015644528,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Draw absolute_sg",
+      "display": "+0.573",
+      "expected": 0.573484876419933,
+      "rounding_tolerance": 0.0005000000005734848,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Draw estimate",
+      "display": "+0.004434",
+      "expected": 0.004433925527972051,
+      "rounding_tolerance": 5.000000044339255e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Draw lower_95",
+      "display": "+0.004363",
+      "expected": 0.004363272128619715,
+      "rounding_tolerance": 5.000000043632721e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Draw upper_95",
+      "display": "+0.004502",
+      "expected": 0.004501976200912722,
+      "rounding_tolerance": 5.000000045019762e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Fade lateral_sd_m",
+      "display": "1.082",
+      "expected": 1.0816807701801636,
+      "rounding_tolerance": 0.0005000000010816808,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Fade downrange_sd_m",
+      "display": "1.198",
+      "expected": 1.1984535787262849,
+      "rounding_tolerance": 0.0005000000011984536,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Fade target_rmse_m",
+      "display": "1.615",
+      "expected": 1.6146822787640756,
+      "rounding_tolerance": 0.0005000000016146822,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Fade absolute_sg",
+      "display": "+0.565",
+      "expected": 0.5646010990272211,
+      "rounding_tolerance": 0.0005000000005646011,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Fade estimate",
+      "display": "-0.00445",
+      "expected": -0.004449851864739739,
+      "rounding_tolerance": 5.000000004449852e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Fade lower_95",
+      "display": "-0.004517",
+      "expected": -0.00451668884298232,
+      "rounding_tolerance": 5.000000045166888e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C17 Fade upper_95",
+      "display": "-0.00438",
+      "expected": -0.004380068485324844,
+      "rounding_tolerance": 5.000000004380069e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Straight support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Straight lateral_sd_m",
+      "display": "1.074",
+      "expected": 1.0742797900037906,
+      "rounding_tolerance": 0.0005000000010742798,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Straight downrange_sd_m",
+      "display": "4.001",
+      "expected": 4.00124809209157,
+      "rounding_tolerance": 0.0005000000040012481,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Straight target_rmse_m",
+      "display": "4.512",
+      "expected": 4.5123581401248956,
+      "rounding_tolerance": 0.0005000000045123582,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Straight absolute_sg",
+      "display": "+0.191",
+      "expected": 0.19118657494270486,
+      "rounding_tolerance": 0.0005000000001911866,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Draw support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Draw lateral_sd_m",
+      "display": "1.092",
+      "expected": 1.091999697621707,
+      "rounding_tolerance": 0.0005000000010919997,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Draw downrange_sd_m",
+      "display": "3.987",
+      "expected": 3.986645994743399,
+      "rounding_tolerance": 0.000500000003986646,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Draw target_rmse_m",
+      "display": "4.504",
+      "expected": 4.5041860060678225,
+      "rounding_tolerance": 0.000500000004504186,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Draw absolute_sg",
+      "display": "+0.1913",
+      "expected": 0.19128165780344816,
+      "rounding_tolerance": 5.000000019128166e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Draw estimate",
+      "display": "+9.508e-05",
+      "expected": 9.508286074337285e-05,
+      "rounding_tolerance": 5.0000000950828606e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Draw lower_95",
+      "display": "-6.221e-05",
+      "expected": -6.220824133306044e-05,
+      "rounding_tolerance": 5.000000062208241e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Draw upper_95",
+      "display": "+2.800e-04",
+      "expected": 0.0002799945735120517,
+      "rounding_tolerance": 5.0000000279994574e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Fade support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Fade lateral_sd_m",
+      "display": "1.056",
+      "expected": 1.05558936821086,
+      "rounding_tolerance": 0.0005000000010555893,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Fade downrange_sd_m",
+      "display": "4.015",
+      "expected": 4.014940551567068,
+      "rounding_tolerance": 0.0005000000040149405,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Fade target_rmse_m",
+      "display": "4.520",
+      "expected": 4.519717602497237,
+      "rounding_tolerance": 0.0005000000045197176,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Fade absolute_sg",
+      "display": "+0.1913",
+      "expected": 0.19128047406514484,
+      "rounding_tolerance": 5.000000019128048e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Fade estimate",
+      "display": "+9.390e-05",
+      "expected": 9.389912244001297e-05,
+      "rounding_tolerance": 5.000000093899123e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Fade lower_95",
+      "display": "-3.145e-05",
+      "expected": -3.145027987597752e-05,
+      "rounding_tolerance": 5.00000003145028e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C18 Fade upper_95",
+      "display": "+2.411e-04",
+      "expected": 0.0002411445166358826,
+      "rounding_tolerance": 5.0000000241144514e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Straight lateral_sd_m",
+      "display": "2.201",
+      "expected": 2.20081277462137,
+      "rounding_tolerance": 0.0005000000022008128,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Straight downrange_sd_m",
+      "display": "2.286",
+      "expected": 2.286090666304557,
+      "rounding_tolerance": 0.0005000000022860907,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Straight target_rmse_m",
+      "display": "3.176",
+      "expected": 3.1759588916680417,
+      "rounding_tolerance": 0.0005000000031759589,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Straight absolute_sg",
+      "display": "+0.344",
+      "expected": 0.3439964596350485,
+      "rounding_tolerance": 0.0005000000003439964,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Draw lateral_sd_m",
+      "display": "2.237",
+      "expected": 2.236550313838219,
+      "rounding_tolerance": 0.0005000000022365504,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Draw downrange_sd_m",
+      "display": "2.180",
+      "expected": 2.179685651111268,
+      "rounding_tolerance": 0.0005000000021796857,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Draw target_rmse_m",
+      "display": "3.126",
+      "expected": 3.125692593719878,
+      "rounding_tolerance": 0.0005000000031256926,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Draw absolute_sg",
+      "display": "+0.3495",
+      "expected": 0.34952306835551655,
+      "rounding_tolerance": 5.000000034952307e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Draw estimate",
+      "display": "+0.005527",
+      "expected": 0.005526608720468065,
+      "rounding_tolerance": 5.000000055266087e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Draw lower_95",
+      "display": "+0.005466",
+      "expected": 0.0054655311492273605,
+      "rounding_tolerance": 5.000000054655311e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Draw upper_95",
+      "display": "+0.005576",
+      "expected": 0.005576311501475418,
+      "rounding_tolerance": 5.000000055763115e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Fade lateral_sd_m",
+      "display": "2.161",
+      "expected": 2.1613353795260735,
+      "rounding_tolerance": 0.0005000000021613354,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Fade downrange_sd_m",
+      "display": "2.392",
+      "expected": 2.3922501941339482,
+      "rounding_tolerance": 0.0005000000023922503,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Fade target_rmse_m",
+      "display": "3.227",
+      "expected": 3.226656714517627,
+      "rounding_tolerance": 0.0005000000032266567,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Fade absolute_sg",
+      "display": "+0.3385",
+      "expected": 0.338509511481143,
+      "rounding_tolerance": 5.0000000338509517e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Fade estimate",
+      "display": "-0.005487",
+      "expected": -0.005486948153905506,
+      "rounding_tolerance": 5.000000054869481e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Fade lower_95",
+      "display": "-0.005537",
+      "expected": -0.005537317455304703,
+      "rounding_tolerance": 5.000000055373175e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C19 Fade upper_95",
+      "display": "-0.005427",
+      "expected": -0.0054266215216518575,
+      "rounding_tolerance": 5.000000054266215e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Straight support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Straight lateral_sd_m",
+      "display": "2.138",
+      "expected": 2.1378682852990294,
+      "rounding_tolerance": 0.0005000000021378683,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Straight downrange_sd_m",
+      "display": "4.431",
+      "expected": 4.431038555936541,
+      "rounding_tolerance": 0.0005000000044310386,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Straight target_rmse_m",
+      "display": "5.260",
+      "expected": 5.259624029187918,
+      "rounding_tolerance": 0.000500000005259624,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Straight absolute_sg",
+      "display": "+0.1011",
+      "expected": 0.10111118029419923,
+      "rounding_tolerance": 5.0000000101111186e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Draw support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Draw lateral_sd_m",
+      "display": "2.172",
+      "expected": 2.1720528086541404,
+      "rounding_tolerance": 0.0005000000021720528,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Draw downrange_sd_m",
+      "display": "4.380",
+      "expected": 4.3795866596228565,
+      "rounding_tolerance": 0.0005000000043795867,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Draw target_rmse_m",
+      "display": "5.232",
+      "expected": 5.231557311340193,
+      "rounding_tolerance": 0.0005000000052315573,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Draw absolute_sg",
+      "display": "+0.1016",
+      "expected": 0.10159557845857033,
+      "rounding_tolerance": 5.000000010159558e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Draw estimate",
+      "display": "+4.844e-04",
+      "expected": 0.0004843981643710978,
+      "rounding_tolerance": 5.000000048439816e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Draw lower_95",
+      "display": "+3.075e-04",
+      "expected": 0.0003075226887943026,
+      "rounding_tolerance": 5.000000030752269e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Draw upper_95",
+      "display": "+6.523e-04",
+      "expected": 0.0006522765451755754,
+      "rounding_tolerance": 5.0000000652276545e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Fade support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Fade lateral_sd_m",
+      "display": "2.101",
+      "expected": 2.100519438533813,
+      "rounding_tolerance": 0.0005000000021005194,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Fade downrange_sd_m",
+      "display": "4.483",
+      "expected": 4.482867184635999,
+      "rounding_tolerance": 0.0005000000044828672,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Fade target_rmse_m",
+      "display": "5.287",
+      "expected": 5.287439886745447,
+      "rounding_tolerance": 0.0005000000052874399,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Fade absolute_sg",
+      "display": "+0.1008",
+      "expected": 0.10077746892416772,
+      "rounding_tolerance": 5.000000010077747e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Fade estimate",
+      "display": "-3.337e-04",
+      "expected": -0.0003337113700315144,
+      "rounding_tolerance": 5.0000000333711365e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Fade lower_95",
+      "display": "-5.016e-04",
+      "expected": -0.0005016453427555888,
+      "rounding_tolerance": 5.000000050164534e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C20 Fade upper_95",
+      "display": "-1.721e-04",
+      "expected": -0.00017205136832585546,
+      "rounding_tolerance": 5.000000017205137e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Straight lateral_sd_m",
+      "display": "1.102",
+      "expected": 1.1019152415584275,
+      "rounding_tolerance": 0.0005000000011019152,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Straight downrange_sd_m",
+      "display": "1.145",
+      "expected": 1.1451148674494898,
+      "rounding_tolerance": 0.0005000000011451148,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Straight target_rmse_m",
+      "display": "1.589",
+      "expected": 1.5894576612309668,
+      "rounding_tolerance": 0.0005000000015894576,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Straight absolute_sg",
+      "display": "+0.569",
+      "expected": 0.5690509508919609,
+      "rounding_tolerance": 0.000500000000569051,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Draw lateral_sd_m",
+      "display": "1.137",
+      "expected": 1.1367074619146518,
+      "rounding_tolerance": 0.0005000000011367075,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Draw downrange_sd_m",
+      "display": "1.038",
+      "expected": 1.0378997728926111,
+      "rounding_tolerance": 0.0005000000010378998,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Draw target_rmse_m",
+      "display": "1.540",
+      "expected": 1.539546391871209,
+      "rounding_tolerance": 0.0005000000015395464,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Draw absolute_sg",
+      "display": "+0.578",
+      "expected": 0.5779290132471046,
+      "rounding_tolerance": 0.000500000000577929,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Draw estimate",
+      "display": "+0.008878",
+      "expected": 0.008878062355143674,
+      "rounding_tolerance": 5.000000088780623e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Draw lower_95",
+      "display": "+0.008738",
+      "expected": 0.008737846175303628,
+      "rounding_tolerance": 5.000000087378462e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Draw upper_95",
+      "display": "+0.009015",
+      "expected": 0.009015448386456537,
+      "rounding_tolerance": 5.000000090154484e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Fade lateral_sd_m",
+      "display": "1.060",
+      "expected": 1.0595994343328377,
+      "rounding_tolerance": 0.0005000000010595995,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Fade downrange_sd_m",
+      "display": "1.252",
+      "expected": 1.251732494283186,
+      "rounding_tolerance": 0.0005000000012517325,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Fade target_rmse_m",
+      "display": "1.640",
+      "expected": 1.640263223082752,
+      "rounding_tolerance": 0.0005000000016402632,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Fade absolute_sg",
+      "display": "+0.560",
+      "expected": 0.560116627358193,
+      "rounding_tolerance": 0.0005000000005601166,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Fade estimate",
+      "display": "-0.008934",
+      "expected": -0.00893432353376787,
+      "rounding_tolerance": 5.000000089343235e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Fade lower_95",
+      "display": "-0.009068",
+      "expected": -0.009067910113062906,
+      "rounding_tolerance": 5.000000090679101e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C21 Fade upper_95",
+      "display": "-0.008798",
+      "expected": -0.008797751739735037,
+      "rounding_tolerance": 5.000000087977517e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Straight support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Straight lateral_sd_m",
+      "display": "1.074",
+      "expected": 1.0742797900037906,
+      "rounding_tolerance": 0.0005000000010742798,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Straight downrange_sd_m",
+      "display": "4.001",
+      "expected": 4.00124809209157,
+      "rounding_tolerance": 0.0005000000040012481,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Straight target_rmse_m",
+      "display": "4.512",
+      "expected": 4.5123581401248956,
+      "rounding_tolerance": 0.0005000000045123582,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Straight absolute_sg",
+      "display": "+0.191",
+      "expected": 0.19118657494270486,
+      "rounding_tolerance": 0.0005000000001911866,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Draw support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Draw lateral_sd_m",
+      "display": "1.109",
+      "expected": 1.108678109244904,
+      "rounding_tolerance": 0.0005000000011086782,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Draw downrange_sd_m",
+      "display": "3.971",
+      "expected": 3.9711056417180606,
+      "rounding_tolerance": 0.0005000000039711057,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Draw target_rmse_m",
+      "display": "4.495",
+      "expected": 4.495154249505183,
+      "rounding_tolerance": 0.0005000000044951543,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Draw absolute_sg",
+      "display": "+0.1914",
+      "expected": 0.19143787989757027,
+      "rounding_tolerance": 5.0000000191437885e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Draw estimate",
+      "display": "+2.513e-04",
+      "expected": 0.0002513049548654383,
+      "rounding_tolerance": 5.000000025130495e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Draw lower_95",
+      "display": "-3.605e-05",
+      "expected": -3.604852436822569e-05,
+      "rounding_tolerance": 5.0000000360485246e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Draw upper_95",
+      "display": "+5.326e-04",
+      "expected": 0.0005325912067969175,
+      "rounding_tolerance": 5.000000053259121e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Fade support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Fade lateral_sd_m",
+      "display": "1.036",
+      "expected": 1.036004891432779,
+      "rounding_tolerance": 0.000500000001036005,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Fade downrange_sd_m",
+      "display": "4.028",
+      "expected": 4.027752789118699,
+      "rounding_tolerance": 0.0005000000040277528,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Fade target_rmse_m",
+      "display": "4.526",
+      "expected": 4.526316273348623,
+      "rounding_tolerance": 0.0005000000045263163,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Fade absolute_sg",
+      "display": "+0.1915",
+      "expected": 0.19147849772049416,
+      "rounding_tolerance": 5.00000001914785e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Fade estimate",
+      "display": "+2.919e-04",
+      "expected": 0.0002919227777893537,
+      "rounding_tolerance": 5.0000000291922776e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Fade lower_95",
+      "display": "+3.620e-05",
+      "expected": 3.6197689663183434e-05,
+      "rounding_tolerance": 5.00000003619769e-09,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C22 Fade upper_95",
+      "display": "+5.922e-04",
+      "expected": 0.0005921619032916435,
+      "rounding_tolerance": 5.00000005921619e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Straight support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Straight lateral_sd_m",
+      "display": "2.201",
+      "expected": 2.20081277462137,
+      "rounding_tolerance": 0.0005000000022008128,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Straight downrange_sd_m",
+      "display": "2.286",
+      "expected": 2.286090666304557,
+      "rounding_tolerance": 0.0005000000022860907,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Straight target_rmse_m",
+      "display": "3.176",
+      "expected": 3.1759588916680417,
+      "rounding_tolerance": 0.0005000000031759589,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Straight absolute_sg",
+      "display": "+0.344",
+      "expected": 0.3439964596350485,
+      "rounding_tolerance": 0.0005000000003439964,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Draw support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Draw lateral_sd_m",
+      "display": "2.268",
+      "expected": 2.2684928109851743,
+      "rounding_tolerance": 0.0005000000022684928,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Draw downrange_sd_m",
+      "display": "2.073",
+      "expected": 2.0728697447153888,
+      "rounding_tolerance": 0.0005000000020728698,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Draw target_rmse_m",
+      "display": "3.076",
+      "expected": 3.0756242017233975,
+      "rounding_tolerance": 0.0005000000030756242,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Draw absolute_sg",
+      "display": "+0.355",
+      "expected": 0.35511355988052645,
+      "rounding_tolerance": 0.0005000000003551135,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Draw estimate",
+      "display": "+0.011117",
+      "expected": 0.011117100245477964,
+      "rounding_tolerance": 5.000000111171002e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Draw lower_95",
+      "display": "+0.010994",
+      "expected": 0.010993544758325062,
+      "rounding_tolerance": 5.000000109935448e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Draw upper_95",
+      "display": "+0.01122",
+      "expected": 0.011219336437250878,
+      "rounding_tolerance": 5.000000011219337e-06,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Fade support",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Fade lateral_sd_m",
+      "display": "2.118",
+      "expected": 2.118181513411924,
+      "rounding_tolerance": 0.0005000000021181815,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Fade downrange_sd_m",
+      "display": "2.498",
+      "expected": 2.4983382395951206,
+      "rounding_tolerance": 0.0005000000024983382,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Fade target_rmse_m",
+      "display": "3.278",
+      "expected": 3.2780494192560994,
+      "rounding_tolerance": 0.0005000000032780494,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Fade absolute_sg",
+      "display": "+0.333",
+      "expected": 0.33303049165187965,
+      "rounding_tolerance": 0.0005000000003330305,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Fade estimate",
+      "display": "-0.010966",
+      "expected": -0.010965967983168904,
+      "rounding_tolerance": 5.000000109659679e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Fade lower_95",
+      "display": "-0.011068",
+      "expected": -0.011068061975392694,
+      "rounding_tolerance": 5.00000011068062e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C23 Fade upper_95",
+      "display": "-0.010844",
+      "expected": -0.010844315728321823,
+      "rounding_tolerance": 5.000000108443157e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Straight support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Straight attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Straight lateral_sd_m",
+      "display": "2.138",
+      "expected": 2.1378682852990294,
+      "rounding_tolerance": 0.0005000000021378683,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Straight downrange_sd_m",
+      "display": "4.431",
+      "expected": 4.431038555936541,
+      "rounding_tolerance": 0.0005000000044310386,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Straight target_rmse_m",
+      "display": "5.260",
+      "expected": 5.259624029187918,
+      "rounding_tolerance": 0.000500000005259624,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Straight absolute_sg",
+      "display": "+0.1011",
+      "expected": 0.10111118029419923,
+      "rounding_tolerance": 5.0000000101111186e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Draw support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Draw attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Draw lateral_sd_m",
+      "display": "2.203",
+      "expected": 2.2030008084664336,
+      "rounding_tolerance": 0.0005000000022030008,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Draw downrange_sd_m",
+      "display": "4.328",
+      "expected": 4.328464647188038,
+      "rounding_tolerance": 0.0005000000043284647,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Draw target_rmse_m",
+      "display": "5.203",
+      "expected": 5.203096526900156,
+      "rounding_tolerance": 0.0005000000052030965,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Draw absolute_sg",
+      "display": "+0.1022",
+      "expected": 0.10215766411041799,
+      "rounding_tolerance": 5.0000000102157665e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Draw estimate",
+      "display": "+0.001046",
+      "expected": 0.0010464838162187527,
+      "rounding_tolerance": 5.000000010464838e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Draw lower_95",
+      "display": "+7.406e-04",
+      "expected": 0.0007406395903417094,
+      "rounding_tolerance": 5.0000000740639585e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Draw upper_95",
+      "display": "+0.001332",
+      "expected": 0.0013323229558774572,
+      "rounding_tolerance": 5.00000001332323e-07,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Fade support",
+      "display": "9999",
+      "expected": 9999,
+      "rounding_tolerance": 0.500000009999,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Fade attempts",
+      "display": "10000",
+      "expected": 10000,
+      "rounding_tolerance": 0.50000001,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Fade lateral_sd_m",
+      "display": "2.060",
+      "expected": 2.060088940612412,
+      "rounding_tolerance": 0.000500000002060089,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Fade downrange_sd_m",
+      "display": "4.535",
+      "expected": 4.535138395735808,
+      "rounding_tolerance": 0.0005000000045351384,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Fade target_rmse_m",
+      "display": "5.315",
+      "expected": 5.315170379853339,
+      "rounding_tolerance": 0.0005000000053151704,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Fade absolute_sg",
+      "display": "+0.1005",
+      "expected": 0.10048400585001513,
+      "rounding_tolerance": 5.000000010048401e-05,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Fade estimate",
+      "display": "-6.272e-04",
+      "expected": -0.0006271744441841137,
+      "rounding_tolerance": 5.000000062717444e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Fade lower_95",
+      "display": "-9.681e-04",
+      "expected": -0.0009681119547827299,
+      "rounding_tolerance": 5.000000096811195e-08,
+      "matches_display_precision": true
+    },
+    {
+      "field": "C24 Fade upper_95",
+      "display": "-2.936e-04",
+      "expected": -0.00029360825221030255,
+      "rounding_tolerance": 5.000000029360825e-08,
+      "matches_display_precision": true
+    }
+  ],
+  "max_selected_nominal_residual_m": 1.9997332019487617e-13,
+  "course_contexts": [
+    {
+      "club_id": "driver",
+      "start_lie": "tee",
+      "start_distance_m": 400.0,
+      "hole_distance_m": 400.0,
+      "fairway_half_width_m": 15.0,
+      "green_radius_m": null
+    },
+    {
+      "club_id": "seven_iron",
+      "start_lie": "fairway",
+      "start_distance_m": 127.88194166336235,
+      "hole_distance_m": null,
+      "fairway_half_width_m": null,
+      "green_radius_m": 15.0
+    },
+    {
+      "club_id": "pitching_wedge",
+      "start_lie": "fairway",
+      "start_distance_m": 77.40247724866299,
+      "hole_distance_m": null,
+      "fairway_half_width_m": null,
+      "green_radius_m": 15.0
+    }
+  ],
+  "selected_control_identities": [
+    {
+      "source_protocols": [
+        "original_control/1",
+        "driver-control-speed-bounds/1"
+      ],
+      "source_cells": [
+        "driver_lean0_curve2_rotation2_combined2",
+        "driver_lean5_curve2_rotation2_combined2"
+      ],
+      "common_six_n": 9940
+    },
+    {
+      "source_protocols": [
+        "pw-primary-face-bounds/1",
+        "pw-control-face-bounds/1"
+      ],
+      "source_cells": [
+        "pitching_wedge_lean0_curve2_rotation2_combined2",
+        "pitching_wedge_lean5_curve2_rotation2_combined2"
+      ],
+      "common_six_n": 9999
+    }
+  ],
+  "sources": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/selected_headline_traceability_v1/review.json": "f4cc8ab15c65167617ecda4be1ae408c47b1039171cb44ffd4a63d5f3cd515cd",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.csv": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.csv": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.md": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/control_aliases.json": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1/driver_lean0_curve2_rotation2_combined2/summary.json": "e1313f8cf8c699e2536cc3ee1c2c430b5fac7d3f396219b025d315b19858de71",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/summary.json": "038055a639246c267964e62b2f5f73683b3502b733a4246c0ab7f7740dabae4c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/summary.json": "078878c32284aa822aabf3fee2068e46907c68050ab546697a588ce1314b756b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/summary.json": "a107158ee7f608276495532f38de4580013feae92fc8836af61e330b8559f4f3"
+  }
+}

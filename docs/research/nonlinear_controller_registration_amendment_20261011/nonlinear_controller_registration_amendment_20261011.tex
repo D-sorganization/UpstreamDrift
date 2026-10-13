@@ -1,0 +1,68 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\title{Nonlinear-Controller Registration Authority Amendment}
+\author{UpstreamDrift Research Record}
+\date{11 October 2026}
+\begin{document}
+\maketitle
+
+\section*{Purpose and Scope}
+This standalone editable reference records a prospective authority amendment to
+the outcome-blind nonlinear-controller comparison registration. It is a
+calculation-level provenance record, not a new solver or plant qualification.
+The historical registration at
+\texttt{data/nonlinear\_controller\_comparison\_registration.json} retains its
+SHA-256 digest
+\texttt{4856de8cabd4a820c22c2bb3e25f9f97852c22bbb7f08d405702f9b10d64d7bf}.
+The new registration is
+\texttt{data/nonlinear\_controller\_comparison\_registration\_20261011.json};
+its SHA-256 digest is
+\texttt{892f1dedc18707a551c64b97154c262bc2cc7bb83c7d290ac0e337209b8b88f0}.
+The machine-readable amendment is
+\texttt{data/nonlinear\_controller\_registration\_amendment\_20261011.json}.
+
+\section*{Reviewed Authority Changes}
+Only three authority digests differ from the predecessor: the Python
+environment lock (\texttt{requirements.lock}), the ODE backend
+(\texttt{src/shared/python/simulation\_backends/ode\_backend.py}), and the
+double-pendulum implementation
+(\texttt{src/engines/pendulum\_models/python/double\_pendulum\_model/physics/double\_pendulum.py}).
+The amendment JSON records each previous and current digest. All other
+registration fields are identical after JSON parsing, including the
+three parent authorities, controller families, matched plant and coordinate
+contract, units, 24 disjoint evaluation trials, eight tuning trials, 1~ms
+integration step, 400-step horizon, torque bounds, event definition, objective,
+single-worker checkpoint rule, falsifiers, and fail-closed ranking rule.
+The ODE-backend change renames a protocol in a module docstring; the
+double-pendulum change adds a \texttt{refresh\_cache} wrapper around its existing
+parameter-cache method. Neither changes the equations in these files. The
+lockfile updates six package pins: anyio, fsspec, PyJWT, tornado, urllib3,
+and Werkzeug. These source-level observations explain the changed digests;
+they are not numerical requalification of the new authority set.
+
+\section*{Qualification and Inference Boundary}
+The prior manufactured solver qualification remains bound to the historical
+registration digest beginning \texttt{4856de8c}. The prior plant-transport
+report records an earlier historical registration digest beginning
+\texttt{e964b681}; this is preserved as its actual provenance rather than
+rewritten. Neither report qualifies the new registration. Fresh qualification
+against the current authority set is required before any controller comparison.
+No controller evaluation was run for this amendment, and no method is eligible
+for ranking. No participant, anatomical, coaching, or release-approval claim
+follows from this record.
+
+\section*{Reproduction and Acceptance}
+From the repository root, run
+\begin{verbatim}
+python -m scripts.research.proximal_distal_energy.nonlinear_controller_registration validate
+python -m pytest -q -n 0 tests/research/test_nonlinear_controller_registration_amendment.py
+sha256sum docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json
+\end{verbatim}
+Acceptance requires the historic digest to remain exact, the new registration
+to match the deterministic generator, the three authority changes to be
+exhaustive, and the protocol and zero-outcome/ranking fields to remain
+unchanged. The command validates registration identity only; it does not
+execute, qualify, or approve a controller campaign.
+\end{document}

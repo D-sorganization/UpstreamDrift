@@ -388,19 +388,19 @@ class TestFilterData:
     def test_filter_gt_returns_filtered_rows(self, loaded_engine) -> None:
         """filter_data('a', '>', 2.0) returns rows where a > 2."""
         result = loaded_engine.filter_data("a", ">", 2.0)
-        assert result.solver_status == "success"
+        assert result.success is True
         assert len(result.data) == 3  # rows with a=3,4,5
 
     def test_filter_eq_returns_matching_rows(self, loaded_engine) -> None:
         """filter_data('a', '==', 1.0) returns row where a == 1."""
         result = loaded_engine.filter_data("a", "==", 1.0)
-        assert result.solver_status == "success"
+        assert result.success is True
         assert len(result.data) == 1
 
     def test_filter_lt_returns_filtered_rows(self, loaded_engine) -> None:
         """filter_data('a', '<', 3.0) returns rows where a < 3."""
         result = loaded_engine.filter_data("a", "<", 3.0)
-        assert result.solver_status == "success"
+        assert result.success is True
         assert len(result.data) == 2
 
     def test_filter_no_data_raises(self, engine) -> None:
@@ -535,7 +535,7 @@ class TestCalculatedAndTransform:
     def test_add_calculated_column_creates_new_column(self, loaded_engine) -> None:
         """add_calculated_column creates a new column from an expression."""
         result = loaded_engine.add_calculated_column("c", "a * 2")
-        assert result.solver_status == "success"
+        assert result.success is True
         assert "c" in loaded_engine.get_column_names()
 
     def test_transform_column_log(self, loaded_engine) -> None:

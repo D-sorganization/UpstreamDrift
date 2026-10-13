@@ -1,0 +1,487 @@
+{
+  "scope": "72 baseline PNG assets in shaft-SD records 84\u201395; no whole-publication acceptance",
+  "status": "partial_hold",
+  "reviewer": "root",
+  "utc": "2026-10-11T02:43:47.437767+00:00",
+  "batch_inventory_sha256": "6b8fc6a66bdf6a6dc231ee133765b66ff72aace60fec7980cbea2d636d991f8b",
+  "command_receipt_sha256": "ee2a5ffaa326d3f66ec530617902860633ec4240f9585399df58d32e7eaa7ee4",
+  "all_assets_rehashed": 192,
+  "numeric_sha256": {
+    "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
+    "REPORT_SUPPLEMENT.csv": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+    "REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "REPORT_SUPPLEMENT_COMPARISONS.csv": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8",
+    "REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+    "REPORT_SUPPLEMENT_COMPARISONS.md": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721",
+    "control_aliases.json": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b"
+  },
+  "inspected_contacts": [
+    {
+      "path": "contact_084_1.jpg",
+      "sha256": "8c8a66b208ab937e0b068fcc0d0b014e332b11a50e5f8d3311afcc2063b22986"
+    },
+    {
+      "path": "contact_084_2.jpg",
+      "sha256": "9a60cb3d4a53cf9c462db23d4c90513f49d5bb3895df5b9b166c256db6c746bf"
+    },
+    {
+      "path": "contact_084_3.jpg",
+      "sha256": "9492f409bf211c1104bc8905d1f7abb7add4573d4f32c3cc42beb48f037a5c34"
+    },
+    {
+      "path": "contact_085_1.jpg",
+      "sha256": "d375cdec10b781aa9ddfd042c5ba6cc240626cfdb35205bef3104fe18b091996"
+    },
+    {
+      "path": "contact_085_2.jpg",
+      "sha256": "9179ae0a717d213e9a96360518c16719ce87e75b71a391f91e4c4667cc9f765f"
+    },
+    {
+      "path": "contact_085_3.jpg",
+      "sha256": "feb3023ad309f791deafea1bbea66929b0d82a122ccb8ba57a4abe79ca06b37a"
+    },
+    {
+      "path": "contact_086_1.jpg",
+      "sha256": "5901c1148a51814382a3547a99c9845687514bcb3269add2cce2fbe7cd667000"
+    },
+    {
+      "path": "contact_086_2.jpg",
+      "sha256": "4b4a14a471cdf81064fe28d55a33b28354ef7932c29245b1da079a160c967079"
+    },
+    {
+      "path": "contact_086_3.jpg",
+      "sha256": "9db6907f8d9941b6a8495ff96df710805c45793eab19dce0c1c01f085f11a5b5"
+    },
+    {
+      "path": "contact_087_1.jpg",
+      "sha256": "1990852115a0ef82a9495c2c69e20622017f0c231a9f7106531702c1daf60f82"
+    },
+    {
+      "path": "contact_087_2.jpg",
+      "sha256": "afbe16b6ebe62e5999953d7a76a3d38276c0cf9bb76bc1c66b59378c6cd8280a"
+    },
+    {
+      "path": "contact_087_3.jpg",
+      "sha256": "1a5f63cf99d67ed9b57870bb653a7543384404904730e04e065a45843bae348b"
+    },
+    {
+      "path": "contact_088_1.jpg",
+      "sha256": "127b1e18c26a033835954cbf8398a276055238b36ca75f12271c8d34f4f4bd3f"
+    },
+    {
+      "path": "contact_088_2.jpg",
+      "sha256": "c35c2f0e868c9cc469af674d0b41c97f3ba78d485ddadaa5a442d78013676c34"
+    },
+    {
+      "path": "contact_088_3.jpg",
+      "sha256": "5905b24c330532d9ac81397514882f3179e5bc9c32e331409b2b08adae710e65"
+    },
+    {
+      "path": "contact_089_1.jpg",
+      "sha256": "507420364770b9996862506fdc3f722fc744e377c9dc107bf0c0162770265663"
+    },
+    {
+      "path": "contact_089_2.jpg",
+      "sha256": "6adbe5b601d395549f834ee2bb06db53e8bdce8346908f583130628cb6a27116"
+    },
+    {
+      "path": "contact_089_3.jpg",
+      "sha256": "d9c7952a85c9cf5ff24f535ed4aa0217f6f32361949121f96d80cfc4a79ffde6"
+    },
+    {
+      "path": "contact_090_1.jpg",
+      "sha256": "c00f260f282465f06033498fbb1504d2d81a76cad97d9f7a8749fe239d18f66e"
+    },
+    {
+      "path": "contact_090_2.jpg",
+      "sha256": "e63ebd19b84328c0a62ed201c27ccff976dd2b77131cb0e43e6b98689362e43e"
+    },
+    {
+      "path": "contact_090_3.jpg",
+      "sha256": "e596ff6a654842721d5d2668927864fb73500762ebcb1c7f7f3f8603a22166a0"
+    },
+    {
+      "path": "contact_091_1.jpg",
+      "sha256": "d5940815d674ad88cf62d8883eeba57e7256019c80c68f1e7e65fc373b4ebfb4"
+    },
+    {
+      "path": "contact_091_2.jpg",
+      "sha256": "f6c7288b9eac4896bdd1e88011fdc6e14a8556ab7988c99c1aa267cc20f0e497"
+    },
+    {
+      "path": "contact_091_3.jpg",
+      "sha256": "5809e83afb6fd9d178c9831e9deb0363c4a50f596cf2c51e48300bb7e309811f"
+    },
+    {
+      "path": "contact_092_1.jpg",
+      "sha256": "f59904f0b6770245391547f89a8ed435a996d294f3b3b462fc786656b6349f30"
+    },
+    {
+      "path": "contact_092_2.jpg",
+      "sha256": "fbbce100308a4b26adfe4cfde100b1d6148300c0e27163af778ccb9301fc1d44"
+    },
+    {
+      "path": "contact_092_3.jpg",
+      "sha256": "d0023ce5a3651234056f2056f307f8de3880e6991ef453d6700a51c3349ddfcf"
+    },
+    {
+      "path": "contact_093_1.jpg",
+      "sha256": "167969a64175713750cecf5019ac1d1c4fe2befb44e8ead13b80a7ca02158c58"
+    },
+    {
+      "path": "contact_093_2.jpg",
+      "sha256": "180be4c28240b4da9407d84224399ceeaa0f328e9b0ab629c3705089558f666e"
+    },
+    {
+      "path": "contact_093_3.jpg",
+      "sha256": "3f3df685dc80c8949864e02cbbe08db0c8203071976bf47e73a08aeb2a766854"
+    },
+    {
+      "path": "contact_094_1.jpg",
+      "sha256": "9ca588031908efaa1be82051aa92e9ae84c8e5e0eade5e1cf100cde671a98399"
+    },
+    {
+      "path": "contact_094_2.jpg",
+      "sha256": "355e15ce45491422af0a46fb1de0875f9d574131caa76b608dc627046e4d1b10"
+    },
+    {
+      "path": "contact_094_3.jpg",
+      "sha256": "db3991a4afd45c2e1c88a3d02c82f181bb105beecebd7a486c6e135e7f415deb"
+    },
+    {
+      "path": "contact_095_1.jpg",
+      "sha256": "764074e7942089333391e967ffb8c947b27a288f5597953274ecf59647d9ae2f"
+    },
+    {
+      "path": "contact_095_2.jpg",
+      "sha256": "a0488d793bbc6996bccf7c189520d7afd63aa63fecb991c252c1798294b27073"
+    },
+    {
+      "path": "contact_095_3.jpg",
+      "sha256": "39dca2e0e81c33bae0b6b90f545a9c8e09708bc4d46d220fe0b65eee1b63895b"
+    }
+  ],
+  "full_size_originals_viewed": [
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.png",
+      "sha256": "e75f96a1a8d571feef79da64b25912af9372b13f9e681e48eee750230a94dec3"
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.png",
+      "sha256": "0349b49e8ba96ced125484cbc02b52e6bf7e3f1fcbec05f290b8fd84e3fd5fcd"
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density.png",
+      "sha256": "d78976a9ccb5077560434bdd7cadc3672cb97ec0336568cf8f25d7f51b2d2c02"
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_overhead_social.png",
+      "sha256": "d2dad3b276ff3f6dd992bb82d6014d8a0239b656e3591e7750d5f5e2f34cdafb"
+    }
+  ],
+  "records": [
+    {
+      "index": 84,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density_straight_social.png": "dc3431ecf7f9ade185d2519384868cb768560c7a597351eeb9700731ad8ffab5",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density_straight_social.pdf": "bdbfbe43c64d9c4b2e7a5be6e93ebf451e9e1796ae744d9af5f2a360353e1094",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density_straight_social.svg": "5f29f6597dad76f9503b6a6105a380ceefbbe7f9614b56ffe30c761ab59fd6c2",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density_draw_social.png": "106a31da110e9e1535a6de1d65b6f9987cabfd7ad2392865db7b3eddfffbd941",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density_draw_social.pdf": "e502e3aed0e48ef0b8f8369ddf25268da24c62d88e179036c834cb2dc9414189",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density_draw_social.svg": "a57cd714e9657e9b0f9f14126e0035f87e9edbbf6c36c1c69187e7c66b2b784b",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density_fade_social.png": "317c231ee7407130e97d5ce3e1a634e71da5e51394ecdb98140ab8a54b62e978",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density_fade_social.pdf": "1813284a3f0a2828e3e23393ff5f222d1f19fb954fe9a511a5e9aba615feacc1",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density_fade_social.svg": "a404e741245439cd588873b987fe2d6b70225e7a2fc1898420e1ea2275bba591",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density.png": "d93dbc7ecb4a214a7ca4a0ed81aab888b724bc314c98a50b023c88f47e5777f3",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density.pdf": "4fc34dd68cef3d22cbba2c0591fcad2c8bd66300d56c84f38bc6a3baf0e0327f",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_density.svg": "a58f3e365f60d29654c48684abcc8635943d7d83253e31235ee1b7dd46098bbb",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_overhead.png": "f5660c432cc38e185250a77121cdd9f510affc087145dc0496766334d62f9370",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_overhead.pdf": "2cc58dc2939bb59c2f6742da295a566b37c2a79cb18c861d23d4ba936700d3a9",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_overhead.svg": "ff642e0c852ca2d2682512b32074857f0d8883acd09a7b5aeb053a1e25225850",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean10_curve2_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_shaft_stri_287c88378a_overhead_social.png": "cecdcd4c956bded0a61330515ff7729e6fde394d0e74f337d27624db13e36c53"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    },
+    {
+      "index": 85,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density_straight_social.png": "4f18967d3ad8e559fd4b4b077aaa734805790fb107e2165fc9ed02d1d077c4e2",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density_straight_social.pdf": "91ed1fbe35341f10e7d4097a15ee8e7e63365ab91bb4f66c4f9882a5bab0a14d",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density_straight_social.svg": "4b024e49bc8d6cc57d355fcfbedc1909d697a552aeea892e3406de269a6c4217",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density_draw_social.png": "0417f99f9086934febfc61f0b507bda38c8b6f5403c4d514a909837f31d90e7f",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density_draw_social.pdf": "e2078295c0ae925b7869bc6d05583fc6adeba0afb9d52487ce3fa6148ea52ef2",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density_draw_social.svg": "86754a2c653d85bb892f401f15d4a4e17596f3eb6c9fd373c976db159ac7bd8b",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density_fade_social.png": "8205d604004e54c903f909d379dbe854d46f7c3c79cf4757a31c5f374135964e",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density_fade_social.pdf": "54bb06bc03b9e3eeb4f79581e51046a43edde9fdbe5bf7f8ade59d286bb69501",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density_fade_social.svg": "0ce9f994b65b0ab5afbed2b3740604a6ba9ce6570dc68e12c56d7d5ed682f082",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density.png": "d59e3b6dd87b1e936dda937826228671cf5a97ab979d06b0331ec91aebb2f47d",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density.pdf": "06aea128a0671c71c04c80e15f1fbe439174fc2cdd8ac7bdce6847b1dc929e1b",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_density.svg": "38786c85a5806130400049bd85f3f3ea68fafa6a68703b9e7905df4595e1de66",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_overhead.png": "6582b61ccd83acd073a149b763aab6bfde0b6b6286db6cc4ba12652cdb97587e",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_overhead.pdf": "b6d4b37658242844afff2f0e8055c05ca6296d370f049fa1561dbdc7edfca567",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_overhead.svg": "73ac6b1dac95a6ae1db27fbda9decbaf77e200127572bbb409cbf2af35508101",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined1_90p43_8c0a3ce341_overhead_social.png": "8ded161a761750f7c2cb5901d7167b1e8caac603e314ab37dca3df76ddf6f33e"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    },
+    {
+      "index": 86,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density_straight_social.png": "a78e504327c587cba4b587704c6c32ee9f86279f8c088d543dc5794522bbea72",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density_straight_social.pdf": "7a0c331a49680f6e42246cafbcdea996ba61a05b1a819992d8c77f392cce0f7a",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density_straight_social.svg": "98663e248b2a1543a3705d28e0771af79632510b995951ab81794ffa2ba259ef",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density_draw_social.png": "db3f7717b091c52109e08a776dc4fdfb96bdbdb02501a75dd76166e7c4d9e053",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density_draw_social.pdf": "c0711ef10e12688401878baa1853934cefc8fa1202ed6080b9b3f92646353af3",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density_draw_social.svg": "caabe999e7e0f0fc9c63e9e2ef26fbce65dd75994c6222a46af1ca7a2dd2ae39",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density_fade_social.png": "3d6d06329d1e8072419841515b251cfac04352a9467d01bd1cc04cbc405d766d",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density_fade_social.pdf": "498b43bae705019b2e456344f9e1506a658b372d3bc48226142816125e7e9e53",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density_fade_social.svg": "b61d9cc3fea9f78298c70ce80d9d97afeb35f3220dae7701496d25bcbfe86b6f",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density.png": "d58b8a4906c8328e24fb5dff3a1ad2e9c0b5478b192a21ac10d69b3f98afbbe1",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density.pdf": "2e8d43fa0b8cad3adb4b08d3160fb88f43f3602347d1ce652735bd43e9a8408c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_density.svg": "40561f96665b3ddf58761121127bbb65112e86d188f36578ae1129e5b7518d63",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_overhead.png": "f4bfcea81428d8a1a6c3261a3d91b8b2784c580dbcee8f5edbbb4784215d8d6f",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_overhead.pdf": "4a7fac554b96dd5b7f18c572620f3bb2ec4bcaeac2838ee1c6d1c969d5fd534a",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_overhead.svg": "c20370a6a918a2d36f7f64407d0cd379674265131d5a015204d5fc7a369cb355",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_combined2_90p43_ff27d61100_overhead_social.png": "1c597fddb7c370a95ad8b1c38c959044295b5b4309d2077dd71d8cb9c5d7535a"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    },
+    {
+      "index": 87,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density_straight_social.png": "0964498563af6ea48adb722562e143e89828e28124e37d5bc8059b2b72640d19",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density_straight_social.pdf": "45de824edcb7468a0d6bd0688ae17af1458e8bc6ae90643df27bf9d0420277c1",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density_straight_social.svg": "512f7e1161e0970e5d177a845d38021c0f6e232dce62846cac96fb6c25a9e8ca",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density_draw_social.png": "d7daee5cad10a25f0ed66e3d64c98c2ac5a26c624dca8f8c7bf37915029f2dc4",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density_draw_social.pdf": "78d7011be8536fb14da4ccfa590e32b82fa14b7601419db6ebbf542418387ba2",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density_draw_social.svg": "c655b882eb879a66855cbb2b198d74f8ff2214ad81bfd7086cc2c0e66892c7be",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density_fade_social.png": "1e5af7ecb0da13d936fd29534c95f0a0defc2cbd1324ee9261ff25eca9ae9747",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density_fade_social.pdf": "13dfafb8133ce733a22245fc29fc087048f6ad7c73bf73048865e0da41e4d359",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density_fade_social.svg": "d615d4e0604f6b8de1b9a5cad3c0b91476ae38bc86da610dd9da2c7bb29667cb",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.png": "e75f96a1a8d571feef79da64b25912af9372b13f9e681e48eee750230a94dec3",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.pdf": "0c8b784df3a51f2addfeb5d37b7d9abafee9cc4fd1e1c2ac8193ebecc63af4e6",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.svg": "5ee3967fe06f91d058c832cbdabf6e27d2cd873a50255df1887dedd371268342",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_overhead.png": "5555c5c26be888adb00e100fccf6071a74d4ebd03a8accf8881f8f8738e8feff",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_overhead.pdf": "3a4a1ddbc9e456c71041e9b59b77addaa955a9170d5f5c7556a2329c283fc0af",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_overhead.svg": "c51feada2b9ba2bf2fb48faa08bf0ae97c4900a2a2b092df56300df7793c7634",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_overhead_social.png": "d177053e17e39727cefd0e8602caee0967f3f554631792bd89c42986c34feab0"
+      },
+      "status": "partial_hold",
+      "finding": "Academic density legend/top-panel titles crowded; #12243 repair required."
+    },
+    {
+      "index": 88,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density_straight_social.png": "ad899855fe69298793234386f737963ecf00bd8a514cf5bebab5364ff4fc11dc",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density_straight_social.pdf": "acc092a4f3f4e6d3ceec55936057b15deb5bc44c1f2a0257a6e83174f03f9d62",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density_straight_social.svg": "bebdad976e91ecbc5737157ea7ea98a7939e5df103e17d868c7b32787eadcdec",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density_draw_social.png": "4786a91485af354a7aadee207aa764e2d452449edc6756fa1e6203b9b56e7495",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density_draw_social.pdf": "966adc72d4aaab504e9bcad2aa0920e3ad7e1e71a5567fe4fd01ec3d42f9838b",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density_draw_social.svg": "aa1835602c21d81031abe21f18296f20824565ce64e2778daf5f444388bb2f7d",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density_fade_social.png": "0e6aab630847479ef4eb892d3034ef56bae14b90574bb174e4437212a0fd3ec4",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density_fade_social.pdf": "20a9abc954dad0de5cd7cb282722d0ac9c969dbd2e6df7988715df92f72b1167",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density_fade_social.svg": "7370dc1ab9277f8ac8f2f1f3df3ba096595c8b1337e5f2952158963d3302612c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.png": "0349b49e8ba96ced125484cbc02b52e6bf7e3f1fcbec05f290b8fd84e3fd5fcd",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.pdf": "f5623b8a9e86ab4075dec9648633a19f977fd82dd1acd4e303188051e9e678fa",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.svg": "b3a4c7e07d0f347a31a3ee0df23c9eb8356640205c858d7da956346e0db934d8",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_overhead.png": "1a3639129d71156e64c7a48dc5696a818c6e89033d9cc2b2a65faa5ea13cf341",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_overhead.pdf": "e7456a3d8887be258ae02c30f26f98e47cffeb397c18357756c14e75e1f00708",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_overhead.svg": "01cf996fa4e77ddde621d2a68672fb23514f6d70ee531020ab08ca0c2b68188f",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_overhead_social.png": "890db8fde555efcada3f2da7e1fac934da04fc7a4580769a31dde3617f762ccb"
+      },
+      "status": "partial_hold",
+      "finding": "Academic density legend/top-panel titles crowded; #12243 repair required."
+    },
+    {
+      "index": 89,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density_straight_social.png": "716c46a389d13a77341fccc2349f0744fcbec026d3939c7f3f3b3331a9819c53",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density_straight_social.pdf": "77655d290bdb586e26ffed8f51f0dc3779cc655f10a9d0c9d3820a6990e2ca52",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density_straight_social.svg": "497b7ee15f1d6e40b3aa0eb17d69204c56cf969fa9f0b585bf26719873a54c84",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density_draw_social.png": "ef42c54d86387f88ca0f7d84a92019451305a23e2edf92d3b8fc5902b708d57a",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density_draw_social.pdf": "947c632fe24f8bb45b44dd3401d7a9ce917bc7306bc405d33b81b7350b7c551e",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density_draw_social.svg": "dcb682baea21e83328414e79d1ece2760abc73bea47923686470c13f7d8fdb70",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density_fade_social.png": "5c5a72fddabcffb0155331c141c93a8550d6ccf03bb995f8e10b87336945fc1b",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density_fade_social.pdf": "f0edd824619039df813e71dbb0d36a475244ed0189cbb8c436e702055a59d321",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density_fade_social.svg": "db669d08df5f9bc66d516f82197038e2a5d8d2d3d171066c876c76e6f0270d66",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density.png": "6a2f2f240f27a3d38c174dc5094b4a49c9b4bede2fa2c18345d8d09d09f0ab1c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density.pdf": "8fbf3765302ecc5dd43b4e2920486371d4070442751b9a8b6bb524a96935495f",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_density.svg": "6385667e4f4136b68d0cfeb2203bd7178b3bec95ce8de421f2a0a0c74eb55c1a",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_overhead.png": "607f7b6fdc37446c39267bb07b854b93924e931aeb41fc1970939e943ee1a9fe",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_overhead.pdf": "aa9e181538cf192ac6a745a42811d0ae8996855a694363da9dae1b4aa2375e3d",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_overhead.svg": "bc0cf686bf0209f5f6dd3a98de56095056cfcf264fef6e8ba9be0f0901a00202",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_only_90p_fc1aaa74a4_overhead_social.png": "77ffae9d825e0eb8da5c6aae0fb5cdb661303bcc09d544cf43d2b2915a863927"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    },
+    {
+      "index": 90,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density_straight_social.png": "b669729555283e462bc059ca60784dd538ba4ab693b74388bdd4029deb2e098c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density_straight_social.pdf": "1d1dcd0b2afcd1c0026e875d774f505ef914294a989227eafea5fc267320813c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density_straight_social.svg": "c5f35aeac5f85a07e03cd2d2cb42f0e9bf5f276534e4d245e58cb4a3fdf66ea1",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density_draw_social.png": "113b14a8fce17340c6ff6626769cc2d094132bdd27538c67dda7c173ac7ad099",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density_draw_social.pdf": "e5325509152c8968d3b453b366e88b81d69ba4ed5afe2a1a93c7dff83f69cf9b",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density_draw_social.svg": "91e6ab041aa84a746b8b5a13480d9d729fa28d418cebfd0301e35ef5f6d2b472",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density_fade_social.png": "b5e174d5bd1723fd13d777b30d2c7bae809569367938cf2b3143916ba6f284c9",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density_fade_social.pdf": "499424a0597dbb8f449a7dd2a9e1ec837823ba2c84633583164f09924bf80207",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density_fade_social.svg": "be45866687cf0b36a943e3e5d1565c56c2c12c27bddc1ef4b397af990dc3bdf0",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density.png": "46914e0944160699bccf22177357bc7225bd6a6d2037e2264c7863d5f4070f31",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density.pdf": "43a009978ad67b30ff1c4f641c7f420890d99324eedfa35b7d25295c0e6dc29c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_density.svg": "67f6ce52ec1a086d004fa1a451be381a490781fca0aead7922b8722e43ae1cf7",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_overhead.png": "5b9c232d73edd6bf6821595b69d4d5ea7460151dbde476404e481612966387b3",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_overhead.pdf": "06df628eb9d5505b1b8a011335119684f19e7dc00ee9b3273a56c59110ad9eb4",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_overhead.svg": "1139af35c93ad9eb2357391a00475192b20f58a2080e3836c2f7f9fb95b5e08b",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_path_90p_62dc40fbb5_overhead_social.png": "6f50c2ab9d9b8239bfa30ecba9ce6993c17b02f8af6b3fdac3bdcbf3d614c653"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    },
+    {
+      "index": 91,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density_straight_social.png": "4c42715718acec924b9d43a39061b25decca16f440d2415058111ec92f438c56",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density_straight_social.pdf": "a20aef4cb4d595187309354f8a7e542e91e62de54df6909e96ca09dab3b2562b",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density_straight_social.svg": "bc39b64cfcc74317bae99f44dc6886fc1f0183a852699743067a32677207c516",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density_draw_social.png": "9a478a65fa6be547754e0e23a67fa942ddd0b3df27b1e1f2cfd94a2b785bef43",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density_draw_social.pdf": "1a90724f876f6191f706b9ebf0dface300d494e24c5f504d9920415f67aede29",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density_draw_social.svg": "56656b6245549c97912e9915a88f12fc0554d87568fbdb48396383bd197b07ec",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density_fade_social.png": "b238763ce572ceaca4f7887a419bd64de3ec8425451903c00f224dd691ddbc09",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density_fade_social.pdf": "34b83336285d5e25a0efc5333174e737318fb576a6b590f4e050f827decc4043",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density_fade_social.svg": "3da1c08050b562abffa87aa8bd47a6cdcfade30e3fcf9b86cbf708df9e747bb7",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density.png": "137b8db04d3186d2e07aac424a45c9a9ddedba3665ff99b45d6b8038fcfb556e",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density.pdf": "68ad05578c19370835f08ef9d546b778b94abf624f94452a8944182c7d2bd170",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_density.svg": "571f5d0f59ea0e52e23227133c46349cd450fe058124d68a51bb7c8fd9616b1f",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_overhead.png": "0346d51b3d1112e050c7bfe8fbdfbff8038b51db9d1033bdf5fb2d798ac38135",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_overhead.pdf": "36fa5eedffbc69cbb8483790ce2103af3973aa40e4f480db77cac29c0ad9476c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_overhead.svg": "18dfcf7679aa74d2aad6c042a384703b96c2b03622cfb7519152b6ef20649b39",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed1_28eea41d9c_overhead_social.png": "4eff9a5d1e8bdf686ec5e78723e9b433b365f1489911a541fe2990e3b162143c"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    },
+    {
+      "index": 92,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density_straight_social.png": "bfea8469057463b4c22105ff7be42b25ea616e76ce3e6fe4519c52d6ad30774a",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density_straight_social.pdf": "ff943a420d1de60e92b5ef15fa1c134ecc89b64c664a241f1a298cda6b4d9116",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density_straight_social.svg": "43c32091b8b7de99e3ef388ee42d2cdd633369717b18a4cc420bfb1116ecd071",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density_draw_social.png": "96d44ebf53119eff99fc36a63e3de2d3de0d57dad85ad7f9245063dee06dc076",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density_draw_social.pdf": "4c0910bbc5878ea1c16efef64d85735900841657e6925a8d5b4a15f9ed37891c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density_draw_social.svg": "d09670e7a8d60f94d4106a489d8995b76588d04d47dc061eb199a3270d0b75d2",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density_fade_social.png": "aeea192c9916de42f5c09ad5a5b756ed3f7d5b722155893c032bede84792c153",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density_fade_social.pdf": "23e44a9b085e7e23a7f17b1d4caa672fac37346847281e9e916393ed0d037fa7",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density_fade_social.svg": "76d5bc748db178fad12234b12ccf7bc30a3080594d680e0bf0e1e0fc07e0a54c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density.png": "289eb76c57fb0b477078d9e3e58bb9c243165cacbbec4930b9e0e932ff727054",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density.pdf": "559b9ec657f0b50469973ded1a58750d577ca67daf6652ed8eec10defa2504d9",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_density.svg": "0a0fdaa696404e04a96618da23203005b3f8ede5d4ba1e9edea9484a342785c8",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_overhead.png": "0f5cf9f9c892940309a2d8134787d36350d364881040a1234481d2496d412bc0",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_overhead.pdf": "9628c064d09aba23610360c0f4782a14595246fde4712cc9fa6ed6225f7b1140",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_overhead.svg": "22b86d23f565e17b6feffe78373ef4a4febe500272d3f1c8cdc16ac1c04df6d7",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_speed2_ac3fe72ae2_overhead_social.png": "75ea19bce848c79e955be534b88846ac1b798a067cbe923b1526453685fa4086"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    },
+    {
+      "index": 93,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density_straight_social.png": "22a562c9257a9fb2f6e1ccf7c57456c2785cc0dc46d5b5f7df6b753b59674641",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density_straight_social.pdf": "e04a96a88f76c842d22c7c5c9fbd89f86a311900428aa61a8ecac85e8a6c266d",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density_straight_social.svg": "d968d968cadb32f156a4c42e2b36e3ce1ce21ce7c2a3d4dcab1e85c41030a7b1",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density_draw_social.png": "b7b9d6052d86492b86ad53e685e78ad36a6136211f84726fae777bf5bb053468",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density_draw_social.pdf": "a5157e2e37a42e1aa340153a7b99a06316251a0abe550932d7c62d55f44d438e",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density_draw_social.svg": "5f739b3e91debb432cbbc60c4c7753b9a2a9ba5aa69e36ea149688466ac9e6eb",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density_fade_social.png": "0d553eae48f99cd2ffafca63fb45cc3e20260b1c8428441f4edb80502594bf6f",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density_fade_social.pdf": "d85caf328c81b50a21f11f5b66809699b289e2eaddbaf8bb5346d1451c679480",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density_fade_social.svg": "4924866b2ebf8f19aa6b85cc8be988ef473a8041c541607cd4fb20bf61ec1d3d",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density.png": "5234a3009ec24142bc11aa5dd12530aa5eb32de2c5467e17bac125905a0c18b4",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density.pdf": "06a09940d052ebbf22bc156ddfb9478dd3244c0e772676316006229785e91dae",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_density.svg": "d2dd6baf57d655fe39a23464ea83de6311fecd631e874cf4090309e6fcea6842",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_overhead.png": "5638cbd0f26dd32fb34552ccef5e9bcfb388b9771eb7334d7195ff994b6d6ad1",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_overhead.pdf": "bf75556fbe3583156c8cdba79598bab30e26a2200645567c3ee83e7da8e3873f",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_overhead.svg": "66fa2caaed10634bdfbbd8ae963786918e9d68e58828dfb9b2a1e6d2a4416580",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_shaft_strike_ce3c79402f_overhead_social.png": "4c87eaae3048a3899dd4e32c376ba5f5d79ce3e3019592eb0872f2cc686132b5"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    },
+    {
+      "index": 94,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density_straight_social.png": "f198b9009ae2fa18af9fbbaa322807178beb4e164dead327ef75185df7f4a511",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density_straight_social.pdf": "22218778aa85ed769d0de0ec3a7689b4d5971876c60b27003e18555278c7c3b5",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density_straight_social.svg": "94674ad4c1721c7416ecf1db2a290e16d86979f536bbbb527d4dccf3c968bcad",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density_draw_social.png": "d1aa91bfba617856b6ece5dd070404b22ea3b01d3259e94b7701592c8e49bda1",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density_draw_social.pdf": "1949f085b5f33d7933da891ead4dc73ff4c3319f119a40466ef8f93c2ba9e230",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density_draw_social.svg": "eb292e43778bf693d432e4eb36d5c1fb0970b82f42d1591508c0401586954bea",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density_fade_social.png": "d4dcab947c4e2a815d4f695fb69e24d0ab17ec28430f0e4bda4f204983caf936",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density_fade_social.pdf": "1c13377101192b2fad98eab1156e73a5b3784f25a963cc96a7367c078934d632",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density_fade_social.svg": "fb758b0d60ad5757227c69582d053e6e801b0cfc823e715dcee79ad9db2e5b03",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density.png": "90a1fdae277c52c164276dada611cd9e61831a189309e9e48a9641ba500e89fe",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density.pdf": "17a4ade07f45cde0f63c3adde91c9f496cd6970ac2629a5865e848cdb01ae7ae",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_density.svg": "e85d641f80a892a03c0ebbf1d493a18b9329c11ced7a27cd1619603e8f401a23",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_overhead.png": "a12c4971d0baf1652d57414cd453da0eda45eb4f2ce8a2a220eef8d20667fbea",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_overhead.pdf": "faadf581ce47d29f36b6d1da20c42561202216fc44a588ddac8e9da300cb44b0",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_overhead.svg": "dbfd8184639f30758deb4d87cc87bbe2fce65decc7d618f7d22c88dba5ed3fcb",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined1_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined1_90p43_7710796788_overhead_social.png": "0e84e8ea24e39dd6ac5c64554ee2555da55f412efa0d2c5df64782ea44d43c86"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    },
+    {
+      "index": 95,
+      "stem": "shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d",
+      "asset_sha256": {
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density_straight_social.png": "e545684e37b6367d7a151c7dc9f7f2439188eeefdf72440319d1cb38a6241427",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density_straight_social.pdf": "4e7f960b94fcddc1892390a070e6bab6851e7175f8f61ab68991f005d9fe6498",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density_straight_social.svg": "f5deb93c7cb5416a65919fb1466c093ec957a749b8c0ad436f53cc9cc5a13818",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density_draw_social.png": "42e5d4667aa6be839eddf63e3cc4960fc5d281a7b6b172777c699a8455609bab",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density_draw_social.pdf": "230e461e438cdffcab4df55e2697d749777dba42f2d31b21ee6d3031f7e52b7c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density_draw_social.svg": "f2768d54637e2e9899e2c0481b26f315d7631f3250082ea5b6f5ff86d338f1ef",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density_fade_social.png": "5bcb3d4432be851d4b3a26ea3c6bd03c10848f4b574631571a96faf7aa56aedb",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density_fade_social.pdf": "9ce304ffc8a5cedcef29a90f6dd32b71b373ccb9c3f0b0d40561ed2b32dad078",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density_fade_social.svg": "e3df5d42c0070f717ae6e86f7833db3f70cd694a7069e28144eacc0e58e170f3",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density.png": "d78976a9ccb5077560434bdd7cadc3672cb97ec0336568cf8f25d7f51b2d2c02",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density.pdf": "19124eed771d9d9aa8a120c1f5277d1ce68a753dd06bc19eba78c17480f1ff27",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_density.svg": "6e9ce9dc37dbf17f7d5047a2116b5ebfe8d3221acf4fd9b797ddae85dec3f341",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_overhead.png": "b666265f645311a32d09600322b89c14eec8987501e18d1c93109386d4218d1c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_overhead.pdf": "f125c8c0e4648138352416dcb986b96f6df4e2218b8439ddf19e036dba6a1f5c",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_overhead.svg": "dd4500dcbfa2a857c8e2c8c041ce86cb2d9b2100fb1ee681200f95af6dd2f903",
+        "figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_combined2_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_combined2_90p43_d84e97e51d_overhead_social.png": "d2dad3b276ff3f6dd992bb82d6014d8a0239b656e3591e7750d5f5e2f34cdafb"
+      },
+      "status": "accepted",
+      "finding": "No visible clipping, overlap or missing content in three inspected contacts."
+    }
+  ],
+  "findings": [
+    {
+      "indices": [
+        87,
+        88
+      ],
+      "figure": "academic density",
+      "issue": 12243,
+      "reason": "Legend and top panel title spacing insufficient; replace and re-review."
+    }
+  ],
+  "notes": [
+    "All 36 contacts and four original PNGs actually inspected. 70 PNGs accepted; two held.",
+    "All 192 assets, seven numeric ledgers and 36 contact hashes rechecked. Baseline only; expanded 49-file override applies."
+  ]
+}

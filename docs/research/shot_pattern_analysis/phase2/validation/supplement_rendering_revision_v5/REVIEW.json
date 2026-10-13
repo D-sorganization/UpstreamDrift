@@ -1,0 +1,22 @@
+{
+  "status": "preflight_qualified_not_launched",
+  "v4_start_sha256": "d6af966d503090e90fd4722878b10c0576ba02b2fe2b61405fb812c5d58a846c",
+  "candidate_commit": "14f27706e4e9e52ca1324a7a2bac59e86ab33ef9",
+  "wrapper_sha256": "a9ce9321c2ca2aeed346f6089625683c60321d2d83e29d8d2ff43029fee74961",
+  "preflight_sha256": "8b48721d50d6bfcb580a4c7b2e77c9860eb9b470a0de7c7e6b1c9898b53ef340",
+  "tests": {
+    "red": "11 failed, 4 passed",
+    "green": "15 passed"
+  },
+  "actual_preflight_exit_code": 0,
+  "changes": [
+    "Replace mutable MAIN comparison with exact immutable hash-bound v4 start snapshot.",
+    "Retain exact canonical CLI, candidate HEAD/clean-tree/import path, source52, producer14, input9, accepted review, native/runtime and vendor guards.",
+    "Repeat full capture against immutable snapshot after process completion."
+  ],
+  "limitations": [
+    "No production process launched; root owns detached-session startup and durable PID monitoring.",
+    "Preflight does not establish process completion, final output integrity or graphical acceptance.",
+    "No cause assigned to prior wrapper termination."
+  ]
+}

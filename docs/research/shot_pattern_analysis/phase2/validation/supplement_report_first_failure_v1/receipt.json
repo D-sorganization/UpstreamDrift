@@ -1,0 +1,9 @@
+{
+  "status": "failed_before_publication",
+  "exit_code": 1,
+  "session": 75757,
+  "observed_at": "2026-10-10T05:26:06.079119+00:00",
+  "failure": "curve_strength pair includes match_speed_factors outside current allowed comparison fields",
+  "data_status": "Accepted saved simulations unchanged; no simulation rerun required",
+  "next_step": "Astra investigates reviewed protocol-specific validation, TDD with rejection cases"
+}

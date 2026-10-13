@@ -1,0 +1,65 @@
+{
+  "status": "accepted_component",
+  "scope": "Marginal Tick Spacing Repair and Representative Saved-Data Academic/Social Density; Not Final Production Set Acceptance",
+  "renderer_sha256": "7527d00ff5e6ca5913bbf14cd14e7d73e6d323725d104a9bdb074b5b4ea63da3",
+  "regression_test_sha256": "c8a15c6e88bf6635755fccdd45285f1c445f990e309366d547dc557425c3d83a",
+  "render_exit_code": 0,
+  "independent_default_tests": {
+    "passed": 16,
+    "slow_deselected": 5,
+    "exit_code": 0
+  },
+  "strengthened_origin_regressions": {
+    "passed": 2,
+    "exit_code": 0
+  },
+  "visual_inspection": [
+    "driver_academic",
+    "driver_social",
+    "seven_iron_academic",
+    "seven_iron_social",
+    "pitching_wedge_academic",
+    "pitching_wedge_social"
+  ],
+  "all_artifact_hashes_verified": true,
+  "source_and_input_bytes_unchanged": true,
+  "histogram_values_and_shared_limits_exact": true,
+  "minimum_gutter_pt": 4.725464987613704,
+  "issues": [],
+  "evidence_files": {
+    "driver_academic.pdf": "181657b4e6821c930bcb9e4ca5e9e8059a57e45a340ddefc4c8f90aed9f6aafc",
+    "driver_academic.png": "c15d847dfc37e1b75a09da5436e3c73e50bcfc105a9a13a8df5e76a8b3dd8414",
+    "driver_academic.svg": "8e94be49c2b38d969391493d19c6d397a29d7a650dff89db86252a065ddedd4a",
+    "driver_academic_1080px.png": "1edc03fe758c6502bff19e4237f27cd0d41e37e2f095f83398188ac2b17559ba",
+    "driver_social.pdf": "4c999f19e3da8a534ce86995d243156256483d090303d11f5c21f8335de01758",
+    "driver_social.png": "125fc44b1407fd77bd21d38408c4cbc0cd0d2a5a4d61b708f3569f6d2497da42",
+    "driver_social.svg": "c5d29cf8957276a580121c1355ec38e8c7c0724f7039361e976bc7e729cce015",
+    "driver_social_1080px.png": "dc7f6871e83fe7ff167986dbae0554603e98aa45b741ba24da38bc1594605336",
+    "independent_tests_log.txt": "09eddb7b6091c2f35bcd605aaebea82e62e54056830ba4f64dac13fc709323c0",
+    "origin_regression_log.txt": "b72f1b7508a00a3a602450b0df3af7f3eeaa072847e61a0fcde5869adb513b74",
+    "pitching_wedge_academic.pdf": "54824edb22c954d96d22919daf1e2fb576dc9e4b21df3fe23d3be5b0c9dfee2d",
+    "pitching_wedge_academic.png": "ac735cb0681c702a4c4d1cf75d741f1c6e5b2fc97d4e5eb9da87d3293e7fe3c0",
+    "pitching_wedge_academic.svg": "2a7a33dfa2f75e647c3eb60a8bced3a62796f6671e418d6f7b71865a12c33507",
+    "pitching_wedge_academic_1080px.png": "9053f0a7c119300282cb6d62e555783d9e031dd4df94a947d6324a1f6624cf66",
+    "pitching_wedge_social.pdf": "1c891f5576096778cbf235757856454186db2eda81bebb0ff78ef1b3967ed149",
+    "pitching_wedge_social.png": "c495db523a952795f0e039256bb96892c11c1231bdf82c23403e25b282ed04b1",
+    "pitching_wedge_social.svg": "b7c8e03e3f1c2a4a6350ba6922f7ffeeac8cfca79bafba85ad121b25e5e5ebaa",
+    "pitching_wedge_social_1080px.png": "36de84052b60c5887964ff0227edc787058e2c9c44c9737c036147c630c151d5",
+    "render_harness_executed.py.txt": "083ae6eadef5fd58535277470301d7cc8a71aa74bb6a9caac1f20f5baaa93719",
+    "render_log.txt": "836181970bddff4badab8078ccc6861d3612cbdc4ab9af954c8f6d3c0f94d5e1",
+    "render_receipt.json": "2e50a8a9c6c39248a12595da02532aa9cadfed551a8e4f132c137a59ee972e3f",
+    "seven_iron_academic.pdf": "74c1fec7f8a1f884683c6528e3bb20f93a0d6da1753b7830c68bffa25d9efb82",
+    "seven_iron_academic.png": "881a3465362f7db12bfcfd5f2f34c5dd198687738492a1a56dfc290e49cfd3fd",
+    "seven_iron_academic.svg": "7413ce728c4b9b0238efa1a48b7fc4bfbcb24c128f6cf94c0fa3c38af247372b",
+    "seven_iron_academic_1080px.png": "c9e2c8b6603bb4e53f00be30574dc97eb5d4ad3e23eba5a1ff8f02e0c05a6a79",
+    "seven_iron_social.pdf": "cc7a103195a03ca0b37bc3ba92bd1f3cb6f78400510b38b5c79521f5a63dea25",
+    "seven_iron_social.png": "46b511e96aa4960f5321e145023f2927e86cb973a80bff09baf31ac0aca3ac1f",
+    "seven_iron_social.svg": "cf4c7ba60af70ee9fc99fd82b70a27faf2f32a98775be4fee5b3ba25cdd50f6e",
+    "seven_iron_social_1080px.png": "56d9cd04d1ec90b41f51ef520c49d6db6976a7414a256c0bf9b7b3c8e6bd5b93"
+  },
+  "limitations": [
+    "Saved-data representative component review does not certify every final condition or whole-set asset completeness.",
+    "Five slow tests were excluded by default selection; parent reports its broader 21-test gate separately.",
+    "No empirical player-accuracy qualification and no physical simulation were performed."
+  ]
+}

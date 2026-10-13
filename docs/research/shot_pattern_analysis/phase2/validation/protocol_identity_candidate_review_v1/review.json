@@ -1,0 +1,8 @@
+{
+  "accepted": false,
+  "reason": "Target rounded before hashing; ambiguous underscore encoding; weakened ID types; missing full selection preflight; duplicate raw-path helper; external fixture skip",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "df1469a8e43f0e947cb30861bc8fb41eeeadb8ad165621d7d9814c754fe38b83",
+    "tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py": "abc898f8e8ccf5ed837d056d00c22a73dcbbf9c0671a531a720698f08b4306e9"
+  }
+}

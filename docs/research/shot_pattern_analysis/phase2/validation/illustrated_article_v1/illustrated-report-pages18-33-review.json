@@ -1,0 +1,128 @@
+{
+  "created_utc": "2026-10-11T04:29:53.170606+00:00",
+  "findings": [
+    {
+      "location": "Table 4, file page 22 to 23 (printed 21 to 22)",
+      "observation": "Only C09 Straight appears below table start; continuation page repeats columns without caption or Continued label.",
+      "severity": "polish"
+    },
+    {
+      "location": "Table 6, file page 23 to 24 (printed 22 to 23)",
+      "observation": "Only C17 and C18 Straight appear below table start; continuation page repeats columns without caption or Continued label.",
+      "severity": "polish"
+    },
+    {
+      "location": "Section 3.11, file page 27 (printed 26)",
+      "observation": "Publication status still says final graphics, full publication review, and successful compilation remain separate open gates; reconcile with current completed scoped graphics and this compiled-page review.",
+      "severity": "content_status"
+    },
+    {
+      "location": "Table 9 explanation, file page 25 to 26",
+      "observation": "Explanatory sentence splits at page break after word for.",
+      "severity": "minor_flow"
+    }
+  ],
+  "overall": "No clipping or broken equation/table geometry on PDF pages 18\u201333; table continuation and current-status revisions recommended before final publication.",
+  "pages_actually_viewed": [
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 18,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-18.png",
+      "render_sha256": "a8a84c2d93a8b2583af2728a14f807974f4b8437614a7468c9e579a2fa1685be"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 19,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-19.png",
+      "render_sha256": "87ed774f2e9b87b5ba49a69e637b655fdd3a3180672f26091543a31219749a45"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 20,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-20.png",
+      "render_sha256": "a3bf66cccec9f4cb1572f9e45fb31fc198b4cd831de3f3919694163fd1556b8a"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 21,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-21.png",
+      "render_sha256": "db66f2352c88feaf060b590c96ea884b9cc1183a8b8646f0c40ca2e47e449314"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 22,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-22.png",
+      "render_sha256": "6aa2a2c3a918bcaffabe32821b982e73f67f8bdde793ec2661122d6632c2dc6a"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 23,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-23.png",
+      "render_sha256": "9fe0049a674c13af4f0b9d443e4bd7e462dabcf6959312557664f6ac9180c02b"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 24,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-24.png",
+      "render_sha256": "b9dae361f90f039819ad7abee39a88ca23f6da41a493f5140035f317d29dce4e"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 25,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-25.png",
+      "render_sha256": "3366b9c2bed80b3142fa286f0326794598d938ca64885a039237901aa9fe2b8a"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 26,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-26.png",
+      "render_sha256": "b95507419572827be6c01a53065cfa818fa4bd004129fa270c068891394d5ac9"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 27,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-27.png",
+      "render_sha256": "15f0e232ad3358926d8651557bec1b047e99d1f9828392296e134cde64b984b4"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 28,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-28.png",
+      "render_sha256": "d279736ea79c303c6773a619a7e83784d73ab1fba9454e49685c062ddd750ddd"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 29,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-29.png",
+      "render_sha256": "2b6cc2854f59fe6e17b3f41312c0e64e990d86ba83509bf89e7ff7099c7bc62c"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 30,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-30.png",
+      "render_sha256": "55793d284382fd8f513c9e08ca915b6a0ff88a91bf9c2fea8d77d4f2a86898d9"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 31,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-31.png",
+      "render_sha256": "af2b4a9931e0a7e563e176d58e10f79cfe77c9d8e17c7fe3b5f33e74f5827842"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 32,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-32.png",
+      "render_sha256": "c29dc1f6849fd57e4a0145dd0b79ca541b94fe05bec29c5979e1d24155b015ac"
+    },
+    {
+      "decision": "viewed; no clipping or illegible columns",
+      "pdf_page": 33,
+      "render_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/final_pages/page-33.png",
+      "render_sha256": "d150730a27c44e266e096cdee26e7adb3f2c88c37d0930e981d6ed1acc787eab"
+    }
+  ],
+  "pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/illustrated_article_v1/build/shot_pattern_analysis.pdf",
+  "pdf_sha256": "d9fd43fc7e6b5094ac8c5b2e2c2338f7862c3c32d92da8a31f884fd7a17bd290",
+  "reviewer": "Sol",
+  "schema": "illustrated-report-body-visual-review/1"
+}

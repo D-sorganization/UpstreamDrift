@@ -1,0 +1,11 @@
+driver 9940 {'Draw': 0.005980075434717972, 'Fade': -0.0013974497727458593}
+Traceback (most recent call last):
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/across_lean_interaction_review_v1/check_actual_controls.py", line 38, in <module>
+    pair=analyze_explicit_source_pair(*refs,comparison_kind='across_lean',target_x_m=previous['target_x_m'],transition_receipt_path=transition,transition_receipt_sha256=sha(transition))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_lean_control.py", line 594, in analyze_explicit_source_pair
+    transition_sha = _execution_transition(
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_lean_control.py", line 255, in _execution_transition
+    raise ValueError(
+ValueError: transition receipt is unnecessary for identical executions

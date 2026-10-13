@@ -1,0 +1,142 @@
+{
+  "seed": 20261008,
+  "shots_per_pattern": 10000,
+  "face_distribution": "Independent normal deviations N(0, 1\u00b0), paired across patterns",
+  "physics": {
+    "impact_model": "rigid_body",
+    "flight_model": "BallFlightSimulator (upstream_physics Rust RK4)",
+    "club_attack_deg": -5.0,
+    "clubhead_mass_kg": 0.3,
+    "delivery_mode": "fixed_loft",
+    "lie_deg": 64.0,
+    "shaft_lean_deg": 0.0,
+    "contact_offset_m": [
+      0.0,
+      0.0
+    ],
+    "environment": "Default EnvironmentalConditions, zero wind",
+    "rust_package_version": "2.1.3",
+    "rust_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
+    "impact_parameters": {
+      "cor": 0.83,
+      "contact_duration": 0.0005,
+      "contact_stiffness": 1000000.0,
+      "contact_damping": 1000.0,
+      "friction_coefficient": 0.4,
+      "gear_effect_factor": 0.5,
+      "gear_effect_h_scale": 350.0,
+      "gear_effect_v_scale": 150.0
+    },
+    "ball_properties": {
+      "mass_kg": 0.04593,
+      "radius_m": 0.021335
+    },
+    "environment_values": {
+      "air_density_kg_m3": 1.225,
+      "gravity_m_s2": 9.80665,
+      "temperature_c": 15.0,
+      "wind_velocity_mps": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "numpy": "2.5.3"
+  },
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/core.py": "fd5b68132d57bbde1b39f1e4f05acc49531bdc6d30507bba63c55fae5bf58bac",
+    "src/tools/shot_pattern_analysis/physics.py": "19e8d9a4c6c7e55edb9d1fe7dbacc3544b195131499707e0b06c4bbb34aafc1c",
+    "src/tools/shot_pattern_analysis/delivery_geometry.py": "f8938a47b98b6057cb3e48619ab4453109f1865a74f3f45a3b40e8012b0168a9",
+    "src/tools/shot_pattern_analysis/presets.py": "5be2a521220c9dc5474baa020babbb09de037783aee8fb353656c03069ed292a",
+    "src/tools/shot_pattern_analysis/dispersion_stats.py": "956eec2eefa14c6ae73c3e460d0c97dcee871299ca52fffb66c9621c92a6ce6e",
+    "src/tools/shot_pattern_analysis/scoring.py": "e8215d3ef9da56d5521cbe5dd9eedd91c205e100fb8b900fb39430a262f0df6f",
+    "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "src/tools/shot_pattern_analysis/scenario_scoring.py": "41f1a52bfb56720dc946ad283f1eef510590ec5dadf65659f2ae114381d1938c",
+    "src/tools/shot_pattern_analysis/reporting.py": "3c67aff2359e735db46ffad7e99debdb591407531d397500bbd1784a73c84bd3",
+    "src/tools/shot_pattern_analysis/range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987",
+    "src/shared/python/physics/impact_model/models.py": "121c43c4430e13c139727616b5e946c0b943a38fdad8d951fd487c4f976cbb9a",
+    "src/shared/python/physics/impact_model/solver.py": "2c8bce4fad0adc2bf8eafbfa332a8c158665af81b78ef706f972de11c32103e0",
+    "src/shared/python/physics/impact_model/types.py": "48445f0c2baa4ff4ea6c975c82a368561f36fd92ff38b787a482e99abf1dd627",
+    "src/shared/python/physics/ball_simulator.py": "98d1db42577578501187c3b6042b715f3bb2d2ff77caa4807e26af931e2b1858",
+    "src/shared/python/physics/ball_launch_conditions.py": "7a4540b99160799cf2f98b20a8e3fedb6bc0a6f73f4e72ae248c7f95bafcc253",
+    "src/shared/python/physics/ball_properties.py": "0df69e5db7db6d0822851bd48c382d87b01524df07b19e35afaea8aa82b4b6b3",
+    "src/shared/python/core/physics_constants.py": "ed1152072384caf1118f23483ec0076e1a2150332da5f2c32c966a4e67c3ed38",
+    "rust_core/upstream-physics/Cargo.toml": "62b0a0a18d2b85b9b64fe29e3ed951dc5e67779ee3a65c1f7eeeb8c1e7194d5d",
+    "Cargo.lock": "bd136e723ee90edfcf6836d73ba45213e2122372da997428f02ec3144d69dfe9",
+    "rust_core/upstream-physics/src/aero_engine.rs": "274675f38957a3bcf7adc5e8b127dae53fcf3ce7ea47cc4bb019c0c7f96558e3",
+    "rust_core/upstream-physics/src/aerodynamics.rs": "29859f3f21cbff7aa5c5113e47748216e07d88f7a4f4050d7a4633dd8613125e",
+    "rust_core/upstream-physics/src/ball_flight.rs": "7d92d7122cdce94f81d930afc70137ab57f62510d481e0ad1c62319bb65f190d",
+    "rust_core/upstream-physics/src/contact.rs": "ea41fdc56a6d5a69baa6a8d9d60feb51064db509eb06c9e0024da2fc9390a765",
+    "rust_core/upstream-physics/src/fsp.rs": "5688801b4d416b5590beb6e5820175c14d236ed95430c1442c29aa8493cf8e5f",
+    "rust_core/upstream-physics/src/lib.rs": "dc76edb8fe8d92b69fd9317f2e1d9d76467b0481270e27a9309f11e2762f7227",
+    "rust_core/upstream-physics/src/rk4.rs": "d9edb9bc960cf48663d837116fd22aa511af8a99f1f65ba6dfc718677476e51b",
+    "rust_core/upstream-physics/src/shaft_fem.rs": "882cedc99f87c73c8c6a7f08a3c0a9b0451586c699f77ba1163702240e391e43",
+    "rust_core/upstream-physics/src/swing_plane.rs": "4630f52c5b1c46b175a80b7b3b23fe67f21e39ce8b13be76c78d2c353af32b6a",
+    "rust_core/upstream-physics/src/wind.rs": "ea7bfb94eb6227bb115212d26b21a79b36f5719a107c5fc91f2e6d8625d9225e",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265"
+  },
+  "limitations": [
+    "Simplified central rigid-body impulse and shaft-axis delivery geometry; no measured player covariance, off-center gear physics, or ground roll. Results are model-conditional, not observed player performance.",
+    "No player-specific face/path covariance, speed/loft variation, wind, or ground roll."
+  ],
+  "scoring_postprocess": {
+    "method": "Public Tools API at baseline knots; exact piecewise-linear interpolation of returned scores at endpoints",
+    "api_evaluated_states": 336,
+    "scored_shots": 30000,
+    "baseline_artifact_sha256": "334d425d328c6dcbc43002d6134cfc359c2688213c2a37065c1184991103260a",
+    "source_pdf_sha256": "f22c305ae47f3f2973882d16852b6f43dbde577c5e1c11b12bcb19d2956699e7",
+    "scoring_source_sha256": "41f1a52bfb56720dc946ad283f1eef510590ec5dadf65659f2ae114381d1938c",
+    "scoring_cache_source_sha256": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "baseline_builder_source_sha256": "2cf970d09d3068154e985637d3c99c83e39eda570cbf47ceeb1ea39a71d510b4",
+    "provider_commit": "3678409fc51024150ab28970b72e3b468935f345",
+    "provider_source_sha256": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1"
+  },
+  "execution_source_sha256": {
+    "src/tools/shot_pattern_analysis/core.py": "fd5b68132d57bbde1b39f1e4f05acc49531bdc6d30507bba63c55fae5bf58bac",
+    "src/tools/shot_pattern_analysis/physics.py": "19e8d9a4c6c7e55edb9d1fe7dbacc3544b195131499707e0b06c4bbb34aafc1c",
+    "src/tools/shot_pattern_analysis/delivery_geometry.py": "f8938a47b98b6057cb3e48619ab4453109f1865a74f3f45a3b40e8012b0168a9",
+    "src/tools/shot_pattern_analysis/presets.py": "5be2a521220c9dc5474baa020babbb09de037783aee8fb353656c03069ed292a",
+    "src/tools/shot_pattern_analysis/reporting.py": "3c67aff2359e735db46ffad7e99debdb591407531d397500bbd1784a73c84bd3",
+    "src/tools/shot_pattern_analysis/scoring.py": "e8215d3ef9da56d5521cbe5dd9eedd91c205e100fb8b900fb39430a262f0df6f",
+    "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "src/tools/shot_pattern_analysis/scenario_scoring.py": "41f1a52bfb56720dc946ad283f1eef510590ec5dadf65659f2ae114381d1938c",
+    "src/tools/shot_pattern_analysis/dispersion_stats.py": "956eec2eefa14c6ae73c3e460d0c97dcee871299ca52fffb66c9621c92a6ce6e",
+    "src/tools/shot_pattern_analysis/range_control.py": "125bb314909427becc5988698eb89de3edd334b9d5e43353534171c9045e0987",
+    "src/tools/shot_pattern_analysis/uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+    "src/tools/shot_pattern_analysis/matrix.py": "7c20333f58a47f88f730d4d656fc954c081bb381519f4988d391b2f8e7a14d35",
+    "src/shared/python/physics/impact_model/models.py": "121c43c4430e13c139727616b5e946c0b943a38fdad8d951fd487c4f976cbb9a",
+    "src/shared/python/physics/impact_model/solver.py": "2c8bce4fad0adc2bf8eafbfa332a8c158665af81b78ef706f972de11c32103e0",
+    "src/shared/python/physics/impact_model/types.py": "48445f0c2baa4ff4ea6c975c82a368561f36fd92ff38b787a482e99abf1dd627",
+    "src/shared/python/physics/ball_simulator.py": "98d1db42577578501187c3b6042b715f3bb2d2ff77caa4807e26af931e2b1858",
+    "src/shared/python/physics/ball_launch_conditions.py": "7a4540b99160799cf2f98b20a8e3fedb6bc0a6f73f4e72ae248c7f95bafcc253",
+    "src/shared/python/physics/ball_properties.py": "0df69e5db7db6d0822851bd48c382d87b01524df07b19e35afaea8aa82b4b6b3",
+    "src/shared/python/core/physics_constants.py": "ed1152072384caf1118f23483ec0076e1a2150332da5f2c32c966a4e67c3ed38",
+    "rust_core/upstream-physics/Cargo.toml": "62b0a0a18d2b85b9b64fe29e3ed951dc5e67779ee3a65c1f7eeeb8c1e7194d5d",
+    "Cargo.lock": "bd136e723ee90edfcf6836d73ba45213e2122372da997428f02ec3144d69dfe9",
+    "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1",
+    "rust_core/upstream-physics/src/aero_engine.rs": "274675f38957a3bcf7adc5e8b127dae53fcf3ce7ea47cc4bb019c0c7f96558e3",
+    "rust_core/upstream-physics/src/aerodynamics.rs": "29859f3f21cbff7aa5c5113e47748216e07d88f7a4f4050d7a4633dd8613125e",
+    "rust_core/upstream-physics/src/ball_flight.rs": "7d92d7122cdce94f81d930afc70137ab57f62510d481e0ad1c62319bb65f190d",
+    "rust_core/upstream-physics/src/contact.rs": "ea41fdc56a6d5a69baa6a8d9d60feb51064db509eb06c9e0024da2fc9390a765",
+    "rust_core/upstream-physics/src/fsp.rs": "5688801b4d416b5590beb6e5820175c14d236ed95430c1442c29aa8493cf8e5f",
+    "rust_core/upstream-physics/src/lib.rs": "dc76edb8fe8d92b69fd9317f2e1d9d76467b0481270e27a9309f11e2762f7227",
+    "rust_core/upstream-physics/src/rk4.rs": "d9edb9bc960cf48663d837116fd22aa511af8a99f1f65ba6dfc718677476e51b",
+    "rust_core/upstream-physics/src/shaft_fem.rs": "882cedc99f87c73c8c6a7f08a3c0a9b0451586c699f77ba1163702240e391e43",
+    "rust_core/upstream-physics/src/swing_plane.rs": "4630f52c5b1c46b175a80b7b3b23fe67f21e39ce8b13be76c78d2c353af32b6a",
+    "rust_core/upstream-physics/src/wind.rs": "ea7bfb94eb6227bb115212d26b21a79b36f5719a107c5fc91f2e6d8625d9225e"
+  },
+  "execution_native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce",
+  "source_unchanged_during_run": true,
+  "source_sha256_timing": "at_export; verified identical to run_start.json",
+  "rescoring": {
+    "status": "postflight_correction",
+    "reason": "Unholed zero-distance green endpoint requires one remaining tap-in stroke; full published Table 9 baseline version 2",
+    "pre_correction_scoring_archive_sha256": "9c5130e845b91442fe427d9166a7c89c4b48655a50a849ff7abc5129df7da9ec",
+    "frozen_flight_source_archive_sha256": "e6de6acc7979f0cc7affffc4ccb73b6429c74d0ed4e3ba097e65871e2926dd73",
+    "shots_csv_sha256": "0e9a10d3f8fbc6f605426f7a09b1c8fc7848b393a0b46ad7d9229fb5519cb0e7",
+    "interpretation": "Flight execution source hashes and source_unchanged_during_run describe the original frozen run; scoring_postprocess hashes describe this later correction."
+  }
+}

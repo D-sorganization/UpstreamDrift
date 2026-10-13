@@ -1,0 +1,2300 @@
+{
+  "schema": "independent-png-component-review/1",
+  "reviewer": "Sol independent reviewer",
+  "created_utc": "2026-10-11T02:52:16.494953+00:00",
+  "accepted": false,
+  "scope": "Only shaft_rotation_sd_108: 12 ordered pairs / 72 baseline PNGs; Seven Iron. Three density PNGs held for selective child review.",
+  "whole_publication_accepted": false,
+  "counts": {
+    "pairs": 12,
+    "png_decisions": 72,
+    "accepted_pngs": 69,
+    "held_density_pngs": 3,
+    "contacts_inspected": 36,
+    "full_size_originals_inspected": 3,
+    "all_format_assets_hash_verified": 192
+  },
+  "completion_boundary": {
+    "start_sha256": "ab2d3b97b8be26a0fbe4bfa7f2fabaccefb8de602493f76a6d07d2682595bfc0",
+    "exit_sha256": "bc0bb4e12f22194f0e8c8ceda53c7ef591af93dc32071957fb80c663f0b78fd5",
+    "pipeline_receipt_sha256": "035c65b249937a639d0ddfd5bd5df3aef8b46aaae351b98a4c6ae9e29e0b064a",
+    "ledger_sha256": "b01de45bb20d8bc7b0d041fb69af2185d77275d19ec598f269fed0bb2589b293"
+  },
+  "producer_sources": {
+    "matched_supplement_pipeline.py": "6590c485e5f8eb71b12ae2616ddb9c30b99e8a762aad781ddb3de64f2cd572f3",
+    "matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "matched_supplement_figures.py": "8a61cc4df94a59b4a8ee8ab110d51899e2390587e1f76862a6c871ea884f5754",
+    "matched_figure_identity.py": "fc475ced792c889c2e63a216b7194da2f0ab27ca8e940e472fcbb15c2b68e4d1",
+    "matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "matched_report_plots.py": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
+    "academic_plots.py": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb",
+    "density.py": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+    "matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+    "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+    "scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+    "uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+    "matched_pair_social.py": "16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369"
+  },
+  "findings": [
+    {
+      "kind": "known_density_layout_clearance",
+      "held_indices": [
+        111,
+        112,
+        119
+      ],
+      "scope_sha256": "7599cc36a0008857c5579502512510f8521f8452f53b88b771e3d5db3462caba"
+    }
+  ],
+  "remaining_gates": [
+    "Other PNG batches and final union coverage",
+    "Selective child PNG/PDF/SVG acceptance",
+    "Final report/narrative/PDF acceptance"
+  ],
+  "per_asset": [
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_straight_social.png",
+      "sha256": "76c3dd0b4a617e5781069817bdc28c6895a2be0fc6a14febea17cf2aafe8e58b",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+            "4128240aa39f2d27579d26d27cee8777d2c066460f551b78bf83ed1de6c0c917"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+            "bd876841991f1d70185e79b72786875b31ed369ea825b757759dfab33bb9d0c4"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_108_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_draw_social.png",
+      "sha256": "c6192e53cf3b98e141c0bb27d92ddd2c72601af0171833a36a8e9c2bd5f81ac2",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+            "4128240aa39f2d27579d26d27cee8777d2c066460f551b78bf83ed1de6c0c917"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+            "bd876841991f1d70185e79b72786875b31ed369ea825b757759dfab33bb9d0c4"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_108_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_fade_social.png",
+      "sha256": "c20ed7dc50ac946b54841858d310f9cf7564cc1cb17e058829ade86edd6c9bf6",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+            "4128240aa39f2d27579d26d27cee8777d2c066460f551b78bf83ed1de6c0c917"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+            "bd876841991f1d70185e79b72786875b31ed369ea825b757759dfab33bb9d0c4"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_108_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density.png",
+      "sha256": "a4468eb596a3d95d43463aac78c41fd1e7ca3ed54ce08b2832c8a919d89499c5",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+            "4128240aa39f2d27579d26d27cee8777d2c066460f551b78bf83ed1de6c0c917"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+            "bd876841991f1d70185e79b72786875b31ed369ea825b757759dfab33bb9d0c4"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_108_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_overhead.png",
+      "sha256": "8ec5c988217ce2cdf3e38735c1787132cf864fa6fa5d9075196f6dc1033c265a",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+            "4128240aa39f2d27579d26d27cee8777d2c066460f551b78bf83ed1de6c0c917"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+            "bd876841991f1d70185e79b72786875b31ed369ea825b757759dfab33bb9d0c4"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_108_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_overhead_social.png",
+      "sha256": "cab92d3d67e4c4657d13f152e48c27ca107a493a5ec3142260252a8b403d5d15",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_speed2",
+            "4128240aa39f2d27579d26d27cee8777d2c066460f551b78bf83ed1de6c0c917"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_speed2",
+            "bd876841991f1d70185e79b72786875b31ed369ea825b757759dfab33bb9d0c4"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_108_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_straight_social.png",
+      "sha256": "1f160886fa992fa01532d4c43f84c9be3a20e522316729e081da2379d114cbad",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_strike",
+            "64ab3e21abf603b01ad2afe4ff91292b77fb18d22ef94cd18882565c298a6d5f"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_strike",
+            "34c0a011d81207285b68122c6da031e25fbf922f24a15c517e24141e12058f88"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_109_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_draw_social.png",
+      "sha256": "6b8a2da343024c2a2c0d4e9619aca0312065a39ed7834ee56e3d6c2d930b0eb1",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_strike",
+            "64ab3e21abf603b01ad2afe4ff91292b77fb18d22ef94cd18882565c298a6d5f"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_strike",
+            "34c0a011d81207285b68122c6da031e25fbf922f24a15c517e24141e12058f88"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_109_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_fade_social.png",
+      "sha256": "7511679b21133b89a82bec804867b940f1d779252645a3a28adf846e5659b336",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_strike",
+            "64ab3e21abf603b01ad2afe4ff91292b77fb18d22ef94cd18882565c298a6d5f"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_strike",
+            "34c0a011d81207285b68122c6da031e25fbf922f24a15c517e24141e12058f88"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_109_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density.png",
+      "sha256": "44a05a777796c937e1780ef26d7235efb0f8c628d527f676742d089fc2e905bf",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_strike",
+            "64ab3e21abf603b01ad2afe4ff91292b77fb18d22ef94cd18882565c298a6d5f"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_strike",
+            "34c0a011d81207285b68122c6da031e25fbf922f24a15c517e24141e12058f88"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_109_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_overhead.png",
+      "sha256": "210471f4cae33e5337c514f0124b08fdb9522c6b350a46a67208db72c895b4b3",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_strike",
+            "64ab3e21abf603b01ad2afe4ff91292b77fb18d22ef94cd18882565c298a6d5f"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_strike",
+            "34c0a011d81207285b68122c6da031e25fbf922f24a15c517e24141e12058f88"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_109_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_overhead_social.png",
+      "sha256": "c173420c4facf3c3b2b1b36d54d69d7b0a0ab497cd1b43f2bcfa6cd3d54b38e6",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation1_shaft_strike",
+            "64ab3e21abf603b01ad2afe4ff91292b77fb18d22ef94cd18882565c298a6d5f"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve1_rotation2_shaft_strike",
+            "34c0a011d81207285b68122c6da031e25fbf922f24a15c517e24141e12058f88"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_109_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_straight_social.png",
+      "sha256": "f99ca48aa4478b2e9f6f51a79c2ac104c6190cd24a0dbe4709daef6fb6eb337a",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_combined1",
+            "546fcf8d251a2c3a81b1e432ac91441ec01b59a8e196b6d17a328b0d283bf352"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_combined1",
+            "c7b7ced9fe94d8e74f7cb44d0fa24f92a3b24d4f65dcb2cea8c614591c5b4820"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_110_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_draw_social.png",
+      "sha256": "33976c8b95f8383978d897351b4689599dc2013fdaed290769a52da31d4c1401",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_combined1",
+            "546fcf8d251a2c3a81b1e432ac91441ec01b59a8e196b6d17a328b0d283bf352"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_combined1",
+            "c7b7ced9fe94d8e74f7cb44d0fa24f92a3b24d4f65dcb2cea8c614591c5b4820"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_110_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_fade_social.png",
+      "sha256": "7d21cafc6fb859e0c2cdc70ed808851fcbf0807b001a119f309f7e1349867ccf",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_combined1",
+            "546fcf8d251a2c3a81b1e432ac91441ec01b59a8e196b6d17a328b0d283bf352"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_combined1",
+            "c7b7ced9fe94d8e74f7cb44d0fa24f92a3b24d4f65dcb2cea8c614591c5b4820"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_110_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density.png",
+      "sha256": "3c027e3b1deeaea669dc0d7f69dc98e44ce0a509ccce665cceb32d0c59d839f1",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_combined1",
+            "546fcf8d251a2c3a81b1e432ac91441ec01b59a8e196b6d17a328b0d283bf352"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_combined1",
+            "c7b7ced9fe94d8e74f7cb44d0fa24f92a3b24d4f65dcb2cea8c614591c5b4820"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_110_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_overhead.png",
+      "sha256": "d54cd3de7201e5e400bb603a6a0ccc678c03e2f401c6d4eb28412bd04a262250",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_combined1",
+            "546fcf8d251a2c3a81b1e432ac91441ec01b59a8e196b6d17a328b0d283bf352"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_combined1",
+            "c7b7ced9fe94d8e74f7cb44d0fa24f92a3b24d4f65dcb2cea8c614591c5b4820"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_110_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_overhead_social.png",
+      "sha256": "0d7a7eb2f39ad9390ef946ef6ee42bc7ffe55da746bfda95bf11bc9abdbed41f",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_combined1",
+            "546fcf8d251a2c3a81b1e432ac91441ec01b59a8e196b6d17a328b0d283bf352"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_combined1",
+            "c7b7ced9fe94d8e74f7cb44d0fa24f92a3b24d4f65dcb2cea8c614591c5b4820"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_110_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_straight_social.png",
+      "sha256": "21c9371add084acc86c18787bde5e8060f60c5bac46922d768d79aeef7cdadec",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+            "66d97b30129ed8164167dcf8356de9fb3c0243c11de088899a4af3d6561c7378"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_negative",
+            "5182383a75ca96f66786339e7faa511ff2cd8fdbc332ed47302f32aac7f3d40a"
+          ]
+        ],
+        127.88194166336235,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_111_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_draw_social.png",
+      "sha256": "34d38c04f7aa54238c85da9f273e46f3e0c10f1cad587c8166e41040dd410dd3",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+            "66d97b30129ed8164167dcf8356de9fb3c0243c11de088899a4af3d6561c7378"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_negative",
+            "5182383a75ca96f66786339e7faa511ff2cd8fdbc332ed47302f32aac7f3d40a"
+          ]
+        ],
+        127.88194166336235,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_111_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_fade_social.png",
+      "sha256": "1de73aca99374cc4044e6d22baa7b942868c7a1e03137bb6c8ca068d5f920aa8",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+            "66d97b30129ed8164167dcf8356de9fb3c0243c11de088899a4af3d6561c7378"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_negative",
+            "5182383a75ca96f66786339e7faa511ff2cd8fdbc332ed47302f32aac7f3d40a"
+          ]
+        ],
+        127.88194166336235,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_111_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.png",
+      "sha256": "4672033a181649e60fe08f5459aa590554e33e3094ec1292eeae9c1d2e10afa8",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+            "66d97b30129ed8164167dcf8356de9fb3c0243c11de088899a4af3d6561c7378"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_negative",
+            "5182383a75ca96f66786339e7faa511ff2cd8fdbc332ed47302f32aac7f3d40a"
+          ]
+        ],
+        127.88194166336235,
+        9997
+      ],
+      "decision": "held_for_selective_layout_repair",
+      "fresh_contact_inspection": "contact_111_2.jpg",
+      "full_size_inspected": true,
+      "observations": "Known legend/title gutter below 2 pt; selective child review required."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_overhead.png",
+      "sha256": "b7a2cf80cc0d476ce5a38d80afc557f1a3e80f4dbe0e783d79d32fbea42beb89",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+            "66d97b30129ed8164167dcf8356de9fb3c0243c11de088899a4af3d6561c7378"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_negative",
+            "5182383a75ca96f66786339e7faa511ff2cd8fdbc332ed47302f32aac7f3d40a"
+          ]
+        ],
+        127.88194166336235,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_111_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_overhead_social.png",
+      "sha256": "14c145d087ae846ea1eca2ba0f8c2ba5ca0f1c5daeb212de19fbdd84e643e19c",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+            "66d97b30129ed8164167dcf8356de9fb3c0243c11de088899a4af3d6561c7378"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_negative",
+            "5182383a75ca96f66786339e7faa511ff2cd8fdbc332ed47302f32aac7f3d40a"
+          ]
+        ],
+        127.88194166336235,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_111_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_straight_social.png",
+      "sha256": "d7e0e69def4ffb1d72b9e844379ead30b1951a265f98f60036de5b3d5337c44e",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+            "fed70bcb49f0b6972db6d4d18edb2aeb7f8fd33d1e8b77a3f40b64ccd6d25ded"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_positive",
+            "4c3288489d75bc31c96db82da516229eda5f1a39ac1644479a85ada3422fbbb6"
+          ]
+        ],
+        127.88194166336235,
+        9998
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_112_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_draw_social.png",
+      "sha256": "bf328d721618bc8a9d06528afaf3cec3660131370fdf9dfb585beb2594def47d",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+            "fed70bcb49f0b6972db6d4d18edb2aeb7f8fd33d1e8b77a3f40b64ccd6d25ded"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_positive",
+            "4c3288489d75bc31c96db82da516229eda5f1a39ac1644479a85ada3422fbbb6"
+          ]
+        ],
+        127.88194166336235,
+        9998
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_112_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_fade_social.png",
+      "sha256": "5c6491504846ad733600236cb57fbac56ba9c25028e56c30c3b0fb3c29389260",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+            "fed70bcb49f0b6972db6d4d18edb2aeb7f8fd33d1e8b77a3f40b64ccd6d25ded"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_positive",
+            "4c3288489d75bc31c96db82da516229eda5f1a39ac1644479a85ada3422fbbb6"
+          ]
+        ],
+        127.88194166336235,
+        9998
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_112_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.png",
+      "sha256": "17db737f2b4b12a594390a9b8fa219133d1d90cac94aab5a689f4c38c7ad5a85",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+            "fed70bcb49f0b6972db6d4d18edb2aeb7f8fd33d1e8b77a3f40b64ccd6d25ded"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_positive",
+            "4c3288489d75bc31c96db82da516229eda5f1a39ac1644479a85ada3422fbbb6"
+          ]
+        ],
+        127.88194166336235,
+        9998
+      ],
+      "decision": "held_for_selective_layout_repair",
+      "fresh_contact_inspection": "contact_112_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Known legend/title gutter below 2 pt; selective child review required."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_overhead.png",
+      "sha256": "fde0393d5b86a86349bb83073a3c5b87d15fd9196a4b3eac9489d0062fdb4f7c",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+            "fed70bcb49f0b6972db6d4d18edb2aeb7f8fd33d1e8b77a3f40b64ccd6d25ded"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_positive",
+            "4c3288489d75bc31c96db82da516229eda5f1a39ac1644479a85ada3422fbbb6"
+          ]
+        ],
+        127.88194166336235,
+        9998
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_112_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_overhead_social.png",
+      "sha256": "0613afe55bbeca3c24575897b9da7425b914fcd50137e095553f4b25107e56f3",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_cov_facepath_positive",
+            "fed70bcb49f0b6972db6d4d18edb2aeb7f8fd33d1e8b77a3f40b64ccd6d25ded"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_cov_facepath_positive",
+            "4c3288489d75bc31c96db82da516229eda5f1a39ac1644479a85ada3422fbbb6"
+          ]
+        ],
+        127.88194166336235,
+        9998
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_112_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_straight_social.png",
+      "sha256": "fec5862c566a03bcb5b925e5dc3bd000cf181956c00841b03b3506d22b9c9710",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_path",
+            "0fa5584ac4278a41a0239bfdb064515aba133536217514edf37d31f6957e99ea"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_path",
+            "94ea31121751314c0ab1909daf25d796f81c6314d54ed949a693e8d8d58b8441"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_113_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_draw_social.png",
+      "sha256": "97c0c9d8d5062779c00fa42e71c2a2cc95cf605de4100a82c438380183025774",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_path",
+            "0fa5584ac4278a41a0239bfdb064515aba133536217514edf37d31f6957e99ea"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_path",
+            "94ea31121751314c0ab1909daf25d796f81c6314d54ed949a693e8d8d58b8441"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_113_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_fade_social.png",
+      "sha256": "7803d5133404ab584690eb2c108a845dfe6739cdaeaadb18dcf7ce87330fb284",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_path",
+            "0fa5584ac4278a41a0239bfdb064515aba133536217514edf37d31f6957e99ea"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_path",
+            "94ea31121751314c0ab1909daf25d796f81c6314d54ed949a693e8d8d58b8441"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_113_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density.png",
+      "sha256": "e9d98f70a12fc6748d49fedaae4a6df6bf5db20d693459f3269e142d5303c541",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_path",
+            "0fa5584ac4278a41a0239bfdb064515aba133536217514edf37d31f6957e99ea"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_path",
+            "94ea31121751314c0ab1909daf25d796f81c6314d54ed949a693e8d8d58b8441"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_113_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_overhead.png",
+      "sha256": "432bf75cf188a5be24c424ab3c54de3311baa657d605beb078e99f1177c39e06",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_path",
+            "0fa5584ac4278a41a0239bfdb064515aba133536217514edf37d31f6957e99ea"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_path",
+            "94ea31121751314c0ab1909daf25d796f81c6314d54ed949a693e8d8d58b8441"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_113_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_overhead_social.png",
+      "sha256": "9afc3eea4984252fd81bbab13c17ae12c83e9b7ae38172c7b47be2d57af97a84",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_path",
+            "0fa5584ac4278a41a0239bfdb064515aba133536217514edf37d31f6957e99ea"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_path",
+            "94ea31121751314c0ab1909daf25d796f81c6314d54ed949a693e8d8d58b8441"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_113_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_straight_social.png",
+      "sha256": "2094745f6693e4872dddf7916e4504fa453b13593b3a07897aecb7086869b93f",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+            "e55a2042febf67191a16100af139fc9e15df994f9abe466e6c49d10be13dd1cb"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+            "467704ad7ac2c895a18df73c16177ecc03742c0ba87d6a0292d762bfc0b3fe3d"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_114_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_draw_social.png",
+      "sha256": "ed0ef3dfa415d9a65fa979950918b492e93b7b2448fa0ff102739f80a242b817",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+            "e55a2042febf67191a16100af139fc9e15df994f9abe466e6c49d10be13dd1cb"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+            "467704ad7ac2c895a18df73c16177ecc03742c0ba87d6a0292d762bfc0b3fe3d"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_114_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_fade_social.png",
+      "sha256": "8ac2e3332e5d383793168dd1720f1a9bdb6e7a85338651456cd5f87097a3c487",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+            "e55a2042febf67191a16100af139fc9e15df994f9abe466e6c49d10be13dd1cb"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+            "467704ad7ac2c895a18df73c16177ecc03742c0ba87d6a0292d762bfc0b3fe3d"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_114_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density.png",
+      "sha256": "5b53efd97bb54742318e0829702fd8be9c62e3283bde50051db11efe38c5283c",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+            "e55a2042febf67191a16100af139fc9e15df994f9abe466e6c49d10be13dd1cb"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+            "467704ad7ac2c895a18df73c16177ecc03742c0ba87d6a0292d762bfc0b3fe3d"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_114_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_overhead.png",
+      "sha256": "9a76560dea0442801f93e88868c13d6a9d0ee4d0c8dd720f334d61eafac12249",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+            "e55a2042febf67191a16100af139fc9e15df994f9abe466e6c49d10be13dd1cb"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+            "467704ad7ac2c895a18df73c16177ecc03742c0ba87d6a0292d762bfc0b3fe3d"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_114_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_overhead_social.png",
+      "sha256": "9db256711b139c6fa659020aa8c4aff18e5182593e106a17e65530ee7caf2520",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed1",
+            "e55a2042febf67191a16100af139fc9e15df994f9abe466e6c49d10be13dd1cb"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed1",
+            "467704ad7ac2c895a18df73c16177ecc03742c0ba87d6a0292d762bfc0b3fe3d"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_114_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_straight_social.png",
+      "sha256": "35b8f01f841c2b1c45881660901980054f2825c58f516d585d9f1d36a5d0841b",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+            "ce67daea4418595d261a0d0ec0f4d59291b18c06d64f7819de5d5affc497b8be"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+            "3dce0388662f7b4547491f176e22a898b12926b396b68d12b19dd18d9f040d76"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_115_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_draw_social.png",
+      "sha256": "e2a76ce20615144bc61b2d6e9d43ca76d426b64c17a5175a40635e7e71883cee",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+            "ce67daea4418595d261a0d0ec0f4d59291b18c06d64f7819de5d5affc497b8be"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+            "3dce0388662f7b4547491f176e22a898b12926b396b68d12b19dd18d9f040d76"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_115_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_fade_social.png",
+      "sha256": "2905242a3498f235b694b195b6ed2e603aa71522f8d8d52044c32c687370e019",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+            "ce67daea4418595d261a0d0ec0f4d59291b18c06d64f7819de5d5affc497b8be"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+            "3dce0388662f7b4547491f176e22a898b12926b396b68d12b19dd18d9f040d76"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_115_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density.png",
+      "sha256": "bb14d586a8172dfba7bb26584c9b426a0ac2a2515bba1e71f842a831bc2ea74e",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+            "ce67daea4418595d261a0d0ec0f4d59291b18c06d64f7819de5d5affc497b8be"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+            "3dce0388662f7b4547491f176e22a898b12926b396b68d12b19dd18d9f040d76"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_115_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_overhead.png",
+      "sha256": "9a8fea6ec74681f5c61dcb71db6f3d91a7116eab3744a196795c46bae0a52be7",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+            "ce67daea4418595d261a0d0ec0f4d59291b18c06d64f7819de5d5affc497b8be"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+            "3dce0388662f7b4547491f176e22a898b12926b396b68d12b19dd18d9f040d76"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_115_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_overhead_social.png",
+      "sha256": "84668772e3ec6a7088e691d49c540414714ad4ba5afb4558e509931d86aa5ed2",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_speed2",
+            "ce67daea4418595d261a0d0ec0f4d59291b18c06d64f7819de5d5affc497b8be"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_speed2",
+            "3dce0388662f7b4547491f176e22a898b12926b396b68d12b19dd18d9f040d76"
+          ]
+        ],
+        127.88194166336235,
+        10000
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_115_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_straight_social.png",
+      "sha256": "6a3fc914d2da4b0dbaa42abe6418416354c119aad463d8102e3fc270cf8e6dbb",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_strike",
+            "63cc489178059be0f0e06c6f0ab78eb8f4c71a0e4c5abc32f2a6b29215e0e373"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_strike",
+            "96be0ca8b3aa8aab3a2abfb9c00716e84de50f7051af5681d5e1c9b05f68764b"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_116_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_draw_social.png",
+      "sha256": "4bc1645b545648717ba39f67cbf278fc8314cd07bba6b2c8842a28eaf73ce60f",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_strike",
+            "63cc489178059be0f0e06c6f0ab78eb8f4c71a0e4c5abc32f2a6b29215e0e373"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_strike",
+            "96be0ca8b3aa8aab3a2abfb9c00716e84de50f7051af5681d5e1c9b05f68764b"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_116_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_fade_social.png",
+      "sha256": "4c35f341f46c04441bfd0dcc1bf9125023719fb2959b89bab4562b03e153e748",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_strike",
+            "63cc489178059be0f0e06c6f0ab78eb8f4c71a0e4c5abc32f2a6b29215e0e373"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_strike",
+            "96be0ca8b3aa8aab3a2abfb9c00716e84de50f7051af5681d5e1c9b05f68764b"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_116_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density.png",
+      "sha256": "a5fc41f41b466baee4b072e7e3a4d1a3e3b0be6d745e920d4cea114ffb4335bd",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_strike",
+            "63cc489178059be0f0e06c6f0ab78eb8f4c71a0e4c5abc32f2a6b29215e0e373"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_strike",
+            "96be0ca8b3aa8aab3a2abfb9c00716e84de50f7051af5681d5e1c9b05f68764b"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_116_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_overhead.png",
+      "sha256": "7d8ec2cdebdaa22a23d1d7f6659abd59d69e6b797fa3991bcc2257fa596a7b26",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_strike",
+            "63cc489178059be0f0e06c6f0ab78eb8f4c71a0e4c5abc32f2a6b29215e0e373"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_strike",
+            "96be0ca8b3aa8aab3a2abfb9c00716e84de50f7051af5681d5e1c9b05f68764b"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_116_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_overhead_social.png",
+      "sha256": "9688a6cc7a1284ee71813527c649e2405cfc3f1291749596e1a49ae0315ec10a",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation1_shaft_strike",
+            "63cc489178059be0f0e06c6f0ab78eb8f4c71a0e4c5abc32f2a6b29215e0e373"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean0_curve2_rotation2_shaft_strike",
+            "96be0ca8b3aa8aab3a2abfb9c00716e84de50f7051af5681d5e1c9b05f68764b"
+          ]
+        ],
+        127.88194166336235,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_116_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_straight_social.png",
+      "sha256": "2c37b8ad3f4c60a38e5e123fe6252414b9424e2666ac7df5a342f0327433db25",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined1",
+            "ee35f1e0ae88ff02c95a01c4d5c0f3b10db821608c4bc2c5db5732e61cf92e5d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined1",
+            "ba65db480ac07ce7a50fd9cfebfaf4540d0e8ff19ebac247a056f5d793d49427"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_117_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_draw_social.png",
+      "sha256": "36440ce0b2126693c05ab82adb4ffaf66f0c4feeb8f940e2a6d1675fb267edab",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined1",
+            "ee35f1e0ae88ff02c95a01c4d5c0f3b10db821608c4bc2c5db5732e61cf92e5d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined1",
+            "ba65db480ac07ce7a50fd9cfebfaf4540d0e8ff19ebac247a056f5d793d49427"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_117_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_fade_social.png",
+      "sha256": "67e103ab079539301ff331a6958dbffa64931fd5f8dfcd6b580d92b7ff1fbc1c",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined1",
+            "ee35f1e0ae88ff02c95a01c4d5c0f3b10db821608c4bc2c5db5732e61cf92e5d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined1",
+            "ba65db480ac07ce7a50fd9cfebfaf4540d0e8ff19ebac247a056f5d793d49427"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_117_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density.png",
+      "sha256": "73e0280ba93f6962657be622189cf6ab8f93f7b5d06d3884447e1c55d2ce64f6",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined1",
+            "ee35f1e0ae88ff02c95a01c4d5c0f3b10db821608c4bc2c5db5732e61cf92e5d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined1",
+            "ba65db480ac07ce7a50fd9cfebfaf4540d0e8ff19ebac247a056f5d793d49427"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_117_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_overhead.png",
+      "sha256": "5aed813ad88ee4f7fdd63265ab1d1b290027a57a7a6d87ad0a5fe9ba38c12538",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined1",
+            "ee35f1e0ae88ff02c95a01c4d5c0f3b10db821608c4bc2c5db5732e61cf92e5d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined1",
+            "ba65db480ac07ce7a50fd9cfebfaf4540d0e8ff19ebac247a056f5d793d49427"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_117_3.jpg",
+      "full_size_inspected": true,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_overhead_social.png",
+      "sha256": "19d88cb8fe8ac2ff923795bf0ce3e946302210a3ca07f41636e08511bef09ae7",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined1",
+            "ee35f1e0ae88ff02c95a01c4d5c0f3b10db821608c4bc2c5db5732e61cf92e5d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined1",
+            "ba65db480ac07ce7a50fd9cfebfaf4540d0e8ff19ebac247a056f5d793d49427"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_117_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_straight_social.png",
+      "sha256": "4601c47d745b33eb89d3ea7e3934d0fa87ecebd8dee8d4dc2a6216cbbda43b00",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined2",
+            "461eab5e4a5206d0cd8fb8df077240a7922e6fa82936c3df3e16832100ac1016"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined2",
+            "65e351475caaa2fd11a1d625325d52ddcd100772981bdc4d87e0c4f033679da0"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_118_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_draw_social.png",
+      "sha256": "077fd067d6c67e874fc4d0927ee43ac7a9f8e7acc04ca04109466f77212f3944",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined2",
+            "461eab5e4a5206d0cd8fb8df077240a7922e6fa82936c3df3e16832100ac1016"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined2",
+            "65e351475caaa2fd11a1d625325d52ddcd100772981bdc4d87e0c4f033679da0"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_118_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_fade_social.png",
+      "sha256": "e09c5bc72e3dad01d7e44a99aaf0455005b66bbb862b7ac0d757c6034725e8ec",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined2",
+            "461eab5e4a5206d0cd8fb8df077240a7922e6fa82936c3df3e16832100ac1016"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined2",
+            "65e351475caaa2fd11a1d625325d52ddcd100772981bdc4d87e0c4f033679da0"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_118_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density.png",
+      "sha256": "a625a8aa2af45dcc4bcf8ca702994ca700fbb5895306d531dcc5503e448df70b",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined2",
+            "461eab5e4a5206d0cd8fb8df077240a7922e6fa82936c3df3e16832100ac1016"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined2",
+            "65e351475caaa2fd11a1d625325d52ddcd100772981bdc4d87e0c4f033679da0"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_118_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_overhead.png",
+      "sha256": "d8119df2660c09e5c272a18b731960916d80322519a93cdb0b7b75f34c809bb3",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined2",
+            "461eab5e4a5206d0cd8fb8df077240a7922e6fa82936c3df3e16832100ac1016"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined2",
+            "65e351475caaa2fd11a1d625325d52ddcd100772981bdc4d87e0c4f033679da0"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_118_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_overhead_social.png",
+      "sha256": "c1f825c13b53fdf51148e354fc2d5126673cbc502e11df40626eb4985cbac0ec",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_combined2",
+            "461eab5e4a5206d0cd8fb8df077240a7922e6fa82936c3df3e16832100ac1016"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_combined2",
+            "65e351475caaa2fd11a1d625325d52ddcd100772981bdc4d87e0c4f033679da0"
+          ]
+        ],
+        149.74419150637488,
+        9996
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_118_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_straight_social.png",
+      "sha256": "9098222be7486b8c09c044f0f58590e1fa31e126a7203da92baa0d13ca8ac482",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_cov_facepath_negative",
+            "aa36db38867979a224588c3be8c8ba7e00713dd77d39cf95eaf298556182947d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+            "e618d92a3015a121ef5e4fe1e22d600cca5686d61ffa4fad90716d58fcdfa664"
+          ]
+        ],
+        149.74419150637488,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_119_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_draw_social.png",
+      "sha256": "799b431bb53a5526ca2c75384c92375ed55f3a1fa5b15706ebd7c57a27a74132",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_cov_facepath_negative",
+            "aa36db38867979a224588c3be8c8ba7e00713dd77d39cf95eaf298556182947d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+            "e618d92a3015a121ef5e4fe1e22d600cca5686d61ffa4fad90716d58fcdfa664"
+          ]
+        ],
+        149.74419150637488,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_119_1.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_fade_social.png",
+      "sha256": "66ad580debfea7629bd8e5c9a1059b9fa514bfe524b1a5cfa51fde2b7df2a175",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_cov_facepath_negative",
+            "aa36db38867979a224588c3be8c8ba7e00713dd77d39cf95eaf298556182947d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+            "e618d92a3015a121ef5e4fe1e22d600cca5686d61ffa4fad90716d58fcdfa664"
+          ]
+        ],
+        149.74419150637488,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_119_2.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.png",
+      "sha256": "112d8606ed6b85ab8ec994e12d185de0fc22cb5c58e2b969b30ab2e912afc998",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_cov_facepath_negative",
+            "aa36db38867979a224588c3be8c8ba7e00713dd77d39cf95eaf298556182947d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+            "e618d92a3015a121ef5e4fe1e22d600cca5686d61ffa4fad90716d58fcdfa664"
+          ]
+        ],
+        149.74419150637488,
+        9997
+      ],
+      "decision": "held_for_selective_layout_repair",
+      "fresh_contact_inspection": "contact_119_2.jpg",
+      "full_size_inspected": true,
+      "observations": "Known legend/title gutter below 2 pt; selective child review required."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_overhead.png",
+      "sha256": "d00e7e489cb39e506e2f4122f05b88ba8193540f1d0e869b8742503785e8010a",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_cov_facepath_negative",
+            "aa36db38867979a224588c3be8c8ba7e00713dd77d39cf95eaf298556182947d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+            "e618d92a3015a121ef5e4fe1e22d600cca5686d61ffa4fad90716d58fcdfa664"
+          ]
+        ],
+        149.74419150637488,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_119_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    },
+    {
+      "path": "figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_overhead_social.png",
+      "sha256": "14d42e1411a3aa423f21d37b852cb5d44f83d19c6762c5c0a0f6bb60677dc791",
+      "scientific_identity": [
+        "shaft_rotation_sd",
+        [
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation1_cov_facepath_negative",
+            "aa36db38867979a224588c3be8c8ba7e00713dd77d39cf95eaf298556182947d"
+          ],
+          [
+            "original_primary/1",
+            "seven_iron_lean10_curve1_rotation2_cov_facepath_negative",
+            "e618d92a3015a121ef5e4fe1e22d600cca5686d61ffa4fad90716d58fcdfa664"
+          ]
+        ],
+        149.74419150637488,
+        9997
+      ],
+      "decision": "accepted_within_this_png_batch",
+      "fresh_contact_inspection": "contact_119_3.jpg",
+      "full_size_inspected": false,
+      "observations": "Condition identities, target, units, populations and scales legible; no new clipping or overlap observed."
+    }
+  ],
+  "contacts_inspected": [
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_108_1.jpg",
+      "sha256": "36c06cbc9328b750266ba92d8e951a019974f9675476613f9503ece5902cf0d1",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_108_2.jpg",
+      "sha256": "e7c26664a2d7f350d1f23dc04ae7b21eaefcc6e294fe014b353de9613ae790b0",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_108_3.jpg",
+      "sha256": "71691658b0f4ed036e398acf09fd2368c2751e099fdc1abba6be90f065b2653c",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_109_1.jpg",
+      "sha256": "d334244a33b7b870f209ac5d173e4b19f8bfc38a2cbcb21395564099ea47a037",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_109_2.jpg",
+      "sha256": "1da5ef640a4c04eab5b8f3385a1d7f00ac1039e24739043575e8806e6354c277",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_109_3.jpg",
+      "sha256": "8b8530a53835c62d792831a9c85d72b4b95119acbc32a9b3d9132f31db8c3e59",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_110_1.jpg",
+      "sha256": "4262c3ec9bf312d8c3c07bb6d847478933680b727165942ba5c17954306b41b5",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_110_2.jpg",
+      "sha256": "0b0e0a172bc1992a37ea736b3a318d7ce585707816f2f2f26938041b1a78f672",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_110_3.jpg",
+      "sha256": "3efcc7e0f97bdbc8ee847584fbe42d8e79b2c634cafc57b75cf4c7ef81ff1308",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_111_1.jpg",
+      "sha256": "1c47b3cc2721493e449e472cccfc53efbeceb6b58aae1bb0bf8f2ce4cbc81904",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_111_2.jpg",
+      "sha256": "72a9d9e445c07ac4202af8c8d50efec9a78d66f86e4f06c7e38a2490af46e759",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_111_3.jpg",
+      "sha256": "08722ab911239ac43e101fa7447aafaeb978fd48d5085a5f883e9da2f736402d",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_112_1.jpg",
+      "sha256": "bdad007867ccdfca822cd0b0e6734ca5666742edfa2c150cee7f0621601fd423",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_112_2.jpg",
+      "sha256": "648e2447f6a92d47812292398c99466fdf1cf10d8bb74e3c6b1757bc14c31996",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_112_3.jpg",
+      "sha256": "172e2124fbc3a9152e08fce5c6122046e08ce9faf37484eae1eda93be94f0ca3",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_113_1.jpg",
+      "sha256": "06cb8aabd6949348965f8894795374eec5615ed11737514e9919ac2c14e5a37f",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_113_2.jpg",
+      "sha256": "1eca404ee87d9cb97b2b91d36dc4e30fd391222e83c8d19967cdd8a6f8d85a7f",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_113_3.jpg",
+      "sha256": "cde96f77fbbd435b2d832032f96a4029b66ddb5851d85411172a75c1d59bd1cb",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_114_1.jpg",
+      "sha256": "edfc5fa857b4f73b4d82916a1bc6f8e3be0a05eb658f24d5c830b02ead6ba276",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_114_2.jpg",
+      "sha256": "73a25a86183ee69023ac0f6d3bd600e648a8dd3e08128ee78ff657c5e74ba1f7",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_114_3.jpg",
+      "sha256": "aeb564aa7cc819e11be6aaddf96f61923deceaeb898ab79d4b3a9631f618da65",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_115_1.jpg",
+      "sha256": "f25be234672effe00b3b8bf3ac7574c76f6fe9ea537c04e8f238dbaacca24177",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_115_2.jpg",
+      "sha256": "d59675439201d8e8930827118ebbd3d24abe20ba9245bc598613df6a8b684bba",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_115_3.jpg",
+      "sha256": "1bffb772ea4ff9ac8560a43fdf855e91ca847f0163c163b73eceeed990910aad",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_116_1.jpg",
+      "sha256": "106ba6229f326f9ff5768bcff0081af311d5a90f1b7c2573241bf405ee3868e8",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_116_2.jpg",
+      "sha256": "766091b4b613e58bc4abb0b027e6208c06df72acdb85e0b79514177779f29170",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_116_3.jpg",
+      "sha256": "72bb83058dfc27baced40ac267e5e18e8bfa5ed24a8f494d96b98eae80b2dace",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_117_1.jpg",
+      "sha256": "4b08ab154c8a440cc42e1ea2659696cd843ef3e1a4cddd3493338b25c62ea6c7",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_117_2.jpg",
+      "sha256": "db024f384b8c9bf40bcbc7a3ab8d59933c49bda6b4d0489fffd63bb2aabb7995",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_117_3.jpg",
+      "sha256": "338a12143bf6ece03a17c90df20b1dc7870786b823bd47cf6e62a66c804ecb9f",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_118_1.jpg",
+      "sha256": "c9d650bb467af2453292f747e8c3fbb98027bb0285090f3237898c5b7641b799",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_118_2.jpg",
+      "sha256": "f854628078e43f4e7b7bcd2b46e287c1be722dbbb3ff5cd68bd51f4f9f2272ce",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_118_3.jpg",
+      "sha256": "7dff1bcb34dc749705090e2acaa669ef0acd2c97c56560d548d778c83bfbdbe9",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_119_1.jpg",
+      "sha256": "4210467b348687d1ba5922abc4790ccbaeec75b7622200d0680c55915e77a369",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_119_2.jpg",
+      "sha256": "ff226a1b540e81238d9835610a6afa890366a24cd8b17ad51d817887de2e37eb",
+      "visually_inspected": true
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_119_3.jpg",
+      "sha256": "4b66366237f345e33110a2d1ddc5f0ad32b3862182df6fa272ab353b0adb2cc2",
+      "visually_inspected": true
+    }
+  ],
+  "full_size_inspected": [
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.png",
+      "sha256": "4672033a181649e60fe08f5459aa590554e33e3094ec1292eeae9c1d2e10afa8"
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_overhead.png",
+      "sha256": "5aed813ad88ee4f7fdd63265ab1d1b290027a57a7a6d87ad0a5fe9ba38c12538"
+    },
+    {
+      "path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.png",
+      "sha256": "112d8606ed6b85ab8ec994e12d185de0fc22cb5c58e2b969b30ab2e912afc998"
+    }
+  ],
+  "input_sha256": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/batch_inventory.json": "f5724b99b339b330a3cb341fd95fde35e8d38130968760eaabeed0f77d61498d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108_command.json": "eb724f075d948e75b18852c95ec784af5ea169a4a69364e2747a332cdfc2d914",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/density_layout_repair_scope.json": "7599cc36a0008857c5579502512510f8521f8452f53b88b771e3d5db3462caba",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.csv": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.csv": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.md": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/control_aliases.json": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_108_1.jpg": "36c06cbc9328b750266ba92d8e951a019974f9675476613f9503ece5902cf0d1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_108_2.jpg": "e7c26664a2d7f350d1f23dc04ae7b21eaefcc6e294fe014b353de9613ae790b0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_108_3.jpg": "71691658b0f4ed036e398acf09fd2368c2751e099fdc1abba6be90f065b2653c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_straight_social.png": "76c3dd0b4a617e5781069817bdc28c6895a2be0fc6a14febea17cf2aafe8e58b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_straight_social.pdf": "be4fdffb22c04cc167f82b7d531f74f7bed04ce226df18663f367e9aa7974583",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_straight_social.svg": "1715da5c1d7fef2a640ad471d025372fc0881a7ea6ad1997aa11f0a55f1893d2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_draw_social.png": "c6192e53cf3b98e141c0bb27d92ddd2c72601af0171833a36a8e9c2bd5f81ac2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_draw_social.pdf": "295a158ebe2020380666ddd22025736120de71e66b9e6d3129a4058089a67f74",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_draw_social.svg": "7109f517529f84f4dd4fd80fccc4041d5c183a951b173e8421ced319f401dc95",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_fade_social.png": "c20ed7dc50ac946b54841858d310f9cf7564cc1cb17e058829ade86edd6c9bf6",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_fade_social.pdf": "31822949ab1e26105ba15961d934b347f3e1e4b1dc5bd2651a344c6f437c52b8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density_fade_social.svg": "3f1ef601956da6859f8546e61f86fe58475a67d83cee81bb62929d2a66029603",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density.png": "a4468eb596a3d95d43463aac78c41fd1e7ca3ed54ce08b2832c8a919d89499c5",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density.pdf": "8b65d472cccb62dcf42659b31b50e2a37eef1bc214dde044d9b7c09a8c3ffb54",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_density.svg": "643bbc5af11a799ffda8eec235c72364885752baade23a24b8c495a7694c93c4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_overhead.png": "8ec5c988217ce2cdf3e38735c1787132cf864fa6fa5d9075196f6dc1033c265a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_overhead.pdf": "77aea5c748cca7e3eedd49abcb3b1e01227f3ee6f0bf42ead2e3648917667958",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_overhead.svg": "a2ba8c55a93d30803d743a7c6edf624ddb69b31b459da7a5eaae30bdf68ce400",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_speed2_127p882_4269c8360a_overhead_social.png": "cab92d3d67e4c4657d13f152e48c27ca107a493a5ec3142260252a8b403d5d15",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_109_1.jpg": "d334244a33b7b870f209ac5d173e4b19f8bfc38a2cbcb21395564099ea47a037",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_109_2.jpg": "1da5ef640a4c04eab5b8f3385a1d7f00ac1039e24739043575e8806e6354c277",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_109_3.jpg": "8b8530a53835c62d792831a9c85d72b4b95119acbc32a9b3d9132f31db8c3e59",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_straight_social.png": "1f160886fa992fa01532d4c43f84c9be3a20e522316729e081da2379d114cbad",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_straight_social.pdf": "2ba292eb28e3fb0ab6af1e77d11d451f3f9e0b9f4676350d9f249118c8e4fb70",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_straight_social.svg": "c5d334bc8829b528f8393693583af7e4cdf719a243df39289e76d4fce307aa95",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_draw_social.png": "6b8a2da343024c2a2c0d4e9619aca0312065a39ed7834ee56e3d6c2d930b0eb1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_draw_social.pdf": "77b1f7f7a4b557cb03ef8d521b565f51e8d1c570a52fccbd786fc0978a1179d1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_draw_social.svg": "02418d4fa64347b35d9e52bdbc9832fd2d06ee6b223526a6c864cbdab95d9d8f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_fade_social.png": "7511679b21133b89a82bec804867b940f1d779252645a3a28adf846e5659b336",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_fade_social.pdf": "bb8b4d12bc9fd7891c099dc405ae99a0c512458f3fa01c5c27be5769529fbb6e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density_fade_social.svg": "3cc4f1565cb93c86c3d6601667545ff0a4da4c2fd879b95cd098ea97bc2d5e62",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density.png": "44a05a777796c937e1780ef26d7235efb0f8c628d527f676742d089fc2e905bf",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density.pdf": "05332f7ca436b493a87a9d22088e5071dd7fabdc4e32d4224043d0a734020d47",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_density.svg": "bcab0c04246252d36b16fb9304b06b813a39ba2f1ac24532595f0414abd9c541",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_overhead.png": "210471f4cae33e5337c514f0124b08fdb9522c6b350a46a67208db72c895b4b3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_overhead.pdf": "a387c9b59309caea36d0bd06b4680b15c40022b93bd6e8286b7297aea57634ac",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_overhead.svg": "faafc5a94b37f3b67570a1491a5f573258a3d8c38ae7654352d421bfb7e55b66",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_shaft_strike_127p882_2add2588d9_overhead_social.png": "c173420c4facf3c3b2b1b36d54d69d7b0a0ab497cd1b43f2bcfa6cd3d54b38e6",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_110_1.jpg": "4262c3ec9bf312d8c3c07bb6d847478933680b727165942ba5c17954306b41b5",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_110_2.jpg": "0b0e0a172bc1992a37ea736b3a318d7ce585707816f2f2f26938041b1a78f672",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_110_3.jpg": "3efcc7e0f97bdbc8ee847584fbe42d8e79b2c634cafc57b75cf4c7ef81ff1308",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_straight_social.png": "f99ca48aa4478b2e9f6f51a79c2ac104c6190cd24a0dbe4709daef6fb6eb337a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_straight_social.pdf": "eafe388fd4f7215cea1f7a4e8d02e23b443e94788829db99b7263fdb8086ef90",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_straight_social.svg": "86a02b283adc0d7a517d90c3982436a975bb26ab63438167c0bc41a3297d81bf",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_draw_social.png": "33976c8b95f8383978d897351b4689599dc2013fdaed290769a52da31d4c1401",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_draw_social.pdf": "d7d6e20e2e8f5f6f2b94bd3bb85d1add5250302d7e39912a1f224bdf49d661ce",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_draw_social.svg": "151de65eba8c7e2aae258064f5c774ed996be31453695270157b7a36184ea163",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_fade_social.png": "7d21cafc6fb859e0c2cdc70ed808851fcbf0807b001a119f309f7e1349867ccf",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_fade_social.pdf": "edcb5317598aaede93b2b30dc1808cc52d49f48b9429f1ddb79daff3204b7357",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density_fade_social.svg": "934f276ed15a54be52649366db7f7c9d08ac94197cee0746ad3d27879d0aab1b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density.png": "3c027e3b1deeaea669dc0d7f69dc98e44ce0a509ccce665cceb32d0c59d839f1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density.pdf": "d77382a7bf2215afceedd55f180c3e159da47d95b839570f5db15458a15a11ea",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_density.svg": "673822c4d70db32da1db7f574479d6f2f277efc5cd49fd41a5cf372b3c20e781",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_overhead.png": "d54cd3de7201e5e400bb603a6a0ccc678c03e2f401c6d4eb28412bd04a262250",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_overhead.pdf": "0e1a634bcf4bc8e9fe2da82b6aad60f4651514b84bea8fe71ee9b921e7629c5a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_overhead.svg": "4bdcbd4a0a4a92c128c13d260368b7efe1958f5c4cc590fcd348f59c7440493c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_combined1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_combined1_127p882m_832a9dc783_overhead_social.png": "0d7a7eb2f39ad9390ef946ef6ee42bc7ffe55da746bfda95bf11bc9abdbed41f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_111_1.jpg": "1c47b3cc2721493e449e472cccfc53efbeceb6b58aae1bb0bf8f2ce4cbc81904",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_111_2.jpg": "72a9d9e445c07ac4202af8c8d50efec9a78d66f86e4f06c7e38a2490af46e759",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_111_3.jpg": "08722ab911239ac43e101fa7447aafaeb978fd48d5085a5f883e9da2f736402d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_straight_social.png": "21c9371add084acc86c18787bde5e8060f60c5bac46922d768d79aeef7cdadec",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_straight_social.pdf": "da307a44e86b60bbba470ecaced75a4cd21c6894a654c2afd3a77f70c3a568db",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_straight_social.svg": "793e85d6c288e2021e1d9a5f07b475d50fca1fd0b9c808e533e6b294647694f8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_draw_social.png": "34d38c04f7aa54238c85da9f273e46f3e0c10f1cad587c8166e41040dd410dd3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_draw_social.pdf": "d875f04e7b7da5c9c45752bb82d7bd0925f4605af7e2387d6126fe1ed14e9b18",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_draw_social.svg": "6cfd2adfa29c1831c8da4069cdc56357b73f4632abb09c60188a978bdc77ee85",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_fade_social.png": "1de73aca99374cc4044e6d22baa7b942868c7a1e03137bb6c8ca068d5f920aa8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_fade_social.pdf": "7a5f20a692dbf8242e1f6fb735799c26f478c49054f40d87b9f036a38363930c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density_fade_social.svg": "6513a4897bc159dd25082d91ece574b33b4a2637ca7389035807d6219cadf379",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.png": "4672033a181649e60fe08f5459aa590554e33e3094ec1292eeae9c1d2e10afa8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.pdf": "173cd1073c36e109804e3c97d354d70f284c83b7d97d86a008ead54b85f97eaf",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.svg": "f4bf13b4547bfe0640e00f7330610ecef23e0afb91944753ebed88c96e20e3c4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_overhead.png": "b7a2cf80cc0d476ce5a38d80afc557f1a3e80f4dbe0e783d79d32fbea42beb89",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_overhead.pdf": "7ed1b78c51840bbedaca24e12574141801c5cecf2650761a4e8b627e633c5a49",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_overhead.svg": "0f6675f01cd1646bc0a07ad27b3521e0195901b22f6e7d7ef62777eab5b34489",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_overhead_social.png": "14c145d087ae846ea1eca2ba0f8c2ba5ca0f1c5daeb212de19fbdd84e643e19c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_112_1.jpg": "bdad007867ccdfca822cd0b0e6734ca5666742edfa2c150cee7f0621601fd423",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_112_2.jpg": "648e2447f6a92d47812292398c99466fdf1cf10d8bb74e3c6b1757bc14c31996",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_112_3.jpg": "172e2124fbc3a9152e08fce5c6122046e08ce9faf37484eae1eda93be94f0ca3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_straight_social.png": "d7e0e69def4ffb1d72b9e844379ead30b1951a265f98f60036de5b3d5337c44e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_straight_social.pdf": "b608624c7bf7484d0adfba1fdef4f6f2de0e589aeaef4a0d949c23bfe178d666",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_straight_social.svg": "bf852aca0efddbc7940162d03a8839ff3e2cd1ac83ebecd762fa78149ac73aaf",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_draw_social.png": "bf328d721618bc8a9d06528afaf3cec3660131370fdf9dfb585beb2594def47d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_draw_social.pdf": "f1703cae3bc9713415bc1727877a2ff431fbac9078ff5ff5beef54ee2da507e4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_draw_social.svg": "32ea3c4060694c95b504dfe340e1f3509fa6a6964e5453c593b9f212b4a2dba7",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_fade_social.png": "5c6491504846ad733600236cb57fbac56ba9c25028e56c30c3b0fb3c29389260",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_fade_social.pdf": "3d5aa59ca7461f877e2c9beb373ef0363ab30a6db00cd43851ca536bebdb96a0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density_fade_social.svg": "3e9bcbfa5b49f9fb91a39848276964d089fa29e4f13a3e1e8067ae5d4570eb35",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.png": "17db737f2b4b12a594390a9b8fa219133d1d90cac94aab5a689f4c38c7ad5a85",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.pdf": "3b6883ca7f8fb26a3d36e4bf1fb4e172f7bd095fa847cfb8a1d8ecfe2f540f9a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_density.svg": "5877a7a72572083e29fc0693851e98b398fa5219cc23e910272fa595cfbb029d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_overhead.png": "fde0393d5b86a86349bb83073a3c5b87d15fd9196a4b3eac9489d0062fdb4f7c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_overhead.pdf": "e80445422f8ffb9576098447985636bbb8ad59bd7c863a5714e9c7c335dcef5e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_overhead.svg": "0b46d72b3dfd9ae2c10227efbdcb38ca79a49b90c12aa15427999586a0f44377",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_70b97095a0_overhead_social.png": "0613afe55bbeca3c24575897b9da7425b914fcd50137e095553f4b25107e56f3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_113_1.jpg": "06cb8aabd6949348965f8894795374eec5615ed11737514e9919ac2c14e5a37f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_113_2.jpg": "1eca404ee87d9cb97b2b91d36dc4e30fd391222e83c8d19967cdd8a6f8d85a7f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_113_3.jpg": "cde96f77fbbd435b2d832032f96a4029b66ddb5851d85411172a75c1d59bd1cb",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_straight_social.png": "fec5862c566a03bcb5b925e5dc3bd000cf181956c00841b03b3506d22b9c9710",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_straight_social.pdf": "e410de90d1fa17bc7fc214aae568e26bd966511f3cac1da3b5afda6b41e9a9b1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_straight_social.svg": "edd27417a7d4a062ea5c1060b5084b595390608955a6c10db0ee82c07dd58d6c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_draw_social.png": "97c0c9d8d5062779c00fa42e71c2a2cc95cf605de4100a82c438380183025774",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_draw_social.pdf": "4824368988b0552306c827d7ab481b3bd7ddc469ef7df14b8d5a691d39f3e861",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_draw_social.svg": "0e7eac3325d0769f611e392e0423f8b68ee25f0a84dbef78c32d1e3c8c577caa",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_fade_social.png": "7803d5133404ab584690eb2c108a845dfe6739cdaeaadb18dcf7ce87330fb284",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_fade_social.pdf": "c352960f1e0432a23ce8ec061aef47b8aab1a8a763d899f7298411ee1adb47ad",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density_fade_social.svg": "75f1b66d67b6837932509094720a0167b2d93477375f65638f4117a98787b647",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density.png": "e9d98f70a12fc6748d49fedaae4a6df6bf5db20d693459f3269e142d5303c541",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density.pdf": "1faec56b8ccf355608d5d9986d98ea2abf922ccc465acf491e8d271d91820603",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_density.svg": "bd0ff0635b79e78130ed8c7d73943007c69ddd61eacca04f0cf7f5f53d18af57",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_overhead.png": "432bf75cf188a5be24c424ab3c54de3311baa657d605beb078e99f1177c39e06",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_overhead.pdf": "9c10b68d43d7b205429bcf42441658d7489f7b8809f9980c71378fa9e9cb6363",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_overhead.svg": "6a13b4b9a3e4c077dd59ed1bcb189ea3c68de56af7fa18d954de21caedc71c75",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_path_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_path_127p882m_ddd75830bc_overhead_social.png": "9afc3eea4984252fd81bbab13c17ae12c83e9b7ae38172c7b47be2d57af97a84",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_114_1.jpg": "edfc5fa857b4f73b4d82916a1bc6f8e3be0a05eb658f24d5c830b02ead6ba276",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_114_2.jpg": "73a25a86183ee69023ac0f6d3bd600e648a8dd3e08128ee78ff657c5e74ba1f7",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_114_3.jpg": "aeb564aa7cc819e11be6aaddf96f61923deceaeb898ab79d4b3a9631f618da65",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_straight_social.png": "2094745f6693e4872dddf7916e4504fa453b13593b3a07897aecb7086869b93f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_straight_social.pdf": "b2b6e9d86328e53c9a0927b952d33a33179a240ee15df602990d3671538bc825",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_straight_social.svg": "8c0144c9247703189dd64a6948ae1bba75bf2967863a963cfa4ade3c461c1cd1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_draw_social.png": "ed0ef3dfa415d9a65fa979950918b492e93b7b2448fa0ff102739f80a242b817",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_draw_social.pdf": "7748e9b6b62c7984996121f456f1da97a1a82e3577c6a5b3e22014a1ace089ff",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_draw_social.svg": "812933de2f4e4c802271c378c71031d46b161f5b7d2e151f42b3839f5e9f8f12",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_fade_social.png": "8ac2e3332e5d383793168dd1720f1a9bdb6e7a85338651456cd5f87097a3c487",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_fade_social.pdf": "cb4cff31765f71146b43d47dfb662c46b3b8713b273393b001c1f7a8cb522389",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density_fade_social.svg": "ca99d56d9443eddf10acca4475a7bab48095b27039c804ee016804faf7d21448",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density.png": "5b53efd97bb54742318e0829702fd8be9c62e3283bde50051db11efe38c5283c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density.pdf": "36202bf1ace5dafafeb79dc1e2f3c16c6c81c3d5fac3524f1abf596d6cb388d0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_density.svg": "31cb448e8e17399c1ed55624fcf111608b03c37a4c58ea75e0baa5959ecccec9",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_overhead.png": "9a76560dea0442801f93e88868c13d6a9d0ee4d0c8dd720f334d61eafac12249",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_overhead.pdf": "8e7a913d7db2740111703530def3ac2ad4035f012406da907b2748ee80760197",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_overhead.svg": "2863f340d2e31c7fe6f47dbc6694935921b06e66ddaa3506926d8708c1cec881",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed1_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed1_127p882_a4bad1ea3a_overhead_social.png": "9db256711b139c6fa659020aa8c4aff18e5182593e106a17e65530ee7caf2520",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_115_1.jpg": "f25be234672effe00b3b8bf3ac7574c76f6fe9ea537c04e8f238dbaacca24177",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_115_2.jpg": "d59675439201d8e8930827118ebbd3d24abe20ba9245bc598613df6a8b684bba",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_115_3.jpg": "1bffb772ea4ff9ac8560a43fdf855e91ca847f0163c163b73eceeed990910aad",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_straight_social.png": "35b8f01f841c2b1c45881660901980054f2825c58f516d585d9f1d36a5d0841b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_straight_social.pdf": "5d829a79b561338c9b4bc852047b5efa7e307d19ec6435b578a21f32efafb4d1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_straight_social.svg": "0d1cb9f7c3eb7eb1e6395527b1631d043c8b5d5e708691f857549c713b2dcba0",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_draw_social.png": "e2a76ce20615144bc61b2d6e9d43ca76d426b64c17a5175a40635e7e71883cee",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_draw_social.pdf": "d4cad713cefa548e7dba78668e48ff6dd17caeaa99eb3bbd868a74fddcb1bbf2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_draw_social.svg": "78b533d189c0b5f2c36ee81b4676c3d59efe24a4cc51a1b876a180af4abe1b8d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_fade_social.png": "2905242a3498f235b694b195b6ed2e603aa71522f8d8d52044c32c687370e019",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_fade_social.pdf": "d7407bf0b27cb8354a7215905c75aa38e5876c5d9aee40ac8b77dc1e952d1fdd",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density_fade_social.svg": "47a3982620485255523142da426ffc0d05fbb60ef39ad6c954f09eed11e04c38",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density.png": "bb14d586a8172dfba7bb26584c9b426a0ac2a2515bba1e71f842a831bc2ea74e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density.pdf": "857412eae2abbe8bdddec7d8892d325ac5c5779173fdf0edbd543272a08f4dbe",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_density.svg": "afc976f362a434ef5f6887760e2791b820893278ac58ae40651da4bc4748883d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_overhead.png": "9a8fea6ec74681f5c61dcb71db6f3d91a7116eab3744a196795c46bae0a52be7",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_overhead.pdf": "55604a519a0548a3d020f7c85ecbe890fb7b231542f9499da11428f0d8a683ff",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_overhead.svg": "780c9d7baa5492abfe876fee77745fb7455bad23bcaa9afb35b6e13edadaadd1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_speed2_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_speed2_127p882_9a61d254dc_overhead_social.png": "84668772e3ec6a7088e691d49c540414714ad4ba5afb4558e509931d86aa5ed2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_116_1.jpg": "106ba6229f326f9ff5768bcff0081af311d5a90f1b7c2573241bf405ee3868e8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_116_2.jpg": "766091b4b613e58bc4abb0b027e6208c06df72acdb85e0b79514177779f29170",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_116_3.jpg": "72bb83058dfc27baced40ac267e5e18e8bfa5ed24a8f494d96b98eae80b2dace",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_straight_social.png": "6a3fc914d2da4b0dbaa42abe6418416354c119aad463d8102e3fc270cf8e6dbb",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_straight_social.pdf": "9073701da77ef75fd3f9e49fc5887408687056f085068bfb1c2cc35b674f64f4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_straight_social.svg": "e16669f21daa282aa4a189205b29b0adae968ab2568a670b72145ce0bdf3a63d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_draw_social.png": "4bc1645b545648717ba39f67cbf278fc8314cd07bba6b2c8842a28eaf73ce60f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_draw_social.pdf": "efd2fcb836b77d9766b1882d51f79e0e3c18f198aacd10133d5c29ea9d7678e3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_draw_social.svg": "5beb478994ffe2610885472b7f63abcff0914f530fa6f628460263913b7155a3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_fade_social.png": "4c35f341f46c04441bfd0dcc1bf9125023719fb2959b89bab4562b03e153e748",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_fade_social.pdf": "11832ba6e18e06a2ecd54a31b2f44a0bdbd1e3f5b01289ff7ccd3a114c6277e4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density_fade_social.svg": "aec7eb80c6e33222a9222dfdef1170e80b8607a2ee10f1523db960ed72b94abe",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density.png": "a5fc41f41b466baee4b072e7e3a4d1a3e3b0be6d745e920d4cea114ffb4335bd",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density.pdf": "8d5046b8b1812ed6368ab2e778c5d5d32f71d189851fe2a880cbfba6c7beb19f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_density.svg": "bdfe951d0e7e9cd84cc2bde12273482f9d39e20602dfdcaa362b6d686ba378df",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_overhead.png": "7d8ec2cdebdaa22a23d1d7f6659abd59d69e6b797fa3991bcc2257fa596a7b26",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_overhead.pdf": "6ba021b5b0007c91a00c4a65003b7647c9006ce84d425c4142d1d16c7f67a07f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_overhead.svg": "ee87766176cfb3ae90c196be39faeadcf572ef19a5221ae3a3aac3fac9dc8576",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_shaft_strike_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_shaft_strike_127p882_e09e78630e_overhead_social.png": "9688a6cc7a1284ee71813527c649e2405cfc3f1291749596e1a49ae0315ec10a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_117_1.jpg": "4b08ab154c8a440cc42e1ea2659696cd843ef3e1a4cddd3493338b25c62ea6c7",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_117_2.jpg": "db024f384b8c9bf40bcbc7a3ab8d59933c49bda6b4d0489fffd63bb2aabb7995",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_117_3.jpg": "338a12143bf6ece03a17c90df20b1dc7870786b823bd47cf6e62a66c804ecb9f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_straight_social.png": "2c37b8ad3f4c60a38e5e123fe6252414b9424e2666ac7df5a342f0327433db25",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_straight_social.pdf": "4f81d51385e4d29c22684ac5d6610f6266131085a94b43ebeff450c16b057714",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_straight_social.svg": "6416d8db5c394a17afb652f7ffc9fc528848ec7cd164d9f0e3ab6be56318826f",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_draw_social.png": "36440ce0b2126693c05ab82adb4ffaf66f0c4feeb8f940e2a6d1675fb267edab",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_draw_social.pdf": "9c8291602a6848d9ed8f5f541faa7a39d2613af340e3db79f506f8bc85fabf3d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_draw_social.svg": "9e1dfcb4dafd4fb6f150947da0012de1ec0c8663a9b16c4af24a6347a93000e5",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_fade_social.png": "67e103ab079539301ff331a6958dbffa64931fd5f8dfcd6b580d92b7ff1fbc1c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_fade_social.pdf": "cfa235d131b13fbb1058596784eced17d01bce81d0d6a76204a2e8dd1536cc97",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density_fade_social.svg": "abdf534388dd59a0539519d83c330150ad35e16cdda2f888e47961cf8e62f92a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density.png": "73e0280ba93f6962657be622189cf6ab8f93f7b5d06d3884447e1c55d2ce64f6",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density.pdf": "29533d63b55bef22bd6e5ea581e731936dbb9a00cb870f5fe2749737d7b951ed",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_density.svg": "d2ca98677f9da65c095af881b8976b3d0ebe4b9acbdb527d8cde26dc13012c90",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_overhead.png": "5aed813ad88ee4f7fdd63265ab1d1b290027a57a7a6d87ad0a5fe9ba38c12538",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_overhead.pdf": "3b3a2c8475c696e1d56f5455b73ebbcef911fe1b19b3beb839d155091fd8974c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_overhead.svg": "916166dd077ecca4b40b1fdb744533872e367cc937377d05d17fc8dff8c6d0f7",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined1_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined1_149p744m_25729bc944_overhead_social.png": "19d88cb8fe8ac2ff923795bf0ce3e946302210a3ca07f41636e08511bef09ae7",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_118_1.jpg": "c9d650bb467af2453292f747e8c3fbb98027bb0285090f3237898c5b7641b799",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_118_2.jpg": "f854628078e43f4e7b7bcd2b46e287c1be722dbbb3ff5cd68bd51f4f9f2272ce",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_118_3.jpg": "7dff1bcb34dc749705090e2acaa669ef0acd2c97c56560d548d778c83bfbdbe9",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_straight_social.png": "4601c47d745b33eb89d3ea7e3934d0fa87ecebd8dee8d4dc2a6216cbbda43b00",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_straight_social.pdf": "5c9a68967119a81a2665b2e916037e23f802407961d66abf435886d8c85fede5",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_straight_social.svg": "1ce737d826ca6e06afe7f115f05315e42bb70a2520b2f265116fba3bd7adc4f4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_draw_social.png": "077fd067d6c67e874fc4d0927ee43ac7a9f8e7acc04ca04109466f77212f3944",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_draw_social.pdf": "7147a4c6fb75f82353f2b2531fa1079f283b2d689cf81536dc7f2e67692059e4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_draw_social.svg": "412d5d5cdc51bd7ce646998b36734be1635f5361adb370acb9d66c07a92f9310",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_fade_social.png": "e09c5bc72e3dad01d7e44a99aaf0455005b66bbb862b7ac0d757c6034725e8ec",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_fade_social.pdf": "3e76f48a34d70b397e03c29bd6d7321432b2e4b2adc2afd0125694f189ecb388",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density_fade_social.svg": "0745922d4c7bd41bdf6d0c6d328cff0501727c700d610f0c65aae2e51918bcb4",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density.png": "a625a8aa2af45dcc4bcf8ca702994ca700fbb5895306d531dcc5503e448df70b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density.pdf": "005499948bee7e474ea3e63fef52d4aade508a215606d7f7d0ae1e44a16f4c17",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_density.svg": "d67269108f6de247876d959cc769cc871b032f3efafcf850828b179315232cb8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_overhead.png": "d8119df2660c09e5c272a18b731960916d80322519a93cdb0b7b75f34c809bb3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_overhead.pdf": "256332e02ca28546e1290a787358682d16cf0b299b6db73fd1488664835e8609",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_overhead.svg": "408a0a1c3888d4c79de6eb1aa30e7df4e5cbc9b340cb7372ef5965f4a74d06f2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_combined2_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_combined2_149p744m_35b382cdaa_overhead_social.png": "c1f825c13b53fdf51148e354fc2d5126673cbc502e11df40626eb4985cbac0ec",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_119_1.jpg": "4210467b348687d1ba5922abc4790ccbaeec75b7622200d0680c55915e77a369",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_119_2.jpg": "ff226a1b540e81238d9835610a6afa890366a24cd8b17ad51d817887de2e37eb",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/shaft_rotation_sd_108/contact_119_3.jpg": "4b66366237f345e33110a2d1ddc5f0ad32b3862182df6fa272ab353b0adb2cc2",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_straight_social.png": "9098222be7486b8c09c044f0f58590e1fa31e126a7203da92baa0d13ca8ac482",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_straight_social.pdf": "b8801d6a9a5fdfa678156bc4f6ad080075afd298a8cee3ddb235bb1e854f3c45",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_straight_social.svg": "84ba36681c5696896a23c4c37c5597bb1601023428090f9779ea10de2c052af1",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_draw_social.png": "799b431bb53a5526ca2c75384c92375ed55f3a1fa5b15706ebd7c57a27a74132",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_draw_social.pdf": "26f00380521b727ced43710f0a785b107a58181829ece54705a1775cd592a988",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_draw_social.svg": "042eab22d8115126d42003c8c39ee2d7166085499352089dc3a8387ecf11a67c",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_fade_social.png": "66ad580debfea7629bd8e5c9a1059b9fa514bfe524b1a5cfa51fde2b7df2a175",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_fade_social.pdf": "606d9f82c30e98a237be22a8781ddbe5d9a3c54c8688c9ebfc7b03b5190d7ced",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density_fade_social.svg": "5cf11ac00de4433875ce09f555edf13bdbcdcdd5193605f3bdf1cfa934395911",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.png": "112d8606ed6b85ab8ec994e12d185de0fc22cb5c58e2b969b30ab2e912afc998",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.pdf": "7a76fe15bafb461a79c260e81acdf999130bd4669e5527b6470946379a810918",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_density.svg": "0cff0af02a4b959db7757ba1d572ebd65127ff9995a0df08b4cc9a2f74b92f24",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_overhead.png": "d00e7e489cb39e506e2f4122f05b88ba8193540f1d0e869b8742503785e8010a",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_overhead.pdf": "087be174ee4a9658cf9c0254770cc715e9a17530bea4798628bd02135dba5afa",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_overhead.svg": "7f365d612356c48dffcb605e24d91a53be07e3c30a57a26a4c73524019c824c3",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facep_3b0f6549bb_overhead_social.png": "14d42e1411a3aa423f21d37b852cb5d44f83d19c6762c5c0a0f6bb60677dc791"
+  },
+  "before_after_hashes_equal": true,
+  "limitations": [
+    "Human visual inspection covered all PNGs on two-image contact sheets plus three full-size originals; not every original was opened at full resolution.",
+    "Density assets in measured repair scope remain held.",
+    "PDF/SVG files were hashed, not visually accepted by this review."
+  ]
+}

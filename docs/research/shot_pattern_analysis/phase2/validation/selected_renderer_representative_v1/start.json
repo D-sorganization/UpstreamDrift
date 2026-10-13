@@ -1,0 +1,22 @@
+{
+  "candidate_source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "2ce59515c23c3de8cc95d194ac1b3e5164079aba1049c6c4899b95b7dba87a3c",
+    "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py": "62f659035976a0c27994ef7d637678ab7b162f5325d60deabaad4d72df0eb3f6",
+    "tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py": "df41a1e769971a01374f08aa20373d18a541231ed1e347ef236afa216c5909f6",
+    "tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py": "eae68bc232d2d762a189eebedcb2d6d594408b13ead800659714e68a306bae9c"
+  },
+  "worker_exit": {
+    "exit_code": 0,
+    "finished_utc": "2026-10-10T14:10:27.904136+00:00"
+  },
+  "worker_evidence_sha256": {
+    "green.log": "11586f67976c2ecdc999329aa533ab06db69a1a193bb75120bd5d47eceae16c4",
+    "patch.diff": "c7df2d9880f69141a513d7e6f0b0f9c4de7cf40ba39663a3c2a3f337d1d71fdc",
+    "recovery_summary.json": "0bac5fef2c6a6e4ad24c52ec24b72a40e546b253ca17bd3a760db39ab433ffa6",
+    "API.md": "00edea4b9889b37cb7a681c6b67057f9afd0b3168941bc1631e2bcb3bb3c6b91",
+    "launcher.json": "ce4ae3ff193ea183fe19f58373e53627156b3a1ae754ae76ed3304563f4facbf",
+    "exit.json": "24fcc71f022fcd2395b7bde6c2be12d334e58abeeeb10eaecdfe5649f2ed8b1e",
+    "red.log": "ea10a40b8a5605f67bc70b4538d1afdb7ec7a327e139d965578a45917bb48073"
+  },
+  "harness_sha256": "341677e2f080baf76b6a7dac4979fe9cb4a077ecb9234b42b16357e14cc5dcae"
+}

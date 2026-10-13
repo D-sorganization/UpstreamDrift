@@ -1,0 +1,46 @@
+{
+  "schema": "shot-pattern-speed-bounds-sensitivity-predeclaration/1",
+  "issue": 12000,
+  "status": "predeclared_after_feasibility_audit_not_authorized_for_mc",
+  "club": "driver",
+  "lean_deg": 5,
+  "curve_scale": 2,
+  "n_shots_per_pattern": 10000,
+  "patterns": [
+    "Straight",
+    "Draw",
+    "Fade"
+  ],
+  "seed": 20261009,
+  "absolute_face_bounds_deg": [
+    -6,
+    6
+  ],
+  "speed_bounds_mps": [
+    33.75,
+    58.5
+  ],
+  "original_speed_bounds_mps": [
+    33.75,
+    56.25
+  ],
+  "target_x_m": 178.94875782337786,
+  "match_tolerance_m": 0.05,
+  "new_control_cells": [
+    "driver_lean5_curve2_rotation1_shaft_only",
+    "driver_lean5_curve2_rotation1_combined2",
+    "driver_lean5_curve2_rotation2_shaft_only",
+    "driver_lean5_curve2_rotation2_combined2"
+  ],
+  "unique_new_cells": 4,
+  "unique_new_attempted_shots": 120000,
+  "interpretation": "Separate speed-bound sensitivity; not part of face-only supplement or original control matrix",
+  "required_gates": [
+    "Original frozen workers finished",
+    "TDD configurable speed bounds and independent source-transition review",
+    "Fine replay residual <=0.05m",
+    "Source-bound32-shot pilot with independent audit",
+    "Immutable final-run acceptance before10k",
+    "Final audit preserving original bounded-unavailable records"
+  ]
+}

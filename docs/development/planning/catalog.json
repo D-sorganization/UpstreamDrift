@@ -221,6 +221,41 @@
         "evidence": null
       },
       "activation_issue": null
+    },
+    {
+      "id": "DV-11984",
+      "title": "Empirical Qualification of Contact and Delivery Covariance",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/11984",
+      "source_snapshot": "source-11984.json",
+      "record": "DV-11984.md",
+      "disposition": "defer",
+      "kind": "physical-measurement",
+      "status": "deferred",
+      "rationale": "Numerical conservation and geometric analysis cannot establish measured equipment accuracy or identify player delivery covariance without independent physical measurements.",
+      "prerequisites": [
+        {
+          "name": "Physical clubheads with measured mass, CG, full inertia tensor and face geometry.",
+          "evidence": null
+        },
+        {
+          "name": "Calibrated launch, spin and strike-location measurements with repeated trials.",
+          "evidence": null
+        },
+        {
+          "name": "Authorized player delivery measurement sessions and synchronized instruments.",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Preregister tolerances and measure held-out center/heel/toe/high/low impact outcomes with uncertainty.",
+        "Compare contact and flight predictions against held-out measurements and document failures.",
+        "Fit and validate player covariance using repeated synchronized delivery measurements."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
     }
   ]
 }

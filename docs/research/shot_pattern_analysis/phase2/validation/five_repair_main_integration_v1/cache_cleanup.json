@@ -1,0 +1,86 @@
+{
+  "scope": "Obsolete task-owned tagged Mypy caches only; no study data, artifacts, source or validation evidence removed",
+  "removed": [
+    {
+      "path": "/tmp/p2-final-boundary-mypy",
+      "bytes": 32583904
+    },
+    {
+      "path": "/tmp/p2-legacy-gear-mypy",
+      "bytes": 27259104
+    },
+    {
+      "path": "/tmp/p2-presentation-wrapper-mypy",
+      "bytes": 32489696
+    },
+    {
+      "path": "/tmp/p2-restore-mypy-20261009",
+      "bytes": 32522464
+    },
+    {
+      "path": "/tmp/p2-root-pair-proof-mypy",
+      "bytes": 32501984
+    },
+    {
+      "path": "/tmp/p2-social-reviewed-mypy",
+      "bytes": 43167968
+    },
+    {
+      "path": "/tmp/p2-supplement-final-mypy-accepted",
+      "bytes": 43110624
+    },
+    {
+      "path": "/tmp/p2-supplement-final-mypy-qualified",
+      "bytes": 43106528
+    },
+    {
+      "path": "/tmp/p2-supplement-mypy-final6",
+      "bytes": 43077856
+    },
+    {
+      "path": "/tmp/p2-supplement-pipeline-mypy",
+      "bytes": 12632288
+    },
+    {
+      "path": "/tmp/p2-supplement-pipeline-mypy-final",
+      "bytes": 16608
+    },
+    {
+      "path": "/tmp/p2-supplement-pipeline-mypy2",
+      "bytes": 2236640
+    },
+    {
+      "path": "/tmp/p2-supplement-pipeline-mypy3",
+      "bytes": 13795552
+    },
+    {
+      "path": "/tmp/p2-supplement-pipeline-mypy4",
+      "bytes": 13795552
+    },
+    {
+      "path": "/tmp/p2-supplement-report-mypy-final",
+      "bytes": 12620000
+    },
+    {
+      "path": "/tmp/p2-supplement-report-mypy-isolated",
+      "bytes": 12611808
+    },
+    {
+      "path": "/tmp/p2-supplement-report-mypy-review",
+      "bytes": 32514272
+    },
+    {
+      "path": "/tmp/p2-supplement-report-mypy-review-current",
+      "bytes": 12615904
+    },
+    {
+      "path": "/tmp/p2-supplement-report-mypy-review-current2",
+      "bytes": 12620000
+    },
+    {
+      "path": "/tmp/p2-supplement-report-mypy-review-final2",
+      "bytes": 12620000
+    }
+  ],
+  "bytes": 467898752
+}

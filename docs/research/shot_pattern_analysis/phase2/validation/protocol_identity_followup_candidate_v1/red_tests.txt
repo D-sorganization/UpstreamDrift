@@ -1,0 +1,197 @@
+..FF.FFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+___________ test_close_targets_produce_distinct_slugs_and_identities ___________
+
+    def test_close_targets_produce_distinct_slugs_and_identities() -> None:
+        """Two targets differing beyond 3 decimal places (e.g. 100.0001 and 100.0002) must not collide."""
+        from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            pair_comparison_identity,
+            pair_comparison_slug,
+        )
+    
+        rec1 = {
+            "comparison_kind": "curve_strength",
+            "first": {"protocol_id": "original_primary/1", "cell": "cell_a"},
+            "second": {"protocol_id": "original_primary/1", "cell": "cell_b"},
+            "target_x_m": 100.0001,
+        }
+        rec2 = {
+            "comparison_kind": "curve_strength",
+            "first": {"protocol_id": "original_primary/1", "cell": "cell_a"},
+            "second": {"protocol_id": "original_primary/1", "cell": "cell_b"},
+            "target_x_m": 100.0002,
+        }
+    
+        id1 = pair_comparison_identity(rec1)
+        id2 = pair_comparison_identity(rec2)
+        assert id1 != id2
+        assert id1[5] != id2[5]
+    
+        slug1 = pair_comparison_slug(rec1)
+        slug2 = pair_comparison_slug(rec2)
+>       assert slug1 != slug2, f"Close targets collided on slug: {slug1}"
+E       AssertionError: Close targets collided on slug: curve_strength_original_primary_1_cell_a_vs_original_primary_1_cell_b_100p000m_77752e7451
+E       assert 'curve_strength_original_primary_1_cell_a_vs_original_primary_1_cell_b_100p000m_77752e7451' != 'curve_strength_original_primary_1_cell_a_vs_original_primary_1_cell_b_100p000m_77752e7451'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py:278: AssertionError
+__________ test_delimiter_ambiguous_identities_produce_distinct_slugs __________
+
+    def test_delimiter_ambiguous_identities_produce_distinct_slugs() -> None:
+        """Ambiguous delimiter concatenation (p0='a_b', c0='c' vs p0='a', c0='b_c') must not collide."""
+        from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            pair_comparison_identity,
+            pair_comparison_slug,
+        )
+    
+        rec1 = {
+            "comparison_kind": "curve",
+            "sources": [
+                {"protocol_id": "a_b", "cell": "c"},
+                {"protocol_id": "p", "cell": "c2"},
+            ],
+            "target_x_m": 100.0,
+        }
+        rec2 = {
+            "comparison_kind": "curve",
+            "sources": [
+                {"protocol_id": "a", "cell": "b_c"},
+                {"protocol_id": "p", "cell": "c2"},
+            ],
+            "target_x_m": 100.0,
+        }
+    
+        id1 = pair_comparison_identity(rec1)
+        id2 = pair_comparison_identity(rec2)
+        assert id1 != id2
+    
+        slug1 = pair_comparison_slug(rec1)
+        slug2 = pair_comparison_slug(rec2)
+>       assert slug1 != slug2, f"Delimiter ambiguous identities collided on slug: {slug1}"
+E       AssertionError: Delimiter ambiguous identities collided on slug: curve_a_b_c_vs_p_c2_100p000m_41a9071fb1
+E       assert 'curve_a_b_c_vs_p_c2_100p000m_41a9071fb1' != 'curve_a_b_c_vs_p_c2_100p000m_41a9071fb1'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py:311: AssertionError
+________ test_pair_comparison_identity_strict_type_and_value_validation ________
+
+    def test_pair_comparison_identity_strict_type_and_value_validation() -> None:
+        """Preflight identity validation strictly rejects malformed types, whitespace, and non-finites."""
+        from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            pair_comparison_identity,
+        )
+    
+        base = {
+            "comparison_kind": "curve_strength",
+            "sources": [
+                {"protocol_id": "p1", "cell": "c1"},
+                {"protocol_id": "p2", "cell": "c2"},
+            ],
+            "target_x_m": 100.0,
+        }
+    
+        # Record type
+        with pytest.raises(TypeError, match="Mapping"):
+            pair_comparison_identity(["not", "a", "mapping"])  # type: ignore[arg-type]
+    
+        # Non-string comparison_kind
+>       with pytest.raises(TypeError, match="comparison_kind"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE TypeError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py:363: Failed
+______________ test_validate_planned_figure_identities_happy_path ______________
+
+    def test_validate_planned_figure_identities_happy_path() -> None:
+        """Preflight planned figure identities helper succeeds on distinct planned pairs and cell refs."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            validate_planned_figure_identities,
+        )
+E       ImportError: cannot import name 'validate_planned_figure_identities' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py:437: ImportError
+_ test_validate_planned_figure_identities_detects_duplicate_cell_stems_across_protocols _
+
+    def test_validate_planned_figure_identities_detects_duplicate_cell_stems_across_protocols() -> None:
+        """Two different protocols sharing existing cell name must fail preflight without renaming cell output."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            validate_planned_figure_identities,
+        )
+E       ImportError: cannot import name 'validate_planned_figure_identities' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py:462: ImportError
+____ test_validate_planned_figure_identities_detects_repeated_cell_identity ____
+
+    def test_validate_planned_figure_identities_detects_repeated_cell_identity() -> None:
+        """Repeated identical cell references in planned outputs are rejected."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            validate_planned_figure_identities,
+        )
+E       ImportError: cannot import name 'validate_planned_figure_identities' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py:476: ImportError
+____ test_validate_planned_figure_identities_detects_repeated_pair_identity ____
+
+    def test_validate_planned_figure_identities_detects_repeated_pair_identity() -> None:
+        """Repeated identical pair comparisons in planned outputs are rejected."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            validate_planned_figure_identities,
+        )
+E       ImportError: cannot import name 'validate_planned_figure_identities' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py:490: ImportError
+_______ test_validate_planned_figure_identities_namespaces_are_distinct ________
+
+    def test_validate_planned_figure_identities_namespaces_are_distinct() -> None:
+        """cells/ and comparisons/ namespaces are kept distinct; matching names do not collide across namespaces."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            validate_planned_figure_identities,
+        )
+E       ImportError: cannot import name 'validate_planned_figure_identities' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py:506: ImportError
+________ test_validate_planned_figure_identities_type_and_field_checks _________
+
+    def test_validate_planned_figure_identities_type_and_field_checks() -> None:
+        """Preflight helper enforces sequence types and valid cell/protocol fields."""
+>       from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            validate_planned_figure_identities,
+        )
+E       ImportError: cannot import name 'validate_planned_figure_identities' from 'src.tools.shot_pattern_analysis.matched_supplement_figures' (/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py:526: ImportError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_close_targets_produce_distinct_slugs_and_identities
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_delimiter_ambiguous_identities_produce_distinct_slugs
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_pair_comparison_identity_strict_type_and_value_validation
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_validate_planned_figure_identities_happy_path
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_validate_planned_figure_identities_detects_duplicate_cell_stems_across_protocols
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_validate_planned_figure_identities_detects_repeated_cell_identity
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_validate_planned_figure_identities_detects_repeated_pair_identity
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_validate_planned_figure_identities_namespaces_are_distinct
+FAILED tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py::test_validate_planned_figure_identities_type_and_field_checks
+9 failed, 3 passed, 6 warnings in 7.88s

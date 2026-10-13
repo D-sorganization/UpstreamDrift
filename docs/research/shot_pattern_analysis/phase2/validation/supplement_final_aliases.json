@@ -1,0 +1,283 @@
+{
+  "references": [
+    {
+      "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "alias_of_primary": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "execution_kind": "provenance_alias",
+      "protocol_id": "supplement_control_alias",
+      "requested_config": {
+        "club": {
+          "attack_angle_deg": -5.0,
+          "bulge_radius_m": 0.0,
+          "cg_depth_m": 0.008,
+          "club_id": "pitching_wedge",
+          "club_speed_mps": 32.0,
+          "clubhead_mass_kg": 0.3,
+          "contact_backend": "auto",
+          "contact_law": "incremental_coulomb_energetic",
+          "cor": 0.83,
+          "dt_s": 0.02,
+          "face_half_height_m": 0.025,
+          "face_half_width_m": 0.035,
+          "friction_coefficient": 0.4,
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
+          "lie_deg": 64.0,
+          "loft_deg": 46.0,
+          "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100",
+          "max_time_s": 12.0,
+          "roll_radius_m": 0.0,
+          "shaft_lean_deg": 0.0,
+          "steps_per_compression": 128
+        },
+        "curve_scale": 2.0,
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ],
+        "match_tolerance_m": 0.05,
+        "n_shots": 10000,
+        "noise": {
+          "correlation": null,
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "seed": 20261009,
+        "target_radius_m": 15.0,
+        "target_x_m": 77.40247724866299
+      },
+      "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+      "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159",
+      "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+      "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face"
+    },
+    {
+      "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "alias_of_primary": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "execution_kind": "provenance_alias",
+      "protocol_id": "supplement_control_alias",
+      "requested_config": {
+        "club": {
+          "attack_angle_deg": -5.0,
+          "bulge_radius_m": 0.0,
+          "cg_depth_m": 0.008,
+          "club_id": "pitching_wedge",
+          "club_speed_mps": 32.0,
+          "clubhead_mass_kg": 0.3,
+          "contact_backend": "auto",
+          "contact_law": "incremental_coulomb_energetic",
+          "cor": 0.83,
+          "dt_s": 0.02,
+          "face_half_height_m": 0.025,
+          "face_half_width_m": 0.035,
+          "friction_coefficient": 0.4,
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
+          "lie_deg": 64.0,
+          "loft_deg": 46.0,
+          "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100",
+          "max_time_s": 12.0,
+          "roll_radius_m": 0.0,
+          "shaft_lean_deg": 0.0,
+          "steps_per_compression": 128
+        },
+        "curve_scale": 2.0,
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ],
+        "match_tolerance_m": 0.05,
+        "n_shots": 10000,
+        "noise": {
+          "correlation": null,
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "seed": 20261009,
+        "target_radius_m": 15.0,
+        "target_x_m": 77.40247724866299
+      },
+      "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+      "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92",
+      "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+      "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face"
+    },
+    {
+      "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "alias_of_primary": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "execution_kind": "provenance_alias",
+      "protocol_id": "supplement_control_alias",
+      "requested_config": {
+        "club": {
+          "attack_angle_deg": -5.0,
+          "bulge_radius_m": 0.0,
+          "cg_depth_m": 0.008,
+          "club_id": "pitching_wedge",
+          "club_speed_mps": 32.0,
+          "clubhead_mass_kg": 0.3,
+          "contact_backend": "auto",
+          "contact_law": "incremental_coulomb_energetic",
+          "cor": 0.83,
+          "dt_s": 0.02,
+          "face_half_height_m": 0.025,
+          "face_half_width_m": 0.035,
+          "friction_coefficient": 0.4,
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
+          "lie_deg": 64.0,
+          "loft_deg": 46.0,
+          "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100",
+          "max_time_s": 12.0,
+          "roll_radius_m": 0.0,
+          "shaft_lean_deg": 0.0,
+          "steps_per_compression": 128
+        },
+        "curve_scale": 2.0,
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ],
+        "match_tolerance_m": 0.05,
+        "n_shots": 10000,
+        "noise": {
+          "correlation": null,
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "seed": 20261009,
+        "target_radius_m": 15.0,
+        "target_x_m": 77.40247724866299
+      },
+      "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+      "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60",
+      "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+      "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face"
+    },
+    {
+      "alias_cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "alias_of_primary": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "execution_kind": "provenance_alias",
+      "protocol_id": "supplement_control_alias",
+      "requested_config": {
+        "club": {
+          "attack_angle_deg": -5.0,
+          "bulge_radius_m": 0.0,
+          "cg_depth_m": 0.008,
+          "club_id": "pitching_wedge",
+          "club_speed_mps": 32.0,
+          "clubhead_mass_kg": 0.3,
+          "contact_backend": "auto",
+          "contact_law": "incremental_coulomb_energetic",
+          "cor": 0.83,
+          "dt_s": 0.02,
+          "face_half_height_m": 0.025,
+          "face_half_width_m": 0.035,
+          "friction_coefficient": 0.4,
+          "inertia_diagonal_kg_m2": [
+            0.0001,
+            0.0002,
+            0.00022
+          ],
+          "lie_deg": 64.0,
+          "loft_deg": 46.0,
+          "loft_source": "https://www.titleist.com/golf-clubs/irons/720-t100",
+          "max_time_s": 12.0,
+          "roll_radius_m": 0.0,
+          "shaft_lean_deg": 0.0,
+          "steps_per_compression": 128
+        },
+        "curve_scale": 2.0,
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ],
+        "match_tolerance_m": 0.05,
+        "n_shots": 10000,
+        "noise": {
+          "correlation": null,
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "seed": 20261009,
+        "target_radius_m": 15.0,
+        "target_x_m": 77.40247724866299
+      },
+      "source_cell_manifest_sha256": "09ab039fe92f8a6a68ac2e5f9f47bfc50a58e93f8a85bc0b434df3f455ba3de3",
+      "source_csv_sha256": "5b51a7bf988aadfbe4e8d9e810526937ee1bfbf450799a9aa4d6339990e5712d",
+      "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+      "source_root": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face"
+    }
+  ],
+  "schema": "matched-study-control-aliases/1",
+  "status_by_alias": {
+    "pitching_wedge_lean0_curve2_rotation1_combined2": {
+      "proof_status": "verified",
+      "reason": ""
+    },
+    "pitching_wedge_lean0_curve2_rotation1_shaft_only": {
+      "proof_status": "verified",
+      "reason": ""
+    },
+    "pitching_wedge_lean0_curve2_rotation2_combined2": {
+      "proof_status": "verified",
+      "reason": ""
+    },
+    "pitching_wedge_lean0_curve2_rotation2_shaft_only": {
+      "proof_status": "verified",
+      "reason": ""
+    }
+  }
+}

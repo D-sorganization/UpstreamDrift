@@ -1,0 +1,29 @@
+{
+  "focused_tests": 18,
+  "inspected_images": [
+    {
+      "observation": "Short subtitle and wrapped explicit noise units fit; common-six 9939/10000 and 600 displayed dots disclosed; canonical model-conditional footer visible.",
+      "path": "/tmp/p2-production-social-review-v3/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_straight_social.png",
+      "sha256": "54cefe8829fa0a36f56ab20047a5528c688726ede289b930cf286b52a7abf05e"
+    }
+  ],
+  "no_physical_simulations": true,
+  "no_source_edits": true,
+  "remaining_findings": [
+    "Academic overhead still inherits figure_scope one-cell supported population; override with saved-flight scope.",
+    "Known canonical marginal-tick overlap remains deferred pending separate source qualification.",
+    "Full v3 render and final affected-asset rerender remain pending."
+  ],
+  "reviewed_commit": "538c9c684c",
+  "schema": "independent-social-layout-component-review/1",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "8b80820cb16b2a4f975a3bfcfa960d30500d3aec3d08fabd6a949bf4f9e37694",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "4940bc4b0e91719f8b8e59bf2ccd6e14a2bec214a0e08ddbff2f107020203450",
+    "tests/tools/shot_pattern_analysis/test_matched_pair_social.py": "bbef8b380266f3d02e396e93524686f577ab91b569d8015fff1a1039363ff8a7",
+    "tests/tools/shot_pattern_analysis/test_matched_social_integration.py": "64213398675955de1536a5d1f5ec20a640da8a434510aae02e55ecc2a973350f",
+    "tests/tools/shot_pattern_analysis/test_social_review_contracts.py": "212bc79277066ceedd2ddd81c262ed5585e476ffd7231044f6f06b706de19dc2"
+  },
+  "status": "contracts_pass_visual_review_partial_changes_required",
+  "test_exit_code": 0,
+  "test_log_sha256": "72be17d15162dbdd61696823abda52cf0a2b1e6e135b07fef9ef63a5009db02b"
+}

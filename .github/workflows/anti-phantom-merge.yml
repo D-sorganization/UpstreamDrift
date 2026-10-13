@@ -105,8 +105,12 @@ jobs:
           # last user who applied the label via the timeline.
           actor="$SENDER"
           if [ "$EVENT_NAME" != "pull_request_target" ]; then
-            actor=$(gh api "repos/$REPO/issues/$PR_NUMBER/timeline" \
+            actor=$(gh api "repos/$REPO/issues/$PR_NUMBER/events" --paginate \
               --jq '[.[] | select(.event=="labeled" and .label.name=="phantom-guard-override")] | last | .actor.login' 2>/dev/null || echo "")
+            if [ -z "$actor" ] || [ "$actor" = "null" ]; then
+              actor=$(gh api "repos/$REPO/issues/$PR_NUMBER/timeline" \
+                --jq '[.[] | select(.event=="labeled" and .label.name=="phantom-guard-override")] | last | .actor.login' 2>/dev/null || echo "")
+            fi
           fi
           if [ -z "$actor" ] || [ "$actor" = "null" ]; then
             echo "override=false" >> "$GITHUB_OUTPUT"
@@ -172,7 +176,9 @@ jobs:
             sleep 10
             RETRIES=$((RETRIES + 1))
           done
-          export PR_CHANGED_FILES="$CHANGED_FILES"
+          CHANGED_FILES_PATH="$RUNNER_TEMP/pr_changed_files.txt"
+          printf '%s\n' "$CHANGED_FILES" > "$CHANGED_FILES_PATH"
+          export PR_CHANGED_FILES_PATH="$CHANGED_FILES_PATH"
           echo "num_changed=$NUM_CHANGED"
           echo "changed files:"
           echo "$CHANGED_FILES"

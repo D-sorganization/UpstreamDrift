@@ -1,0 +1,8 @@
+{
+  "scope": "Expected Numerical Bytes for Protocol Filename Repair; Not Execution Acceptance",
+  "source_parity_receipt": "../supplement_v5_protocol_collision_stop/numerical_parity.json",
+  "source_parity_receipt_sha256": "4cd9a5237f27ce19b3715e736f1ba8da0f1b6a68344b8dee41f5775e00dad036",
+  "expected_numeric_hashes_sha256": "59a922fbcd2c06b23674466538d992f5169628464783adbcb6353a4cfb921edd",
+  "exact_file_count": 7,
+  "monte_carlo_rerun_required": false
+}

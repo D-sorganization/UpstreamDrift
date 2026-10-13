@@ -1,0 +1,42 @@
+{
+  "comparison": "Historical functions compiled from commit and current functions run with the same current __file__ for self-source receipt hashing; exact JSON artifact bytes and interpretation values/errors compared.",
+  "fixture": "Synthetic paired 2-shot Straight/Draw/Fade endpoints; seed 3; target 200 m; cell fixtures from test_matched_interpretation.py.",
+  "historical_commit": "c69fc7eefe",
+  "historical_source_sha256": {
+    "matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80",
+    "scenario_scoring.py": "8518db856a9510502575e878abcded81a84820e87071063a9695e0fd75e0077f"
+  },
+  "interpretation_case_count": 11,
+  "interpretation_case_sha256": {
+    "completed_supported_0_delivered": "7d724b4e06741d3856fa3805498336340c097d90a207797717314c46fafeaf97",
+    "completed_supported_0_no_delivered": "7d724b4e06741d3856fa3805498336340c097d90a207797717314c46fafeaf97",
+    "completed_supported_1_delivered": "7e80a3baa2ded9a76ff6ca81b40b3d6583c90ae89854a3da8c83989c8d672adb",
+    "completed_supported_1_no_delivered": "a66312781f219aa9d0d12a9a3f95e870fa1b4c1ca26ac417d3e2398387b95932",
+    "completed_supported_2_delivered": "5edc43f3b848212e1161f7a2095b01dc83cd6ea17547b4a36c0c3839a7250f28",
+    "completed_supported_2_no_delivered": "8c670b4a414259c1da4628027a16b6e8525c6f20f9f023aa6a11392d397168d2",
+    "completed_supported_9000_delivered": "cff3c3eac0d36b6296d64fc7a6d3f29d1c19a901970711a1d7f092db8349e727",
+    "completed_supported_9000_no_delivered": "85b786ed075ee60a46891802b5e83949433fee6c902b505750de074b43ed2456",
+    "status_bogus": "8cb0c33a5acf4bc081202b99ca10e9372e3e0108bc2f9ef710d3bd2623e9be17",
+    "status_not_run": "b8b0b932e10be0c6add2d8abab8113700656801e0ab21c61f7a1a600b4cef7f2",
+    "status_unavailable": "dc63921a156909198a269deb065bf09d0a512f6b2c8775786a8a5659b5e6a16f"
+  },
+  "schema": "shot-pattern-scoring-refactor-parity/1",
+  "scoring_artifact_sha256": {
+    "driver": {
+      "receipt.json": "430e5d20da41c712a014bfa885cc8e9769501bfd60f7fc749685937dc1b76e66",
+      "strokes_gained.json": "ae9323aae1bd03abe9d2b0bef48d31131a3ae041e2c6ef1bb9500b2d78fc7ce1",
+      "strokes_gained_baseline.json": "334d425d328c6dcbc43002d6134cfc359c2688213c2a37065c1184991103260a",
+      "summary.json": "907cb502d84e7bd009d7247bb76a9cdaa707b322abba2b3663c652b473cc3bc7"
+    },
+    "seven_iron": {
+      "receipt.json": "87383b51cd55c817b4bf996aaa32c3d29c1894ab1cac7801e072129dd1110ddd",
+      "strokes_gained.json": "f919d792cf2316c04e5376cd95cb25e77dae7bd59d4d9d388202b0962589ee89",
+      "strokes_gained_baseline.json": "334d425d328c6dcbc43002d6134cfc359c2688213c2a37065c1184991103260a",
+      "summary.json": "20e725008a3ee1f2177662fd81d9774c13456004d59ac12f94e75ca4ec4c90a9"
+    }
+  },
+  "scoring_clubs": [
+    "driver",
+    "seven_iron"
+  ]
+}

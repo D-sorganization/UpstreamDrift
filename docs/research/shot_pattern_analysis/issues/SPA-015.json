@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-015",
+  "title": "Qualify Mirror Symmetry to Fixed-Loft Shot Delivery",
+  "body": "## Problem\n\nThe general symmetry statement ignored that the same right-handed shaft axis maps opposite face errors to different delivered lofts. Coupled draw/fade differences can be structural, not merely sampling.\n\n## Acceptance Criteria\n\nQualify mirror symmetry to fixed loft; explain that a full physical reflection would also mirror the shaft geometry. Retain sampling-only CI limits and avoid player-specific preference claims.\n\n## Validation\n\nAstra independently checked geometric parity and the six corrected SD1 scale1 bundles; PW fixed draw/fade lateral SDs are almost identical while same-axis coupled SDs differ. No scientific equations were changed.\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11862,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11862",
+  "issue_number": 11862,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11862"
+}

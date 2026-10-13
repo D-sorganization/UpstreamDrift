@@ -330,7 +330,7 @@ L > 600 (incl. tests).
 #### 6.4 Example — Size S
 
 - `src/shared/python/optimization/examples/bioptim_tracking_example.py`: load a bundled
-  compact swing dataset (`tests/test_load_compact_swing_dataset.py` shows how), run 3.1, print RMS. No plots.
+  compact swing dataset (`tests/scripts/test_load_compact_swing_dataset.py` shows how), run 3.1, print RMS. No plots.
 
 ---
 

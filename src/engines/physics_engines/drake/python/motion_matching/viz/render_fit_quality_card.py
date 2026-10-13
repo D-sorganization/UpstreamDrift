@@ -24,6 +24,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
+from ._validation import validate_shared_timegrid
+
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from src.shared.python.motion_matching.club_target import ClubTarget
 
@@ -68,12 +70,7 @@ def compute_fit_quality_metrics(
     Public so the same numbers can be logged or written to JSON without
     re-rendering the matplotlib card.
     """
-    if fit.time.shape[0] != target.time.shape[0]:
-        msg = (
-            "fit and target must share the canonical timegrid; got "
-            f"{fit.time.shape[0]} vs {target.time.shape[0]} samples"
-        )
-        raise ValueError(msg)
+    validate_shared_timegrid(fit, target)
     head_err_m = np.linalg.norm(
         np.asarray(fit.clubhead, dtype=float)
         - np.asarray(target.clubhead, dtype=float),

@@ -1,0 +1,108 @@
+F.F...                                                                   [100%]
+=================================== FAILURES ===================================
+______ test_main_tick_neighbors_keep_readable_gutter[148.5-3.5-academic] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2019/test_main_tick_neighbors_keep_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x78145020e9f0>
+presentation = 'academic', center = 148.5, spread = 3.5
+
+    @pytest.mark.parametrize("presentation", ["academic", "social"])
+    @pytest.mark.parametrize("center,spread", [(148.5, 3.5), (77.4, 0.02), (180.0, 15.0)])
+    def test_main_tick_neighbors_keep_readable_gutter(tmp_path, monkeypatch, presentation, center, spread):
+        plots, _, canvas_type, _ = _plots()
+        captured = []
+        monkeypatch.setattr(plots, "_save_formats", lambda figure, *_a, **_k: captured.append(figure) or {})
+        rng = np.random.default_rng(311)
+        points = {name: np.column_stack((np.linspace(center-spread, center+spread, 500), rng.normal(0, 3, 500))) for name in ("Straight", "Draw", "Fade")}
+        plots.write_academic_dispersion_figure(points, tmp_path / "main_ticks", scenario="Main Tick Review", metadata={"social_club": "7-Iron"}, target_point_m=(center, 0), presentation=presentation, dpi=96)
+        figure = captured[0]
+        canvas_type(figure)
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        main_axes = [figure.axes[3 * i + 1] for i in range(3)]
+        reference = main_axes[0].get_xticks()
+        for axis in main_axes:
+            np.testing.assert_array_equal(axis.get_xticks(), reference)
+            labels = [t for t in axis.get_xticklabels() if t.get_visible() and t.get_text()]
+            boxes = sorted((t.get_window_extent(renderer) for t in labels), key=lambda b: b.x0)
+            assert len(boxes) >= 2
+>           assert min((b.x0-a.x1)*72/figure.dpi for a,b in zip(boxes, boxes[1:])) >= 4
+E           assert np.float64(-0.02112320458923932) >= 4
+E            +  where np.float64(-0.02112320458923932) = min(<generator object test_main_tick_neighbors_keep_readable_gutter.<locals>.<genexpr> at 0x7814407aa180>)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py:131: AssertionError
+______ test_main_tick_neighbors_keep_readable_gutter[77.4-0.02-academic] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2019/test_main_tick_neighbors_keep_2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x781442ee3470>
+presentation = 'academic', center = 77.4, spread = 0.02
+
+    @pytest.mark.parametrize("presentation", ["academic", "social"])
+    @pytest.mark.parametrize("center,spread", [(148.5, 3.5), (77.4, 0.02), (180.0, 15.0)])
+    def test_main_tick_neighbors_keep_readable_gutter(tmp_path, monkeypatch, presentation, center, spread):
+        plots, _, canvas_type, _ = _plots()
+        captured = []
+        monkeypatch.setattr(plots, "_save_formats", lambda figure, *_a, **_k: captured.append(figure) or {})
+        rng = np.random.default_rng(311)
+        points = {name: np.column_stack((np.linspace(center-spread, center+spread, 500), rng.normal(0, 3, 500))) for name in ("Straight", "Draw", "Fade")}
+        plots.write_academic_dispersion_figure(points, tmp_path / "main_ticks", scenario="Main Tick Review", metadata={"social_club": "7-Iron"}, target_point_m=(center, 0), presentation=presentation, dpi=96)
+        figure = captured[0]
+        canvas_type(figure)
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        main_axes = [figure.axes[3 * i + 1] for i in range(3)]
+        reference = main_axes[0].get_xticks()
+        for axis in main_axes:
+            np.testing.assert_array_equal(axis.get_xticks(), reference)
+            labels = [t for t in axis.get_xticklabels() if t.get_visible() and t.get_text()]
+            boxes = sorted((t.get_window_extent(renderer) for t in labels), key=lambda b: b.x0)
+            assert len(boxes) >= 2
+>           assert min((b.x0-a.x1)*72/figure.dpi for a,b in zip(boxes, boxes[1:])) >= 4
+E           assert np.float64(-2.903103505074978) >= 4
+E            +  where np.float64(-2.903103505074978) = min(<generator object test_main_tick_neighbors_keep_readable_gutter.<locals>.<genexpr> at 0x78143e4fa340>)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py:131: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+10.27s call     tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[148.5-3.5-social]
+7.33s call     tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[77.4-0.02-social]
+6.74s call     tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[148.5-3.5-academic]
+5.36s call     tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[180.0-15.0-social]
+4.70s call     tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[77.4-0.02-academic]
+4.14s call     tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[180.0-15.0-academic]
+0.19s setup    tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[148.5-3.5-academic]
+0.05s setup    tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[77.4-0.02-academic]
+0.01s setup    tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[148.5-3.5-social]
+0.01s teardown tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[148.5-3.5-social]
+0.01s teardown tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[77.4-0.02-academic]
+0.01s teardown tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[77.4-0.02-social]
+
+(6 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[148.5-3.5-academic]
+FAILED tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[77.4-0.02-academic]

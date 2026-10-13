@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_pilot_figures_v1/render_diagnostics.py", line 140, in <module>
+    main()
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_pilot_figures_v1/render_diagnostics.py", line 67, in main
+    summary, target, config["matching_tolerance_m"], context="pilot diagnostic"
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'matching_tolerance_m'

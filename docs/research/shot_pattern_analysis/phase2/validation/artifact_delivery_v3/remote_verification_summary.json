@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "release_url": "https://github.com/D-sorganization/UpstreamDrift/releases/tag/shot-pattern-phase2-research-2026-10-10",
+  "release_checkpoint": "cb5eff6dcd9df7d878f10578078b6fea69c8b681",
+  "asset_count": 21,
+  "bundle_members": {
+    "control": 548,
+    "primary": 690,
+    "supplement": 6465
+  },
+  "source_members": 15,
+  "figures": 13,
+  "report_links": 98,
+  "receipt_sha256": "ae627d514050e252c2446f01b9ecb527a4e86ede1453bf9f1bec4a06ade70de8",
+  "receipt_gzip_sha256": "94f1fdea97207cb0eb8bf59db981d09cffd60d74d02f3ddd8957a3990e728843",
+  "initial_failure": "Release aliases differ from primary/control manifest archive filenames. Initial prefix stripping failed with FileNotFoundError after all 21 asset hashes passed.",
+  "correction": "Map trusted manifest archives to already verified release assets by unique size and SHA256, requiring a bijection. Sol reviewed; fresh work directory; no asset modifications.",
+  "verification_exit_code": 0
+}

@@ -1,0 +1,19 @@
+{
+  "status": "confirmed_candidate_contract_gap",
+  "source_sha256": "9a111012f09b12f15fed41e1d55bb5f0486eab3fa3d0c3c2c83fb5bebdd20e61",
+  "rows": [
+    {
+      "label": "driver_rotation1.5_combined2",
+      "slug": "driver_rotation1.5_combined2_3810cfe0af",
+      "density_output": "/tmp/repro/driver_rotation1.png",
+      "overhead_output": "/tmp/repro/driver_rotation1.png"
+    },
+    {
+      "label": "driver_rotation1.6_combined2",
+      "slug": "driver_rotation1.6_combined2_1f1da6f828",
+      "density_output": "/tmp/repro/driver_rotation1.png",
+      "overhead_output": "/tmp/repro/driver_rotation1.png"
+    }
+  ],
+  "finding": "Fractional cell labels yield distinct safe-looking stems but suffix replacement removes fractional token, digest, and density/overhead discriminator; both cells and both academic figure kinds collapse to one path. Existing 26 production labels have no fractional tokens; no actual cell overwrite asserted."
+}

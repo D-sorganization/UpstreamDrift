@@ -1,0 +1,25 @@
+{
+  "status": "accepted_for_byte_preserving_packaging",
+  "scope": "File-byte integrity and stated path/regular-member contracts; not empirical/scientific acceptance",
+  "source_sha256": "5f0c483dd31e11517e5d5dbeb464f499df56c94aedcab6bbf049f65537a57969",
+  "tests_sha256": "8921d6e2db11480160e399558e925b3154fa94e4818055ba7ed5f6672bf0be79",
+  "independent_test_result": "12 passed, exit0",
+  "findings": {
+    "late_source_mutation": "resolved by final complete inventory and file-hash recheck",
+    "symlink_metadata": "resolved by rejecting nonregular archive members",
+    "windows_drive_paths": "resolved by PureWindowsPath.drive rejection"
+  },
+  "verified_member_counts": {
+    "pilot_v1": 2178,
+    "control_pilot_v1": 426
+  },
+  "manifest_sha256": {
+    "pilot_v1": "838917606c860f4135b4304a5c45d7640813dc8caef347d6173e652e92f64a0b",
+    "control_pilot_v1": "bd149803e65df3ae8e48b8a844cda573abd8d3c461346a79259df4cc1a9f6d80"
+  },
+  "limitations": [
+    "Source files must be quiescent; no filesystem snapshot or adversarial-writer lock is provided.",
+    "Archive manifests establish integrity relative to their trusted recorded hashes, not independent authenticity.",
+    "Empty directories and original permissions are not preservation targets."
+  ]
+}

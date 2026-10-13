@@ -1,0 +1,19 @@
+{
+  "accepted_metadata_correction": true,
+  "global_merge_or_publication_accepted": false,
+  "sha256": {
+    "AGENT_HANDOFF.md": "0de880c5f5d8b68885a9b230b5d5aac0fb48e62f3fdb72bf9c3d274d9a9d5b61",
+    "docs/agents/handoffs/shot-pattern-integration-peer-records.md": "bf292cd335b83d70a52c91ead19ff27781a857fe2d7f2513f8f5bbb5e243b564",
+    "docs/agents/handoffs/shot-pattern-integration-peer-original.zip": "ccdf76e585e6a5c43eba8a714d4d20d075ff0781b45f2f2fba694c0a7da0db54"
+  },
+  "source_unchanged": true,
+  "archive_member": "AGENT_HANDOFF.md",
+  "original_payload_sha256": "c1b9011feb789e7e949ff03adcace4f3eced7b79dfb97b0040c9f69e2079a845",
+  "displayed_payload_sha256": "0491c6d0bb821121d94c36960f0712758511b731b78c7a7e7ee0d1fb41612103",
+  "displayed_payload_byte_offset": 654,
+  "reversed_links": 12,
+  "entire_original_recovered": true,
+  "root_lines": 120,
+  "peer_anchors": 68,
+  "broken_local_links": []
+}

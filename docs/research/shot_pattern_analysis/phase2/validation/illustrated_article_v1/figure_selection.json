@@ -1,0 +1,100 @@
+{
+  "old_article_sha256": "bfd7bfccc9dbf8ff6503d361a4b6ff82fd526e2470344f4412a19c1f331a6fc6",
+  "selection_source_sha256": "4bf9ed81b83e49f7fb29a68cf8637a8d797e4ad2563cb50e836c9aa9ba3bcd0b",
+  "figures": [
+    {
+      "panel": "main_driver",
+      "asset": "density_pdf",
+      "path": "phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/density.pdf",
+      "sha256": "0507952992a7c86cfc04deca758c183932e7b086527e7919b004215f4a58f067",
+      "caption": "Driver: Endpoint Dispersion"
+    },
+    {
+      "panel": "main_driver",
+      "asset": "overhead_pdf",
+      "path": "phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "e4cd3d08b10eaad81a371f9e1c595d2afd9e994cab6c3abacf9a4940bee2ad43",
+      "caption": "Driver: Illustrative Flight Paths"
+    },
+    {
+      "panel": "main_seven_iron",
+      "asset": "density_pdf",
+      "path": "phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/density.pdf",
+      "sha256": "6c3a4d4c299eb1fd5db4f8cb6f689d829c10e1994557cccc94f61fa708ba6923",
+      "caption": "Seven Iron: Endpoint Dispersion"
+    },
+    {
+      "panel": "main_seven_iron",
+      "asset": "overhead_pdf",
+      "path": "phase2/final_figures_v1/details/seven_iron_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "10cff8597c711a2e187ee1dec11fcd0ec6de3df08ad1745853a01c35b11371b5",
+      "caption": "Seven Iron: Illustrative Flight Paths"
+    },
+    {
+      "panel": "main_pitching_wedge",
+      "asset": "density_pdf",
+      "path": "phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/density.pdf",
+      "sha256": "d937a11f678512683714b02796bc8ad8376eba44988e3036acc0686ec8ba9b12",
+      "caption": "Pitching Wedge: Endpoint Dispersion"
+    },
+    {
+      "panel": "main_pitching_wedge",
+      "asset": "overhead_pdf",
+      "path": "phase2/final_figures_v1/details/pitching_wedge_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "91193705e647fd05eb1494adbd3401efcdc711ced4d7a52512a0b8d87afa5744",
+      "caption": "Pitching Wedge: Illustrative Flight Paths"
+    },
+    {
+      "panel": "shaft_rotation_sd_driver",
+      "asset": "density_png",
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve1_rotation2_combined2_178p949m_3517439202_density.png",
+      "sha256": "b4bc60a7aab17b932b5ac99366be5599db656837a9771392d62f990cec66e99e",
+      "caption": "Driver: Increasing Shaft-Rotation Variability"
+    },
+    {
+      "panel": "curve_strength_driver",
+      "asset": "density_png",
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_driver_lean0_curve1_rotation1_combined2_vs_original_control_1_driver_lean0_curve2_rotation1_combined2_178p949m_56038f8c02_density.png",
+      "sha256": "3b48720e713e9a7f315659f642c0bf48cae4e1aade85c940b47e86762da17215",
+      "caption": "Driver: Doubling Curve Strength"
+    },
+    {
+      "panel": "shaft_rotation_sd_seven_iron",
+      "asset": "density_pdf",
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve1_rotation2_combined2_127p882m_df1aad6644_density.pdf",
+      "sha256": "276b18ab2102fa281b89bb74bb8bac3e443338dd660914ff70f331fb0e39b8ac",
+      "caption": "Seven Iron: Increasing Shaft-Rotation Variability"
+    },
+    {
+      "panel": "curve_strength_seven_iron",
+      "asset": "density_pdf",
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_seven_iron_lean0_curve1_rotation1_combined2_vs_original_control_1_seven_iron_lean0_curve2_rotation1_combined2_127p882m_2d9a63d794_density.pdf",
+      "sha256": "99d8d4846164306e35d4b6c29c4bf566602fe534eef3836bafbe926923e700c2",
+      "caption": "Seven Iron: Doubling Curve Strength"
+    },
+    {
+      "panel": "shaft_rotation_sd_pitching_wedge",
+      "asset": "density_pdf",
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/shaft_rotation_sd_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_original_control_1_pitching_wedge_lean0_curve1_rotation2_combined2_77p40_0a8f5f6cae_density.pdf",
+      "sha256": "1bfad32b922f44c96182f9e073e471b8c6294858002d457d00c9984df342b7e1",
+      "caption": "Pitching Wedge: Increasing Shaft-Rotation Variability"
+    },
+    {
+      "panel": "curve_strength_pitching_wedge",
+      "asset": "density_pdf",
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_control_1_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pw-primary-face-bounds_1_pitching_wedge_lean0_curve2_rotation1_combined2_77_14a48258b1_density.pdf",
+      "sha256": "c3cc169d95d8d6f516c785f4df241ccb37d6ca32b6272d9bccfe1c7e2916493e",
+      "caption": "Pitching Wedge: Doubling Curve Strength"
+    },
+    {
+      "panel": "lean_carry_driver",
+      "asset": "overhead_pdf",
+      "path": "phase2/supplement_report_v2_layout_repair/figures/comparisons/across_lean_original_control_1_driver_lean0_curve1_rotation2_combined2_vs_original_control_1_driver_lean5_curve1_rotation2_combined2_178p949m_e5c0a1a1e9_overhead.pdf",
+      "sha256": "21b0dcf83ba76252949eaaecb661a432cfc84001f82355a4ccf902e6a8a584fd",
+      "caption": "Driver: Forward-Lean Comparison"
+    }
+  ],
+  "status": "embedded_assets_verified_and_assembled_pdf_visually_reviewed",
+  "article_sha256": "0b484b0393fa6cedbbd907f5ee603d7b0c74eb9908f455b596001bf283fde288",
+  "compiled_pdf_sha256": "ca030b3c97fb759b384aab58b3da6be68687a194f353976754d43e7ffa69beda"
+}

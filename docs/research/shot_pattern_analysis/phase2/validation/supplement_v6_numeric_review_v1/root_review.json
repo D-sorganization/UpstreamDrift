@@ -1,0 +1,23 @@
+{
+  "scope": "V6 Numerical Parity During Live Figure Generation",
+  "checked_at": "2026-10-10T16:12:44.369513+00:00",
+  "numeric_parity": true,
+  "reference": "docs/research/shot_pattern_analysis/phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json",
+  "reference_sha256": "59a922fbcd2c06b23674466538d992f5169628464783adbcb6353a4cfb921edd",
+  "artifact_sha256": {
+    "REPORT_ORIGINAL_SOURCE_INVENTORY.csv": "6a237d80f005b3a8da7d0b4502fc7e5ec0f0aae7d805c5b15c879f9e6f58c7d5",
+    "REPORT_SUPPLEMENT.csv": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+    "REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "REPORT_SUPPLEMENT_COMPARISONS.csv": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8",
+    "REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+    "REPORT_SUPPLEMENT_COMPARISONS.md": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721",
+    "control_aliases.json": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b"
+  },
+  "comparison_count": 384,
+  "unique_cells": 26,
+  "producer_commit": "4023111d2aaf8b20449a36f8691a295f4a94ceff",
+  "wrapper_pid": 51305,
+  "pipeline_pid": 51475,
+  "full_publication_accepted": false,
+  "limitations": "Graphics generation remains live. No figure/terminal receipt or full publication acceptance inferred. Reconcile final outputs after successful terminal boundary."
+}

@@ -1,0 +1,15 @@
+import hashlib,json
+from pathlib import Path
+from src.tools.shot_pattern_analysis.matched_lean_control import analyze_explicit_source_pair
+root=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+out=root/'validation/driver_curve_bounds_reporting_review_v1'
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def ref(folder,cell,protocol):
+ r=root/folder;d=r/cell
+ return {'cell':cell,'source_root':str(r),'source_protocol':protocol,'execution_kind':'unique','source_plan_sha256':sha(r/'matrix_plan.json'),'source_cell_manifest_sha256':sha(d/'manifest.json'),'source_csv_sha256':sha(d/'shots.csv.gz')}
+a=ref('control_final_v1','driver_lean5_curve1_rotation2_combined2','original_control/1')
+b=ref('supplement_final_v1/driver_control_speed','driver_lean5_curve2_rotation2_combined2','driver-control-speed-bounds/1')
+t=root/'source_transition_supplement.json'
+r=analyze_explicit_source_pair(a,b,comparison_kind='curve_strength',target_x_m=178.94875782337786,transition_receipt_path=t,transition_receipt_sha256=sha(t))
+(out/'real_driver_curve_pair.json').write_text(json.dumps(r,indent=2)+'\n')
+print(json.dumps({'common_supported_n':r['common_supported_n'],'differences':r['allowed_config_differences']},indent=2))

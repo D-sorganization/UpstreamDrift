@@ -1,0 +1,27 @@
+from pathlib import Path
+import hashlib,json,datetime
+from PIL import Image,ImageOps,ImageDraw
+phase=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2');new=phase/'final_figures_v1';old=phase/'presentation_preview_rejected_final_v4/final_figures_v1';out=phase/'validation/original_final_graphics_independent_review_v6';out.mkdir(exist_ok=True)
+h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+a=json.loads((new/'figure_manifest.json').read_text());b=json.loads((old/'figure_manifest.json').read_text())
+assert all(h(new/k)==v for k,v in a['outputs'].items())
+assert set(a['outputs'])=={str(p.relative_to(new)) for p in new.rglob('*') if p.is_file() and p.name!='figure_manifest.json'}
+assert set(a['outputs'])==set(b['outputs'])
+changes={k for k in a if a[k]!=b[k]};print('Changed manifest fields:',sorted(changes))
+same=[];changed=[]
+for k in a['outputs']:
+ if k.endswith('.png'):
+  (same if h(new/k)==h(old/k) else changed).append(k)
+assert len(same)==270 and len(changed)==18 and all(k.endswith('/shaft_rotation_sd.png') for k in changed)
+for k in a['outputs']:
+ if k.endswith('.csv'):assert h(new/k)==h(old/k)
+for club in ['driver','seven_iron','pitching_wedge']:
+ paths=sorted(k for k in changed if f'/{club}/' in k);assert len(paths)==6
+ sheet=Image.new('RGB',(1560,2460),'#eeeeee');draw=ImageDraw.Draw(sheet)
+ for i,k in enumerate(paths):
+  with Image.open(new/k) as im:thumb=ImageOps.contain(im.convert('RGB'),(760,1160))
+  x=10+(i%2)*780;y=25+(i//2)*810
+  thumb=ImageOps.contain(thumb,(760,775));sheet.paste(thumb,(x,y));draw.text((x,y-18),k.split(f'/{club}/')[1],fill='black')
+ sheet.save(out/f'primary_changed_{club}.jpg',quality=93)
+record={'status':'primary_hash_reconciliation_pass_visual_review_pending','checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'outputs_verified':len(a['outputs']),'png_count':len(same)+len(changed),'identical_png_count':len(same),'changed_png_count':len(changed),'manifest_changed_fields':sorted(changes),'same_png_sha256':{k:h(new/k) for k in same},'changed_png_sha256':{k:h(new/k) for k in changed},'all_csv_byte_identical':True,'manifest_sha256':h(new/'figure_manifest.json'),'terminal':json.loads(Path('/tmp/p2-v6-final_figures_v1-exit.json').read_text()),'remaining':'Inspect all18changedcards; full two-dataset wrapper finalreceipt remains pending.'}
+(out/'primary_manifest_reconciliation.json').write_text(json.dumps(record,indent=2)+'\n');print('Verified',len(a['outputs']),'outputs;',len(same),'unchanged PNGs;',len(changed),'caption PNGs')

@@ -1,0 +1,187 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{\textbf{#1}}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\section{Legacy Gear-Spin Direction
+Reference}\label{legacy-gear-spin-direction-reference}
+
+\subsection{Scope and Disposition}\label{scope-and-disposition}
+
+Issue
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/12006}{\#12006}
+corrects the horizontal spin sign in the public legacy impact helper.
+The matched-delivery study uses coupled contact and does not call this
+helper. Historical study outputs and their source hashes remain
+unchanged. This is a separate research reference; its editable
+\href{LEGACY_GEAR_SIGN_REFERENCE.tex}{LaTeX Source} is not part of the
+canonical engineering manual.
+
+\subsection{Frames, Inputs, and
+Equations}\label{frames-inputs-and-equations}
+
+For the documented right-handed convention, X points forward, Z upward,
+and Y left. The two contact coordinates are toe-positive horizontal
+offset h and high-positive vertical offset v, in metres from face
+center. V is clubhead speed in m/s, g is a dimensionless gear factor,
+and \(k_h/k_v\) are heuristic scales in \(\mathrm{rad\,m^{-2}}\). With
+unit upward vector \(\mathbf u\) and horizontal face-normal
+perpendicular
+\(\mathbf t = (\mathbf u \times \mathbf n)/|\mathbf u \times \mathbf n|\),
+the additive angular velocity is
+
+\[\Delta\boldsymbol\omega = g h V k_h\,\mathbf u + g v V k_v\,\mathbf t.\]
+
+For a forward face normal, t is +Y. The native Magnus direction is
+angular velocity cross ball velocity. Thus positive h adds +Z spin and
+produces a leftward contribution for a +X shot. Negative h reverses it.
+Positive v adds topspin about +Y and reduces negative-Y backspin. The
+vertical term, scale, contact model and native flight equations are
+unchanged by this repair.
+
+The old horizontal term had the opposite sign. At h = 0.00635 m, V = 45
+m/s, g = 0.5 and \(k_h = 350\,\mathrm{rad\,m^{-2}}\), the corrected
+contribution is +50.00625 rad/s about Z; the old code returned
+\(-50.00625\,\mathrm{rad/s}\). This is a frame/sign correction, not a
+recalibration or a change in the magnitude model.
+
+\subsection{Acceptance Evidence and
+Reproduction}\label{acceptance-evidence-and-reproduction}
+
+Nine new tests failed before the production change: toe/heel Magnus
+direction at three headings, public solver spin increments, and
+public-solver-to-native landing direction. The native pre-fix test
+placed the heel shot at +11.293335 m laterally while the centered shot
+stayed at zero, demonstrating the reversed curvature. After the sign
+correction, those tests and the existing impact regressions pass. An
+additional boundary regression replaces the legacy helper with a
+function that raises and verifies the matched contact pathway still
+produces a finite off-center landing.
+
+The old assertions that called negative-Z toe spin a draw were corrected
+to agree with the independently tested force direction. Their magnitude
+intervals were reflected, not widened. Astra independently reviewed the
+sign and ran the original nine new tests. The final relevant suite
+passes 58 tests, including both native flight tests. The
+\href{LEGACY_GEAR_SIGN_VALIDATION.json}{Validation Receipt} binds source
+hashes and the \href{LEGACY_GEAR_SIGN_TESTS.txt}{Final Test Log}; the
+\href{LEGACY_GEAR_SIGN_RED.txt}{Pre-Fix Log} preserves the nine failing
+regressions. LaTeX compilation remains unverified because the built-in
+compiler could not retrieve its uncached bundle; editable source is
+preserved.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\VariableTok{OPENBLAS\_NUM\_THREADS}\OperatorTok{=}\NormalTok{1 }\ExtensionTok{/tmp/shot{-}pattern{-}validation{-}venv{-}20261009/bin/python} \AttributeTok{{-}m}\NormalTok{ pytest tests/unit/physics/test\_legacy\_gear\_flight\_direction.py tests/unit/physics/test\_impact\_physics\_value\_assertions.py tests/unit/shared\_python/test\_impact\_model.py tests/unit/physics/test\_impact\_friction\_axis\_and\_gear\_offset.py }\AttributeTok{{-}o}\NormalTok{ addopts=}\StringTok{\textquotesingle{}\textquotesingle{}} \AttributeTok{{-}q}
+\end{Highlighting}
+\end{Shaded}
+
+Native flight tests skip explicitly if the required kernel cannot be
+imported; the qualified local run must execute them. Pure vector and
+public solver tests do not depend on a native flight installation.
+
+\subsection{Limitations}\label{limitations}
+
+The legacy model adds spin without solving the coupled club/ball
+rotational collision. Its coefficients have no player or equipment
+calibration in this study, and its angular momentum and energy
+consistency are not established by this sign repair. It assumes an
+approximately forward face normal and a global vertical spin axis; it is
+not an arbitrary-orientation contact law. No accuracy claim,
+left-handed-delivery qualification, or universal net-curvature claim
+follows from these tests. Bulge, roll and other launch/spin
+contributions can change net curvature in a fuller model. Use the
+independently qualified coupled contact pathway for the matched-delivery
+research.
+
+\end{document}

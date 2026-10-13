@@ -1,0 +1,71 @@
+{
+  "schema": "partial-report-layout-review/1",
+  "accepted": false,
+  "status": "changes_required",
+  "scope": "Partial corrected numerical report sections only;8pages independently visually inspected",
+  "reviewed_at_utc": "2026-10-10T12:43:23.445165+00:00",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_pdf.py": "9f1daaeb2d47cc5ba61b4edabc6dc55c3ceed6130ceed608931a75b469b90a03",
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "e11fdfb85c8f66c3db9e20cbf4d7636c742a3781126c57df6154b818cd557a6a",
+    "scripts/research/shot_pattern_analysis/report_synthesis.py": "b30aea47fdebe1149075a955a39cbb742d11b5577a5029fc0a0e2377d789e58c",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80"
+  },
+  "artifact_sha256": {
+    "partial_composition.pdf": "a2fd4bf7670ed4f944815432fc58ac54da7184295a00807cb706cc26a484c143",
+    "render_initial_heading_failure.txt": "03668305049c113cb3b6c4d47761ca95f6b6ba52fb3a969a095d35f28f3ede0b",
+    "page-4.png": "6e116cdde69b5392be00390245bfb50985c2e655c67a30521a4f11ff874232a7",
+    "page-6.png": "4defc29d203c54d810f5bd31e314a08d9eb79e8da6dbf03df8ab08fef5800814",
+    "render.txt": "fe05b166136f879adc9ba6a4ef260a27d78474208264d9a63fad93d037252d77",
+    "page-2.png": "acdd5e3a59a0472571a81eed18b0022794db86e0b16d1a63272a76ab2e24260d",
+    "page-3.png": "e0f6dcbac7dd9af389d51076c47850a3ab6712848320d1a6a5aaeaee6b1b5b3b",
+    "page-1.png": "031e54d8baa0671d75e0be7bba2d7139a79938d56c82850f986380e2ea96181a",
+    "page-7.png": "397378990d20ace0fdeab7c320c7e049d4c7a2e224b240986e98d4cee9da743f",
+    "page-8.png": "46e22ddbcef22275c10d44a0acb9c899086b07b03c62e3cb22c4c1fa14bb1932",
+    "page-5.png": "dd21d3578f5e112d47ed5c638198e1a33bbda28dbac7fdd9406a122d28f5ca18",
+    "partial_composition.md": "78a5b6043491b8cd5b9db9554d7686ea3b66500690aac4ba2a020b8a2b17c82c"
+  },
+  "pages_reviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "render_exit_code": 0,
+  "findings": [
+    {
+      "pages": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "severity": "publication blocking",
+      "finding": "Nine-column resolved selection table splits numeric tokens, signs/exponents and decimal digits across lines. Headers also split inside words.",
+      "example": "Page2 first Driver SG token +7.462e-05 breaks after e-; interval digits span several lines.",
+      "recommendation": "Restructure the report table into narrower protocol/club-labelled blocks or separate outcome and population tables; preserve exact identities/counts/precision and existing readable font floor. Require no within-number line breaks in rendered regression."
+    },
+    {
+      "pages": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "severity": "readability",
+      "finding": "Paired effect numbers remain readable, but repeated full ordered source identifiers occupy most row height and break inside words.",
+      "recommendation": "Use a readable condition-key mapping adjacent to a compact effects table while preserving exact protocol/cell identity and ordered A\u2192B mapping; alternatively give source column more space. No missing provenance or truncation."
+    }
+  ],
+  "acceptable_components": [
+    "Page1 summary and correlation tables",
+    "Body text and model/population qualifications",
+    "No observed page-edge clipping or footer overlap; repeated table headers present"
+  ],
+  "harness_note": "First preview added H1 above source H3 without intermediate H2; ReportLab outline rejected it before output. Added H2 to diagnostic wrapper only, preserved initial failure log; source builder unchanged. Relative study links retain production-relative paths and are not qualified in this relocated partial preview.",
+  "final_publication_accepted": false,
+  "no_source_changes": true
+}

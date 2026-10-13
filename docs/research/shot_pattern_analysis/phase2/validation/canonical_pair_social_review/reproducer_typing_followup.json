@@ -1,0 +1,9 @@
+{
+  "scope": "Typing-only correction to the reproducer; retained graphic receipt describes the exact prior script from 76eb0eff77",
+  "historical_commit": "76eb0eff77",
+  "historical_sha256": "15cb6972fad19837c48fec0781a8667988de1451036fc917bb2f1d0d8fb7e9a8",
+  "current_sha256": "bb22391dbfb2ed0e1bb0ce8b27f5f5d67d37c54deb19aa0e709f48f3a3b57a51",
+  "normalized_execution_ast_equal": true,
+  "mypy": "Qualified runtime, Python3.12, follow-imports=silent: success, one source file",
+  "reason": "Annotate heterogeneous reference records rather than infer Collection[str] for their values."
+}

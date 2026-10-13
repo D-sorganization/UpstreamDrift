@@ -1,0 +1,195 @@
+{
+  "pid": 1591157,
+  "start_ticks": 54830630,
+  "started_utc": "2026-10-11T00:43:20.471088+00:00",
+  "script_sha256": "c1d41f28249eb8c5769ecc92c9d4c6fb30fa5210bacd26d02d7fab43769b1014",
+  "schedule": [
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 0,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 12,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 24,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 36,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 48,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 60,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 72,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 84,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 96,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 108,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 120,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 132,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 144,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "curve_strength",
+      "offset": 156,
+      "limit": 8
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 0,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 12,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 24,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 36,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 48,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 60,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 72,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 84,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 96,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 108,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 120,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 132,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 144,
+      "limit": 12
+    },
+    {
+      "group": "pairs",
+      "kind": "shaft_rotation_sd",
+      "offset": 156,
+      "limit": 8
+    },
+    {
+      "group": "cells",
+      "kind": null,
+      "offset": 0,
+      "limit": 12
+    },
+    {
+      "group": "cells",
+      "kind": null,
+      "offset": 12,
+      "limit": 12
+    },
+    {
+      "group": "cells",
+      "kind": null,
+      "offset": 24,
+      "limit": 2
+    }
+  ],
+  "prior_partial": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/curve_strength_000"
+}

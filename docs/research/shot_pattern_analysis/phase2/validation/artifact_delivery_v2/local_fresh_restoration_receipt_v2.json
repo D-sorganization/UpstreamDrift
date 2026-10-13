@@ -1,0 +1,74 @@
+{
+  "api_checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+  "results": {
+    "control": {
+      "archives": [
+        {
+          "bytes": 168462247,
+          "name": "control_final_figures_v1-001.zip",
+          "sha256": "0101c2cbc5cba3ffb0b6bded0979cb63fb28adb52f446fbda1a4384c226e35c0"
+        }
+      ],
+      "files_verified": 548,
+      "manifest_bytes": 148477,
+      "manifest_sha256": "492962d0dc0a2f43ea95b143d352b4234331a8a2c42d10b33c1f7a55c9dbae9c",
+      "restore_root": "/tmp/shot-pattern-delivery-resume/local-fresh-restoration-v2/control",
+      "restored_inventory_files": 548
+    },
+    "primary": {
+      "archives": [
+        {
+          "bytes": 223739795,
+          "name": "final_figures_v1-001.zip",
+          "sha256": "6ba794355bf4575e2a6fb24a3dc7473dbd0279a628c3e99bbe191ce2a4785cc2"
+        }
+      ],
+      "files_verified": 690,
+      "manifest_bytes": 183464,
+      "manifest_sha256": "3375d756c1aa39fb985ebccfb46600de8e1e07714f3dee5561ec7e5ae6229d44",
+      "restore_root": "/tmp/shot-pattern-delivery-resume/local-fresh-restoration-v2/primary",
+      "restored_inventory_files": 690
+    },
+    "supplement": {
+      "archives": [
+        {
+          "bytes": 499745789,
+          "name": "supplement_report_v2_layout_repair-001.zip",
+          "sha256": "ec83fbe79b0ed719a83ed0cdc72a3c15bce76cda14f09cc01e30752f56431213"
+        },
+        {
+          "bytes": 499031555,
+          "name": "supplement_report_v2_layout_repair-002.zip",
+          "sha256": "7241f510bb2f6fee12b88b7f552bb321aba2f5fec96edaa79af1aa9b30e10670"
+        },
+        {
+          "bytes": 499548341,
+          "name": "supplement_report_v2_layout_repair-003.zip",
+          "sha256": "2b3ffa5aa961f2c24497decb2e8d3714455cbbfcfef56a01e1ebca19c71c5eea"
+        },
+        {
+          "bytes": 499224726,
+          "name": "supplement_report_v2_layout_repair-004.zip",
+          "sha256": "85bd31e721e4347208a447dfaffb4efdb39a4c11bde22873ebe50d7a64634bee"
+        },
+        {
+          "bytes": 499866395,
+          "name": "supplement_report_v2_layout_repair-005.zip",
+          "sha256": "53af700ae57207d79427cc0c6e525671b72e3be12736a409566f5b1c6326a829"
+        },
+        {
+          "bytes": 247922196,
+          "name": "supplement_report_v2_layout_repair-006.zip",
+          "sha256": "0f4c6df8f51d44b18f8bbe89f87ece17025486fde4483a7e621f0ea5472505e4"
+        }
+      ],
+      "files_verified": 6465,
+      "manifest_bytes": 2733779,
+      "manifest_sha256": "5d776ea73d9564812431416a01c2661a3f9335de1554ef111d24673b23125f74",
+      "restore_root": "/tmp/shot-pattern-delivery-resume/local-fresh-restoration-v2/supplement",
+      "restored_inventory_files": 6465
+    }
+  },
+  "schema": "shot-pattern-local-fresh-restore/1",
+  "type": "offline local archive restore rehearsal; not a remote release download"
+}

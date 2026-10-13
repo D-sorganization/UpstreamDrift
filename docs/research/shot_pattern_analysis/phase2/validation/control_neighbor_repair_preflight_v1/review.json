@@ -1,0 +1,22 @@
+{
+  "status": "component_accepted_for_regeneration",
+  "reviewer": "root",
+  "scope": "Two exact saved-control academic/social previews; not whole-set acceptance",
+  "input_sha256": {
+    "summary.json": "c3011dd8c72e3acc7ae3211e6825b3dd3c32e8822445da5bd56d233e93f788b7",
+    "manifest.json": "8578c51528380927bbf7592fa063a198d424ea29c371e3a842bd795fa0885769",
+    "shots.csv.gz": "2de0e5f886463e343136c04625a459ef4253f251d36552e79cc62443f36e914e"
+  },
+  "renderer_sha256": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb",
+  "main_builder_sha256": "daecb84c22a758e013c2ebdd27d2e0617999ccf693bba117637640a2bf764ac1",
+  "shared_histogram_sha256": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+  "target_x_m": 127.88194166336235,
+  "unchanged_histogram_recipe_xlim_m": [
+    116.74354570737056,
+    130.75009816744767
+  ],
+  "minimum_neighbor_gap_pt": 20.35668792287099,
+  "actual_receipt_sha256": "7e8a3e7e8aa129d9d335b343a66d7d899b41efeada4f3107c4ea0e5b300d5a7e",
+  "executed_preflight_sha256": "0c84d3b0a0305144265b3b2d45c7d35fe366d5ba4b75693928755bf3981dfd30",
+  "visual_review": "Both full images inspected: separated main ticks, no new main/marginal boundary collision; common limits and density color scale retained. Diagnostic export100dpi, builder180dpi; full production regeneration remains required."
+}

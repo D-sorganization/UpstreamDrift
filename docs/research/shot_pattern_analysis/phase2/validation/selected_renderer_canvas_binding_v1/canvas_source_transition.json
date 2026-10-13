@@ -1,0 +1,8 @@
+{
+  "old_sha256": "2ce59515c23c3de8cc95d194ac1b3e5164079aba1049c6c4899b95b7dba87a3c",
+  "new_sha256": "3f01a910900ff0897e9dece06b057c812ac0dc5254cd8944cf203d1780232ae5",
+  "changed_sites": 2,
+  "purpose": "Bind the concrete Agg canvas already constructed; get_renderer is called on that same object. Bytecode is not asserted identical; exact output parity is checked separately.",
+  "previous_review_sha256": "b0cbd93580393147a896ded6b487eb1ef2f09b03bd7c3ef66277598ee7130f72",
+  "source": "src/tools/shot_pattern_analysis/matched_supplement_figures.py"
+}

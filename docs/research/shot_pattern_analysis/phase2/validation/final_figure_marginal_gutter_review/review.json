@@ -1,0 +1,19 @@
+{
+  "status": "changes_required",
+  "scope": "Original Final Academic Density Component; Not Whole-Set Acceptance",
+  "source_and_artifact_sha256": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/tools/shot_pattern_analysis/academic_plots.py": "b3375f2324a62fe2ad997b5e3686195ead314dca40b5887f6f200626d131d0e5",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1/details/driver_lean0_curve1_rotation1_combined2/density.png": "b8d55a0f57444ce9c280297d738ffcb0e13c0a8dd5d1d3f3b06603a5264d10ec"
+  },
+  "finding": "Adjacent right-marginal labels have only 1.950840119 pt gutter in all three academic panels; no literal bbox intersection. Social counterpart has 18.396513053 pt. Visual academic labels appear concatenated at presentation scale.",
+  "required_regression": "At least 4 pt adjacent tick-label gutter for both academic and social, preserving readable fonts and quantitative axis scales.",
+  "data": "Saved Driver lean0 curve1 rotation1 combined2, 10000 shots per pattern; no physical simulation.",
+  "reproducer_sha256": "e227f1f6380122ccc5cf9128648ba6c2ce8aaf81cd129e394c3dab371b4b49bf",
+  "measurements_sha256": "f8b3e5f3e11fc206dc440ba3eef3673ac7b60529df48bb013dc3c689a543f2f6",
+  "regression": {
+    "test_path": "tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py",
+    "sha256": "6a1eec5c468f660188092b0ea2095217f5d88ca0223799fb596094d8cd29ce0a",
+    "result": "Academic fails measured gutter -0.131047676 pt; social passes. Exact plotted density values and shared limit assertions pass before the gutter assertion.",
+    "renderer_modified": false
+  }
+}

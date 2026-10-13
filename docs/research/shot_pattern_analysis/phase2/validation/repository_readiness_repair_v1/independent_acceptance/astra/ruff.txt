@@ -1,0 +1,24 @@
+LOG015 `exception()` call on root logger
+   --> docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py:102:9
+    |
+100 |         )
+101 |     except Exception as exc:
+102 |         logging.exception("Validation record rejected")
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+103 |         failures.append({**rec, "error": repr(exc)})
+    |
+help: Use own logger instead
+
+LOG015 `exception()` call on root logger
+  --> docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py:95:9
+   |
+93 |         row["status"] = "configuration_and_nominal_checks_passed"
+94 |     except Exception as exc:
+95 |         logging.exception("Validation record rejected")
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+96 |         row.update(status="failed", error=repr(exc))
+97 |     else:
+   |
+help: Use own logger instead
+
+Found 4 errors (2 fixed, 2 remaining).

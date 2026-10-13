@@ -1,0 +1,8 @@
+{
+  "issue": 12139,
+  "comment_id": 6098840405,
+  "url": "https://github.com/D-sorganization/UpstreamDrift/issues/12139#issuecomment-6098840405",
+  "author": "dieterolson",
+  "request_sha256": "3007e96e5b036a331c08b440a2439e3d39cd4df38fbd54328ca2435f0c6a4c62",
+  "scope": "Added verified full-precision, identifier-boundary and fractional-cell filename acceptance refinements; issue remains open."
+}

@@ -1,0 +1,30 @@
+{
+  "scientific_runtime_native_identity_equal": true,
+  "supplement_producer_sha256": {
+    "matched_supplement_pipeline.py": "f836132f5e850ea58d54c166b405487f8e4508746be466e30122d0ce5c1cdd59",
+    "matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "matched_supplement_figures.py": "9254d7aede64f5aed19bd32f7cd5a8fb1b1899f6e18d000ba2096b228fc18246",
+    "matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "matched_report_plots.py": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
+    "academic_plots.py": "0a32b4176cb114d62e96b1cc56adb177a74d093a55f40379c1fe0cf47ff427cb",
+    "density.py": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+    "matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+    "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a",
+    "scenario_scoring.py": "5b472bfde3663f6d9c9904e95f247e2d7babe0d6c0ff5da79ddecf3636e2f12b",
+    "uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+    "matched_pair_social.py": "16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369"
+  },
+  "original_builder_sha256": "a3b6aa26c2fa5d6ad98a39e697f5d0a5ab75de9e3c4d537b5265f07996ccbfe3",
+  "integrated_commits": [
+    "aa76fa2eb3",
+    "9a1aabce5c",
+    "3f34a6b247"
+  ],
+  "candidate_commits": [
+    "c9c0fb194f",
+    "b9f1ad05b4",
+    "14f27706e4"
+  ]
+}

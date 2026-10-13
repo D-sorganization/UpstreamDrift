@@ -1,0 +1,5552 @@
+{
+  "description": "Pre-refactor synthetic source-bound selection/interpretation values, identities, and error/checkpoint order; no frozen data read or recomputed.",
+  "source_sha256": "d651e71b3eb9bf17c08d70118d6b4d9d27aadda9094956614509b987ed28119c",
+  "resolved": {
+    "resolved": [
+      {
+        "cell": "driver_lean0_curve1_rotation1_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9990
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9990
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9990
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9900
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9900,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": -0.002,
+              "upper_95": 0.002
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": -0.002,
+              "upper_95": 0.002
+            }
+          }
+        },
+        "source_manifest_sha256": "b54ea7e0a9ef06882e21864741c4060b2519eae490f9fae273e9d17ca87ded82",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "driver_lean0_curve1_rotation1_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9989
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9989
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9989
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9899
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9899,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.001,
+              "lower_95": -0.001,
+              "upper_95": 0.003
+            },
+            "Fade": {
+              "estimate": 0.001,
+              "lower_95": -0.001,
+              "upper_95": 0.003
+            }
+          }
+        },
+        "source_manifest_sha256": "aa4e8c24d662ff904c3605ae38351a04b5c79cb39d42c09e7264a3d236bf25a2",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "driver_lean0_curve1_rotation2_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9988
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9988
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9988
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9898
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9898,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.002,
+              "lower_95": 0.0,
+              "upper_95": 0.004
+            },
+            "Fade": {
+              "estimate": 0.002,
+              "lower_95": 0.0,
+              "upper_95": 0.004
+            }
+          }
+        },
+        "source_manifest_sha256": "4c2065c6b27844b7ddd3899fda873e26cee79bf80161a88c25e66adc43a3b85c",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "driver_lean0_curve1_rotation2_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9987
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9987
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9987
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9897
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9897,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.003,
+              "lower_95": 0.001,
+              "upper_95": 0.005
+            },
+            "Fade": {
+              "estimate": 0.003,
+              "lower_95": 0.001,
+              "upper_95": 0.005
+            }
+          }
+        },
+        "source_manifest_sha256": "445bcc9b84d3e759922c72fa14e302840d55a395a9da669c4bef5bedc1bb646a",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "driver_lean0_curve2_rotation1_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9986
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9986
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9986
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9896
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9896,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.004,
+              "lower_95": 0.002,
+              "upper_95": 0.006
+            },
+            "Fade": {
+              "estimate": 0.004,
+              "lower_95": 0.002,
+              "upper_95": 0.006
+            }
+          }
+        },
+        "source_manifest_sha256": "0827310411ec2752308af46990c406ac3aa33ece85e8def9ba8fd8a480bab17d",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "driver_lean0_curve2_rotation1_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9985
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9985
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9985
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9895
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9895,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.005,
+              "lower_95": 0.003,
+              "upper_95": 0.007
+            },
+            "Fade": {
+              "estimate": 0.005,
+              "lower_95": 0.003,
+              "upper_95": 0.007
+            }
+          }
+        },
+        "source_manifest_sha256": "f5c02fff3d8feb9915365343ce5a1e82b88166b5c2dfb4ab7fb174d64b8c3473",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "driver_lean0_curve2_rotation2_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9984
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9984
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9984
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9894
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9894,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.006,
+              "lower_95": 0.004,
+              "upper_95": 0.008
+            },
+            "Fade": {
+              "estimate": 0.006,
+              "lower_95": 0.004,
+              "upper_95": 0.008
+            }
+          }
+        },
+        "source_manifest_sha256": "5b138fdaa0f68a4dac6b5b3522daecd2e6073c0e90de9ae35b253ab099c44b78",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "driver_lean0_curve2_rotation2_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "driver",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9983
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9983
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9983
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9893
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9893,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.007,
+              "lower_95": 0.005,
+              "upper_95": 0.009000000000000001
+            },
+            "Fade": {
+              "estimate": 0.007,
+              "lower_95": 0.005,
+              "upper_95": 0.009000000000000001
+            }
+          }
+        },
+        "source_manifest_sha256": "6bb7aac1375e5f54a12160761ff878a52ca850dd416b37fe91ec1976f178bdfd",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "seven_iron",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9982
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9982
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9982
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9892
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9892,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.008,
+              "lower_95": 0.006,
+              "upper_95": 0.01
+            },
+            "Fade": {
+              "estimate": 0.008,
+              "lower_95": 0.006,
+              "upper_95": 0.01
+            }
+          }
+        },
+        "source_manifest_sha256": "d1529df549926145e96e5501398179a95c95a60af0b6188aa948d228d473e23d",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "seven_iron",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9981
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9981
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9981
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9891
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9891,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.009000000000000001,
+              "lower_95": 0.007000000000000001,
+              "upper_95": 0.011000000000000001
+            },
+            "Fade": {
+              "estimate": 0.009000000000000001,
+              "lower_95": 0.007000000000000001,
+              "upper_95": 0.011000000000000001
+            }
+          }
+        },
+        "source_manifest_sha256": "91eeb8f4c039ed3a04e675c06fb787aea0b6dada1851bc98244c7d92782ddbe3",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "seven_iron",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9980
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9980
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9980
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9890
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9890,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.01,
+              "lower_95": 0.008,
+              "upper_95": 0.012
+            },
+            "Fade": {
+              "estimate": 0.01,
+              "lower_95": 0.008,
+              "upper_95": 0.012
+            }
+          }
+        },
+        "source_manifest_sha256": "30097b3021d0a69fa06ea4399a24434651f4bb2b08fd19fa98518f56bf0cba44",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "seven_iron",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9979
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9979
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9979
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9889
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9889,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.011,
+              "lower_95": 0.009,
+              "upper_95": 0.013
+            },
+            "Fade": {
+              "estimate": 0.011,
+              "lower_95": 0.009,
+              "upper_95": 0.013
+            }
+          }
+        },
+        "source_manifest_sha256": "b25249cdef0c185936788093c4b3c87cdbb1c8054fac4800c8b9fb61f22046e0",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "seven_iron",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9978
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9978
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9978
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9888
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9888,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.012,
+              "lower_95": 0.01,
+              "upper_95": 0.014
+            },
+            "Fade": {
+              "estimate": 0.012,
+              "lower_95": 0.01,
+              "upper_95": 0.014
+            }
+          }
+        },
+        "source_manifest_sha256": "28bc23c8d71f99981b1ebcbf6013bb5d6f4828c9f494340718f78d64d4abff7f",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "seven_iron",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9977
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9977
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9977
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9887
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9887,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.013000000000000001,
+              "lower_95": 0.011000000000000001,
+              "upper_95": 0.015000000000000001
+            },
+            "Fade": {
+              "estimate": 0.013000000000000001,
+              "lower_95": 0.011000000000000001,
+              "upper_95": 0.015000000000000001
+            }
+          }
+        },
+        "source_manifest_sha256": "b9987ab00edf9038f8eab7de4909018ab1881b6683cdfb8058c648e6683f888a",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "seven_iron_lean0_curve2_rotation2_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "seven_iron",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9976
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9976
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9976
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9886
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9886,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.014,
+              "lower_95": 0.012,
+              "upper_95": 0.016
+            },
+            "Fade": {
+              "estimate": 0.014,
+              "lower_95": 0.012,
+              "upper_95": 0.016
+            }
+          }
+        },
+        "source_manifest_sha256": "9d79a91e4034e153c5a2560a88496f7809227b68d01bc4f4523d122a6d11cd43",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "seven_iron",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9975
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9975
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9975
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9885
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9885,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.015,
+              "lower_95": 0.013,
+              "upper_95": 0.017
+            },
+            "Fade": {
+              "estimate": 0.015,
+              "lower_95": 0.013,
+              "upper_95": 0.017
+            }
+          }
+        },
+        "source_manifest_sha256": "a2ab5645666926a64cde70782f79041a37b140567913519a5aea56fa86a4a79f",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "pitching_wedge",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9974
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9974
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9974
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9884
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9884,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.016,
+              "lower_95": 0.014,
+              "upper_95": 0.018000000000000002
+            },
+            "Fade": {
+              "estimate": 0.016,
+              "lower_95": 0.014,
+              "upper_95": 0.018000000000000002
+            }
+          }
+        },
+        "source_manifest_sha256": "b97c2ebc770ac59d9079519769d7ee13789af6324c70670d8ff742de7ffef681",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "pitching_wedge",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9973
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9973
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9973
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9883
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9883,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.017,
+              "lower_95": 0.015000000000000001,
+              "upper_95": 0.019000000000000003
+            },
+            "Fade": {
+              "estimate": 0.017,
+              "lower_95": 0.015000000000000001,
+              "upper_95": 0.019000000000000003
+            }
+          }
+        },
+        "source_manifest_sha256": "fdd1a096ff67b06f6f9e6edd3121e4226de936c92886f3ceb49324029c88e434",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "pitching_wedge",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9972
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9972
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9972
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9882
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9882,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.018000000000000002,
+              "lower_95": 0.016,
+              "upper_95": 0.020000000000000004
+            },
+            "Fade": {
+              "estimate": 0.018000000000000002,
+              "lower_95": 0.016,
+              "upper_95": 0.020000000000000004
+            }
+          }
+        },
+        "source_manifest_sha256": "8d0d09d3cbd8462654ba2d30483600a19c198fbbb4f819388c8fbf5f6f36d2d4",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "pitching_wedge",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 1,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": null,
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9971
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9971
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9971
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9881
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9881,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.019,
+              "lower_95": 0.017,
+              "upper_95": 0.020999999999999998
+            },
+            "Fade": {
+              "estimate": 0.019,
+              "lower_95": 0.017,
+              "upper_95": 0.020999999999999998
+            }
+          }
+        },
+        "source_manifest_sha256": "1a2a07656fb961f5d27c38ea59bda0a3d17aeeff316bad4c49a3625461cb8ef3",
+        "source_protocol": "original_primary/1"
+      },
+      {
+        "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "pitching_wedge",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": [
+            -6.0,
+            6.0
+          ],
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9970
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9970
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9970
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9880
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9880,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.02,
+              "lower_95": 0.018000000000000002,
+              "upper_95": 0.022
+            },
+            "Fade": {
+              "estimate": 0.02,
+              "lower_95": 0.018000000000000002,
+              "upper_95": 0.022
+            }
+          }
+        },
+        "source_manifest_sha256": "fad26194014069a8a7365068408aceb5851f7204abcb71f5f6ab1786ecb3c567",
+        "source_protocol": "pw-primary-face-bounds/1",
+        "original_status": "unavailable"
+      },
+      {
+        "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "pitching_wedge",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": [
+            -6.0,
+            6.0
+          ],
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9969
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9969
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9969
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9879
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9879,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.021,
+              "lower_95": 0.019000000000000003,
+              "upper_95": 0.023
+            },
+            "Fade": {
+              "estimate": 0.021,
+              "lower_95": 0.019000000000000003,
+              "upper_95": 0.023
+            }
+          }
+        },
+        "source_manifest_sha256": "494bcd441cfd401d46cda774354e36500c7dbb3458e7e72a610deb6d08971c14",
+        "source_protocol": "pw-primary-face-bounds/1",
+        "original_status": "unavailable"
+      },
+      {
+        "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "pitching_wedge",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": [
+            -6.0,
+            6.0
+          ],
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9968
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9968
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9968
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9878
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9878,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.022,
+              "lower_95": 0.019999999999999997,
+              "upper_95": 0.024
+            },
+            "Fade": {
+              "estimate": 0.022,
+              "lower_95": 0.019999999999999997,
+              "upper_95": 0.024
+            }
+          }
+        },
+        "source_manifest_sha256": "8b8ee26662f0b49be46ae1692d098ca7a6428987d340c19485fbdeb876b3c2a6",
+        "source_protocol": "pw-primary-face-bounds/1",
+        "original_status": "unavailable"
+      },
+      {
+        "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+        "status": "completed",
+        "config": {
+          "club": {
+            "club_id": "pitching_wedge",
+            "shaft_lean_deg": 0
+          },
+          "curve_scale": 2,
+          "noise": {
+            "standard_deviations": [
+              2,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "n_shots": 10000,
+          "match_face_bounds_deg": [
+            -6.0,
+            6.0
+          ],
+          "match_speed_factors": [
+            0.75,
+            1.25
+          ]
+        },
+        "summary": {
+          "Straight": {
+            "total_n": 10000,
+            "supported_n": 9967
+          },
+          "Draw": {
+            "total_n": 10000,
+            "supported_n": 9967
+          },
+          "Fade": {
+            "total_n": 10000,
+            "supported_n": 9967
+          }
+        },
+        "paired_comparisons": {
+          "paired_n": 9877
+        },
+        "course_scoring": {
+          "total_n": 10000,
+          "paired_n": 9877,
+          "status": "conditional_only",
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.023,
+              "lower_95": 0.020999999999999998,
+              "upper_95": 0.025
+            },
+            "Fade": {
+              "estimate": 0.023,
+              "lower_95": 0.020999999999999998,
+              "upper_95": 0.025
+            }
+          }
+        },
+        "source_manifest_sha256": "b76ceaed032889abfca6175e44a69614db8965b7801f850c6d3c57bd6a40139b",
+        "source_protocol": "pw-primary-face-bounds/1",
+        "original_status": "unavailable"
+      }
+    ],
+    "errors": {
+      "duplicate_primary": "duplicate primary cell: driver_lean0_curve1_rotation1_shaft_only",
+      "duplicate_supplement": "duplicate supplement cell: pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "missing_primary": "missing requested primary cell: driver_lean0_curve1_rotation1_shaft_only",
+      "missing_supplement": "missing resolved supplement cell for unavailable primary: pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "primary_support": "cell lacks individual support count: driver_lean0_curve1_rotation1_shaft_only",
+      "primary_paired": "cell lacks common paired count: driver_lean0_curve1_rotation1_shaft_only",
+      "supplement_support": "supplement cell lacks individual support count: pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "supplement_paired": "supplement cell lacks common paired count: pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "supplement_incomplete": "supplement cell is not completed: pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "invalid_status": "cell has invalid status not_run: driver_lean0_curve1_rotation1_shaft_only",
+      "protocol": "resolved selection has incorrect source protocol"
+    }
+  },
+  "qualified": {
+    "pipeline": {
+      "result": {
+        "selected_cells": [
+          {
+            "cell": "driver_lean0_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "driver_lean5_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "driver_lean10_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "pitching_wedge_lean5_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "pitching_wedge_lean10_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "seven_iron_lean5_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "seven_iron_lean10_curve1_rotation2_combined2"
+          }
+        ],
+        "resolved_selected_cells": [
+          {
+            "cell": "driver_lean0_curve1_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9990
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9990
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9990
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9900
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9900,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.0,
+                  "lower_95": -0.002,
+                  "upper_95": 0.002
+                },
+                "Fade": {
+                  "estimate": 0.0,
+                  "lower_95": -0.002,
+                  "upper_95": 0.002
+                }
+              }
+            },
+            "source_manifest_sha256": "b54ea7e0a9ef06882e21864741c4060b2519eae490f9fae273e9d17ca87ded82",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve1_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9989
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9989
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9989
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9899
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9899,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.001,
+                  "lower_95": -0.001,
+                  "upper_95": 0.003
+                },
+                "Fade": {
+                  "estimate": 0.001,
+                  "lower_95": -0.001,
+                  "upper_95": 0.003
+                }
+              }
+            },
+            "source_manifest_sha256": "aa4e8c24d662ff904c3605ae38351a04b5c79cb39d42c09e7264a3d236bf25a2",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve1_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9988
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9988
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9988
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9898
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9898,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.002,
+                  "lower_95": 0.0,
+                  "upper_95": 0.004
+                },
+                "Fade": {
+                  "estimate": 0.002,
+                  "lower_95": 0.0,
+                  "upper_95": 0.004
+                }
+              }
+            },
+            "source_manifest_sha256": "4c2065c6b27844b7ddd3899fda873e26cee79bf80161a88c25e66adc43a3b85c",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve1_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9987
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9987
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9987
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9897
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9897,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.003,
+                  "lower_95": 0.001,
+                  "upper_95": 0.005
+                },
+                "Fade": {
+                  "estimate": 0.003,
+                  "lower_95": 0.001,
+                  "upper_95": 0.005
+                }
+              }
+            },
+            "source_manifest_sha256": "445bcc9b84d3e759922c72fa14e302840d55a395a9da669c4bef5bedc1bb646a",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve2_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9986
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9986
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9986
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9896
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9896,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.004,
+                  "lower_95": 0.002,
+                  "upper_95": 0.006
+                },
+                "Fade": {
+                  "estimate": 0.004,
+                  "lower_95": 0.002,
+                  "upper_95": 0.006
+                }
+              }
+            },
+            "source_manifest_sha256": "0827310411ec2752308af46990c406ac3aa33ece85e8def9ba8fd8a480bab17d",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve2_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9985
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9985
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9985
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9895
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9895,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.005,
+                  "lower_95": 0.003,
+                  "upper_95": 0.007
+                },
+                "Fade": {
+                  "estimate": 0.005,
+                  "lower_95": 0.003,
+                  "upper_95": 0.007
+                }
+              }
+            },
+            "source_manifest_sha256": "f5c02fff3d8feb9915365343ce5a1e82b88166b5c2dfb4ab7fb174d64b8c3473",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve2_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9984
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9984
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9984
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9894
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9894,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.006,
+                  "lower_95": 0.004,
+                  "upper_95": 0.008
+                },
+                "Fade": {
+                  "estimate": 0.006,
+                  "lower_95": 0.004,
+                  "upper_95": 0.008
+                }
+              }
+            },
+            "source_manifest_sha256": "5b138fdaa0f68a4dac6b5b3522daecd2e6073c0e90de9ae35b253ab099c44b78",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve2_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9983
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9983
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9983
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9893
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9893,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.007,
+                  "lower_95": 0.005,
+                  "upper_95": 0.009000000000000001
+                },
+                "Fade": {
+                  "estimate": 0.007,
+                  "lower_95": 0.005,
+                  "upper_95": 0.009000000000000001
+                }
+              }
+            },
+            "source_manifest_sha256": "6bb7aac1375e5f54a12160761ff878a52ca850dd416b37fe91ec1976f178bdfd",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9982
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9982
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9982
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9892
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9892,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.008,
+                  "lower_95": 0.006,
+                  "upper_95": 0.01
+                },
+                "Fade": {
+                  "estimate": 0.008,
+                  "lower_95": 0.006,
+                  "upper_95": 0.01
+                }
+              }
+            },
+            "source_manifest_sha256": "d1529df549926145e96e5501398179a95c95a60af0b6188aa948d228d473e23d",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9981
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9981
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9981
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9891
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9891,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.009000000000000001,
+                  "lower_95": 0.007000000000000001,
+                  "upper_95": 0.011000000000000001
+                },
+                "Fade": {
+                  "estimate": 0.009000000000000001,
+                  "lower_95": 0.007000000000000001,
+                  "upper_95": 0.011000000000000001
+                }
+              }
+            },
+            "source_manifest_sha256": "91eeb8f4c039ed3a04e675c06fb787aea0b6dada1851bc98244c7d92782ddbe3",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9980
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9980
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9980
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9890
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9890,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.01,
+                  "lower_95": 0.008,
+                  "upper_95": 0.012
+                },
+                "Fade": {
+                  "estimate": 0.01,
+                  "lower_95": 0.008,
+                  "upper_95": 0.012
+                }
+              }
+            },
+            "source_manifest_sha256": "30097b3021d0a69fa06ea4399a24434651f4bb2b08fd19fa98518f56bf0cba44",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9979
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9979
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9979
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9889
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9889,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.011,
+                  "lower_95": 0.009,
+                  "upper_95": 0.013
+                },
+                "Fade": {
+                  "estimate": 0.011,
+                  "lower_95": 0.009,
+                  "upper_95": 0.013
+                }
+              }
+            },
+            "source_manifest_sha256": "b25249cdef0c185936788093c4b3c87cdbb1c8054fac4800c8b9fb61f22046e0",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9978
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9978
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9978
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9888
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9888,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.012,
+                  "lower_95": 0.01,
+                  "upper_95": 0.014
+                },
+                "Fade": {
+                  "estimate": 0.012,
+                  "lower_95": 0.01,
+                  "upper_95": 0.014
+                }
+              }
+            },
+            "source_manifest_sha256": "28bc23c8d71f99981b1ebcbf6013bb5d6f4828c9f494340718f78d64d4abff7f",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9977
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9977
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9977
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9887
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9887,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.013000000000000001,
+                  "lower_95": 0.011000000000000001,
+                  "upper_95": 0.015000000000000001
+                },
+                "Fade": {
+                  "estimate": 0.013000000000000001,
+                  "lower_95": 0.011000000000000001,
+                  "upper_95": 0.015000000000000001
+                }
+              }
+            },
+            "source_manifest_sha256": "b9987ab00edf9038f8eab7de4909018ab1881b6683cdfb8058c648e6683f888a",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve2_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9976
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9976
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9976
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9886
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9886,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.014,
+                  "lower_95": 0.012,
+                  "upper_95": 0.016
+                },
+                "Fade": {
+                  "estimate": 0.014,
+                  "lower_95": 0.012,
+                  "upper_95": 0.016
+                }
+              }
+            },
+            "source_manifest_sha256": "9d79a91e4034e153c5a2560a88496f7809227b68d01bc4f4523d122a6d11cd43",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9975
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9975
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9975
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9885
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9885,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.015,
+                  "lower_95": 0.013,
+                  "upper_95": 0.017
+                },
+                "Fade": {
+                  "estimate": 0.015,
+                  "lower_95": 0.013,
+                  "upper_95": 0.017
+                }
+              }
+            },
+            "source_manifest_sha256": "a2ab5645666926a64cde70782f79041a37b140567913519a5aea56fa86a4a79f",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9974
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9974
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9974
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9884
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9884,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.016,
+                  "lower_95": 0.014,
+                  "upper_95": 0.018000000000000002
+                },
+                "Fade": {
+                  "estimate": 0.016,
+                  "lower_95": 0.014,
+                  "upper_95": 0.018000000000000002
+                }
+              }
+            },
+            "source_manifest_sha256": "b97c2ebc770ac59d9079519769d7ee13789af6324c70670d8ff742de7ffef681",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9973
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9973
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9973
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9883
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9883,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.017,
+                  "lower_95": 0.015000000000000001,
+                  "upper_95": 0.019000000000000003
+                },
+                "Fade": {
+                  "estimate": 0.017,
+                  "lower_95": 0.015000000000000001,
+                  "upper_95": 0.019000000000000003
+                }
+              }
+            },
+            "source_manifest_sha256": "fdd1a096ff67b06f6f9e6edd3121e4226de936c92886f3ceb49324029c88e434",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9972
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9972
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9972
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9882
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9882,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.018000000000000002,
+                  "lower_95": 0.016,
+                  "upper_95": 0.020000000000000004
+                },
+                "Fade": {
+                  "estimate": 0.018000000000000002,
+                  "lower_95": 0.016,
+                  "upper_95": 0.020000000000000004
+                }
+              }
+            },
+            "source_manifest_sha256": "8d0d09d3cbd8462654ba2d30483600a19c198fbbb4f819388c8fbf5f6f36d2d4",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9971
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9971
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9971
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9881
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9881,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.019,
+                  "lower_95": 0.017,
+                  "upper_95": 0.020999999999999998
+                },
+                "Fade": {
+                  "estimate": 0.019,
+                  "lower_95": 0.017,
+                  "upper_95": 0.020999999999999998
+                }
+              }
+            },
+            "source_manifest_sha256": "1a2a07656fb961f5d27c38ea59bda0a3d17aeeff316bad4c49a3625461cb8ef3",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9970
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9970
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9970
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9880
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9880,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.02,
+                  "lower_95": 0.018000000000000002,
+                  "upper_95": 0.022
+                },
+                "Fade": {
+                  "estimate": 0.02,
+                  "lower_95": 0.018000000000000002,
+                  "upper_95": 0.022
+                }
+              }
+            },
+            "source_manifest_sha256": "fad26194014069a8a7365068408aceb5851f7204abcb71f5f6ab1786ecb3c567",
+            "source_protocol": "pw-primary-face-bounds/1",
+            "original_status": "unavailable"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9969
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9969
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9969
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9879
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9879,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.021,
+                  "lower_95": 0.019000000000000003,
+                  "upper_95": 0.023
+                },
+                "Fade": {
+                  "estimate": 0.021,
+                  "lower_95": 0.019000000000000003,
+                  "upper_95": 0.023
+                }
+              }
+            },
+            "source_manifest_sha256": "494bcd441cfd401d46cda774354e36500c7dbb3458e7e72a610deb6d08971c14",
+            "source_protocol": "pw-primary-face-bounds/1",
+            "original_status": "unavailable"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9968
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9968
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9968
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9878
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9878,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.022,
+                  "lower_95": 0.019999999999999997,
+                  "upper_95": 0.024
+                },
+                "Fade": {
+                  "estimate": 0.022,
+                  "lower_95": 0.019999999999999997,
+                  "upper_95": 0.024
+                }
+              }
+            },
+            "source_manifest_sha256": "8b8ee26662f0b49be46ae1692d098ca7a6428987d340c19485fbdeb876b3c2a6",
+            "source_protocol": "pw-primary-face-bounds/1",
+            "original_status": "unavailable"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9967
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9967
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9967
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9877
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9877,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.023,
+                  "lower_95": 0.020999999999999998,
+                  "upper_95": 0.025
+                },
+                "Fade": {
+                  "estimate": 0.023,
+                  "lower_95": 0.020999999999999998,
+                  "upper_95": 0.025
+                }
+              }
+            },
+            "source_manifest_sha256": "b76ceaed032889abfca6175e44a69614db8965b7801f850c6d3c57bd6a40139b",
+            "source_protocol": "pw-primary-face-bounds/1",
+            "original_status": "unavailable"
+          }
+        ],
+        "scores": [
+          [
+            "driver_lean0_curve1_rotation2_combined2",
+            {
+              "n": 9897
+            }
+          ],
+          [
+            "driver_lean5_curve1_rotation2_combined2",
+            {
+              "n": 9897
+            }
+          ],
+          [
+            "driver_lean10_curve1_rotation2_combined2",
+            {
+              "n": 9897
+            }
+          ],
+          [
+            "pitching_wedge_lean0_curve1_rotation2_combined2",
+            {
+              "n": 9881
+            }
+          ],
+          [
+            "pitching_wedge_lean5_curve1_rotation2_combined2",
+            {
+              "n": 9881
+            }
+          ],
+          [
+            "pitching_wedge_lean10_curve1_rotation2_combined2",
+            {
+              "n": 9881
+            }
+          ],
+          [
+            "seven_iron_lean0_curve1_rotation2_combined2",
+            {
+              "n": 9889
+            }
+          ],
+          [
+            "seven_iron_lean5_curve1_rotation2_combined2",
+            {
+              "n": 9889
+            }
+          ],
+          [
+            "seven_iron_lean10_curve1_rotation2_combined2",
+            {
+              "n": 9889
+            }
+          ]
+        ],
+        "effects": [
+          {
+            "effect": 0.125
+          }
+        ],
+        "bounds_control": {
+          "effects": [
+            {
+              "effect": -0.25
+            }
+          ],
+          "unavailable": [
+            "missing control"
+          ]
+        },
+        "figure_links": [
+          {
+            "relative_path": "synthetic.png"
+          },
+          {
+            "relative_path": "synthetic.png"
+          },
+          {
+            "relative_path": "supplement.png"
+          }
+        ],
+        "figure_inventories": [
+          "availability.csv",
+          "availability.csv"
+        ],
+        "supplement": {
+          "status": "qualified",
+          "unique_executed_cells": 26,
+          "verified_control_aliases": 1,
+          "receipt_sha256": "019dd5f1692d0ae6bd8913b504a30c4706ef8c8c53cf75462156e2b5029943de",
+          "publication_identity": {
+            "kind": "pipeline",
+            "receipt_filename": "REPORT_SUPPLEMENT_PIPELINE.json",
+            "receipt_sha256": "019dd5f1692d0ae6bd8913b504a30c4706ef8c8c53cf75462156e2b5029943de",
+            "parent_receipt_sha256": "019dd5f1692d0ae6bd8913b504a30c4706ef8c8c53cf75462156e2b5029943de"
+          },
+          "comparison_inventory": "supplement/REPORT_SUPPLEMENT_COMPARISONS.csv",
+          "figure_inventory": "supplement/REPORT_SUPPLEMENT_FIGURES.json"
+        }
+      },
+      "error": null,
+      "events": [
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ],
+        [
+          "supplement_figure_links",
+          null
+        ]
+      ]
+    },
+    "explicit_identity": {
+      "result": {
+        "selected_cells": [
+          {
+            "cell": "driver_lean0_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "driver_lean5_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "driver_lean10_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "pitching_wedge_lean5_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "pitching_wedge_lean10_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "seven_iron_lean5_curve1_rotation2_combined2"
+          },
+          {
+            "cell": "seven_iron_lean10_curve1_rotation2_combined2"
+          }
+        ],
+        "resolved_selected_cells": [
+          {
+            "cell": "driver_lean0_curve1_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9990
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9990
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9990
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9900
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9900,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.0,
+                  "lower_95": -0.002,
+                  "upper_95": 0.002
+                },
+                "Fade": {
+                  "estimate": 0.0,
+                  "lower_95": -0.002,
+                  "upper_95": 0.002
+                }
+              }
+            },
+            "source_manifest_sha256": "b54ea7e0a9ef06882e21864741c4060b2519eae490f9fae273e9d17ca87ded82",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve1_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9989
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9989
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9989
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9899
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9899,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.001,
+                  "lower_95": -0.001,
+                  "upper_95": 0.003
+                },
+                "Fade": {
+                  "estimate": 0.001,
+                  "lower_95": -0.001,
+                  "upper_95": 0.003
+                }
+              }
+            },
+            "source_manifest_sha256": "aa4e8c24d662ff904c3605ae38351a04b5c79cb39d42c09e7264a3d236bf25a2",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve1_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9988
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9988
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9988
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9898
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9898,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.002,
+                  "lower_95": 0.0,
+                  "upper_95": 0.004
+                },
+                "Fade": {
+                  "estimate": 0.002,
+                  "lower_95": 0.0,
+                  "upper_95": 0.004
+                }
+              }
+            },
+            "source_manifest_sha256": "4c2065c6b27844b7ddd3899fda873e26cee79bf80161a88c25e66adc43a3b85c",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve1_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9987
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9987
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9987
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9897
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9897,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.003,
+                  "lower_95": 0.001,
+                  "upper_95": 0.005
+                },
+                "Fade": {
+                  "estimate": 0.003,
+                  "lower_95": 0.001,
+                  "upper_95": 0.005
+                }
+              }
+            },
+            "source_manifest_sha256": "445bcc9b84d3e759922c72fa14e302840d55a395a9da669c4bef5bedc1bb646a",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve2_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9986
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9986
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9986
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9896
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9896,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.004,
+                  "lower_95": 0.002,
+                  "upper_95": 0.006
+                },
+                "Fade": {
+                  "estimate": 0.004,
+                  "lower_95": 0.002,
+                  "upper_95": 0.006
+                }
+              }
+            },
+            "source_manifest_sha256": "0827310411ec2752308af46990c406ac3aa33ece85e8def9ba8fd8a480bab17d",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve2_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9985
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9985
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9985
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9895
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9895,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.005,
+                  "lower_95": 0.003,
+                  "upper_95": 0.007
+                },
+                "Fade": {
+                  "estimate": 0.005,
+                  "lower_95": 0.003,
+                  "upper_95": 0.007
+                }
+              }
+            },
+            "source_manifest_sha256": "f5c02fff3d8feb9915365343ce5a1e82b88166b5c2dfb4ab7fb174d64b8c3473",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve2_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9984
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9984
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9984
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9894
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9894,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.006,
+                  "lower_95": 0.004,
+                  "upper_95": 0.008
+                },
+                "Fade": {
+                  "estimate": 0.006,
+                  "lower_95": 0.004,
+                  "upper_95": 0.008
+                }
+              }
+            },
+            "source_manifest_sha256": "5b138fdaa0f68a4dac6b5b3522daecd2e6073c0e90de9ae35b253ab099c44b78",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "driver_lean0_curve2_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "driver",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9983
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9983
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9983
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9893
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9893,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.007,
+                  "lower_95": 0.005,
+                  "upper_95": 0.009000000000000001
+                },
+                "Fade": {
+                  "estimate": 0.007,
+                  "lower_95": 0.005,
+                  "upper_95": 0.009000000000000001
+                }
+              }
+            },
+            "source_manifest_sha256": "6bb7aac1375e5f54a12160761ff878a52ca850dd416b37fe91ec1976f178bdfd",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9982
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9982
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9982
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9892
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9892,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.008,
+                  "lower_95": 0.006,
+                  "upper_95": 0.01
+                },
+                "Fade": {
+                  "estimate": 0.008,
+                  "lower_95": 0.006,
+                  "upper_95": 0.01
+                }
+              }
+            },
+            "source_manifest_sha256": "d1529df549926145e96e5501398179a95c95a60af0b6188aa948d228d473e23d",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9981
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9981
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9981
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9891
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9891,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.009000000000000001,
+                  "lower_95": 0.007000000000000001,
+                  "upper_95": 0.011000000000000001
+                },
+                "Fade": {
+                  "estimate": 0.009000000000000001,
+                  "lower_95": 0.007000000000000001,
+                  "upper_95": 0.011000000000000001
+                }
+              }
+            },
+            "source_manifest_sha256": "91eeb8f4c039ed3a04e675c06fb787aea0b6dada1851bc98244c7d92782ddbe3",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9980
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9980
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9980
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9890
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9890,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.01,
+                  "lower_95": 0.008,
+                  "upper_95": 0.012
+                },
+                "Fade": {
+                  "estimate": 0.01,
+                  "lower_95": 0.008,
+                  "upper_95": 0.012
+                }
+              }
+            },
+            "source_manifest_sha256": "30097b3021d0a69fa06ea4399a24434651f4bb2b08fd19fa98518f56bf0cba44",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9979
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9979
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9979
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9889
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9889,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.011,
+                  "lower_95": 0.009,
+                  "upper_95": 0.013
+                },
+                "Fade": {
+                  "estimate": 0.011,
+                  "lower_95": 0.009,
+                  "upper_95": 0.013
+                }
+              }
+            },
+            "source_manifest_sha256": "b25249cdef0c185936788093c4b3c87cdbb1c8054fac4800c8b9fb61f22046e0",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9978
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9978
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9978
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9888
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9888,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.012,
+                  "lower_95": 0.01,
+                  "upper_95": 0.014
+                },
+                "Fade": {
+                  "estimate": 0.012,
+                  "lower_95": 0.01,
+                  "upper_95": 0.014
+                }
+              }
+            },
+            "source_manifest_sha256": "28bc23c8d71f99981b1ebcbf6013bb5d6f4828c9f494340718f78d64d4abff7f",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9977
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9977
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9977
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9887
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9887,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.013000000000000001,
+                  "lower_95": 0.011000000000000001,
+                  "upper_95": 0.015000000000000001
+                },
+                "Fade": {
+                  "estimate": 0.013000000000000001,
+                  "lower_95": 0.011000000000000001,
+                  "upper_95": 0.015000000000000001
+                }
+              }
+            },
+            "source_manifest_sha256": "b9987ab00edf9038f8eab7de4909018ab1881b6683cdfb8058c648e6683f888a",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve2_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9976
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9976
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9976
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9886
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9886,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.014,
+                  "lower_95": 0.012,
+                  "upper_95": 0.016
+                },
+                "Fade": {
+                  "estimate": 0.014,
+                  "lower_95": 0.012,
+                  "upper_95": 0.016
+                }
+              }
+            },
+            "source_manifest_sha256": "9d79a91e4034e153c5a2560a88496f7809227b68d01bc4f4523d122a6d11cd43",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "seven_iron",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9975
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9975
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9975
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9885
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9885,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.015,
+                  "lower_95": 0.013,
+                  "upper_95": 0.017
+                },
+                "Fade": {
+                  "estimate": 0.015,
+                  "lower_95": 0.013,
+                  "upper_95": 0.017
+                }
+              }
+            },
+            "source_manifest_sha256": "a2ab5645666926a64cde70782f79041a37b140567913519a5aea56fa86a4a79f",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9974
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9974
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9974
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9884
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9884,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.016,
+                  "lower_95": 0.014,
+                  "upper_95": 0.018000000000000002
+                },
+                "Fade": {
+                  "estimate": 0.016,
+                  "lower_95": 0.014,
+                  "upper_95": 0.018000000000000002
+                }
+              }
+            },
+            "source_manifest_sha256": "b97c2ebc770ac59d9079519769d7ee13789af6324c70670d8ff742de7ffef681",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9973
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9973
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9973
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9883
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9883,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.017,
+                  "lower_95": 0.015000000000000001,
+                  "upper_95": 0.019000000000000003
+                },
+                "Fade": {
+                  "estimate": 0.017,
+                  "lower_95": 0.015000000000000001,
+                  "upper_95": 0.019000000000000003
+                }
+              }
+            },
+            "source_manifest_sha256": "fdd1a096ff67b06f6f9e6edd3121e4226de936c92886f3ceb49324029c88e434",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9972
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9972
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9972
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9882
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9882,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.018000000000000002,
+                  "lower_95": 0.016,
+                  "upper_95": 0.020000000000000004
+                },
+                "Fade": {
+                  "estimate": 0.018000000000000002,
+                  "lower_95": 0.016,
+                  "upper_95": 0.020000000000000004
+                }
+              }
+            },
+            "source_manifest_sha256": "8d0d09d3cbd8462654ba2d30483600a19c198fbbb4f819388c8fbf5f6f36d2d4",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 1,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": null,
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9971
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9971
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9971
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9881
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9881,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.019,
+                  "lower_95": 0.017,
+                  "upper_95": 0.020999999999999998
+                },
+                "Fade": {
+                  "estimate": 0.019,
+                  "lower_95": 0.017,
+                  "upper_95": 0.020999999999999998
+                }
+              }
+            },
+            "source_manifest_sha256": "1a2a07656fb961f5d27c38ea59bda0a3d17aeeff316bad4c49a3625461cb8ef3",
+            "source_protocol": "original_primary/1"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9970
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9970
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9970
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9880
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9880,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.02,
+                  "lower_95": 0.018000000000000002,
+                  "upper_95": 0.022
+                },
+                "Fade": {
+                  "estimate": 0.02,
+                  "lower_95": 0.018000000000000002,
+                  "upper_95": 0.022
+                }
+              }
+            },
+            "source_manifest_sha256": "fad26194014069a8a7365068408aceb5851f7204abcb71f5f6ab1786ecb3c567",
+            "source_protocol": "pw-primary-face-bounds/1",
+            "original_status": "unavailable"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9969
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9969
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9969
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9879
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9879,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.021,
+                  "lower_95": 0.019000000000000003,
+                  "upper_95": 0.023
+                },
+                "Fade": {
+                  "estimate": 0.021,
+                  "lower_95": 0.019000000000000003,
+                  "upper_95": 0.023
+                }
+              }
+            },
+            "source_manifest_sha256": "494bcd441cfd401d46cda774354e36500c7dbb3458e7e72a610deb6d08971c14",
+            "source_protocol": "pw-primary-face-bounds/1",
+            "original_status": "unavailable"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9968
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9968
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9968
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9878
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9878,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.022,
+                  "lower_95": 0.019999999999999997,
+                  "upper_95": 0.024
+                },
+                "Fade": {
+                  "estimate": 0.022,
+                  "lower_95": 0.019999999999999997,
+                  "upper_95": 0.024
+                }
+              }
+            },
+            "source_manifest_sha256": "8b8ee26662f0b49be46ae1692d098ca7a6428987d340c19485fbdeb876b3c2a6",
+            "source_protocol": "pw-primary-face-bounds/1",
+            "original_status": "unavailable"
+          },
+          {
+            "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+            "status": "completed",
+            "config": {
+              "club": {
+                "club_id": "pitching_wedge",
+                "shaft_lean_deg": 0
+              },
+              "curve_scale": 2,
+              "noise": {
+                "standard_deviations": [
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "n_shots": 10000,
+              "match_face_bounds_deg": [
+                -6.0,
+                6.0
+              ],
+              "match_speed_factors": [
+                0.75,
+                1.25
+              ]
+            },
+            "summary": {
+              "Straight": {
+                "total_n": 10000,
+                "supported_n": 9967
+              },
+              "Draw": {
+                "total_n": 10000,
+                "supported_n": 9967
+              },
+              "Fade": {
+                "total_n": 10000,
+                "supported_n": 9967
+              }
+            },
+            "paired_comparisons": {
+              "paired_n": 9877
+            },
+            "course_scoring": {
+              "total_n": 10000,
+              "paired_n": 9877,
+              "status": "conditional_only",
+              "paired_benefit_vs_straight": {
+                "Draw": {
+                  "estimate": 0.023,
+                  "lower_95": 0.020999999999999998,
+                  "upper_95": 0.025
+                },
+                "Fade": {
+                  "estimate": 0.023,
+                  "lower_95": 0.020999999999999998,
+                  "upper_95": 0.025
+                }
+              }
+            },
+            "source_manifest_sha256": "b76ceaed032889abfca6175e44a69614db8965b7801f850c6d3c57bd6a40139b",
+            "source_protocol": "pw-primary-face-bounds/1",
+            "original_status": "unavailable"
+          }
+        ],
+        "scores": [
+          [
+            "driver_lean0_curve1_rotation2_combined2",
+            {
+              "n": 9897
+            }
+          ],
+          [
+            "driver_lean5_curve1_rotation2_combined2",
+            {
+              "n": 9897
+            }
+          ],
+          [
+            "driver_lean10_curve1_rotation2_combined2",
+            {
+              "n": 9897
+            }
+          ],
+          [
+            "pitching_wedge_lean0_curve1_rotation2_combined2",
+            {
+              "n": 9881
+            }
+          ],
+          [
+            "pitching_wedge_lean5_curve1_rotation2_combined2",
+            {
+              "n": 9881
+            }
+          ],
+          [
+            "pitching_wedge_lean10_curve1_rotation2_combined2",
+            {
+              "n": 9881
+            }
+          ],
+          [
+            "seven_iron_lean0_curve1_rotation2_combined2",
+            {
+              "n": 9889
+            }
+          ],
+          [
+            "seven_iron_lean5_curve1_rotation2_combined2",
+            {
+              "n": 9889
+            }
+          ],
+          [
+            "seven_iron_lean10_curve1_rotation2_combined2",
+            {
+              "n": 9889
+            }
+          ]
+        ],
+        "effects": [
+          {
+            "effect": 0.125
+          }
+        ],
+        "bounds_control": {
+          "effects": [
+            {
+              "effect": -0.25
+            }
+          ],
+          "unavailable": [
+            "missing control"
+          ]
+        },
+        "figure_links": [
+          {
+            "relative_path": "synthetic.png"
+          },
+          {
+            "relative_path": "synthetic.png"
+          },
+          {
+            "relative_path": "supplement.png"
+          }
+        ],
+        "figure_inventories": [
+          "availability.csv",
+          "availability.csv"
+        ],
+        "supplement": {
+          "status": "qualified",
+          "unique_executed_cells": 26,
+          "verified_control_aliases": 1,
+          "receipt_sha256": "019dd5f1692d0ae6bd8913b504a30c4706ef8c8c53cf75462156e2b5029943de",
+          "publication_identity": {
+            "kind": "synthetic",
+            "receipt_filename": "REPORT_SUPPLEMENT_PIPELINE.json",
+            "receipt_sha256": "019dd5f1692d0ae6bd8913b504a30c4706ef8c8c53cf75462156e2b5029943de",
+            "parent_receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "comparison_inventory": "supplement/REPORT_SUPPLEMENT_COMPARISONS.csv",
+          "figure_inventory": "supplement/REPORT_SUPPLEMENT_FIGURES.json"
+        }
+      },
+      "error": null,
+      "events": [
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ],
+        [
+          "supplement_figure_links",
+          null
+        ]
+      ]
+    },
+    "identity_changed": {
+      "result": null,
+      "error": "supplement publication identity changed",
+      "events": [
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ],
+        [
+          "supplement_figure_links",
+          null
+        ]
+      ]
+    },
+    "missing_condition": {
+      "result": null,
+      "error": "selected interpretation requires nine club/lean conditions",
+      "events": []
+    },
+    "comparison_schema": {
+      "result": null,
+      "error": "qualified supplement comparison schema differs",
+      "events": [
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ]
+      ]
+    },
+    "ledger_schema": {
+      "result": null,
+      "error": "qualified supplement figure inventory differs",
+      "events": [
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ]
+      ]
+    },
+    "inventory_count": {
+      "result": null,
+      "error": "additive supplement inventory is incomplete",
+      "events": [
+        [
+          "describe",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "describe",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "driver_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "pitching_wedge_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean0_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean5_curve1_rotation2_combined2"
+        ],
+        [
+          "score",
+          "seven_iron_lean10_curve1_rotation2_combined2"
+        ],
+        [
+          "select_representative_interaction_pairs",
+          null
+        ],
+        [
+          "select_bounds_control_pairs",
+          null
+        ],
+        [
+          "verified_original_figure_links",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_links",
+          "original_control"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_primary"
+        ],
+        [
+          "verified_original_figure_inventory",
+          "original_control"
+        ],
+        [
+          "supplement_figure_links",
+          null
+        ]
+      ]
+    }
+  }
+}

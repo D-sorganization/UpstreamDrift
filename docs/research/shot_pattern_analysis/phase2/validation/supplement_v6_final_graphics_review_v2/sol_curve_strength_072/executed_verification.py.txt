@@ -1,0 +1,42 @@
+import hashlib,json,pathlib,datetime
+P=pathlib.Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+B=P/'validation/supplement_v6_final_graphics_review_v2'; D=B/'curve_strength_072'; O=B/'sol_curve_strength_072'; R=P/'supplement_report_v1'
+def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+def require(v,message):
+    if not v: raise ValueError(message)
+tracked={}
+def verify(p,expected=None):
+    h=sha(p)
+    if expected is not None: require(h==expected,str(p))
+    tracked[str(p)]=h
+    return h
+i=json.loads((D/'batch_inventory.json').read_text()); cmd=json.loads((B/'curve_strength_072_command.json').read_text())
+require(cmd['exit_code']==0,'batch command failed'); verify(D/'batch_inventory.json',cmd['batch_inventory_sha256']);verify(B/'curve_strength_072_command.json')
+for f,h in i['numeric_sha256'].items(): verify(R/f,h)
+records=json.loads((R/'REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons']
+require(len(i['selected'])==12 and not i['pending'],'batch incomplete')
+def identity(rec): return [rec['comparison_kind'],[[src['protocol_id'],src['cell'],src['source_csv_sha256']] for src in rec['sources']],rec['target_x_m'],rec['common_supported_n']]
+representatives={(77,'density.png'),(80,'overhead_social.png'),(82,'density_straight_social.png')}
+entries=[];contacts=[]; full=[];reused=0
+for selected in i['selected']:
+    rec=selected['record']; require(sum(r==rec for r in records)==1,'numeric record not exact unique match')
+    ident=identity(rec)
+    for c in selected['contacts']:
+        verify(D/c['path'],c['sha256']);contacts.append({'path':str(D/c['path']),'sha256':c['sha256'],'visually_inspected':True})
+    for rel,h in selected['asset_sha256'].items():
+        verify(R/rel,h)
+        if not rel.endswith('.png'): continue
+        suffix=pathlib.Path(rel).name.removeprefix(selected['stem']+'_')
+        contact_num=1 if suffix in ('density_straight_social.png','density_draw_social.png') else 2 if suffix in ('density_fade_social.png','density.png') else 3
+        entry={'path':rel,'sha256':h,'scientific_identity':ident,'decision':'accepted_within_this_png_batch','fresh_contact_inspection':selected['contacts'][contact_num-1]['path'],'full_size_inspected':(selected['index'],suffix) in representatives,'observations':'Condition identities, target, units, population and scale labels readable; no clipping or overlap observed.'}
+        if entry['full_size_inspected']: full.append({'path':str(R/rel),'sha256':h})
+        if suffix.startswith('overhead'):
+            entry['observations']='Saved raw trajectories distinguished from common-six endpoints and paired shot indices; common physical axes and lateral display magnification disclosed. Aspect-driven whitespace is not missing data.'
+        else:
+            entry['observations']='Common-six density population, 600 displayed dots, HDR/marginals, shared axes, target and ordered conditions legible; row gutter clear.'
+        entries.append(entry)
+require(len(entries)==72 and len(contacts)==36 and reused==0 and len(full)==3,'coverage count mismatch')
+for p,h in tracked.items(): require(sha(pathlib.Path(p))==h,'changed during review: '+p)
+result={'schema':'independent-png-component-review/1','reviewer':'Sol independent reviewer','created_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'accepted':True,'scope':'Only curve_strength_072: 12 ordered pairs / 72 PNGs; Pitching Wedge across lean 0° and 10°. No whole-publication or vector visual acceptance.','whole_publication_accepted':False,'counts':{'pairs':12,'png_decisions':72,'contacts_inspected':36,'full_size_originals_inspected':3,'prior_exact_byte_social_density_matches':0,'all_format_assets_hash_verified':192},'completion_boundary':i['completion_boundary'],'producer_sources':i['producer_sources'],'findings':[],'remaining_gates':['Other PNG batches and final union coverage','Independent PDF/SVG diagnostics and visual scope','Final report/narrative/PDF acceptance'],'per_asset':entries,'contacts_inspected':contacts,'full_size_inspected':full,'input_sha256':tracked,'before_after_hashes_equal':True,'limitations':['Human visual inspection covered all PNGs on two-image contact sheets plus three full-size originals; not every original was opened at full resolution.','No prior visual scope reused in this batch.','PDF/SVG files were hashed, not visually accepted by this review.']}
+(O/'review.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({'review_sha256':sha(O/'review.json'),'counts':result['counts']}))

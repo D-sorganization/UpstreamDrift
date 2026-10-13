@@ -1,0 +1,23 @@
+{
+  "checked_utc": "2026-10-10T09:26:49.009157+00:00",
+  "source_freeze": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift": {
+      "file_count": 52,
+      "matches_preflight": true
+    },
+    "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift": {
+      "file_count": 52,
+      "matches_preflight": true
+    }
+  },
+  "initial_candidate_commit": "b9f1ad05b4055a8c3780e7be21d4b9a808feb59f",
+  "status": "initial_candidate_requires_astra_requested_revision",
+  "revision_session": 91001,
+  "revision_log": "/tmp/p2-social-context-r2-agy.log",
+  "original_graphics_session": 91987,
+  "supplemental_report_session": 86589,
+  "initial_agy_exit_code": 0,
+  "initial_tests_passed": 28,
+  "independent_review": "provisional_code_review.json",
+  "no_candidate_integrated_in_main": true
+}

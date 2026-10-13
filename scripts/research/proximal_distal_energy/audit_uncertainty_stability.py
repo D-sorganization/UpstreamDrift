@@ -7,11 +7,43 @@ from pathlib import Path
 
 import numpy as np
 
+from .release_bundle import artifact_sha256, artifact_size
 from .uncertainty_control import nondominated_indices, partial_rank_correlations
 
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 OUTPUT = DATA / "uncertainty_control_stability_audit.json"
+ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
+PUBLISHED_STUDY_INPUTS = {
+    "uncertainty_control_study.json": (
+        "101b9be2bccf705af9e856364312f797f0c725fab521b0c7357830e9e778715b",
+        18917,
+    ),
+    "uncertainty_control_study.npz": (
+        "b051d567fcf7d0c03060f058887b2342ca46a85e78a3f1e5108d1c469ed6be9d",
+        16911,
+    ),
+}
+
+
+def _verify_study_inputs() -> None:
+    """Bind the audit to the exact primary study and array release artifacts."""
+    manifest = json.loads(
+        (ARTICLE / "release_manifest.json").read_text(encoding="utf-8")
+    )
+    artifacts = manifest["artifacts"]
+    for name, (published_sha, published_size) in PUBLISHED_STUDY_INPUTS.items():
+        path = DATA / name
+        relative = f"docs/research/proximal_distal_energy_transfer/data/{name}"
+        expected = artifacts.get(relative)
+        if (
+            not isinstance(expected, dict)
+            or expected.get("sha256") != published_sha
+            or expected.get("bytes") != published_size
+            or artifact_sha256(path) != published_sha
+            or artifact_size(path) != published_size
+        ):
+            raise ValueError(f"study input identity hash mismatch: {relative}")
 
 
 def _objectives(outputs: np.ndarray) -> np.ndarray:
@@ -27,8 +59,33 @@ def _objectives(outputs: np.ndarray) -> np.ndarray:
     )
 
 
+def _threshold_sensitivity(
+    singular: np.ndarray, sensitivity: np.ndarray
+) -> dict[str, object]:
+    """Preserve published values while independently checking every rank."""
+    computed_singular = np.linalg.svd(sensitivity, compute_uv=False)
+    threshold_fractions = (0.01, 0.05, 0.10, 0.20)
+    threshold_ranks = {
+        str(fraction): int(np.sum(singular > fraction * singular[0]))
+        for fraction in threshold_fractions
+    }
+    computed_ranks = {
+        str(fraction): int(np.sum(computed_singular > fraction * computed_singular[0]))
+        for fraction in threshold_fractions
+    }
+    if len(singular) != len(computed_singular) or threshold_ranks != computed_ranks:
+        raise ValueError(
+            "study singular values disagree with independently computed ranks"
+        )
+    return {
+        "singular_values": singular.tolist(),
+        "rank_by_fraction_of_largest": threshold_ranks,
+    }
+
+
 def build_audit() -> dict[str, object]:
     """Compute leave-one-out rankings, Pareto membership, and rank thresholds."""
+    _verify_study_inputs()
     record = json.loads(
         (DATA / "uncertainty_control_study.json").read_text(encoding="utf-8")
     )
@@ -94,12 +151,13 @@ def build_audit() -> dict[str, object]:
         for index, name in enumerate(names)
     }
 
-    singular = np.linalg.svd(sensitivity, compute_uv=False)
-    threshold_fractions = (0.01, 0.05, 0.10, 0.20)
-    threshold_ranks = {
-        str(fraction): int(np.sum(singular > fraction * singular[0]))
-        for fraction in threshold_fractions
-    }
+    singular = np.asarray(
+        record["identifiability"]["coupled_parameter_screen"][
+            "standardized_sensitivity_singular_values"
+        ],
+        dtype=float,
+    )
+    threshold_sensitivity = _threshold_sensitivity(singular, sensitivity)
     return {
         "schema_version": "proximal-distal-uncertainty-stability-audit-v1",
         "prcc_leave_one_out": {
@@ -116,10 +174,7 @@ def build_audit() -> dict[str, object]:
             "point_members": [names[index] for index in point_pareto],
             "membership_counts": membership_counts,
         },
-        "identifiability_threshold_sensitivity": {
-            "singular_values": singular.tolist(),
-            "rank_by_fraction_of_largest": threshold_ranks,
-        },
+        "identifiability_threshold_sensitivity": threshold_sensitivity,
         "interpretation": (
             "small-sample perturbation audit only; instability weakens ranking "
             "and Pareto-membership claims and cannot quantify population uncertainty"

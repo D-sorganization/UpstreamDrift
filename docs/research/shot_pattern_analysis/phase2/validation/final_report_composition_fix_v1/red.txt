@@ -1,0 +1,139 @@
+.....................FFFFFF                                              [100%]
+=================================== FAILURES ===================================
+___________ test_f1_resolved_zero_lean_cells_assembly_and_rendering ____________
+
+    def test_f1_resolved_zero_lean_cells_assembly_and_rendering():
+>       from scripts.research.shot_pattern_analysis.final_report_inputs import (
+            assemble_resolved_selected_cells,
+        )
+E       ImportError: cannot import name 'assemble_resolved_selected_cells' from 'scripts.research.shot_pattern_analysis.final_report_inputs' (/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/final_report_inputs.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:950: ImportError
+____________ test_f2_exact_12_representative_interaction_contrasts _____________
+
+    def test_f2_exact_12_representative_interaction_contrasts():
+        import random
+>       from scripts.research.shot_pattern_analysis.final_report_inputs import (
+            select_representative_interaction_pairs,
+        )
+E       ImportError: cannot import name 'select_representative_interaction_pairs' from 'scripts.research.shot_pattern_analysis.final_report_inputs' (/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/shot_pattern_analysis/final_report_inputs.py)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:1048: ImportError
+___________ test_f3_substantive_conclusions_and_mechanism_synthesis ____________
+
+    def test_f3_substantive_conclusions_and_mechanism_synthesis():
+        cell = _detailed_cell()
+        matrix = _matrix([cell], "final")
+        lean = {
+            "schema": "matched-across-lean/1",
+            "pairs": [],
+            "population": {"planned_pairs": 0},
+        }
+        interpretation = _qualified_interpretation()
+    
+        rendered = build_final_report.render_final_report(
+            matrix, matrix, lean, {}, interpretation=interpretation
+        )
+    
+>       assert "### Conclusions and Geometric Mechanism Synthesis" in rendered
+E       AssertionError: assert '### Conclusions and Geometric Mechanism Synthesis' in '# Matched Shot Patterns: Final Conditional Simulation Report\n\n## Scope and Status\n\nThe primary within-lean matrix..._pdf docs/research/shot_pattern_analysis/phase2/REPORT.md docs/research/shot_pattern_analysis/phase2/REPORT.pdf\n```\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:1137: AssertionError
+________ test_f4_speed_bounds_scoping_and_driver_supplement_disclosure _________
+
+    def test_f4_speed_bounds_scoping_and_driver_supplement_disclosure():
+        cell = _detailed_cell()
+        matrix = _matrix([cell], "final")
+        lean = {
+            "schema": "matched-across-lean/1",
+            "pairs": [],
+            "population": {"planned_pairs": 0},
+        }
+        interpretation = _qualified_interpretation()
+    
+        rendered = build_final_report.render_final_report(
+            matrix, matrix, lean, {}, interpretation=interpretation
+        )
+    
+        # 1. Controlled Inputs scopes 75–125% to original protocols
+>       assert "original_primary/1" in rendered
+E       AssertionError: assert 'original_primary/1' in '# Matched Shot Patterns: Final Conditional Simulation Report\n\n## Scope and Status\n\nThe primary within-lean matrix..._pdf docs/research/shot_pattern_analysis/phase2/REPORT.md docs/research/shot_pattern_analysis/phase2/REPORT.pdf\n```\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:1168: AssertionError
+_ test_f5_figure_population_prose_distinguishes_individual_and_paired_densities _
+
+    def test_f5_figure_population_prose_distinguishes_individual_and_paired_densities():
+        cell = _detailed_cell()
+        matrix = _matrix([cell], "final")
+        lean = {
+            "schema": "matched-across-lean/1",
+            "pairs": [],
+            "population": {"planned_pairs": 0},
+        }
+        interpretation = _qualified_interpretation()
+    
+        rendered = build_final_report.render_final_report(
+            matrix, matrix, lean, {}, interpretation=interpretation
+        )
+    
+        # Figure population prose distinguishes individual vs paired populations
+>       assert (
+            "Individual cell densities use individually supported endpoints" in rendered
+        )
+E       AssertionError: assert 'Individual cell densities use individually supported endpoints' in '# Matched Shot Patterns: Final Conditional Simulation Report\n\n## Scope and Status\n\nThe primary within-lean matrix..._pdf docs/research/shot_pattern_analysis/phase2/REPORT.md docs/research/shot_pattern_analysis/phase2/REPORT.pdf\n```\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:1193: AssertionError
+___________ test_f6_draft_conclusions_provenance_truthful_v5_pending ___________
+
+    def test_f6_draft_conclusions_provenance_truthful_v5_pending():
+        repo_root = Path(__file__).resolve().parents[2]
+        path = (
+            repo_root
+            / "docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md"
+        )
+        content = path.read_text(encoding="utf-8")
+>       assert "completed v4 receipt" not in content
+E       AssertionError: assert 'completed v4 receipt' not in '# Draft Pha...4 receipt.\n'
+E         
+E         'completed v4 receipt' is contained here:
+E            with the completed v4 receipt.
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_final_report.py:1209: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_final_report.py::test_f1_resolved_zero_lean_cells_assembly_and_rendering
+FAILED tests/research/test_shot_pattern_final_report.py::test_f2_exact_12_representative_interaction_contrasts
+FAILED tests/research/test_shot_pattern_final_report.py::test_f3_substantive_conclusions_and_mechanism_synthesis
+FAILED tests/research/test_shot_pattern_final_report.py::test_f4_speed_bounds_scoping_and_driver_supplement_disclosure
+FAILED tests/research/test_shot_pattern_final_report.py::test_f5_figure_population_prose_distinguishes_individual_and_paired_densities
+FAILED tests/research/test_shot_pattern_final_report.py::test_f6_draft_conclusions_provenance_truthful_v5_pending
+6 failed, 21 passed, 7 warnings in 27.56s

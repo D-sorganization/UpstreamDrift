@@ -1,0 +1,21 @@
+from pathlib import Path
+import subprocess,json,hashlib,datetime,shutil
+r=Path('docs/research/shot_pattern_analysis/phase2');v=r/'validation/reporting_revision_preservation_v4';v.mkdir(exist_ok=True)
+changed=subprocess.check_output(['git','diff','--name-only','9ea4c14bed','HEAD','--','src/tools/shot_pattern_analysis','scripts/research/shot_pattern_analysis'],text=True).splitlines()
+assert not [p for p in changed if p.endswith('.py')],changed
+new=subprocess.check_output(['git','ls-files','--others','--exclude-standard','src/tools/shot_pattern_analysis','scripts/research/shot_pattern_analysis'],text=True).splitlines()
+assert not [p for p in new if p.endswith('.py')],new
+for pid in (2508214,2654100,2509004,2509013):assert not Path(f'/proc/{pid}').exists(),pid
+records=[]
+for old,target in [('final_figures_v1','presentation_preview_rejected_final_v3/final_figures_v1'),('control_final_figures_v1','presentation_preview_rejected_final_v3/control_final_figures_v1'),('supplement_report_v1','presentation_preview_rejected_supplement_v2/supplement_report_v1')]:
+ a=r/old;b=r/target;assert a.is_dir() and not b.exists()
+ files={str(p.relative_to(a)):hashlib.sha256(p.read_bytes()).hexdigest() for p in a.rglob('*') if p.is_file()}
+ b.parent.mkdir(exist_ok=True);a.rename(b)
+ assert all(hashlib.sha256((b/p).read_bytes()).hexdigest()==h for p,h in files.items())
+ records.append({'old_path':str(a),'preserved_path':str(b),'file_count':len(files),'files_sha256':files})
+for name in ('p2-supplement-v2-intentional-stop.json','p2-supplement-report-v2-start.json','p2-supplement-report-v2-exit.json'):
+ shutil.copyfile(Path('/tmp')/name,v/name)
+receipt={'time_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'status':'preserved_superseded_publications','main_source_freeze_released':True,'study_python_source_diff_from_start_empty':True,'non_python_changes':changed,'all_producers_terminal':True,'original_graphics':'Both complete; graphically rejected, receipts preserved.','supplemental':'Intentionally terminated with signal15 after confirmed correctness defects; partial output is not accepted. Existing statistics are provisional comparisons for unchanged-field checks only.','preflight_note':'First guard rejected an allowed README.md change before any move. Corrected guard checks the Python-only freeze and separately records other paths.','records':records}
+(v/'preservation.json').write_text(json.dumps(receipt,indent=2)+'\n')
+shutil.copyfile('/tmp/p2-preserve-superseded-publications.py',v/'executed_preservation.py.txt')
+print([(x['preserved_path'],x['file_count']) for x in records])

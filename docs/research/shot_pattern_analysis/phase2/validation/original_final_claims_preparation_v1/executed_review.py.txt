@@ -1,0 +1,78 @@
+"""Review audited saved summaries without rereading or rescoring shot CSVs."""
+import hashlib
+import json
+from collections import Counter, defaultdict
+from pathlib import Path
+
+ROOT = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+PHASE = ROOT / 'docs/research/shot_pattern_analysis/phase2'
+OUT = PHASE / 'validation/original_final_claims_preparation_v1'
+assert not OUT.exists()
+OUT.mkdir()
+sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+inputs = {}
+matrices = {}
+for folder, audit_name in [('final_v1', 'independent_primary_final_audit.json'), ('control_final_v1', 'independent_control_final_audit.json')]:
+    directory = PHASE / folder
+    audit_path = PHASE / 'validation' / audit_name
+    audit = json.loads(audit_path.read_text())
+    assert audit['pass'] and audit['complete'] and not audit['failures']
+    plan_path = directory / 'matrix_plan.json'
+    assert sha(plan_path) == audit['plan_sha256']
+    plan = json.loads(plan_path.read_text())
+    assert set(plan['cells']) == set(audit['cells'])
+    inputs[str(audit_path)] = sha(audit_path)
+    inputs[str(plan_path)] = sha(plan_path)
+    statuses = Counter()
+    clubs = defaultdict(lambda: {'supported_n': [], 'common_three_n': [], 'draw_delta_sg': [], 'fade_delta_sg': []})
+    selected = {}
+    rows = 0
+    for name, config in plan['cells'].items():
+        manifest_path = directory / name / 'manifest.json'
+        summary_path = directory / name / 'summary.json'
+        assert sha(manifest_path) == audit['cells'][name]['manifest_sha256']
+        manifest = json.loads(manifest_path.read_text())
+        assert sha(summary_path) == manifest['files_sha256']['summary.json']
+        inputs[str(manifest_path)] = sha(manifest_path)
+        inputs[str(summary_path)] = sha(summary_path)
+        cell = json.loads(summary_path.read_text())
+        assert cell['config'] == config
+        status = cell['status']
+        assert status == audit['cells'][name]['status']
+        statuses[status] += 1
+        if status != 'completed':
+            continue
+        assert config['n_shots'] == 10000
+        assert cell['aim_adjustment_applied'] is False
+        rows += 3 * config['n_shots']
+        course = cell['course_scoring']
+        paired_n = course['paired_n']
+        assert paired_n == audit['cells'][name]['paired_n']
+        club_id = config['club']['club_id']
+        group = clubs[club_id]
+        group['common_three_n'].append(paired_n)
+        for pattern in ('Straight', 'Draw', 'Fade'):
+            p = cell['summary'][pattern]
+            assert p['total_n'] == 10000
+            assert paired_n <= p['supported_n'] <= 10000
+            group['supported_n'].append(p['supported_n'])
+            assert course['patterns'][pattern]['n'] == paired_n
+        for pattern in ('Draw', 'Fade'):
+            interval = course['paired_benefit_vs_straight'][pattern]
+            assert interval['lower_95'] <= interval['estimate'] <= interval['upper_95']
+            group[pattern.lower()+'_delta_sg'].append(interval['estimate'])
+        assert course['baseline']['version'] == 'table9-full-plus-anchor-reconciled-putting/2'
+        assert course['start_lie'] == ('tee' if club_id == 'driver' else 'fairway')
+        if club_id == 'driver':
+            assert course['hole_distance_m'] == 400 and course['fairway_half_width_m'] == 15
+        else:
+            assert course['green_radius_m'] == 15
+        if '_lean0_curve1_rotation2_combined2' in name:
+            selected[name] = {'target_x_m': cell['target_x_m'], 'common_three_scored_n': paired_n, 'patterns': {p: {'supported_n':cell['summary'][p]['supported_n'], 'mean_carry_m':cell['summary'][p]['mean_carry_m'], 'lateral_sd_m':cell['summary'][p]['lateral_sd_m'], 'mean_sg':course['patterns'][p]['mean_strokes_gained']} for p in ('Straight','Draw','Fade')}, 'paired_sg':course['paired_benefit_vs_straight']}
+    matrices[folder] = {'statuses':dict(statuses),'attempted_pattern_rows':rows,'club_ranges':{club:{key:{'min':min(values),'max':max(values)} for key,values in group.items()} for club,group in clubs.items()},'selected_report_stratum':selected}
+assert all(sha(Path(path)) == value for path,value in inputs.items())
+sources = {str(ROOT/path):sha(ROOT/path) for path in ['scripts/research/shot_pattern_analysis/build_final_report.py','src/tools/shot_pattern_analysis/matched_interpretation.py']}
+result = {'status':'claims_preparation_checks_pass','scope':'Audited Original Summaries and Current Report Narrative Contracts; Not Final Rendered Report or Figure Acceptance','script_sha256':sha(Path(__file__)),'inputs':inputs,'report_sources':sources,'matrices':matrices,'limits':['No CSV recomputation; relies on the hash-bound complete independent data audits.','Range summaries are descriptive across heterogeneous cells, not pooled treatment effects or probabilities.','Supplement and final six-population interaction inventories remain pending completed supplemental data.']}
+(OUT/'review.json').write_text(json.dumps(result,indent=2)+'\n')
+(OUT/'executed_review.py.txt').write_bytes(Path(__file__).read_bytes())
+print(json.dumps({key:{k:v for k,v in value.items() if k!='selected_report_stratum'} for key,value in matrices.items()},indent=2))

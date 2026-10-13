@@ -1,0 +1,54 @@
+{
+  "schema": "independent-control-graphics-review/1",
+  "accepted": true,
+  "scope": "Completed original fixed-target control graphics; not supplemental or complete final-report acceptance.",
+  "manifest_sha256": "47ea6e292883ea5958651e6786d5b73f2f463ebd004488d75c77f385036f34fd",
+  "reconciliation_receipt_sha256": "68056fb348889d6fcd3b834ab306eb66b0ff244083d9229748535ffb96de3a54",
+  "terminal_receipt_sha256": "b0ee88faff927e1b7779356fbd81fbf569f1e50153039fb1e3cfb1e47867622c",
+  "total_outputs": 547,
+  "png_count": 194,
+  "previously_reviewed_byte_identical_png_count": 176,
+  "changed_png_contact_review_count": 18,
+  "fullsize_reviewed_files": {
+    "social/comparisons/driver/combined2/Straight/shaft_rotation_sd.png": "acf8a9940fcf2f4f8ad73f4b94494f1985b1c6c239630f7e6f72d70ec7252c92",
+    "social/comparisons/seven_iron/shaft_only/Fade/shaft_rotation_sd.png": "ee31dfec17766bf1c2d45e4eef40818660535738336d414a40508a3180d7c12c",
+    "social/comparisons/pitching_wedge/combined2/Draw/shaft_rotation_sd.png": "a9c7c81aebc2aab36ddb1dde50d0f2d410a5793f6d495e36d3d408dc631883ec"
+  },
+  "changed_png_sha256": {
+    "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.png": "212f73fd3baf2a7f049cd03b114ac5288a0c242183bd8ac8e099152929336fc2",
+    "social/comparisons/driver/combined2/Fade/shaft_rotation_sd.png": "fd62080bdf8a25d303c142312f87adfb1f58bfd3d2b61be2c3747c06c2a5bdb1",
+    "social/comparisons/driver/combined2/Straight/shaft_rotation_sd.png": "acf8a9940fcf2f4f8ad73f4b94494f1985b1c6c239630f7e6f72d70ec7252c92",
+    "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.png": "df33518293c3b5b7a9f5c27b423a9c0827ed50c432b67bb804c9a7802d55e1ad",
+    "social/comparisons/driver/shaft_only/Fade/shaft_rotation_sd.png": "5ec1192a452f46ba818d000cc059ebe63cae84862965b36199f8c9668898a611",
+    "social/comparisons/driver/shaft_only/Straight/shaft_rotation_sd.png": "36af6bc0b3d646927dad5277740c3f42af51b9cbb4b5e051203fb3d84396d653",
+    "social/comparisons/pitching_wedge/combined2/Draw/shaft_rotation_sd.png": "a9c7c81aebc2aab36ddb1dde50d0f2d410a5793f6d495e36d3d408dc631883ec",
+    "social/comparisons/pitching_wedge/combined2/Fade/shaft_rotation_sd.png": "a6a3d9717471fe3363a70e7c7ae8d4e1dadd160220a18c8fbf8961f144a3e382",
+    "social/comparisons/pitching_wedge/combined2/Straight/shaft_rotation_sd.png": "5466821fec96f7bd5000f4d411f5c5c22feb01594af8317b530af34646e364d1",
+    "social/comparisons/pitching_wedge/shaft_only/Draw/shaft_rotation_sd.png": "f842a496b2eb0462e40bafb1dd6ad1a7c27c99e011b0b221fb64b9fa1d9e3efb",
+    "social/comparisons/pitching_wedge/shaft_only/Fade/shaft_rotation_sd.png": "4e4dda247263a0edcad1d84088094e9d6c25b37816717d613816c26048606da5",
+    "social/comparisons/pitching_wedge/shaft_only/Straight/shaft_rotation_sd.png": "0a8af79cc697e08a4c131d391edac835f1440119de269e4b18e526ce0131bf48",
+    "social/comparisons/seven_iron/combined2/Draw/shaft_rotation_sd.png": "797e0584c2e922191e04528db8d97e240ece5e837aeb51041565e9af60a9fd2a",
+    "social/comparisons/seven_iron/combined2/Fade/shaft_rotation_sd.png": "acf1132aa8e80300565a7c563905096470d5b1228bea45eaf0c654f2fed96c7c",
+    "social/comparisons/seven_iron/combined2/Straight/shaft_rotation_sd.png": "87e6c3f2f36d4575fcf31834e51101f9b2944f49cfd3859c52c0a7e48875e244",
+    "social/comparisons/seven_iron/shaft_only/Draw/shaft_rotation_sd.png": "1cb5e189cf5c9a258ab7393cf94b5bdd146c274ecaab9578e7bfc437152ee2e1",
+    "social/comparisons/seven_iron/shaft_only/Fade/shaft_rotation_sd.png": "ee31dfec17766bf1c2d45e4eef40818660535738336d414a40508a3180d7c12c",
+    "social/comparisons/seven_iron/shaft_only/Straight/shaft_rotation_sd.png": "77ff719a24abce623cf46ea6ce5779a869f0b52c14ed68c35c85db985df4f49e"
+  },
+  "contact_sheet_sha256": {
+    "control_changed_driver.jpg": "4280a1aee9ddd9ec9a2e33dd67822f4bb15d73d18daf203555d153f5791d37b8",
+    "control_changed_seven_iron.jpg": "61f2576df406bd06349320c848775dc2d55ca0f8dd4bf6b842744e42021710a3",
+    "control_changed_pitching_wedge.jpg": "0417946040e6b9c38c0d92eac95baa78e2139c8fde579e448d07a5422ac7f480"
+  },
+  "visual_findings": [],
+  "checks": [
+    "All18 changed PNGs visually inspected on three contact sheets; three representative changed cards inspected full size.",
+    "Shaft Twist SD explicitly identifies varied input; physical pattern, curve, target, noise units and supported counts readable.",
+    "No observed text clipping or main/marginal tick, legend or footer collision. Shared scales and sampled-dot versus all-supported density labels retained.",
+    "All18 changed bytes and completed manifest independently rehashed; unchanged176 PNG visual qualification inherited through exact-byte reconciliation.",
+    "No claim based on recovery wrapper self-equality assertion; independent primary revalidation recorded separately."
+  ],
+  "limitations": [
+    "Original control inventory preserves unavailable cases; supplementary resolved controls remain separately published.",
+    "Model-conditional visual acceptance does not establish empirical validation."
+  ]
+}

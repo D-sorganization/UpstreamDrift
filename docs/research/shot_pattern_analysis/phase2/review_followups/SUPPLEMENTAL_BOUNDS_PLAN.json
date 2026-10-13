@@ -1,0 +1,97 @@
+{
+  "schema": "shot-pattern-bounds-supplement-predeclaration/1",
+  "issue": 12000,
+  "status": "predeclared_not_authorized_for_mc",
+  "scope": "Correct evidenced face-search exclusions; preserve original bounded-search study",
+  "n_shots_per_pattern": 10000,
+  "patterns": [
+    "Straight",
+    "Draw",
+    "Fade"
+  ],
+  "seed": 20261009,
+  "absolute_face_bounds_deg": [
+    -6,
+    6
+  ],
+  "pitching_wedge_speed_bounds_mps": [
+    24,
+    40
+  ],
+  "match_tolerance_m": 0.05,
+  "curve_scale": 2,
+  "fixed_control_target_m": 77.40247724866299,
+  "primary_new_cells": [
+    "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_path",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
+    "pitching_wedge_lean0_curve2_rotation1_combined1",
+    "pitching_wedge_lean0_curve2_rotation1_combined2",
+    "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
+    "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_path",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_speed1",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_speed2",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_strike",
+    "pitching_wedge_lean0_curve2_rotation2_combined1",
+    "pitching_wedge_lean0_curve2_rotation2_combined2",
+    "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive",
+    "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative"
+  ],
+  "control_new_cells": [
+    "pitching_wedge_lean5_curve2_rotation1_shaft_only",
+    "pitching_wedge_lean5_curve2_rotation1_combined2",
+    "pitching_wedge_lean5_curve2_rotation2_shaft_only",
+    "pitching_wedge_lean5_curve2_rotation2_combined2"
+  ],
+  "control_aliases_to_primary": {
+    "pitching_wedge_lean0_curve2_rotation1_shaft_only": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation1_combined2": "pitching_wedge_lean0_curve2_rotation1_combined2",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_only": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation2_combined2": "pitching_wedge_lean0_curve2_rotation2_combined2"
+  },
+  "unique_new_cells": 22,
+  "unique_new_attempted_shots": 660000,
+  "primary_curve1_references": {
+    "pitching_wedge_lean0_curve2_rotation1_shaft_only": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_path": "pitching_wedge_lean0_curve1_rotation1_shaft_path",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_speed1": "pitching_wedge_lean0_curve1_rotation1_shaft_speed1",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_speed2": "pitching_wedge_lean0_curve1_rotation1_shaft_speed2",
+    "pitching_wedge_lean0_curve2_rotation1_shaft_strike": "pitching_wedge_lean0_curve1_rotation1_shaft_strike",
+    "pitching_wedge_lean0_curve2_rotation1_combined1": "pitching_wedge_lean0_curve1_rotation1_combined1",
+    "pitching_wedge_lean0_curve2_rotation1_combined2": "pitching_wedge_lean0_curve1_rotation1_combined2",
+    "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive",
+    "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_only": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_path": "pitching_wedge_lean0_curve1_rotation2_shaft_path",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_speed1": "pitching_wedge_lean0_curve1_rotation2_shaft_speed1",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_speed2": "pitching_wedge_lean0_curve1_rotation2_shaft_speed2",
+    "pitching_wedge_lean0_curve2_rotation2_shaft_strike": "pitching_wedge_lean0_curve1_rotation2_shaft_strike",
+    "pitching_wedge_lean0_curve2_rotation2_combined1": "pitching_wedge_lean0_curve1_rotation2_combined1",
+    "pitching_wedge_lean0_curve2_rotation2_combined2": "pitching_wedge_lean0_curve1_rotation2_combined2",
+    "pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_positive",
+    "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative"
+  },
+  "original_primary_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+  "original_control_plan_sha256": null,
+  "required_gates": [
+    "Original frozen workers finished",
+    "Configurable-bounds implementation TDD and independent review",
+    "Numerical source projection unchanged or new qualification",
+    "All supplemental nominals pass 0.05m fine replay",
+    "Alias equality validated for full physical inputs, sampled noise, target, nominals, scoring context and source projection",
+    "Source-bound 32-shot pilot and independent audit",
+    "New immutable execution acceptance before 10000-shot cells",
+    "Strict final22unique-cell audit plus4verified provenance aliases"
+  ],
+  "forbidden": [
+    "Overwrite original324/72records",
+    "Widen speed bounds",
+    "Relax0.05mresidual gate",
+    "Publish aliases as independently rerun cells",
+    "Start supplemental Monte Carlo before gates"
+  ]
+}

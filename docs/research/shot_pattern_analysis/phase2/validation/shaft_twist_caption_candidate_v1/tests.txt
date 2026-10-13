@@ -1,0 +1,48 @@
+...................                                                      [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+1.05s call     tests/research/test_shot_pattern_final_figures.py::test_detail_selection_keeps_only_declared_shaft_only_and_combined_profiles
+0.71s setup    tests/research/test_shot_pattern_final_figures.py::test_detail_selection_keeps_only_declared_shaft_only_and_combined_profiles
+0.12s call     tests/research/test_shot_pattern_final_figures.py::test_pilot_preview_writes_separate_manifest_and_facebook_pngs
+0.06s teardown tests/research/test_shot_pattern_final_figures.py::test_direct_density_comparison_rejects_different_targets
+0.05s call     tests/research/test_shot_pattern_final_figures.py::test_direct_density_comparison_rejects_different_targets
+0.04s teardown tests/research/test_shot_pattern_final_figures.py::test_facebook_selection_falls_back_to_pitching_wedge_lean5_when_lean0_unavailable
+0.03s teardown tests/research/test_shot_pattern_final_figures.py::test_detail_selection_keeps_only_declared_shaft_only_and_combined_profiles
+0.03s teardown tests/research/test_shot_pattern_final_figures.py::test_direct_density_comparison_uses_social_layout_and_index_path
+0.03s teardown tests/research/test_shot_pattern_final_figures.py::test_pilot_preview_writes_separate_manifest_and_facebook_pngs
+0.03s setup    tests/research/test_shot_pattern_final_figures.py::test_direct_density_comparison_uses_social_layout_and_index_path
+0.03s setup    tests/research/test_shot_pattern_final_figures.py::test_direct_density_comparison_rejects_different_targets
+0.02s setup    tests/research/test_shot_pattern_final_figures.py::test_facebook_selection_falls_back_to_pitching_wedge_lean5_when_lean0_unavailable
+0.02s setup    tests/research/test_shot_pattern_final_figures.py::test_pilot_preview_writes_separate_manifest_and_facebook_pngs
+0.02s teardown tests/research/test_shot_pattern_final_figures.py::test_direct_density_pairs_hold_all_but_face_sd_or_curve_scale_constant
+0.02s setup    tests/research/test_shot_pattern_final_figures.py::test_report_cell_ids_are_adapted_to_heatmap_scenario_names
+0.01s setup    tests/research/test_shot_pattern_final_figures.py::test_direct_density_pairs_hold_all_but_face_sd_or_curve_scale_constant
+0.01s call     tests/research/test_shot_pattern_final_figures.py::test_publication_rejects_changed_saved_bytes_even_with_new_manifest[False]
+0.01s setup    tests/research/test_shot_pattern_final_figures.py::test_academic_noise_caption_identifies_all_seven_units
+0.01s setup    tests/research/test_shot_pattern_final_figures.py::test_publication_rejects_changed_saved_bytes_even_with_new_manifest[True]
+0.01s setup    tests/research/test_shot_pattern_final_figures.py::test_detail_metadata_names_matched_raw_landing_and_pattern_nominals

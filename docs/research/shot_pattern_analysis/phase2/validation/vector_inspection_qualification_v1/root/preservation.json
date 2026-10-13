@@ -1,0 +1,5 @@
+{
+  "archive_sha256": "2997525ba41711b8f0a102294bc35e877188e71397a3aec1df4ebb63aeb6c9a5",
+  "original_review_sha256": "acd5490e9e7a2e5524a06902595b8abc4bc3852a18ae2d0c87673e1231d0fecd",
+  "readable_copy_transform": "Normalize text newlines and strip trailing whitespace; exact raw bytes in ZIP"
+}

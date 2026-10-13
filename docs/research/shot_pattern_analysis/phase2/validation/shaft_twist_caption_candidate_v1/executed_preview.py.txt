@@ -1,0 +1,29 @@
+import hashlib,json,subprocess,ast
+from pathlib import Path
+from matplotlib.figure import Figure
+from scripts.research.shot_pattern_analysis import build_final_figures as b
+from src.tools.shot_pattern_analysis.matched_report import load_validated_cell
+root=Path.cwd();main=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift');data=main/'docs/research/shot_pattern_analysis/phase2/final_v1';out=root/'docs/research/shot_pattern_analysis/phase2/validation/shaft_twist_caption_candidate_v1';out.mkdir(exist_ok=True,parents=True)
+h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+source=Path(b.__file__);before=h(source);plan=json.loads((data/'matrix_plan.json').read_text());cells=[];inputs={}
+for profile in ['shaft_only','combined2']:
+ for sd,curve in [(1,1),(2,1),(2,2)]:
+  name=f'driver_lean0_curve{curve}_rotation{sd}_{profile}';d=data/name
+  for f in d.iterdir():
+   if f.is_file():inputs[str(f)]=h(f)
+  cells.append({**load_validated_cell(d,plan['cells'][name],plan['execution']),'cell':name})
+pairs=[p for p in b._comparison_pair_specs(cells) if p['pattern']=='Draw' and (p['comparison']=='shaft_rotation_sd' or p['profile']=='combined2')]
+layout=[];save=Figure.savefig
+def capture(fig,path,*a,**kw):
+ if str(path).endswith('.png'):
+  fig.canvas.draw();r=fig.canvas.get_renderer();layout.append({'path':str(path),'text':[{'text':t.get_text(),'bounds':list(t.get_window_extent(r).transformed(fig.transFigure.inverted()).bounds)} for t in fig.texts]})
+ return save(fig,path,*a,**kw)
+Figure.savefig=capture
+results=[]
+for p in pairs:
+ row,paths=b._render_density_comparison(p,data,out,dpi=180,preview=False);results.append({'row':row,'assets':{str(f.relative_to(out)):h(f) for f in paths}})
+assert all(h(Path(p))==v for p,v in inputs.items());assert h(source)==before
+old=subprocess.check_output(['git','show','3615196639:scripts/research/shot_pattern_analysis/build_final_figures.py'],text=True)
+def funcs(s):return {n.name:ast.dump(n,include_attributes=False) for n in ast.parse(s).body if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))}
+a,c=funcs(old),funcs(source.read_text());changed=[n for n in a if a[n]!=c[n]];assert changed==['_render_density_comparison'],changed
+(out/'actual_preview.json').write_text(json.dumps({'status':'visual_review_pending','source_sha256':before,'baseline':'3615196639','changed_functions':changed,'inputs':inputs,'inputs_unchanged':True,'results':results,'layout':layout},indent=2)+'\n');print('completed',len(results),'cards',flush=True)

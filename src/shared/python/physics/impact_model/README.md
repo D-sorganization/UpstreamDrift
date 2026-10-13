@@ -11,3 +11,10 @@ right-hander); heel is the reverse (fade). Its magnitude scales are heuristic
 assumptions and unqualified, and the additive helper does not solve a coupled
 rotational collision. Historical outputs produced before this sign correction
 are not rewritten.
+
+The calculation-level [Direction Reference](../../../../../docs/research/shot_pattern_analysis/phase2/review_followups/LEGACY_GEAR_SIGN_REFERENCE.md)
+and editable [LaTeX Source](../../../../../docs/research/shot_pattern_analysis/phase2/review_followups/LEGACY_GEAR_SIGN_REFERENCE.tex)
+record the sign correction, units, regression evidence and limitations.
+The separate [Matched-Delivery Design](../../../../../docs/research/shot_pattern_analysis/phase2/DESIGN.md)
+documents the coupled-contact research pathway; that pathway does not add this
+legacy gear-spin term.
