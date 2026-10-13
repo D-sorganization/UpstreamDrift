@@ -8388,6 +8388,18 @@
       "spelling_only": false
     },
     {
+      "path": "estimation/mosaic/manifold_spline.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "mosaic",
+      "ud_bytes": 27009,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "estimation/mosaic/outer_solve.py",
       "classification": "ud-only",
       "package": "estimation",
