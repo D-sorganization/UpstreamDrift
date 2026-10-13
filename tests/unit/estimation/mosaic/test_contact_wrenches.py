@@ -256,9 +256,11 @@ def test_retained_negative_stick_slip_edge_case() -> None:
     assert solution.is_cone_feasible
     assert solution.max_cone_violation < 1e-5
 
-    # Normal force is ~10.0
-    np.testing.assert_allclose(solution.wrenches[0, 2], 10.0, atol=1e-3)
-    # Shear force must NOT exceed mu * fz = 0.3 * 10 = 3.0
+    # Optimal projection onto friction cone boundary:
+    # fz* = (10 + mu * 8) / (1 + mu^2) = 12.4 / 1.09 ~ 11.376
+    expected_fz = (10.0 + mu * 8.0) / (1.0 + mu**2)
+    np.testing.assert_allclose(solution.wrenches[0, 2], expected_fz, atol=1e-3)
+    # Shear force is on the cone boundary: ||ft|| = mu * fz
     ft = np.hypot(solution.wrenches[0, 0], solution.wrenches[0, 1])
     np.testing.assert_allclose(ft, mu * solution.wrenches[0, 2], atol=1e-4)
 
