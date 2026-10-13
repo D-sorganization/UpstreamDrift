@@ -80,8 +80,7 @@ def main() -> int:
             for p in (
                 Path(__file__),
                 ROOT / "src/shared/python/motion_matching/tour_capture_contract.py",
-                ROOT
-                / "src/engines/physics_engines/opensim/python/tour_matching/trc.py",
+                ROOT / "src/shared/python/motion_matching/trc_io.py",
                 ROOT
                 / "src/engines/physics_engines/opensim/python/tour_matching/marker_map.py",
             )
