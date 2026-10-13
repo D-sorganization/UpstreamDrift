@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "a51fb6e1a8e7cced65577aeca7f2503286d87cbf",
+  "tools_pin": "21c83f86350af7ba613937e9653a9eda0fb713b2",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -14,7 +14,7 @@
     "identical": 375,
     "diverged": 271,
     "ud-only": 1694,
-    "tools-only": 835,
+    "tools-only": 837,
     "spelling-only": 121
   },
   "packages": {
@@ -757,7 +757,7 @@
       "identical": 210,
       "diverged": 68,
       "ud-only": 36,
-      "tools-only": 89,
+      "tools-only": 91,
       "spelling-only": 23
     },
     "sidekick_data_processing_bridge.py": {
@@ -28356,6 +28356,18 @@
       "spelling_only": false
     },
     {
+      "path": "sidekick/tests/_calculator_state_helpers.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "tests",
+      "ud_bytes": null,
+      "tools_bytes": 396,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "sidekick/tests/calculators/__init__.py",
       "classification": "identical",
       "package": "sidekick",
@@ -28997,8 +29009,20 @@
       "package": "sidekick",
       "subpackage": "tests",
       "ud_bytes": 14882,
-      "tools_bytes": 14884,
-      "byte_delta": -2,
+      "tools_bytes": 14656,
+      "byte_delta": 226,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/tests/test_calculator_state_mixin_lifetime.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "tests",
+      "ud_bytes": null,
+      "tools_bytes": 2631,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -29537,8 +29561,8 @@
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 31010,
-      "tools_bytes": 31522,
-      "byte_delta": -512,
+      "tools_bytes": 33286,
+      "byte_delta": -2276,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -30449,7 +30473,7 @@
       "package": "signal_toolkit",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 2776,
+      "tools_bytes": 2913,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30509,7 +30533,7 @@
       "package": "signal_toolkit",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 21685,
+      "tools_bytes": 22094,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30533,7 +30557,7 @@
       "package": "signal_toolkit",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 26531,
+      "tools_bytes": 26132,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -42283,9 +42307,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-10-12",
+        "commit": "24bb0c38714e36fc7d2d27be8d6b73ffe4dce106"
       }
     },
     {
@@ -42322,9 +42346,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "32b0513e89aec767725515e76911b4edb8f9ae69"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-10-12",
+        "commit": "24bb0c38714e36fc7d2d27be8d6b73ffe4dce106"
       }
     },
     {
