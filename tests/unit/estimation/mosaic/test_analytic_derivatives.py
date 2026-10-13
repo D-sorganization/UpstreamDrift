@@ -29,7 +29,7 @@ def _double_pendulum() -> tuple[PlanarChain, np.ndarray, PlanarParameterization]
         link_lengths=np.array([0.8, 0.5]),
         actuated=np.array([True, True]),
     )
-    param = PlanarParameterization(n_bodies=2)
+    param = PlanarParameterization()
     # Physical theta coordinates for double pendulum
     theta = np.array(
         [
@@ -44,7 +44,7 @@ def _double_pendulum() -> tuple[PlanarChain, np.ndarray, PlanarParameterization]
         ],
         dtype=np.float64,
     )
-    pi = param.realise(theta)
+    pi = param.from_unconstrained(theta)
     return chain, pi, param
 
 
@@ -53,7 +53,7 @@ def _triple_pendulum() -> tuple[PlanarChain, np.ndarray, PlanarParameterization]
         link_lengths=np.array([0.9, 0.6, 0.4]),
         actuated=np.array([False, True, True]),
     )
-    param = PlanarParameterization(n_bodies=3)
+    param = PlanarParameterization()
     theta = np.array(
         [
             np.log(1.3),
@@ -71,7 +71,7 @@ def _triple_pendulum() -> tuple[PlanarChain, np.ndarray, PlanarParameterization]
         ],
         dtype=np.float64,
     )
-    pi = param.realise(theta)
+    pi = param.from_unconstrained(theta)
     return chain, pi, param
 
 
@@ -223,8 +223,8 @@ def test_forward_dynamics_inertial_manifold_derivatives_conformance() -> None:
     for k in range(8):
         dth = np.zeros(8)
         dth[k] = eps
-        pi_pos = param.realise(theta0 + dth)
-        pi_neg = param.realise(theta0 - dth)
+        pi_pos = param.from_unconstrained(theta0 + dth)
+        pi_neg = param.from_unconstrained(theta0 - dth)
         qddot_pos = chain.forward_dynamics(q, v, u, pi_pos)
         qddot_neg = chain.forward_dynamics(q, v, u, pi_neg)
         fd_theta = (qddot_pos - qddot_neg) / (2.0 * eps)
