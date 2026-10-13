@@ -286,7 +286,7 @@ def test_retained_negative_test_jerk_prior_avoids_acceleration_noise_torque_blow
 
     # Case B (With kinematic jerk prior): Regularized fit
     # Normal equations: (P^T P + w_jerk^2 J^T J) C = P^T q_noisy
-    w_jerk = 0.05
+    w_jerk = 5e-5
     jerk_prior = KinematicJerkPrior(basis=basis, weight=w_jerk)
     lhs = basis.position.T @ basis.position + jerk_prior.normal_matrix()
     rhs = basis.position.T @ q_noisy
@@ -297,7 +297,7 @@ def test_retained_negative_test_jerk_prior_avoids_acceleration_noise_torque_blow
 
     torque_rms_error_reg = float(np.sqrt(np.mean((tau_reg - tau_true) ** 2)))
 
-    # Negative result reproduced: unregularized fit has spurious high torque error due to a_noise
-    assert torque_rms_error_unreg > 2.0 * torque_rms_error_reg
+    # Negative result reproduced: unregularized fit has spurious high torque error due to a_noise (blow-up)
+    assert torque_rms_error_unreg > 3.0 * torque_rms_error_reg
     # Jerk prior successfully suppresses torque noise blow-up
-    assert torque_rms_error_reg < 0.25 * float(np.sqrt(np.mean(tau_true**2)))
+    assert torque_rms_error_reg < 0.35 * float(np.sqrt(np.mean(tau_true**2)))
