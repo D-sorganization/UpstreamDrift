@@ -108,6 +108,56 @@ class WhitenessGateResult:
     details: dict[str, float] = field(default_factory=dict)
 
 
+def _validate_whiteness_inputs(
+    obs: FloatArray,
+    pred: FloatArray,
+    sigma: float,
+) -> str | None:
+    """Validate inputs for whiteness gate; return error string or None if valid."""
+    if not (math.isfinite(sigma) and sigma > 0.0):
+        return f"sigma must be positive and finite, got {sigma!r}"
+    if obs.shape != pred.shape or obs.size == 0:
+        return f"shape mismatch or empty input: obs {obs.shape} vs pred {pred.shape}"
+    if not (np.all(np.isfinite(obs)) and np.all(np.isfinite(pred))):
+        return "non-finite values in observed or predicted data"
+    if obs.shape[0] < 4:
+        return f"need at least 4 temporal samples, got {obs.shape[0]}"
+    return None
+
+
+def _compute_residual_statistics(
+    e: FloatArray,
+) -> tuple[float, float, float, dict[str, float]]:
+    """Compute whitened RMS, mean lag-1 autocorrelation, and mean Durbin-Watson statistic."""
+    n_samples = e.shape[0]
+    rms = float(np.sqrt(np.mean(e**2)))
+    e_flat_cols = e.reshape(n_samples, -1)
+    n_cols = e_flat_cols.shape[1]
+
+    autocorrs: list[float] = []
+    dw_stats: list[float] = []
+    for col in range(n_cols):
+        series = e_flat_cols[:, col]
+        diff = series - np.mean(series)
+        var = np.sum(diff**2)
+        rho1 = float(np.sum(diff[:-1] * diff[1:]) / var) if var > 1e-15 else 0.0
+        autocorrs.append(rho1)
+
+        denom = np.sum(series**2)
+        dw = float(np.sum(np.diff(series) ** 2) / denom) if denom > 1e-15 else 2.0
+        dw_stats.append(dw)
+
+    mean_autocorr = float(np.mean(autocorrs))
+    mean_dw = float(np.mean(dw_stats))
+    details = {
+        "rms": rms,
+        "mean_autocorrelation_lag1": mean_autocorr,
+        "durbin_watson": mean_dw,
+        "max_abs_autocorr": float(np.max(np.abs(autocorrs))),
+    }
+    return rms, mean_autocorr, mean_dw, details
+
+
 def evaluate_whiteness_gate(
     observed: FloatArray,
     predicted: FloatArray,
@@ -127,84 +177,20 @@ def evaluate_whiteness_gate(
     obs = np.asarray(observed, dtype=np.float64)
     pred = np.asarray(predicted, dtype=np.float64)
 
-    if not (math.isfinite(sigma) and sigma > 0.0):
+    val_err = _validate_whiteness_inputs(obs, pred, sigma)
+    if val_err is not None:
         return WhitenessGateResult(
             status="unqualified",
             passed=False,
             rms=float("nan"),
             autocorrelation_lag1=float("nan"),
             durbin_watson=float("nan"),
-            reason=f"sigma must be positive and finite, got {sigma!r}",
+            reason=val_err,
         )
 
-    if obs.shape != pred.shape or obs.size == 0:
-        return WhitenessGateResult(
-            status="unqualified",
-            passed=False,
-            rms=float("nan"),
-            autocorrelation_lag1=float("nan"),
-            durbin_watson=float("nan"),
-            reason=f"shape mismatch or empty input: obs {obs.shape} vs pred {pred.shape}",
-        )
-
-    if not (np.all(np.isfinite(obs)) and np.all(np.isfinite(pred))):
-        return WhitenessGateResult(
-            status="unqualified",
-            passed=False,
-            rms=float("nan"),
-            autocorrelation_lag1=float("nan"),
-            durbin_watson=float("nan"),
-            reason="non-finite values in observed or predicted data",
-        )
-
-    # Whitened residuals: e_t = (obs_t - pred_t) / sigma
     e = (obs - pred) / sigma
-    n_samples = e.shape[0]
+    rms, mean_autocorr, mean_dw, details = _compute_residual_statistics(e)
 
-    if n_samples < 4:
-        return WhitenessGateResult(
-            status="unqualified",
-            passed=False,
-            rms=float("nan"),
-            autocorrelation_lag1=float("nan"),
-            durbin_watson=float("nan"),
-            reason=f"need at least 4 temporal samples, got {n_samples}",
-        )
-
-    # Normalized RMS
-    rms = float(np.sqrt(np.mean(e**2)))
-
-    # Per-column lag-1 autocorrelation and Durbin-Watson statistic
-    e_flat_cols = e.reshape(n_samples, -1)
-    n_cols = e_flat_cols.shape[1]
-
-    autocorrs = []
-    dw_stats = []
-
-    for col in range(n_cols):
-        series = e_flat_cols[:, col]
-        diff = series - np.mean(series)
-        var = np.sum(diff**2)
-        rho1 = float(np.sum(diff[:-1] * diff[1:]) / var) if var > 1e-15 else 0.0
-        autocorrs.append(rho1)
-
-        denom = np.sum(series**2)
-        dw = float(np.sum(np.diff(series) ** 2) / denom) if denom > 1e-15 else 2.0
-        dw_stats.append(dw)
-
-    mean_autocorr = float(np.mean(autocorrs))
-    mean_dw = float(np.mean(dw_stats))
-
-    details = {
-        "rms": rms,
-        "mean_autocorrelation_lag1": mean_autocorr,
-        "durbin_watson": mean_dw,
-        "max_abs_autocorr": float(np.max(np.abs(autocorrs))),
-    }
-
-    # Pass criteria:
-    # 1. Whitened RMS within declared factor of 1
-    # 2. Residuals uncorrelated in time (|rho_1| <= max_autocorr and DW in bounds)
     passed_rms = min_rms <= rms <= max_rms
     passed_autocorr = abs(mean_autocorr) <= max_autocorr
     passed_dw = dw_min <= mean_dw <= dw_max
@@ -220,7 +206,7 @@ def evaluate_whiteness_gate(
             details=details,
         )
 
-    reasons = []
+    reasons: list[str] = []
     if not passed_rms:
         reasons.append(f"normalized RMS {rms:.3f} outside [{min_rms}, {max_rms}]")
     if not passed_autocorr:
