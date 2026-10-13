@@ -8,18 +8,15 @@
       "club": "driver",
       "pattern": "Draw",
       "selected_cell_count": 8,
-      "actual_sg_estimate_range": [
-        2.6911773453713884e-05,
-        0.0077976550468906
-      ],
+      "actual_sg_estimate_range": [2.6911773453713884e-5, 0.0077976550468906],
       "rows": [
         {
           "cell": "driver_lean0_curve1_rotation1_shaft_only",
           "protocol": "original_primary/1",
           "n": 10000,
           "interval": {
-            "estimate": 7.461555935228152e-05,
-            "lower_95": -7.104046933162085e-05,
+            "estimate": 7.461555935228152e-5,
+            "lower_95": -7.104046933162085e-5,
             "upper_95": 0.00021896077539046698
           }
         },
@@ -28,7 +25,7 @@
           "protocol": "original_primary/1",
           "n": 10000,
           "interval": {
-            "estimate": 2.6911773453713884e-05,
+            "estimate": 2.6911773453713884e-5,
             "lower_95": -0.00016417507301096237,
             "upper_95": 0.00022037368523597208
           }
@@ -100,8 +97,7 @@
       "pattern": "Fade",
       "selected_cell_count": 8,
       "actual_sg_estimate_range": [
-        0.0008933617862555983,
-        0.0025816340316445357
+        0.0008933617862555983, 0.0025816340316445357
       ],
       "rows": [
         {
@@ -190,10 +186,7 @@
       "club": "pitching_wedge",
       "pattern": "Draw",
       "selected_cell_count": 8,
-      "actual_sg_estimate_range": [
-        9.508286074337285e-05,
-        0.011117100245477964
-      ],
+      "actual_sg_estimate_range": [9.508286074337285e-5, 0.011117100245477964],
       "rows": [
         {
           "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
@@ -210,8 +203,8 @@
           "protocol": "original_primary/1",
           "n": 9999,
           "interval": {
-            "estimate": 9.508286074337285e-05,
-            "lower_95": -6.220824133306044e-05,
+            "estimate": 9.508286074337285e-5,
+            "lower_95": -6.220824133306044e-5,
             "upper_95": 0.0002799945735120517
           }
         },
@@ -251,7 +244,7 @@
           "n": 9999,
           "interval": {
             "estimate": 0.0002513049548654383,
-            "lower_95": -3.604852436822569e-05,
+            "lower_95": -3.604852436822569e-5,
             "upper_95": 0.0005325912067969175
           }
         },
@@ -278,8 +271,5 @@
       ]
     }
   ],
-  "actual_shaft_sd_degrees": [
-    1,
-    2
-  ]
+  "actual_shaft_sd_degrees": [1, 2]
 }

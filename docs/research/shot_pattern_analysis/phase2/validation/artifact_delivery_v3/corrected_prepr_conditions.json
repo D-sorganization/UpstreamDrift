@@ -18,10 +18,7 @@
     "SDL_VIDEODRIVER": "dummy",
     "OPENBLAS_NUM_THREADS": "1"
   },
-  "credentials_removed": [
-    "GH_TOKEN",
-    "GITHUB_TOKEN"
-  ],
+  "credentials_removed": ["GH_TOKEN", "GITHUB_TOKEN"],
   "started_utc": "2026-10-11T05:07:30.025415+00:00",
   "pid": 2164894
 }

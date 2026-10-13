@@ -2,10 +2,7 @@
   "checked_utc": "2026-10-10T07:51:31.998476+00:00",
   "scope": "Archive mappings, full archive byte verification and isolated restoration of the exact pilot plan prerequisite; not a rerun of final simulations or full publication",
   "status": "pass",
-  "old_missing_bundle_paths": [
-    "final_v1",
-    "control_final_v1"
-  ],
+  "old_missing_bundle_paths": ["final_v1", "control_final_v1"],
   "missing_pilot_plan_negative_control": "FileNotFoundError",
   "bundles": {
     "final_primary_v1": {

@@ -5,289 +5,193 @@
       "index": 1,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density.png",
       "sha256": "683fe49296afb355f30cbca96a72dfec8731540b446f3fd6b35232b0a2131f00",
-      "pixels": [
-        4827,
-        2835
-      ]
+      "pixels": [4827, 2835]
     },
     {
       "index": 2,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density_social.png",
       "sha256": "411457f71bbee9654e9c76c75f91532f61a54fb1f5bdac455e6103442f807a97",
-      "pixels": [
-        3099,
-        5281
-      ]
+      "pixels": [3099, 5281]
     },
     {
       "index": 3,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead.png",
       "sha256": "5696aebe8add2f89024f443352d5ccfa96262cb28e2456157356d0a37cd19b20",
-      "pixels": [
-        5163,
-        1800
-      ]
+      "pixels": [5163, 1800]
     },
     {
       "index": 4,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_overhead_social.png",
       "sha256": "44845cc38ea64639301d55dd7fdc2e7fe9de2d4087580eee805e03bdd3307da1",
-      "pixels": [
-        4620,
-        2666
-      ]
+      "pixels": [4620, 2666]
     },
     {
       "index": 5,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density.png",
       "sha256": "258fe2b1fcbf85b71b9770f91304049be03aafdfce90fbeaf021b839ce0cee4d",
-      "pixels": [
-        4800,
-        2835
-      ]
+      "pixels": [4800, 2835]
     },
     {
       "index": 6,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.png",
       "sha256": "9c715760cd446456c230a959d067ddddfffaabf54c8241138cb4be9837c83ff1",
-      "pixels": [
-        3075,
-        5281
-      ]
+      "pixels": [3075, 5281]
     },
     {
       "index": 7,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead.png",
       "sha256": "12a0b2199ddac3345820a7219d1eb2d3f1144355b22a20dca45111a08cd3a88d",
-      "pixels": [
-        5193,
-        1800
-      ]
+      "pixels": [5193, 1800]
     },
     {
       "index": 8,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_overhead_social.png",
       "sha256": "359117785fb7330f6dd4d2dbc5f4c2c7327f625f4f04b01297b1d0b957640596",
-      "pixels": [
-        4651,
-        2666
-      ]
+      "pixels": [4651, 2666]
     },
     {
       "index": 9,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density.png",
       "sha256": "3c7caabbbae0a97483bd01ca7c645395b1168ad14e6c147415f9153830a5cea6",
-      "pixels": [
-        4827,
-        2835
-      ]
+      "pixels": [4827, 2835]
     },
     {
       "index": 10,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_density_social.png",
       "sha256": "cf4f3c94a724d8f38235742933e4d21bc640b94251acbb702cb0833b881888a7",
-      "pixels": [
-        3099,
-        5281
-      ]
+      "pixels": [3099, 5281]
     },
     {
       "index": 11,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead.png",
       "sha256": "104c1ddfef3ac536e71faeeba15a864cf4a9296c3f3f40d45a73b3d6430a4dc7",
-      "pixels": [
-        5123,
-        1800
-      ]
+      "pixels": [5123, 1800]
     },
     {
       "index": 12,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png",
       "sha256": "1e649a3d7c729c280ad010e85887817921fb5b4507c5ec42733098a1a8c2d208",
-      "pixels": [
-        4580,
-        2666
-      ]
+      "pixels": [4580, 2666]
     },
     {
       "index": 13,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density.png",
       "sha256": "f3df69e5203ddb9bab51ec0056fe20b2a2f3f2da717a5d3858e40c853867518b",
-      "pixels": [
-        4800,
-        2835
-      ]
+      "pixels": [4800, 2835]
     },
     {
       "index": 14,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_density_social.png",
       "sha256": "c1b84b348ee946bf2435811ec7818d1317808c69220942c94c896f5bf87a4c25",
-      "pixels": [
-        3075,
-        5281
-      ]
+      "pixels": [3075, 5281]
     },
     {
       "index": 15,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead.png",
       "sha256": "a3fe23cdd88ff4892edc23041e90a49dad41b1d9cceae5d9f428397ed5851de3",
-      "pixels": [
-        5123,
-        1800
-      ]
+      "pixels": [5123, 1800]
     },
     {
       "index": 16,
       "path": "supplement_report_v1/figures/cells/driver_lean5_curve2_rotation2_shaft_only_9115e9cd23_overhead_social.png",
       "sha256": "9120ccd40fdb7982d47be8d750245de51c34a6123505cc8e83e7c2c635c0f315",
-      "pixels": [
-        4580,
-        2666
-      ]
+      "pixels": [4580, 2666]
     },
     {
       "index": 17,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density.png",
       "sha256": "4984db44fe03162308f6020ff521762e0f024d6931465ca561da6e7aeb21dc8b",
-      "pixels": [
-        4753,
-        2835
-      ]
+      "pixels": [4753, 2835]
     },
     {
       "index": 18,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density_social.png",
       "sha256": "77700ba9e14416b7183903bfa49d95377791120a6f526531e5b1f67f1c6d3574",
-      "pixels": [
-        3027,
-        5281
-      ]
+      "pixels": [3027, 5281]
     },
     {
       "index": 19,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead.png",
       "sha256": "3ac8b9d60195ddc0aad7e6aba547878d860304317994b120d1a499908e7cbdfe",
-      "pixels": [
-        5136,
-        1800
-      ]
+      "pixels": [5136, 1800]
     },
     {
       "index": 20,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_overhead_social.png",
       "sha256": "df5dbf9e54e468ae842355cc07c39620ce7fc279c1cf8913d6a0c88722f8eb4e",
-      "pixels": [
-        4593,
-        2666
-      ]
+      "pixels": [4593, 2666]
     },
     {
       "index": 21,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density.png",
       "sha256": "fbe473df466991f3e952645f142d9529cd052092334844567bb8446aca33a738",
-      "pixels": [
-        4725,
-        2835
-      ]
+      "pixels": [4725, 2835]
     },
     {
       "index": 22,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.png",
       "sha256": "a1d20523d732a635cf5465f2f654d0855d7773bea16d00be2b3541e59f657ea2",
-      "pixels": [
-        2992,
-        5281
-      ]
+      "pixels": [2992, 5281]
     },
     {
       "index": 23,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead.png",
       "sha256": "ab66e4ae9dd398aac9ff2cfa78c42acff4dccc6432a9533a4ed1a9fdc1f75c97",
-      "pixels": [
-        5136,
-        1800
-      ]
+      "pixels": [5136, 1800]
     },
     {
       "index": 24,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_overhead_social.png",
       "sha256": "645e89e651db939934872e74a2ecf69537ea551ebdc376033cda8b9ff567ebc6",
-      "pixels": [
-        4593,
-        2666
-      ]
+      "pixels": [4593, 2666]
     },
     {
       "index": 25,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density.png",
       "sha256": "43f7ebe4d683706f04c914268ba6f615ccc0468b39e0c48533d5c9cd9f1204bf",
-      "pixels": [
-        4831,
-        2835
-      ]
+      "pixels": [4831, 2835]
     },
     {
       "index": 26,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_density_social.png",
       "sha256": "17cfdb54900764fcbdfffe0b0d5970b496167605c1bfc402a8777140922025ea",
-      "pixels": [
-        3107,
-        5281
-      ]
+      "pixels": [3107, 5281]
     },
     {
       "index": 27,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead.png",
       "sha256": "f60e99822b75893eab24e4b53393e62ddc43eda7ea1624eb21fd8c1de0945cab",
-      "pixels": [
-        5096,
-        1800
-      ]
+      "pixels": [5096, 1800]
     },
     {
       "index": 28,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png",
       "sha256": "5cd2dda727ca99063bc653586e2d6653f6354ceb7eaef85df6d71c08bbf5e823",
-      "pixels": [
-        4553,
-        2666
-      ]
+      "pixels": [4553, 2666]
     },
     {
       "index": 29,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density.png",
       "sha256": "e69cf4b9447a400d8f0a15cb6eff2e64a568994c983c317063580e3dc42016ce",
-      "pixels": [
-        4756,
-        2835
-      ]
+      "pixels": [4756, 2835]
     },
     {
       "index": 30,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_density_social.png",
       "sha256": "4709c47fe3c95268ab8da5f3b21c1d1d1a2616c96c3a05e042ac01a1e7cdd5f7",
-      "pixels": [
-        3032,
-        5281
-      ]
+      "pixels": [3032, 5281]
     },
     {
       "index": 31,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead.png",
       "sha256": "e8f166540825a36fb77915faf38c37f38949d428759c4d31228a56fd7f23c2e9",
-      "pixels": [
-        5096,
-        1800
-      ]
+      "pixels": [5096, 1800]
     },
     {
       "index": 32,
       "path": "supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation2_shaft_only_79b2ed8516_overhead_social.png",
       "sha256": "e6f89293db78466d7e20330f0ccc3586a888fdc6792e9dce822d7697f1ce874e",
-      "pixels": [
-        4553,
-        2666
-      ]
+      "pixels": [4553, 2666]
     }
   ]
 }

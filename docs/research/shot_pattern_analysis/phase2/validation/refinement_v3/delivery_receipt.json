@@ -6,9 +6,7 @@
   "review": {
     "root": "All39pages layout/contact review; individual density/flight/summary graphics; corrected Figure14 page17 inspected at1600px",
     "astra": "Methods18\u201324, summary1\u20134, baseline5\u201310, lean17 reviewed on ac258301ef7482c3d584c46eae38faed604119f4a36a4071839c30c6ae1f7290; only blocker was stale Figure14 caption, corrected",
-    "final_text_diff_pages": [
-      17
-    ]
+    "final_text_diff_pages": [17]
   },
   "compile": {
     "local": "Tectonic exit0, no warnings",

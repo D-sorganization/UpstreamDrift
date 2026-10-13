@@ -3,6 +3,7 @@
 During independent visual inspection of rendered academic supplemental figures (`docs/research/shot_pattern_analysis/phase2/validation/supplement_v5_across_lean_graphics_review_v1/pw_academic_row_boundary_crop.png`), cramped vertical spacing between subplot rows was confirmed in academic paired-density figures. Specifically, the upper row's horizontal axis labels sit almost flush against the lower row's panel titles.
 
 > **Operational and Scope Notes**:
+>
 > - **Scope Under Active Review**: Root and Astra are reviewing the live supplemental graphics separately. The full extent of affected figures is still under evaluation; a single confirmed example suffices to file and track the issue.
 > - **Independent Live Pipeline**: The figure generation pipeline remains live in another checkout (`FINAL_LAYOUT`). Do not touch or stop the running pipeline.
 > - **No Scientific Changes**: This issue concerns presentation-only grid geometry. All underlying data, numerical arrays, and statistical parameters remain strictly unchanged.

@@ -175,7 +175,7 @@
       "pattern": "Fade",
       "field": "estimate",
       "display": "+9.299e-05",
-      "actual": 9.298539323259105e-05,
+      "actual": 9.298539323259105e-5,
       "matches": true
     },
     {
@@ -199,7 +199,7 @@
       "pattern": "Draw",
       "field": "estimate",
       "display": "+6.449e-06",
-      "actual": 6.44854712184901e-06,
+      "actual": 6.44854712184901e-6,
       "matches": true
     },
     {
@@ -207,7 +207,7 @@
       "pattern": "Draw",
       "field": "lower_95",
       "display": "-7.089e-05",
-      "actual": -7.089106865572494e-05,
+      "actual": -7.089106865572494e-5,
       "matches": true
     },
     {
@@ -215,7 +215,7 @@
       "pattern": "Draw",
       "field": "upper_95",
       "display": "+4.934e-05",
-      "actual": 4.934200314962887e-05,
+      "actual": 4.934200314962887e-5,
       "matches": true
     },
     {
@@ -223,7 +223,7 @@
       "pattern": "Fade",
       "field": "estimate",
       "display": "+2.000e-05",
-      "actual": 1.9999688110256854e-05,
+      "actual": 1.9999688110256854e-5,
       "matches": true
     },
     {
@@ -231,7 +231,7 @@
       "pattern": "Fade",
       "field": "lower_95",
       "display": "-5.979e-05",
-      "actual": -5.979478102884672e-05,
+      "actual": -5.979478102884672e-5,
       "matches": true
     },
     {
@@ -255,7 +255,7 @@
       "pattern": "Draw",
       "field": "lower_95",
       "display": "+9.164e-05",
-      "actual": 9.163611485094543e-05,
+      "actual": 9.163611485094543e-5,
       "matches": true
     },
     {
@@ -295,7 +295,7 @@
       "pattern": "Draw",
       "field": "estimate",
       "display": "-6.028e-05",
-      "actual": -6.0275021816287154e-05,
+      "actual": -6.0275021816287154e-5,
       "matches": true
     },
     {
@@ -327,7 +327,7 @@
       "pattern": "Fade",
       "field": "lower_95",
       "display": "-7.965e-05",
-      "actual": -7.965288156183586e-05,
+      "actual": -7.965288156183586e-5,
       "matches": true
     },
     {
@@ -359,7 +359,7 @@
       "pattern": "Draw",
       "field": "upper_95",
       "display": "+2.780e-05",
-      "actual": 2.7803916800896178e-05,
+      "actual": 2.7803916800896178e-5,
       "matches": true
     },
     {
@@ -575,7 +575,7 @@
       "pattern": "Fade",
       "field": "upper_95",
       "display": "-8.723e-05",
-      "actual": -8.723417604624049e-05,
+      "actual": -8.723417604624049e-5,
       "matches": true
     }
   ]

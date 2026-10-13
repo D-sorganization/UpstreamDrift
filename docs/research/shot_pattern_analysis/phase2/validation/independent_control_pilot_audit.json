@@ -25,7 +25,7 @@
   },
   "limits": {
     "statistics": 1e-10,
-    "covariance": 1e-08,
+    "covariance": 1e-8,
     "noise": 1e-12,
     "nominal_residual": 0.05,
     "direct_api_sg": 1e-12

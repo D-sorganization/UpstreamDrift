@@ -14,25 +14,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            154.320094,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            179.878281,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [154.320094, 147.0],
+          "legend_anchor_pt": [179.878281, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            154.97946900000002,
-            139.4015625,
-            250.24665650000003,
-            149.0796875
+            154.97946900000002, 139.4015625, 250.24665650000003, 149.0796875
           ],
           "legend_glyph_bounds_pt": [
-            180.65015599999998,
-            91.5058595,
-            321.9798435,
-            101.18398450000001
+            180.65015599999998, 91.5058595, 321.9798435, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -40,25 +28,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            495.114794,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            370.267344,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [495.114794, 147.0],
+          "legend_anchor_pt": [370.267344, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            496.096044,
-            139.578125,
-            577.2663565,
-            147.1421875
+            496.096044, 139.578125, 577.2663565, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            370.945469,
-            91.5058595,
-            512.3689065,
-            101.18398450000001
+            370.945469, 91.5058595, 512.3689065, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -66,25 +42,13 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            830.348557,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            751.045469,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [830.348557, 147.0],
+          "legend_anchor_pt": [751.045469, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            831.3298070000001,
-            139.4015625,
-            909.8469945,
-            147.1421875
+            831.3298070000001, 139.4015625, 909.8469945, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            751.6064065,
-            91.682422,
-            829.9626565000001,
-            101.18398450000001
+            751.6064065, 91.682422, 829.9626565000001, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -99,25 +63,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            182.624853,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            179.878281,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [182.624853, 147.0],
+          "legend_anchor_pt": [179.878281, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            183.284228,
-            139.4015625,
-            278.5514155,
-            149.0796875
+            183.284228, 139.4015625, 278.5514155, 149.0796875
           ],
           "legend_glyph_bounds_pt": [
-            180.65015599999998,
-            91.5058595,
-            321.9798435,
-            101.18398450000001
+            180.65015599999998, 91.5058595, 321.9798435, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -125,25 +77,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            523.419553,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            370.267344,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [523.419553, 147.0],
+          "legend_anchor_pt": [370.267344, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            524.400803,
-            139.578125,
-            605.5711154999999,
-            147.1421875
+            524.400803, 139.578125, 605.5711154999999, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            370.945469,
-            91.5058595,
-            512.3689065,
-            101.18398450000001
+            370.945469, 91.5058595, 512.3689065, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -151,25 +91,13 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            858.653316,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            751.045469,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [858.653316, 147.0],
+          "legend_anchor_pt": [751.045469, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            859.6345660000001,
-            139.4015625,
-            938.1517535,
-            147.1421875
+            859.6345660000001, 139.4015625, 938.1517535, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            751.6064065,
-            91.682422,
-            829.9626565000001,
-            101.18398450000001
+            751.6064065, 91.682422, 829.9626565000001, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -184,25 +112,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            120.999365,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            192.941543,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [120.999365, 147.0],
+          "legend_anchor_pt": [192.941543, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            121.65874,
-            139.4015625,
-            216.9259275,
-            149.0796875
+            121.65874, 139.4015625, 216.9259275, 149.0796875
           ],
           "legend_glyph_bounds_pt": [
-            193.713418,
-            91.5058595,
-            335.0431055,
-            101.18398450000001
+            193.713418, 91.5058595, 335.0431055, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -210,25 +126,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            461.794065,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            383.330606,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [461.794065, 147.0],
+          "legend_anchor_pt": [383.330606, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            462.775315,
-            139.578125,
-            543.9456275,
-            147.1421875
+            462.775315, 139.578125, 543.9456275, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            384.008731,
-            91.5058595,
-            525.4321685,
-            101.18398450000001
+            384.008731, 91.5058595, 525.4321685, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -236,25 +140,13 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            797.027828,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            764.108731,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [797.027828, 147.0],
+          "legend_anchor_pt": [764.108731, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            798.009078,
-            139.4015625,
-            876.5262655,
-            147.1421875
+            798.009078, 139.4015625, 876.5262655, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            764.6696685000001,
-            91.682422,
-            843.0259185,
-            101.18398450000001
+            764.6696685000001, 91.682422, 843.0259185, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -269,25 +161,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            135.520469,
-            162.916639
-          ],
-          "legend_anchor_pt": [
-            221.98375,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [135.520469, 162.916639],
+          "legend_anchor_pt": [221.98375, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            136.179844,
-            155.31820150000001,
-            231.44703149999998,
-            164.9963265
+            136.179844, 155.31820150000001, 231.44703149999998, 164.9963265
           ],
           "legend_glyph_bounds_pt": [
-            222.75562499999998,
-            91.5058595,
-            364.0853125,
-            101.18398450000001
+            222.75562499999998, 91.5058595, 364.0853125, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -295,25 +175,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            476.315169,
-            162.916639
-          ],
-          "legend_anchor_pt": [
-            412.372813,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [476.315169, 162.916639],
+          "legend_anchor_pt": [412.372813, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            477.296419,
-            155.494764,
-            558.4667315,
-            163.0588265
+            477.296419, 155.494764, 558.4667315, 163.0588265
           ],
           "legend_glyph_bounds_pt": [
-            413.05093800000003,
-            91.5058595,
-            554.4743755,
-            101.18398450000001
+            413.05093800000003, 91.5058595, 554.4743755, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -321,25 +189,14 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            811.548931,
-            162.916639
-          ],
-          "legend_anchor_pt": [
-            793.150938,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [811.548931, 162.916639],
+          "legend_anchor_pt": [793.150938, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            812.5301810000001,
-            155.31820150000001,
-            891.0473685000001,
+            812.5301810000001, 155.31820150000001, 891.0473685000001,
             163.0588265
           ],
           "legend_glyph_bounds_pt": [
-            793.7118755,
-            91.682422,
-            872.0681255,
-            101.18398450000001
+            793.7118755, 91.682422, 872.0681255, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -354,93 +211,48 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            116.682646,
-            150.396445
-          ],
-          "legend_anchor_pt": [
-            184.308105,
-            141.672539
-          ],
+          "panel_title_anchor_pt": [116.682646, 150.396445],
+          "legend_anchor_pt": [184.308105, 141.672539],
           "panel_title_glyph_bounds_pt": [
-            117.342021,
-            142.7980075,
-            212.60920850000002,
-            152.4761325
+            117.342021, 142.7980075, 212.60920850000002, 152.4761325
           ],
           "legend_glyph_bounds_pt": [
-            185.07998,
-            134.0741015,
-            326.4096675,
-            143.7522265
+            185.07998, 134.0741015, 326.4096675, 143.7522265
           ],
           "bounding_box_intersection_pt": [
-            185.07998,
-            142.7980075,
-            212.60920850000002,
-            143.7522265
+            185.07998, 142.7980075, 212.60920850000002, 143.7522265
           ],
           "glyph_path_intersection": false
         },
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            457.477346,
-            150.396445
-          ],
-          "legend_anchor_pt": [
-            374.697168,
-            141.672539
-          ],
+          "panel_title_anchor_pt": [457.477346, 150.396445],
+          "legend_anchor_pt": [374.697168, 141.672539],
           "panel_title_glyph_bounds_pt": [
-            458.458596,
-            142.97457,
-            539.6289085000001,
-            150.5386325
+            458.458596, 142.97457, 539.6289085000001, 150.5386325
           ],
           "legend_glyph_bounds_pt": [
-            375.375293,
-            134.0741015,
-            516.7987304999999,
-            143.7522265
+            375.375293, 134.0741015, 516.7987304999999, 143.7522265
           ],
           "bounding_box_intersection_pt": [
-            458.458596,
-            142.97457,
-            516.7987304999999,
-            143.7522265
+            458.458596, 142.97457, 516.7987304999999, 143.7522265
           ],
           "glyph_path_intersection": false
         },
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            792.711109,
-            150.396445
-          ],
-          "legend_anchor_pt": [
-            755.475293,
-            141.672539
-          ],
+          "panel_title_anchor_pt": [792.711109, 150.396445],
+          "legend_anchor_pt": [755.475293, 141.672539],
           "panel_title_glyph_bounds_pt": [
-            793.692359,
-            142.7980075,
-            872.2095465,
-            150.5386325
+            793.692359, 142.7980075, 872.2095465, 150.5386325
           ],
           "legend_glyph_bounds_pt": [
-            756.0362305,
-            134.250664,
-            834.3924804999999,
-            143.7522265
+            756.0362305, 134.250664, 834.3924804999999, 143.7522265
           ],
           "bounding_box_intersection_pt": [
-            793.692359,
-            142.7980075,
-            834.3924804999999,
-            143.7522265
+            793.692359, 142.7980075, 834.3924804999999, 143.7522265
           ],
           "glyph_path_intersection": false
         }
@@ -454,93 +266,48 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            134.536305,
-            150.396445
-          ],
-          "legend_anchor_pt": [
-            220.015423,
-            141.672539
-          ],
+          "panel_title_anchor_pt": [134.536305, 150.396445],
+          "legend_anchor_pt": [220.015423, 141.672539],
           "panel_title_glyph_bounds_pt": [
-            135.19568,
-            142.7980075,
-            230.46286750000002,
-            152.4761325
+            135.19568, 142.7980075, 230.46286750000002, 152.4761325
           ],
           "legend_glyph_bounds_pt": [
-            220.787298,
-            134.0741015,
-            362.1169855,
-            143.7522265
+            220.787298, 134.0741015, 362.1169855, 143.7522265
           ],
           "bounding_box_intersection_pt": [
-            220.787298,
-            142.7980075,
-            230.46286750000002,
-            143.7522265
+            220.787298, 142.7980075, 230.46286750000002, 143.7522265
           ],
           "glyph_path_intersection": false
         },
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            475.331005,
-            150.396445
-          ],
-          "legend_anchor_pt": [
-            410.404485,
-            141.672539
-          ],
+          "panel_title_anchor_pt": [475.331005, 150.396445],
+          "legend_anchor_pt": [410.404485, 141.672539],
           "panel_title_glyph_bounds_pt": [
-            476.312255,
-            142.97457,
-            557.4825675,
-            150.5386325
+            476.312255, 142.97457, 557.4825675, 150.5386325
           ],
           "legend_glyph_bounds_pt": [
-            411.08261000000005,
-            134.0741015,
-            552.5060475,
-            143.7522265
+            411.08261000000005, 134.0741015, 552.5060475, 143.7522265
           ],
           "bounding_box_intersection_pt": [
-            476.312255,
-            142.97457,
-            552.5060475,
-            143.7522265
+            476.312255, 142.97457, 552.5060475, 143.7522265
           ],
           "glyph_path_intersection": true
         },
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            810.564768,
-            150.396445
-          ],
-          "legend_anchor_pt": [
-            791.18261,
-            141.672539
-          ],
+          "panel_title_anchor_pt": [810.564768, 150.396445],
+          "legend_anchor_pt": [791.18261, 141.672539],
           "panel_title_glyph_bounds_pt": [
-            811.546018,
-            142.7980075,
-            890.0632055,
-            150.5386325
+            811.546018, 142.7980075, 890.0632055, 150.5386325
           ],
           "legend_glyph_bounds_pt": [
-            791.7435475,
-            134.250664,
-            870.0997975,
-            143.7522265
+            791.7435475, 134.250664, 870.0997975, 143.7522265
           ],
           "bounding_box_intersection_pt": [
-            811.546018,
-            142.7980075,
-            870.0997975,
-            143.7522265
+            811.546018, 142.7980075, 870.0997975, 143.7522265
           ],
           "glyph_path_intersection": false
         }
@@ -554,25 +321,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            194.030192,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            179.878281,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [194.030192, 147.0],
+          "legend_anchor_pt": [179.878281, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            194.689567,
-            139.4015625,
-            289.9567545,
-            149.0796875
+            194.689567, 139.4015625, 289.9567545, 149.0796875
           ],
           "legend_glyph_bounds_pt": [
-            180.65015599999998,
-            91.5058595,
-            321.9798435,
-            101.18398450000001
+            180.65015599999998, 91.5058595, 321.9798435, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -580,25 +335,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            534.824892,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            370.267344,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [534.824892, 147.0],
+          "legend_anchor_pt": [370.267344, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            535.806142,
-            139.578125,
-            616.9764545,
-            147.1421875
+            535.806142, 139.578125, 616.9764545, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            370.945469,
-            91.5058595,
-            512.3689065,
-            101.18398450000001
+            370.945469, 91.5058595, 512.3689065, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -606,25 +349,13 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            870.058655,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            751.045469,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [870.058655, 147.0],
+          "legend_anchor_pt": [751.045469, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            871.0399050000001,
-            139.4015625,
-            949.5570925000001,
-            147.1421875
+            871.0399050000001, 139.4015625, 949.5570925000001, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            751.6064065,
-            91.682422,
-            829.9626565000001,
-            101.18398450000001
+            751.6064065, 91.682422, 829.9626565000001, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -639,25 +370,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            193.096249,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            179.878281,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [193.096249, 147.0],
+          "legend_anchor_pt": [179.878281, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            193.755624,
-            139.4015625,
-            289.0228115,
-            149.0796875
+            193.755624, 139.4015625, 289.0228115, 149.0796875
           ],
           "legend_glyph_bounds_pt": [
-            180.65015599999998,
-            91.5058595,
-            321.9798435,
-            101.18398450000001
+            180.65015599999998, 91.5058595, 321.9798435, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -665,25 +384,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            533.890949,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            370.267344,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [533.890949, 147.0],
+          "legend_anchor_pt": [370.267344, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            534.872199,
-            139.578125,
-            616.0425115,
-            147.1421875
+            534.872199, 139.578125, 616.0425115, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            370.945469,
-            91.5058595,
-            512.3689065,
-            101.18398450000001
+            370.945469, 91.5058595, 512.3689065, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -691,25 +398,13 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            869.124711,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            751.045469,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [869.124711, 147.0],
+          "legend_anchor_pt": [751.045469, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            870.1059610000001,
-            139.4015625,
-            948.6231485000001,
-            147.1421875
+            870.1059610000001, 139.4015625, 948.6231485000001, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            751.6064065,
-            91.682422,
-            829.9626565000001,
-            101.18398450000001
+            751.6064065, 91.682422, 829.9626565000001, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -724,25 +419,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            148.268714,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            179.878281,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [148.268714, 147.0],
+          "legend_anchor_pt": [179.878281, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            148.928089,
-            139.4015625,
-            244.19527649999998,
-            149.0796875
+            148.928089, 139.4015625, 244.19527649999998, 149.0796875
           ],
           "legend_glyph_bounds_pt": [
-            180.65015599999998,
-            91.5058595,
-            321.9798435,
-            101.18398450000001
+            180.65015599999998, 91.5058595, 321.9798435, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -750,25 +433,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            489.063414,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            370.267344,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [489.063414, 147.0],
+          "legend_anchor_pt": [370.267344, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            490.044664,
-            139.578125,
-            571.2149765,
-            147.1421875
+            490.044664, 139.578125, 571.2149765, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            370.945469,
-            91.5058595,
-            512.3689065,
-            101.18398450000001
+            370.945469, 91.5058595, 512.3689065, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -776,25 +447,13 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            824.297176,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            751.045469,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [824.297176, 147.0],
+          "legend_anchor_pt": [751.045469, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            825.2784260000001,
-            139.4015625,
-            903.7956135000001,
-            147.1421875
+            825.2784260000001, 139.4015625, 903.7956135000001, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            751.6064065,
-            91.682422,
-            829.9626565000001,
-            101.18398450000001
+            751.6064065, 91.682422, 829.9626565000001, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -809,25 +468,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            135.520469,
-            153.751705
-          ],
-          "legend_anchor_pt": [
-            221.98375,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [135.520469, 153.751705],
+          "legend_anchor_pt": [221.98375, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            136.179844,
-            146.1532675,
-            231.44703149999998,
-            155.8313925
+            136.179844, 146.1532675, 231.44703149999998, 155.8313925
           ],
           "legend_glyph_bounds_pt": [
-            222.75562499999998,
-            91.5058595,
-            364.0853125,
-            101.18398450000001
+            222.75562499999998, 91.5058595, 364.0853125, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -835,25 +482,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            476.315169,
-            153.751705
-          ],
-          "legend_anchor_pt": [
-            412.372813,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [476.315169, 153.751705],
+          "legend_anchor_pt": [412.372813, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            477.296419,
-            146.32983,
-            558.4667315,
-            153.8938925
+            477.296419, 146.32983, 558.4667315, 153.8938925
           ],
           "legend_glyph_bounds_pt": [
-            413.05093800000003,
-            91.5058595,
-            554.4743755,
-            101.18398450000001
+            413.05093800000003, 91.5058595, 554.4743755, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -861,25 +496,13 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            811.548931,
-            153.751705
-          ],
-          "legend_anchor_pt": [
-            793.150938,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [811.548931, 153.751705],
+          "legend_anchor_pt": [793.150938, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            812.5301810000001,
-            146.1532675,
-            891.0473685000001,
-            153.8938925
+            812.5301810000001, 146.1532675, 891.0473685000001, 153.8938925
           ],
           "legend_glyph_bounds_pt": [
-            793.7118755,
-            91.682422,
-            872.0681255,
-            101.18398450000001
+            793.7118755, 91.682422, 872.0681255, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -894,25 +517,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            133.71211,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            179.878281,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [133.71211, 147.0],
+          "legend_anchor_pt": [179.878281, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            134.371485,
-            139.4015625,
-            229.63867249999998,
-            149.0796875
+            134.371485, 139.4015625, 229.63867249999998, 149.0796875
           ],
           "legend_glyph_bounds_pt": [
-            180.65015599999998,
-            91.5058595,
-            321.9798435,
-            101.18398450000001
+            180.65015599999998, 91.5058595, 321.9798435, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -920,25 +531,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            474.50681,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            370.267344,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [474.50681, 147.0],
+          "legend_anchor_pt": [370.267344, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            475.48805999999996,
-            139.578125,
-            556.6583725,
-            147.1421875
+            475.48805999999996, 139.578125, 556.6583725, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            370.945469,
-            91.5058595,
-            512.3689065,
-            101.18398450000001
+            370.945469, 91.5058595, 512.3689065, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -946,25 +545,13 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            809.740572,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            751.045469,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [809.740572, 147.0],
+          "legend_anchor_pt": [751.045469, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            810.7218220000001,
-            139.4015625,
-            889.2390095000001,
-            147.1421875
+            810.7218220000001, 139.4015625, 889.2390095000001, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            751.6064065,
-            91.682422,
-            829.9626565000001,
-            101.18398450000001
+            751.6064065, 91.682422, 829.9626565000001, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -979,25 +566,13 @@
         {
           "panel_title": "Straight \u00b7 Curve \u00d71",
           "legend_label": "50% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            163.159288,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            179.878281,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [163.159288, 147.0],
+          "legend_anchor_pt": [179.878281, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            163.81866300000002,
-            139.4015625,
-            259.0858505,
-            149.0796875
+            163.81866300000002, 139.4015625, 259.0858505, 149.0796875
           ],
           "legend_glyph_bounds_pt": [
-            180.65015599999998,
-            91.5058595,
-            321.9798435,
-            101.18398450000001
+            180.65015599999998, 91.5058595, 321.9798435, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -1005,25 +580,13 @@
         {
           "panel_title": "Draw \u00b7 Curve \u00d71",
           "legend_label": "80% Simulated-Sample HDR",
-          "panel_title_anchor_pt": [
-            503.953988,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            370.267344,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [503.953988, 147.0],
+          "legend_anchor_pt": [370.267344, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            504.93523799999997,
-            139.578125,
-            586.1055504999999,
-            147.1421875
+            504.93523799999997, 139.578125, 586.1055504999999, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            370.945469,
-            91.5058595,
-            512.3689065,
-            101.18398450000001
+            370.945469, 91.5058595, 512.3689065, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false
@@ -1031,25 +594,13 @@
         {
           "panel_title": "Fade \u00b7 Curve \u00d71",
           "legend_label": "Common Target",
-          "panel_title_anchor_pt": [
-            839.18775,
-            147.0
-          ],
-          "legend_anchor_pt": [
-            751.045469,
-            99.104297
-          ],
+          "panel_title_anchor_pt": [839.18775, 147.0],
+          "legend_anchor_pt": [751.045469, 99.104297],
           "panel_title_glyph_bounds_pt": [
-            840.1690000000001,
-            139.4015625,
-            918.6861875000001,
-            147.1421875
+            840.1690000000001, 139.4015625, 918.6861875000001, 147.1421875
           ],
           "legend_glyph_bounds_pt": [
-            751.6064065,
-            91.682422,
-            829.9626565000001,
-            101.18398450000001
+            751.6064065, 91.682422, 829.9626565000001, 101.18398450000001
           ],
           "bounding_box_intersection_pt": null,
           "glyph_path_intersection": false

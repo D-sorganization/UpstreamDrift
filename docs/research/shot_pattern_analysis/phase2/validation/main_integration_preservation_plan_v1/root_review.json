@@ -1,13 +1,8 @@
 {
   "plan_sha256": "23601525db5ec29e14b730ecff5cd6870da2004216abb282b7b3adb0d218bbdb",
-  "registry_parent_counts": [
-    22,
-    54
-  ],
+  "registry_parent_counts": [22, 54],
   "required_union": 55,
-  "study_only_ids": [
-    "UP-D1-shot-pattern-variance-inventory"
-  ],
+  "study_only_ids": ["UP-D1-shot-pattern-variance-inventory"],
   "shared_ids_requiring_upstream_refinement": [
     "UP-D1-feedback-comparison-admission-inventory",
     "UP-D1-grip-wrench-reduction-inventory"

@@ -182,12 +182,7 @@
     "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/summary.json": "ac9f328de946ace9321abcededc156eb0c84d44b64e587461bf6afb58eba29c8"
   },
   "script_sha256": "c03cddb56cc40a3c0af1e53a7b8f7a5017ed56b12950560799405f8260ec0e46",
-  "pairs": [
-    "pw_narrow",
-    "iron_narrow",
-    "pw_covariance",
-    "driver_fixed"
-  ],
+  "pairs": ["pw_narrow", "iron_narrow", "pw_covariance", "driver_fixed"],
   "artist_and_density_parity": true,
   "exact_seven_outputs_per_pair": true,
   "output_sha256": {

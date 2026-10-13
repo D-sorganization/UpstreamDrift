@@ -2,10 +2,7 @@
   {
     "group": "pairs",
     "record": {
-      "source_protocols": [
-        "original_control/1",
-        "original_control/1"
-      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
       "sources": [
         {
           "protocol_id": "original_control/1",
@@ -37,10 +34,7 @@
   {
     "group": "pairs",
     "record": {
-      "source_protocols": [
-        "original_control/1",
-        "original_control/1"
-      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
       "sources": [
         {
           "protocol_id": "original_control/1",
@@ -72,10 +66,7 @@
   {
     "group": "pairs",
     "record": {
-      "source_protocols": [
-        "original_control/1",
-        "original_control/1"
-      ],
+      "source_protocols": ["original_control/1", "original_control/1"],
       "sources": [
         {
           "protocol_id": "original_control/1",

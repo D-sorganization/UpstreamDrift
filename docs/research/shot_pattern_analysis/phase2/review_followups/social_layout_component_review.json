@@ -18,10 +18,7 @@
   "v1_render": {
     "assets": 28,
     "outside_canvas_subtitles": 5,
-    "right_edges_fraction": [
-      1.2,
-      1.63
-    ],
+    "right_edges_fraction": [1.2, 1.63],
     "acceptance": "changes_required"
   },
   "v2_render": {

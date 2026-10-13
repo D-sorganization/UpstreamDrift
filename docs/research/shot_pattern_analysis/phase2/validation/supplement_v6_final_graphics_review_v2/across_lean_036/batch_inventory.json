@@ -77,10 +77,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -114,9 +111,7 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": [
-          "club.shaft_lean_deg"
-        ],
+        "allowed_config_differences": ["club.shaft_lean_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -378,10 +373,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -415,9 +407,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "club.shaft_lean_deg"
-        ],
+        "allowed_config_differences": ["club.shaft_lean_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -496,9 +486,9 @@
               "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
             },
             "course_sg_difference": {
-              "estimate": 9.346886102743099e-05,
-              "lower_95": 8.747873384878533e-05,
-              "upper_95": 9.922430451414912e-05
+              "estimate": 9.346886102743099e-5,
+              "lower_95": 8.747873384878533e-5,
+              "upper_95": 9.922430451414912e-5
             },
             "course_sg_means": {
               "earlier_lean": 0.5450126876270474,
@@ -679,10 +669,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -716,9 +703,7 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": [
-          "club.shaft_lean_deg"
-        ],
+        "allowed_config_differences": ["club.shaft_lean_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -980,10 +965,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1017,9 +999,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "club.shaft_lean_deg"
-        ],
+        "allowed_config_differences": ["club.shaft_lean_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1281,10 +1261,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1318,9 +1295,7 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": [
-          "club.shaft_lean_deg"
-        ],
+        "allowed_config_differences": ["club.shaft_lean_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1582,10 +1557,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1619,9 +1591,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "club.shaft_lean_deg"
-        ],
+        "allowed_config_differences": ["club.shaft_lean_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1883,10 +1853,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1920,9 +1887,7 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": [
-          "club.shaft_lean_deg"
-        ],
+        "allowed_config_differences": ["club.shaft_lean_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2184,10 +2149,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2221,9 +2183,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "club.shaft_lean_deg"
-        ],
+        "allowed_config_differences": ["club.shaft_lean_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2485,10 +2445,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "pw-control-face-bounds/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["pw-control-face-bounds/1", "original_control/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {
@@ -2696,13 +2653,13 @@
         "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
         "course_scoring_effect_modification": {
           "Draw": {
-            "estimate": -7.184629575228414e-05,
+            "estimate": -7.184629575228414e-5,
             "lower_95": -0.00017962774837337802,
-            "upper_95": 6.939849757459825e-05
+            "upper_95": 6.939849757459825e-5
           },
           "Fade": {
             "estimate": 0.0001977880465622134,
-            "lower_95": 9.987043878669066e-06,
+            "lower_95": 9.987043878669066e-6,
             "upper_95": 0.00038954591765025243
           }
         },
@@ -2787,10 +2744,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "pw-control-face-bounds/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["pw-control-face-bounds/1", "original_control/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {
@@ -3089,10 +3043,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "pw-control-face-bounds/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["pw-control-face-bounds/1", "original_control/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {
@@ -3391,10 +3342,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "pw-control-face-bounds/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["pw-control-face-bounds/1", "original_control/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {

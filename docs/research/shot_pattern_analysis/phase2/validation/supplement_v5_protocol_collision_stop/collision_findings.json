@@ -13,10 +13,7 @@
     "curve_strength_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation1_combined2_10c002730b": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -42,10 +39,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -73,10 +67,7 @@
     "curve_strength_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation1_shaft_only_7884acf089": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -102,10 +93,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -133,10 +121,7 @@
     "curve_strength_pitching_wedge_lean10_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_e618afea44": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -162,10 +147,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -193,10 +175,7 @@
     "curve_strength_pitching_wedge_lean10_curve1_rotation2_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_e9d08aa3d8": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -222,10 +201,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -253,10 +229,7 @@
     "curve_strength_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve2_rotation1_combined2_c50e19f0d5": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "pw-control-face-bounds/1"
-        ],
+        "source_protocols": ["original_control/1", "pw-control-face-bounds/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -282,10 +255,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -313,10 +283,7 @@
     "curve_strength_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve2_rotation1_shaft_only_b7f3d5c3df": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "pw-control-face-bounds/1"
-        ],
+        "source_protocols": ["original_control/1", "pw-control-face-bounds/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -342,10 +309,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -373,10 +337,7 @@
     "curve_strength_pitching_wedge_lean5_curve1_rotation2_combined2_vs_pitching_wedge_lean5_curve2_rotation2_combined2_60a9e8d2f5": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "pw-control-face-bounds/1"
-        ],
+        "source_protocols": ["original_control/1", "pw-control-face-bounds/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -402,10 +363,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -433,10 +391,7 @@
     "curve_strength_pitching_wedge_lean5_curve1_rotation2_shaft_only_vs_pitching_wedge_lean5_curve2_rotation2_shaft_only_5d9d9684c6": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "pw-control-face-bounds/1"
-        ],
+        "source_protocols": ["original_control/1", "pw-control-face-bounds/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -462,10 +417,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -493,10 +445,7 @@
     "curve_strength_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve2_rotation1_combined2_df8757196a": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -553,10 +502,7 @@
     "curve_strength_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve2_rotation1_shaft_only_1aaa21acf6": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -613,10 +559,7 @@
     "curve_strength_driver_lean5_curve1_rotation2_combined2_vs_driver_lean5_curve2_rotation2_combined2_b0540b05f3": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -673,10 +616,7 @@
     "curve_strength_driver_lean5_curve1_rotation2_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_f83178aa67": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -733,10 +673,7 @@
     "curve_strength_seven_iron_lean10_curve1_rotation1_combined2_vs_seven_iron_lean10_curve2_rotation1_combined2_d7fee1942f": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -762,10 +699,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -793,10 +727,7 @@
     "curve_strength_seven_iron_lean10_curve1_rotation1_shaft_only_vs_seven_iron_lean10_curve2_rotation1_shaft_only_8c76ef0599": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -822,10 +753,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -853,10 +781,7 @@
     "curve_strength_seven_iron_lean10_curve1_rotation2_combined2_vs_seven_iron_lean10_curve2_rotation2_combined2_8aa0b1db66": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -882,10 +807,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -913,10 +835,7 @@
     "curve_strength_seven_iron_lean10_curve1_rotation2_shaft_only_vs_seven_iron_lean10_curve2_rotation2_shaft_only_f011e84484": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -942,10 +861,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -973,10 +889,7 @@
     "curve_strength_seven_iron_lean5_curve1_rotation1_combined2_vs_seven_iron_lean5_curve2_rotation1_combined2_1f958664d2": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1002,10 +915,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1033,10 +943,7 @@
     "curve_strength_seven_iron_lean5_curve1_rotation1_shaft_only_vs_seven_iron_lean5_curve2_rotation1_shaft_only_0b5b5237dd": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1062,10 +969,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1093,10 +997,7 @@
     "curve_strength_seven_iron_lean5_curve1_rotation2_combined2_vs_seven_iron_lean5_curve2_rotation2_combined2_c0f3f96e9e": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1122,10 +1023,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1153,10 +1051,7 @@
     "curve_strength_seven_iron_lean5_curve1_rotation2_shaft_only_vs_seven_iron_lean5_curve2_rotation2_shaft_only_59d39ec8e1": [
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1182,10 +1077,7 @@
       },
       {
         "comparison_kind": "curve_strength",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1213,10 +1105,7 @@
     "shaft_rotation_sd_pitching_wedge_lean10_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve1_rotation2_combined2_0aec506cff": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1242,10 +1131,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1273,10 +1159,7 @@
     "shaft_rotation_sd_pitching_wedge_lean10_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve1_rotation2_shaft_only_8cd0bf6ca1": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1302,10 +1185,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1333,10 +1213,7 @@
     "shaft_rotation_sd_pitching_wedge_lean10_curve2_rotation1_combined2_vs_pitching_wedge_lean10_curve2_rotation2_combined2_ff331dd394": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1362,10 +1239,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1393,10 +1267,7 @@
     "shaft_rotation_sd_pitching_wedge_lean10_curve2_rotation1_shaft_only_vs_pitching_wedge_lean10_curve2_rotation2_shaft_only_9854dead45": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1422,10 +1293,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1453,10 +1321,7 @@
     "shaft_rotation_sd_pitching_wedge_lean5_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve1_rotation2_combined2_5b77699e49": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1482,10 +1347,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1513,10 +1375,7 @@
     "shaft_rotation_sd_pitching_wedge_lean5_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve1_rotation2_shaft_only_41065d8240": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1542,10 +1401,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1602,10 +1458,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1662,10 +1515,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1693,10 +1543,7 @@
     "shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1722,10 +1569,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1753,10 +1597,7 @@
     "shaft_rotation_sd_driver_lean5_curve1_rotation1_shaft_only_vs_driver_lean5_curve1_rotation2_shaft_only_4e3d58e5ff": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1782,10 +1623,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1813,10 +1651,7 @@
     "shaft_rotation_sd_driver_lean5_curve2_rotation1_combined2_vs_driver_lean5_curve2_rotation2_combined2_3942571772": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1873,10 +1708,7 @@
     "shaft_rotation_sd_driver_lean5_curve2_rotation1_shaft_only_vs_driver_lean5_curve2_rotation2_shaft_only_ca91f64013": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1933,10 +1765,7 @@
     "shaft_rotation_sd_seven_iron_lean10_curve1_rotation1_combined2_vs_seven_iron_lean10_curve1_rotation2_combined2_ba681dda44": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -1962,10 +1791,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -1993,10 +1819,7 @@
     "shaft_rotation_sd_seven_iron_lean10_curve1_rotation1_shaft_only_vs_seven_iron_lean10_curve1_rotation2_shaft_only_24da986e1c": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -2022,10 +1845,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -2053,10 +1873,7 @@
     "shaft_rotation_sd_seven_iron_lean10_curve2_rotation1_combined2_vs_seven_iron_lean10_curve2_rotation2_combined2_cd805272b8": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -2082,10 +1899,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -2113,10 +1927,7 @@
     "shaft_rotation_sd_seven_iron_lean10_curve2_rotation1_shaft_only_vs_seven_iron_lean10_curve2_rotation2_shaft_only_5dbe4e9418": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -2142,10 +1953,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -2173,10 +1981,7 @@
     "shaft_rotation_sd_seven_iron_lean5_curve1_rotation1_combined2_vs_seven_iron_lean5_curve1_rotation2_combined2_04ab7a50c7": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -2202,10 +2007,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -2233,10 +2035,7 @@
     "shaft_rotation_sd_seven_iron_lean5_curve1_rotation1_shaft_only_vs_seven_iron_lean5_curve1_rotation2_shaft_only_b8fe23619a": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -2262,10 +2061,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -2293,10 +2089,7 @@
     "shaft_rotation_sd_seven_iron_lean5_curve2_rotation1_combined2_vs_seven_iron_lean5_curve2_rotation2_combined2_dbebb17a4f": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -2322,10 +2115,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",
@@ -2353,10 +2143,7 @@
     "shaft_rotation_sd_seven_iron_lean5_curve2_rotation1_shaft_only_vs_seven_iron_lean5_curve2_rotation2_shaft_only_08c60a6b0b": [
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "sources": [
           {
             "protocol_id": "original_control/1",
@@ -2382,10 +2169,7 @@
       },
       {
         "comparison_kind": "shaft_rotation_sd",
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "sources": [
           {
             "protocol_id": "original_primary/1",

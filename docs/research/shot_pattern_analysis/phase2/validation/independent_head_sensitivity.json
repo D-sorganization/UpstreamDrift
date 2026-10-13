@@ -91,11 +91,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -147,11 +143,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -203,11 +195,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -259,11 +247,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -315,11 +299,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -371,11 +351,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -427,11 +403,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -483,11 +455,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -548,11 +516,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -604,11 +568,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -660,11 +620,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -716,11 +672,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -772,11 +724,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -828,11 +776,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -884,11 +828,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -940,11 +880,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1005,11 +941,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1061,11 +993,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1117,11 +1045,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1173,11 +1097,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1229,11 +1149,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1285,11 +1201,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1341,11 +1253,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1397,11 +1305,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1462,11 +1366,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1518,11 +1418,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1574,11 +1470,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1630,11 +1522,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1686,11 +1574,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1742,11 +1626,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1798,11 +1678,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1854,11 +1730,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1919,11 +1791,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -1975,11 +1843,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2031,11 +1895,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2087,11 +1947,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2143,11 +1999,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2199,11 +2051,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2255,11 +2103,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2311,11 +2155,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2376,11 +2216,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2432,11 +2268,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2488,11 +2320,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2544,11 +2372,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2600,11 +2424,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2656,11 +2476,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2712,11 +2528,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2768,11 +2580,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2833,11 +2641,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2889,11 +2693,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -2945,11 +2745,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3001,11 +2797,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3057,11 +2849,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3113,11 +2901,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3169,11 +2953,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3225,11 +3005,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3290,11 +3066,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3346,11 +3118,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3402,11 +3170,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3458,11 +3222,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3514,11 +3274,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3570,11 +3326,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3626,11 +3378,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3682,11 +3430,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3747,11 +3491,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3803,11 +3543,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3859,11 +3595,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3915,11 +3647,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -3971,11 +3699,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4027,11 +3751,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4083,11 +3803,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4139,11 +3855,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4204,11 +3916,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4260,11 +3968,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4316,11 +4020,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4372,11 +4072,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4428,11 +4124,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4484,11 +4176,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4540,11 +4228,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4596,11 +4280,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4661,11 +4341,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4698,11 +4374,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4735,11 +4407,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4772,11 +4440,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4809,11 +4473,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4846,11 +4506,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4883,11 +4539,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4920,11 +4572,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -4966,11 +4614,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5003,11 +4647,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5040,11 +4680,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5077,11 +4713,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5114,11 +4746,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5151,11 +4779,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5188,11 +4812,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5225,11 +4845,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5271,11 +4887,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5308,11 +4920,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5345,11 +4953,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5382,11 +4986,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5419,11 +5019,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5456,11 +5052,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5493,11 +5085,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5530,11 +5118,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5576,11 +5160,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5632,11 +5212,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5688,11 +5264,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5744,11 +5316,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5800,11 +5368,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5856,11 +5420,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5912,11 +5472,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -5968,11 +5524,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -6033,11 +5585,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -6070,11 +5618,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.028000000000000004,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -6107,11 +5651,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0002,
-              0.00032,
-              0.00036
-            ],
+            "inertia_diagonal_kg_m2": [0.0002, 0.00032, 0.00036],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -6144,11 +5684,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -6181,11 +5717,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.042,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -6218,11 +5750,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.0003,
-              0.00048,
-              0.00054
-            ],
+            "inertia_diagonal_kg_m2": [0.0003, 0.00048, 0.00054],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -6255,11 +5783,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -6292,11 +5816,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -0.9,
             "clubhead_mass_kg": 0.2,
-            "inertia_diagonal_kg_m2": [
-              0.00025,
-              0.0004,
-              0.00045
-            ],
+            "inertia_diagonal_kg_m2": [0.00025, 0.0004, 0.00045],
             "cg_depth_m": 0.035,
             "face_half_width_m": 0.05,
             "face_half_height_m": 0.027,
@@ -6338,11 +5858,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6394,11 +5910,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6450,11 +5962,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6506,11 +6014,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6562,11 +6066,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6618,11 +6118,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6683,11 +6179,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6739,11 +6231,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6795,11 +6283,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6851,11 +6335,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6907,11 +6387,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -6963,11 +6439,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7003,7 +6475,7 @@
               "carry_x_m": -0.00255425352020211,
               "carry_y_m": 0.43477794315085583,
               "spin_rpm": -4.990759858124875,
-              "launch_elevation_deg": 2.4131054203735403e-06,
+              "launch_elevation_deg": 2.4131054203735403e-6,
               "ball_speed_mps": -0.0027687186183129597,
               "endpoint_displacement_m": 0.4347854460093326
             }
@@ -7028,11 +6500,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7084,11 +6552,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7140,11 +6604,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7196,11 +6656,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7252,11 +6708,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7308,11 +6760,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7348,7 +6796,7 @@
               "carry_x_m": -0.00255425352020211,
               "carry_y_m": -0.43477794315085583,
               "spin_rpm": -4.990759858124875,
-              "launch_elevation_deg": 2.4131054203735403e-06,
+              "launch_elevation_deg": 2.4131054203735403e-6,
               "ball_speed_mps": -0.0027687186183129597,
               "endpoint_displacement_m": 0.4347854460093326
             }
@@ -7373,11 +6821,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7429,11 +6873,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7485,11 +6925,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7541,11 +6977,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7597,11 +7029,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7653,11 +7081,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7718,11 +7142,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7774,11 +7194,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7830,11 +7246,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7886,11 +7298,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7942,11 +7350,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -7998,11 +7402,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8063,11 +7463,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8119,11 +7515,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8175,11 +7567,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8231,11 +7619,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8287,11 +7671,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8343,11 +7723,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8408,11 +7784,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8464,11 +7836,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8520,11 +7888,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8576,11 +7940,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8632,11 +7992,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8688,11 +8044,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8728,7 +8080,7 @@
               "carry_x_m": 0.010856336697628421,
               "carry_y_m": 0.7759414435521095,
               "spin_rpm": -6.3882925023544885,
-              "launch_elevation_deg": -4.583242720457292e-06,
+              "launch_elevation_deg": -4.583242720457292e-6,
               "ball_speed_mps": -0.0030321164097699693,
               "endpoint_displacement_m": 0.7760173863182601
             }
@@ -8753,11 +8105,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8809,11 +8157,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8865,11 +8209,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8921,11 +8261,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -8977,11 +8313,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9033,11 +8365,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9073,7 +8401,7 @@
               "carry_x_m": 0.010856336697628421,
               "carry_y_m": -0.7759414435521095,
               "spin_rpm": -6.3882925023544885,
-              "launch_elevation_deg": -4.583242720457292e-06,
+              "launch_elevation_deg": -4.583242720457292e-6,
               "ball_speed_mps": -0.0030321164097699693,
               "endpoint_displacement_m": 0.7760173863182601
             }
@@ -9098,11 +8426,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9154,11 +8478,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9210,11 +8530,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9266,11 +8582,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9322,11 +8634,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9378,11 +8686,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9443,11 +8747,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9499,11 +8799,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9555,11 +8851,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9611,11 +8903,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9667,11 +8955,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9723,11 +9007,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9788,11 +9068,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9844,11 +9120,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9900,11 +9172,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -9956,11 +9224,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10012,11 +9276,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10068,11 +9328,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10133,11 +9389,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10189,11 +9441,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10245,11 +9493,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10301,11 +9545,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10357,11 +9597,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10413,11 +9649,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10453,7 +9685,7 @@
               "carry_x_m": 0.04391509967388174,
               "carry_y_m": 1.2235557080167383,
               "spin_rpm": -8.21026525664729,
-              "launch_elevation_deg": -1.129927364473815e-05,
+              "launch_elevation_deg": -1.129927364473815e-5,
               "ball_speed_mps": -0.0032587358891333906,
               "endpoint_displacement_m": 1.224343541086287
             }
@@ -10478,11 +9710,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10534,11 +9762,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10590,11 +9814,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10646,11 +9866,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10702,11 +9918,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10758,11 +9970,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10798,7 +10006,7 @@
               "carry_x_m": 0.04391509967388174,
               "carry_y_m": -1.2235557080167383,
               "spin_rpm": -8.21026525664729,
-              "launch_elevation_deg": -1.129927364473815e-05,
+              "launch_elevation_deg": -1.129927364473815e-5,
               "ball_speed_mps": -0.0032587358891333906,
               "endpoint_displacement_m": 1.224343541086287
             }
@@ -10823,11 +10031,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10879,11 +10083,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10935,11 +10135,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -10991,11 +10187,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -11047,11 +10239,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -11103,11 +10291,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -11168,11 +10352,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -11224,11 +10404,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -11280,11 +10456,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              9.6e-05,
-              0.00016,
-              0.0002
-            ],
+            "inertia_diagonal_kg_m2": [9.6e-5, 0.00016, 0.0002],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -11336,11 +10508,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.012,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -11392,11 +10560,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.000144,
-              0.00024,
-              0.0003
-            ],
+            "inertia_diagonal_kg_m2": [0.000144, 0.00024, 0.0003],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -11448,11 +10612,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -4.0,
             "clubhead_mass_kg": 0.272,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.0002,
-              0.00025
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.0002, 0.00025],
             "cg_depth_m": 0.01,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.023,
@@ -11513,11 +10673,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -11569,11 +10725,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -11625,11 +10777,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -11681,11 +10829,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -11737,11 +10881,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -11793,11 +10933,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -11858,11 +10994,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -11914,11 +11046,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -11970,11 +11098,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12026,11 +11150,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12082,11 +11202,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12138,11 +11254,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12178,7 +11290,7 @@
               "carry_x_m": -0.0047266736255267006,
               "carry_y_m": -0.07137499593233729,
               "spin_rpm": -1.9055141152775832,
-              "launch_elevation_deg": 1.4666794271533945e-05,
+              "launch_elevation_deg": 1.4666794271533945e-5,
               "ball_speed_mps": -0.0014384615997116157,
               "endpoint_displacement_m": 0.07153133221116055
             }
@@ -12203,11 +11315,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12259,11 +11367,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12315,11 +11419,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12371,11 +11471,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12427,11 +11523,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12483,11 +11575,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12523,7 +11611,7 @@
               "carry_x_m": -0.0047266736255267006,
               "carry_y_m": 0.07137499593233729,
               "spin_rpm": -1.9055141152775832,
-              "launch_elevation_deg": 1.4666794271533945e-05,
+              "launch_elevation_deg": 1.4666794271533945e-5,
               "ball_speed_mps": -0.0014384615997116157,
               "endpoint_displacement_m": 0.07153133221116055
             }
@@ -12548,11 +11636,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12604,11 +11688,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12660,11 +11740,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12716,11 +11792,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12772,11 +11844,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12828,11 +11896,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12893,11 +11957,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -12949,11 +12009,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13005,11 +12061,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13061,11 +12113,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13117,11 +12165,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13173,11 +12217,7 @@
             "shaft_lean_deg": 0.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13238,11 +12278,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13294,11 +12330,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13350,11 +12382,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13406,11 +12434,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13462,11 +12486,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13518,11 +12538,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13583,11 +12599,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13639,11 +12651,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13695,11 +12703,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13751,11 +12755,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13807,11 +12807,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13863,11 +12859,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13903,7 +12895,7 @@
               "carry_x_m": -0.005214325427360222,
               "carry_y_m": 0.005312018563614776,
               "spin_rpm": -2.508073753109784,
-              "launch_elevation_deg": 3.9887534697413685e-07,
+              "launch_elevation_deg": 3.9887534697413685e-7,
               "ball_speed_mps": -0.001711508595896305,
               "endpoint_displacement_m": 0.007443569767430366
             }
@@ -13928,11 +12920,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -13984,11 +12972,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14040,11 +13024,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14096,11 +13076,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14152,11 +13128,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14208,11 +13180,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14248,7 +13216,7 @@
               "carry_x_m": -0.005214325427360222,
               "carry_y_m": -0.005312018563614776,
               "spin_rpm": -2.508073753109784,
-              "launch_elevation_deg": 3.9887534697413685e-07,
+              "launch_elevation_deg": 3.9887534697413685e-7,
               "ball_speed_mps": -0.001711508595896305,
               "endpoint_displacement_m": 0.007443569767430366
             }
@@ -14273,11 +13241,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14329,11 +13293,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14385,11 +13345,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14441,11 +13397,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14497,11 +13449,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14553,11 +13501,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14618,11 +13562,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14674,11 +13614,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14730,11 +13666,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14786,11 +13718,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14842,11 +13770,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14898,11 +13822,7 @@
             "shaft_lean_deg": 5.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -14963,11 +13883,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15019,11 +13935,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15075,11 +13987,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15131,11 +14039,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15187,11 +14091,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15243,11 +14143,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15308,11 +14204,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15364,11 +14256,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15420,11 +14308,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15476,11 +14360,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15532,11 +14412,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15588,11 +14464,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15628,7 +14500,7 @@
               "carry_x_m": -0.003748621197658508,
               "carry_y_m": 0.12942143888502036,
               "spin_rpm": -3.2455642418863135,
-              "launch_elevation_deg": -7.526947893410352e-06,
+              "launch_elevation_deg": -7.526947893410352e-6,
               "ball_speed_mps": -0.001954468081635241,
               "endpoint_displacement_m": 0.12947571588507473
             }
@@ -15653,11 +14525,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15709,11 +14577,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15765,11 +14629,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15821,11 +14681,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15877,11 +14733,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15933,11 +14785,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -15973,7 +14821,7 @@
               "carry_x_m": -0.003748621197658508,
               "carry_y_m": -0.12942143888502036,
               "spin_rpm": -3.2455642418863135,
-              "launch_elevation_deg": -7.526947893410352e-06,
+              "launch_elevation_deg": -7.526947893410352e-6,
               "ball_speed_mps": -0.001954468081635241,
               "endpoint_displacement_m": 0.12947571588507473
             }
@@ -15998,11 +14846,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16054,11 +14898,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16110,11 +14950,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16166,11 +15002,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16222,11 +15054,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16278,11 +15106,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16343,11 +15167,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16399,11 +15219,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0064,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16455,11 +15271,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              8e-05,
-              0.00016,
-              0.00017600000000000002
-            ],
+            "inertia_diagonal_kg_m2": [8e-5, 0.00016, 0.00017600000000000002],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16511,11 +15323,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.0096,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16567,11 +15375,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.00012,
-              0.00024,
-              0.000264
-            ],
+            "inertia_diagonal_kg_m2": [0.00012, 0.00024, 0.000264],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,
@@ -16623,11 +15427,7 @@
             "shaft_lean_deg": 10.0,
             "attack_angle_deg": -5.0,
             "clubhead_mass_kg": 0.3,
-            "inertia_diagonal_kg_m2": [
-              0.0001,
-              0.0002,
-              0.00022
-            ],
+            "inertia_diagonal_kg_m2": [0.0001, 0.0002, 0.00022],
             "cg_depth_m": 0.008,
             "face_half_width_m": 0.035,
             "face_half_height_m": 0.025,

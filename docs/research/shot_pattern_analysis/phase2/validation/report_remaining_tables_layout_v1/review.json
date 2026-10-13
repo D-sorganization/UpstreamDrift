@@ -2,16 +2,7 @@
   "scope": "partial_nine_condition_carry_geometry_absolute_scoring_layout",
   "accepted": true,
   "final_report_accepted": false,
-  "pages_visually_inspected": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8
-  ],
+  "pages_visually_inspected": [1, 2, 3, 4, 5, 6, 7, 8],
   "selected_conditions": 9,
   "input_summary_hashes_rechecked": true,
   "source_sha256": {

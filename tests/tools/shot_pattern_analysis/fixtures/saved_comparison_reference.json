@@ -1055,10 +1055,7 @@
           "curve_scale": 1.0,
           "target_x_m": 180.0,
           "target_radius_m": 15.0,
-          "leans_deg": [
-            0.0,
-            5.0
-          ],
+          "leans_deg": [0.0, 5.0],
           "difference_direction": "later_lean_minus_earlier_lean",
           "total_per_physical_population": 4,
           "cells": [
@@ -1226,10 +1223,7 @@
           "curve_scale": 1.0,
           "target_x_m": 180.0,
           "target_radius_m": 15.0,
-          "leans_deg": [
-            0.0,
-            10.0
-          ],
+          "leans_deg": [0.0, 10.0],
           "difference_direction": "later_lean_minus_earlier_lean",
           "total_per_physical_population": 4,
           "cells": [
@@ -1238,10 +1232,7 @@
           ],
           "status": "unavailable",
           "reason": "one_or_both_cells_unavailable",
-          "cell_statuses": [
-            "completed",
-            "unavailable"
-          ]
+          "cell_statuses": ["completed", "unavailable"]
         },
         {
           "club_id": "seven_iron",
@@ -1250,10 +1241,7 @@
           "curve_scale": 1.0,
           "target_x_m": 180.0,
           "target_radius_m": 15.0,
-          "leans_deg": [
-            5.0,
-            10.0
-          ],
+          "leans_deg": [5.0, 10.0],
           "difference_direction": "later_lean_minus_earlier_lean",
           "total_per_physical_population": 4,
           "cells": [
@@ -1262,10 +1250,7 @@
           ],
           "status": "unavailable",
           "reason": "one_or_both_cells_unavailable",
-          "cell_statuses": [
-            "completed",
-            "unavailable"
-          ]
+          "cell_statuses": ["completed", "unavailable"]
         }
       ],
       "limitations": "Conditional geometric model; shared supported indices only; historical hypothetical course SG with sampling-only paired intervals."
@@ -1308,10 +1293,7 @@
           "curve_scale": 1.0,
           "target_x_m": 180.0,
           "target_radius_m": 15.0,
-          "leans_deg": [
-            0.0,
-            5.0
-          ],
+          "leans_deg": [0.0, 5.0],
           "difference_direction": "later_lean_minus_earlier_lean",
           "total_per_physical_population": 4,
           "cells": [
@@ -1479,10 +1461,7 @@
           "curve_scale": 1.0,
           "target_x_m": 180.0,
           "target_radius_m": 15.0,
-          "leans_deg": [
-            0.0,
-            10.0
-          ],
+          "leans_deg": [0.0, 10.0],
           "difference_direction": "later_lean_minus_earlier_lean",
           "total_per_physical_population": 4,
           "cells": [
@@ -1650,10 +1629,7 @@
           "curve_scale": 1.0,
           "target_x_m": 180.0,
           "target_radius_m": 15.0,
-          "leans_deg": [
-            5.0,
-            10.0
-          ],
+          "leans_deg": [5.0, 10.0],
           "difference_direction": "later_lean_minus_earlier_lean",
           "total_per_physical_population": 4,
           "cells": [
@@ -1840,10 +1816,7 @@
         "matched_lean_control.py": "<run-specific SHA-256>",
         "course_score_vectors.py": "<run-specific SHA-256>"
       },
-      "source_protocols": [
-        "original_primary/1",
-        "original_primary/1"
-      ],
+      "source_protocols": ["original_primary/1", "original_primary/1"],
       "source_transition_receipt_sha256": null,
       "sources": [
         {
@@ -1877,9 +1850,7 @@
           "Fade": 0
         }
       },
-      "allowed_config_differences": [
-        "club.shaft_lean_deg"
-      ],
+      "allowed_config_differences": ["club.shaft_lean_deg"],
       "patterns": {
         "Straight": {
           "radial_error_difference_m": {
@@ -1904,7 +1875,7 @@
           },
           "course_sg_difference": {
             "estimate": 0.0002766021374543219,
-            "lower_95": -7.416159630491137e-05,
+            "lower_95": -7.416159630491137e-5,
             "upper_95": 0.0008142617003058517
           },
           "course_sg_means": {
@@ -1959,7 +1930,7 @@
           },
           "course_sg_difference": {
             "estimate": 0.0002766021374543219,
-            "lower_95": -7.416159630491137e-05,
+            "lower_95": -7.416159630491137e-5,
             "upper_95": 0.0008142617003058517
           },
           "course_sg_means": {
@@ -2014,7 +1985,7 @@
           },
           "course_sg_difference": {
             "estimate": 0.0002766021374543219,
-            "lower_95": -7.416159630491137e-05,
+            "lower_95": -7.416159630491137e-5,
             "upper_95": 0.0008142617003058517
           },
           "course_sg_means": {
@@ -2097,10 +2068,7 @@
         "matched_lean_control.py": "<run-specific SHA-256>",
         "course_score_vectors.py": "<run-specific SHA-256>"
       },
-      "source_protocols": [
-        "original_primary/1",
-        "original_primary/1"
-      ],
+      "source_protocols": ["original_primary/1", "original_primary/1"],
       "source_transition_receipt_sha256": null,
       "sources": [
         {
@@ -2134,9 +2102,7 @@
           "Fade": 0
         }
       },
-      "allowed_config_differences": [
-        "curve_scale"
-      ],
+      "allowed_config_differences": ["curve_scale"],
       "patterns": {
         "Straight": {
           "radial_error_difference_m": {
@@ -2354,10 +2320,7 @@
         "matched_lean_control.py": "<run-specific SHA-256>",
         "course_score_vectors.py": "<run-specific SHA-256>"
       },
-      "source_protocols": [
-        "original_primary/1",
-        "original_primary/1"
-      ],
+      "source_protocols": ["original_primary/1", "original_primary/1"],
       "source_transition_receipt_sha256": null,
       "sources": [
         {
@@ -2391,9 +2354,7 @@
           "Fade": 0
         }
       },
-      "allowed_config_differences": [
-        "noise.standard_deviations[0]"
-      ],
+      "allowed_config_differences": ["noise.standard_deviations[0]"],
       "patterns": {
         "Straight": {
           "radial_error_difference_m": {

@@ -21,45 +21,27 @@
           "success": true,
           "face_deg": 4.871605574542844,
           "speed_mps": 56.24999999999999,
-          "residual_xy_m": [
-            -0.6350881303448546,
-            -1.0354742926294014e-07
-          ],
-          "active_mask": [
-            0,
-            1
-          ],
-          "optimality": 1.9030495540934688e-06,
+          "residual_xy_m": [-0.6350881303448546, -1.0354742926294014e-7],
+          "active_mask": [0, 1],
+          "optimality": 1.9030495540934688e-6,
           "n_evaluations": 16
         },
         {
           "success": true,
           "face_deg": 4.871605633487204,
           "speed_mps": 56.24999999999999,
-          "residual_xy_m": [
-            -0.6350881303445988,
-            7.98968832899094e-08
-          ],
-          "active_mask": [
-            0,
-            1
-          ],
-          "optimality": 3.243895691323124e-05,
+          "residual_xy_m": [-0.6350881303445988, 7.98968832899094e-8],
+          "active_mask": [0, 1],
+          "optimality": 3.243895691323124e-5,
           "n_evaluations": 19
         },
         {
           "success": true,
           "face_deg": 4.87160571050455,
           "speed_mps": 56.24999999999999,
-          "residual_xy_m": [
-            -0.6350881303446556,
-            3.1958724116404325e-07
-          ],
-          "active_mask": [
-            0,
-            1
-          ],
-          "optimality": 1.6219466813358034e-05,
+          "residual_xy_m": [-0.6350881303446556, 3.1958724116404325e-7],
+          "active_mask": [0, 1],
+          "optimality": 1.6219466813358034e-5,
           "n_evaluations": 14
         }
       ]
@@ -82,45 +64,27 @@
           "success": true,
           "face_deg": -4.87160571050455,
           "speed_mps": 56.24999999999999,
-          "residual_xy_m": [
-            -0.6350881303446556,
-            -3.1958724116404325e-07
-          ],
-          "active_mask": [
-            0,
-            1
-          ],
-          "optimality": 1.6219466813358034e-05,
+          "residual_xy_m": [-0.6350881303446556, -3.1958724116404325e-7],
+          "active_mask": [0, 1],
+          "optimality": 1.6219466813358034e-5,
           "n_evaluations": 14
         },
         {
           "success": true,
           "face_deg": -4.871605710504679,
           "speed_mps": 56.24999999999999,
-          "residual_xy_m": [
-            -0.635088130344684,
-            -3.19587664200649e-07
-          ],
-          "active_mask": [
-            0,
-            1
-          ],
-          "optimality": 1.892272552978059e-05,
+          "residual_xy_m": [-0.635088130344684, -3.19587664200649e-7],
+          "active_mask": [0, 1],
+          "optimality": 1.892272552978059e-5,
           "n_evaluations": 15
         },
         {
           "success": true,
           "face_deg": -4.871605574542844,
           "speed_mps": 56.24999999999999,
-          "residual_xy_m": [
-            -0.6350881303448546,
-            1.0354742926294014e-07
-          ],
-          "active_mask": [
-            0,
-            1
-          ],
-          "optimality": 1.9030495540934688e-06,
+          "residual_xy_m": [-0.6350881303448546, 1.0354742926294014e-7],
+          "active_mask": [0, 1],
+          "optimality": 1.9030495540934688e-6,
           "n_evaluations": 16
         }
       ]

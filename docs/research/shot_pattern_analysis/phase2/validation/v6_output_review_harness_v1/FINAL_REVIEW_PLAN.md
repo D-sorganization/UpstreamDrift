@@ -8,13 +8,13 @@ The frozen producer is PRESENTATION commit `4023111d2aaf8b20449a36f8691a295f4a94
 
 ## Exact Ledger Coverage
 
-| Component | Records | Formats per Record | Assets | PNGs |
-|---|---:|---|---:|---:|
-| Across-Lean Pairs | 56 | Six PNG, Five PDF, Five SVG | 896 | 336 |
-| Curve-Strength Pairs | 164 | Six PNG, Five PDF, Five SVG | 2,624 | 984 |
-| Shaft-Twist-SD Pairs | 164 | Six PNG, Five PDF, Five SVG | 2,624 | 984 |
-| Unique Supplemental Cells | 26 | Four PNG, Four PDF, Four SVG | 312 | 104 |
-| Total | 410 | | 6,456 | 2,408 |
+| Component                 | Records | Formats per Record           | Assets |  PNGs |
+| ------------------------- | ------: | ---------------------------- | -----: | ----: |
+| Across-Lean Pairs         |      56 | Six PNG, Five PDF, Five SVG  |    896 |   336 |
+| Curve-Strength Pairs      |     164 | Six PNG, Five PDF, Five SVG  |  2,624 |   984 |
+| Shaft-Twist-SD Pairs      |     164 | Six PNG, Five PDF, Five SVG  |  2,624 |   984 |
+| Unique Supplemental Cells |      26 | Four PNG, Four PDF, Four SVG |    312 |   104 |
+| Total                     |     410 |                              |  6,456 | 2,408 |
 
 Pair suffixes are `density.{png,pdf,svg}`, `overhead.{png,pdf,svg}`, `overhead_social.png`, and `density_{straight,draw,fade}_social.{png,pdf,svg}`. There is no pair overhead-social PDF/SVG. Cell suffixes are `{density,density_social,overhead,overhead_social}.{png,pdf,svg}`. Totals are 2,408 PNG, 2,024 PDF and 2,024 SVG. These are expected production counts, not a substitute for the actual final ledger. Any explicit unavailable record requires reconciliation and a scope decision; never silently drop it to hit a count.
 

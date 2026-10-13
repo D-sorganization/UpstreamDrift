@@ -8,27 +8,27 @@ Gemini 3.8 Flash High through `agy` is filing these records and retaining actual
 issue URLs in publication receipts. No issue is claimed closed without a merged
 implementing PR or an explicitly permitted disposition.
 
-| Record | Finding | Implementation State | Acceptance Evidence |
-| --- | --- | --- | --- |
-| SPA-001 | Friction Changed Spin Without Tangential Translation | Corrected Locally | Three Regression Tests Failed Before the Fix; Broad Impact Suite: 117 Passed |
-| SPA-002 | Sticking Impulse Assumed Infinite Club Mass | Corrected Locally | Finite-Mass Slip and Momentum Tests; Independent 3D Conservation Review: Six Passed |
-| SPA-003 | Earlier Results Used the Defective Impact Model | Corrected 24-Cell V2 Matrix Complete | Four Historical Bundles Marked Superseded; All 24 Corrected V2 Manifests Verified |
-| SPA-004 | Fixed Loft Omitted Face–Loft Geometry | Geometric Mode and Full Matrix Complete | 17 Geometry Tests and 24 Core/Physics Tests Passed |
-| SPA-005 | Dispersion Summary Omitted Long/Short Covariance | Covariance and Report Integration Complete | Eight Tests Passed, Including Mirror and Zero-Variance Cases |
-| SPA-006 | Driver Approach Scoring Did Not Match Tee Context | Tee/Approach Contexts and V2 Scoring Complete | Historical Table 9 Tee/Fairway/Rough; Dense API Parity; 24 V2 Manifests Verified |
-| SPA-007 | Presets Could Be Mistaken for Measured Club/Player Data | Assumptions Qualified in Final Reports | Astra Identified Assumed 7-Iron Loft, Optimizer PW Example, and Static-Lie Assumptions |
-| SPA-008 | Physics Qualification Could Be Overstated | Scope and Deferred Physical Validation Explicit | Central Contact Only; Off-Center Club Rotation and Player Validation Remain Unqualified |
-| SPA-009 | Separating Contact Produced an Attracting Normal Impulse | Corrected Locally | Separating-Contact Regression Failed Then Passed; Zero Approach Remains No Impulse |
-| SPA-010 | Comparison Accepted Different Delivery Baselines | Corrected Locally | Three New Tests Failed Before the Baseline Contract; Eight Comparison Tests Passed |
-| SPA-011 | GUI Custom Inputs Passed a Rejected CLI Preset | Corrected Locally; Custom CLI/GUI Regressions Passed | Permit Explicit Custom Mode and Preserve User Delivery Overrides |
-| SPA-012 | New GUI/Core Boundaries Failed Static Type Checks | Local Corrections and Focused Mypy Passed; Canonical Gate Pending | Guard Qt Headers; Compatible Resize Signature; Typed Physics Calls and Numeric Refinement Rows |
-| SPA-013 | Export-Time Hashes Could Misidentify Loaded Experiment Sources | Matrix and Standalone Provenance Corrected; Resume Hash Checks Tested | Freeze Worker Sources Before Simulation; Verify and Link Source/Native Receipts |
-| SPA-014 | Extended Scoring Table Retained the Abbreviated Baseline Version | V2 Baseline and Separate Postprocess Provenance Complete | Content SHA Is Authoritative; Version and Postprocess Receipts Must Identify Full Table |
-| SPA-015 | Mirror Symmetry Was Overgeneralized to Coupled Delivery | Documentation Corrected; Astra Verified Geometry | Fixed Loft Is Symmetric; Same Right-Handed Axis Coupling Can Differ Structurally |
-| SPA-016 | Putting Baseline Awarded Partial Hole-Outs at Positive Distance | Corrected; All 24 Saved-Flight Bundles Re-Scored | Unholed Expected Strokes Must Be at Least One; Terminal Holed State Must Be Separate |
-| SPA-017 | Shared SG Legend Repeated Entries and Overlapped a Panel Title | Corrected; Regenerated V2 Overview | Red–Green Legend Test and Visually Verified 1080p PNGs |
-| SPA-018 | Git Line-Ending Normalization Changed Evidence Hashes | Corrected and Committed | All 24 Indexed CSV Hashes Match Frozen Manifests |
-| SPA-019 | Bare Test Module Name Collided During Broad Collection | Corrected and Committed | Red Canonical Collection; Green Combined Collection of Both Test Modules |
+| Record  | Finding                                                          | Implementation State                                                  | Acceptance Evidence                                                                            |
+| ------- | ---------------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| SPA-001 | Friction Changed Spin Without Tangential Translation             | Corrected Locally                                                     | Three Regression Tests Failed Before the Fix; Broad Impact Suite: 117 Passed                   |
+| SPA-002 | Sticking Impulse Assumed Infinite Club Mass                      | Corrected Locally                                                     | Finite-Mass Slip and Momentum Tests; Independent 3D Conservation Review: Six Passed            |
+| SPA-003 | Earlier Results Used the Defective Impact Model                  | Corrected 24-Cell V2 Matrix Complete                                  | Four Historical Bundles Marked Superseded; All 24 Corrected V2 Manifests Verified              |
+| SPA-004 | Fixed Loft Omitted Face–Loft Geometry                            | Geometric Mode and Full Matrix Complete                               | 17 Geometry Tests and 24 Core/Physics Tests Passed                                             |
+| SPA-005 | Dispersion Summary Omitted Long/Short Covariance                 | Covariance and Report Integration Complete                            | Eight Tests Passed, Including Mirror and Zero-Variance Cases                                   |
+| SPA-006 | Driver Approach Scoring Did Not Match Tee Context                | Tee/Approach Contexts and V2 Scoring Complete                         | Historical Table 9 Tee/Fairway/Rough; Dense API Parity; 24 V2 Manifests Verified               |
+| SPA-007 | Presets Could Be Mistaken for Measured Club/Player Data          | Assumptions Qualified in Final Reports                                | Astra Identified Assumed 7-Iron Loft, Optimizer PW Example, and Static-Lie Assumptions         |
+| SPA-008 | Physics Qualification Could Be Overstated                        | Scope and Deferred Physical Validation Explicit                       | Central Contact Only; Off-Center Club Rotation and Player Validation Remain Unqualified        |
+| SPA-009 | Separating Contact Produced an Attracting Normal Impulse         | Corrected Locally                                                     | Separating-Contact Regression Failed Then Passed; Zero Approach Remains No Impulse             |
+| SPA-010 | Comparison Accepted Different Delivery Baselines                 | Corrected Locally                                                     | Three New Tests Failed Before the Baseline Contract; Eight Comparison Tests Passed             |
+| SPA-011 | GUI Custom Inputs Passed a Rejected CLI Preset                   | Corrected Locally; Custom CLI/GUI Regressions Passed                  | Permit Explicit Custom Mode and Preserve User Delivery Overrides                               |
+| SPA-012 | New GUI/Core Boundaries Failed Static Type Checks                | Local Corrections and Focused Mypy Passed; Canonical Gate Pending     | Guard Qt Headers; Compatible Resize Signature; Typed Physics Calls and Numeric Refinement Rows |
+| SPA-013 | Export-Time Hashes Could Misidentify Loaded Experiment Sources   | Matrix and Standalone Provenance Corrected; Resume Hash Checks Tested | Freeze Worker Sources Before Simulation; Verify and Link Source/Native Receipts                |
+| SPA-014 | Extended Scoring Table Retained the Abbreviated Baseline Version | V2 Baseline and Separate Postprocess Provenance Complete              | Content SHA Is Authoritative; Version and Postprocess Receipts Must Identify Full Table        |
+| SPA-015 | Mirror Symmetry Was Overgeneralized to Coupled Delivery          | Documentation Corrected; Astra Verified Geometry                      | Fixed Loft Is Symmetric; Same Right-Handed Axis Coupling Can Differ Structurally               |
+| SPA-016 | Putting Baseline Awarded Partial Hole-Outs at Positive Distance  | Corrected; All 24 Saved-Flight Bundles Re-Scored                      | Unholed Expected Strokes Must Be at Least One; Terminal Holed State Must Be Separate           |
+| SPA-017 | Shared SG Legend Repeated Entries and Overlapped a Panel Title   | Corrected; Regenerated V2 Overview                                    | Red–Green Legend Test and Visually Verified 1080p PNGs                                         |
+| SPA-018 | Git Line-Ending Normalization Changed Evidence Hashes            | Corrected and Committed                                               | All 24 Indexed CSV Hashes Match Frozen Manifests                                               |
+| SPA-019 | Bare Test Module Name Collided During Broad Collection           | Corrected and Committed                                               | Red Canonical Collection; Green Combined Collection of Both Test Modules                       |
 
 | SPA-020 | Provenance Required an Ignored Generated Lockfile | Corrected in the Canonical Run/Export Snapshot | Red Clean-Clone CLI/Export; Optional Lock Presence Explicit; Required Sources and Native Binary Retained |
 | SPA-021 | Native Provenance Ignored Windows `.pyd` Layouts | Corrected and Committed | Ten Native-Discovery Tests Cover Direct/Packaged Layouts and Ambiguity |

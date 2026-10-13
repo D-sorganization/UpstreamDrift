@@ -230,108 +230,79 @@
       "caller": "src/tools/shot_pattern_analysis/_embed_adapter.py",
       "line": 7,
       "provider": "src.shared.python.launcher_embed",
-      "names": [
-        "EmbedCapabilities",
-        "register_embeddable_tool"
-      ]
+      "names": ["EmbedCapabilities", "register_embeddable_tool"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/gui.py",
       "line": 15,
       "provider": "src.shared.python.core.process_safety",
-      "names": [
-        "managed_popen"
-      ]
+      "names": ["managed_popen"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/gui.py",
       "line": 16,
       "provider": "src.shared.python.logging_pkg.logging_config",
-      "names": [
-        "get_logger"
-      ]
+      "names": ["get_logger"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/matched_export.py",
       "line": 18,
       "provider": "src.shared.python.physics.incremental_contact",
-      "names": [
-        "contact_backend_info"
-      ]
+      "names": ["contact_backend_info"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/matched_physics.py",
       "line": 15,
       "provider": "src.shared.python.physics.ball_simulator",
-      "names": [
-        "BallFlightSimulator"
-      ]
+      "names": ["BallFlightSimulator"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/matched_physics.py",
       "line": 16,
       "provider": "src.shared.python.physics.incremental_contact",
-      "names": [
-        "solve_incremental_contact"
-      ]
+      "names": ["solve_incremental_contact"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/matched_physics.py",
       "line": 17,
       "provider": "src.shared.python.physics.rigid_contact",
-      "names": [
-        "RigidContactInput",
-        "solve_rigid_contact"
-      ]
+      "names": ["RigidContactInput", "solve_rigid_contact"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/physics.py",
       "line": 11,
       "provider": "src.shared.python.physics.ball_launch_conditions",
-      "names": [
-        "LaunchConditions"
-      ]
+      "names": ["LaunchConditions"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/physics.py",
       "line": 12,
       "provider": "src.shared.python.physics.ball_simulator",
-      "names": [
-        "BallFlightSimulator"
-      ]
+      "names": ["BallFlightSimulator"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/physics.py",
       "line": 13,
       "provider": "src.shared.python.physics.impact_model",
-      "names": [
-        "ImpactSolverAPI",
-        "PreImpactState"
-      ]
+      "names": ["ImpactSolverAPI", "PreImpactState"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/reporting.py",
       "line": 15,
       "provider": "src.shared.python.physics.ball_launch_conditions",
-      "names": [
-        "EnvironmentalConditions"
-      ]
+      "names": ["EnvironmentalConditions"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/reporting.py",
       "line": 16,
       "provider": "src.shared.python.physics.ball_properties",
-      "names": [
-        "BallProperties"
-      ]
+      "names": ["BallProperties"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/reporting.py",
       "line": 17,
       "provider": "src.shared.python.physics.impact_model",
-      "names": [
-        "ImpactParameters"
-      ]
+      "names": ["ImpactParameters"]
     },
     {
       "caller": "src/tools/shot_pattern_analysis/scoring.py",

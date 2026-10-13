@@ -113,12 +113,12 @@
   "limits": {
     "input": 1e-12,
     "summary": 1e-10,
-    "covariance": 1e-08,
+    "covariance": 1e-8,
     "correlation": 1e-10,
-    "paired": 1e-09,
+    "paired": 1e-9,
     "scoring": 1e-12,
     "direct_api": 1e-12,
-    "bootstrap": 1e-08
+    "bootstrap": 1e-8
   },
   "failures": [],
   "cells": {

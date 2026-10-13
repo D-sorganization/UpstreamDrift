@@ -39,10 +39,10 @@ lean, closing by 2° lowers delivered loft in all three presets, but carry respo
 differently:
 
 | Illustrative Club | Closed-Face Loft | Closed-Face Carry Change | Open-Face Loft | Open-Face Carry Change |
-| --- | ---: | ---: | ---: | ---: |
-| Driver | 11.572° | −6.746 m | 14.022° | +2.423 m |
-| 7-Iron | 22.977° | +1.468 m | 25.015° | −1.961 m |
-| Pitching Wedge | 35.719° | +2.223 m | 37.669° | −2.456 m |
+| ----------------- | ---------------: | -----------------------: | -------------: | ---------------------: |
+| Driver            |          11.572° |                 −6.746 m |        14.022° |               +2.423 m |
+| 7-Iron            |          22.977° |                 +1.468 m |        25.015° |               −1.961 m |
+| Pitching Wedge    |          35.719° |                 +2.223 m |        37.669° |               −2.456 m |
 
 These are deterministic face-error ±2° sensitivities around straight delivery,
 not averages over the 10,000-shot populations. The iron and PW examples show
@@ -61,11 +61,11 @@ orientation.
 
 ## Experiment Definition
 
-| Pattern | Mean Face Relative to Target | Fixed Path Relative to Target |
-| --- | ---: | ---: |
-| Straight | 0° | 0° |
-| Draw | +1.5° | +3° |
-| Fade | −1.5° | −3° |
+| Pattern  | Mean Face Relative to Target | Fixed Path Relative to Target |
+| -------- | ---------------------------: | ----------------------------: |
+| Straight |                           0° |                            0° |
+| Draw     |                        +1.5° |                           +3° |
+| Fade     |                        −1.5° |                           −3° |
 
 The larger-curve trials double both means: draw face +3° / path +6°, and
 fade face −3° / path −6°. Straight remains 0°/0°. Each magnitude is evaluated
@@ -89,16 +89,16 @@ radius target circle. No per-shot aiming or sample-mean correction is applied.
 
 After each pattern receives its single nominal aiming adjustment:
 
-| Measure | Straight | Draw | Fade |
-| --- | ---: | ---: | ---: |
-| Shots | 10,000 | 10,000 | 10,000 |
-| Lateral Standard Deviation (m) | 9.677 | 9.585 | 9.583 |
-| Lateral Variance (m²) | 93.643 | 91.870 | 91.829 |
-| Central 90% Lateral Width (m) | 31.799 | 31.499 | 31.482 |
-| Landings Within 15 m of Target | 87.56% | 87.88% | 87.72% |
-| Target RMSE (m) | 9.704 | 9.652 | 9.651 |
-| Mean Carry (m) | 195.154 | 194.749 | 194.746 |
-| Carry Standard Deviation (m) | 0.255 | 0.597 | 0.601 |
+| Measure                        | Straight |    Draw |    Fade |
+| ------------------------------ | -------: | ------: | ------: |
+| Shots                          |   10,000 |  10,000 |  10,000 |
+| Lateral Standard Deviation (m) |    9.677 |   9.585 |   9.583 |
+| Lateral Variance (m²)          |   93.643 |  91.870 |  91.829 |
+| Central 90% Lateral Width (m)  |   31.799 |  31.499 |  31.482 |
+| Landings Within 15 m of Target |   87.56% |  87.88% |  87.72% |
+| Target RMSE (m)                |    9.704 |   9.652 |   9.651 |
+| Mean Carry (m)                 |  195.154 | 194.749 | 194.746 |
+| Carry Standard Deviation (m)   |    0.255 |   0.597 |   0.601 |
 
 Curving reduces lateral standard deviation by only 9–10 cm, about 1%, and
 central 90% width by about 30 cm. The draw improves target-hit fraction by
@@ -121,11 +121,11 @@ asymmetry is consistent with finite sampling of a symmetric model.
 
 ## The 2° Face-Variability Trial
 
-| Measure | Straight | Draw | Fade |
-| --- | ---: | ---: | ---: |
-| Lateral Standard Deviation (m) | 18.940 | 18.772 | 18.763 |
-| Landings Within 15 m of Target | 56.04% | 56.34% | 56.31% |
-| Mean Carry (m) | 194.613 | 194.211 | 194.204 |
+| Measure                        | Straight |    Draw |    Fade |
+| ------------------------------ | -------: | ------: | ------: |
+| Lateral Standard Deviation (m) |   18.940 |  18.772 |  18.763 |
+| Landings Within 15 m of Target |   56.04% |  56.34% |  56.31% |
+| Mean Carry (m)                 |  194.613 | 194.211 | 194.204 |
 
 Doubling face SD almost doubles landing SD and reduces target-hit fraction
 from about 88% to 56%. The curve-related SD reduction remains below 1%:
@@ -137,18 +137,18 @@ in this conditional model. Target-hit gains are 0.30 and 0.27 percentage points.
 
 The larger draw uses face +3° / path +6°; fade mirrors these angles.
 
-| Face SD | Measure | Straight | Draw | Fade |
-| --- | --- | ---: | ---: | ---: |
-| 1° | Lateral Standard Deviation (m) | 9.677 | 9.313 | 9.308 |
-| 1° | Central 90% Lateral Width (m) | 31.799 | 30.602 | 30.570 |
-| 1° | Landings Within 15 m | 87.56% | 88.31% | 88.33% |
-| 1° | Target RMSE (m) | 9.704 | 9.608 | 9.605 |
-| 1° | Mean Carry (m) | 195.154 | 193.531 | 193.525 |
-| 2° | Lateral Standard Deviation (m) | 18.940 | 18.270 | 18.252 |
-| 2° | Central 90% Lateral Width (m) | 62.338 | 60.111 | 59.990 |
-| 2° | Landings Within 15 m | 56.04% | 56.95% | 56.95% |
-| 2° | Target RMSE (m) | 19.149 | 18.795 | 18.782 |
-| 2° | Mean Carry (m) | 194.613 | 193.001 | 192.988 |
+| Face SD | Measure                        | Straight |    Draw |    Fade |
+| ------- | ------------------------------ | -------: | ------: | ------: |
+| 1°      | Lateral Standard Deviation (m) |    9.677 |   9.313 |   9.308 |
+| 1°      | Central 90% Lateral Width (m)  |   31.799 |  30.602 |  30.570 |
+| 1°      | Landings Within 15 m           |   87.56% |  88.31% |  88.33% |
+| 1°      | Target RMSE (m)                |    9.704 |   9.608 |   9.605 |
+| 1°      | Mean Carry (m)                 |  195.154 | 193.531 | 193.525 |
+| 2°      | Lateral Standard Deviation (m) |   18.940 |  18.270 |  18.252 |
+| 2°      | Central 90% Lateral Width (m)  |   62.338 |  60.111 |  59.990 |
+| 2°      | Landings Within 15 m           |   56.04% |  56.95% |  56.95% |
+| 2°      | Target RMSE (m)                |   19.149 |  18.795 |  18.782 |
+| 2°      | Mean Carry (m)                 |  194.613 | 193.001 | 192.988 |
 
 Doubling curve magnitude increases the modeled lateral-SD reduction to
 3.5–3.8%, but costs approximately 1.62 m mean carry. The target RMSE improves
@@ -167,10 +167,10 @@ shorter in the 1° trial. To check this geometric advantage, each aimed endpoint
 is projected radially onto the same 195.334 m range, preserving its landing
 bearing. This is a geometric diagnostic, not a second physical flight model.
 
-| 1° Trial: Lateral Standard Deviation (m) | Straight | Draw | Fade |
-| --- | ---: | ---: | ---: |
-| Actual Carry | 9.677 | 9.585 | 9.583 |
-| Common Range | 9.704 | 9.630 | 9.629 |
+| 1° Trial: Lateral Standard Deviation (m) | Straight |  Draw |  Fade |
+| ---------------------------------------- | -------: | ----: | ----: |
+| Actual Carry                             |    9.677 | 9.585 | 9.583 |
+| Common Range                             |    9.704 | 9.630 | 9.629 |
 
 The curved-pattern SD advantage falls from approximately 0.95% to 0.76%.
 Shorter carry therefore explains part of the apparent improvement, while a
@@ -250,10 +250,10 @@ ellipse; adding independent speed, path and strike errors would change its shape
 The normal-error assumption gives the following theoretical chance of crossing
 zero face-to-path and curving opposite the intended direction:
 
-| Curve Magnitude | Face SD 1° | Face SD 2° |
-| --- | ---: | ---: |
-| Original: 1.5° Mean Face-to-Path Offset | 6.68% | 22.66% |
-| Doubled: 3° Mean Face-to-Path Offset | 0.135% | 6.68% |
+| Curve Magnitude                         | Face SD 1° | Face SD 2° |
+| --------------------------------------- | ---------: | ---------: |
+| Original: 1.5° Mean Face-to-Path Offset |      6.68% |     22.66% |
+| Doubled: 3° Mean Face-to-Path Offset    |     0.135% |      6.68% |
 
 These are direction probabilities, not accuracy or scoring improvements. Curving intention does not eliminate one
 curvature direction under the assumed error distribution. Draw/fade differences

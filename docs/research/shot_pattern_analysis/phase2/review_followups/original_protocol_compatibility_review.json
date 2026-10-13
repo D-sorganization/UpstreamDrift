@@ -5,10 +5,7 @@
       "historical": "absent"
     },
     "match_speed_factors": {
-      "current": [
-        0.75,
-        1.25
-      ],
+      "current": [0.75, 1.25],
       "historical": "absent"
     }
   },

@@ -116,11 +116,11 @@ All distances describe carry at first ground contact, excluding roll.
 
 Angles are relative to the target, positive right for a right-handed golfer:
 
-| Pattern | Mean Face | Fixed Path | Face-to-Path |
-| --- | ---: | ---: | ---: |
-| Straight | 0° | 0° | 0° |
-| Draw | +1.5° | +3° | −1.5° |
-| Fade | −1.5° | −3° | +1.5° |
+| Pattern  | Mean Face | Fixed Path | Face-to-Path |
+| -------- | --------: | ---------: | -----------: |
+| Straight |        0° |         0° |           0° |
+| Draw     |     +1.5° |        +3° |        −1.5° |
+| Fade     |     −1.5° |        −3° |        +1.5° |
 
 `spin_axis_tilt_deg` is positive for native +world-z spin and draw/left curvature,
 opposite a right-positive TrackMan-style tilt sign; face, path, and carry are

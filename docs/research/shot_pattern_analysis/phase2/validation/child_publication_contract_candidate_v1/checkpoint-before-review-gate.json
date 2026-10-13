@@ -13,11 +13,7 @@
     "ruff": "passed",
     "mypy": "4 source files passed"
   },
-  "red_evidence": [
-    "red.txt",
-    "pin-red.txt",
-    "identity-red.txt"
-  ],
+  "red_evidence": ["red.txt", "pin-red.txt", "identity-red.txt"],
   "remaining": [
     "Public selective renderer callback integration and saved-pair preparation adapter",
     "CLI with pinned verifier binding and reviewed expanded figure-kind scope",

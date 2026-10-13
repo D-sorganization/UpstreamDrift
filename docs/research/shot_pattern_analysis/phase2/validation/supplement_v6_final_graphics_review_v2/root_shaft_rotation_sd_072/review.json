@@ -471,10 +471,7 @@
   ],
   "findings": [
     {
-      "indices": [
-        78,
-        79
-      ],
+      "indices": [78, 79],
       "figure": "academic density",
       "issue": 12243,
       "reason": "Legend and top panel title spacing insufficient; replace and re-review."

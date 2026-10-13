@@ -46,10 +46,7 @@
     "gui_source_sha256": "91cf57e85c39d46643787bcf7c0f16ef52699b276106cb5b1dd94c66dd6256ab"
   },
   "offscreen_layout": {
-    "size": [
-      1000,
-      760
-    ],
+    "size": [1000, 760],
     "screenshots_inspected": 4,
     "all_result_and_score_labels_fit_height_for_width": true,
     "source_populations": "Individual endpoint counts remain in nominal results; common-three denominator applies to all displayed SG means/differences."

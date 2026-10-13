@@ -6,900 +6,630 @@
       "index": 1,
       "path": "social/details/driver_lean0_curve1_rotation1_combined2/density.png",
       "sha256": "125fc44b1407fd77bd21d38408c4cbc0cd0d2a5a4d61b708f3569f6d2497da42",
-      "pixels": [
-        1857,
-        3169
-      ]
+      "pixels": [1857, 3169]
     },
     {
       "group": "social_details",
       "index": 2,
       "path": "social/details/driver_lean0_curve1_rotation1_combined2/overhead.png",
       "sha256": "e7fd63f2d6b617c9cf1b41a624faae629b6a46462db50df5e74837c94ee34c34",
-      "pixels": [
-        2747,
-        1599
-      ]
+      "pixels": [2747, 1599]
     },
     {
       "group": "social_details",
       "index": 3,
       "path": "social/details/driver_lean0_curve1_rotation1_shaft_only/density.png",
       "sha256": "56ac5cc989bcb6199958b15a4da38152cd306b823f36453f61be8cea8393c07e",
-      "pixels": [
-        1827,
-        3169
-      ]
+      "pixels": [1827, 3169]
     },
     {
       "group": "social_details",
       "index": 4,
       "path": "social/details/driver_lean0_curve1_rotation1_shaft_only/overhead.png",
       "sha256": "61296a43073cfc3eb4659574b1a8a53d2efcafb0cd582d191d13df8f832be17b",
-      "pixels": [
-        2747,
-        1599
-      ]
+      "pixels": [2747, 1599]
     },
     {
       "group": "social_details",
       "index": 5,
       "path": "social/details/driver_lean0_curve1_rotation2_combined2/density.png",
       "sha256": "3363450ec7288b422a346b9b671c766ce776b7ab4f1fae501978e4df0d805af0",
-      "pixels": [
-        1879,
-        3169
-      ]
+      "pixels": [1879, 3169]
     },
     {
       "group": "social_details",
       "index": 6,
       "path": "social/details/driver_lean0_curve1_rotation2_combined2/overhead.png",
       "sha256": "1ae4ef2267863b6c1f87a7ae293b61d1a816fa970c89cca1c74e182df44cad9a",
-      "pixels": [
-        2747,
-        1599
-      ]
+      "pixels": [2747, 1599]
     },
     {
       "group": "social_details",
       "index": 7,
       "path": "social/details/driver_lean0_curve1_rotation2_shaft_only/density.png",
       "sha256": "08dbec008470566cd6b7f79ad05da7c5516113094a7ee8c1161faea9615f9442",
-      "pixels": [
-        1842,
-        3169
-      ]
+      "pixels": [1842, 3169]
     },
     {
       "group": "social_details",
       "index": 8,
       "path": "social/details/driver_lean0_curve1_rotation2_shaft_only/overhead.png",
       "sha256": "4f18a5b5afd4f22543fed8680bbe144c199c55fb3a2e45a68d8cd51ee73caf6e",
-      "pixels": [
-        2747,
-        1599
-      ]
+      "pixels": [2747, 1599]
     },
     {
       "group": "social_details",
       "index": 9,
       "path": "social/details/driver_lean0_curve2_rotation1_combined2/density.png",
       "sha256": "d84d6dc2bcbac0a882c1b1e2e626e609ccc22d7a0f30c8703dd09ea3d51f6995",
-      "pixels": [
-        1857,
-        3169
-      ]
+      "pixels": [1857, 3169]
     },
     {
       "group": "social_details",
       "index": 10,
       "path": "social/details/driver_lean0_curve2_rotation1_combined2/overhead.png",
       "sha256": "a9a88a72a11ee11ccbb0091758780ed940addaf67a23b4210ffc304329a6a457",
-      "pixels": [
-        2771,
-        1599
-      ]
+      "pixels": [2771, 1599]
     },
     {
       "group": "social_details",
       "index": 11,
       "path": "social/details/driver_lean0_curve2_rotation1_shaft_only/density.png",
       "sha256": "3050a993d5bd380cf186676c363a843c1c24a406da9de2ac07bc6a1c9193b6f1",
-      "pixels": [
-        1827,
-        3169
-      ]
+      "pixels": [1827, 3169]
     },
     {
       "group": "social_details",
       "index": 12,
       "path": "social/details/driver_lean0_curve2_rotation1_shaft_only/overhead.png",
       "sha256": "dd0289fc7ffd02521e9b255e4f92ac82eda1611a1b9fa4ec0577313152a1a216",
-      "pixels": [
-        2747,
-        1599
-      ]
+      "pixels": [2747, 1599]
     },
     {
       "group": "social_details",
       "index": 13,
       "path": "social/details/driver_lean0_curve2_rotation2_combined2/density.png",
       "sha256": "ad7edad7d99a959d360baded24033c26849e586b9c2b94148c7f014efcd3edb8",
-      "pixels": [
-        1864,
-        3169
-      ]
+      "pixels": [1864, 3169]
     },
     {
       "group": "social_details",
       "index": 14,
       "path": "social/details/driver_lean0_curve2_rotation2_combined2/overhead.png",
       "sha256": "6ea7deaf5c9e763a8702cd26a10df16933e4a28408f083d672978fef1530f38e",
-      "pixels": [
-        2747,
-        1599
-      ]
+      "pixels": [2747, 1599]
     },
     {
       "group": "social_details",
       "index": 15,
       "path": "social/details/driver_lean0_curve2_rotation2_shaft_only/density.png",
       "sha256": "d861b13dd141ff265731886d40ab0a2f1906288528480cfc60268fa63b429d2f",
-      "pixels": [
-        1864,
-        3169
-      ]
+      "pixels": [1864, 3169]
     },
     {
       "group": "social_details",
       "index": 16,
       "path": "social/details/driver_lean0_curve2_rotation2_shaft_only/overhead.png",
       "sha256": "be0cb48bb01374fc8b97561894adad2fcde4f75126d5663cd0d0df0cd9ee38db",
-      "pixels": [
-        2747,
-        1599
-      ]
+      "pixels": [2747, 1599]
     },
     {
       "group": "social_details",
       "index": 17,
       "path": "social/details/pitching_wedge_lean0_curve1_rotation1_combined2/density.png",
       "sha256": "c495db523a952795f0e039256bb96892c11c1231bdf82c23403e25b282ed04b1",
-      "pixels": [
-        1819,
-        3169
-      ]
+      "pixels": [1819, 3169]
     },
     {
       "group": "social_details",
       "index": 18,
       "path": "social/details/pitching_wedge_lean0_curve1_rotation1_combined2/overhead.png",
       "sha256": "9b4413ef4ea942fd4c007567afc1e56f563ea69b89be2d79472b26351763fe1b",
-      "pixels": [
-        2755,
-        1599
-      ]
+      "pixels": [2755, 1599]
     },
     {
       "group": "social_details",
       "index": 19,
       "path": "social/details/pitching_wedge_lean0_curve1_rotation1_shaft_only/density.png",
       "sha256": "c123a70f6e5ec3f2ff4fe1ce25a5d3e07e95c57227e1154ae22f830a5fffc9c0",
-      "pixels": [
-        1819,
-        3169
-      ]
+      "pixels": [1819, 3169]
     },
     {
       "group": "social_details",
       "index": 20,
       "path": "social/details/pitching_wedge_lean0_curve1_rotation1_shaft_only/overhead.png",
       "sha256": "83869eba98eabb433d95a2eb09a71983847b4a659acdb3a4eb3befc49322e988",
-      "pixels": [
-        2755,
-        1599
-      ]
+      "pixels": [2755, 1599]
     },
     {
       "group": "social_details",
       "index": 21,
       "path": "social/details/pitching_wedge_lean0_curve1_rotation2_combined2/density.png",
       "sha256": "917a2b3ed786cf2c655f69ada4e4fc422c001c079d3f2d9300dbc8493f070527",
-      "pixels": [
-        1866,
-        3169
-      ]
+      "pixels": [1866, 3169]
     },
     {
       "group": "social_details",
       "index": 22,
       "path": "social/details/pitching_wedge_lean0_curve1_rotation2_combined2/overhead.png",
       "sha256": "faf579bdf753d41742c7395f22be7375a3fd31c79b770d9bd375d86b01a55507",
-      "pixels": [
-        2731,
-        1599
-      ]
+      "pixels": [2731, 1599]
     },
     {
       "group": "social_details",
       "index": 23,
       "path": "social/details/pitching_wedge_lean0_curve1_rotation2_shaft_only/density.png",
       "sha256": "b324b7a43965f3cdc22f9b3cb9cad9703f1c809b930d514b9219ffcf0a268cf7",
-      "pixels": [
-        1836,
-        3169
-      ]
+      "pixels": [1836, 3169]
     },
     {
       "group": "social_details",
       "index": 24,
       "path": "social/details/pitching_wedge_lean0_curve1_rotation2_shaft_only/overhead.png",
       "sha256": "eae4b6f6203189eb4c3ac8e36f5256ff4d7565951a46c6cb39c332e6ec8bc0af",
-      "pixels": [
-        2731,
-        1599
-      ]
+      "pixels": [2731, 1599]
     },
     {
       "group": "social_details",
       "index": 25,
       "path": "social/details/seven_iron_lean0_curve1_rotation1_combined2/density.png",
       "sha256": "46b511e96aa4960f5321e145023f2927e86cb973a80bff09baf31ac0aca3ac1f",
-      "pixels": [
-        1842,
-        3169
-      ]
+      "pixels": [1842, 3169]
     },
     {
       "group": "social_details",
       "index": 26,
       "path": "social/details/seven_iron_lean0_curve1_rotation1_combined2/overhead.png",
       "sha256": "56ea4b293e245bd953e8c30ec29ec0074ec3f2a90a62f881096acb0c1dd5202f",
-      "pixels": [
-        2742,
-        1599
-      ]
+      "pixels": [2742, 1599]
     },
     {
       "group": "social_details",
       "index": 27,
       "path": "social/details/seven_iron_lean0_curve1_rotation1_shaft_only/density.png",
       "sha256": "78c6ff1dd64d225b5442c0b72ce030a076765fc0ffa07d2374693db6632ce0bf",
-      "pixels": [
-        1836,
-        3169
-      ]
+      "pixels": [1836, 3169]
     },
     {
       "group": "social_details",
       "index": 28,
       "path": "social/details/seven_iron_lean0_curve1_rotation1_shaft_only/overhead.png",
       "sha256": "e140fa30cacdc575d7df286fb0bb4061947e9c675c53e1158098a64d29f1d69a",
-      "pixels": [
-        2731,
-        1599
-      ]
+      "pixels": [2731, 1599]
     },
     {
       "group": "social_details",
       "index": 29,
       "path": "social/details/seven_iron_lean0_curve1_rotation2_combined2/density.png",
       "sha256": "acb677f8b83e607746553b2eef53e138b67234044cb0ed0365539a40ea084c96",
-      "pixels": [
-        1842,
-        3169
-      ]
+      "pixels": [1842, 3169]
     },
     {
       "group": "social_details",
       "index": 30,
       "path": "social/details/seven_iron_lean0_curve1_rotation2_combined2/overhead.png",
       "sha256": "a425bd932dfbe63641441eee1431273e9f13373f2a04d70e9d0b75846d2a3d2f",
-      "pixels": [
-        2750,
-        1599
-      ]
+      "pixels": [2750, 1599]
     },
     {
       "group": "social_details",
       "index": 31,
       "path": "social/details/seven_iron_lean0_curve1_rotation2_shaft_only/density.png",
       "sha256": "4e694119c2abd5452ef7b83d937fbce078f93f4cd95e6e467107dfb51609d0b9",
-      "pixels": [
-        1842,
-        3169
-      ]
+      "pixels": [1842, 3169]
     },
     {
       "group": "social_details",
       "index": 32,
       "path": "social/details/seven_iron_lean0_curve1_rotation2_shaft_only/overhead.png",
       "sha256": "412ac81dbb97f60e81a06beab32709d5dc45ead63f427efda8a0993cae9687ab",
-      "pixels": [
-        2731,
-        1599
-      ]
+      "pixels": [2731, 1599]
     },
     {
       "group": "social_details",
       "index": 33,
       "path": "social/details/seven_iron_lean0_curve2_rotation1_combined2/density.png",
       "sha256": "94929a6a923a52038455701f5e7a7f43ac0d1f9a9960a6ec893b72847aa0106a",
-      "pixels": [
-        1842,
-        3169
-      ]
+      "pixels": [1842, 3169]
     },
     {
       "group": "social_details",
       "index": 34,
       "path": "social/details/seven_iron_lean0_curve2_rotation1_combined2/overhead.png",
       "sha256": "6f997ac37abd18e653f6ca4835acc4d9e48f71f638af7c6995373092e63592ad",
-      "pixels": [
-        2741,
-        1599
-      ]
+      "pixels": [2741, 1599]
     },
     {
       "group": "social_details",
       "index": 35,
       "path": "social/details/seven_iron_lean0_curve2_rotation1_shaft_only/density.png",
       "sha256": "8d3c37ae3705813209f5513f7cf8548567d304a8a9051d5f42989eb14bda3bd4",
-      "pixels": [
-        1812,
-        3169
-      ]
+      "pixels": [1812, 3169]
     },
     {
       "group": "social_details",
       "index": 36,
       "path": "social/details/seven_iron_lean0_curve2_rotation1_shaft_only/overhead.png",
       "sha256": "41c4f0d200ca08f79f005c97637be387935ecfb6f74405abf9f942ac2221f71d",
-      "pixels": [
-        2731,
-        1599
-      ]
+      "pixels": [2731, 1599]
     },
     {
       "group": "social_details",
       "index": 37,
       "path": "social/details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
       "sha256": "d4a64b8f8ab4c20e60932b64197347b37393b20e23a41ed00978b40bf8f63bb5",
-      "pixels": [
-        1842,
-        3169
-      ]
+      "pixels": [1842, 3169]
     },
     {
       "group": "social_details",
       "index": 38,
       "path": "social/details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
       "sha256": "77feb526c4b519da2814c74102e0cdd3566eb9f584cb4e8cdc4031a77f27c1d6",
-      "pixels": [
-        2748,
-        1599
-      ]
+      "pixels": [2748, 1599]
     },
     {
       "group": "social_details",
       "index": 39,
       "path": "social/details/seven_iron_lean0_curve2_rotation2_shaft_only/density.png",
       "sha256": "028ec0fa20ccf04e1b433bb5a1e0947041215ce87211a2621af0ca03e20aff43",
-      "pixels": [
-        1842,
-        3169
-      ]
+      "pixels": [1842, 3169]
     },
     {
       "group": "social_details",
       "index": 40,
       "path": "social/details/seven_iron_lean0_curve2_rotation2_shaft_only/overhead.png",
       "sha256": "06e112917db211d9999cf50f11a65a94b0b7b14c5b6f48e4ec02376bcd0645e9",
-      "pixels": [
-        2731,
-        1599
-      ]
+      "pixels": [2731, 1599]
     },
     {
       "group": "comparisons",
       "index": 1,
       "path": "social/comparisons/driver/combined2/Draw/curve_scale.png",
       "sha256": "c088c3e4162794e3e7c46a5998bdd6bd7db7e8955215ad3217c68c6470b42a0e",
-      "pixels": [
-        1879,
-        2385
-      ]
+      "pixels": [1879, 2385]
     },
     {
       "group": "comparisons",
       "index": 2,
       "path": "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.png",
       "sha256": "b90748fa80d3585564f7aded0073487a7d99c7e18ac86325748e5f07801d9c3c",
-      "pixels": [
-        1857,
-        2385
-      ]
+      "pixels": [1857, 2385]
     },
     {
       "group": "comparisons",
       "index": 3,
       "path": "social/comparisons/driver/combined2/Fade/curve_scale.png",
       "sha256": "e9d87f1bbf859ac8884ffecffeb7f90caae9b095c7f590f117d64225e258fb4b",
-      "pixels": [
-        1864,
-        2385
-      ]
+      "pixels": [1864, 2385]
     },
     {
       "group": "comparisons",
       "index": 4,
       "path": "social/comparisons/driver/combined2/Fade/shaft_rotation_sd.png",
       "sha256": "14e80c02b6e8511e1432bc22050314bdecf5dc3e2a067d46426af6c47a081155",
-      "pixels": [
-        1857,
-        2385
-      ]
+      "pixels": [1857, 2385]
     },
     {
       "group": "comparisons",
       "index": 5,
       "path": "social/comparisons/driver/combined2/Straight/curve_scale.png",
       "sha256": "1db38162c3fc4d3cd8ff36d1a86e2e2c56fb4348dfc2a9e9382412bb2ee11a11",
-      "pixels": [
-        1879,
-        2385
-      ]
+      "pixels": [1879, 2385]
     },
     {
       "group": "comparisons",
       "index": 6,
       "path": "social/comparisons/driver/combined2/Straight/shaft_rotation_sd.png",
       "sha256": "30705067d86b923811a02b60e7d45b3aadc0051c58b5666ecf4146d41e19351b",
-      "pixels": [
-        1857,
-        2385
-      ]
+      "pixels": [1857, 2385]
     },
     {
       "group": "comparisons",
       "index": 7,
       "path": "social/comparisons/driver/shaft_only/Draw/curve_scale.png",
       "sha256": "5d6024ab6cf87867d8441ec5a9bca5952dda2dd5235472837f2ecd2bdcf76718",
-      "pixels": [
-        1857,
-        2385
-      ]
+      "pixels": [1857, 2385]
     },
     {
       "group": "comparisons",
       "index": 8,
       "path": "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.png",
       "sha256": "30ad244b89042520d87020b9c9bffd962581ffb91dc2b136819861b31bdcb01c",
-      "pixels": [
-        1842,
-        2385
-      ]
+      "pixels": [1842, 2385]
     },
     {
       "group": "comparisons",
       "index": 9,
       "path": "social/comparisons/driver/shaft_only/Fade/curve_scale.png",
       "sha256": "6151009edffb9f9f2b0d47b6f3f3e274fe3582a3ac07db77ab7117158c56f163",
-      "pixels": [
-        1849,
-        2385
-      ]
+      "pixels": [1849, 2385]
     },
     {
       "group": "comparisons",
       "index": 10,
       "path": "social/comparisons/driver/shaft_only/Fade/shaft_rotation_sd.png",
       "sha256": "9d419c525b64d5c6d64787270fd408572c4fa894389fd4ef6bd6eaee74fd3a57",
-      "pixels": [
-        1827,
-        2385
-      ]
+      "pixels": [1827, 2385]
     },
     {
       "group": "comparisons",
       "index": 11,
       "path": "social/comparisons/driver/shaft_only/Straight/curve_scale.png",
       "sha256": "b514abf0d8caeabf8da40bde174ab35b4157bd6eedbd089603c2f6f7886fbfab",
-      "pixels": [
-        1842,
-        2385
-      ]
+      "pixels": [1842, 2385]
     },
     {
       "group": "comparisons",
       "index": 12,
       "path": "social/comparisons/driver/shaft_only/Straight/shaft_rotation_sd.png",
       "sha256": "d8163312544bf3b10bffeda11e79f360f38c474584384f18281ca5952fa91e8d",
-      "pixels": [
-        1827,
-        2385
-      ]
+      "pixels": [1827, 2385]
     },
     {
       "group": "comparisons",
       "index": 13,
       "path": "social/comparisons/pitching_wedge/combined2/Draw/shaft_rotation_sd.png",
       "sha256": "155c0444cfc100097103293996a02bff600ff5d713b51bd1cb2e496241895386",
-      "pixels": [
-        1866,
-        2385
-      ]
+      "pixels": [1866, 2385]
     },
     {
       "group": "comparisons",
       "index": 14,
       "path": "social/comparisons/pitching_wedge/combined2/Fade/shaft_rotation_sd.png",
       "sha256": "239f01e60a867c5f399b5c1cf9475baa49134fddef82d48da1a80002c45cdb7f",
-      "pixels": [
-        1866,
-        2385
-      ]
+      "pixels": [1866, 2385]
     },
     {
       "group": "comparisons",
       "index": 15,
       "path": "social/comparisons/pitching_wedge/combined2/Straight/shaft_rotation_sd.png",
       "sha256": "78a673ad4d0173e478a59b63de544b40518962e5adcc68d6a710e8eee1a56a5a",
-      "pixels": [
-        1851,
-        2385
-      ]
+      "pixels": [1851, 2385]
     },
     {
       "group": "comparisons",
       "index": 16,
       "path": "social/comparisons/pitching_wedge/shaft_only/Draw/shaft_rotation_sd.png",
       "sha256": "f0d68e198104b2d73dfc733ab3f699e3da83cf29733021dc43bf275601c1737f",
-      "pixels": [
-        1836,
-        2385
-      ]
+      "pixels": [1836, 2385]
     },
     {
       "group": "comparisons",
       "index": 17,
       "path": "social/comparisons/pitching_wedge/shaft_only/Fade/shaft_rotation_sd.png",
       "sha256": "5f8e0c770ecb79f11d4a1b17e9a81bfe32805e443ec9bf2d62ef49fff5f5c7ed",
-      "pixels": [
-        1836,
-        2385
-      ]
+      "pixels": [1836, 2385]
     },
     {
       "group": "comparisons",
       "index": 18,
       "path": "social/comparisons/pitching_wedge/shaft_only/Straight/shaft_rotation_sd.png",
       "sha256": "9c43f87fde356183f88ecc34e8d959b76a64d266be7820ba77873afb56a4d683",
-      "pixels": [
-        1836,
-        2385
-      ]
+      "pixels": [1836, 2385]
     },
     {
       "group": "comparisons",
       "index": 19,
       "path": "social/comparisons/seven_iron/combined2/Draw/curve_scale.png",
       "sha256": "98b8df5e35405be4821fcfd72e4daf8b131757f8635f6ed0444d68c6f583649d",
-      "pixels": [
-        1842,
-        2385
-      ]
+      "pixels": [1842, 2385]
     },
     {
       "group": "comparisons",
       "index": 20,
       "path": "social/comparisons/seven_iron/combined2/Draw/shaft_rotation_sd.png",
       "sha256": "afecc3a085f50c38663e80a520683c3f645df7d0c0fbe1ca3924c76f876509f2",
-      "pixels": [
-        1842,
-        2385
-      ]
+      "pixels": [1842, 2385]
     },
     {
       "group": "comparisons",
       "index": 21,
       "path": "social/comparisons/seven_iron/combined2/Fade/curve_scale.png",
       "sha256": "22a22fcd0eeadba91108efe21f9262a116405154c4c437f2d740d48668d1195f",
-      "pixels": [
-        1842,
-        2385
-      ]
+      "pixels": [1842, 2385]
     },
     {
       "group": "comparisons",
       "index": 22,
       "path": "social/comparisons/seven_iron/combined2/Fade/shaft_rotation_sd.png",
       "sha256": "6faccef4fcade8b4bc0a1d47e89704861e49eac25bd1e8c947b6173d6aff25d6",
-      "pixels": [
-        1842,
-        2385
-      ]
+      "pixels": [1842, 2385]
     },
     {
       "group": "comparisons",
       "index": 23,
       "path": "social/comparisons/seven_iron/combined2/Straight/curve_scale.png",
       "sha256": "b51c7592058c3ff8fb63da7785e398954ecd274be43f309658f675c507c3ff66",
-      "pixels": [
-        1842,
-        2385
-      ]
+      "pixels": [1842, 2385]
     },
     {
       "group": "comparisons",
       "index": 24,
       "path": "social/comparisons/seven_iron/combined2/Straight/shaft_rotation_sd.png",
       "sha256": "b0c2c0fa4152639fcfdb3943728bb93ce2609a6e6db38647338de68bfeb0103c",
-      "pixels": [
-        1842,
-        2385
-      ]
+      "pixels": [1842, 2385]
     },
     {
       "group": "comparisons",
       "index": 25,
       "path": "social/comparisons/seven_iron/shaft_only/Draw/curve_scale.png",
       "sha256": "e65ff8eb2d641e65fc5d2a7a2171a952d9589a66c3a43a0df5a612e888f94a60",
-      "pixels": [
-        1827,
-        2385
-      ]
+      "pixels": [1827, 2385]
     },
     {
       "group": "comparisons",
       "index": 26,
       "path": "social/comparisons/seven_iron/shaft_only/Draw/shaft_rotation_sd.png",
       "sha256": "89fb1b4e308810bc72ef801ef827a844f96362524faf9b2377a1ca6afc714506",
-      "pixels": [
-        1827,
-        2385
-      ]
+      "pixels": [1827, 2385]
     },
     {
       "group": "comparisons",
       "index": 27,
       "path": "social/comparisons/seven_iron/shaft_only/Fade/curve_scale.png",
       "sha256": "290858945aad36940e25b30dedeaa5c40f44c00cab2812a21cdb16c253ff2044",
-      "pixels": [
-        1827,
-        2385
-      ]
+      "pixels": [1827, 2385]
     },
     {
       "group": "comparisons",
       "index": 28,
       "path": "social/comparisons/seven_iron/shaft_only/Fade/shaft_rotation_sd.png",
       "sha256": "ff504de15a1be7a1d54a3d8f3ebeea0f3f497a0f33c9ece4a7a9faaf18202ae1",
-      "pixels": [
-        1827,
-        2385
-      ]
+      "pixels": [1827, 2385]
     },
     {
       "group": "comparisons",
       "index": 29,
       "path": "social/comparisons/seven_iron/shaft_only/Straight/curve_scale.png",
       "sha256": "3b664a58c6bb07801e98c0674f1df6aa52b36e630d04554578b643b8b09d6579",
-      "pixels": [
-        1842,
-        2385
-      ]
+      "pixels": [1842, 2385]
     },
     {
       "group": "comparisons",
       "index": 30,
       "path": "social/comparisons/seven_iron/shaft_only/Straight/shaft_rotation_sd.png",
       "sha256": "e477614a37c343a9888d920e275eede0fc0576ce9442f34a734f9c397203e91b",
-      "pixels": [
-        1827,
-        2385
-      ]
+      "pixels": [1827, 2385]
     },
     {
       "group": "matrix",
       "index": 1,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
       "sha256": "1717bf76362f2e02efdbd22d5d90fb8abd29a200e7a0ce59aa7db5ace3dea6c3",
-      "pixels": [
-        2854,
-        1911
-      ]
+      "pixels": [2854, 1911]
     },
     {
       "group": "matrix",
       "index": 2,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
       "sha256": "0e5ca89e0a06b28e8428922596588146fee382f9aba5a10ef2cd3c90559f88f0",
-      "pixels": [
-        2825,
-        1857
-      ]
+      "pixels": [2825, 1857]
     },
     {
       "group": "matrix",
       "index": 3,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
       "sha256": "8ad61c498dcb3f277ff6e9b732d8098eb1729c9f4beb1396e7cd0272dce21148",
-      "pixels": [
-        2833,
-        1857
-      ]
+      "pixels": [2833, 1857]
     },
     {
       "group": "matrix",
       "index": 4,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
       "sha256": "39d6674237d096caf557d08301c8e314d31fd035f2cdda2ca735514ed31d025f",
-      "pixels": [
-        2833,
-        1857
-      ]
+      "pixels": [2833, 1857]
     },
     {
       "group": "matrix",
       "index": 5,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
       "sha256": "ec05ad779e3a3fbb00f6489a54869afcd9f92fe3bab7b069d31293179145d312",
-      "pixels": [
-        2825,
-        1857
-      ]
+      "pixels": [2825, 1857]
     },
     {
       "group": "matrix",
       "index": 6,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
       "sha256": "6e8b9fcef1934415abf0f6e16a2325739f175b5869108044ac7961bd7b776f8e",
-      "pixels": [
-        2854,
-        1911
-      ]
+      "pixels": [2854, 1911]
     },
     {
       "group": "matrix",
       "index": 7,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
       "sha256": "3b61d28b23100b5aa23dcb92c959f6b9448b7c38f997896e4331db58a14f2a44",
-      "pixels": [
-        2825,
-        1857
-      ]
+      "pixels": [2825, 1857]
     },
     {
       "group": "matrix",
       "index": 8,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
       "sha256": "8737f52376eab510cac0660784f941b9fa26b3e61618b20ac3bbddbdfdba797d",
-      "pixels": [
-        2833,
-        1857
-      ]
+      "pixels": [2833, 1857]
     },
     {
       "group": "matrix",
       "index": 9,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
       "sha256": "0bece0b42ab8f5614395c76761f18e9044762ae5dae01e5e9d1f5339f14abef6",
-      "pixels": [
-        2833,
-        1857
-      ]
+      "pixels": [2833, 1857]
     },
     {
       "group": "matrix",
       "index": 10,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot1_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
       "sha256": "a0be6bf9715881635edc2a9824935e5e551dbccb72b5a85a2e0fb197f561a87d",
-      "pixels": [
-        2825,
-        1857
-      ]
+      "pixels": [2825, 1857]
     },
     {
       "group": "matrix",
       "index": 11,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
       "sha256": "db84d8d1177d8c9be9deb3b69f6eac148916bf56f8965036404c5e5121f23a2b",
-      "pixels": [
-        2854,
-        1911
-      ]
+      "pixels": [2854, 1911]
     },
     {
       "group": "matrix",
       "index": 12,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
       "sha256": "be84e56dd9573f42a207765292e7fb7261cf9eee9d3414a36b2adaef2c00d331",
-      "pixels": [
-        2825,
-        1857
-      ]
+      "pixels": [2825, 1857]
     },
     {
       "group": "matrix",
       "index": 13,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
       "sha256": "8d7684069e48037ed6fc31cb7ea254d58562bce635b6eeaa50ec7596606f2e0a",
-      "pixels": [
-        2833,
-        1857
-      ]
+      "pixels": [2833, 1857]
     },
     {
       "group": "matrix",
       "index": 14,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
       "sha256": "7b1b4f06053513ea47272f6741e2f259a61dc27381b61e5507ab09fcd807e503",
-      "pixels": [
-        2833,
-        1857
-      ]
+      "pixels": [2833, 1857]
     },
     {
       "group": "matrix",
       "index": 15,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
       "sha256": "abfa62e93ae01a5b1bbfc156059c0f31c1d06254fc1d80e0e593ff7561326fcc",
-      "pixels": [
-        2825,
-        1857
-      ]
+      "pixels": [2825, 1857]
     },
     {
       "group": "matrix",
       "index": 16,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
       "sha256": "4b7a85694e774ee34124482df428566ca13e1271b43b16415578e8d8e5e816b0",
-      "pixels": [
-        2854,
-        1911
-      ]
+      "pixels": [2854, 1911]
     },
     {
       "group": "matrix",
       "index": 17,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_radial_p95_m.png",
       "sha256": "406b2a1836c42b031afe1093919f21d0ec618bfe8a34c7fdcb74bdb0730d8885",
-      "pixels": [
-        2825,
-        1857
-      ]
+      "pixels": [2825, 1857]
     },
     {
       "group": "matrix",
       "index": 18,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_supported_fraction.png",
       "sha256": "742af910ad4565afecedaf36edd1e25e429b56a7ee07da192c1b72c3dc55d90b",
-      "pixels": [
-        2833,
-        1857
-      ]
+      "pixels": [2833, 1857]
     },
     {
       "group": "matrix",
       "index": 19,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
       "sha256": "9b9955d0cddc2a515f872d79d8e65d5a4742353e63b712a2eeef6f0037fb1db5",
-      "pixels": [
-        2833,
-        1857
-      ]
+      "pixels": [2833, 1857]
     },
     {
       "group": "matrix",
       "index": 20,
       "path": "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0_speed0_contactx0_contacty0_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_rmse_m.png",
       "sha256": "919be1ec2f02e8aa92e2a668d9a1efab2b37a715149dd990cd2402e7a2a7575f",
-      "pixels": [
-        2825,
-        1857
-      ]
+      "pixels": [2825, 1857]
     }
   ]
 }

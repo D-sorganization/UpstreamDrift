@@ -5,9 +5,6 @@
   "schema_and_boundary_review": true,
   "executed_selection": false,
   "graphic_acceptance": false,
-  "initial_vector_sample_bounds": [
-    114,
-    182
-  ],
+  "initial_vector_sample_bounds": [114, 182],
   "uncapped_anomaly_expansion": true
 }

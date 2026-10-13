@@ -6,480 +6,336 @@
       "page": 1,
       "path": "details/seven_iron_lean0_curve1_rotation1_combined2/density.png",
       "sha256": "39e39984cc91df0464feea8359fbe2ed6b8df2dc1c0210772e526f63d4c3d542",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 2,
       "page": 1,
       "path": "details/seven_iron_lean0_curve1_rotation1_combined2/overhead.png",
       "sha256": "f484314da03bf04ad76261123273dd3d654cca57cff9b954496f8a706c02c3c5",
-      "size": [
-        3066,
-        1080
-      ]
+      "size": [3066, 1080]
     },
     {
       "index": 3,
       "page": 1,
       "path": "details/seven_iron_lean0_curve1_rotation1_shaft_only/density.png",
       "sha256": "7802edf78d659261d51fc79153066921044069f74d81f729cd7320f602234c72",
-      "size": [
-        2867,
-        1701
-      ]
+      "size": [2867, 1701]
     },
     {
       "index": 4,
       "page": 1,
       "path": "details/seven_iron_lean0_curve1_rotation1_shaft_only/overhead.png",
       "sha256": "355c05e0b6879eb0778e6c8c7e9830ef9bf989e0fdb58cb6f0a887f87366666a",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 5,
       "page": 1,
       "path": "details/seven_iron_lean0_curve1_rotation2_combined2/density.png",
       "sha256": "a47b2928c6154d3fbb570f5ac846b41e4de5967eecc0bb7d4b2725350b92a6f7",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 6,
       "page": 1,
       "path": "details/seven_iron_lean0_curve1_rotation2_combined2/overhead.png",
       "sha256": "e2504a4f094dac630d5e6c04dd3250d9fc3f54585a1b6c43ebcac6c9dd9ba9db",
-      "size": [
-        3073,
-        1080
-      ]
+      "size": [3073, 1080]
     },
     {
       "index": 7,
       "page": 1,
       "path": "details/seven_iron_lean0_curve1_rotation2_shaft_only/density.png",
       "sha256": "497146716e87be2bddc0ad0de970d3cf5ea7ca96f8f8e73a97ceaeb8307d2c1f",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 8,
       "page": 1,
       "path": "details/seven_iron_lean0_curve1_rotation2_shaft_only/overhead.png",
       "sha256": "48ff8df31168b34a9152a8bad97780eebf9cedb2b786a5621f0fde95ea57f634",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 9,
       "page": 1,
       "path": "details/seven_iron_lean0_curve2_rotation1_combined2/density.png",
       "sha256": "c3709484c723b3a4fa73876dab816eea8858ca96cd3f2bc7dfb621797bf8b469",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 10,
       "page": 1,
       "path": "details/seven_iron_lean0_curve2_rotation1_combined2/overhead.png",
       "sha256": "d461df4f114ad9d4a63ef120698bfec31219a3b2dcc28461f55a49793cc17a22",
-      "size": [
-        3065,
-        1080
-      ]
+      "size": [3065, 1080]
     },
     {
       "index": 11,
       "page": 1,
       "path": "details/seven_iron_lean0_curve2_rotation1_shaft_only/density.png",
       "sha256": "a2bf55128fcb754b615b7519492f3f6257f56a125ab990e3907abed6413bb827",
-      "size": [
-        2848,
-        1701
-      ]
+      "size": [2848, 1701]
     },
     {
       "index": 12,
       "page": 1,
       "path": "details/seven_iron_lean0_curve2_rotation1_shaft_only/overhead.png",
       "sha256": "c4ea75880cd77022645c533b3630f72eae72a5da86832cff4ccc6451f8ef4d6d",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 13,
       "page": 1,
       "path": "details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
       "sha256": "8b67a2679f7a69ad2ad31c80ee53dacc9b48c06fceda0c6d3d6acea061b11641",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 14,
       "page": 1,
       "path": "details/seven_iron_lean0_curve2_rotation2_combined2/overhead.png",
       "sha256": "e38bd4c1f680d042d283d5ee5088d74bd5380f64624274d534715f95c2d7d2de",
-      "size": [
-        3073,
-        1080
-      ]
+      "size": [3073, 1080]
     },
     {
       "index": 15,
       "page": 1,
       "path": "details/seven_iron_lean0_curve2_rotation2_shaft_only/density.png",
       "sha256": "f300c69ab0176505d421f95ac142a5b54661f143f3ddedcccc3eb41e0330bfc2",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 16,
       "page": 1,
       "path": "details/seven_iron_lean0_curve2_rotation2_shaft_only/overhead.png",
       "sha256": "f547295079171e15f0af88c258b8ea28aa4b08c4c3e2ccc589c02c5cc451a314",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 17,
       "page": 2,
       "path": "details/seven_iron_lean10_curve1_rotation1_combined2/density.png",
       "sha256": "1d3087f3e603af00ccd15a9579cd3e654f05c6e3d0dbe5ee10810875b81e2f92",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 18,
       "page": 2,
       "path": "details/seven_iron_lean10_curve1_rotation1_combined2/overhead.png",
       "sha256": "435c1bcf0ba2980e21bbc11029099977d38e1fa468228879e5714e3a7bc1e0c7",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 19,
       "page": 2,
       "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.png",
       "sha256": "7baa9404a81134e4de2b9f6ddfbc45233cbff30774a3f24187def7f8ab54e42d",
-      "size": [
-        2848,
-        1701
-      ]
+      "size": [2848, 1701]
     },
     {
       "index": 20,
       "page": 2,
       "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/overhead.png",
       "sha256": "8c2158a946032f4108c4a98cf2e4cc32c2f45efe4f1993d350bc7fb8280cfdd0",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 21,
       "page": 2,
       "path": "details/seven_iron_lean10_curve1_rotation2_combined2/density.png",
       "sha256": "ab8306aae77cfd08c8a75aeb82bda1fa02025ceafe474bd357a712837d52a22b",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 22,
       "page": 2,
       "path": "details/seven_iron_lean10_curve1_rotation2_combined2/overhead.png",
       "sha256": "dd5105dd2a69776cca138baf4d465bd9bb7e19ede9fadcf7ce5b22e3419b17aa",
-      "size": [
-        3097,
-        1080
-      ]
+      "size": [3097, 1080]
     },
     {
       "index": 23,
       "page": 2,
       "path": "details/seven_iron_lean10_curve1_rotation2_shaft_only/density.png",
       "sha256": "ed9333ac4f90ac6ba9acac470cdea7f22ea63a9467216c1a5980e86b3fcfe1ec",
-      "size": [
-        2864,
-        1701
-      ]
+      "size": [2864, 1701]
     },
     {
       "index": 24,
       "page": 2,
       "path": "details/seven_iron_lean10_curve1_rotation2_shaft_only/overhead.png",
       "sha256": "91adba8b7c6a91fe89eae2b626d0c31a959a476580c49a9379b71b10f011a516",
-      "size": [
-        3097,
-        1080
-      ]
+      "size": [3097, 1080]
     },
     {
       "index": 25,
       "page": 2,
       "path": "details/seven_iron_lean10_curve2_rotation1_combined2/density.png",
       "sha256": "593f8fbad8da361b2bf3356072a8fd8e954b4193cfaf6ce3012ddc3407eb4739",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 26,
       "page": 2,
       "path": "details/seven_iron_lean10_curve2_rotation1_combined2/overhead.png",
       "sha256": "4fdc47ceee3b2d0f29f82364d4f7c33fd16941d756926086ad28f2770353c387",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 27,
       "page": 2,
       "path": "details/seven_iron_lean10_curve2_rotation1_shaft_only/density.png",
       "sha256": "32f1a9975c8fde0c0fe96f8b745d3af1cbe75c1f1b89b3e41f08fdd5d7d52547",
-      "size": [
-        2848,
-        1701
-      ]
+      "size": [2848, 1701]
     },
     {
       "index": 28,
       "page": 2,
       "path": "details/seven_iron_lean10_curve2_rotation1_shaft_only/overhead.png",
       "sha256": "2d4b9f9a4741c1950fb5c636e08140b475f97add6b717076646aa5ff1612af6b",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 29,
       "page": 2,
       "path": "details/seven_iron_lean10_curve2_rotation2_combined2/density.png",
       "sha256": "69b02e8b53fd4e988e0b84fc7d1b19cd3dc5e70e1f530b959469e040e973a0ed",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 30,
       "page": 2,
       "path": "details/seven_iron_lean10_curve2_rotation2_combined2/overhead.png",
       "sha256": "c6d942494970d56b7c969bcc88f9427cec507f4c9bd1ab45eb29cb7ec56f319c",
-      "size": [
-        3097,
-        1080
-      ]
+      "size": [3097, 1080]
     },
     {
       "index": 31,
       "page": 2,
       "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
       "sha256": "29231b56d5e9a008016e3085e06d0b2162f63caefacf604c270a36cf2153c292",
-      "size": [
-        2864,
-        1701
-      ]
+      "size": [2864, 1701]
     },
     {
       "index": 32,
       "page": 2,
       "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.png",
       "sha256": "d2017b7ded52df80aa327acbe0a23b16d9c2a390d4b0eb7e76c962ebb69cae8f",
-      "size": [
-        3097,
-        1080
-      ]
+      "size": [3097, 1080]
     },
     {
       "index": 33,
       "page": 3,
       "path": "details/seven_iron_lean5_curve1_rotation1_combined2/density.png",
       "sha256": "345cc4efa4a39cdbc2e6cc40651b538dc76bf84976c9969c4432016669de50fa",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 34,
       "page": 3,
       "path": "details/seven_iron_lean5_curve1_rotation1_combined2/overhead.png",
       "sha256": "d1356f0b4a4661bccd52ef85b30bb1a39c96c97dcda4bf92a8203d96da32407b",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 35,
       "page": 3,
       "path": "details/seven_iron_lean5_curve1_rotation1_shaft_only/density.png",
       "sha256": "c9703d78b27a94a9c75617ae90fb47a10907273e1572f88bbcb447b209757873",
-      "size": [
-        2848,
-        1701
-      ]
+      "size": [2848, 1701]
     },
     {
       "index": 36,
       "page": 3,
       "path": "details/seven_iron_lean5_curve1_rotation1_shaft_only/overhead.png",
       "sha256": "f7cffd1887c0ae44cc9334ad9be1257bde6f194f3284ee60507b762533631906",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 37,
       "page": 3,
       "path": "details/seven_iron_lean5_curve1_rotation2_combined2/density.png",
       "sha256": "daf6771e7224b199614914b576a312f1a084c966d760d70985dfc7e9642f0f8a",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 38,
       "page": 3,
       "path": "details/seven_iron_lean5_curve1_rotation2_combined2/overhead.png",
       "sha256": "76f067c35b87b001aa40ee8539a1cf1bbe5496a7c4cd194a515f62a2494f0cf2",
-      "size": [
-        3097,
-        1080
-      ]
+      "size": [3097, 1080]
     },
     {
       "index": 39,
       "page": 3,
       "path": "details/seven_iron_lean5_curve1_rotation2_shaft_only/density.png",
       "sha256": "fb4b04f6e92cc6c6a850023d7860f441697ac43104b75bc160219eaba1425259",
-      "size": [
-        2864,
-        1701
-      ]
+      "size": [2864, 1701]
     },
     {
       "index": 40,
       "page": 3,
       "path": "details/seven_iron_lean5_curve1_rotation2_shaft_only/overhead.png",
       "sha256": "87f9814b8768352fc4f05cddfd23d9666e7ce13bd79698d60df52efcc0d858e9",
-      "size": [
-        3073,
-        1080
-      ]
+      "size": [3073, 1080]
     },
     {
       "index": 41,
       "page": 3,
       "path": "details/seven_iron_lean5_curve2_rotation1_combined2/density.png",
       "sha256": "d803a151940e93177329982e21aa5ac32df23381c22a4ca69d56e7c7ff2388e1",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 42,
       "page": 3,
       "path": "details/seven_iron_lean5_curve2_rotation1_combined2/overhead.png",
       "sha256": "2993333cde649bd5b412183f735a108f3f486277865de9b99ae3fde4a0fd90e0",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 43,
       "page": 3,
       "path": "details/seven_iron_lean5_curve2_rotation1_shaft_only/density.png",
       "sha256": "604f3dc4365e2f0e19c2f6c97a5648efb9a374fa4bdb95520e11d5653cb09d70",
-      "size": [
-        2848,
-        1701
-      ]
+      "size": [2848, 1701]
     },
     {
       "index": 44,
       "page": 3,
       "path": "details/seven_iron_lean5_curve2_rotation1_shaft_only/overhead.png",
       "sha256": "3092208c7e9de410f4956e92979e1d897908a172a07e5b20ed1d400f1a5a94d6",
-      "size": [
-        3057,
-        1080
-      ]
+      "size": [3057, 1080]
     },
     {
       "index": 45,
       "page": 3,
       "path": "details/seven_iron_lean5_curve2_rotation2_combined2/density.png",
       "sha256": "5c7448efe87e9a677b86ca828017dc76711000dd16babdbde41ed18f46e31af0",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 46,
       "page": 3,
       "path": "details/seven_iron_lean5_curve2_rotation2_combined2/overhead.png",
       "sha256": "07a535a7a9e8c2f4fb72a3aa237e08bfec85f6121cf748db8a73bee5bf09d3b0",
-      "size": [
-        3097,
-        1080
-      ]
+      "size": [3097, 1080]
     },
     {
       "index": 47,
       "page": 3,
       "path": "details/seven_iron_lean5_curve2_rotation2_shaft_only/density.png",
       "sha256": "3be799a7cfa763ae89ce22b2c14c4992ade1ee5f1ce8fd49f62b3dfd465b77bf",
-      "size": [
-        2880,
-        1701
-      ]
+      "size": [2880, 1701]
     },
     {
       "index": 48,
       "page": 3,
       "path": "details/seven_iron_lean5_curve2_rotation2_shaft_only/overhead.png",
       "sha256": "7bfe2e6d29e5538b01e192570aa7584462bdaf3b52a96e33c5d05c4009339304",
-      "size": [
-        3073,
-        1080
-      ]
+      "size": [3073, 1080]
     }
   ]
 }

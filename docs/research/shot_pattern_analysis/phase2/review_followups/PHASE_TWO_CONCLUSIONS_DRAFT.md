@@ -12,20 +12,20 @@ PW shaft-only conditions favor Draw and penalize Fade in all four selected cases
 
 Doubling primitive shaft-twist SD changes both the endpoint spread and its bias; it is not a prescribed doubling of delivered face-angle SD. The following direct interactions quantify changes in relative scoring, not changes in absolute performance. A curve can gain relative to Straight even if both patterns become worse. Curve-strength comparisons include nominal delivery rematching and, for strong PW, the explicitly adapted bounds protocol.
 
-| Club / Profile | Ordered Change | Common Six n / 10,000 | Draw Interaction, Strokes [95% CI] | Fade Interaction, Strokes [95% CI] |
-|---|---|---:|---:|---:|
-| driver / shaft_only | SD 1→2°, curve ×1 | 10000 | +0.00281801 [+0.00234573, +0.00328781] | -0.00129338 [-0.00170755, -0.000895627] |
-| driver / shaft_only | Curve ×1→×2, SD 2° | 10000 | +0.00490503 [+0.00438298, +0.00545231] | -0.000235419 [-0.000574032, +0.000112352] |
-| driver / combined2 | SD 1→2°, curve ×1 | 10000 | +0.00216825 [+0.00160011, +0.00270617] | -0.000969873 [-0.00150214, -0.000502799] |
-| driver / combined2 | Curve ×1→×2, SD 2° | 10000 | +0.00448715 [+0.00393767, +0.0050661] | +9.29854e-05 [-0.000273522, +0.000464163] |
-| seven_iron / shaft_only | SD 1→2°, curve ×1 | 10000 | +6.44855e-06 [-7.08911e-05, +4.9342e-05] | +1.99997e-05 [-5.97948e-05, +0.000135795] |
-| seven_iron / shaft_only | Curve ×1→×2, SD 2° | 10000 | +0.000210886 [+9.16361e-05, +0.000357793] | +0.00151468 [+0.00143332, +0.00162877] |
-| seven_iron / combined2 | SD 1→2°, curve ×1 | 9996 | -6.0275e-05 [-0.000296613, +0.00015399] | +0.00021754 [-7.96529e-05, +0.000511338] |
-| seven_iron / combined2 | Curve ×1→×2, SD 2° | 9996 | -0.000247592 [-0.00049481, +2.78039e-05] | +0.0011829 [+0.000981745, +0.00136468] |
-| pitching_wedge / shaft_only | SD 1→2°, curve ×1 | 10000 | +0.00109268 [+0.00102641, +0.00116357] | -0.0010371 [-0.00110479, -0.000971134] |
-| pitching_wedge / shaft_only | Curve ×1→×2, SD 2° | 10000 | +0.00559049 [+0.00552875, +0.00564324] | -0.00547902 [-0.00553037, -0.00541849] |
-| pitching_wedge / combined2 | SD 1→2°, curve ×1 | 9999 | +0.000389315 [+0.000218487, +0.000550562] | -0.00042761 [-0.000545245, -0.00031499] |
-| pitching_wedge / combined2 | Curve ×1→×2, SD 2° | 9999 | +0.000562086 [+0.000416443, +0.000716681] | -0.000293463 [-0.000491058, -8.72342e-05] |
+| Club / Profile              | Ordered Change     | Common Six n / 10,000 |        Draw Interaction, Strokes [95% CI] |        Fade Interaction, Strokes [95% CI] |
+| --------------------------- | ------------------ | --------------------: | ----------------------------------------: | ----------------------------------------: |
+| driver / shaft_only         | SD 1→2°, curve ×1  |                 10000 |    +0.00281801 [+0.00234573, +0.00328781] |   -0.00129338 [-0.00170755, -0.000895627] |
+| driver / shaft_only         | Curve ×1→×2, SD 2° |                 10000 |    +0.00490503 [+0.00438298, +0.00545231] | -0.000235419 [-0.000574032, +0.000112352] |
+| driver / combined2          | SD 1→2°, curve ×1  |                 10000 |    +0.00216825 [+0.00160011, +0.00270617] |  -0.000969873 [-0.00150214, -0.000502799] |
+| driver / combined2          | Curve ×1→×2, SD 2° |                 10000 |     +0.00448715 [+0.00393767, +0.0050661] | +9.29854e-05 [-0.000273522, +0.000464163] |
+| seven_iron / shaft_only     | SD 1→2°, curve ×1  |                 10000 |  +6.44855e-06 [-7.08911e-05, +4.9342e-05] | +1.99997e-05 [-5.97948e-05, +0.000135795] |
+| seven_iron / shaft_only     | Curve ×1→×2, SD 2° |                 10000 | +0.000210886 [+9.16361e-05, +0.000357793] |    +0.00151468 [+0.00143332, +0.00162877] |
+| seven_iron / combined2      | SD 1→2°, curve ×1  |                  9996 |   -6.0275e-05 [-0.000296613, +0.00015399] |  +0.00021754 [-7.96529e-05, +0.000511338] |
+| seven_iron / combined2      | Curve ×1→×2, SD 2° |                  9996 |  -0.000247592 [-0.00049481, +2.78039e-05] |    +0.0011829 [+0.000981745, +0.00136468] |
+| pitching_wedge / shaft_only | SD 1→2°, curve ×1  |                 10000 |    +0.00109268 [+0.00102641, +0.00116357] |    -0.0010371 [-0.00110479, -0.000971134] |
+| pitching_wedge / shaft_only | Curve ×1→×2, SD 2° |                 10000 |    +0.00559049 [+0.00552875, +0.00564324] |    -0.00547902 [-0.00553037, -0.00541849] |
+| pitching_wedge / combined2  | SD 1→2°, curve ×1  |                  9999 | +0.000389315 [+0.000218487, +0.000550562] |   -0.00042761 [-0.000545245, -0.00031499] |
+| pitching_wedge / combined2  | Curve ×1→×2, SD 2° |                  9999 | +0.000562086 [+0.000416443, +0.000716681] | -0.000293463 [-0.000491058, -8.72342e-05] |
 
 Intervals were taken directly from same-index six-population interaction records. None were formed by subtracting marginal confidence limits. An interval spanning zero does not prove equivalence or no effect.
 

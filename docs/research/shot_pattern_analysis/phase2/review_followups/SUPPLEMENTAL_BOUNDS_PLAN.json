@@ -4,20 +4,10 @@
   "status": "predeclared_not_authorized_for_mc",
   "scope": "Correct evidenced face-search exclusions; preserve original bounded-search study",
   "n_shots_per_pattern": 10000,
-  "patterns": [
-    "Straight",
-    "Draw",
-    "Fade"
-  ],
+  "patterns": ["Straight", "Draw", "Fade"],
   "seed": 20261009,
-  "absolute_face_bounds_deg": [
-    -6,
-    6
-  ],
-  "pitching_wedge_speed_bounds_mps": [
-    24,
-    40
-  ],
+  "absolute_face_bounds_deg": [-6, 6],
+  "pitching_wedge_speed_bounds_mps": [24, 40],
   "match_tolerance_m": 0.05,
   "curve_scale": 2,
   "fixed_control_target_m": 77.40247724866299,

@@ -12,10 +12,7 @@
       "kind": "density",
       "presentation": "academic",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1",
-        "original_primary/1"
-      ],
+      "source_protocols": ["original_primary/1", "original_primary/1"],
       "source_cells": [
         "driver_lean5_curve1_rotation1_combined2",
         "driver_lean5_curve1_rotation2_combined2"
@@ -30,10 +27,7 @@
       "kind": "density",
       "presentation": "social",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1",
-        "original_primary/1"
-      ],
+      "source_protocols": ["original_primary/1", "original_primary/1"],
       "source_cells": [
         "driver_lean5_curve1_rotation1_combined2",
         "driver_lean5_curve1_rotation2_combined2"
@@ -48,10 +42,7 @@
       "kind": "density",
       "presentation": "social",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1",
-        "original_primary/1"
-      ],
+      "source_protocols": ["original_primary/1", "original_primary/1"],
       "source_cells": [
         "driver_lean5_curve1_rotation1_combined2",
         "driver_lean5_curve1_rotation2_combined2"
@@ -66,10 +57,7 @@
       "kind": "density",
       "presentation": "social",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1",
-        "original_primary/1"
-      ],
+      "source_protocols": ["original_primary/1", "original_primary/1"],
       "source_cells": [
         "driver_lean5_curve1_rotation1_combined2",
         "driver_lean5_curve1_rotation2_combined2"
@@ -84,10 +72,7 @@
       "kind": "overhead",
       "presentation": "academic",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1",
-        "original_primary/1"
-      ],
+      "source_protocols": ["original_primary/1", "original_primary/1"],
       "source_cells": [
         "driver_lean5_curve1_rotation1_combined2",
         "driver_lean5_curve1_rotation2_combined2"
@@ -102,10 +87,7 @@
       "kind": "overhead",
       "presentation": "social",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1",
-        "original_primary/1"
-      ],
+      "source_protocols": ["original_primary/1", "original_primary/1"],
       "source_cells": [
         "driver_lean5_curve1_rotation1_combined2",
         "driver_lean5_curve1_rotation2_combined2"
@@ -120,12 +102,8 @@
       "kind": "density",
       "presentation": "academic",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1"
-      ],
-      "source_cells": [
-        "driver_lean5_curve1_rotation1_combined2"
-      ],
+      "source_protocols": ["original_primary/1"],
+      "source_cells": ["driver_lean5_curve1_rotation1_combined2"],
       "physical_pattern": null,
       "comparison_kind": null,
       "source_kind": "individual_supported_endpoints",
@@ -136,12 +114,8 @@
       "kind": "density",
       "presentation": "social",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1"
-      ],
-      "source_cells": [
-        "driver_lean5_curve1_rotation1_combined2"
-      ],
+      "source_protocols": ["original_primary/1"],
+      "source_cells": ["driver_lean5_curve1_rotation1_combined2"],
       "physical_pattern": null,
       "comparison_kind": null,
       "source_kind": "individual_supported_endpoints",
@@ -152,12 +126,8 @@
       "kind": "overhead",
       "presentation": "academic",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1"
-      ],
-      "source_cells": [
-        "driver_lean5_curve1_rotation1_combined2"
-      ],
+      "source_protocols": ["original_primary/1"],
+      "source_cells": ["driver_lean5_curve1_rotation1_combined2"],
       "physical_pattern": null,
       "comparison_kind": null,
       "source_kind": "saved_illustrative_trajectories",
@@ -168,12 +138,8 @@
       "kind": "overhead",
       "presentation": "social",
       "source_protocol": "original_primary/1",
-      "source_protocols": [
-        "original_primary/1"
-      ],
-      "source_cells": [
-        "driver_lean5_curve1_rotation1_combined2"
-      ],
+      "source_protocols": ["original_primary/1"],
+      "source_cells": ["driver_lean5_curve1_rotation1_combined2"],
       "physical_pattern": null,
       "comparison_kind": null,
       "source_kind": "saved_illustrative_trajectories",

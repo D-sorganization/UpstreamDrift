@@ -13,106 +13,38 @@
         "inputs": {
           "points_by_pattern": {
             "Straight": [
-              [
-                0,
-                0
-              ],
-              [
-                1,
-                0
-              ],
-              [
-                2,
-                0
-              ]
+              [0, 0],
+              [1, 0],
+              [2, 0]
             ],
             "Draw": [
-              [
-                0,
-                1
-              ],
-              [
-                1,
-                1
-              ],
-              [
-                2,
-                1
-              ]
+              [0, 1],
+              [1, 1],
+              [2, 1]
             ],
             "Fade": [
-              [
-                0,
-                -1
-              ],
-              [
-                1,
-                -1
-              ],
-              [
-                2,
-                -1
-              ]
+              [0, -1],
+              [1, -1],
+              [2, -1]
             ]
           },
           "bins": 4
         },
         "output": {
-          "x_edges_m": [
-            -0.1,
-            0.45000000000000007,
-            1.0,
-            1.55,
-            2.1
-          ],
-          "y_edges_m": [
-            -1.1,
-            -0.55,
-            0.0,
-            0.55,
-            1.1
-          ],
-          "x_limits_m": [
-            -0.1,
-            2.1
-          ],
-          "y_limits_m": [
-            -1.1,
-            1.1
-          ],
-          "bin_resolution_m": [
-            0.55,
-            0.55
-          ],
+          "x_edges_m": [-0.1, 0.45000000000000007, 1.0, 1.55, 2.1],
+          "y_edges_m": [-1.1, -0.55, 0.0, 0.55, 1.1],
+          "x_limits_m": [-0.1, 2.1],
+          "y_limits_m": [-1.1, 1.1],
+          "bin_resolution_m": [0.55, 0.55],
           "density_vmax_per_m2": 1.1019283746556472,
           "patterns": {
             "Straight": {
               "n": 3,
               "density_per_m2": [
-                [
-                  0.0,
-                  0.0,
-                  1.1019283746556472,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  1.1019283746556472,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  1.1019283746556472,
-                  0.0
-                ]
+                [0.0, 0.0, 1.1019283746556472, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.1019283746556472, 0.0],
+                [0.0, 0.0, 1.1019283746556472, 0.0]
               ],
               "hdr_density_thresholds": {
                 "0.5": 1.1019283746556472,
@@ -129,30 +61,10 @@
             "Draw": {
               "n": 3,
               "density_per_m2": [
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  1.1019283746556472
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  1.1019283746556472
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  1.1019283746556472
-                ]
+                [0.0, 0.0, 0.0, 1.1019283746556472],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.1019283746556472],
+                [0.0, 0.0, 0.0, 1.1019283746556472]
               ],
               "hdr_density_thresholds": {
                 "0.5": 1.1019283746556472,
@@ -169,30 +81,10 @@
             "Fade": {
               "n": 3,
               "density_per_m2": [
-                [
-                  1.1019283746556472,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  1.1019283746556472,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  1.1019283746556472,
-                  0.0,
-                  0.0,
-                  0.0
-                ]
+                [1.1019283746556472, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [1.1019283746556472, 0.0, 0.0, 0.0],
+                [1.1019283746556472, 0.0, 0.0, 0.0]
               ],
               "hdr_density_thresholds": {
                 "0.5": 1.1019283746556472,
@@ -213,96 +105,31 @@
         "inputs": {
           "points_by_pattern": {
             "Constant": [
-              [
-                1,
-                2
-              ],
-              [
-                1,
-                2
-              ],
-              [
-                1,
-                2
-              ]
+              [1, 2],
+              [1, 2],
+              [1, 2]
             ]
           },
-          "bins": [
-            4,
-            5
-          ],
-          "target_point_m": [
-            1,
-            2
-          ],
+          "bins": [4, 5],
+          "target_point_m": [1, 2],
           "constant_axis_half_width_m": 0.25,
-          "region_masses": [
-            0.95,
-            0.5,
-            0.8
-          ]
+          "region_masses": [0.95, 0.5, 0.8]
         },
         "output": {
-          "x_edges_m": [
-            0.75,
-            0.875,
-            1.0,
-            1.125,
-            1.25
-          ],
-          "y_edges_m": [
-            1.75,
-            1.85,
-            1.95,
-            2.05,
-            2.15,
-            2.25
-          ],
-          "x_limits_m": [
-            0.75,
-            1.25
-          ],
-          "y_limits_m": [
-            1.75,
-            2.25
-          ],
-          "bin_resolution_m": [
-            0.125,
-            0.10000000000000009
-          ],
+          "x_edges_m": [0.75, 0.875, 1.0, 1.125, 1.25],
+          "y_edges_m": [1.75, 1.85, 1.95, 2.05, 2.15, 2.25],
+          "x_limits_m": [0.75, 1.25],
+          "y_limits_m": [1.75, 2.25],
+          "bin_resolution_m": [0.125, 0.10000000000000009],
           "density_vmax_per_m2": 80.00000000000011,
           "patterns": {
             "Constant": {
               "n": 3,
               "density_per_m2": [
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  80.00000000000011,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ]
+                [0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 80.00000000000011, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0]
               ],
               "hdr_density_thresholds": {
                 "0.95": 80.00000000000011,
@@ -323,107 +150,34 @@
         "inputs": {
           "points_by_pattern": {
             "Unequal": [
-              [
-                0,
-                0
-              ],
-              [
-                0,
-                0
-              ],
-              [
-                1,
-                2
-              ],
-              [
-                2,
-                -1
-              ]
+              [0, 0],
+              [0, 0],
+              [1, 2],
+              [2, -1]
             ],
-            "Other": [
-              [
-                3,
-                0
-              ]
-            ]
+            "Other": [[3, 0]]
           },
-          "bins": [
-            5,
-            4
-          ],
-          "target_point_m": [
-            8,
-            -3
-          ],
+          "bins": [5, 4],
+          "target_point_m": [8, -3],
           "padding_fraction": 0.125,
-          "region_masses": [
-            0.3,
-            0.7
-          ]
+          "region_masses": [0.3, 0.7]
         },
         "output": {
-          "x_edges_m": [
-            -1.0,
-            1.0,
-            3.0,
-            5.0,
-            7.0,
-            9.0
-          ],
-          "y_edges_m": [
-            -3.625,
-            -2.0625,
-            -0.5,
-            1.0625,
-            2.625
-          ],
-          "x_limits_m": [
-            -1.0,
-            9.0
-          ],
-          "y_limits_m": [
-            -3.625,
-            2.625
-          ],
-          "bin_resolution_m": [
-            2.0,
-            1.5625
-          ],
+          "x_edges_m": [-1.0, 1.0, 3.0, 5.0, 7.0, 9.0],
+          "y_edges_m": [-3.625, -2.0625, -0.5, 1.0625, 2.625],
+          "x_limits_m": [-1.0, 9.0],
+          "y_limits_m": [-3.625, 2.625],
+          "bin_resolution_m": [2.0, 1.5625],
           "density_vmax_per_m2": 0.32,
           "patterns": {
             "Unequal": {
               "n": 4,
               "density_per_m2": [
-                [
-                  0.0,
-                  0.0,
-                  0.16,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.08,
-                  0.0,
-                  0.08
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ]
+                [0.0, 0.0, 0.16, 0.0],
+                [0.0, 0.08, 0.0, 0.08],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0]
               ],
               "hdr_density_thresholds": {
                 "0.3": 0.16,
@@ -438,36 +192,11 @@
             "Other": {
               "n": 1,
               "density_per_m2": [
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.32,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ],
-                [
-                  0.0,
-                  0.0,
-                  0.0,
-                  0.0
-                ]
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.32, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0]
               ],
               "hdr_density_thresholds": {
                 "0.3": 0.32,
@@ -487,28 +216,13 @@
       {
         "inputs": {
           "points": [
-            [
-              9,
-              -1
-            ],
-            [
-              10,
-              0
-            ],
-            [
-              11,
-              1
-            ],
-            [
-              12,
-              2
-            ]
+            [9, -1],
+            [10, 0],
+            [11, 1],
+            [12, 2]
           ],
           "target_x_m": 10,
-          "nominal_point": [
-            10.5,
-            0.25
-          ]
+          "nominal_point": [10.5, 0.25]
         },
         "output": {
           "n": 4,
@@ -523,10 +237,7 @@
           "corr_lateral_radial_carry": 0.9992820057481705,
           "median_radial_target_error_m": 1.4142135623730951,
           "p95_radial_target_error_m": 2.6162950903902256,
-          "principal_axis_eigenvalues_m2": [
-            3.333333333333333,
-            0.0
-          ],
+          "principal_axis_eigenvalues_m2": [3.333333333333333, 0.0],
           "principal_axis_orientation_deg": 45.0,
           "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
           "quadrant_fractions": {
@@ -541,24 +252,15 @@
             "right": 1.5
           },
           "interpretation_limit": "Descriptive endpoint covariance only; face variation alone does not calibrate two-dimensional player precision.",
-          "nominal_mean_offset_m": [
-            0.0,
-            0.25
-          ],
+          "nominal_mean_offset_m": [0.0, 0.25],
           "nominal_rmse_m": 1.6007810593582121
         }
       },
       {
         "inputs": {
           "points": [
-            [
-              100,
-              0
-            ],
-            [
-              100,
-              0
-            ]
+            [100, 0],
+            [100, 0]
           ],
           "target_x_m": 100
         },
@@ -575,10 +277,7 @@
           "corr_lateral_radial_carry": null,
           "median_radial_target_error_m": 0.0,
           "p95_radial_target_error_m": 0.0,
-          "principal_axis_eigenvalues_m2": [
-            0.0,
-            0.0
-          ],
+          "principal_axis_eigenvalues_m2": [0.0, 0.0],
           "principal_axis_orientation_deg": null,
           "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
           "quadrant_fractions": {
@@ -598,22 +297,10 @@
       {
         "inputs": {
           "points": [
-            [
-              1,
-              0
-            ],
-            [
-              -1,
-              0
-            ],
-            [
-              0,
-              1
-            ],
-            [
-              0,
-              -1
-            ]
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
           ],
           "target_x_m": 0
         },
@@ -631,8 +318,7 @@
           "median_radial_target_error_m": 1.0,
           "p95_radial_target_error_m": 1.0,
           "principal_axis_eigenvalues_m2": [
-            0.6666666666666666,
-            0.6666666666666666
+            0.6666666666666666, 0.6666666666666666
           ],
           "principal_axis_orientation_deg": null,
           "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
@@ -653,32 +339,14 @@
       {
         "inputs": {
           "points": [
-            [
-              98,
-              -2
-            ],
-            [
-              101,
-              0
-            ],
-            [
-              102,
-              3
-            ],
-            [
-              104,
-              -1
-            ],
-            [
-              95,
-              2
-            ]
+            [98, -2],
+            [101, 0],
+            [102, 3],
+            [104, -1],
+            [95, 2]
           ],
           "target_x_m": 100,
-          "nominal_point": [
-            99,
-            1
-          ]
+          "nominal_point": [99, 1]
         },
         "output": {
           "n": 5,
@@ -694,8 +362,7 @@
           "median_radial_target_error_m": 3.605551275463989,
           "p95_radial_target_error_m": 5.132752970831135,
           "principal_axis_eigenvalues_m2": [
-            12.620189569201838,
-            4.179810430798161
+            12.620189569201838, 4.179810430798161
           ],
           "principal_axis_orientation_deg": -6.853480502039872,
           "principal_axis_angle_convention": "unoriented axis from +downrange toward +right, normalized to [-90, 90)",
@@ -711,10 +378,7 @@
             "right": -1.5
           },
           "interpretation_limit": "Descriptive endpoint covariance only; face variation alone does not calibrate two-dimensional player precision.",
-          "nominal_mean_offset_m": [
-            1.0,
-            -0.6
-          ],
+          "nominal_mean_offset_m": [1.0, -0.6],
           "nominal_rmse_m": 3.847076812334269
         }
       }
@@ -733,18 +397,8 @@
       {
         "inputs": {
           "points_by_pattern": {
-            "": [
-              [
-                0,
-                0
-              ]
-            ],
-            "Good": [
-              [
-                1,
-                2
-              ]
-            ]
+            "": [[0, 0]],
+            "Good": [[1, 2]]
           }
         },
         "error": {
@@ -768,12 +422,7 @@
       {
         "inputs": {
           "points_by_pattern": {
-            "Good": [
-              [
-                "bad",
-                2
-              ]
-            ]
+            "Good": [["bad", 2]]
           }
         },
         "error": {
@@ -785,16 +434,9 @@
       {
         "inputs": {
           "points_by_pattern": {
-            "Good": [
-              [
-                1,
-                2
-              ]
-            ]
+            "Good": [[1, 2]]
           },
-          "target_point_m": [
-            1
-          ]
+          "target_point_m": [1]
         },
         "error": {
           "type": "ValueError",
@@ -805,12 +447,7 @@
       {
         "inputs": {
           "points_by_pattern": {
-            "Good": [
-              [
-                1,
-                2
-              ]
-            ]
+            "Good": [[1, 2]]
           },
           "padding_fraction": -1
         },
@@ -823,12 +460,7 @@
       {
         "inputs": {
           "points_by_pattern": {
-            "Good": [
-              [
-                1,
-                2
-              ]
-            ]
+            "Good": [[1, 2]]
           },
           "constant_axis_half_width_m": 0
         },
@@ -841,12 +473,7 @@
       {
         "inputs": {
           "points_by_pattern": {
-            "Good": [
-              [
-                1,
-                2
-              ]
-            ]
+            "Good": [[1, 2]]
           },
           "bins": 3
         },
@@ -859,12 +486,7 @@
       {
         "inputs": {
           "points_by_pattern": {
-            "Good": [
-              [
-                1,
-                2
-              ]
-            ]
+            "Good": [[1, 2]]
           },
           "bins": "bad"
         },
@@ -877,17 +499,9 @@
       {
         "inputs": {
           "points_by_pattern": {
-            "Good": [
-              [
-                1,
-                2
-              ]
-            ]
+            "Good": [[1, 2]]
           },
-          "region_masses": [
-            0.5,
-            0.5
-          ]
+          "region_masses": [0.5, 0.5]
         },
         "error": {
           "type": "ValueError",
@@ -898,16 +512,9 @@
       {
         "inputs": {
           "points_by_pattern": {
-            "Good": [
-              [
-                1,
-                2
-              ]
-            ]
+            "Good": [[1, 2]]
           },
-          "region_masses": [
-            "bad"
-          ]
+          "region_masses": ["bad"]
         },
         "error": {
           "type": "ValueError",
@@ -942,14 +549,8 @@
       {
         "inputs": {
           "points": [
-            [
-              "bad",
-              0
-            ],
-            [
-              1,
-              2
-            ]
+            ["bad", 0],
+            [1, 2]
           ],
           "target_x_m": 0
         },
@@ -962,19 +563,11 @@
       {
         "inputs": {
           "points": [
-            [
-              1,
-              2
-            ],
-            [
-              3,
-              4
-            ]
+            [1, 2],
+            [3, 4]
           ],
           "target_x_m": 0,
-          "nominal_point": [
-            1
-          ]
+          "nominal_point": [1]
         },
         "error": {
           "type": "ValueError",
@@ -985,20 +578,11 @@
       {
         "inputs": {
           "points": [
-            [
-              1,
-              2
-            ],
-            [
-              3,
-              4
-            ]
+            [1, 2],
+            [3, 4]
           ],
           "target_x_m": 0,
-          "nominal_point": [
-            "bad",
-            0
-          ]
+          "nominal_point": ["bad", 0]
         },
         "error": {
           "type": "ValueError",

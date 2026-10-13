@@ -16,17 +16,17 @@ The final figure ledger supplies `figure_kind`, presentation, physical pattern, 
 
 ## Nine Vector Families
 
-| Record | Family | Required Formats |
-|---|---|---|
-| Pair | Academic Density (`density_pdf/svg`) | PDF and SVG |
-| Pair | Academic Overhead (`overhead_pdf/svg`) | PDF and SVG |
-| Pair | Straight Social Density (`density_straight_social_pdf/svg`) | PDF and SVG |
-| Pair | Draw Social Density (`density_draw_social_pdf/svg`) | PDF and SVG |
-| Pair | Fade Social Density (`density_fade_social_pdf/svg`) | PDF and SVG |
-| Cell | Academic Density (`density_pdf/svg`) | PDF and SVG |
-| Cell | Academic Overhead (`overhead_pdf/svg`) | PDF and SVG |
-| Cell | Social Density (`density_social_pdf/svg`) | PDF and SVG |
-| Cell | Social Overhead (`overhead_social_pdf/svg`) | PDF and SVG |
+| Record | Family                                                      | Required Formats |
+| ------ | ----------------------------------------------------------- | ---------------- |
+| Pair   | Academic Density (`density_pdf/svg`)                        | PDF and SVG      |
+| Pair   | Academic Overhead (`overhead_pdf/svg`)                      | PDF and SVG      |
+| Pair   | Straight Social Density (`density_straight_social_pdf/svg`) | PDF and SVG      |
+| Pair   | Draw Social Density (`density_draw_social_pdf/svg`)         | PDF and SVG      |
+| Pair   | Fade Social Density (`density_fade_social_pdf/svg`)         | PDF and SVG      |
+| Cell   | Academic Density (`density_pdf/svg`)                        | PDF and SVG      |
+| Cell   | Academic Overhead (`overhead_pdf/svg`)                      | PDF and SVG      |
+| Cell   | Social Density (`density_social_pdf/svg`)                   | PDF and SVG      |
+| Cell   | Social Overhead (`overhead_social_pdf/svg`)                 | PDF and SVG      |
 
 There is **no pair social-overhead vector export**. Its PNG remains covered by the full PNG review, not a fabricated tenth vector family. Supplemental unique cells contain Driver and PW only; seven-iron coverage must come from pairs. Absence of seven-iron unique supplemental cells is an inventory fact, not a silent omission.
 
@@ -34,17 +34,17 @@ There is **no pair social-overhead vector export**. Its PNG remains covered by t
 
 Select all five vector families for each selected pair and all four for each selected cell. Deduplicate identities across slots, preserving every selection reason.
 
-| Slots | Selection Rule | Purpose |
-|---|---|---|
-| P01–P09 | For each club (Driver, Seven Iron, PW) × each contrast (`across_lean`, `curve_strength`, `shaft_rotation_sd`), choose the eligible pair with smallest `common_supported_n`, ties by ordered identity. | All clubs, all contrast kinds, and low-support captions. |
-| P10 | Driver `across_lean`, one source `driver-control-speed-bounds/1`, the other original control; prefer actual shaft SD2 and combined2, then identity. | Explicit cross-protocol speed-bound fixed target. |
-| P11 | PW `across_lean` with a verified `provenance_alias` source and `pw-control-face-bounds/1` counterpart; prefer actual shaft SD2 and combined2. | Reused zero-lean primary as fixed-target alias; no independent-run claim. |
-| P12 | Pair with the greatest combined count of nonzero off-diagonal covariance entries in the two configs; ties by length of canonical JSON serialization of the two `config.noise` objects (`sort_keys=True`, compact separators), then identity. | Longest real covariance caption, not profile-name inference. |
-| P13 | Seven-iron pair containing lean10 shaft-only, prefer curve2 and shaft SD2; then smallest saved downrange SD across its six source-pattern summaries, then identity. | Previously demonstrated narrow-range tick stress. |
-| P14 | Driver pair with combined2 and shaft SD2; choose greatest saved downrange SD across the six summaries, then identity. | Broad-dispersion range stress. |
-| P15 | Globally smallest positive saved downrange SD across all six source-pattern summaries, then identity. | Independent small-scale proxy outside the named prior case. |
-| C01–C03 | One unique cell per supplemental protocol (`pw-primary-face-bounds/1`, `pw-control-face-bounds/1`, `driver-control-speed-bounds/1`), minimizing the minimum of three saved `supported_n`, ties by identity. | All unique execution protocols and minimum-support cell captions. |
-| C04 | PW primary cell maximizing number of nonzero off-diagonal correlations; prefer actual SD2, then longest canonical `config.noise` JSON, then identity. | Long social-cell context with strong curve and covariance. |
+| Slots   | Selection Rule                                                                                                                                                                                                                               | Purpose                                                                   |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| P01–P09 | For each club (Driver, Seven Iron, PW) × each contrast (`across_lean`, `curve_strength`, `shaft_rotation_sd`), choose the eligible pair with smallest `common_supported_n`, ties by ordered identity.                                        | All clubs, all contrast kinds, and low-support captions.                  |
+| P10     | Driver `across_lean`, one source `driver-control-speed-bounds/1`, the other original control; prefer actual shaft SD2 and combined2, then identity.                                                                                          | Explicit cross-protocol speed-bound fixed target.                         |
+| P11     | PW `across_lean` with a verified `provenance_alias` source and `pw-control-face-bounds/1` counterpart; prefer actual shaft SD2 and combined2.                                                                                                | Reused zero-lean primary as fixed-target alias; no independent-run claim. |
+| P12     | Pair with the greatest combined count of nonzero off-diagonal covariance entries in the two configs; ties by length of canonical JSON serialization of the two `config.noise` objects (`sort_keys=True`, compact separators), then identity. | Longest real covariance caption, not profile-name inference.              |
+| P13     | Seven-iron pair containing lean10 shaft-only, prefer curve2 and shaft SD2; then smallest saved downrange SD across its six source-pattern summaries, then identity.                                                                          | Previously demonstrated narrow-range tick stress.                         |
+| P14     | Driver pair with combined2 and shaft SD2; choose greatest saved downrange SD across the six summaries, then identity.                                                                                                                        | Broad-dispersion range stress.                                            |
+| P15     | Globally smallest positive saved downrange SD across all six source-pattern summaries, then identity.                                                                                                                                        | Independent small-scale proxy outside the named prior case.               |
+| C01–C03 | One unique cell per supplemental protocol (`pw-primary-face-bounds/1`, `pw-control-face-bounds/1`, `driver-control-speed-bounds/1`), minimizing the minimum of three saved `supported_n`, ties by identity.                                  | All unique execution protocols and minimum-support cell captions.         |
+| C04     | PW primary cell maximizing number of nonzero off-diagonal correlations; prefer actual SD2, then longest canonical `config.noise` JSON, then identity.                                                                                        | Long social-cell context with strong curve and covariance.                |
 
 Eligibility: materialized completed source refs, expected vector family actually available in final ledger, finite target, and at least two common supported rows for pair density. Do not substitute a scoring denominator for endpoint eligibility. Within preference clauses apply the listed criterion in order, not undocumented judgment.
 

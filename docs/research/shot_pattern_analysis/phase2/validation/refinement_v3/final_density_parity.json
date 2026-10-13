@@ -9,10 +9,7 @@
       "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Draw | SD 1\u00b0 20/20; Draw | SD 2\u00b0 20/20. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR."
     ],
     "rgba_sha256": "13fd0d9d7a35aa34bf65abce6f65af19d067c5c87b2f2750e641c62aed216bfb",
-    "size": [
-      1080,
-      1350
-    ]
+    "size": [1080, 1350]
   },
   "old": {
     "captions": [
@@ -22,10 +19,7 @@
       "Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots\nShown/Valid: Draw | SD 1\u00b0 20/20; Draw | SD 2\u00b0 20/20. Density, HDR, and marginals use every\nvalid endpoint. Shared axes and density scale; contours are simulated-sample HDR."
     ],
     "rgba_sha256": "13fd0d9d7a35aa34bf65abce6f65af19d067c5c87b2f2750e641c62aed216bfb",
-    "size": [
-      1080,
-      1350
-    ]
+    "size": [1080, 1350]
   },
   "rgba_equal": true,
   "row_equal": true

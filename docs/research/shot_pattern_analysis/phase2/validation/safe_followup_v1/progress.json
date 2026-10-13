@@ -1046,12 +1046,7 @@
   },
   "remote_reconciliation_pending": {
     "head": "47df000da36fd7ae73fef5de623f4cb5feadd320",
-    "commits": [
-      "1bafd5c4b6",
-      "9beff1c905",
-      "7bf9515aa1",
-      "47df000da3"
-    ],
+    "commits": ["1bafd5c4b6", "9beff1c905", "7bf9515aa1", "47df000da3"],
     "plan": "Rebase onto actual advanced PR head without force; preserve useful ADR index and blocked manual pointers, remove two unnecessary size-budget exceptions (766/46250 bytes vs51200), restore original reviewed canonical heading and its truthful provenance. Then run full canonical on stable committed source.",
     "status": "Complete: ordinary rebase retains remote47df in ancestry; final combined source36ab82a1be passes complete canonical. No force push, size-budget waiver, or scientific acceptance change.",
     "rebased_source_before_final_metadata_commit": "7a1defd5e57e72e133f1637d206505c9a54d32ac",

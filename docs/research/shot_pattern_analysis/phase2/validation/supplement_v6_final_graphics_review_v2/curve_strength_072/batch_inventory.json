@@ -77,10 +77,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "pw-primary-face-bounds/1"
-        ],
+        "source_protocols": ["original_primary/1", "pw-primary-face-bounds/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {
@@ -114,10 +111,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale",
-          "match_face_bounds_deg"
-        ],
+        "allowed_config_differences": ["curve_scale", "match_face_bounds_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -379,10 +373,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "pw-primary-face-bounds/1"
-        ],
+        "source_protocols": ["original_primary/1", "pw-primary-face-bounds/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {
@@ -416,10 +407,7 @@
             "Fade": 1
           }
         },
-        "allowed_config_differences": [
-          "curve_scale",
-          "match_face_bounds_deg"
-        ],
+        "allowed_config_differences": ["curve_scale", "match_face_bounds_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -681,10 +669,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "pw-primary-face-bounds/1"
-        ],
+        "source_protocols": ["original_primary/1", "pw-primary-face-bounds/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {
@@ -718,10 +703,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale",
-          "match_face_bounds_deg"
-        ],
+        "allowed_config_differences": ["curve_scale", "match_face_bounds_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -983,10 +965,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "pw-primary-face-bounds/1"
-        ],
+        "source_protocols": ["original_primary/1", "pw-primary-face-bounds/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {
@@ -1020,10 +999,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale",
-          "match_face_bounds_deg"
-        ],
+        "allowed_config_differences": ["curve_scale", "match_face_bounds_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1285,10 +1261,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "pw-primary-face-bounds/1"
-        ],
+        "source_protocols": ["original_primary/1", "pw-primary-face-bounds/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {
@@ -1322,10 +1295,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale",
-          "match_face_bounds_deg"
-        ],
+        "allowed_config_differences": ["curve_scale", "match_face_bounds_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1587,10 +1557,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "pw-primary-face-bounds/1"
-        ],
+        "source_protocols": ["original_primary/1", "pw-primary-face-bounds/1"],
         "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
         "sources": [
           {
@@ -1624,10 +1591,7 @@
             "Fade": 1
           }
         },
-        "allowed_config_differences": [
-          "curve_scale",
-          "match_face_bounds_deg"
-        ],
+        "allowed_config_differences": ["curve_scale", "match_face_bounds_deg"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1889,10 +1853,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1926,9 +1887,7 @@
             "Fade": 1
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2190,10 +2149,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2227,9 +2183,7 @@
             "Fade": 1
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2310,7 +2264,7 @@
             "course_sg_difference": {
               "estimate": -0.00018916875506743807,
               "lower_95": -0.00033380253824811504,
-              "upper_95": -4.59379051246565e-05
+              "upper_95": -4.59379051246565e-5
             },
             "course_sg_means": {
               "earlier_lean": 0.154023136273792,
@@ -2402,7 +2356,7 @@
           "Draw": {
             "estimate": -0.00018916875506743807,
             "lower_95": -0.00033380253824811504,
-            "upper_95": -4.59379051246565e-05
+            "upper_95": -4.59379051246565e-5
           },
           "Fade": {
             "estimate": 0.000788920490072946,
@@ -2491,10 +2445,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2528,9 +2479,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2792,10 +2741,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2829,9 +2775,7 @@
             "Fade": 1
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2947,7 +2891,7 @@
             "radial_error_difference_m": {
               "estimate": -0.0007036703777255756,
               "lower_95": -0.0012939422234040726,
-              "upper_95": -5.054635191020389e-05
+              "upper_95": -5.054635191020389e-5
             },
             "squared_target_error_difference_m2": {
               "estimate": 0.024644916247430752,
@@ -3093,10 +3037,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -3130,9 +3071,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -3394,10 +3333,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -3431,9 +3367,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {

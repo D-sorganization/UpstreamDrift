@@ -2,29 +2,14 @@
   "cell": "driver_lean5_curve2_rotation2_combined2",
   "loaded_request_equal": true,
   "face_bounds_enabled": true,
-  "face_bounds_deg": [
-    -6.0,
-    6.0
-  ],
-  "speed_factors": [
-    0.75,
-    1.3
-  ],
+  "face_bounds_deg": [-6.0, 6.0],
+  "speed_factors": [0.75, 1.3],
   "target_x_m": 178.94875782337786,
   "scroll_max": 1018,
   "run_visible": true,
   "cancel_visible": true,
   "status_visible": true,
-  "run_position": [
-    11,
-    348
-  ],
-  "cancel_position": [
-    11,
-    379
-  ],
-  "status_position": [
-    11,
-    410
-  ]
+  "run_position": [11, 348],
+  "cancel_position": [11, 379],
+  "status_position": [11, 410]
 }

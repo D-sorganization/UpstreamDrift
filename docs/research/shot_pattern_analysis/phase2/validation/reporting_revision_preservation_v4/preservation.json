@@ -3,9 +3,7 @@
   "status": "preserved_superseded_publications",
   "main_source_freeze_released": true,
   "study_python_source_diff_from_start_empty": true,
-  "non_python_changes": [
-    "src/tools/shot_pattern_analysis/README.md"
-  ],
+  "non_python_changes": ["src/tools/shot_pattern_analysis/README.md"],
   "all_producers_terminal": true,
   "original_graphics": "Both complete; graphically rejected, receipts preserved.",
   "supplemental": "Intentionally terminated with signal15 after confirmed correctness defects; partial output is not accepted. Existing statistics are provisional comparisons for unchanged-field checks only.",

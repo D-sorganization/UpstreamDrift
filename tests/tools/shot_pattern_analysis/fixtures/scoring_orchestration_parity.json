@@ -35,8 +35,5 @@
       "summary.json": "20e725008a3ee1f2177662fd81d9774c13456004d59ac12f94e75ca4ec4c90a9"
     }
   },
-  "scoring_clubs": [
-    "driver",
-    "seven_iron"
-  ]
+  "scoring_clubs": ["driver", "seven_iron"]
 }

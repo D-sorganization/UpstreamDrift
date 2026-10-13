@@ -20,12 +20,7 @@
   "candidate_capture_sha256": "3ed5be3bd43bc9b51dad70b8ad1051d67973b301e4c04a71e8c880fe825c6fc6",
   "worker_script_sha256": "c03cddb56cc40a3c0af1e53a7b8f7a5017ed56b12950560799405f8260ec0e46",
   "pair_input_sha256": "9f3f11147c03c640f4e4daab8534bf867a681ef63e2f5c79a784cc157c5a9eb3",
-  "pairs": [
-    "pw_narrow",
-    "iron_narrow",
-    "pw_covariance",
-    "driver_fixed"
-  ],
+  "pairs": ["pw_narrow", "iron_narrow", "pw_covariance", "driver_fixed"],
   "all_artist_and_density_data_identical": true,
   "all_nonpath_ledger_metadata_identical": true,
   "png_count_byte_identical": 12,

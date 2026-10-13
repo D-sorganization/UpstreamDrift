@@ -21,10 +21,7 @@
     "matched_lean_control.py": "2b111750073259d21837bab6ab0cc0c87d0c335e5f678593183e82198a8b50a8",
     "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
   },
-  "source_protocols": [
-    "original_control/1",
-    "driver-control-speed-bounds/1"
-  ],
+  "source_protocols": ["original_control/1", "driver-control-speed-bounds/1"],
   "source_transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
   "sources": [
     {

@@ -20,17 +20,8 @@
   "actual_render_receipt_sha256": "7fed0069bbf98ae9b7cb9eaeb679847981bbf738f2a5fa0085dc74cbd1123997",
   "actual_pngs_visually_reviewed": 6,
   "minimum_main_tick_gutter_pt": 8.26050015297542,
-  "narrow_case_xlim_m": [
-    144.49132941108118,
-    152.18175832485224
-  ],
-  "narrow_case_shared_ticks_m": [
-    144.8,
-    146.4,
-    148.0,
-    149.6,
-    151.2
-  ],
+  "narrow_case_xlim_m": [144.49132941108118, 152.18175832485224],
+  "narrow_case_shared_ticks_m": [144.8, 146.4, 148.0, 149.6, 151.2],
   "test_red_failures": 2,
   "limitation": "Component qualification only; primary v3 remains changes_required and full regenerated outputs need acceptance. Initial zero-target harness was rejected; final harness calls exact current MAIN builder with saved targets/metadata. Diagnostic PNG export uses 100dpi; production builder is called with its 180dpi argument. No physical simulations or altered density inputs.",
   "tests": {

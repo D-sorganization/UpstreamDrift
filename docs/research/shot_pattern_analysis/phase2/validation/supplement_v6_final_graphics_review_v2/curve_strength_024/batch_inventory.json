@@ -77,10 +77,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -114,9 +111,7 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -378,10 +373,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -415,9 +407,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -679,10 +669,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -716,9 +703,7 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -980,10 +965,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1017,9 +999,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1281,10 +1261,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1318,9 +1295,7 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1582,10 +1557,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1619,9 +1591,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -1883,10 +1853,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -1920,9 +1887,7 @@
             "Fade": 4
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2184,10 +2149,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_control/1",
-          "original_control/1"
-        ],
+        "source_protocols": ["original_control/1", "original_control/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2221,9 +2183,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2302,7 +2262,7 @@
               "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
             },
             "course_sg_difference": {
-              "estimate": -3.791218730229399e-05,
+              "estimate": -3.791218730229399e-5,
               "lower_95": -0.00017501405787212647,
               "upper_95": 0.00011569912492518586
             },
@@ -2394,7 +2354,7 @@
         "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
         "course_scoring_effect_modification": {
           "Draw": {
-            "estimate": -3.791218730229399e-05,
+            "estimate": -3.791218730229399e-5,
             "lower_95": -0.00017501405787212647,
             "upper_95": 0.00011569912492518586
           },
@@ -2485,10 +2445,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2522,9 +2479,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -2659,7 +2614,7 @@
             },
             "course_sg_difference": {
               "estimate": 0.00020748977570402452,
-              "lower_95": 2.3707879126263918e-05,
+              "lower_95": 2.3707879126263918e-5,
               "upper_95": 0.00037053574434664727
             },
             "course_sg_means": {
@@ -2701,7 +2656,7 @@
           },
           "Fade": {
             "estimate": 0.00020748977570402452,
-            "lower_95": 2.3707879126263918e-05,
+            "lower_95": 2.3707879126263918e-5,
             "upper_95": 0.00037053574434664727
           }
         },
@@ -2786,10 +2741,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -2823,9 +2775,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -3087,10 +3037,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -3124,9 +3071,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -3205,8 +3150,8 @@
               "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
             },
             "course_sg_difference": {
-              "estimate": 5.37886835230444e-05,
-              "lower_95": -4.479442233074534e-05,
+              "estimate": 5.37886835230444e-5,
+              "lower_95": -4.479442233074534e-5,
               "upper_95": 0.0001626914111791483
             },
             "course_sg_means": {
@@ -3261,7 +3206,7 @@
             },
             "course_sg_difference": {
               "estimate": 0.0001396573622027204,
-              "lower_95": 2.2564710873120615e-05,
+              "lower_95": 2.2564710873120615e-5,
               "upper_95": 0.00025700966261902865
             },
             "course_sg_means": {
@@ -3297,13 +3242,13 @@
         "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
         "course_scoring_effect_modification": {
           "Draw": {
-            "estimate": 5.37886835230444e-05,
-            "lower_95": -4.479442233074534e-05,
+            "estimate": 5.37886835230444e-5,
+            "lower_95": -4.479442233074534e-5,
             "upper_95": 0.0001626914111791483
           },
           "Fade": {
             "estimate": 0.0001396573622027204,
-            "lower_95": 2.2564710873120615e-05,
+            "lower_95": 2.2564710873120615e-5,
             "upper_95": 0.00025700966261902865
           }
         },
@@ -3388,10 +3333,7 @@
           "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
           "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
         },
-        "source_protocols": [
-          "original_primary/1",
-          "original_primary/1"
-        ],
+        "source_protocols": ["original_primary/1", "original_primary/1"],
         "source_transition_receipt_sha256": null,
         "sources": [
           {
@@ -3425,9 +3367,7 @@
             "Fade": 0
           }
         },
-        "allowed_config_differences": [
-          "curve_scale"
-        ],
+        "allowed_config_differences": ["curve_scale"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {
@@ -3507,7 +3447,7 @@
             },
             "course_sg_difference": {
               "estimate": 0.00023293256419475256,
-              "lower_95": 6.413503829542556e-05,
+              "lower_95": 6.413503829542556e-5,
               "upper_95": 0.000389771372916938
             },
             "course_sg_means": {
@@ -3562,7 +3502,7 @@
             },
             "course_sg_difference": {
               "estimate": 0.00022213251556700434,
-              "lower_95": 7.226690533155762e-05,
+              "lower_95": 7.226690533155762e-5,
               "upper_95": 0.0003690463384461354
             },
             "course_sg_means": {
@@ -3599,12 +3539,12 @@
         "course_scoring_effect_modification": {
           "Draw": {
             "estimate": 0.00023293256419475256,
-            "lower_95": 6.413503829542556e-05,
+            "lower_95": 6.413503829542556e-5,
             "upper_95": 0.000389771372916938
           },
           "Fade": {
             "estimate": 0.00022213251556700434,
-            "lower_95": 7.226690533155762e-05,
+            "lower_95": 7.226690533155762e-5,
             "upper_95": 0.0003690463384461354
           }
         },

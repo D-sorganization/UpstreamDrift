@@ -22,10 +22,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/driver_academic_density_pdf.png",
         "sha256": "10b6eeaea71f07d29c0424a6303e8d38b350336089ef257cbcd21aa6bed8bb8d",
-        "dimensions": [
-          2317,
-          1362
-        ],
+        "dimensions": [2317, 1362],
         "command": [
           "pdftoppm",
           "-f",
@@ -78,10 +75,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/driver_academic_density_svg.png",
         "sha256": "a9b1b7c40212c3b5f2395a6ebeca9eb7a8bf55c0d9ccf07151c22fcf3caefd14",
-        "dimensions": [
-          4632,
-          2722
-        ],
+        "dimensions": [4632, 2722],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -125,10 +119,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/driver_academic_overhead_pdf.png",
         "sha256": "d5925ece71cf241b3dc469ffa225c5d85f63e5b06191d5ce34ce9bc3417e4c47",
-        "dimensions": [
-          2459,
-          865
-        ],
+        "dimensions": [2459, 865],
         "command": [
           "pdftoppm",
           "-f",
@@ -181,10 +172,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/driver_academic_overhead_svg.png",
         "sha256": "17c81faa9161983d76e5f6cc4d772d8fa17d0bf7ca223048f67acf749eb2dc98",
-        "dimensions": [
-          4918,
-          1729
-        ],
+        "dimensions": [4918, 1729],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -228,10 +216,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/driver_social_density_pdf.png",
         "sha256": "8107f6ea8ac69dcf09d171410139d48715e0b5c0609eceb39debd699211b29f2",
-        "dimensions": [
-          1488,
-          2536
-        ],
+        "dimensions": [1488, 2536],
         "command": [
           "pdftoppm",
           "-f",
@@ -284,10 +269,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/driver_social_density_svg.png",
         "sha256": "6022ad864bd3e6b7876d928067f9b75b53d4ed9c1f1a1aadd49ce49a7e1ff44f",
-        "dimensions": [
-          2974,
-          5071
-        ],
+        "dimensions": [2974, 5071],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -331,10 +313,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/driver_social_overhead_pdf.png",
         "sha256": "ae1831b0c2f6439a509452a9cb26feaeaa47163e964b425f788ce1c0230273a8",
-        "dimensions": [
-          2199,
-          1280
-        ],
+        "dimensions": [2199, 1280],
         "command": [
           "pdftoppm",
           "-f",
@@ -387,10 +366,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/driver_social_overhead_svg.png",
         "sha256": "e4c2337473a07746e2a3d596fb713dcaef5fbbf927a2090bb30032036477873f",
-        "dimensions": [
-          4396,
-          2560
-        ],
+        "dimensions": [4396, 2560],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -434,10 +410,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/iron_academic_density_pdf.png",
         "sha256": "1820cef7bc924d9ce5b90bc5ec940c48f4114706a2874cf9bac02dfe7493bbb6",
-        "dimensions": [
-          2291,
-          1362
-        ],
+        "dimensions": [2291, 1362],
         "command": [
           "pdftoppm",
           "-f",
@@ -490,10 +463,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/iron_academic_density_svg.png",
         "sha256": "eec17912fa2e80fd641527101d20aaa152fa07c6d16432b7b07386a57f151eab",
-        "dimensions": [
-          4581,
-          2722
-        ],
+        "dimensions": [4581, 2722],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -537,10 +507,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/iron_academic_overhead_pdf.png",
         "sha256": "0dbd02a7e7cc2ba5b6b79bcf113913c3ae2cf7f3848996e0d06439310d741355",
-        "dimensions": [
-          2447,
-          865
-        ],
+        "dimensions": [2447, 865],
         "command": [
           "pdftoppm",
           "-f",
@@ -593,10 +560,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/iron_academic_overhead_svg.png",
         "sha256": "e24c67b7a418c7aaaa8c9ba3b54eeea041c28dd81640993d25f34770c03f6d47",
-        "dimensions": [
-          4892,
-          1729
-        ],
+        "dimensions": [4892, 1729],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -640,10 +604,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/iron_social_density_pdf.png",
         "sha256": "7e132acc905c096792eb321afdf49451b121b53ec7d45b386c473d044771c1f0",
-        "dimensions": [
-          1472,
-          2536
-        ],
+        "dimensions": [1472, 2536],
         "command": [
           "pdftoppm",
           "-f",
@@ -696,10 +657,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/iron_social_density_svg.png",
         "sha256": "2512212b6d4e1f9655302eaa8b2d66751151ea93d8f62ee9e7f9ed98ea6f0c59",
-        "dimensions": [
-          2943,
-          5071
-        ],
+        "dimensions": [2943, 5071],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -743,10 +701,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/iron_social_overhead_pdf.png",
         "sha256": "5b228b11eabc358c36c75783e42515294c0ac012a86bd3f660721fd1d00b0abc",
-        "dimensions": [
-          2199,
-          1280
-        ],
+        "dimensions": [2199, 1280],
         "command": [
           "pdftoppm",
           "-f",
@@ -799,10 +754,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/iron_social_overhead_svg.png",
         "sha256": "b47826131f250d17d43dd9fcb8d225bac988f9ca458a3bc3b1c2ec33ea4264c2",
-        "dimensions": [
-          4397,
-          2560
-        ],
+        "dimensions": [4397, 2560],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -846,10 +798,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/pw_academic_density_pdf.png",
         "sha256": "adfdb59a980fd22e566f3b8df03824219681d75512937f399213e511720d6465",
-        "dimensions": [
-          2319,
-          1362
-        ],
+        "dimensions": [2319, 1362],
         "command": [
           "pdftoppm",
           "-f",
@@ -902,10 +851,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/pw_academic_density_svg.png",
         "sha256": "6d432378cf049c8191f7e8233473cdf708094f4df8d9c3feb1822c9a516af194",
-        "dimensions": [
-          4637,
-          2722
-        ],
+        "dimensions": [4637, 2722],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -949,10 +895,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/pw_academic_overhead_pdf.png",
         "sha256": "70e81a468fd394063060f41e9329e1f3411cc47a232c42a6b34f4206fe0b8b4b",
-        "dimensions": [
-          2447,
-          865
-        ],
+        "dimensions": [2447, 865],
         "command": [
           "pdftoppm",
           "-f",
@@ -1005,10 +948,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/pw_academic_overhead_svg.png",
         "sha256": "701e595fbd46ed6108c2a6e01515f91972a43bc7b46b236a4a1a6e4f692dff38",
-        "dimensions": [
-          4892,
-          1729
-        ],
+        "dimensions": [4892, 1729],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -1052,10 +992,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/pw_social_density_pdf.png",
         "sha256": "a9d57e098cc18748a7a3c3349ba9ec2db0a725514a8e301d98467879fd00053f",
-        "dimensions": [
-          1472,
-          2536
-        ],
+        "dimensions": [1472, 2536],
         "command": [
           "pdftoppm",
           "-f",
@@ -1108,10 +1045,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/pw_social_density_svg.png",
         "sha256": "e2d093acd082bc97c62e06c365f72f30ff01264c87775853102688ffb225f027",
-        "dimensions": [
-          2943,
-          5071
-        ],
+        "dimensions": [2943, 5071],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",
@@ -1155,10 +1089,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/pw_social_overhead_pdf.png",
         "sha256": "dcad09efe5a34f086bc5a12398db715b8ece164bd2de8ae93f3cd8f19cd7ab5e",
-        "dimensions": [
-          2186,
-          1280
-        ],
+        "dimensions": [2186, 1280],
         "command": [
           "pdftoppm",
           "-f",
@@ -1211,10 +1142,7 @@
       "render": {
         "path": "/tmp/p2-original-vector-visual-review/pw_social_overhead_svg.png",
         "sha256": "cb3c5a9f3a1404b8e09553b7d079b3cff32c62cfc4110897d24086c63af4a165",
-        "dimensions": [
-          4371,
-          2560
-        ],
+        "dimensions": [4371, 2560],
         "command": [
           "/home/dieterolson/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
           "-e",

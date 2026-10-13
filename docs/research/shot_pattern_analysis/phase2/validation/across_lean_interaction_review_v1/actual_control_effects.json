@@ -335,10 +335,7 @@
             "Fade": 1
           }
         },
-        "allowed_config_differences": [
-          "club.shaft_lean_deg",
-          "target_x_m"
-        ],
+        "allowed_config_differences": ["club.shaft_lean_deg", "target_x_m"],
         "patterns": {
           "Straight": {
             "radial_error_difference_m": {

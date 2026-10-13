@@ -24,37 +24,18 @@
     "page-5.png": "dd21d3578f5e112d47ed5c638198e1a33bbda28dbac7fdd9406a122d28f5ca18",
     "partial_composition.md": "78a5b6043491b8cd5b9db9554d7686ea3b66500690aac4ba2a020b8a2b17c82c"
   },
-  "pages_reviewed": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8
-  ],
+  "pages_reviewed": [1, 2, 3, 4, 5, 6, 7, 8],
   "render_exit_code": 0,
   "findings": [
     {
-      "pages": [
-        2,
-        3,
-        4,
-        5
-      ],
+      "pages": [2, 3, 4, 5],
       "severity": "publication blocking",
       "finding": "Nine-column resolved selection table splits numeric tokens, signs/exponents and decimal digits across lines. Headers also split inside words.",
       "example": "Page2 first Driver SG token +7.462e-05 breaks after e-; interval digits span several lines.",
       "recommendation": "Restructure the report table into narrower protocol/club-labelled blocks or separate outcome and population tables; preserve exact identities/counts/precision and existing readable font floor. Require no within-number line breaks in rendered regression."
     },
     {
-      "pages": [
-        5,
-        6,
-        7,
-        8
-      ],
+      "pages": [5, 6, 7, 8],
       "severity": "readability",
       "finding": "Paired effect numbers remain readable, but repeated full ordered source identifiers occupy most row height and break inside words.",
       "recommendation": "Use a readable condition-key mapping adjacent to a compact effects table while preserving exact protocol/cell identity and ordered A\u2192B mapping; alternatively give source column more space. No missing provenance or truncation."

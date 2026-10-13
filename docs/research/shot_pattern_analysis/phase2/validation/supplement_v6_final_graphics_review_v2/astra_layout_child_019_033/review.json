@@ -87,9 +87,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/19_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "bf2c182afc06d8e31cf8a7460c211a13c73b9ec4816424eedf6a3503c15c7e38",
-      "failed_gates": [
-        "all_density_colorbar_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_colorbar_diagnostic.json"],
       "index": 19,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -111,9 +109,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/20_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "510c571e08e39ee6dc3589a8c5b20fefdedd01668841e08eff363f5e792ef114",
-      "failed_gates": [
-        "all_density_colorbar_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_colorbar_diagnostic.json"],
       "index": 20,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -135,9 +131,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/21_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "90681d6bc90bc8faeb76d51eb4401a4ae7aee97153fb7379606b023dd8e864dc",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 21,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -158,9 +152,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/22_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "597022a93f619200298cbf58ec609b7e1a9c49a0de667b7b43b86c34afa5ef6c",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 22,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -181,9 +173,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/23_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "2958f5d4849e44415bc3def94491e4795adb234c1ac9af3e61b3afb0a08d236c",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 23,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -204,9 +194,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/24_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "908d6ee9097e1776b3f4fbb321073cce57c58703278925a7b1f86a1b3a37fffe",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 24,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -227,9 +215,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/25_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "4b3755df5ed4907345029122136a50856ea2a3f8b404047b35eaf32ad362ba6b",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 25,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -250,9 +236,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/26_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "e7f6bc7931791cb94b71b4037f656cc48e0e9a180546f274027bf59804e4b232",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 26,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -273,9 +257,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/27_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "8843147242027aaafb7018405a6475092072f381e621a7beeebe38855f0f9c5e",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 27,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -296,9 +278,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/28_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "627e2db8de4c7f85549b8f38df6d250652774aa117b48fde63cb8a3cfb964985",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 28,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -319,9 +299,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/29_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "ad362b70fe67fc5cc06bf9cd40bbbaf2c5f74b442ae6d831e1ca0de6ba4ab4d2",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 29,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -342,9 +320,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/30_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "3458cb09bdf51c74a905e81c42cdcc8f9409a44e0e214a4f2300c689c9fc9377",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 30,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -365,9 +341,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/31_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "295bd8fefa52769c203359c388759306994d7e0c57de873eb5b7a75ead650a35",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 31,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -388,9 +362,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/32_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "edc5c59db9a750fe87f3ac0f78a4b2eb93dc801bb01c7e36a0912d0bfe2ce2c4",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 32,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",
@@ -411,9 +383,7 @@
       "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/33_astra_shaft.jpg",
       "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
       "contact_sha256": "6342e152fd113f1ed8530adfd29adba27e921a33130cb821709c38e51e9ba3d0",
-      "failed_gates": [
-        "all_density_clearance_diagnostic.json"
-      ],
+      "failed_gates": ["all_density_clearance_diagnostic.json"],
       "index": 33,
       "reviewer": "astra_shaft",
       "decision": "accepted_png_visual",

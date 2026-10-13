@@ -10,14 +10,8 @@
     "svg.png": "907acdfea72989c13334bca43e7e4abcf52116a16cf83ee2dc8abe54a914244d"
   },
   "dimensions": {
-    "pdf": [
-      1472,
-      2536
-    ],
-    "svg": [
-      2943,
-      5071
-    ]
+    "pdf": [1472, 2536],
+    "svg": [2943, 5071]
   },
   "commands": {
     "pdf": "pdftoppm -f 1 -singlefile -r 144 -png INPUT OUTPUT_STEM",
@@ -42,18 +36,9 @@
   "svg_density_probe": {
     "fixture": "72pt by 144pt explicit viewport with matching viewBox",
     "configured_density_to_observed_pixels": {
-      "72": [
-        72,
-        144
-      ],
-      "96": [
-        128,
-        256
-      ],
-      "144": [
-        288,
-        576
-      ]
+      "72": [72, 144],
+      "96": [128, 256],
+      "144": [288, 576]
     },
     "interpretation": "This installed renderer scales differently from nominal dpi-to-point conversion. Record actual dimensions; do not infer same pixel scale from matching density arguments. Preserve original aspect when fitting comparison thumbnails."
   }

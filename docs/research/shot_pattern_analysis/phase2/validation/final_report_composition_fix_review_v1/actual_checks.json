@@ -6,7 +6,7 @@
   "claims_identical_for_empty_vs_unrelated_input": true,
   "actual_selected_sg_ranges": {
     "driver/Draw": {
-      "minimum": 2.6911773453713884e-05,
+      "minimum": 2.6911773453713884e-5,
       "maximum": 0.0077976550468906
     },
     "driver/Fade": {
@@ -22,7 +22,7 @@
       "maximum": 0.0025816340316445357
     },
     "pitching_wedge/Draw": {
-      "minimum": 9.508286074337285e-05,
+      "minimum": 9.508286074337285e-5,
       "maximum": 0.011117100245477964
     },
     "pitching_wedge/Fade": {

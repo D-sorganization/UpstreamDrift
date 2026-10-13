@@ -16,14 +16,8 @@
       "rgba": "fc3f19bb6952f9f5cce15866334f3115befe0d72884fc2eb9c51e9d631f64b9c",
       "xlabel": "",
       "ylabel": "Downrange Distance (m)",
-      "xlim": [
-        -10.0,
-        10.0
-      ],
-      "ylim": [
-        0.0,
-        110.0
-      ],
+      "xlim": [-10.0, 10.0],
+      "ylim": [0.0, 110.0],
       "lines": 4
     },
     {
@@ -32,14 +26,8 @@
       "rgba": "e2e6b82693c2a12dc32b3988d85f9bf181c9051fd8159dcccaeb993bf29e28e5",
       "xlabel": "Lateral Position (m; Right Positive)",
       "ylabel": "",
-      "xlim": [
-        -10.0,
-        10.0
-      ],
-      "ylim": [
-        0.0,
-        110.0
-      ],
+      "xlim": [-10.0, 10.0],
+      "ylim": [0.0, 110.0],
       "lines": 4
     },
     {
@@ -48,14 +36,8 @@
       "rgba": "3d4c1d86c32c08aaf9d120e8d760423aeb2b6bd24555a066c4debbb3033dd042",
       "xlabel": "",
       "ylabel": "Downrange Distance (m)",
-      "xlim": [
-        -10.0,
-        10.0
-      ],
-      "ylim": [
-        0.0,
-        110.0
-      ],
+      "xlim": [-10.0, 10.0],
+      "ylim": [0.0, 110.0],
       "lines": 4
     },
     {
@@ -64,14 +46,8 @@
       "rgba": "645a9f9e7117fb08df639ccd867f154b688b0fe32a799978e48eeaf7d5f56699",
       "xlabel": "Lateral Position (m; Right Positive)",
       "ylabel": "",
-      "xlim": [
-        -10.0,
-        10.0
-      ],
-      "ylim": [
-        0.0,
-        110.0
-      ],
+      "xlim": [-10.0, 10.0],
+      "ylim": [0.0, 110.0],
       "lines": 4
     }
   ],
@@ -82,14 +58,8 @@
       "rgba": "fc3f19bb6952f9f5cce15866334f3115befe0d72884fc2eb9c51e9d631f64b9c",
       "xlabel": "",
       "ylabel": "Downrange Distance (m)",
-      "xlim": [
-        -10.0,
-        10.0
-      ],
-      "ylim": [
-        0.0,
-        110.0
-      ],
+      "xlim": [-10.0, 10.0],
+      "ylim": [0.0, 110.0],
       "lines": 4
     },
     {
@@ -98,14 +68,8 @@
       "rgba": "e2e6b82693c2a12dc32b3988d85f9bf181c9051fd8159dcccaeb993bf29e28e5",
       "xlabel": "Lateral Position (m; Right Positive)",
       "ylabel": "",
-      "xlim": [
-        -10.0,
-        10.0
-      ],
-      "ylim": [
-        0.0,
-        110.0
-      ],
+      "xlim": [-10.0, 10.0],
+      "ylim": [0.0, 110.0],
       "lines": 4
     },
     {
@@ -114,14 +78,8 @@
       "rgba": "3d4c1d86c32c08aaf9d120e8d760423aeb2b6bd24555a066c4debbb3033dd042",
       "xlabel": "",
       "ylabel": "Downrange Distance (m)",
-      "xlim": [
-        -10.0,
-        10.0
-      ],
-      "ylim": [
-        0.0,
-        110.0
-      ],
+      "xlim": [-10.0, 10.0],
+      "ylim": [0.0, 110.0],
       "lines": 4
     },
     {
@@ -130,14 +88,8 @@
       "rgba": "645a9f9e7117fb08df639ccd867f154b688b0fe32a799978e48eeaf7d5f56699",
       "xlabel": "Lateral Position (m; Right Positive)",
       "ylabel": "",
-      "xlim": [
-        -10.0,
-        10.0
-      ],
-      "ylim": [
-        0.0,
-        110.0
-      ],
+      "xlim": [-10.0, 10.0],
+      "ylim": [0.0, 110.0],
       "lines": 4
     }
   ],

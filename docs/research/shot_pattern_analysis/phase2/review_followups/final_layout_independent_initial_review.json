@@ -17,14 +17,8 @@
       "severity": "publication_blocker",
       "finding": "Two-panel bottom main xlabel overlaps footer",
       "reproducer": "test_final_layout_review_contracts.py::test_actual_social_fonts_and_axis_legend_clearance[2]",
-      "label_y_px": [
-        68.78367513020825,
-        84.06145290798604
-      ],
-      "footer_y_px": [
-        24.3,
-        74.73367513020833
-      ],
+      "label_y_px": [68.78367513020825, 84.06145290798604],
+      "footer_y_px": [24.3, 74.73367513020833],
       "overlap_px": 5.95
     },
     {

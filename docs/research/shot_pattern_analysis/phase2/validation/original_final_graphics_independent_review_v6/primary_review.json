@@ -5,10 +5,7 @@
   "png_count": 288,
   "identical_png_count": 270,
   "changed_png_count": 18,
-  "manifest_changed_fields": [
-    "outputs",
-    "plot_source_sha256"
-  ],
+  "manifest_changed_fields": ["outputs", "plot_source_sha256"],
   "same_png_sha256": {
     "details/driver_lean0_curve1_rotation1_combined2/density.png": "8da5050c59493eb740bbf9a221192c17ad9c5b47e076b414a12a2f49362254e6",
     "details/driver_lean0_curve1_rotation1_combined2/overhead.png": "c70b71443f64b53e845f02254431fb667ad7cd800288ba4796dab47044b284f9",

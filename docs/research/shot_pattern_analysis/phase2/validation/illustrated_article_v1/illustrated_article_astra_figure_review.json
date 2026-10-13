@@ -1,36 +1,8 @@
 {
   "scope": "Illustrated Article Figure Plates Only",
   "pdf_sha256": "d9fd43fc7e6b5094ac8c5b2e2c2338f7862c3c32d92da8a31f884fd7a17bd290",
-  "pdf_pages_reviewed": [
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17
-  ],
-  "figure_numbers_reviewed": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13
-  ],
+  "pdf_pages_reviewed": [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+  "figure_numbers_reviewed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
   "page_sha256": {
     "final_pages/page-05.png": "e96eaa0179ad5e95eaf997360686904f6cf7159161389eee31d2512bddd737c8",
     "final_pages/page-06.png": "cb29192629323eafd3576cac30fde5b8b2b8f98b6339ea11d6d7b2eebc67caae",
