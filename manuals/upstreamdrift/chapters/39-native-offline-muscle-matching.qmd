@@ -159,6 +159,91 @@ binding before optimization. No private full-capture muscle match is established
 The mixed Windows OpenSim/C3D runtime limitation is tracked in #12065; source-bound
 TRC preparation can run in a separate process before native Moco execution.
 
+## Bounded One-Step Muscle Recruitment Prototype
+
+`src/shared/python/biomechanics/muscle_allocation.py` provides a pure-Python,
+one-step allocator for a caller-supplied desired generalized effort. It accepts
+ordered coordinate names and explicit effort units (`N` for translation,
+`N*m` for rotation), named muscle moment arms, immutable prior activation and
+raw applied excitation, excitation boxes and slew rates, and a timestep. A
+muscle contributes `r_jq F_j` to coordinate `q`, where `r_jq = -dL_j/dq` is
+provided by the caller in `m/m` or `m/rad`. Missing moment-arm entries mean
+zero contribution; every requested coordinate remains in the residual, even
+when no path actuates it.
+
+For each candidate raw excitation, the existing activation-dynamics kernel
+advances activation by one step. The existing Hill model and equilibrium
+solver then determine fiber length under a quasistatic `v_CE = 0` assumption.
+The returned force audit keeps active, passive, and damping contributions
+separate, reports both along-fiber and tendon-axis projected forces, and
+includes the per-muscle tendon/fiber balance residual in newtons. The current
+model sets damping to zero; it does not model tendon internal dynamics.
+
+For ordered coordinates, the effort estimate is
+
+$$
+\tau_q(u)=\sum_j r_{jq}F_{t,j}(u),\qquad r_{jq}=-\frac{\partial L_j}{\partial q}.
+$$
+
+For a raw command `u_j` and previous raw applied command `u_{j,prev}`, the exact
+single-step box is
+
+$$
+u_j\in\left[\max(u_{j,\min},u_{j,\mathrm{prev}}-\dot u_{j,\max}\Delta t),
+\min(u_{j,\max},u_{j,\mathrm{prev}}+\dot u_{j,\max}\Delta t)\right].
+$$
+
+The activation state is advanced from the caller's prior state,
+
+$$
+a_{j,+}=\operatorname{ActivationDynamics}(u_j,a_{j,\mathrm{prev}},\Delta t),
+$$
+
+and each quasistatic path solve supplies `r_{eq,j}=F_{fiber,j}^{axis}-F_{t,j}`.
+The bounded least-squares objective is
+
+$$
+J(u)=\sum_q\left(\frac{\tau_q(u)-\tau_q^*}{\epsilon_q}\right)^2+
+\sum_j\left(\frac{r_{eq,j}(u)}{\epsilon_{F,j}}\right)^2,
+$$
+
+where `epsilon_q` is the positive tolerance for that coordinate's declared
+unit and `epsilon_F,j` is the positive per-path equilibrium tolerance in N.
+Passing these local residual checks is only numerical fixture feasibility; it
+does not establish an optimum or physical acceptance.
+
+The bounded least-squares objective scales each complete coordinate-effort
+residual by a positive caller tolerance and includes the force-equilibrium
+residual. Raw excitation bounds intersect the previous raw command plus or
+minus the allowed rate times `dt`; zero-width channels remain fixed. The
+`max_nfev` budget counts every complete candidate evaluation, including
+finite-difference probes. Results retain the best successfully evaluated
+candidate. `infeasible` means that candidate misses the declared numeric
+tolerances, not that global or physiological infeasibility has been proved;
+optimizer failure and evaluation-budget exhaustion have distinct statuses.
+No candidate is applied by this function.
+
+The existing activation kernel floors its input and activation at
+`min_activation`. The API therefore reports the caller's raw bounded command
+separately from `effective_excitations`, the values consumed after that kernel
+floor. Slew limits apply to raw commands only; this does not establish an
+effective-activation slew guarantee or OpenSim parity.
+
+The analytic fixture covers two muscles over three named coordinates, including
+a biarticular path and an unactuated residual, plus fixed/rate-limited channels,
+passive force, pennation projection, equilibrium residuals, invalid boxes,
+solver failure, and a counted finite-difference evaluation budget. The current
+focused suite reports 21 passing tests with one pre-existing deprecation
+warning. This small fixture is an analytic prototype, not an efficient
+557-muscle controller or an independently validated biomechanical result.
+Finite-difference least squares with a per-path equilibrium solve has no
+full-body scaling evidence; cached/sparse Jacobians, warm starts, and measured
+scaling would be required before that use. No native engine, model, study,
+native solver or capture was run. The SciPy numerical optimizer is the prototype under test. It changes no row's
+qualification status in the 17-row model inventory and makes no parity claim
+for another engine. The broader controller boundary is described in `docs/development/feedback_controls/DESIGN.md`. Full anatomy, source-derived moment arms, passive-load
+limits, physiology, contact, replay, and all-model qualification remain open.
+
 ## Assistance-Explicit Mixed Moco Link
 
 F07 #12147 adds an optional ordered `mixed_actuation` declaration to the same
