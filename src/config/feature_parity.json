@@ -584,6 +584,15 @@
       "status": "gap",
       "issue": 11717,
       "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead.tsx now draws the same committed assets/club_heads STL heads at spec loft and lie with a hosel. GCV-13 (#11719) landed the shared address-ball geometry (src/shared/python/model_appearance/ball.py) and native-export decorative ball, resolved from the swing bundle's address frame (src/tools/native_viewer_export/ball.py): Drake and Pinocchio MeshCat (slice 2), then MuJoCo native-export, MyoSuite and OpenSim (slice 3, src/tools/native_viewer_export/backends/{_ball,mujoco_worker,myosuite_worker,opensim_worker}.py). Only the web GolferModel.tsx component still draws no ball, keeping the gap open."
+    },
+    "reporting.swing_report_dialog": {
+      "title": "Swing Report Full/Custom Plot Selection and Package Export",
+      "pyqt": "src/shared/python/ui/swing_report_dialog.py",
+      "api": "src/api/routes/swing_report.py",
+      "web": "ui/src/components/analysis/swingReport/SwingReportDialog.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "Swing Report S6 (#12329) and its web parity (#12330), epic #11419. Both dialogs list the same validated swing-report-v1 plots through the Python ReportViewModel (POST /api/swing-report/view returns its text-only rows, so a withheld quantity never reaches the browser as a number): withheld plots are disabled with a 'Not Validated' label and their reason, advertised plots show their engine-spread uncertainty, Full selects every enabled plot and Custom keeps its own selection. Export writes the S4 package (export_package) to a chosen directory on the desktop and downloads it as a zip on the web (POST /api/swing-report/export). Neither dialog is wired to a launcher tile or page yet."
     }
   }
 }
