@@ -82,6 +82,7 @@ DIRECTORY_ALLOWLIST: frozenset[str] = frozenset(
         "shared_scripts",
         "src",
         "stubs",
+        "target",
         "temp",
         "tests",
         "tools",
