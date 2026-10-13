@@ -107,3 +107,10 @@ Tests establish software behavior for their fixtures only; they do not
 establish full-model physical qualification, support/grip, measured anatomy,
 capture matching, or all-model parity. The calculation inventory remains empty
 and publication remains blocked.
+
+
+## Probe-Suppressed Preparation (#12353)
+
+`prepare_native_moco` accepts an explicit `run_capability_probe=False` request; its default remains `True`. The `moco-native` CLI exposes this as `--skip-capability-probe`, and accepts that option only with `--prepare-only`. Preparation still performs its ordinary source, input, physical-body, and native model audits. It may construct the model, finalize connections, restore the declared state, or initialize the system when those existing audits require it. No forward integration runs on this preparation path. Existing initialization and read-only audits remain allowed; the flag does not promise to avoid all native initialization.
+
+The saved preparation report records `capability_probe_requested: false`. Its diagnostic assessment remains `runtime_viability: not-attempted`, with no runtime phase, observed time window, or synthetic probe-completed finding. The software-solve readiness predicate independently requires that the probe was requested, so a stale or otherwise admitted assessment cannot turn this mode into solve admission. The CLI returns its existing not-ready status (2). The default probe-enabled behavior and request identity are unchanged. This mode neither opts into passive-policy exceptions nor changes physical qualification, and it establishes no runtime viability, solve, replay, physiology, or model-parity result.

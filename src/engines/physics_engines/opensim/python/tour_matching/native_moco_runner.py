@@ -73,7 +73,10 @@ _physical_audit_bytes = _native_moco_preparation._physical_audit_bytes
 
 
 def prepare_native_moco(
-    request: NativeMocoRequest, output_dir: Path
+    request: NativeMocoRequest,
+    output_dir: Path,
+    *,
+    run_capability_probe: bool = True,
 ) -> NativeMocoPreparation:
     """Preserve the public runner boundary and injectable test seams."""
     return _native_moco_preparation.prepare_native_moco(
@@ -81,6 +84,7 @@ def prepare_native_moco(
         output_dir,
         wrapped_path_auditor=audit_native_wrapped_path_source,
         probe_callable=_native_short_capability_probe,
+        run_capability_probe=run_capability_probe,
     )
 
 
