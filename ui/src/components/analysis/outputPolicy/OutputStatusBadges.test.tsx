@@ -108,6 +108,16 @@ describe('parseOutputPolicy (DbC)', () => {
     expect(() => parseOutputPolicy({ schema_version: OUTPUT_POLICY_SCHEMA_VERSION, outputs: [{}] })).toThrow();
   });
 
+  it('rejects a malformed face_observability instead of crashing the render', () => {
+    expect(() => parseOutputPolicy({ ...PAYLOAD, face_observability: { observable: true } })).toThrow(
+      /face_observability/,
+    );
+    expect(() =>
+      parseOutputPolicy({ ...PAYLOAD, face_observability: { ...FACE, gaps: [[1]] } }),
+    ).toThrow(/face_observability/);
+    expect(parseOutputPolicy({ ...PAYLOAD, face_observability: null }).face_observability).toBeNull();
+  });
+
   it('accepts the current schema', () => {
     expect(parseOutputPolicy(PAYLOAD).outputs).toHaveLength(3);
   });

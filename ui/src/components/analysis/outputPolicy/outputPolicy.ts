@@ -67,6 +67,32 @@ function parseRow(raw: unknown): OutputPolicyRow {
   };
 }
 
+function isGap(value: unknown): value is [number, number] {
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    Number.isInteger(value[0]) &&
+    Number.isInteger(value[1])
+  );
+}
+
+function parseFace(raw: unknown): FaceObservability | null {
+  if (raw === undefined || raw === null) return null;
+  if (
+    !isRecord(raw) ||
+    typeof raw.observable !== 'boolean' ||
+    typeof raw.reason !== 'string' ||
+    !Number.isInteger(raw.observed_frames) ||
+    !Number.isInteger(raw.total_frames) ||
+    !Number.isFinite(raw.coverage) ||
+    !Array.isArray(raw.gaps) ||
+    !raw.gaps.every(isGap)
+  ) {
+    throw new OutputPolicySchemaError('malformed face_observability');
+  }
+  return raw as unknown as FaceObservability;
+}
+
 /** Parse the API payload; throws on anything but the one known schema (DbC). */
 export function parseOutputPolicy(raw: unknown): OutputPolicyPayload {
   if (!isRecord(raw)) throw new OutputPolicySchemaError('output policy payload missing');
@@ -79,7 +105,7 @@ export function parseOutputPolicy(raw: unknown): OutputPolicyPayload {
   return {
     schema_version: raw.schema_version,
     outputs: raw.outputs.map(parseRow),
-    face_observability: (raw.face_observability as FaceObservability | null) ?? null,
+    face_observability: parseFace(raw.face_observability),
   };
 }
 
