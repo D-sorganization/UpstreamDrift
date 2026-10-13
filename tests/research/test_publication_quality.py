@@ -25,9 +25,9 @@ PDF = ARTICLE / "proximal_distal_energy_transfer.pdf"
 MANIFEST = ARTICLE / "release_manifest.json"
 SOURCE_REPOSITORY = "https://github.com/D-sorganization/UpstreamDrift"
 SOURCE_REVISION = "a" * 40
-# Reviewed census-only rerender: see claim_preservation_9825_turnover.md.
-REVIEWED_PDF_SHA256 = "bf855f791e142e9ff84a30af61966bee6a0fcf406fdb7f41616e0de8a6e567e5"
-REVIEWED_PDF_BYTES = 2_012_367
+# Koike (2016) proceedings metadata correction (#4711): bibliography + PDF rerender.
+REVIEWED_PDF_SHA256 = "d31845c18029151ab08aeefef4e7d067d7bd6605698ee5beb0895325cd45b76c"
+REVIEWED_PDF_BYTES = 2_013_145
 pytestmark = pytest.mark.unit
 requires_fitz = pytest.mark.skipif(
     fitz is None,
