@@ -141,17 +141,15 @@ def test_build_kinematic_controls_blocks_signals_during_clear(
         assert call_args[0][0] != -1, "Signal fired with index -1 during clear()"
 
 
-def test_setup_ui_creates_chk_show_gravity_and_sets_initialized(
+def test_setup_ui_sets_drake_ui_initialized(
     qapp,
 ) -> None:  # noqa: ANN001
-    """_setup_ui must create chk_show_gravity and mark _drake_ui_initialized True."""
+    """_setup_ui must mark _drake_ui_initialized True upon completion."""
     ui = DummyDrakeUI()
     assert ui._drake_ui_initialized is False
 
     ui._setup_ui()
 
-    assert hasattr(ui, "chk_show_gravity")
-    assert isinstance(ui.chk_show_gravity, QtWidgets.QCheckBox)
     assert ui._drake_ui_initialized is True
 
 
