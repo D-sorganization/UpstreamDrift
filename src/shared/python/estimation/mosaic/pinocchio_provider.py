@@ -251,9 +251,8 @@ class PinocchioRegressorModel:
             return joint_ids, offsets_3d, True
         raise PreconditionError(f"Unsupported marker set type: {type(markers)}")
 
-    def marker_positions(self, q: FloatArray, markers: Any) -> FloatArray:
-        """World positions of attached markers."""
-        pin = require_pinocchio()
+    def _validate_q(self, q: FloatArray) -> FloatArray:
+        """Validate joint position trajectory array."""
         q_arr = np.asarray(q, dtype=np.float64)
         require(q_arr.ndim == 2, "q must be (N, nq)", q_arr.shape)
         require(
@@ -262,6 +261,12 @@ class PinocchioRegressorModel:
             q_arr.shape,
         )
         require(bool(np.all(np.isfinite(q_arr))), "q contains non-finite values")
+        return q_arr
+
+    def marker_positions(self, q: FloatArray, markers: Any) -> FloatArray:
+        """World positions of attached markers."""
+        pin = require_pinocchio()
+        q_arr = self._validate_q(q)
 
         joint_ids, offsets, is_planar = self._normalize_markers(markers)
         n_markers = joint_ids.size
@@ -283,14 +288,7 @@ class PinocchioRegressorModel:
     ) -> tuple[FloatArray, FloatArray]:
         """Analytic Jacobians of marker positions w.r.t joint coordinates and marker offsets."""
         pin = require_pinocchio()
-        q_arr = np.asarray(q, dtype=np.float64)
-        require(q_arr.ndim == 2, "q must be (N, nq)", q_arr.shape)
-        require(
-            q_arr.shape[1] == self._model.nq,
-            f"q dimension must be {self._model.nq}",
-            q_arr.shape,
-        )
-        require(bool(np.all(np.isfinite(q_arr))), "q contains non-finite values")
+        q_arr = self._validate_q(q)
 
         joint_ids, offsets, is_planar = self._normalize_markers(markers)
         n_markers = joint_ids.size
