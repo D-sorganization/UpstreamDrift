@@ -243,6 +243,20 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - `FrameSchedule` — frame `j` shows the swing at `t0 + j * speed / fps`; coarse source steps are interpolated (linear joints, `slerp` for free and ball quaternions found by `quaternion_groups_from_model`).
 - `speed_suffix` (`_1x`, `_0p5x`, `_0p25x`) and `DEFAULT_FPS` = 60, `MAX_SPEED` = 4. `stride_for_speed` exists only for the deprecated `--stride` alias.
 
+### Bounded One-Step Muscle Allocation
+
+`src/shared/python/biomechanics/muscle_allocation.py` exposes
+`MuscleRecruitmentPath`, `MuscleAllocationResult`, and
+`allocate_muscle_excitations`: a pure-Python bounded single-step allocator
+that consumes desired generalized effort and returns, but does not apply, a
+raw excitation candidate. It reuses `ActivationDynamics`, `HillMuscleModel`,
+and `EquilibriumSolver`; callers provide named moment arms, effort units,
+tolerances, bounds, rate limits, and immutable prior state. Effective
+activation-kernel floor values are reported separately from raw commands.
+This analytic quasistatic prototype has only a two-muscle/three-coordinate
+fixture; it is not an efficient or qualified full-body controller. See
+chapter39 and `docs/development/feedback_controls/F08_MUSCLE_RECRUITMENT_TURNOVER.md`.
+
 ### MyoFullBody Muscle-Driven Swing
 
 `src/shared/python/myofullbody/` — maps the 44-coordinate spec swing onto the
