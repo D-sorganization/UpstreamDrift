@@ -12,6 +12,8 @@ pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _SPEC_PATH = _REPO_ROOT / "SPEC.md"
+# History moved here by UpstreamDrift#9415; the live SPEC.md keeps only new rows.
+_ARCHIVE_PATH = _REPO_ROOT / "docs" / "spec" / "CHANGELOG_ARCHIVE.md"
 _CHANGE_LOG_HEADING = "## 12. Change Log"
 # Rows are keyed by pull request since Repository_Management#1520, not by a
 # serial spec version: `| YYYY-MM-DD | #<pr> | ... |`. Migrated historical rows
@@ -27,6 +29,11 @@ _REPAIR_ENTRY = (
 
 def _spec_lines() -> list[str]:
     return _SPEC_PATH.read_text(encoding="utf-8").splitlines()
+
+
+def _history_lines() -> list[str]:
+    """Live Section 12 plus the archived rows: the whole change-log history."""
+    return _spec_lines() + _ARCHIVE_PATH.read_text(encoding="utf-8").splitlines()
 
 
 def _change_log_bounds(lines: list[str]) -> tuple[int, int]:
@@ -45,8 +52,8 @@ def _change_log_bounds(lines: list[str]) -> tuple[int, int]:
 
 def test_changelog_rows_are_not_duplicated_across_specification() -> None:
     """A generated change-log row must not be injected throughout the document."""
-    lines = _spec_lines()
-    assert _CHANGE_LOG_HEADING in lines
+    assert _CHANGE_LOG_HEADING in _spec_lines()
+    lines = _history_lines()
     counts = Counter(line for line in lines if _CHANGE_LOG_ROW.match(line))
     # Two legacy rows occur twice in the first-parent specification. Preserve
     # that inherited debt here; this guard targets generated fan-out such as
@@ -58,7 +65,7 @@ def test_changelog_rows_are_not_duplicated_across_specification() -> None:
 
 def test_spec_repair_entry_is_recorded_exactly_once() -> None:
     """The #8995 optimization and its repair have one canonical history record."""
-    matches = [line for line in _spec_lines() if line.startswith(_REPAIR_ENTRY)]
+    matches = [line for line in _history_lines() if line.startswith(_REPAIR_ENTRY)]
 
     assert len(matches) == 1
 

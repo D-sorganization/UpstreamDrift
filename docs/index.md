@@ -94,6 +94,7 @@ separated from current guidance.
 
 ### Archived
 
+- [`spec/`](spec/CHANGELOG_ARCHIVE.md) - 1 page
 - [`assessments/`](assessments/README.md) - 294 pages
 - [`audit_reports/`](audit_reports/induced_acceleration_audit.md) - 1 page
 - [`historical/`](historical/README.md) - 4 pages
@@ -202,6 +203,7 @@ repository, which made them effectively unreachable.
 | `shared_tools/`         | @platform-team        | stable    | UpstreamDrift <-> Tools seam: divergence inventory, per-package rulings, drift-gate docs (UD #9406).                                |
 | `sidekick/`             | @platform-team        | stable    | Sidekick shared-utilities docs, launcher sidebar, chat/provider integration, tools library, and integration guides.                 |
 | `simulation_backends/`  | @physics-team         | stable    | Backend-agnostic golf-model simulation layer (ODE / MuJoCo CPU / MuJoCo Warp GPU): user guide, launcher tile, and cross-validation. |
+| `spec/`                 | @maintainers          | archived  | Verbatim SPEC.md Section 12 change-log archive kept outside the live spec cap (#9415).                                              |
 | `specs/`                | @architecture-team    | stable    | Specifications that expand or support the root `SPEC.md` contract.                                                                  |
 | `sphinx/`               | @docs-team            | stable    | Sphinx source and generated artifacts for the rendered documentation site.                                                          |
 | `status/`               | @maintainers          | draft     | Repository status snapshots and rolling state-of-the-fleet notes.                                                                   |

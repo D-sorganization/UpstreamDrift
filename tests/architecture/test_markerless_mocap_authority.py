@@ -12,6 +12,8 @@ ADR = ROOT / "docs" / "adr" / "0041-markerless-mocap-consumer-authority.md"
 ACCEPTANCE = ROOT / "docs" / "motion_capture" / "markerless_mocap_acceptance.md"
 HANDOFF = ROOT / "AGENT_HANDOFF.md"
 SPEC = ROOT / "SPEC.md"
+# Program history moved out of SPEC.md by UpstreamDrift#9415.
+SPEC_ARCHIVE = ROOT / "docs" / "spec" / "CHANGELOG_ARCHIVE.md"
 
 pytestmark = pytest.mark.gate
 
@@ -94,7 +96,7 @@ def test_acceptance_program_fails_closed_across_evidence_levels() -> None:
 
 def test_spec_and_handoff_point_to_the_current_program() -> None:
     """Agent context must expose the epic, limits, and next dependency."""
-    spec = _text(SPEC)
+    spec = _text(SPEC) + _text(SPEC_ARCHIVE)
     handoff = _text(HANDOFF)
     assert "Markerless Mocap Program (#9063)" in spec
     assert "Markerless Mocap Program (#9063)" in handoff
