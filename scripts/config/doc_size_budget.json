@@ -16,8 +16,8 @@
     {
       "path": "SPEC.md",
       "owner": "@maintainers",
-      "reason": "Root repository specification is governed separately and updated by feature PRs.",
-      "expires_on": "2026-10-31"
+      "reason": "Root repository specification is governed separately and updated by feature PRs. Capped at about 300 KB (tests/unit/repo_hygiene/test_spec_archive.py) after change-log history moved to docs/spec/CHANGELOG_ARCHIVE.md (issue #9415, owner ruling 2026-10-12); renewed 2027-01-31 pending the section split.",
+      "expires_on": "2027-01-31"
     },
     {
       "path": "docs/testing/functional-test-plan.md",
@@ -42,12 +42,6 @@
       "owner": "@physics-team",
       "reason": "Falsification matrix tracking model-tier and empirical completion gates for proximal distal energy transfer; staged for decomposition.",
       "expires_on": "2026-10-31"
-    },
-    {
-      "path": "AGENT_HANDOFF.md",
-      "owner": "@simulation-team",
-      "reason": "Active multi-agent continuation turnover document tracking forward dynamics optimization and gate audits.",
-      "expires_on": "2026-10-15"
     },
     {
       "path": "docs/development/full_body_models/evidence/anthropometry/REVIEW.md",

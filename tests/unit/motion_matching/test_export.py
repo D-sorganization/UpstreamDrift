@@ -406,6 +406,70 @@ class TestExportReport:
         assert any("rejected" in line_entry.lower() for line_entry in lines)
         assert not any("verdict: pass" in line_entry.lower() for line_entry in lines)
 
+    @staticmethod
+    def _with_face_audit(receipt: dict[str, Any], **block: Any) -> dict[str, Any]:
+        audit = {
+            "observable": False,
+            "reason": "club head markers are collinear or coincident",
+            "observed_frames": 0,
+            "total_frames": 10,
+            "gaps": [[0, 10]],
+            "coverage": 0.0,
+        }
+        audit.update(block)
+        return {**receipt, "ik": {**receipt.get("ik", {}), "face_observability": audit}}
+
+    def test_report_marks_unobservable_face_angle_unavailable(
+        self, tmp_path: Path, mock_receipt: dict[str, Any]
+    ) -> None:
+        receipt = self._with_face_audit(mock_receipt)
+        content = export_report(receipt, tmp_path / "r.md").read_text(encoding="utf-8")
+        assert "| `face_angle` | **UNAVAILABLE** | not observable: club head" in content
+        assert "Face-angle observability" in content
+        assert "0/10" in content
+
+    def test_report_lists_gap_runs_of_an_observable_face(
+        self, tmp_path: Path, mock_receipt: dict[str, Any]
+    ) -> None:
+        receipt = self._with_face_audit(
+            mock_receipt,
+            observable=True,
+            reason="observable",
+            observed_frames=7,
+            gaps=[[2, 5]],
+            coverage=0.7,
+        )
+        content = export_report(receipt, tmp_path / "r.md").read_text(encoding="utf-8")
+        assert "| `face_angle` | **NOT VALIDATED**" in content
+        assert "7/10" in content and "[2, 5)" in content
+
+    def test_validated_face_claim_on_unobservable_capture_fails_export(
+        self, tmp_path: Path, mock_receipt: dict[str, Any]
+    ) -> None:
+        from src.shared.python.motion_matching.output_policy import OutputPolicyError
+
+        receipt = self._with_face_audit(mock_receipt)
+        receipt["outputs"] = {
+            "face_angle": {"validated": True, "calibration": "c", "evidence": "e"}
+        }
+        with pytest.raises(OutputPolicyError, match="not observable"):
+            export_report(receipt, tmp_path / "r.md")
+
+    def test_malformed_audit_block_fails_closed(
+        self, tmp_path: Path, mock_receipt: dict[str, Any]
+    ) -> None:
+        receipt = self._with_face_audit(mock_receipt, observed_frames=-3)
+        with pytest.raises(ValueError, match="observed_frames"):
+            export_report(receipt, tmp_path / "r.md")
+
+    def test_report_without_audit_states_it_was_not_audited(
+        self, tmp_path: Path, mock_receipt: dict[str, Any]
+    ) -> None:
+        content = export_report(mock_receipt, tmp_path / "r.md").read_text(
+            encoding="utf-8"
+        )
+        assert "not audited" in content
+
 
 class TestExportCLI:
     def test_cli_export_report(self, tmp_path: Path, receipt_path: Path) -> None:

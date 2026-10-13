@@ -49,6 +49,22 @@ The optional bounded search implementation has one numerical boundary: a finite 
 
 ## OpenSim Muscle Endpoint
 
+The bounded analytic allocator in `biomechanics.muscle_allocation` is a
+separate one-step software prototype: an existing feedback law supplies its
+desired generalized effort, and the allocator returns (but does not apply) a
+bounded raw excitation candidate. It is not a substitute for the forward-
+dynamic muscle endpoint, and repeated per-frame allocation can remain
+dynamically infeasible. Chapter 39 and
+`F08_MUSCLE_RECRUITMENT_TURNOVER.md` define its units, quasistatic equilibrium,
+activation-kernel floor, evaluation budget, and limits. Chapter 39 also defines
+the shared immutable scalar Hill-force snapshot used by the allocator and
+available to a future artifact-validated replay reader; this does not add a
+serialized reader or native-engine parity. Before full-body use,
+the next bounded synthetic slice must connect the existing controller seam to
+this allocation layer, keep requested/applied effort and raw/effective
+excitation distinct, then replay saved commands with feedback disabled under
+the same kernel. No such closed-loop/replay evidence exists yet.
+
 ### Source-Bound Structural Weld Admission (#12280)
 
 The constrained-muscle source policy may admit an exact native `WeldJoint`

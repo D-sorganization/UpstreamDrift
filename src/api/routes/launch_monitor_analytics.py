@@ -180,6 +180,14 @@ class TrendPayloadV2(BaseModel):
     rolling_window: int = Field(10, ge=3, le=500)
 
 
+# Single source of truth for the "Group By" / "Grouped Holdout" choices. Two
+# separate Literal declarations with the same members in a different order
+# compare equal, so ``typing`` hands back whichever was created first and the
+# generated OpenAPI/TypeScript member order became import-order dependent
+# (issue #12422).
+GroupColumn = Literal["monitor_vendor", "session_id", "club"]
+
+
 class DispersionPayloadV2(BaseModel):
     """Bounded inline records and the PyQt Dispersion tab's widget-derived inputs.
 
@@ -193,7 +201,7 @@ class DispersionPayloadV2(BaseModel):
     records: list[dict[str, Any]] = Field(min_length=3, max_length=20_000)
     forward: str = Field("carry_distance", min_length=1)
     lateral: str = Field("lateral_carry", min_length=1)
-    group_column: Literal["monitor_vendor", "session_id", "club"] | None = None
+    group_column: GroupColumn | None = None
 
 
 class RelationshipsPayloadV2(BaseModel):
@@ -285,7 +293,7 @@ class ModelPayloadV2(BaseModel):
     features: list[str] = Field(min_length=1)
     model: ModelName = "linear"
     random_seed: int = Field(42, ge=0, le=2_147_483_647)
-    group_column: Literal["session_id", "monitor_vendor", "club"] | None = None
+    group_column: GroupColumn | None = None
 
     @field_validator("features")
     @classmethod

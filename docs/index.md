@@ -41,7 +41,7 @@ separated from current guidance.
 - [`conventions/`](conventions/) - 3 pages
 - [`critiques/`](critiques/README.md) - 3 pages
 - [`deployment/`](deployment/interim_setup.md) - 1 page
-- [`development/`](development/README.md) - 319 pages
+- [`development/`](development/README.md) - 370 pages
 - [`engineering/`](engineering/) - 2 pages
 - [`engines/`](engines/README.md) - 17 pages
 - [`estimation/`](estimation/) - 2 pages
@@ -52,7 +52,7 @@ separated from current guidance.
 - [`legal/`](legal/licenses.md) - 1 page
 - [`motion_matching/`](motion_matching/README.md) - 2 pages
 - [`motion_pipeline/`](motion_pipeline/README.md) - 6 pages
-- [`operations/`](operations/) - 20 pages
+- [`operations/`](operations/) - 22 pages
 - [`physics/`](physics/) - 3 pages
 - [`portfolio/`](portfolio/golf_modeling_demo.md) - 1 page
 - [`references/`](references/README.md) - 1 page
@@ -77,10 +77,10 @@ separated from current guidance.
 - [`bunkershot3d/`](bunkershot3d/) - 10 pages
 - [`competitive_analysis/`](competitive_analysis/COMPETITOR_ANALYSIS.md) - 1 page
 - [`config/`](config/pydantic-settings-migration.md) - 1 page
-- [`design/`](design/) - 2 pages
+- [`design/`](design/) - 3 pages
 - [`golf-model/`](golf-model/INPUT_POSE_INVESTIGATION.md) - 1 page
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
-- [`motion_capture/`](motion_capture/) - 21 pages
+- [`motion_capture/`](motion_capture/) - 22 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
 - [`plans/`](plans/README.md) - 76 pages
 - [`project/`](project/) - 2 pages
@@ -94,6 +94,7 @@ separated from current guidance.
 
 ### Archived
 
+- [`spec/`](spec/CHANGELOG_ARCHIVE.md) - 1 page
 - [`assessments/`](assessments/README.md) - 294 pages
 - [`audit_reports/`](audit_reports/induced_acceleration_audit.md) - 1 page
 - [`historical/`](historical/README.md) - 4 pages
@@ -202,6 +203,7 @@ repository, which made them effectively unreachable.
 | `shared_tools/`         | @platform-team        | stable    | UpstreamDrift <-> Tools seam: divergence inventory, per-package rulings, drift-gate docs (UD #9406).                                |
 | `sidekick/`             | @platform-team        | stable    | Sidekick shared-utilities docs, launcher sidebar, chat/provider integration, tools library, and integration guides.                 |
 | `simulation_backends/`  | @physics-team         | stable    | Backend-agnostic golf-model simulation layer (ODE / MuJoCo CPU / MuJoCo Warp GPU): user guide, launcher tile, and cross-validation. |
+| `spec/`                 | @maintainers          | archived  | Verbatim SPEC.md Section 12 change-log archive kept outside the live spec cap (#9415).                                              |
 | `specs/`                | @architecture-team    | stable    | Specifications that expand or support the root `SPEC.md` contract.                                                                  |
 | `sphinx/`               | @docs-team            | stable    | Sphinx source and generated artifacts for the rendered documentation site.                                                          |
 | `status/`               | @maintainers          | draft     | Repository status snapshots and rolling state-of-the-fleet notes.                                                                   |

@@ -212,6 +212,32 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - `FrameSchedule` — frame `j` shows the swing at `t0 + j * speed / fps`; coarse source steps are interpolated (linear joints, `slerp` for free and ball quaternions found by `quaternion_groups_from_model`).
 - `speed_suffix` (`_1x`, `_0p5x`, `_0p25x`) and `DEFAULT_FPS` = 60, `MAX_SPEED` = 4. `stride_for_speed` exists only for the deprecated `--stride` alias.
 
+### Bounded One-Step Muscle Allocation
+
+`src/shared/python/biomechanics/muscle_allocation.py` exposes
+`MuscleRecruitmentPath`, `MuscleAllocationResult`, and
+`allocate_muscle_excitations`: a pure-Python bounded single-step allocator
+that consumes desired generalized effort and returns, but does not apply, a
+raw excitation candidate. It reuses `ActivationDynamics`, `HillMuscleModel`,
+and `EquilibriumSolver`; callers provide named moment arms, effort units,
+tolerances, bounds, rate limits, and immutable prior state. Effective
+activation-kernel floor values are reported separately from raw commands.
+This analytic quasistatic prototype has only a two-muscle/three-coordinate
+fixture; it is not an efficient or qualified full-body controller. See
+chapter39 and `docs/development/feedback_controls/F08_MUSCLE_RECRUITMENT_TURNOVER.md`.
+
+### Shared Quasistatic Muscle Force Evaluation
+
+`src/shared/python/biomechanics/muscle_force_evaluation.py` exposes
+`evaluate_quasistatic_muscle_force` and the immutable
+`QuasistaticMuscleForceEvaluation` snapshot. It composes the existing analytic
+Hill-model and fiber-equilibrium calculation at zero fiber velocity; callers
+supply activation and muscle-tendon length. It has no dependency on the
+allocator/controller and accepts no native-engine state. The module reports
+force-equilibrium residuals but does not decide tolerance acceptance. The
+aggregate `biomechanics` initializer still imports the allocator. See chapter
+39 and the F08 recruitment turnover; serialized artifact validation is a
+separate future consumer.
 ### MyoFullBody Muscle-Driven Swing
 
 `src/shared/python/myofullbody/` — maps the 44-coordinate spec swing onto the

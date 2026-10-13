@@ -184,6 +184,7 @@ def test_main_exempts_handoff_and_devlog_archives(
     big = "x" * (mod.MAX_BYTES + 1)
     (dev / "archive" / "HANDOFF_ARCHIVE_2026.md").write_text(big)
     (dev / "DEVELOPMENT_LOG_ARCHIVE_2026.md").write_text(big)
+    (dev / "AGENT_HANDOFF_ARCHIVE.md").write_text(big)
     assert mod.main() == 0
 
 
@@ -194,4 +195,18 @@ def test_main_still_fails_for_oversize_outside_archives(
     root = _setup_root(tmp_path, monkeypatch)
     (root / "docs" / "archive").mkdir(parents=True)
     (root / "docs" / "archive" / "big.md").write_text("x" * (mod.MAX_BYTES + 1))
+    assert mod.main() == 1
+
+
+@pytest.mark.unit
+def test_main_exempts_only_the_spec_change_log_archive(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The verbatim SPEC.md history (#9415) is exempt; its siblings are not."""
+    root = _setup_root(tmp_path, monkeypatch)
+    (root / "docs" / "spec").mkdir(parents=True)
+    big = "x" * (mod.MAX_BYTES + 1)
+    (root / "docs" / "spec" / "CHANGELOG_ARCHIVE.md").write_text(big)
+    assert mod.main() == 0
+    (root / "docs" / "spec" / "OTHER.md").write_text(big)
     assert mod.main() == 1
