@@ -43,6 +43,7 @@ __all__ = [
     "OutputStatus",
     "evaluate_output_policy",
     "face_observability_of_receipt",
+    "output_policy_payload",
     "render_face_observability_markdown",
     "render_output_policy_markdown",
 ]
@@ -192,6 +193,10 @@ _DISPLAY_LABELS = {
 }
 
 
+def _display_label(status: OutputStatus) -> str:
+    return _DISPLAY_LABELS.get(status.status, status.status)
+
+
 def render_output_policy_markdown(statuses: Mapping[str, OutputStatus]) -> str:
     """Render the policy table. Values are intentionally never included."""
     lines = [
@@ -199,7 +204,7 @@ def render_output_policy_markdown(statuses: Mapping[str, OutputStatus]) -> str:
         "|---|---|---|",
     ]
     for name, status in statuses.items():
-        label = _DISPLAY_LABELS.get(status.status, status.status)
+        label = _display_label(status)
         lines.append(f"| `{name}` | **{label}** | {status.reason} |")
     return "\n".join(lines) + "\n"
 
@@ -235,3 +240,50 @@ def render_face_observability_markdown(
         f"{observability.total_frames} ({observability.coverage:.1%})\n"
         f"- Unobserved frame runs: {gaps}\n"
     )
+
+
+def _face_payload(observability: FaceObservability | None) -> dict[str, Any] | None:
+    if observability is None:
+        return None
+    return {
+        "observable": observability.observable,
+        "reason": observability.reason,
+        "observed_frames": observability.observed_frames,
+        "total_frames": observability.total_frames,
+        "coverage": observability.coverage,
+        "gaps": [[start, stop] for start, stop in observability.gaps],
+    }
+
+
+def _row_payload(status: OutputStatus) -> dict[str, str]:
+    return {
+        "name": status.name,
+        "status": status.status,
+        "label": _display_label(status),
+        "reason": status.reason,
+    }
+
+
+def output_policy_payload(receipt: Mapping[str, Any]) -> dict[str, Any]:
+    """Structured, JSON-safe policy view of a receipt for reports and viewers.
+
+    One row per known output (status, display label, reason) plus the face
+    audit (coverage, gap runs) when the receipt carries one. Values are never
+    included. Fails closed: a receipt the policy rejects yields every output
+    ``unavailable`` with the rejection as its reason, never a bare number.
+    """
+    try:
+        audit = face_observability_of_receipt(receipt)
+        statuses = evaluate_output_policy(receipt, face_observability=audit)
+    except ValueError as exc:  # OutputPolicyError is a ValueError
+        failed = OutputStatus("", _STATUS_UNAVAILABLE, f"policy error: {exc}")
+        statuses = {
+            name: OutputStatus(name, failed.status, failed.reason)
+            for name in (*ADVERTISED_OUTPUTS, *WITHHELD_OUTPUTS)
+        }
+        audit = None
+    return {
+        "schema_version": "output-policy/1",
+        "outputs": [_row_payload(status) for status in statuses.values()],
+        "face_observability": _face_payload(audit),
+    }
