@@ -411,6 +411,221 @@ def compute_identifiability_diagnostics(
     )
 
 
+def _build_node_cost(
+    problem: ContactWrenchProblem,
+    n: int,
+    w_mat: FloatArray,
+    tau_n: FloatArray,
+) -> tuple[FloatArray, FloatArray]:
+    """Build quadratic cost matrix H and linear term g for node n."""
+    n_u = problem.n_inputs
+    n_lambda = problem.n_contact_forces
+    j_c = problem.get_jacobian(n)
+    a_n = np.hstack([w_mat @ problem.input_matrix, w_mat @ j_c.T])
+    b_n = w_mat @ tau_n
+
+    grf_meas = problem.measured_grf[n] if problem.measured_grf is not None else None
+    w_grf = problem.grf_weight if grf_meas is not None else 0.0
+
+    h_mat = a_n.T @ a_n
+    h_mat[:n_u, :n_u] += (problem.input_effort_weight**2) * np.eye(n_u)
+    h_mat[n_u:, n_u:] += (problem.contact_effort_weight**2 + w_grf**2) * np.eye(
+        n_lambda
+    )
+
+    g_vec = a_n.T @ b_n
+    if grf_meas is not None:
+        g_vec[n_u:] += (w_grf**2) * grf_meas
+
+    return h_mat, g_vec
+
+
+def _solve_node_slsqp(
+    problem: ContactWrenchProblem,
+    n: int,
+    w_mat: FloatArray,
+    tau_n: FloatArray,
+    max_iterations: int,
+    tolerance: float,
+) -> tuple[FloatArray, FloatArray, bool, int, float]:
+    """Solve the inner wrench optimization at node n using SLSQP."""
+    n_u = problem.n_inputs
+    n_lambda = problem.n_contact_forces
+    n_c = problem.n_contact_points
+    dim = problem.contact_dim
+    mu = problem.friction_coefficient
+
+    h_mat, g_vec = _build_node_cost(problem, n, w_mat, tau_n)
+
+    def fun(x: FloatArray) -> float:
+        return float(0.5 * x @ (h_mat @ x) - g_vec @ x)
+
+    def jac(x: FloatArray) -> FloatArray:
+        return h_mat @ x - g_vec
+
+    bounds: list[tuple[float | None, float | None]] = [(None, None)] * (n_u + n_lambda)
+    for c in range(n_c):
+        idx = n_u + (c * dim + (dim - 1))
+        bounds[idx] = (0.0, None)
+
+    def cone_constraint(x: FloatArray) -> FloatArray:
+        lam = x[n_u:].reshape(n_c, dim)
+        if dim == 3:
+            ft = np.hypot(lam[:, 0], lam[:, 1])
+            fz = lam[:, 2]
+        else:
+            ft = np.abs(lam[:, 0])
+            fz = lam[:, 1]
+        return mu * fz - ft
+
+    x0 = la.solve(h_mat + 1e-4 * np.eye(n_u + n_lambda), g_vec, assume_a="pos")
+    x0[n_u:] = project_friction_cone(x0[n_u:], mu, contact_dim=dim)
+
+    res = opt.minimize(
+        fun,
+        x0,
+        jac=jac,
+        bounds=bounds,
+        constraints={"type": "ineq", "fun": cone_constraint},
+        method="SLSQP",
+        options={"maxiter": max_iterations, "ftol": min(tolerance**2, 1e-12)},
+    )
+
+    x_sol = res.x
+    viol_check = compute_cone_violations(
+        x_sol[n_u:], mu, contact_dim=dim, tolerance=tolerance
+    )
+    is_success = bool(res.success or (res.status == 8 and viol_check.is_cone_feasible))
+    cost = fun(x_sol)
+    return x_sol[:n_u], x_sol[n_u:], is_success, int(res.nit), cost
+
+
+def _solve_contact_wrenches_slsqp(
+    problem: ContactWrenchProblem,
+    w_mat: FloatArray,
+    torques: FloatArray,
+    max_iterations: int,
+    tolerance: float,
+) -> tuple[FloatArray, FloatArray, bool, int, float, str]:
+    """Solve all nodes independently via SLSQP."""
+    inputs_list: list[FloatArray] = []
+    wrenches_list: list[FloatArray] = []
+    converged_all = True
+    total_iters = 0
+    total_cost = 0.0
+
+    for n in range(problem.n_nodes):
+        u_n, lam_n, success, iters, cost = _solve_node_slsqp(
+            problem, n, w_mat, torques[n], max_iterations, tolerance
+        )
+        inputs_list.append(u_n)
+        wrenches_list.append(lam_n)
+        converged_all = converged_all and success
+        total_iters += iters
+        total_cost += cost
+
+    inputs = np.array(inputs_list, dtype=np.float64)
+    wrenches = np.array(wrenches_list, dtype=np.float64)
+    status_msg = "converged" if converged_all else "slsqp_iteration_limit"
+    return inputs, wrenches, converged_all, total_iters, total_cost, status_msg
+
+
+def _solve_contact_wrenches_admm(
+    problem: ContactWrenchProblem,
+    w_mat: FloatArray,
+    torques: FloatArray,
+    max_iterations: int,
+    tolerance: float,
+) -> tuple[FloatArray, FloatArray, bool, int, float, str]:
+    """Solve the coupled contact wrench problem via ADMM."""
+    n_nodes = problem.n_nodes
+    n_u = problem.n_inputs
+    n_lambda = problem.n_contact_forces
+    dim = problem.contact_dim
+    mu = problem.friction_coefficient
+    w_smooth = problem.input_smoothness_weight
+    has_smooth = w_smooth > 0.0 and n_nodes > 2
+
+    q_blocks = []
+    g_blocks = []
+    for n in range(n_nodes):
+        hn, gn = _build_node_cost(problem, n, w_mat, torques[n])
+        q_blocks.append(hn)
+        g_blocks.append(gn)
+
+    q_diag = sp.block_diag(q_blocks, format="csc")
+    g_vec = np.concatenate(g_blocks)
+
+    if has_smooth:
+        diff_rows = []
+        for n in range(1, n_nodes - 1):
+            row = np.zeros(n_nodes)
+            row[n - 1] = 1.0
+            row[n] = -2.0
+            row[n + 1] = 1.0
+            diff_rows.append(row)
+        diff_mat = sp.csr_matrix(np.array(diff_rows))
+        smooth_u = sp.kron(diff_mat, sp.eye(n_u))
+        col_indices = np.concatenate(
+            [
+                np.arange(n * (n_u + n_lambda), n * (n_u + n_lambda) + n_u)
+                for n in range(n_nodes)
+            ]
+        )
+        smooth_full = sp.csr_matrix(
+            (smooth_u.data, (smooth_u.indices, col_indices)),
+            shape=(smooth_u.shape[0], n_nodes * (n_u + n_lambda)),
+        )
+        q_diag += (w_smooth**2) * (smooth_full.T @ smooth_full).tocsc()
+
+    lambda_cols = np.concatenate(
+        [
+            np.arange(n * (n_u + n_lambda) + n_u, (n + 1) * (n_u + n_lambda))
+            for n in range(n_nodes)
+        ]
+    )
+    s_lambda = sp.csr_matrix(
+        (np.ones(n_nodes * n_lambda), (np.arange(n_nodes * n_lambda), lambda_cols)),
+        shape=(n_nodes * n_lambda, n_nodes * (n_u + n_lambda)),
+    )
+
+    rho = 10.0
+    h_aug = (q_diag + rho * (s_lambda.T @ s_lambda)).tocsc()
+    lu_solver = splu(h_aug)
+
+    z = np.zeros(n_nodes * n_lambda)
+    y = np.zeros(n_nodes * n_lambda)
+    converged_all = False
+    iter_count = 0
+    x_sol = np.zeros(n_nodes * (n_u + n_lambda))
+
+    for k in range(max_iterations):
+        iter_count = k + 1
+        rhs = g_vec + s_lambda.T @ (rho * z - y)
+        x_sol = lu_solver.solve(rhs)
+        lam = s_lambda @ x_sol
+        z_prev = z.copy()
+        z = project_friction_cone(lam + (1.0 / rho) * y, mu, contact_dim=dim).reshape(
+            -1
+        )
+        r_pri = lam - z
+        y = y + rho * r_pri
+        r_dual = rho * (z - z_prev)
+        if (
+            float(np.max(np.abs(r_pri))) <= tolerance
+            and float(np.max(np.abs(r_dual))) <= tolerance
+        ):
+            converged_all = True
+            break
+
+    status_msg = "converged" if converged_all else "admm_iteration_limit"
+    stacked_x = x_sol.reshape(n_nodes, n_u + n_lambda)
+    inputs = stacked_x[:, :n_u]
+    wrenches = stacked_x[:, n_u:]
+    total_cost = float(0.5 * x_sol @ (q_diag @ x_sol) - g_vec @ x_sol)
+    return inputs, wrenches, converged_all, iter_count, total_cost, status_msg
+
+
 def solve_contact_wrenches(
     problem: ContactWrenchProblem,
     solver: Literal["admm", "slsqp", "auto"] = "auto",
@@ -422,7 +637,6 @@ def solve_contact_wrenches(
     n_u = problem.n_inputs
     n_lambda = problem.n_contact_forces
     n_v = problem.n_rows_per_node
-    n_c = problem.n_contact_points
     dim = problem.contact_dim
     mu = problem.friction_coefficient
 
@@ -440,212 +654,17 @@ def solve_contact_wrenches(
     )
 
     if use_slsqp:
-        # Solve node-by-node via SLSQP
-        inputs_list: list[FloatArray] = []
-        wrenches_list: list[FloatArray] = []
-        converged_all = True
-        total_iters = 0
-        total_cost = 0.0
-
-        for n in range(n_nodes):
-            j_c = problem.get_jacobian(n)
-            tau_n = torques[n]
-            a_n = np.hstack([w_mat @ problem.input_matrix, w_mat @ j_c.T])
-            b_n = w_mat @ tau_n
-
-            grf_meas = (
-                problem.measured_grf[n] if problem.measured_grf is not None else None
+        inputs, wrenches, converged_all, total_iters, total_cost, status_msg = (
+            _solve_contact_wrenches_slsqp(
+                problem, w_mat, torques, max_iterations, tolerance
             )
-            w_grf = problem.grf_weight if grf_meas is not None else 0.0
-
-            # Quadratic cost matrices: 0.5 x^T H x - g^T x
-            h_mat = a_n.T @ a_n
-            h_mat[:n_u, :n_u] += (problem.input_effort_weight**2) * np.eye(n_u)
-            h_mat[n_u:, n_u:] += (problem.contact_effort_weight**2 + w_grf**2) * np.eye(
-                n_lambda
-            )
-
-            g_vec = a_n.T @ b_n
-            if grf_meas is not None:
-                g_vec[n_u:] += (w_grf**2) * grf_meas
-
-            def fun(
-                x: FloatArray, h: FloatArray = h_mat, g: FloatArray = g_vec
-            ) -> float:
-                return float(0.5 * x @ (h @ x) - g @ x)
-
-            def jac(
-                x: FloatArray, h: FloatArray = h_mat, g: FloatArray = g_vec
-            ) -> FloatArray:
-                return h @ x - g
-
-            # Normal bounds: fz >= 0
-            bounds: list[tuple[float | None, float | None]] = [(None, None)] * (
-                n_u + n_lambda
-            )
-            for c in range(n_c):
-                idx = n_u + (c * dim + (dim - 1))
-                bounds[idx] = (0.0, None)
-
-            # Friction cone inequality constraint: mu * fz - ft >= 0
-            def cone_constraint(x: FloatArray) -> FloatArray:
-                lam = x[n_u:].reshape(n_c, dim)
-                if dim == 3:
-                    ft = np.hypot(lam[:, 0], lam[:, 1])
-                    fz = lam[:, 2]
-                else:
-                    ft = np.abs(lam[:, 0])
-                    fz = lam[:, 1]
-                return mu * fz - ft
-
-            # Initial guess: unconstrained L2 regularized solve, projected
-            x0 = la.solve(h_mat + 1e-4 * np.eye(n_u + n_lambda), g_vec, assume_a="pos")
-            x0[n_u:] = project_friction_cone(x0[n_u:], mu, contact_dim=dim)
-
-            res = opt.minimize(
-                fun,
-                x0,
-                jac=jac,
-                bounds=bounds,
-                constraints={"type": "ineq", "fun": cone_constraint},
-                method="SLSQP",
-                options={"maxiter": max_iterations, "ftol": min(tolerance**2, 1e-12)},
-            )
-
-            total_iters += int(res.nit)
-            x_sol = res.x
-            # SLSQP status 0 is success; status 8 occurs at sharp constrained boundary optima
-            # where directional derivatives are positive in all feasible directions (KKT point).
-            viol_check = compute_cone_violations(
-                x_sol[n_u:], mu, contact_dim=dim, tolerance=tolerance
-            )
-            is_success = bool(
-                res.success or (res.status == 8 and viol_check.is_cone_feasible)
-            )
-            converged_all = converged_all and is_success
-            total_cost += fun(x_sol)
-            inputs_list.append(x_sol[:n_u])
-            wrenches_list.append(x_sol[n_u:])
-
-        inputs = np.array(inputs_list, dtype=np.float64)
-        wrenches = np.array(wrenches_list, dtype=np.float64)
-        status_msg = "converged" if converged_all else "slsqp_iteration_limit"
-
+        )
     else:
-        # ADMM backend
-        # Supports both coupled (w_smooth > 0) and decoupled setups
-        w_smooth = problem.input_smoothness_weight
-        has_smooth = w_smooth > 0.0 and n_nodes > 2
-
-        # Build block-diagonal quadratic term
-        q_blocks = []
-        g_blocks = []
-        for n in range(n_nodes):
-            j_c = problem.get_jacobian(n)
-            tau_n = torques[n]
-            a_n = np.hstack([w_mat @ problem.input_matrix, w_mat @ j_c.T])
-            b_n = w_mat @ tau_n
-            grf_meas = (
-                problem.measured_grf[n] if problem.measured_grf is not None else None
+        inputs, wrenches, converged_all, total_iters, total_cost, status_msg = (
+            _solve_contact_wrenches_admm(
+                problem, w_mat, torques, max_iterations, tolerance
             )
-            w_grf = problem.grf_weight if grf_meas is not None else 0.0
-
-            hn = a_n.T @ a_n
-            hn[:n_u, :n_u] += (problem.input_effort_weight**2) * np.eye(n_u)
-            hn[n_u:, n_u:] += (problem.contact_effort_weight**2 + w_grf**2) * np.eye(
-                n_lambda
-            )
-
-            gn = a_n.T @ b_n
-            if grf_meas is not None:
-                gn[n_u:] += (w_grf**2) * grf_meas
-
-            q_blocks.append(hn)
-            g_blocks.append(gn)
-
-        q_diag = sp.block_diag(q_blocks, format="csc")
-        g_vec = np.concatenate(g_blocks)
-
-        if has_smooth:
-            # Smoothness penalty w_smooth * (u_{n-1} - 2 u_n + u_{n+1})
-            diff_rows = []
-            for n in range(1, n_nodes - 1):
-                row = np.zeros(n_nodes)
-                row[n - 1] = 1.0
-                row[n] = -2.0
-                row[n + 1] = 1.0
-                diff_rows.append(row)
-            diff_mat = sp.csr_matrix(np.array(diff_rows))
-            smooth_u = sp.kron(diff_mat, sp.eye(n_u))  # (n_diff * n_u, n_nodes * n_u)
-            # Embed into (n_u + n_lambda) space
-            col_indices = np.concatenate(
-                [
-                    np.arange(n * (n_u + n_lambda), n * (n_u + n_lambda) + n_u)
-                    for n in range(n_nodes)
-                ]
-            )
-            smooth_full = sp.csr_matrix(
-                (smooth_u.data, (smooth_u.indices, col_indices)),
-                shape=(smooth_u.shape[0], n_nodes * (n_u + n_lambda)),
-            )
-            q_diag += (w_smooth**2) * (smooth_full.T @ smooth_full).tocsc()
-
-        # Contact force selection matrix S_lambda (N * n_lambda, N * (n_u + n_lambda))
-        lambda_cols = np.concatenate(
-            [
-                np.arange(n * (n_u + n_lambda) + n_u, (n + 1) * (n_u + n_lambda))
-                for n in range(n_nodes)
-            ]
         )
-        s_lambda = sp.csr_matrix(
-            (np.ones(n_nodes * n_lambda), (np.arange(n_nodes * n_lambda), lambda_cols)),
-            shape=(n_nodes * n_lambda, n_nodes * (n_u + n_lambda)),
-        )
-
-        rho = 10.0
-        h_aug = (q_diag + rho * (s_lambda.T @ s_lambda)).tocsc()
-        lu_solver = splu(h_aug)
-
-        # ADMM initialization
-        z = np.zeros(n_nodes * n_lambda)
-        y = np.zeros(n_nodes * n_lambda)
-        converged_all = False
-        iter_count = 0
-
-        for k in range(max_iterations):
-            iter_count = k + 1
-            # 1. x-update: H_aug x = g + S_lambda^T (rho * z - y)
-            rhs = g_vec + s_lambda.T @ (rho * z - y)
-            x_sol = lu_solver.solve(rhs)
-
-            # 2. lambda extract
-            lam = s_lambda @ x_sol
-
-            # 3. z-update: projection onto friction cone
-            z_prev = z.copy()
-            z = project_friction_cone(
-                lam + (1.0 / rho) * y, mu, contact_dim=dim
-            ).reshape(-1)
-
-            # 4. y-update
-            r_pri = lam - z
-            y = y + rho * r_pri
-
-            # 5. Convergence check
-            r_dual = rho * (z - z_prev)
-            norm_pri = float(np.max(np.abs(r_pri)))
-            norm_dual = float(np.max(np.abs(r_dual)))
-
-            if norm_pri <= tolerance and norm_dual <= tolerance:
-                converged_all = True
-                break
-
-        total_iters = iter_count
-        status_msg = "converged" if converged_all else "admm_iteration_limit"
-        stacked_x = x_sol.reshape(n_nodes, n_u + n_lambda)
-        inputs = stacked_x[:, :n_u]
-        wrenches = stacked_x[:, n_u:]
-        total_cost = float(0.5 * x_sol @ (q_diag @ x_sol) - g_vec @ x_sol)
 
     # Compute dynamics residuals
     dyn_residuals = []
