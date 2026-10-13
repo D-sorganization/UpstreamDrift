@@ -106,6 +106,9 @@ class PlanarConformanceOracle:
         fitted_parameters = (
             fit_report.fit.parameters if fit_report is not None else np.array(TRUE_PI)
         )
+        tolerances = self.protocol.tolerances
+        min_structural_rank = tolerances.structural_rank
+        open_loop_replay_rms_cap = tolerances.open_loop_replay_rms_max_rad
 
         gate_results: list[GateResult] = [
             check_kinematic_whiteness(whiteness_metric=1.0),
@@ -113,12 +116,10 @@ class PlanarConformanceOracle:
                 sigma_tau=0.2, basis_accel_error=0.01, mass_scale=2.3
             ),
             check_physical_consistency(fitted_parameters),
-            check_observability(
-                structural_rank, min_rank=self.protocol.tolerances.structural_rank
-            ),
+            check_observability(structural_rank, min_rank=min_structural_rank),
             check_open_loop_replay(
                 replays,
-                max_rms_rad=self.protocol.tolerances.open_loop_replay_rms_max_rad,
+                max_rms_rad=open_loop_replay_rms_cap,
             ),
             check_closed_loop_effort(replays, max_effort_rms=0.05),
             check_cross_trial_consistency(modes=(0.999,)),
