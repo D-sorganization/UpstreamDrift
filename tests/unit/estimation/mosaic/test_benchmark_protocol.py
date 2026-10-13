@@ -36,7 +36,9 @@ def test_frozen_protocol_loads_and_has_expected_keys() -> None:
     assert protocol.tolerances.open_loop_horizon_s == 0.75
 
 
-def test_protocol_integrity_fails_if_modified_without_trailer(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_protocol_integrity_fails_if_modified_without_trailer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     protocol = load_benchmark_protocol()
     # Verification succeeds on untouched protocol
     assert verify_protocol_integrity(protocol) is True

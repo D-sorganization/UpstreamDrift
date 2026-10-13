@@ -39,9 +39,13 @@ def test_missing_input_reports_unqualified_never_pass() -> None:
     # All checks with None or missing input must return UNQUALIFIED
     res1 = check_kinematic_whiteness(residual_autocorr=None, whiteness_metric=None)
     assert res1.status == GateStatus.UNQUALIFIED
-    assert "unavailable" in res1.message.lower() or "unqualified" in res1.message.lower()
+    assert (
+        "unavailable" in res1.message.lower() or "unqualified" in res1.message.lower()
+    )
 
-    res2 = check_declared_discrepancy(sigma_tau=None, basis_accel_error=None, mass_scale=None)
+    res2 = check_declared_discrepancy(
+        sigma_tau=None, basis_accel_error=None, mass_scale=None
+    )
     assert res2.status == GateStatus.UNQUALIFIED
 
     res3 = check_physical_consistency(parameters=None)
@@ -62,7 +66,9 @@ def test_missing_input_reports_unqualified_never_pass() -> None:
 
 def test_physical_consistency_gate_checks_cone() -> None:
     # Consistent parameters: m > 0, Ic > 0
-    pi_valid = np.array([1.3, 0.585, 0.0, 0.343, 0.7, 0.175, 0.0, 0.064, 0.3, 0.09, 0.0, 0.03])
+    pi_valid = np.array(
+        [1.3, 0.585, 0.0, 0.343, 0.7, 0.175, 0.0, 0.064, 0.3, 0.09, 0.0, 0.03]
+    )
     res_pass = check_physical_consistency(pi_valid)
     assert res_pass.status == GateStatus.PASSED
 
