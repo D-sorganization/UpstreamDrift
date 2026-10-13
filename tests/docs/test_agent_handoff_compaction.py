@@ -66,9 +66,18 @@ def test_current_handoff_is_a_short_index_and_local_links_resolve() -> None:
     original_index = _read_repo_path(root_snapshot["archive_path"])
     archived_prefix = original_index[: manifest["root_index_prefix_bytes"]]
     assert _sha256(archived_prefix) == manifest["root_index_prefix_sha256"]
-    assert b"## Active Study and Current Status" in handoff_bytes
-    assert b"## Peer Record Index" in handoff_bytes
-    assert b"does not independently validate" in handoff_bytes
+    # #12416 made the live handoff a fleet-wide index; the study's index
+    # sections moved verbatim into one archive section that it points to.
+    assert b"Shot-pattern study" in handoff_bytes
+    assert b"phase2/RESUME_HANDOFF.md" in handoff_bytes
+    archive = (ROOT / "docs/development/AGENT_HANDOFF_ARCHIVE.md").read_bytes()
+    _, marker, section = archive.partition(
+        b"# Shot-Pattern Study Pre-Consolidation Handoff (#12278)"
+    )
+    assert marker
+    assert b"## Active Study and Current Status" in section
+    assert b"## Peer Record Index" in section
+    assert b"does not independently validate" in section
 
     markdown_paths = [handoff, *(ROOT / p for p in manifest["navigation_documents"])]
     historical_link_bases = {
