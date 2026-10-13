@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "bdc3eed0e934ec84d94f5f74ef4b2b7745c1a545",
+  "tools_pin": "f7440f182350b3dd3ca393e93e68afd698417c8b",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -11,7 +11,7 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 376,
+    "identical": 377,
     "diverged": 271,
     "ud-only": 1700,
     "tools-only": 838,
@@ -754,7 +754,7 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 211,
+      "identical": 212,
       "diverged": 68,
       "ud-only": 36,
       "tools-only": 92,
@@ -6581,8 +6581,8 @@
       "package": "contracts.py",
       "subpackage": "",
       "ud_bytes": 24271,
-      "tools_bytes": 24980,
-      "byte_delta": -709,
+      "tools_bytes": 25323,
+      "byte_delta": -1052,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -26416,8 +26416,8 @@
       "classification": "identical",
       "package": "sidekick",
       "subpackage": "lab",
-      "ud_bytes": 34734,
-      "tools_bytes": 34734,
+      "ud_bytes": 35430,
+      "tools_bytes": 35430,
       "byte_delta": 0,
       "byte_identical": true,
       "ud_has_child_copy_header": false,
@@ -28686,6 +28686,18 @@
       "subpackage": "tests",
       "ud_bytes": 8966,
       "tools_bytes": 8966,
+      "byte_delta": 0,
+      "byte_identical": true,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/tests/lab/bio/test_c3d_force_plate_dataframe.py",
+      "classification": "identical",
+      "package": "sidekick",
+      "subpackage": "tests",
+      "ud_bytes": 5037,
+      "tools_bytes": 5037,
       "byte_delta": 0,
       "byte_identical": true,
       "ud_has_child_copy_header": false,
@@ -40570,9 +40582,9 @@
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-10-13",
+        "commit": "9b880daf7c689b61313a1b590f65cfdfbdae4364"
       }
     },
     {
