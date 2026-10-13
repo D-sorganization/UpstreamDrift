@@ -606,6 +606,64 @@ class ManifoldFitResult:
     final_cost: float
 
 
+def _compute_residuals(
+    spline: SE3ManifoldSpline,
+    marker_positions: FloatArray,
+    marker_offsets: FloatArray,
+    marker_sigma: float,
+) -> tuple[FloatArray, FloatArray, float]:
+    """Evaluate poses, residuals and cost for marker observations."""
+    n_samples = spline.basis.n_samples
+    poses = spline.evaluate_poses()
+    res = np.zeros((n_samples, marker_offsets.shape[0], 3), dtype=np.float64)
+    for i in range(n_samples):
+        R_i = poses[i, :3, :3]
+        p_i = poses[i, :3, 3]
+        pred_i = marker_offsets @ R_i.T + p_i
+        res[i] = pred_i - marker_positions[i]
+    cost = 0.5 * float(np.sum((res / marker_sigma) ** 2))
+    return res, poses, cost
+
+
+def _build_normal_equations(
+    poses: FloatArray,
+    res: FloatArray,
+    marker_offsets: FloatArray,
+    P: FloatArray,
+    marker_sigma: float,
+    K: int,
+) -> tuple[FloatArray, FloatArray]:
+    """Build Gauss-Newton approximate Hessian H and gradient g."""
+    n_samples = poses.shape[0]
+    n_markers = marker_offsets.shape[0]
+    H = np.zeros((K * 6, K * 6), dtype=np.float64)
+    g = np.zeros(K * 6, dtype=np.float64)
+
+    for i in range(n_samples):
+        R_i = poses[i, :3, :3]
+        p_i = poses[i, :3, 3]
+        P_i = P[i]
+
+        for m in range(n_markers):
+            x_im = R_i @ marker_offsets[m] + p_i
+            r_im = res[i, m] / marker_sigma
+
+            dY_dxi: FloatArray = np.zeros((3, 6), dtype=np.float64)
+            dY_dxi[:3, :3] = np.eye(3) / marker_sigma
+            dY_dxi[:3, 3:] = -skew(x_im) / marker_sigma
+
+            J_im: FloatArray = np.zeros((3, K * 6), dtype=np.float64)
+            for j in range(K):
+                p_ij = float(P_i[j])
+                if abs(p_ij) > 1e-12:
+                    J_im[:, 6 * j : 6 * j + 6] = p_ij * dY_dxi
+
+            H += J_im.T @ J_im
+            g += J_im.T @ r_im
+
+    return H, g
+
+
 def fit_floating_base_manifold(
     spline: SE3ManifoldSpline,
     marker_positions: FloatArray,
@@ -641,58 +699,24 @@ def fit_floating_base_manifold(
     P = spline.basis.position  # (N, K)
     K = spline.basis.n_coefficients
 
-    def compute_residuals(
-        s: SE3ManifoldSpline,
-    ) -> tuple[FloatArray, FloatArray, float]:
-        poses = s.evaluate_poses()
-        res = np.zeros((n_samples, n_markers, 3), dtype=np.float64)
-        for i in range(n_samples):
-            R_i = poses[i, :3, :3]
-            p_i = poses[i, :3, 3]
-            pred_i = marker_offsets @ R_i.T + p_i
-            res[i] = pred_i - marker_positions[i]
-        cost = 0.5 * float(np.sum((res / marker_sigma) ** 2))
-        return res, poses, cost
-
-    res, poses, current_cost = compute_residuals(current_spline)
+    res, poses, current_cost = _compute_residuals(
+        current_spline, marker_positions, marker_offsets, marker_sigma
+    )
     cost_history.append(current_cost)
     converged = False
 
     for _ in range(max_iterations):
-        H = np.zeros((K * 6, K * 6), dtype=np.float64)
-        g = np.zeros(K * 6, dtype=np.float64)
+        H, g = _build_normal_equations(poses, res, marker_offsets, P, marker_sigma, K)
 
-        for i in range(n_samples):
-            R_i = poses[i, :3, :3]
-            p_i = poses[i, :3, 3]
-            P_i = P[i]  # (K,)
-
-            for m in range(n_markers):
-                x_im = R_i @ marker_offsets[m] + p_i
-                r_im = res[i, m] / marker_sigma  # (3,)
-
-                # Derivative w.r.t tangent perturbation at node i: [I_3, -[x_im]x] / sigma
-                dY_dxi: FloatArray = np.zeros((3, 6), dtype=np.float64)
-                dY_dxi[:3, :3] = np.eye(3) / marker_sigma
-                dY_dxi[:3, 3:] = -skew(x_im) / marker_sigma
-
-                J_im: FloatArray = np.zeros((3, K * 6), dtype=np.float64)
-                for j in range(K):
-                    p_ij = float(P_i[j])
-                    if abs(p_ij) > 1e-12:
-                        J_im[:, 6 * j : 6 * j + 6] = p_ij * dY_dxi
-
-                H += J_im.T @ J_im
-                g += J_im.T @ r_im
-
-        # Nielsen / Levenberg-Marquardt damping
         diag_H = np.diag(H)
         H_damped = H + damping * np.diag(np.maximum(diag_H, 1e-6))
         delta_vec = np.asarray(-np.linalg.solve(H_damped, g), dtype=np.float64)
         delta_C = np.asarray(delta_vec.reshape(K, 6), dtype=np.float64)
 
         candidate_spline = current_spline.retract(delta_C)
-        cand_res, cand_poses, candidate_cost = compute_residuals(candidate_spline)
+        cand_res, cand_poses, candidate_cost = _compute_residuals(
+            candidate_spline, marker_positions, marker_offsets, marker_sigma
+        )
 
         if candidate_cost < current_cost:
             rel_decrease = (current_cost - candidate_cost) / max(current_cost, 1e-12)
