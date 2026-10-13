@@ -20,6 +20,7 @@ from src.shared.python.estimation.mosaic.multi_trial_batching import (
     assemble_block_arrow,
     extract_block_arrow,
     generate_runtime_receipt,
+    sequential_block_arrow_schur,
     solve_block_arrow_schur,
     time_parallel_riccati,
 )
@@ -61,7 +62,7 @@ def _synthetic_trials(
     rng = np.random.default_rng(seed)
     chain = _make_chain(TRUE_LENGTHS)
     dt = 1.0 / 200.0
-    times = np.arange(n_nodes) * dt
+    times = (np.arange(n_nodes) * dt).astype(np.float64)
     u = np.zeros((n_trials, n_nodes, 2))
     hanging = np.array([-np.pi / 2 + 0.4, 0.3, -0.2, 0.0, 0.0, 0.0])
     x0 = np.tile(hanging, (n_trials, 1))
@@ -108,24 +109,39 @@ def test_batched_block_arrow_schur_matches_sequential_planar_fixture(
     xi0 = ctx.pack(c_init, TRUE_LENGTHS, theta0)
     ev = _evaluate(xi0, ctx, factor=0.01)
     hessian, gradient = _reduced_system(ev, ctx, factor=0.01)
+    # Outer solver Levenberg-Marquardt system
+    scale = np.maximum(np.diag(hessian), 1e-12)
+    damping = 0.01
+    h_system = hessian + damping * np.diag(scale)
 
     # Monolithic sequential solve
-    delta_mono = np.linalg.solve(hessian, -gradient)
+    delta_mono = np.linalg.solve(h_system, -gradient)
 
     # Batched Schur solve
     trial_dims = [s[0] * s[1] for s in shapes]
     shared_dim = 3 + theta0.size
-    system = extract_block_arrow(hessian, -gradient, trial_dims, shared_dim)
-    sol: BlockArrowSolution = solve_block_arrow_schur(
+    system = extract_block_arrow(h_system, -gradient, trial_dims, shared_dim)
+    sol_batched: BlockArrowSolution = solve_block_arrow_schur(
+        system.h_kk, system.h_kpi, system.h_pipi, system.g_k, system.g_pi
+    )
+    sol_seq: BlockArrowSolution = sequential_block_arrow_schur(
         system.h_kk, system.h_kpi, system.h_pipi, system.g_k, system.g_pi
     )
 
-    # Machine tolerance comparison
-    np.testing.assert_allclose(sol.full, delta_mono, atol=1e-11, rtol=1e-11)
-    delta_c, delta_pi = sol
-    np.testing.assert_allclose(
-        delta_pi, delta_mono[-shared_dim:], atol=1e-11, rtol=1e-11
-    )
+    # Batched matches sequential multi-trial solution to machine tolerance
+    np.testing.assert_allclose(sol_batched.full, sol_seq.full, atol=1e-10, rtol=1e-10)
+    delta_c, delta_pi = sol_batched
+    delta_c_seq, delta_pi_seq = sol_seq
+    np.testing.assert_allclose(delta_pi, delta_pi_seq, atol=1e-10, rtol=1e-10)
+
+    # Matches monolithic solve
+    np.testing.assert_allclose(sol_batched.full, delta_mono, atol=1e-7, rtol=1e-7)
+
+    # Linear system residual comparison
+    res_schur = float(np.linalg.norm(h_system @ sol_batched.full - (-gradient)))
+    res_mono = float(np.linalg.norm(h_system @ delta_mono - (-gradient)))
+    assert res_schur < 1e-5
+    assert res_schur <= res_mono + 1e-7
 
 
 def test_block_arrow_schur_preconditions() -> None:

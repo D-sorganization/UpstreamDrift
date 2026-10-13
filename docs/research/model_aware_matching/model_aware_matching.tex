@@ -396,6 +396,14 @@ $\bu_{k+1}=\bu_k+\mathbf{L}e_k$ converges iff $\rho(\mathbf{I}-\mathbf{G}\mathbf
 with $\mathbf{L}$ the Riccati gain this is a cross-trial diagnostic, not the
 estimator.
 
+\paragraph{Time-Parallel Riccati Recursion.}
+To eliminate the serial backward bottleneck across the $T$-node horizon, the Riccati recursion is temporally parallelised using the associative Redheffer star product over local scattering operators \cite{Sarkka2023}. At each stage $t$, the transition of state and costate perturbations is represented by the triplet $(\bA_t, \bS_t, \mathbf{Q}_t)$ with $\bS_t = \bB_t \mathbf{R}^{-1} \bB_t^\top$ and cost weight $\mathbf{Q}_t = \mathbf{Q}$. Two adjacent temporal intervals $(\bA_1, \bS_1, \mathbf{Q}_1)$ and $(\bA_2, \bS_2, \mathbf{Q}_2)$ compose associatively via:
+\begin{align}
+  \mathbf{M} &= \mathbf{I} + \bS_1 \mathbf{Q}_2, \quad \mathbf{X} = \mathbf{M}^{-1} \bA_1, \quad \mathbf{Y} = \mathbf{M}^{-1} \bS_1, \label{eq:star_compose} \\
+  \bA_{12} &= \bA_2 \mathbf{X}, \quad \bS_{12} = \bS_2 + \bA_2 \mathbf{Y} \bA_2^\top, \quad \mathbf{Q}_{12} = \mathbf{Q}_1 + \bA_1^\top \mathbf{Q}_2 \mathbf{X}. \nonumber
+\end{align}
+Because $\star$ is associative, all sub-interval suffixes are evaluated in $O(\log T)$ parallel scan steps. From suffix $(\bA_{t:T}, \bS_{t:T}, \mathbf{Q}_{t:T})$ and terminal cost $\mathbf{V}_T$, the exact cost-to-go is $\mathbf{V}_t = \mathbf{Q}_{t:T} + \bA_{t:T}^\top \mathbf{V}_T (\mathbf{I} + \bS_{t:T}\mathbf{V}_T)^{-1} \bA_{t:T}$, and gains $\bK_t = (\mathbf{R} + \bB_t^\top \mathbf{V}_{t+1} \bB_t)^{-1} \bB_t^\top \mathbf{V}_{t+1} \bA_t$ are evaluated simultaneously in parallel across time.
+
 \subsection{Cross-Trial Torque Template}
 Each trial's inputs are binned by normalised phase; the trial-balanced mean
 $\bar\bu(\phi)$ enters the inner solve as a coupling prior ($w_T$) and is
@@ -411,6 +419,28 @@ Trials enter only through the shared blocks, so the per-trial parts are
 independent and batch over trials; the time axis is parallel because no
 integration occurs.  The reference implementation is pure NumPy; the same
 kernels accept MJX/JAX batched regressors unchanged.
+
+\paragraph{Block-Arrow Schur Reduction Over Multiple Trials.}
+When fitting $K$ repeated trials, the outer parameter vector partitions into trial-specific kinematic spline coefficients $\mathbf{c}_k \in \R^{d_k}$ and shared parameters $\boldsymbol{\pi} = (\mathbf{s}, \boldsymbol{\theta}) \in \R^{d_\pi}$ (geometry and unconstrained consistency coordinates). Because observations and trial-specific dynamics residuals depend only on the respective trial kinematics and the shared parameters, the reduced Gauss--Newton Hessian exhibits an exact block-arrow structure:
+\begin{equation}
+  \mathbf{H} = \begin{bmatrix}
+    \mathbf{H}_{11} & \mathbf{0} & \dots & \mathbf{0} & \mathbf{H}_{1\pi} \\
+    \mathbf{0} & \mathbf{H}_{22} & \dots & \mathbf{0} & \mathbf{H}_{2\pi} \\
+    \vdots & \vdots & \ddots & \vdots & \vdots \\
+    \mathbf{0} & \mathbf{0} & \dots & \mathbf{H}_{KK} & \mathbf{H}_{K\pi} \\
+    \mathbf{H}_{1\pi}^\top & \mathbf{H}_{2\pi}^\top & \dots & \mathbf{H}_{K\pi}^\top & \mathbf{H}_{\pi\pi}
+  \end{bmatrix}, \quad
+  \mathbf{g} = \begin{bmatrix}
+    \mathbf{g}_1 \\ \mathbf{g}_2 \\ \vdots \\ \mathbf{g}_K \\ \mathbf{g}_\pi
+  \end{bmatrix}.
+  \label{eq:block_arrow_hessian}
+\end{equation}
+Eliminating the trial kinematics via the Schur complement reduces the global system of dimension $\sum_{k=1}^K d_k + d_\pi$ to the compact shared parameter subsystem of dimension $d_\pi$:
+\begin{align}
+  \boldsymbol{\mathcal{H}}_{\pi\pi} &= \mathbf{H}_{\pi\pi} - \sum_{k=1}^K \mathbf{H}_{k\pi}^\top \mathbf{H}_{kk}^{-1} \mathbf{H}_{k\pi}, \label{eq:schur_reduced_system} \\
+  \mathbf{g}_{\pi,\mathrm{red}} &= \mathbf{g}_\pi - \sum_{k=1}^K \mathbf{H}_{k\pi}^\top \mathbf{H}_{kk}^{-1} \mathbf{g}_k. \nonumber
+\end{align}
+The local linear solves $\mathbf{X}_k = \mathbf{H}_{kk}^{-1} \mathbf{H}_{k\pi}$ and $\mathbf{y}_k = \mathbf{H}_{kk}^{-1} \mathbf{g}_k$ are decoupled and executed in a single batched BLAS call over the trial dimension. Once $\Delta\boldsymbol{\pi} = \boldsymbol{\mathcal{H}}_{\pi\pi}^{-1} \mathbf{g}_{\pi,\mathrm{red}}$ is solved, trial updates are recovered by vectorised back-substitution $\Delta\mathbf{c}_k = \mathbf{y}_k - \mathbf{X}_k \Delta\boldsymbol{\pi}$, matching sequential multi-trial solves to machine precision while scaling linearly in trial count without dense cross-trial memory overhead.
 
 \section{Qualification Gates}
 \label{sec:gates}
