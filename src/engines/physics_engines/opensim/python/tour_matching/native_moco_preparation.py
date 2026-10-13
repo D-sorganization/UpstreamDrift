@@ -39,7 +39,11 @@ from .native_reference_conventions import (
 from .registration import CaptureRegistration, register_points
 from .native_prepared_state import DeclaredColdStart, reconstruct_declared_cold_start
 from .native_mixed_actuation import MixedActuationProfile
-from .native_body_inertia import NativeBodyInertiaAudit, audit_native_body_inertia
+from .native_body_inertia import (
+    NativeBodyInertiaAudit,
+    audit_native_body_inertia,
+    serialize_native_body_inertia_audit as _physical_audit_bytes,
+)
 from .native_diagnostic_contract import (
     DiagnosticCode,
     NativeDiagnosticAssessment,
@@ -89,6 +93,7 @@ class NativeMocoPreparation:
     qualification: str = "not-qualified-for-muscle-matching"
     allow_unqualified_passive_diagnostic: bool = False
     diagnostic_assessment: NativeDiagnosticAssessment | None = None
+    capability_probe_requested: bool = True
     passive_observation_receipt: NativePassiveObservationReceiptReference | None = None
     native_runtime_sha256: str | None = None
 
@@ -99,7 +104,8 @@ class NativeMocoPreparation:
             json.dumps(self.blockers, allow_nan=False).encode()
         ).hexdigest()
         return (
-            self.physical_body_inertia_qualified
+            self.capability_probe_requested
+            and self.physical_body_inertia_qualified
             and self.physical_body_inertia_sha256 is not None
             and self.diagnostic_assessment is not None
             and self.diagnostic_assessment.blocker_receipt_sha256 == blocker_receipt
@@ -595,22 +601,6 @@ def _load_observation_capture(
         return None, None, ["capture-trc-invalid"]
 
 
-def _physical_audit_bytes(audit: NativeBodyInertiaAudit) -> bytes:
-    """Serialize the exact native audit for preparation and later re-admission."""
-    return (
-        json.dumps(
-            {
-                "schema_version": "native-body-inertia-preflight/1.0.0",
-                "qualified": audit.admitted,
-                "audit": asdict(audit),
-            },
-            indent=2,
-            allow_nan=False,
-        )
-        + "\n"
-    ).encode()
-
-
 def _physical_body_preflight(
     request: NativeMocoRequest, directory: Path
 ) -> tuple[str, bool, list[str]]:
@@ -891,6 +881,7 @@ def _prepare_native_model(
     blockers: list[str],
     wrapped_path_auditor: Callable[..., Any],
     probe_callable: Callable[..., tuple[str, float, float]],
+    run_capability_probe: bool = True,
     passive_audit_sink: Callable[[NativePassiveReadinessAudit], None] | None = None,
 ) -> _NativeModelPreparation:
     empty = _NativeModelPreparation(
@@ -922,8 +913,12 @@ def _prepare_native_model(
             ),
         )
     try:
-        run_probe = not blockers and not any(
-            finding.execution_effect.value == "block" for finding in wrapped
+        run_probe = (
+            run_capability_probe
+            and not blockers
+            and not any(
+                finding.execution_effect.value == "block" for finding in wrapped
+            )
         )
         (
             loaded,
@@ -1130,8 +1125,12 @@ def prepare_native_moco(
     probe_callable: Callable[
         ..., tuple[str, float, float]
     ] = _native_short_capability_probe,
+    run_capability_probe: bool = True,
 ) -> NativeMocoPreparation:
     """Collect all independent, obtainable blockers before any expensive solve."""
+    if not isinstance(run_capability_probe, bool):
+        raise TypeError("run_capability_probe must be a bool")
+
     directory = Path(output_dir)
     directory.mkdir(parents=True, exist_ok=True)
     wall = time.perf_counter()
@@ -1157,6 +1156,7 @@ def prepare_native_moco(
         blockers,
         wrapped_path_auditor,
         probe_callable,
+        run_capability_probe=run_capability_probe,
         passive_audit_sink=passive_audits.append,
     )
     passive_receipt, receipt_blockers = prepare_native_passive_observation(
@@ -1185,6 +1185,7 @@ def prepare_native_moco(
         time.process_time() - cpu,
         allow_unqualified_passive_diagnostic=request.allow_unqualified_passive_diagnostic,
         diagnostic_assessment=assessment,
+        capability_probe_requested=run_capability_probe,
         passive_observation_receipt=passive_receipt,
         native_runtime_sha256=model_result.runtime_sha256,
     )

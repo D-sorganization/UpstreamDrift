@@ -184,6 +184,13 @@ def _add_maintenance_subparsers(subparsers: Any) -> None:
     p_native.add_argument("--request", type=Path, required=True)
     p_native.add_argument("--output-dir", type=Path, required=True)
     p_native.add_argument("--prepare-only", action="store_true")
+    p_native.add_argument(
+        "--skip-capability-probe",
+        dest="run_capability_probe",
+        action="store_false",
+        default=True,
+        help="Skip forward integration (prepare-only; remains not-ready)",
+    )
 
     p_guess = subparsers.add_parser(
         "moco-native-guess", help="Materialize a source-bound numerical Moco seed"
@@ -323,7 +330,9 @@ def cmd_moco_native(args: argparse.Namespace) -> int:
     )
 
     request = load_native_moco_request(args.request)
-    prepared = prepare_native_moco(request, args.output_dir)
+    prepared = prepare_native_moco(
+        request, args.output_dir, run_capability_probe=args.run_capability_probe
+    )
     if not prepared.ready_for_software_solve:
         logger.warning("Native preparation has blockers: %s", prepared.blockers)
         return 2
@@ -369,6 +378,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Entrypoint for OpenSim tour matching CLI."""
     parser = build_parser()
     args = parser.parse_args(argv)
+    if (
+        args.command == "moco-native"
+        and not args.run_capability_probe
+        and not args.prepare_only
+    ):
+        logger.error("--skip-capability-probe requires --prepare-only")
+        return 2
 
     handlers = {
         "prepare": cmd_prepare,

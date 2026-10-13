@@ -400,6 +400,7 @@ def test_prepare_orchestration_persists_the_same_single_observation(
         probe_callable: Any,
         *,
         passive_audit_sink: Any,
+        run_capability_probe: bool = True,
     ) -> Any:
         nonlocal calls
         calls += 1

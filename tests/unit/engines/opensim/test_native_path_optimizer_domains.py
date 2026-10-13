@@ -485,6 +485,8 @@ def _run_preparation_with_lifecycle_spies(
     *,
     fail_finalize: bool,
     use_declared_cold_start: bool = True,
+    run_capability_probe: bool = True,
+    through_model_wrapper: bool = False,
 ) -> tuple[tuple[object, ...], list[str], object]:
     from contextlib import nullcontext
     from hashlib import sha256
@@ -534,7 +536,9 @@ def _run_preparation_with_lifecycle_spies(
         "reconstruct_declared_cold_start",
         lambda _declared: (
             events.append("reconstruct")
-            or nullcontext(SimpleNamespace(model=model, state=object()))
+            or nullcontext(
+                SimpleNamespace(model=model, state=SimpleNamespace(getTime=lambda: 0.0))
+            )
         ),
     )
     monkeypatch.setattr(
@@ -555,9 +559,8 @@ def _run_preparation_with_lifecycle_spies(
 
     def probe(*_args):
         events.append("probe")
-        return "e" * 64, True, 0.0, 0.1, None
+        return "e" * 64, 0.0, 0.1
 
-    monkeypatch.setattr(preparation, "_probe_native_state_if_eligible", probe)
     from src.engines.physics_engines.opensim.python.tour_matching import (
         muscle_replay,
     )
@@ -565,7 +568,10 @@ def _run_preparation_with_lifecycle_spies(
     monkeypatch.setattr(
         muscle_replay,
         "_restore_continuous_state",
-        lambda *_args: events.append("restore") or (object(), None, None),
+        lambda *_args: (
+            events.append("restore")
+            or (SimpleNamespace(getTime=lambda: 0.0), None, None)
+        ),
     )
     request = SimpleNamespace(
         model_path=model_path,
@@ -574,9 +580,27 @@ def _run_preparation_with_lifecycle_spies(
         bindings=SimpleNamespace(state_bounds={}, initial_state={}),
         passive_policy=None,
         mixed_actuation=None,
-        config=SimpleNamespace(t_start_s=0.0),
+        config=SimpleNamespace(t_start_s=0.0, duration_s=0.1),
+        wrapped_path_declaration=None,
+        reference_frame_path="/ground",
     )
-    return preparation._native_preparation(request, run_probe=True), events, model
+    if through_model_wrapper:
+        monkeypatch.setattr(
+            preparation, "_reference_state_declaration", lambda _request: None
+        )
+        result = preparation._prepare_native_model(
+            request,
+            {"model": request.model_sha256},
+            [],
+            lambda *_args: SimpleNamespace(findings=()),
+            probe,
+            run_capability_probe=run_capability_probe,
+        )
+    else:
+        result = preparation._native_preparation(
+            request, run_probe=run_capability_probe, probe_callable=probe
+        )
+    return result, events, model
 
 
 def test_native_preparation_finalizes_before_all_native_audits(
@@ -598,6 +622,45 @@ def test_native_preparation_finalizes_before_all_native_audits(
         "reference",
         "probe",
     ]
+
+
+def test_model_preparation_skip_flag_reaches_real_probe_gate(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    result, events, _model = _run_preparation_with_lifecycle_spies(
+        monkeypatch,
+        tmp_path,
+        fail_finalize=False,
+        run_capability_probe=False,
+        through_model_wrapper=True,
+    )
+
+    assert result.probe_sha256 is None
+    assert result.probe_attempted is False
+    assert result.probe_start is None
+    assert result.probe_end is None
+    assert events == [
+        "finalize",
+        "domain",
+        "runtime",
+        "components",
+        "reconstruct",
+        "state",
+        "passive",
+        "reference",
+    ]
+
+
+def test_model_preparation_default_still_runs_probe(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    result, events, _model = _run_preparation_with_lifecycle_spies(
+        monkeypatch, tmp_path, fail_finalize=False, through_model_wrapper=True
+    )
+
+    assert result.probe_attempted is True
+    assert result.probe_sha256 == "e" * 64
+    assert events[-1] == "probe"
 
 
 @pytest.mark.parametrize("use_declared_cold_start", [True, False])
