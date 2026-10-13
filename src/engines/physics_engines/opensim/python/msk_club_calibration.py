@@ -48,6 +48,7 @@ from src.engines.physics_engines.opensim.python import club_visuals
 from src.engines.physics_engines.opensim.python import msk_club as mc
 from src.shared.python.model_appearance import club_assembly as ca
 from src.shared.python.model_appearance import club_face as cf
+from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE, Hand
 
 logger = logging.getLogger(__name__)
 
@@ -85,25 +86,32 @@ GRIP_WEIGHT_M = 0.002
 GRIP_ORIENTATION_WEIGHT_RAD = 0.05
 LANDMARK_WEIGHT_M = 0.04
 NEUTRAL_WEIGHT_RAD = 2.0
-#: Angle of the shaft from the radial axis toward the fingers: in a golf grip
-#: the shaft lies diagonally across the palm, from the heel pad (ulnar,
-#: proximal) to the index finger (radial, distal).
-GRIP_DIAGONAL_DEG = 40.0
-_DIAGONAL = np.radians(GRIP_DIAGONAL_DEG)
-#: Direction of the head end of the shaft (club +y) in each hand frame: radial
-#: (thumb, -z left / +z right) tilted toward the fingers (-y).
+#: Rajagopal hand side -> shared grip-pose hand (lead = left, trail = right).
+SIDE_HANDS = {"L": Hand.LEAD, "R": Hand.TRAIL}
+#: Radial (thumb) axis of each Rajagopal hand frame: -z left, +z right.
+RADIAL_AXIS = {"L": np.array([0.0, 0.0, -1.0]), "R": np.array([0.0, 0.0, 1.0])}
+#: Distal (fingertip) axis of both Rajagopal hand frames.
+DISTAL_AXIS = np.array([0.0, -1.0, 0.0])
+#: Direction of the head end of the shaft (club +y) in each hand frame: the
+#: radial axis tilted toward the fingers by the shared palm diagonal
+#: (``grip_pose.GripPose.palm_diagonal_deg``; no OpenSim-only angle, #11728).
 THUMB_AXIS = {
-    "L": np.array([0.0, -np.sin(_DIAGONAL), -np.cos(_DIAGONAL)]),
-    "R": np.array([0.0, -np.sin(_DIAGONAL), np.cos(_DIAGONAL)]),
+    side: DEFAULT_GRIP_POSE.shaft_direction_in_hand(
+        hand, RADIAL_AXIS[side], DISTAL_AXIS
+    )
+    for side, hand in SIDE_HANDS.items()
 }
 #: Palm normal in both Rajagopal hand frames: the palmar side, toward which the
 #: phalanges curl and on which the pisiform sits (hand meshes, #12306).
 PALM_AXIS = np.array([1.0, 0.0, 0.0])
 #: Horizontal target direction in the Rajagopal world (native target -Y).
 TARGET_DIRECTION = NATIVE_TO_OPENSIM @ np.array([0.0, -1.0, 0.0])
-#: Side of the grip each palm faces: the trail palm faces the target, the lead
-#: palm faces away from it, so the palms are parallel and opposed.
-PALM_FACING = {"L": -1.0, "R": 1.0}
+#: Side of the grip each palm faces, from the shared grip pose: the trail palm
+#: faces the target, the lead palm faces away from it, so the palms are
+#: parallel and opposed.
+PALM_FACING = {
+    side: DEFAULT_GRIP_POSE.palm_target_sign(hand) for side, hand in SIDE_HANDS.items()
+}
 #: Static address limits narrower than the golf models' swing ranges: the
 #: Rajagopal physiological wrist deviation (the golf models widen it to
 #: +/-45 deg for the swing, #10003), so the address pose also loads in the

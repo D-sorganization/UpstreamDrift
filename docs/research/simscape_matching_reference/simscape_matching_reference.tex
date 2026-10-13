@@ -5881,6 +5881,8 @@ Lead V (thumb/index crease) & $\psi_L$ & 20 deg & Between chin (about 10) and tr
 Trail V relative to lead V & $\Delta\psi$ & 0 deg & Parallel V angles \\
 Lead thumb offset to trail side & $\theta_T$ & 10 deg & Short thumb, slightly trail of centre \\
 Finger link & --- & overlap & Trail little finger over the lead index/middle gap \\
+Shaft diagonal across the palm & $\delta$ & 40 deg & Radial axis toward the fingers (heel pad to index base) \\
+Palm facing (sign on target) & $\sigma_h$ & $-1$ lead, $+1$ trail & Palms parallel and opposed \\
 \hline
 \end{tabular}
 \caption{Neutral Grip Parameters for a Right-Handed Golfer}
@@ -5890,6 +5892,33 @@ The angle values are coaching-convention nominals, not measurements: the
 captures carry no hand markers, so only the hand roll that the markers
 constrain is fitted (\texttt{grip\_fit}). A reference figure for every angle
 is part of the slice-2 stills and is not yet produced.
+
+\subsection{Hand Orientation on the Grip}
+The hand-on-grip orientation is part of the same definition (issue item 4).
+For a hand body with anatomical radial (thumb) axis $r$ and distal
+(fingertip) axis $f$, orthogonal unit vectors in that body's own frame, the
+head-end shaft direction in the hand frame is
+\[
+u_h=\cos\delta\,r+\sin\delta\,f ,
+\]
+and the palm normal faces $\sigma_h$ times the target direction, projected
+square to the shaft. \texttt{GripPose.shaft\_direction\_in\_hand} and
+\texttt{GripPose.palm\_target\_sign} compute $u_h$ and $\sigma_h$; each engine
+supplies only $r$ and $f$, which are facts of its hand mesh (Rajagopal:
+$r=\mp z$ left/right, $f=-y$), not grip angles. The OpenSim address
+calibration (\texttt{msk\_club\_calibration}, \#12306) previously carried its
+own \texttt{GRIP\_DIAGONAL\_DEG}~$=40$ and palm-facing signs; it now reads both
+from \texttt{grip\_pose}, with identical values, so the committed calibration
+(\texttt{msk\_club\_grip\_calibration.json}) is unchanged and needs no rerun.
+The MuJoCo, Drake and Pinocchio hand rotations come from the fitted
+\texttt{grip\_fit} receipt (\texttt{GRIP\_ROTATION\_DEG}, shared through the
+anthropometric spec), which takes precedence where available.
+\texttt{tests/unit/model\_appearance/test\_grip\_pose.py} fails if any module
+under \texttt{src/engines} defines a module-level \texttt{GRIP\_*\_DEG},
+\texttt{WRIST\_*\_DEG}, \texttt{HAND\_*\_DEG} or \texttt{PALM\_*\_DEG}
+constant. Limitation: $\delta$ and the V angles are not yet coupled; a
+calibration that turned the hand by $\psi_L$ would change the committed
+address frames and needs an OpenSim host to rerun.
 
 \subsection{Reconciling the Hand Spacing}
 \texttt{club\_geometry.py} previously placed the hands 0.035 m apart
@@ -6475,7 +6504,8 @@ following terms:
   its shaft grip point, weighted at 2 mm;
 \item $1-\hat s\cdot u_h$, weighted at 0.1, where $\hat s$ is the shaft
   direction toward the head and $u_h$ is the radial axis tilted
-  40\textdegree{} toward the fingers (the diagonal palm grip);
+  $\delta=40$\textdegree{} toward the fingers (the diagonal palm grip of the
+  shared \texttt{grip\_pose} definition);
 \item the landmarks, weighted at 4 cm;
 \item the planted foot bodies, weighted at 1 cm;
 \item a pull to neutral of 2 rad on the rotational coordinates.
