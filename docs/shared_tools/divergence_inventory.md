@@ -82,6 +82,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `lifting` | 0 | 0 | 0 | 33 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
+| `logs` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 16 | 0 | 0 |
 | `model_generation` | 25 | 54 | 16 | 20 | 1 | 79 |
@@ -143,7 +144,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 62 | 0 | 0 |
-| **Total** | **376** | **271** | **121** | **1705** | **838** | **647** |
+| **Total** | **376** | **271** | **121** | **1705** | **839** | **647** |
 
 ## Diverged Files by Package
 
@@ -340,7 +341,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 |---|---:|:---:|---|---|
 | `model_generation/__init__.py` | +60 |  | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/_convenience.py` | +12 | yes | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-06-20 |
-| `model_generation/_lazy_map.py` | +546 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-04-26 |
+| `model_generation/_lazy_map.py` | +546 |  | d-sorgclaudeagent[bot] 2026-10-12 | codex-scheduled-tasks[bot] 2026-05-14 |
 | `model_generation/api/__init__.py` | +8 | yes | d-sorgclaudeagent[bot] 2026-10-12 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/api/rest_api.py` | +1096 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-06 |
 | `model_generation/api/rest_api_assets.py` | +275 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-08-25 |
@@ -389,8 +390,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/library/repository.py` | +4968 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-08-20 |
 | `model_generation/library/unified_loader.py` | +25 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-08-20 |
 | `model_generation/mesh/__init__.py` | +76 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-08-20 |
-| `model_generation/tests/test_contracts.py` | +18 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-03-15 |
-| `model_generation/tests/test_github_importer.py` | +18 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-04-19 |
+| `model_generation/tests/test_contracts.py` | +18 |  | d-sorgclaudeagent[bot] 2026-10-12 | codex-scheduled-tasks[bot] 2026-05-14 |
+| `model_generation/tests/test_github_importer.py` | +18 |  | d-sorgclaudeagent[bot] 2026-10-12 | codex-scheduled-tasks[bot] 2026-05-14 |
 | `model_generation/tests/test_physics_validation.py` | -252 |  | d-sorgclaudeagent[bot] 2026-10-12 | Dieter Olson 2026-09-26 |
 
 ### Package `plotting` (3 Diverged Files)
