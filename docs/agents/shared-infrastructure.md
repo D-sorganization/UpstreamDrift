@@ -238,6 +238,7 @@ force-equilibrium residuals but does not decide tolerance acceptance. The
 aggregate `biomechanics` initializer still imports the allocator. See chapter
 39 and the F08 recruitment turnover; serialized artifact validation is a
 separate future consumer.
+
 ### MyoFullBody Muscle-Driven Swing
 
 `src/shared/python/myofullbody/` — maps the 44-coordinate spec swing onto the
