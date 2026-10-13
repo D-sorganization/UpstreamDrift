@@ -1,0 +1,6 @@
+{
+  "guard": "corrupted manifest-listed CSV rejected before data/scoring use",
+  "pass": true,
+  "source_cell": "driver_lean0_curve1_rotation1_shaft_only",
+  "script_sha256": "e7452f6dedb9e52191d31ebc405b99f58b359720c5c7f065f7a68cb8fe7dd86e"
+}

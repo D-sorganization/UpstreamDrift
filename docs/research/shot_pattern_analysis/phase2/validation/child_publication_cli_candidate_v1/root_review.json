@@ -1,0 +1,12 @@
+{
+  "checked_utc": "2026-10-10T14:02:24.925970+00:00",
+  "checkpoint_sha256": "676fa3bee8ba2f62aa0fc9fe6f0d214865e07bb6b9f8f373fb656e0af6852e31",
+  "all_checkpoint_source_and_evidence_hashes_verified": true,
+  "root_tests_passed": 75,
+  "exit_code": 0,
+  "warnings": 6,
+  "actual_parent_verified": false,
+  "production_child_created": false,
+  "visual_acceptance": false,
+  "next_step": "Qualify selected renderer and completed parent; verify all 384 ordered pairs before child rendering."
+}

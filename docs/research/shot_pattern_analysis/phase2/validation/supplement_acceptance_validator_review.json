@@ -1,0 +1,10 @@
+{
+  "status": "all_validators_passed",
+  "acceptance_sha256": "4afeeec8fc1e3a73b18ef87b25b2082078b826646ab8a3e33c441b99b2958d95",
+  "evidence_files": 67,
+  "generic_validations": 1,
+  "production_protocol_validations": 3,
+  "independent_protocol_validations": 3,
+  "execution_started": false,
+  "draft_note": "Never-dispatched initial draft included an interpreter cache entry; preserved separately, removed before durable acceptance dispatch."
+}

@@ -1,0 +1,264 @@
+{
+  "checked_utc": "2026-10-10T07:59:47.146412+00:00",
+  "status": "provisional_visual_and_label_checks_pass",
+  "scope": "48 PNG contact review, five whole-image spot checks across this and the earlier spot-check receipt, plus all48 PDF population/condition labels checked against saved summaries; final manifest reconciliation remains required",
+  "contact_sheets_inspected": [
+    "contact_01.jpg",
+    "contact_02.jpg",
+    "contact_03.jpg"
+  ],
+  "full_size_pngs_inspected": [
+    "details/seven_iron_lean0_curve2_rotation2_combined2/density.png",
+    "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.png",
+    "details/seven_iron_lean5_curve2_rotation1_combined2/overhead.png",
+    "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.png",
+    "details/seven_iron_lean10_curve1_rotation1_shaft_only/overhead.png"
+  ],
+  "findings": [],
+  "limitations": [
+    "Contact thumbnails support layout overview, not every small-text legibility check. Full-size inspections are listed explicitly.",
+    "No new source-data statistical audit or physical acceptance is claimed."
+  ],
+  "pdf_label_checks": [
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_combined2/density.pdf",
+      "sha256": "a5f51a0e40f7b8be1dd68c75e168a19e985b945d3d89d21c140b55c88cde7865",
+      "summary_sha256": "e590a55c6d3fadb01c78ea7daca1f2b4628b3fa26713357ba601aa2be15af5f9"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "b280cd86efcac512ab1d90cb49947fa46f28930dff040a58ffd9d3d6d38e4987",
+      "summary_sha256": "e590a55c6d3fadb01c78ea7daca1f2b4628b3fa26713357ba601aa2be15af5f9"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_shaft_only/density.pdf",
+      "sha256": "7f5ad3a8f2eb66538baee0a79d46de6906a751c0e9c247eba5598acbabf4e461",
+      "summary_sha256": "668eec6793d12f4054d749129b95441096f9b9913072cb7b504c9f45feb52d2c"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation1_shaft_only/overhead.pdf",
+      "sha256": "51b5824f5cac61d7f49a26411e498ba4254d27e03b9ab7f804e3df0d70ffcbef",
+      "summary_sha256": "668eec6793d12f4054d749129b95441096f9b9913072cb7b504c9f45feb52d2c"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_combined2/density.pdf",
+      "sha256": "d069f4a73f42366428462a74d0e050d79f27e01d0ad12a8ded5fff0961fef467",
+      "summary_sha256": "e8b22b7760cd10a57e5556a397878d4b2bb863b784b5f5e2db7bc500647af587"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_combined2/overhead.pdf",
+      "sha256": "ec66299d642397aa256d5c05f760c35cdbe0741a8f93e47997525f8c304c5ad4",
+      "summary_sha256": "e8b22b7760cd10a57e5556a397878d4b2bb863b784b5f5e2db7bc500647af587"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_shaft_only/density.pdf",
+      "sha256": "42e14094c976b209952aa6c9d835c1cb652d8b8c98fb0e86c61d22b845f48352",
+      "summary_sha256": "78694b4ec7ec6ecb5ce604761356e182a34b3b7d11c633ea96277bfac575d5f4"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve1_rotation2_shaft_only/overhead.pdf",
+      "sha256": "1d2349e64d46a73fdc81afa61728b9682a298fd92c7ec175555d0228725e3f6b",
+      "summary_sha256": "78694b4ec7ec6ecb5ce604761356e182a34b3b7d11c633ea96277bfac575d5f4"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_combined2/density.pdf",
+      "sha256": "35d20f1fd98ff141e3ef8421d2c69388e96a20dcd17565996404ec88e68e9c57",
+      "summary_sha256": "ed54b0b5a29aa492c268f340c10686acb4e83a4123ffc243e7cc1c1159fca928"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_combined2/overhead.pdf",
+      "sha256": "93518299ff0f1e49033e125f53c5b8778a26d66dbb5361188b7c21f75ace8e5e",
+      "summary_sha256": "ed54b0b5a29aa492c268f340c10686acb4e83a4123ffc243e7cc1c1159fca928"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_shaft_only/density.pdf",
+      "sha256": "b73dc833d9350987c6d0d77190dedb8f2b20440afe6e8424128e005b59076412",
+      "summary_sha256": "f1bf6e9e13eb7fb79e5d74da2daffb8fbda5d187ec5f67087123d626a11caf7d"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation1_shaft_only/overhead.pdf",
+      "sha256": "0646129dbb9425892219e39274ac2302edc9840576f10f277d86250952f5624f",
+      "summary_sha256": "f1bf6e9e13eb7fb79e5d74da2daffb8fbda5d187ec5f67087123d626a11caf7d"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_combined2/density.pdf",
+      "sha256": "9a595bc500606f14b96e3d2b43125eba8e3d01b4f94b410ccad49a0a2968630e",
+      "summary_sha256": "8e7abd16acea1f477cb28a487634d815bb53324e22dc9ac399098b93b1b9fc7b"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_combined2/overhead.pdf",
+      "sha256": "afdd27e9e3fd0fb3d4b1137b6d5e067d3f9af08d71ca55b5535764b5a47cb271",
+      "summary_sha256": "8e7abd16acea1f477cb28a487634d815bb53324e22dc9ac399098b93b1b9fc7b"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_shaft_only/density.pdf",
+      "sha256": "76033800fe97bd83dc63e41659f837edae92ea1cfc3a7884b30410fc0a6397aa",
+      "summary_sha256": "2b262a83dc3b373544cadb0bac2c9fc51ab0f527d69b1d7d932a3b895beafdcf"
+    },
+    {
+      "path": "details/seven_iron_lean0_curve2_rotation2_shaft_only/overhead.pdf",
+      "sha256": "5d506565ab0cb7fc714f4de42b04cf272ed4a080871b390c696410d32f5ee755",
+      "summary_sha256": "2b262a83dc3b373544cadb0bac2c9fc51ab0f527d69b1d7d932a3b895beafdcf"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_combined2/density.pdf",
+      "sha256": "001d0e3e02efdae1b315f59abb6d47ec84d5e641e1c1c1ed0c2895be731b91e6",
+      "summary_sha256": "3b34e9f60ed1c328546850ec38b66caa18bf279af9d157043098f5782027071a"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "505ae0b3062b685fd1239de5ed1be1113880de1dd9b9807fbd49cdcb73a595e7",
+      "summary_sha256": "3b34e9f60ed1c328546850ec38b66caa18bf279af9d157043098f5782027071a"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/density.pdf",
+      "sha256": "134879b53f9a6d7f747a5c91a6ae5ced32877419eecc4aeb8faa807bf58d5d67",
+      "summary_sha256": "e3df4aa95b97c484d67278c8a8512925c8af6ec99609b7f2b0ebdf72e7201b9f"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation1_shaft_only/overhead.pdf",
+      "sha256": "7e333b8c22d0d710369cdf506291cbc49beee9a6bf61d75faae5b7c798a9935f",
+      "summary_sha256": "e3df4aa95b97c484d67278c8a8512925c8af6ec99609b7f2b0ebdf72e7201b9f"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_combined2/density.pdf",
+      "sha256": "802e051e315187fb3fccc69fcc8480acebf9af493b4eab878cf7e36f93bc1115",
+      "summary_sha256": "99c7761a9afc972addc9688b082011adc750469acedf7e7a5bc2e9db5fbef855"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_combined2/overhead.pdf",
+      "sha256": "415b2999562c42cb27d89850b41922eecb4ddd2724db546ac4fe94ca02358252",
+      "summary_sha256": "99c7761a9afc972addc9688b082011adc750469acedf7e7a5bc2e9db5fbef855"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_shaft_only/density.pdf",
+      "sha256": "abf8a96179300f931c04d90fd558a3d750a34a8ab42fce2d3b1a361c840c50fb",
+      "summary_sha256": "9d5685f7b8854d0e90a6e29f1bf1036ada0e84be32bafa89d1b217022f59e6ee"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve1_rotation2_shaft_only/overhead.pdf",
+      "sha256": "fb6ec868fcbf778e29b895971ccecd675ef33cf4bf5a0d8e65275a99990f0ba8",
+      "summary_sha256": "9d5685f7b8854d0e90a6e29f1bf1036ada0e84be32bafa89d1b217022f59e6ee"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_combined2/density.pdf",
+      "sha256": "68125ad0b1f25f41063c2f9c57c6300a516d805c33a17bb430e638bb10db376f",
+      "summary_sha256": "7f66608811e5e988f6a696511eb9d262e6057b1d15ce45297ea9d37921773a6a"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_combined2/overhead.pdf",
+      "sha256": "448bc7b2e05bbbb41220fa562f862b712c1f1fcdade3dc9793441937f18470ed",
+      "summary_sha256": "7f66608811e5e988f6a696511eb9d262e6057b1d15ce45297ea9d37921773a6a"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_shaft_only/density.pdf",
+      "sha256": "dea36395a27b954cda5ed1c85894b407988663df51fe293e371fec823e0b4311",
+      "summary_sha256": "43efcacdc317f40454ad3c279523c80b874414833c08fab6e5251d3de048a5f1"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation1_shaft_only/overhead.pdf",
+      "sha256": "584dfa2d3cd0b7bbe8c7dffe445b1029fe142690eac8d5a7f320aded6dba5c40",
+      "summary_sha256": "43efcacdc317f40454ad3c279523c80b874414833c08fab6e5251d3de048a5f1"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_combined2/density.pdf",
+      "sha256": "7705f4222f38107843d1950a47ddb6d8b825c2b042f38a9d8169c365a5e67566",
+      "summary_sha256": "f470ce287a983e1ba11151d62c196d389857581fec1faa0c19160d8ade9be4be"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_combined2/overhead.pdf",
+      "sha256": "33e533c5a346fe0f58dadc50eacf1b0421fc46f483c3065e118bda64ec8d387e",
+      "summary_sha256": "f470ce287a983e1ba11151d62c196d389857581fec1faa0c19160d8ade9be4be"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/density.pdf",
+      "sha256": "feb47ae4a74145b846726ab2248f9d758192396e2c7d5b34c5906c8a49ccb7d1",
+      "summary_sha256": "c822ac9009fb94eef8ef8c0822928b96cc16d980855e477e6a807b48cae561fd"
+    },
+    {
+      "path": "details/seven_iron_lean10_curve2_rotation2_shaft_only/overhead.pdf",
+      "sha256": "23d32632ce70097506ee6dd501f9aae9b67e443bfac6936482967513401e7b55",
+      "summary_sha256": "c822ac9009fb94eef8ef8c0822928b96cc16d980855e477e6a807b48cae561fd"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_combined2/density.pdf",
+      "sha256": "57aff96b00498ab86b2ae1138d1a47de81d46eb0fe52bd75ce8642f48b1c5938",
+      "summary_sha256": "9a4ca9cdd7314cdbdb909ef8335d395ef3706443dc816fd46ee1726c329474e6"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_combined2/overhead.pdf",
+      "sha256": "531a02695743969044332ad95084f15fb4833ff7cbfc4aa7323591d9c4f01030",
+      "summary_sha256": "9a4ca9cdd7314cdbdb909ef8335d395ef3706443dc816fd46ee1726c329474e6"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_shaft_only/density.pdf",
+      "sha256": "75db12d2482ecc72adb7432ed242e977bc45d27b62a58aae2e98edb2cc24e7e7",
+      "summary_sha256": "e7b77fd7dc39369a783a92d823fa1f199a9d10936ded4d886f27c35e4a67de97"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation1_shaft_only/overhead.pdf",
+      "sha256": "13c812a6f3f76693ca47e16ee1f2e730f5f4eb03a82a94546d63c1de006f429b",
+      "summary_sha256": "e7b77fd7dc39369a783a92d823fa1f199a9d10936ded4d886f27c35e4a67de97"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_combined2/density.pdf",
+      "sha256": "a76f89f80258794977b319fbdacc8983aa75bd37a4a73278461f750911aad52a",
+      "summary_sha256": "5e9df5e5cc0aead155c55d7776ee149e5281374ae0c452b5ba3dea9814052552"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_combined2/overhead.pdf",
+      "sha256": "5ad5fca7af1e78231d7a0800585149f9960d119690798639c52e6660b77bae00",
+      "summary_sha256": "5e9df5e5cc0aead155c55d7776ee149e5281374ae0c452b5ba3dea9814052552"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_shaft_only/density.pdf",
+      "sha256": "573b67ae606d4fe2e3a531eb54116175cf5870b5bf722656ad6c9d5712d9528f",
+      "summary_sha256": "1ca55aad51bc97e15af7441e4b456f427b70d2960fd88579dc12fb0e91b7f010"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve1_rotation2_shaft_only/overhead.pdf",
+      "sha256": "6f5753ad1c353cb403e4be0555f1b23288af0511598e53f4cd9915f5916eb9f7",
+      "summary_sha256": "1ca55aad51bc97e15af7441e4b456f427b70d2960fd88579dc12fb0e91b7f010"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_combined2/density.pdf",
+      "sha256": "569f07db0441ca426a6d921535d2f26ecea54b59fa08766845d41274a7205968",
+      "summary_sha256": "6768edaf46f89c7716cbf12c175b9be34b2235922230eeda41e3fb21fd16ce9e"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_combined2/overhead.pdf",
+      "sha256": "92752df89bf274d82a5e10431ad7a07998c476d86d76140c2be9a3c5c4a5bf71",
+      "summary_sha256": "6768edaf46f89c7716cbf12c175b9be34b2235922230eeda41e3fb21fd16ce9e"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_shaft_only/density.pdf",
+      "sha256": "a19b401454274de3082772b9e4fc93e392e3cb1804017165fb4f55bb4d815480",
+      "summary_sha256": "8f8da03df136660b3f90d5d045e07e2508e3707f3361234729f09262047e26a1"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation1_shaft_only/overhead.pdf",
+      "sha256": "894b27ba51d911516849bddfb2fb94e4004b48ff63167b38b9d97e9d3637d846",
+      "summary_sha256": "8f8da03df136660b3f90d5d045e07e2508e3707f3361234729f09262047e26a1"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_combined2/density.pdf",
+      "sha256": "4838dca0113bbfe69183294c6f133f4e4623d80afcb2d8506fd61f68626d58dc",
+      "summary_sha256": "2fcb2355d4448897e433fcea35ed09f12a103a82f4f2faed8ed41eebbd4235a7"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_combined2/overhead.pdf",
+      "sha256": "53454c6c53e3a5c46f5fe09fa23d96ea5c4c91042a1ce67b3bacde37ec5be7cc",
+      "summary_sha256": "2fcb2355d4448897e433fcea35ed09f12a103a82f4f2faed8ed41eebbd4235a7"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_shaft_only/density.pdf",
+      "sha256": "95ca61355536411dba9c2f869e3c2e8f154d3f67519c5226b4040703c6f5dc87",
+      "summary_sha256": "2cbe7fc9eaeae069e7cfa91f3702f31849675307057eb545585091e76ea1f888"
+    },
+    {
+      "path": "details/seven_iron_lean5_curve2_rotation2_shaft_only/overhead.pdf",
+      "sha256": "d23329a8e98f9fc466ff3e7fe9492e88e5155009ff4f4c3b41d2b18efecb6def",
+      "summary_sha256": "2cbe7fc9eaeae069e7cfa91f3702f31849675307057eb545585091e76ea1f888"
+    }
+  ]
+}

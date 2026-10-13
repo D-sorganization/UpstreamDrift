@@ -1,0 +1,22 @@
+{
+  "status": "provisional_changes_requested_not_acceptance",
+  "candidate_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "bf61361ce4fb323cd4e8cf6d48abb043a4b325eb19a17b02cde7ac30121d2c28",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "59dd80e484b7ba280efe44465406c2f307be54693c4258f904121b17e9981b3b",
+    "tests/tools/shot_pattern_analysis/test_matched_pair_social.py": "6dba84c5ab0324b9ac107cb2be306ed68456b582b98e6744c539e0f230c2f244",
+    "tests/tools/shot_pattern_analysis/test_matched_social_integration.py": "23cdc09ce035877ac8498f5c568f1d39b63b52ffecdd53d88448004faddf2b46"
+  },
+  "findings": [
+    "Remove overlapping source_protocols/context/metadata fallback APIs and unused alias keys; use typed distinct ordered protocol and target-basis fields.",
+    "Current pair caller does not pass target basis; only Common Target is emitted, while mixed primary/control alias contexts need explicit ordered basis.",
+    "Validate both target coordinates and shape before caption generation; current added check validates only X.",
+    "Replace fabricated protocol IDs and lean5-alias-of-lean0 fixture with exact reviewed protocol IDs and same-cell PW0 alias representation."
+  ],
+  "qualification_pending": [
+    "Final stable candidate source/commit",
+    "Focused independent tests",
+    "Actual saved primary/control/cross-protocol card rendering and text-bound checks"
+  ],
+  "source_edits_by_reviewer": false
+}

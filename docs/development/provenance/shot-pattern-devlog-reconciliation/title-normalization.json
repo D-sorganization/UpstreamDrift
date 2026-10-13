@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-12",
+  "scope": "Title capitalization only; no record fields, state, acceptance claims, or validation limits changed.",
+  "source_commit": "4317a39b461db30d59c7062d4b9cd0334ec37956",
+  "archive_path": "docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md",
+  "archive_before_sha256": "c4789e2dbfd4f810149becafcc69be3294d1acbecae15e9fc943c5a7c28754e5",
+  "archive_after_sha256": "7bb3560a62361e67619aac89fac76b216cf0e826cf0ca859374e3aa7912d6b82",
+  "archive_bytes": 280375,
+  "line": 791,
+  "before_heading": "DL-#11556 \u00b7 Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.",
+  "after_heading": "DL-#11556 \u00b7 Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo If: Exemption and Sink-Based Head-Checkout Analysis.",
+  "formatter": "shared_scripts.document_title_case.apply_text_fixes",
+  "formatter_sha256": "c6ec3c3243bb08dec0f0a31a5bf9306d3d948e40522f73bf97b8caa3f6f5131d",
+  "canonical_finding_before": true,
+  "canonical_finding_after": false,
+  "original_evidence_unchanged": {
+    "original-development-log.md.gz": {
+      "gzip_sha256": "803bc3ad54b37281f66956ef398922bede4e15ed9b94d0121d450495ce6c62e1",
+      "uncompressed_sha256": "72154f850177d6006163e93e1804b4ca3b1d24504f8455448cadee6acf7cd00b"
+    },
+    "original-archive-2026.md.gz": {
+      "gzip_sha256": "59eb77ffa78614c558473b2351f01848bba34110cb11507f3595cab2630d8467",
+      "uncompressed_sha256": "ff19451640b913ad056967f9a6c9e5cb5af813c9b7ba90262709aa677307ddf8"
+    }
+  },
+  "reproduction": "After the recorded official archival transform, apply the canonical formatter to the single finding whose actual heading equals before_heading; verify both archive digests."
+}

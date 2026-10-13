@@ -1,0 +1,21 @@
+"""Recover interrupted control-only saved-data rendering with original guards."""
+import importlib.util,json,datetime,subprocess,os
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('original','/tmp/p2-render-original-final-figures-v6.py'); m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+e=m.PHASE/'validation/original_control_recovery_v6'; e.mkdir(exist_ok=True)
+pre=json.loads((m.PHASE/'validation/original_final_figures_rendering_v6_preflight/preflight.json').read_text()); snap=m.capture(); assert all(pre[k]==v for k,v in snap.items())
+terminal=json.loads(Path('/tmp/p2-v6-final_figures_v1-exit.json').read_text()); assert terminal['exit_code']==0
+primary=m.PHASE/'final_figures_v1'; manifest=json.loads((primary/'figure_manifest.json').read_text()); assert all(m.sha(primary/k)==v for k,v in manifest['outputs'].items())
+out=m.PHASE/'control_final_figures_v1'; retired=m.PHASE/'presentation_preview_interrupted_control_v6/control_final_figures_v1'
+assert out.is_dir() and not retired.exists() and not (out/'figure_manifest.json').exists()
+files={str(f.relative_to(out)):m.sha(f) for f in out.rglob('*') if f.is_file()}; retired.parent.mkdir(); out.rename(retired); assert files=={str(f.relative_to(retired)):m.sha(f) for f in retired.rglob('*') if f.is_file()}
+(e/'preservation.json').write_text(json.dumps({'status':'outer_session_exit_143_no_control_terminal_receipt','cause':'unknown; no child success inferred','preserved':files,'destination':str(retired),'snapshot':snap},indent=2)+'\n')
+(e/'executed_wrapper.py.txt').write_bytes(Path(__file__).read_bytes())
+command=[m.PYTHON,'-m','scripts.research.shot_pattern_analysis.build_final_figures',str(m.PHASE/'control_final_v1'),str(out)]
+record={'command':command,'started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'wrapper_sha256':m.sha(Path(__file__)),'snapshot':snap}
+(e/'start.json').write_text(json.dumps(record,indent=2)+'\n'); print('Control recovery started',flush=True)
+result=subprocess.run(command,cwd=m.BOUNDS,env={**os.environ,'QT_QPA_PLATFORM':'offscreen','MPLBACKEND':'Agg','OPENBLAS_NUM_THREADS':'1'})
+record.update(exit_code=result.returncode,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat()); (e/'process_exit.json').write_text(json.dumps(record,indent=2)+'\n'); assert result.returncode==0
+assert m.capture()==snap
+assert m.sha(primary/'figure_manifest.json')==m.sha(primary/'figure_manifest.json')
+record.update(status='completed_pending_independent_control_review',manifest_sha256=m.sha(out/'figure_manifest.json')); (e/'completion.json').write_text(json.dumps(record,indent=2)+'\n')

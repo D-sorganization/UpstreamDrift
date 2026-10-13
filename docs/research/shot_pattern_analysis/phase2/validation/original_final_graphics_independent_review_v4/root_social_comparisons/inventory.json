@@ -1,0 +1,244 @@
+{
+  "files": [
+    {
+      "path": "social/comparisons/driver/combined2/Draw/curve_scale.png",
+      "sha256": "c088c3e4162794e3e7c46a5998bdd6bd7db7e8955215ad3217c68c6470b42a0e",
+      "pixels": [
+        1879,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.png",
+      "sha256": "b90748fa80d3585564f7aded0073487a7d99c7e18ac86325748e5f07801d9c3c",
+      "pixels": [
+        1857,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/combined2/Fade/curve_scale.png",
+      "sha256": "e9d87f1bbf859ac8884ffecffeb7f90caae9b095c7f590f117d64225e258fb4b",
+      "pixels": [
+        1864,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/combined2/Fade/shaft_rotation_sd.png",
+      "sha256": "14e80c02b6e8511e1432bc22050314bdecf5dc3e2a067d46426af6c47a081155",
+      "pixels": [
+        1857,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/combined2/Straight/curve_scale.png",
+      "sha256": "1db38162c3fc4d3cd8ff36d1a86e2e2c56fb4348dfc2a9e9382412bb2ee11a11",
+      "pixels": [
+        1879,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/combined2/Straight/shaft_rotation_sd.png",
+      "sha256": "30705067d86b923811a02b60e7d45b3aadc0051c58b5666ecf4146d41e19351b",
+      "pixels": [
+        1857,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/shaft_only/Draw/curve_scale.png",
+      "sha256": "5d6024ab6cf87867d8441ec5a9bca5952dda2dd5235472837f2ecd2bdcf76718",
+      "pixels": [
+        1857,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.png",
+      "sha256": "30ad244b89042520d87020b9c9bffd962581ffb91dc2b136819861b31bdcb01c",
+      "pixels": [
+        1842,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/shaft_only/Fade/curve_scale.png",
+      "sha256": "6151009edffb9f9f2b0d47b6f3f3e274fe3582a3ac07db77ab7117158c56f163",
+      "pixels": [
+        1849,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/shaft_only/Fade/shaft_rotation_sd.png",
+      "sha256": "9d419c525b64d5c6d64787270fd408572c4fa894389fd4ef6bd6eaee74fd3a57",
+      "pixels": [
+        1827,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/shaft_only/Straight/curve_scale.png",
+      "sha256": "b514abf0d8caeabf8da40bde174ab35b4157bd6eedbd089603c2f6f7886fbfab",
+      "pixels": [
+        1842,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/driver/shaft_only/Straight/shaft_rotation_sd.png",
+      "sha256": "d8163312544bf3b10bffeda11e79f360f38c474584384f18281ca5952fa91e8d",
+      "pixels": [
+        1827,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/pitching_wedge/combined2/Draw/shaft_rotation_sd.png",
+      "sha256": "155c0444cfc100097103293996a02bff600ff5d713b51bd1cb2e496241895386",
+      "pixels": [
+        1866,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/pitching_wedge/combined2/Fade/shaft_rotation_sd.png",
+      "sha256": "239f01e60a867c5f399b5c1cf9475baa49134fddef82d48da1a80002c45cdb7f",
+      "pixels": [
+        1866,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/pitching_wedge/combined2/Straight/shaft_rotation_sd.png",
+      "sha256": "78a673ad4d0173e478a59b63de544b40518962e5adcc68d6a710e8eee1a56a5a",
+      "pixels": [
+        1851,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/pitching_wedge/shaft_only/Draw/shaft_rotation_sd.png",
+      "sha256": "f0d68e198104b2d73dfc733ab3f699e3da83cf29733021dc43bf275601c1737f",
+      "pixels": [
+        1836,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/pitching_wedge/shaft_only/Fade/shaft_rotation_sd.png",
+      "sha256": "5f8e0c770ecb79f11d4a1b17e9a81bfe32805e443ec9bf2d62ef49fff5f5c7ed",
+      "pixels": [
+        1836,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/pitching_wedge/shaft_only/Straight/shaft_rotation_sd.png",
+      "sha256": "9c43f87fde356183f88ecc34e8d959b76a64d266be7820ba77873afb56a4d683",
+      "pixels": [
+        1836,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/combined2/Draw/curve_scale.png",
+      "sha256": "98b8df5e35405be4821fcfd72e4daf8b131757f8635f6ed0444d68c6f583649d",
+      "pixels": [
+        1842,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/combined2/Draw/shaft_rotation_sd.png",
+      "sha256": "afecc3a085f50c38663e80a520683c3f645df7d0c0fbe1ca3924c76f876509f2",
+      "pixels": [
+        1842,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/combined2/Fade/curve_scale.png",
+      "sha256": "22a22fcd0eeadba91108efe21f9262a116405154c4c437f2d740d48668d1195f",
+      "pixels": [
+        1842,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/combined2/Fade/shaft_rotation_sd.png",
+      "sha256": "6faccef4fcade8b4bc0a1d47e89704861e49eac25bd1e8c947b6173d6aff25d6",
+      "pixels": [
+        1842,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/combined2/Straight/curve_scale.png",
+      "sha256": "b51c7592058c3ff8fb63da7785e398954ecd274be43f309658f675c507c3ff66",
+      "pixels": [
+        1842,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/combined2/Straight/shaft_rotation_sd.png",
+      "sha256": "b0c2c0fa4152639fcfdb3943728bb93ce2609a6e6db38647338de68bfeb0103c",
+      "pixels": [
+        1842,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/shaft_only/Draw/curve_scale.png",
+      "sha256": "e65ff8eb2d641e65fc5d2a7a2171a952d9589a66c3a43a0df5a612e888f94a60",
+      "pixels": [
+        1827,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/shaft_only/Draw/shaft_rotation_sd.png",
+      "sha256": "89fb1b4e308810bc72ef801ef827a844f96362524faf9b2377a1ca6afc714506",
+      "pixels": [
+        1827,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/shaft_only/Fade/curve_scale.png",
+      "sha256": "290858945aad36940e25b30dedeaa5c40f44c00cab2812a21cdb16c253ff2044",
+      "pixels": [
+        1827,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/shaft_only/Fade/shaft_rotation_sd.png",
+      "sha256": "ff504de15a1be7a1d54a3d8f3ebeea0f3f497a0f33c9ece4a7a9faaf18202ae1",
+      "pixels": [
+        1827,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/shaft_only/Straight/curve_scale.png",
+      "sha256": "3b664a58c6bb07801e98c0674f1df6aa52b36e630d04554578b643b8b09d6579",
+      "pixels": [
+        1842,
+        2385
+      ]
+    },
+    {
+      "path": "social/comparisons/seven_iron/shaft_only/Straight/shaft_rotation_sd.png",
+      "sha256": "e477614a37c343a9888d920e275eede0fc0576ce9442f34a734f9c397203e91b",
+      "pixels": [
+        1827,
+        2385
+      ]
+    }
+  ]
+}

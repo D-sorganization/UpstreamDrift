@@ -1,0 +1,78 @@
+{
+  "affected_test_summary": "34 failed, 5861 passed, 48 skipped, 36 deselected, 1 xpassed, 1514 warnings, 7 errors, 21 subtests passed in 765.44s",
+  "base_ref": "fa7ee92f5cddd753099d7418fc974b142b7ebb54",
+  "checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift",
+  "classification_limit": "All 41 failed/error nodes were in unchanged test files outside this delivery diff. This is scope evidence only; no runtime-baseline claim was tested.",
+  "command": "python /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --from-ref <base> --to-ref <tested_head>",
+  "exit_code": 1,
+  "exit_marker": "/tmp/shot-pattern-delivery-resume/prepr-final-dac6618c58.exit",
+  "failed_or_error_node_count": 41,
+  "failure_paths_in_scope_diff": [],
+  "failure_test_paths": [
+    "tests/research/test_articulated_ground_posthoc_sensitivity.py",
+    "tests/research/test_nonlinear_controller_comparison_registration.py",
+    "tests/research/test_uncertainty_stability_audit.py",
+    "tests/scripts/test_check_test_layout.py",
+    "tests/shared/wave7_model_generation/test_format_utils.py",
+    "tests/shared/wave7_python_core/test_logger_utils.py",
+    "tests/test_build_humanoid_models.py",
+    "tests/tools/test_code_quality_check.py",
+    "tests/toplevel/wave8_toplevel/test_code_quality_check.py",
+    "tests/ui/engines/drake/test_drake_embed_adapter.py",
+    "tests/ui/engines/pinocchio/test_pinocchio_embed_adapter.py",
+    "tests/unit/engines/physics_engines/drake/test_drake_gui_app.py",
+    "tests/unit/shared_python/test_signal_toolkit_core.py",
+    "tests/unit/test_core_install_isolation.py",
+    "tests/unit/test_data_processing_core_extended.py",
+    "tests/unit/test_drake_physics_engine.py",
+    "tests/unit/test_opensim_physics_engine.py",
+    "tests/unit/theme/test_api_models.py"
+  ],
+  "fleet_policy_failures": [
+    "DL-8869 Last verified lacks commit SHA",
+    "DL-9193 Last verified lacks commit SHA",
+    "DL-9349 missing State and Owner",
+    "143 active DEVELOPMENT_LOG entries exceed ceiling 75",
+    "DEVELOPMENT_LOG.md exceeds 200000-byte ceiling"
+  ],
+  "focused_followup": {
+    "central_import_policy": "pass; Semgrep unavailable/advisory skipped",
+    "commit": "c8dff74a0a",
+    "mypy": "passed",
+    "ruff": "passed",
+    "scope": "focused vector/import-policy validation only; broad pre-PR suite not rerun",
+    "vector_tests": "41 passed"
+  },
+  "full_log": "/tmp/shot-pattern-delivery-resume/prepr-final-dac6618c58.log",
+  "full_log_compressed": "docs/research/shot_pattern_analysis/phase2/validation/artifact_delivery_v2/pre_pr_final_dac6618c58.log.gz",
+  "full_log_compressed_sha256": "373391d91bb4a5fc6ffe246a5a72827e582d0cb2b8c827cff7da5f4608708b18",
+  "full_log_sha256": "7fa661e6b1a6541c04b7541dc42a89674b3a2ae36802391f56df871f6677f2a3",
+  "gate_results": {
+    "affected_tests": "fail",
+    "consistency_tests": "pass",
+    "diff_mypy": "pass",
+    "fleet_policy_gate": "fail",
+    "lint_format": "pass",
+    "policy_fragment_validators": "pass",
+    "semgrep_import_policy": "fail",
+    "workflow_lint": "pass"
+  },
+  "issue_references": {
+    "development_log_policy_debt": "#11935",
+    "other_stale_research_provenance": "#11940",
+    "unrelated_drake_abort": "#11934"
+  },
+  "publication_disposition": "Remote publication is on hold pending a polished research-grade report with embedded shot-pattern and dispersion graphics and human visual acceptance. After report acceptance, only a research prerelease at exact pushed DELIVERY SHA is contemplated, with remaining nonzero repository gates disclosed and PR blocked from merge.",
+  "runtime": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+  "schema": "shot-pattern-pre-pr-evidence/1",
+  "semgrep_import_policy_failure": "scripts/research/shot_pattern_analysis/vector_inspection.py:12 raw xml.parsers.expat import remains flagged; defusedxml.ElementTree second parse is fixed, but the intentional custom Expat preflight remains a gate failure.",
+  "tested_head": "dac6618c58834b671acc7cf7e1137f7a548cee73",
+  "unchanged_test_paths_outside_scope_count": 18,
+  "working_tree_note": "Committed docs/data-only changes were added to HEAD while the long gate was running; the ref diff and precomputed changed-file scope remained base..tested_head. No Python runtime source changed after the gate started.",
+  "count_correction": {
+    "previous_node_count": 37,
+    "previous_path_count": 17,
+    "evidence": "../artifact_delivery_v3/original_failure_nodes.json",
+    "method": "Independent FAILED/ERROR summary extraction preserving parameter IDs containing spaces; 41 unique nodes across18paths; original compressed log preserved."
+  }
+}

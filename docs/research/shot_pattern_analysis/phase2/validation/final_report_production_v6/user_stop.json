@@ -1,0 +1,7 @@
+{
+  "status": "intentionally_stopped_for_user_handoff",
+  "pid": 1423081,
+  "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python -m scripts.research.shot_pattern_analysis.build_final_report /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1 /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1 /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/REPORT.md --supplement-dir /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1 --primary-figures /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1 --control-figures /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_figures_v1 ",
+  "utc": "2026-10-10T23:19:13.007573+00:00",
+  "reason": "User requested stop to conserve credits; no final report acceptance."
+}

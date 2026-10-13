@@ -1,0 +1,1742 @@
+{
+  "schema": "selected-synthesis-fixture/1",
+  "provenance": "Exact selected fields from saved final_v1 and verified pw-primary-face-bounds/1 summary.json; per-cell full-summary SHA retained. No derived statistics.",
+  "cells": [
+    {
+      "cell": "driver_lean0_curve1_rotation1_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "driver",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 7.461555935228152e-05,
+            "lower_95": -7.104046933162085e-05,
+            "upper_95": 0.00021896077539046698
+          },
+          "Fade": {
+            "estimate": 6.825953225868763e-05,
+            "lower_95": -5.2277181705243884e-05,
+            "upper_95": 0.00017049843183190757
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9788481134613395,
+            "mean_downrange_error_m": -0.5045593046803335
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9770390638908056,
+            "mean_downrange_error_m": -0.5379805352353608
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9802603396118437,
+            "mean_downrange_error_m": -0.46589271640940416
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "2ff839ccbc3efed5501e9ce228f57262402e68cb414607881a6f68cd71493a4a"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation1_combined2",
+      "config": {
+        "club": {
+          "club_id": "driver",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 2.6911773453713884e-05,
+            "lower_95": -0.00016417507301096237,
+            "upper_95": 0.00022037368523597208
+          },
+          "Fade": {
+            "estimate": 4.2175453160651455e-05,
+            "lower_95": -0.00017391896152132183,
+            "upper_95": 0.0002645740815497581
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.4916000546326451,
+            "mean_downrange_error_m": -2.6422203438623217
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.4894180061072879,
+            "mean_downrange_error_m": -2.676437418298394
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.4932741905108126,
+            "mean_downrange_error_m": -2.5965962977522743
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "7bf03b58d7349b32112e3961747f882662ffa83a1f22f913d2d29a9a9f1dd373"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "driver",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.002892622455209583,
+            "lower_95": 0.002462300702968206,
+            "upper_95": 0.0033783187780881603
+          },
+          "Fade": {
+            "estimate": -0.0012251198782864715,
+            "lower_95": -0.001619667175215034,
+            "upper_95": -0.0008628541516474099
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9185567086844555,
+            "mean_downrange_error_m": -2.005290257780881
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9135593783921022,
+            "mean_downrange_error_m": -2.1181148460370633
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9229117084913239,
+            "mean_downrange_error_m": -1.8672912397264227
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "79ec2a67fdc585f466b290dde44213a7080f01ecc9d2445ff12605af25a58e4f"
+    },
+    {
+      "cell": "driver_lean0_curve1_rotation2_combined2",
+      "config": {
+        "club": {
+          "club_id": "driver",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.002195160317973801,
+            "lower_95": 0.001694900809112219,
+            "upper_95": 0.00263646030502905
+          },
+          "Fade": {
+            "estimate": -0.0009276973154250246,
+            "lower_95": -0.001382424571512692,
+            "upper_95": -0.0005146905618213765
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.7202702362734626,
+            "mean_downrange_error_m": -4.137338781039607
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.725702649097886,
+            "mean_downrange_error_m": -4.248122576387065
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.7119840236413671,
+            "mean_downrange_error_m": -3.9954212760687975
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "f8c27205ba8dcd6f6597143f54e9418917f6b696961b6a9a6188df2906fa3346"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "driver",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.0003250170574719388,
+            "lower_95": 0.00010419990359491727,
+            "upper_95": 0.0005512859618879582
+          },
+          "Fade": {
+            "estimate": 0.00023438701772961358,
+            "lower_95": 5.011171232938114e-05,
+            "upper_95": 0.0004289664606828679
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9788481134613395,
+            "mean_downrange_error_m": -0.5045593046803335
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9749781224176931,
+            "mean_downrange_error_m": -0.558583219100327
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9811173735780689,
+            "mean_downrange_error_m": -0.4303543945007955
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "62c2eeef023aaf93ab7aec1f98b86e21b3d1cb66ef59fda782029b64340d8f49"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation1_combined2",
+      "config": {
+        "club": {
+          "club_id": "driver",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.0005625981068929291,
+            "lower_95": 0.00023922180285302648,
+            "upper_95": 0.000897767091841708
+          },
+          "Fade": {
+            "estimate": 9.461602514953083e-05,
+            "lower_95": -0.00022182231653632132,
+            "upper_95": 0.000441863460349558
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.4916000546326451,
+            "mean_downrange_error_m": -2.6422203438623217
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.48333775808287555,
+            "mean_downrange_error_m": -2.691485243396273
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.4969486529817694,
+            "mean_downrange_error_m": -2.547865265260857
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "fed95852fb12390dd8cbd09191267744f0a5baa5cc939f2f1d61fc7d58490ea5"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "driver",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.0077976550468906,
+            "lower_95": 0.007132512276517505,
+            "upper_95": 0.00851800983301036
+          },
+          "Fade": {
+            "estimate": -0.0014605392519033656,
+            "lower_95": -0.00197428365531585,
+            "upper_95": -0.0009630426997952468
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9185567086844555,
+            "mean_downrange_error_m": -2.005290257780881
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9083008683986259,
+            "mean_downrange_error_m": -2.1784262087198227
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.9259145268525876,
+            "mean_downrange_error_m": -1.7347349533536824
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "ecb0dcf6c73d992bcb75bc6752bcfb5ab37b8f77502e8dbead57a77b4f063c89"
+    },
+    {
+      "cell": "driver_lean0_curve2_rotation2_combined2",
+      "config": {
+        "club": {
+          "club_id": "driver",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.006682310193510924,
+            "lower_95": 0.00593805307697459,
+            "upper_95": 0.007437961717395396
+          },
+          "Fade": {
+            "estimate": -0.0008347119221924334,
+            "lower_95": -0.0014784010680460502,
+            "upper_95": -0.0002621467109694824
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.7202702362734626,
+            "mean_downrange_error_m": -4.137338781039607
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.7272775900017706,
+            "mean_downrange_error_m": -4.30079847394176
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": 0.7021128124629499,
+            "mean_downrange_error_m": -3.8527013283286395
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "ac47b4ed7e3920a5552df059257ae19e891c2345d6c57721370ce2136301ad40"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "seven_iron",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.0005056061017231564,
+            "lower_95": -0.0005136910470865477,
+            "upper_95": -0.0004968345325920594
+          },
+          "Fade": {
+            "estimate": 0.0010469558147421583,
+            "lower_95": 0.0010332127670539123,
+            "upper_95": 0.001059062684997039
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9959943396965917,
+            "mean_downrange_error_m": -0.05472428742371818
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.995550496419245,
+            "mean_downrange_error_m": -0.05661388397051571
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9963343139763304,
+            "mean_downrange_error_m": -0.05292670669256352
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "668eec6793d12f4054d749129b95441096f9b9913072cb7b504c9f45feb52d2c"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+      "config": {
+        "club": {
+          "club_id": "seven_iron",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 9996
+      },
+      "course_scoring": {
+        "status": "conditional_only",
+        "total_n": 10000,
+        "paired_n": 9996,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.000744997384623318,
+            "lower_95": -0.0008996071841677639,
+            "upper_95": -0.0005794542262540843
+          },
+          "Fade": {
+            "estimate": 0.0008933617862555983,
+            "lower_95": 0.0007089665616960485,
+            "upper_95": 0.001077775678132865
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.21014443456892723,
+            "mean_downrange_error_m": -2.490641190038705
+          }
+        },
+        "Draw": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.22481917206112217,
+            "mean_downrange_error_m": -2.493696244162037
+          }
+        },
+        "Fade": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.19423721513762826,
+            "mean_downrange_error_m": -2.4886488974566396
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "e590a55c6d3fadb01c78ea7daca1f2b4628b3fa26713357ba601aa2be15af5f9"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "seven_iron",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.0004991575546013074,
+            "lower_95": -0.0005776302928350938,
+            "upper_95": -0.000454438117389022
+          },
+          "Fade": {
+            "estimate": 0.0010669555028524154,
+            "lower_95": 0.0009860655573140106,
+            "upper_95": 0.0011823456196609781
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.984081450380485,
+            "mean_downrange_error_m": -0.21950182887958267
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.982353961629758,
+            "mean_downrange_error_m": -0.22687267407094755
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9854174083426636,
+            "mean_downrange_error_m": -0.2123092308596889
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "78694b4ec7ec6ecb5ce604761356e182a34b3b7d11c633ea96277bfac575d5f4"
+    },
+    {
+      "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+      "config": {
+        "club": {
+          "club_id": "seven_iron",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 9996
+      },
+      "course_scoring": {
+        "status": "conditional_only",
+        "total_n": 10000,
+        "paired_n": 9996,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.000805272406439605,
+            "lower_95": -0.0010375654126761375,
+            "upper_95": -0.0005917861027988725
+          },
+          "Fade": {
+            "estimate": 0.0011109014711365183,
+            "lower_95": 0.0008441733823956837,
+            "upper_95": 0.0013554839330177611
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.4032118445644527,
+            "mean_downrange_error_m": -2.6530329533041423
+          }
+        },
+        "Draw": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.39311691166114165,
+            "mean_downrange_error_m": -2.6614629239980636
+          }
+        },
+        "Fade": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.41202618520044254,
+            "mean_downrange_error_m": -2.645691551884123
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "e8b22b7760cd10a57e5556a397878d4b2bb863b784b5f5e2db7bc500647af587"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "seven_iron",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.00039781680835424563,
+            "lower_95": -0.0004105793744515264,
+            "upper_95": -0.0003851088886991594
+          },
+          "Fade": {
+            "estimate": 0.00255256876498472,
+            "lower_95": 0.0025200337078003718,
+            "upper_95": 0.0025800222645107466
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9959943396965917,
+            "mean_downrange_error_m": -0.05472428742371818
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9949699485843587,
+            "mean_downrange_error_m": -0.05840177568736267
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9966006477998021,
+            "mean_downrange_error_m": -0.05102092462609292
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "f1bf6e9e13eb7fb79e5d74da2daffb8fbda5d187ec5f67087123d626a11caf7d"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+      "config": {
+        "club": {
+          "club_id": "seven_iron",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 9996
+      },
+      "course_scoring": {
+        "status": "conditional_only",
+        "total_n": 10000,
+        "paired_n": 9996,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.0013557199204084474,
+            "lower_95": -0.001651328160000656,
+            "upper_95": -0.0010252767808334937
+          },
+          "Fade": {
+            "estimate": 0.001974931464121476,
+            "lower_95": 0.001622698230536737,
+            "upper_95": 0.002286495553933502
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.21014443456892723,
+            "mean_downrange_error_m": -2.490641190038705
+          }
+        },
+        "Draw": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.23832100267323736,
+            "mean_downrange_error_m": -2.497570927829731
+          }
+        },
+        "Fade": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.1770362489472531,
+            "mean_downrange_error_m": -2.4874809709641825
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "ed54b0b5a29aa492c268f340c10686acb4e83a4123ffc243e7cc1c1159fca928"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "seven_iron",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.00028827142960523414,
+            "lower_95": -0.00044262025569419695,
+            "upper_95": -0.00013058616003233314
+          },
+          "Fade": {
+            "estimate": 0.0025816340316445357,
+            "lower_95": 0.002452822708401985,
+            "upper_95": 0.0027363617926215254
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.984081450380485,
+            "mean_downrange_error_m": -0.21950182887958267
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9800902609310572,
+            "mean_downrange_error_m": -0.23412821631536881
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9864680375849145,
+            "mean_downrange_error_m": -0.20502074999646866
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "2b262a83dc3b373544cadb0bac2c9fc51ab0f527d69b1d7d932a3b895beafdcf"
+    },
+    {
+      "cell": "seven_iron_lean0_curve2_rotation2_combined2",
+      "config": {
+        "club": {
+          "club_id": "seven_iron",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 9996
+      },
+      "course_scoring": {
+        "status": "conditional_only",
+        "total_n": 10000,
+        "paired_n": 9996,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": -0.0010528643124719517,
+            "lower_95": -0.0014284417050673154,
+            "upper_95": -0.0006655062897350165
+          },
+          "Fade": {
+            "estimate": 0.0022938022643235758,
+            "lower_95": 0.0019305516115089587,
+            "upper_95": 0.0026454744396299298
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.4032118445644527,
+            "mean_downrange_error_m": -2.6530329533041423
+          }
+        },
+        "Draw": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.38169550014348175,
+            "mean_downrange_error_m": -2.670723353565911
+          }
+        },
+        "Fade": {
+          "supported_n": 9996,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.4195959878507461,
+            "mean_downrange_error_m": -2.639205900639244
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "8e7abd16acea1f477cb28a487634d815bb53324e22dc9ac399098b93b1b9fc7b"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "pitching_wedge",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.004433925527972051,
+            "lower_95": 0.004363272128619715,
+            "upper_95": 0.004501976200912722
+          },
+          "Fade": {
+            "estimate": -0.004449851864739739,
+            "lower_95": -0.00451668884298232,
+            "upper_95": -0.004380068485324844
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9982320404705045,
+            "mean_downrange_error_m": -0.023424886944182644
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9981967839402821,
+            "mean_downrange_error_m": -0.02433637348889439
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.998253304701095,
+            "mean_downrange_error_m": -0.022519574358775322
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "e8b2e18554af3a47c502ac26285c0ae852fc8b7854915265b0abfe15f8ce5aa3"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+      "config": {
+        "club": {
+          "club_id": "pitching_wedge",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 9999
+      },
+      "course_scoring": {
+        "status": "conditional_only",
+        "total_n": 10000,
+        "paired_n": 9999,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 9.508286074337285e-05,
+            "lower_95": -6.220824133306044e-05,
+            "upper_95": 0.0002799945735120517
+          },
+          "Fade": {
+            "estimate": 9.389912244001297e-05,
+            "lower_95": -3.145027987597752e-05,
+            "upper_95": 0.0002411445166358826
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.270227137847732,
+            "mean_downrange_error_m": -1.788456461046174
+          }
+        },
+        "Draw": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.28213296059008564,
+            "mean_downrange_error_m": -1.7898547705980152
+          }
+        },
+        "Fade": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.2573980636375694,
+            "mean_downrange_error_m": -1.7871815152965733
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "e8264d9d5df4c7f8314644037c6e885888d62daa182e295ff551fd77d9ec58c5"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "pitching_wedge",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.005526608720468065,
+            "lower_95": 0.0054655311492273605,
+            "upper_95": 0.005576311501475418
+          },
+          "Fade": {
+            "estimate": -0.005486948153905506,
+            "lower_95": -0.005537317455304703,
+            "upper_95": -0.0054266215216518575
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9929716203306999,
+            "mean_downrange_error_m": -0.09469264872405576
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9928297070106756,
+            "mean_downrange_error_m": -0.09825560262423402
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.993058767205097,
+            "mean_downrange_error_m": -0.09109687672288874
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "cd6cb4f1302c1922671983a52701b90894628c68c1ad8e26dc08810a6fa70adf"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+      "config": {
+        "club": {
+          "club_id": "pitching_wedge",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 1.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 9999
+      },
+      "course_scoring": {
+        "status": "conditional_only",
+        "total_n": 10000,
+        "paired_n": 9999,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.0004843981643710978,
+            "lower_95": 0.0003075226887943026,
+            "upper_95": 0.0006522765451755754
+          },
+          "Fade": {
+            "estimate": -0.0003337113700315144,
+            "lower_95": -0.0005016453427555888,
+            "upper_95": -0.00017205136832585546
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.49389284126545246,
+            "mean_downrange_error_m": -1.8583805846616717
+          }
+        },
+        "Draw": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.48683867320354,
+            "mean_downrange_error_m": -1.8623759285508215
+          }
+        },
+        "Fade": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.5002142520714098,
+            "mean_downrange_error_m": -1.8544763873440673
+          }
+        }
+      },
+      "source_protocol": "original_primary/1",
+      "source_summary_sha256": "1aa3c170be4d19ba88b35ecef18e4cdd36e9efa01b418870dbd1d52bcf3d2ae0"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "pitching_wedge",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000,
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.008878062355143674,
+            "lower_95": 0.008737846175303628,
+            "upper_95": 0.009015448386456537
+          },
+          "Fade": {
+            "estimate": -0.00893432353376787,
+            "lower_95": -0.009067910113062906,
+            "upper_95": -0.008797751739735037
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9982320404705045,
+            "mean_downrange_error_m": -0.023424886944182644
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.998145329361746,
+            "mean_downrange_error_m": -0.025255845499863445
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9982623275169586,
+            "mean_downrange_error_m": -0.0216242998911227
+          }
+        }
+      },
+      "source_protocol": "pw-primary-face-bounds/1",
+      "source_summary_sha256": "159c2e564f314232798d165aa8f1fc7d212c04c43cb724b0dd8a549c9de35299"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+      "config": {
+        "club": {
+          "club_id": "pitching_wedge",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            1.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000,
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 9999
+      },
+      "course_scoring": {
+        "status": "conditional_only",
+        "total_n": 10000,
+        "paired_n": 9999,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.0002513049548654383,
+            "lower_95": -3.604852436822569e-05,
+            "upper_95": 0.0005325912067969175
+          },
+          "Fade": {
+            "estimate": 0.0002919227777893537,
+            "lower_95": 3.6197689663183434e-05,
+            "upper_95": 0.0005921619032916435
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.270227137847732,
+            "mean_downrange_error_m": -1.788456461046174
+          }
+        },
+        "Draw": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.29315535487541783,
+            "mean_downrange_error_m": -1.7913805751429956
+          }
+        },
+        "Fade": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.24360067807372973,
+            "mean_downrange_error_m": -1.7860350891156085
+          }
+        }
+      },
+      "source_protocol": "pw-primary-face-bounds/1",
+      "source_summary_sha256": "a694d62396f081c470fe9cd134651addd45c587c6fa3fa8163cae3d43dd97908"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_shaft_only",
+      "config": {
+        "club": {
+          "club_id": "pitching_wedge",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000,
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 10000
+      },
+      "course_scoring": {
+        "status": "available",
+        "total_n": 10000,
+        "paired_n": 10000,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.011117100245477964,
+            "lower_95": 0.010993544758325062,
+            "upper_95": 0.011219336437250878
+          },
+          "Fade": {
+            "estimate": -0.010965967983168904,
+            "lower_95": -0.011068061975392694,
+            "upper_95": -0.010844315728321823
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9929716203306999,
+            "mean_downrange_error_m": -0.09469264872405576
+          }
+        },
+        "Draw": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.9926237458644465,
+            "mean_downrange_error_m": -0.10179532454549685
+          }
+        },
+        "Fade": {
+          "supported_n": 10000,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.993098061302777,
+            "mean_downrange_error_m": -0.08747887471123406
+          }
+        }
+      },
+      "source_protocol": "pw-primary-face-bounds/1",
+      "source_summary_sha256": "85685aa21c5ac55fb7bfc4a7fe20b6ef6e7a7469871d99388d256d48d1db8384"
+    },
+    {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "config": {
+        "club": {
+          "club_id": "pitching_wedge",
+          "shaft_lean_deg": 0.0
+        },
+        "curve_scale": 2.0,
+        "noise": {
+          "standard_deviations": [
+            2.0,
+            0.5,
+            0.89408,
+            0.00635,
+            0.00635,
+            0.0,
+            0.0
+          ]
+        },
+        "n_shots": 10000,
+        "match_face_bounds_deg": [
+          -6.0,
+          6.0
+        ],
+        "match_speed_factors": [
+          0.75,
+          1.25
+        ]
+      },
+      "status": "completed",
+      "paired_comparisons": {
+        "paired_n": 9999
+      },
+      "course_scoring": {
+        "status": "conditional_only",
+        "total_n": 10000,
+        "paired_n": 9999,
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.0010464838162187527,
+            "lower_95": 0.0007406395903417094,
+            "upper_95": 0.0013323229558774572
+          },
+          "Fade": {
+            "estimate": -0.0006271744441841137,
+            "lower_95": -0.0009681119547827299,
+            "upper_95": -0.00029360825221030255
+          }
+        }
+      },
+      "summary": {
+        "Straight": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.49389284126545246,
+            "mean_downrange_error_m": -1.8583805846616717
+          }
+        },
+        "Draw": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.47903911080552436,
+            "mean_downrange_error_m": -1.8664599419537335
+          }
+        },
+        "Fade": {
+          "supported_n": 9999,
+          "total_n": 10000,
+          "statistics": {
+            "corr_lateral_downrange_error": -0.5058066665951079,
+            "mean_downrange_error_m": -1.8506654775410323
+          }
+        }
+      },
+      "source_protocol": "pw-primary-face-bounds/1",
+      "source_summary_sha256": "078878c32284aa822aabf3fee2068e46907c68050ab546697a588ce1314b756b"
+    }
+  ]
+}

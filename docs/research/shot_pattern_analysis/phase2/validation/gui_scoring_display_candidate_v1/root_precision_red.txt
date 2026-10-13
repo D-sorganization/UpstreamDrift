@@ -1,0 +1,108 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_saved_small_sg_intervals_remain_numerically_visible[1.0] _________
+
+qapp = <PyQt6.QtWidgets.QApplication object at 0x72b8d73fe3f0>, scale = 1.0
+
+    @pytest.mark.parametrize("scale", [1.0, 0.001])
+    def test_saved_small_sg_intervals_remain_numerically_visible(qapp, scale) -> None:  # noqa: ANN001
+        """Display must preserve the sign and width of small simulated differences."""
+        import re
+    
+        from src.tools.shot_pattern_analysis.matched_gui import format_matched_course_scoring
+    
+        estimate, low, high = (scale * x for x in (0.0000746156, -0.0000710405, 0.000218961))
+        text = format_matched_course_scoring(
+            {
+                "status": "available",
+                "club_id": "driver",
+                "paired_n": 10000,
+                "total_n": 10000,
+                "paired_benefit_vs_straight": {
+                    "Draw": {"estimate": estimate, "lower_95": low, "upper_95": high}
+                },
+            }
+        )
+        match = re.search(r"Draw: ([^ ]+) \[([^,]+), ([^\]]+)\] strokes", text)
+        assert match is not None
+        shown = tuple(float(value) for value in match.groups())
+>       assert shown == pytest.approx((estimate, low, high), rel=0.01, abs=0.0)
+E       assert (0.0, -0.0, 0.0) == approx((7.461...61 ± 2.2e-06))
+E         
+E         comparison failed. Mismatched elements: 3 / 3:
+E         Max absolute difference: 0.000218961
+E         Max relative difference: inf
+E         Index | Obtained | Expected              
+E         0     | 0.0      | 7.46156e-05 ± 7.5e-07 
+E         1     | -0.0     | -7.10405e-05 ± 7.1e-07
+E         2     | 0.0      | 0.000218961 ± 2.2e-06
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1007: AssertionError
+_______ test_saved_small_sg_intervals_remain_numerically_visible[0.001] ________
+
+qapp = <PyQt6.QtWidgets.QApplication object at 0x72b8d73fe3f0>, scale = 0.001
+
+    @pytest.mark.parametrize("scale", [1.0, 0.001])
+    def test_saved_small_sg_intervals_remain_numerically_visible(qapp, scale) -> None:  # noqa: ANN001
+        """Display must preserve the sign and width of small simulated differences."""
+        import re
+    
+        from src.tools.shot_pattern_analysis.matched_gui import format_matched_course_scoring
+    
+        estimate, low, high = (scale * x for x in (0.0000746156, -0.0000710405, 0.000218961))
+        text = format_matched_course_scoring(
+            {
+                "status": "available",
+                "club_id": "driver",
+                "paired_n": 10000,
+                "total_n": 10000,
+                "paired_benefit_vs_straight": {
+                    "Draw": {"estimate": estimate, "lower_95": low, "upper_95": high}
+                },
+            }
+        )
+        match = re.search(r"Draw: ([^ ]+) \[([^,]+), ([^\]]+)\] strokes", text)
+        assert match is not None
+        shown = tuple(float(value) for value in match.groups())
+>       assert shown == pytest.approx((estimate, low, high), rel=0.01, abs=0.0)
+E       assert (0.0, -0.0, 0.0) == approx((7.461...07 ± 2.2e-09))
+E         
+E         comparison failed. Mismatched elements: 3 / 3:
+E         Max absolute difference: 2.18961e-07
+E         Max relative difference: inf
+E         Index | Obtained | Expected                        
+E         0     | 0.0      | 7.46156e-08 ± 7.5e-10           
+E         1     | -0.0     | -7.104050000000001e-08 ± 7.1e-10
+E         2     | 0.0      | 2.18961e-07 ± 2.2e-09
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_gui.py:1007: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_gui.py::test_saved_small_sg_intervals_remain_numerically_visible[1.0]
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_gui.py::test_saved_small_sg_intervals_remain_numerically_visible[0.001]
+2 failed, 29 deselected, 6 warnings in 3.39s

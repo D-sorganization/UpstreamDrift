@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "integration_commit": "2708710875",
+  "command": "QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg OPENBLAS_NUM_THREADS=1 /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest -o addopts='' -q tests/research/test_shot_pattern_final_figures.py tests/tools/shot_pattern_analysis/test_academic_plots.py tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py",
+  "exit_code": 0,
+  "result": "37 passed, 7 warnings in 86.29s",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_figures.py": "6f0ad23c122666cf99126a2d4357ab9b58a9504a605a32c177819a9dc9440e07",
+    "src/tools/shot_pattern_analysis/academic_plots.py": "7527d00ff5e6ca5913bbf14cd14e7d73e6d323725d104a9bdb074b5b4ea63da3",
+    "tests/research/test_shot_pattern_final_figures.py": "2785edf46bd18f41a97f575df4b4330ae0e1673344c2aead9f7ebef015de5bfb",
+    "tests/tools/shot_pattern_analysis/test_academic_plots.py": "27094eca536b2a37cb46d060e0b075d9d19af1560651e55199f4615b917e12e1",
+    "tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py": "6348bb9b17390aa13b28ff947fea988faac9cf90c7446dc44aea1f6cfb3eefda",
+    "tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py": "c8a15c6e88bf6635755fccdd45285f1c445f990e309366d547dc557425c3d83a"
+  },
+  "log_sha256": "42f8f5ea5427ea5921c6cf5ba03ea28c9ca80d4e3e381e45cc05bc6bdea801c0",
+  "scope": "Reviewed renderer and validated endpoint-loader integration regression tests; not complete final-figure or scientific acceptance.",
+  "log_path": "execution_log.txt"
+}

@@ -1,0 +1,71 @@
+..............F.                                                         [100%]
+=================================== FAILURES ===================================
+_____________ test_frozen_subprocess_rejects_drift[omitted_source] _____________
+
+verifier_pin = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2194/test_frozen_subprocess_rejects3/frozen'), {'source_root': '/tmp/pyt...n-venv-20261009/bin/python', 'python_sha256': 'd778d0b551287fb5f06c4464f78b616c086f8d42e94d8cfc209b12324cf937a1', ...})
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2194/test_frozen_subprocess_rejects3')
+mutation = 'omitted_source'
+
+    @pytest.mark.parametrize('mutation',['runtime','source','commit','omitted_source'])
+    def test_frozen_subprocess_rejects_drift(verifier_pin,tmp_path,mutation):
+        import subprocess
+        from scripts.research.shot_pattern_analysis.supplement_parent_verifier import verify_parent_in_frozen_source
+        root,pin=verifier_pin
+        if mutation=='runtime':pin['execution']['native']='changed'
+        elif mutation=='source':(root/'src/tools/shot_pattern_analysis/matched_export.py').write_text('changed')
+        elif mutation=='commit':pin['source_commit']='0'*40
+        else:pin['source_sha256'].pop('src/tools/shot_pattern_analysis/matched_export.py')
+>       with pytest.raises((ValueError,subprocess.CalledProcessError)):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE any of (ValueError, CalledProcessError)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:241: Failed
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+3.11s call     tests/research/test_supplement_publication_revision.py::test_ordinary_dispatch_retains_public_parent_verifier
+0.50s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+0.39s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+0.30s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+0.29s setup    tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.22s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+0.22s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+0.22s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+0.20s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+0.20s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+0.16s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+0.14s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+0.12s call     tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.09s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[source]
+0.08s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]
+0.08s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+0.07s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+0.07s call     tests/research/test_supplement_publication_revision.py::test_parent_mutation_during_render_rejected_without_receipt
+0.06s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+0.05s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+=========================== short test summary info ============================
+FAILED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]

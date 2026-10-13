@@ -1,0 +1,81 @@
+"""Review complete supplemental evidence without new physics or rescoring."""
+import hashlib
+import json
+import subprocess
+from pathlib import Path
+from docs.research.shot_pattern_analysis.phase2.validation.supplement_audit_protocol import validate_supplement_plan, validate_control_aliases, validate_execution_acceptance
+from docs.research.shot_pattern_analysis.phase2.validation.restore_final_primary_archives import inventory
+from scripts.research.shot_pattern_analysis.archive_data import verify_archives
+from src.tools.shot_pattern_analysis.provenance import manifest_files_match
+from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
+
+ROOT=Path.cwd();PHASE=ROOT/'docs/research/shot_pattern_analysis/phase2';VALIDATION=PHASE/'validation'
+OUT=VALIDATION/'supplement_final_independent_completion_review_v1';assert not OUT.exists();OUT.mkdir()
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+inputs={}
+def read(path):
+    before=sha(path);value=json.loads(path.read_text());assert sha(path)==before;inputs[str(path.relative_to(ROOT))]=before;return value
+completion=read(VALIDATION/'supplement_final_completion.json')
+acceptance=read(PHASE/'supplement_final_acceptance.json')
+assert sha(PHASE/'supplement_final_acceptance.json')=='4afeeec8fc1e3a73b18ef87b25b2082078b826646ab8a3e33c441b99b2958d95'
+current_execution=matched_source_snapshot();execution=acceptance['execution']
+assert completion['execution_snapshot_unchanged'] is True
+assert {k:v for k,v in current_execution.items() if k!='source_sha256'}=={k:v for k,v in execution.items() if k!='source_sha256'}
+changed={k for k,v in execution['source_sha256'].items() if current_execution['source_sha256'][k]!=v}
+assert changed=={'src/tools/shot_pattern_analysis/academic_plots.py'}
+assert current_execution['source_sha256']['src/tools/shot_pattern_analysis/academic_plots.py']=='7527d00ff5e6ca5913bbf14cd14e7d73e6d323725d104a9bdb074b5b4ea63da3'
+for path,digest in execution['source_sha256'].items():
+    if path.startswith('vendor/ud-tools/'):
+        pin=subprocess.check_output(['git','ls-tree','256745676e','vendor/ud-tools']).decode().split()[2]
+        old=subprocess.check_output(['git','-C','vendor/ud-tools','show',f'{pin}:{path.removeprefix("vendor/ud-tools/")}'])
+    else:
+        old=subprocess.check_output(['git','show',f'256745676e:{path}'])
+    assert hashlib.sha256(old).hexdigest()==digest
+
+protocols={}
+for key in ('pw_primary_face','pw_control_face','driver_control_speed'):
+    data=PHASE/'supplement_final_v1'/key
+    plan=read(data/'matrix_plan.json');audit_path=VALIDATION/f'independent_supplement_final_{key}.json';audit=read(audit_path)
+    assert sha(audit_path)==completion['audit_sha256'][key]
+    assert audit['pass'] and audit['complete'] and audit['failures']==[]
+    assert audit['plan_sha256']==sha(data/'matrix_plan.json') and audit['execution']==execution==plan['execution']
+    assert audit['script_sha256']==sha(VALIDATION/'independent_final_audit.py')
+    assert audit['protocol_auditor_sha256']==sha(VALIDATION/'supplement_audit_protocol.py')
+    for path,digest in audit['audit_dependency_sha256'].items():assert sha(ROOT/path)==digest
+    assert set(audit['cells'])==set(plan['cells'])
+    protocol=validate_supplement_plan(plan,'final',PHASE)
+    acceptance_check=validate_execution_acceptance(plan,PHASE/'supplement_final_acceptance.json',PHASE)
+    rows=supported=direct=bootstrap=0
+    for name,record in audit['cells'].items():
+        folder=data/name;manifest=read(folder/'manifest.json');summary=read(folder/'summary.json')
+        assert sha(folder/'manifest.json')==record['manifest_sha256']
+        assert manifest_files_match(folder/'manifest.json')
+        assert summary['config']==plan['cells'][name]
+        assert record['status']==summary['status']=='completed'
+        assert record['rows']==30000
+        assert record['supported_rows']==sum(p['supported_n'] for p in summary['summary'].values())
+        assert record['paired_n']==summary['course_scoring']['paired_n']
+        rows+=record['rows'];supported+=record['supported_rows'];direct+=record['direct_api_rows'];bootstrap+=bool(record['bootstrap_checked'])
+    counts={'planned':len(plan['cells']),'audited':len(audit['cells']),'rows':rows,'supported_rows':supported,'direct_api_rows':direct,'bootstrap_cells':bootstrap}
+    assert counts==completion['protocol_counts'][key]
+    assert all(audit['maxima'][kind]<=limit for kind,limit in audit['limits'].items())
+    protocols[key]={'counts':counts,'unsupported_rows':rows-supported,'protocol':protocol,'acceptance_check':acceptance_check,'audit_maxima':audit['maxima']}
+alias_path=VALIDATION/'supplement_final_aliases.json';aliases=read(alias_path);alias_check=validate_control_aliases(alias_path,'final',PHASE)
+assert alias_check['verified_aliases']==4 and alias_check['new_executions']==0
+pw_audit=read(VALIDATION/'independent_supplement_final_pw_primary_face.json');assert pw_audit['alias_review']['reference_file_sha256']==sha(alias_path)
+restore_path=VALIDATION/'supplement_final_archive_restoration.json';restoration=read(restore_path)
+assert sha(restore_path)==completion['restoration_receipt_sha256']
+assert restoration['status']=='passed'
+for flag in ('exact_file_hashes_and_sizes','full_reports_equal','temporary_directory_removed','originals_and_archives_unchanged'):assert restoration[flag] is True
+restore_script=VALIDATION/'supplement_final_restore_executed.py.txt';assert sha(restore_script)==restoration['executed_script_sha256'];inputs[str(restore_script.relative_to(ROOT))]=sha(restore_script)
+bundle=PHASE/'data_archives/supplement_final_v1';manifest=read(bundle/'archive_manifest.json');assert sha(bundle/'archive_manifest.json')==restoration['archive_manifest_sha256']
+assert inventory(bundle)==restoration['bundle_files']
+assert verify_archives(bundle)==restoration['files']==191
+expected={name:{k:item[k] for k in ('sha256','bytes')} for name,item in manifest['files'].items()}
+assert inventory(PHASE/'supplement_final_v1')==expected
+assert all(sha(ROOT/path)==digest for path,digest in inputs.items())
+assert matched_source_snapshot()==current_execution
+assert completion['total_rows']==sum(p['counts']['rows'] for p in protocols.values())==780000
+result={'status':'accepted_complete_saved_data_and_packaging_evidence','scope':'26 Unique Supplemental Executions Plus Four Verified Reuse Aliases; Not Figure or Final Narrative Acceptance','execution':execution,'review_current_execution':current_execution,'accepted_source_commit_verified':'256745676e','only_current_source_delta':'Reviewed academic renderer 7527d00f; not a changed simulation source','protocols':protocols,'alias_review':alias_check,'fresh_restoration_receipt_review':{'files':191,'executed_script_hash_verified':True,'archive_inventory_reverified':True,'original_inventory_reverified':True,'new_restoration_performed_by_this_review':False},'total_rows':780000,'supported_rows':sum(p['counts']['supported_rows'] for p in protocols.values()),'unsupported_rows_retained':sum(p['unsupported_rows'] for p in protocols.values()),'inputs':inputs,'executed_script_sha256':sha(Path(__file__)),'limitations':['Independent rereview binds prior full CSV audits and fresh-restoration execution; does not rerun Monte Carlo or duplicate the fresh restoration.','Conditional supported-shot estimates do not establish full-population scoring or empirical player precision.','Original unavailable cells remain in their original inventories; adapted supplements and aliases must retain explicit protocol identities.']}
+(OUT/'review.json').write_text(json.dumps(result,indent=2)+'\n');(OUT/'executed_review.py.txt').write_bytes(Path(__file__).read_bytes())
+print(json.dumps({k:result[k] for k in ('status','total_rows','supported_rows','unsupported_rows_retained','alias_review')},indent=2))

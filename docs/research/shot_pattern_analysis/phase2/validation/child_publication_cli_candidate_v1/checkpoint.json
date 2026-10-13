@@ -1,0 +1,63 @@
+{
+  "scope": "CLI, frozen verifier pin, ordered saved-pair adapter, staged child publication contracts",
+  "status": "component_tests_passed_renderer_integration_pending",
+  "tests_passed": 74,
+  "test_exit_code": 0,
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/supplement_publication.py": "7a3ee6f9ba8667c7887e817bf219a91b75cb28cbffdf605ed2e6cd82d7ad38f8",
+    "scripts/research/shot_pattern_analysis/supplement_parent_verifier.py": "2af3611a596f32c8d473b7ea5425e3de1a4eb7c673158dd437775f789bdce064",
+    "scripts/research/shot_pattern_analysis/supplement_revision_adapter.py": "e6448dc29fd2ce7da63d8b1a56d50204242983027182765ee35fb354952f0621",
+    "scripts/research/shot_pattern_analysis/supplement_revision_pin.py": "cfe117ccfcff9942401eca5e8870525f8de6a8d9440b27dcd4410fd39c7e07ec",
+    "scripts/research/shot_pattern_analysis/revise_supplement_figures.py": "f29c2d9c1e0d8eb75765afccdb6994ccb4ec0adb56fdfd722b36accfd7841ea1",
+    "tests/research/test_supplement_publication_revision.py": "48519d231ff4a7dad357b2c5f1be5b3fa9c0ed49e00850f6a1ced5ad8a196bd9",
+    "tests/research/test_supplement_revision_adapter.py": "01215372dfc05df8af672bc183982c1245910a8966dfa3ee454784d545c1ca28",
+    "tests/research/test_supplement_revision_command.py": "a59c4690de1f9bc8b46ad6610ead5b7e8b10d6fab67390bd2cb2e14313c9be23"
+  },
+  "line_counts": {
+    "scripts/research/shot_pattern_analysis/supplement_publication.py": 483,
+    "scripts/research/shot_pattern_analysis/supplement_parent_verifier.py": 124,
+    "scripts/research/shot_pattern_analysis/supplement_revision_adapter.py": 197,
+    "scripts/research/shot_pattern_analysis/supplement_revision_pin.py": 94,
+    "scripts/research/shot_pattern_analysis/revise_supplement_figures.py": 97,
+    "tests/research/test_supplement_publication_revision.py": 563,
+    "tests/research/test_supplement_revision_adapter.py": 200,
+    "tests/research/test_supplement_revision_command.py": 126
+  },
+  "evidence_sha256": {
+    "command-red.txt": "edd2c880f1579f5008afc2129025000605392bc468147050eea97a5131ac157c",
+    "ruff.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "adapter-red.txt": "d18d9bb0507dc5a6f3de23b0c8e2f738eb9b9b3dc81a2bf9c0dc610759cd6e25",
+    "integration.txt": "addb16571f00b10ccab23d59c6fb45846a59f06f9e295262313d8da126788d71",
+    "green.txt": "a8fe49d61f557d96c57832fbcc78a8bb0778688d5b80f8b8575f65f3c628934d",
+    "origin-red.txt": "256b6a068fe31a33dcb2b9e5630d5d63ec985c2776be2073540b9c98578ecdae",
+    "scope-red.txt": "23070502c4860cec6fc1a91e19e25240aa8c0e2223a6434f5b94529a34f4d901",
+    "mypy.txt": "588f803e3446aa36df07178a20083f800060813d3ee6748845a85c053d08aed4",
+    "adapter-green.txt": "b32159abd5228ef171c1a282dffe829c4a7816704b3c4f2755fedcd1c625ccd1",
+    "final-tests.txt": "c66ac58681a70277cbbc868be2e87a66c12dcb77ae62a6dd0dfd89e6b701e850",
+    "mypy-final.txt": "e317872697c2cbfdefa321527a6efe73290dff3a390b0fa8723b87092eccba6a"
+  },
+  "actual_parent_verified": false,
+  "production_child_created": false,
+  "visual_acceptance": false,
+  "remaining": [
+    "Gemini public selected renderer qualification",
+    "Full completed parent validation using exact preserved source/runtime",
+    "All actual ordered pair reconstruction",
+    "Actual child rendering and independent visual/contract review before finalization"
+  ],
+  "closed_revision_kinds": [
+    "density_png",
+    "density_pdf",
+    "density_svg",
+    "overhead_png",
+    "overhead_pdf",
+    "overhead_svg",
+    "overhead_social_png"
+  ],
+  "production_expected_if_all_384_pairs_available": {
+    "revised": 2688,
+    "reused": 3768,
+    "total": 6456
+  },
+  "counts_derived_from_ledger_in_implementation": true
+}

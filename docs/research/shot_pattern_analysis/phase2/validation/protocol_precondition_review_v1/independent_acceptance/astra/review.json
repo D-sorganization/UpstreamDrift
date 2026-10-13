@@ -1,0 +1,38 @@
+{
+  "accepted_component": true,
+  "whole_publication_accepted": false,
+  "scope": "Actual source_protocol precondition for resolved renderer refs; both entry points and valid four-pair parity",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "f4282ad097854b635a8c5e0a6c19b7cc8ac8a3e2d4384efb8ede89570db74c1b",
+    "tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py": "4b73cc80ad227aba272b58a8bf977adc3f41e90f6d7f11cee9c1798bfbe6bc4b"
+  },
+  "tests": {
+    "independent_red_cases": 8,
+    "green": 48,
+    "warnings": 6,
+    "ruff": true,
+    "format": true,
+    "mypy": true
+  },
+  "valid_parity": {
+    "pair_count": 4,
+    "png_byte_identical": 12,
+    "artist_arrays_limits_text_density_recipe_and_nonhash_ledger_equal": true,
+    "inputs_sources_unchanged": true,
+    "terminal_exit": 0
+  },
+  "evidence_sha256": {
+    "independent_red.txt": "b116b6b449768a085c9eed2c673ef9e9542e60cfde3b204a6d7fe2e5745af43a",
+    "independent_green.txt": "bbd253329610162d597a96decd113993d259d2f0bb4d9877c02579ee74e00bca",
+    "test_results.json": "d3e71f903e89bc77a83a8899cf507affce678001fc254524e5efac77287788eb",
+    "ruff.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "format.txt": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "mypy.txt": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+    "parity_review.json": "2e2da44fc1929c45881ce001f28cbe9396780f767b62051016ada64e6424d112",
+    "parity_run.txt": "7c9e5c5ef7e5217d8a93872144090c3dce9b895894b360520a96e8b9da91e542",
+    "parity.py": "a1b4c5585d0b480217457d0a98de06396588f190a4dea9225e351884488a8ad6",
+    "run_checks.py": "28996dc9ca43864518e8edfdb4a255345e871ad9448a317d3afd6b38a60ef3e5",
+    "REVIEW.md": "32d2965c18eef70dcc6154d52c40aaeda197feb1f8f1d7f1053afe183bc50b12"
+  },
+  "provenance_limit": "Historical v6 must remain validated under exact frozen402 source; no receipt refresh or loader exception approved."
+}

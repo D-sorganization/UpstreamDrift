@@ -6,7 +6,7 @@ Coverage:
    provider in the cross-engine registry.
 2. The provider's ``fit_swing`` returns a canonical :class:`FitResult`
    for a synthetic :class:`ClubTarget` (using the existing stub-sim
-   pattern from ``tests/test_drake_fit_swing.py``).
+   pattern from ``tests/engines/drake/test_drake_fit_swing.py``).
 3. ``MultiSourceTarget`` / ``ClubBallTarget`` shaped inputs (anything
    with a ``.club`` attribute) are accepted via duck-typing.
 4. Numerical regression on ``TW_ProV1.mat`` against the historical
@@ -14,7 +14,7 @@ Coverage:
    not installed locally — these gates are reproduced in CI).
 
 The optimizer itself is not under test here — see
-``tests/test_drake_fit_swing.py`` for that. This module only verifies
+``tests/engines/drake/test_drake_fit_swing.py`` for that. This module only verifies
 the Protocol/registry adaptation layer.
 """
 
@@ -46,8 +46,10 @@ from src.shared.python.motion_matching.provider_registry import (
     get_provider,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
-# Test helpers (mirror the patterns in tests/test_drake_fit_swing.py).
+# Test helpers (mirror the patterns in tests/engines/drake/test_drake_fit_swing.py).
 # ---------------------------------------------------------------------------
 
 

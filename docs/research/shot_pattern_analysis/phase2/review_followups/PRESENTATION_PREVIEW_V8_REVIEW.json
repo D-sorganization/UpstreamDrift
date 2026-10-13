@@ -1,0 +1,34 @@
+{
+  "review_type": "pilot figure presentation review",
+  "status": "passed visual layout review; pilot only",
+  "source_root": "phase2/pilot_v1",
+  "selected_cell": "driver_lean0_curve1_rotation1_shaft_only",
+  "source_cell_manifest_sha256": "43a0a3bd21b2ab488fe948a8be5e58288d4eeea8ecb8bff35df171f37150d798",
+  "output_root": "phase2/presentation_preview_v8",
+  "output_manifest_sha256": "315f5923bb04b080f1c7514b713c8c3a13fd11630c0549e8bbee2100db35e3ba",
+  "images": {
+    "density": {
+      "path": "phase2/presentation_preview_v8/details/driver_lean0_curve1_rotation1_shaft_only/density.png",
+      "sha256": "4e5bdc57bb6be52a2c3a1ab6ed48713c2add2e4e6568e55b473386e4d69616fc",
+      "review": "Nominal face/path/speed caption wraps without overlap or clipping; density axes, target, legend and caveat remain legible."
+    },
+    "overhead": {
+      "path": "phase2/presentation_preview_v8/details/driver_lean0_curve1_rotation1_shaft_only/overhead.png",
+      "sha256": "501957c3287c7b55de185640300f5668378de6ef8c594d1711e0ef3aa518003e",
+      "review": "Nominal metadata, trajectory panels, labels and footer fit without overlap or clipping."
+    }
+  },
+  "visual_reviewers": ["Luna", "root"],
+  "builder_commit": "fc5435a951",
+  "plot_source_sha256": "5822f2c2dd701582908f0157f98c093d1164c5ebe68b865e24bd94fe796f889c",
+  "builder_source_sha256": "f7e268d44bdd95885a2bff01e9052d92f18d00c96b221059ead58a82b4979ac3",
+  "validation": {
+    "pytest": "14 passed: tests/research/test_shot_pattern_final_figures.py",
+    "ruff": "passed",
+    "mypy": "Success: no issues found in 1 source file; --python-version 3.12 scripts/research/shot_pattern_analysis/build_final_figures.py"
+  },
+  "limitations": [
+    "This is a pilot preview and is not final data acceptance.",
+    "The preview is an output-only postprocessing rerender; physics, scoring and archived pilot sources were not changed."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "scope": "Independent root regression run, valid-renderer parity still pending",
+  "tests": 29,
+  "warnings": 6,
+  "exit_code": 0,
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "f4282ad097854b635a8c5e0a6c19b7cc8ac8a3e2d4384efb8ede89570db74c1b",
+    "tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py": "4b73cc80ad227aba272b58a8bf977adc3f41e90f6d7f11cee9c1798bfbe6bc4b"
+  },
+  "log_sha256": "165bea1ed84d2793e0207575e823cc8e7f17308ee42415feba82bf4098f6d86f",
+  "diff_check": "pass",
+  "publication_acceptance": false,
+  "component_accepted": true,
+  "astra_receipt_sha256": "09d4a34727220a52a836daecfe56886e4acea40e824e44a75dfd60d45184c965",
+  "root_rehashed_png_pairs": 12,
+  "root_rehashed_all_bound_sources_inputs_evidence": true,
+  "integration_pending_frozen_report": true
+}

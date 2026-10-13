@@ -1,0 +1,45 @@
+{
+  "status": "component_tests_pass_visual_review_pending",
+  "issue": 11988,
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "8b80820cb16b2a4f975a3bfcfa960d30500d3aec3d08fabd6a949bf4f9e37694",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "4940bc4b0e91719f8b8e59bf2ccd6e14a2bec214a0e08ddbff2f107020203450",
+    "tests/tools/shot_pattern_analysis/test_matched_pair_social.py": "bbef8b380266f3d02e396e93524686f577ab91b569d8015fff1a1039363ff8a7",
+    "tests/tools/shot_pattern_analysis/test_social_review_contracts.py": "212bc79277066ceedd2ddd81c262ed5585e476ffd7231044f6f06b706de19dc2",
+    "tests/tools/shot_pattern_analysis/test_matched_social_integration.py": "64213398675955de1536a5d1f5ec20a640da8a434510aae02e55ecc2a973350f"
+  },
+  "tests": "32 passed, 1 deselected (slow saved-data render); Ruff and two-file Mypy pass",
+  "fixes": [
+    "Low endpoint support records unavailable density while retaining available overhead exports.",
+    "Physical noise details move from overlong subtitles into canonical wrapped metadata.",
+    "Overhead metadata removes endpoint-population counts and labels saved raw trajectories.",
+    "Covariance profile names do not assert actual nonzero covariance."
+  ],
+  "v1_render": {
+    "assets": 28,
+    "outside_canvas_subtitles": 5,
+    "right_edges_fraction": [
+      1.2,
+      1.63
+    ],
+    "acceptance": "changes_required"
+  },
+  "v2_render": {
+    "status": "intentionally_terminated",
+    "exit_code": 143,
+    "reason": "Astra identified additional overhead-population labeling defect; stopped only this obsolete preview to apply the correction, not a timeout or simulation restart."
+  },
+  "v3_render": {
+    "status": "running",
+    "session": 31074,
+    "pid": 1826164,
+    "script": "/tmp/p2-render-production-social-review-v3.py",
+    "output": "/tmp/p2-production-social-review-v3"
+  },
+  "remaining": [
+    "Astra independent visual review pending.",
+    "Academic overhead figure_scope still says one-cell supported population; correct after v3 render before qualification.",
+    "Canonical marginal tick overlap remains separately tracked.",
+    "No final publication or full-study acceptance."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "local_fresh_restoration_pass_remote_delivery_pending",
+  "checked_utc": "2026-10-10T10:56:26.728994+00:00",
+  "files_verified": 548,
+  "figure_outputs_verified": 547,
+  "manifest_sha256": "47ea6e292883ea5958651e6786d5b73f2f463ebd004488d75c77f385036f34fd",
+  "visual_review_sha256": "bab6a49c147606b071a45a09dff2bb3088a598328ea7e9f8cd9f2ea75866a982",
+  "archives": {
+    "control_final_figures_v1-001.zip": {
+      "bytes": 168462247,
+      "sha256": "0101c2cbc5cba3ffb0b6bded0979cb63fb28adb52f446fbda1a4384c226e35c0"
+    }
+  },
+  "bundle_root": "/tmp/shot-pattern-publication-bundles-v1/control",
+  "restored_root": "/tmp/shot-pattern-publication-restored-v1",
+  "max_bundle_bytes": 500000000
+}

@@ -1,0 +1,5 @@
+# Caption API Test Recovery
+
+The initial Gemini caption/API candidate is unaccepted. Its full parity unit test repeatedly exceeded the existing timeout while encoding many redundant high-resolution exports. Root preserved the terminal failure, interrupted only the owned Gemini process (3933902; wrapper exit 1), verified its absence, and started a detached recovery worker (wrapper 4001482). Production renderer 3402855 was not interrupted.
+
+The recovery must preserve the timeout and substantive acceptance assertions, compare source arrays/common masks/artist geometry/metadata rather than incidental PDF timestamps or SVG IDs, and retain representative actual export/containment checks. Gemini owns only renderer and tests/tools changes; Astra owns separate publication CLI and tests/research changes. No candidate is accepted until independent tests and visual review pass. Recovery status: `/tmp/shot-pattern-caption-api-recovery-evidence/`; log: `/tmp/shot-pattern-caption-api-recovery-task.log`.

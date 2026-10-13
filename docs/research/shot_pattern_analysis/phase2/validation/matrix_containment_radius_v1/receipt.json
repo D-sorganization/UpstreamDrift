@@ -1,0 +1,7 @@
+{
+  "status": "tests_passed_pending_independent_review",
+  "tests": 15,
+  "static_checks": "Ruff and scoped Mypy passed",
+  "source_sha256": "ff9461237861bd5fbc22a6e6be7a151bb35d8ea8b021a1d7ced4f4aef19a251b",
+  "scope": "Actual circular containment radius; mixed/invalid radius configurations rejected; hypothetical SG green/fairway geometry remains separate"
+}

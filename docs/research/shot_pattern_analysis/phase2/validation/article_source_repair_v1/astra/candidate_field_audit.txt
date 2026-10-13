@@ -1,0 +1,56 @@
+{
+  "checked_pattern_rows": 72,
+  "checked_numeric_fields": 576,
+  "numeric_rounding_mismatches": [],
+  "max_selected_nominal_residual_m": 1.9997332019487617e-13,
+  "course_contexts": [
+    {
+      "club_id": "driver",
+      "start_lie": "tee",
+      "start_distance_m": 400.0,
+      "hole_distance_m": 400.0,
+      "fairway_half_width_m": 15.0,
+      "green_radius_m": null
+    },
+    {
+      "club_id": "seven_iron",
+      "start_lie": "fairway",
+      "start_distance_m": 127.88194166336235,
+      "hole_distance_m": null,
+      "fairway_half_width_m": null,
+      "green_radius_m": 15.0
+    },
+    {
+      "club_id": "pitching_wedge",
+      "start_lie": "fairway",
+      "start_distance_m": 77.40247724866299,
+      "hole_distance_m": null,
+      "fairway_half_width_m": null,
+      "green_radius_m": 15.0
+    }
+  ],
+  "selected_control_identities": [
+    {
+      "source_protocols": [
+        "original_control/1",
+        "driver-control-speed-bounds/1"
+      ],
+      "source_cells": [
+        "driver_lean0_curve2_rotation2_combined2",
+        "driver_lean5_curve2_rotation2_combined2"
+      ],
+      "common_six_n": 9940
+    },
+    {
+      "source_protocols": [
+        "pw-primary-face-bounds/1",
+        "pw-control-face-bounds/1"
+      ],
+      "source_cells": [
+        "pitching_wedge_lean0_curve2_rotation2_combined2",
+        "pitching_wedge_lean5_curve2_rotation2_combined2"
+      ],
+      "common_six_n": 9999
+    }
+  ]
+}

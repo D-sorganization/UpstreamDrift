@@ -1,0 +1,2190 @@
+{
+  "scope": "PNG visual component review only; not whole publication or vector acceptance",
+  "status": "accepted",
+  "reviewer": "root",
+  "utc": "2026-10-11T01:05:47.521322+00:00",
+  "batch_inventory_sha256": "2152a80125cc9f3c3b58ec8e8fd21815b59068fed78106a8b8cef12c5fceaadd",
+  "command_receipt_sha256": "ad2a7b056c5de8532b27b7baeffc6a2e1966a8f1f3c8e1940a90d904e8682c98",
+  "all_assets_rehashed": 192,
+  "inspected_contacts": [
+    {
+      "path": "contact_048_1.jpg",
+      "sha256": "ecaa90a0384a70967da6808baa29fd665f933b2562b1697958c23249b26f31da"
+    },
+    {
+      "path": "contact_048_2.jpg",
+      "sha256": "9482d5eba94516671fc917bc659a3272a3a54aa651927118f1e9ee85c09b7829"
+    },
+    {
+      "path": "contact_048_3.jpg",
+      "sha256": "35a4cd9eded420d6354ae547c8986a86c6c6cb17b8ee6efa73aef90f8b5b6895"
+    },
+    {
+      "path": "contact_049_1.jpg",
+      "sha256": "e44c3146d20a7510a83710f562fd72effef8c3c20cdf58b161ebb46a0f2c1581"
+    },
+    {
+      "path": "contact_049_2.jpg",
+      "sha256": "8fbafed0c5414ddd855608a3a37d5fe20e7cef43287a7e13480ba43409f71556"
+    },
+    {
+      "path": "contact_049_3.jpg",
+      "sha256": "08185989c4eaddafcdc5f8d389a34d9afb2ca502806493c3199b5e43f642b3b4"
+    },
+    {
+      "path": "contact_050_1.jpg",
+      "sha256": "bfad3cceed397eb0d66dd38090bcd4a3a4b232bd86e4d5ee5603c9299af4dabd"
+    },
+    {
+      "path": "contact_050_2.jpg",
+      "sha256": "c1ccb569579798c8af6b808ecb9cd219e21766ab04a64199e0d2e9ca3dd4ece4"
+    },
+    {
+      "path": "contact_050_3.jpg",
+      "sha256": "39309b4fcdd4dd05749e7f88942d8ddb13364f8deab6908a18582659b073d97f"
+    },
+    {
+      "path": "contact_051_1.jpg",
+      "sha256": "e9292a5c5fea7bee32122e1da1364d6b81044910757d31e119c7ca581ae78b4b"
+    },
+    {
+      "path": "contact_051_2.jpg",
+      "sha256": "9a6e7e97b7c2d62d55956a7b8b524c6438ac722afa6be00638bfdf4aa6c88e44"
+    },
+    {
+      "path": "contact_051_3.jpg",
+      "sha256": "6ba823f105521310924dd43dbb9ee63e3c6b897abcd6809bc86aa07d0d8fd68a"
+    },
+    {
+      "path": "contact_052_1.jpg",
+      "sha256": "7f274087b194fd3e36710200722681e0e4d8169c6d4734e37282e671519dca8d"
+    },
+    {
+      "path": "contact_052_2.jpg",
+      "sha256": "c3a9b3a601eb49d5fd88a010ef4dea8fe895ae8b4137e39a2bb0959a6ac6ea7e"
+    },
+    {
+      "path": "contact_052_3.jpg",
+      "sha256": "3021684103b303b217511d4fb1d9bfb099ae532361b921f1ffb629c4cfaf3b33"
+    },
+    {
+      "path": "contact_053_1.jpg",
+      "sha256": "59afe59ab525ca4c80c8835cae5090d9af4b3f080429d4a1818713c0fb5a45f1"
+    },
+    {
+      "path": "contact_053_2.jpg",
+      "sha256": "0c370bc0a0c5bdd24a1c6799ca947982021918525da7f7837a9c61c8f7c58f8a"
+    },
+    {
+      "path": "contact_053_3.jpg",
+      "sha256": "026b92b6c6965a888fe061f831e684a43ea6f75e9e1187a134ecd935342040c4"
+    },
+    {
+      "path": "contact_054_1.jpg",
+      "sha256": "b385cded436fb59a996aa63084acdf837c8e05d5a29969f13a59f03cddb379d1"
+    },
+    {
+      "path": "contact_054_2.jpg",
+      "sha256": "db51fd3e41d8dcfd207151cb35df1cce1882bc2af3a9d37ab347137d7c0ab22a"
+    },
+    {
+      "path": "contact_054_3.jpg",
+      "sha256": "4e7baf927259bcba16b9406638a9c79e18eee0b8341e09fadfab71beacd7d800"
+    },
+    {
+      "path": "contact_055_1.jpg",
+      "sha256": "cba29a5abba6ce591e7fc266dfbe63127c7b48e59b465d4e55f2a6d238fc6939"
+    },
+    {
+      "path": "contact_055_2.jpg",
+      "sha256": "6b260e536e161e6dcb5e3185e5e461aafe56044c93604e50b8ebe0056674fd20"
+    },
+    {
+      "path": "contact_055_3.jpg",
+      "sha256": "9455a56bee2c09a2eafe92d1bb18199cc4676f709a8cc786797465bea12c63e3"
+    },
+    {
+      "path": "contact_056_1.jpg",
+      "sha256": "e5d63d03269fce99ea338187b42d735e7f8b2b063dea0fd805e565ad91e00616"
+    },
+    {
+      "path": "contact_056_2.jpg",
+      "sha256": "af6d79b0864bd777729dc8e4064644b9ca0b89f3b685a8b8f71e3f2700e7894b"
+    },
+    {
+      "path": "contact_056_3.jpg",
+      "sha256": "e367bafa94913728e95d6c9a7b155814b44e5bdbc1f848b7451b8559c38d3d45"
+    },
+    {
+      "path": "contact_057_1.jpg",
+      "sha256": "7b23c458e2ac50b411b1aba3d16c6d520990c5edb2a7f414e9cbc5ba8c6ae19c"
+    },
+    {
+      "path": "contact_057_2.jpg",
+      "sha256": "b1c943d1295568080250d0d588b5c7219529f0121b64ad6828f85976febfbc9f"
+    },
+    {
+      "path": "contact_057_3.jpg",
+      "sha256": "21df3f13d83936848743c858d791ebdef1392cc13a175cacfb3b01287278917c"
+    },
+    {
+      "path": "contact_058_1.jpg",
+      "sha256": "b7502a9210fc59fc3f0b2086e1c071f04cf4e0dff28d48ccced417427c2baae3"
+    },
+    {
+      "path": "contact_058_2.jpg",
+      "sha256": "978af8838ad01ebbf2358d57c50d54881c9f284c6aeb44e1208423088480619b"
+    },
+    {
+      "path": "contact_058_3.jpg",
+      "sha256": "7bb564b67732d85400102c5c7838ee5468f8b03a09134b8228089dc1ebc4809e"
+    },
+    {
+      "path": "contact_059_1.jpg",
+      "sha256": "fafe3d40059cbc2fd5f5bfd6082e4fec1b828491a3f58c4b68075abb1082a5b9"
+    },
+    {
+      "path": "contact_059_2.jpg",
+      "sha256": "faed185513fa6c00072dd275f423e1a8bd17a2a38a8f91c358719ccfb9962927"
+    },
+    {
+      "path": "contact_059_3.jpg",
+      "sha256": "b1c0bcc84014b285a0f502b8dba365f1af659591c7c35a3fe0ff5016155863ef"
+    }
+  ],
+  "full_size_originals_actually_viewed": [
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_negative__33cc092803_density.png",
+      "sha256": "2bc4a20d847c478d1faa87490333f8445ca90115413518f6faf7ae872f40190a"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_negative__33cc092803_overhead_social.png",
+      "sha256": "36a42593ac665a20abf0251e4107d67fbb1d0292b08dcf141414240a396e41c3"
+    }
+  ],
+  "png_assets": [
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_negative__d98db3458e_density_straight_social.png",
+      "sha256": "62a159bedd364d356566720ed5a0338d2f0a436b647a4c72d6d8ae5fd61ca9a0",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "50f49feeee71f2151b46f864c4aad3f09143327fdf724df343c510619c85ab40",
+          "source_csv_sha256": "35843ce7a503fa79c9f22bfa61de34608469f44cb5a18908fe1c8fe8b8e2377e"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "339f043951cad773b9e289766ee230d6b16b9bcfafec693cca3aed288d417f2c",
+          "source_csv_sha256": "a1d0031294bf7838e055da2ab65528713ff7cb6685810bf9777c5f18505c7f57"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9971,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_negative__d98db3458e_density_draw_social.png",
+      "sha256": "da4b9ac1352c7ae1665a3ed44e1a311faa4dfe084621f83ed42ce609e9406a8e",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "50f49feeee71f2151b46f864c4aad3f09143327fdf724df343c510619c85ab40",
+          "source_csv_sha256": "35843ce7a503fa79c9f22bfa61de34608469f44cb5a18908fe1c8fe8b8e2377e"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "339f043951cad773b9e289766ee230d6b16b9bcfafec693cca3aed288d417f2c",
+          "source_csv_sha256": "a1d0031294bf7838e055da2ab65528713ff7cb6685810bf9777c5f18505c7f57"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9971,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_negative__d98db3458e_density_fade_social.png",
+      "sha256": "a4fe8bf4f0c6dcd54128ddf692d612c6bf04773c2b7f46d1bc0064e719682a90",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "50f49feeee71f2151b46f864c4aad3f09143327fdf724df343c510619c85ab40",
+          "source_csv_sha256": "35843ce7a503fa79c9f22bfa61de34608469f44cb5a18908fe1c8fe8b8e2377e"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "339f043951cad773b9e289766ee230d6b16b9bcfafec693cca3aed288d417f2c",
+          "source_csv_sha256": "a1d0031294bf7838e055da2ab65528713ff7cb6685810bf9777c5f18505c7f57"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9971,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_negative__d98db3458e_density.png",
+      "sha256": "deb5480074096a1d5323df2243ab0400c441f527207661a6788db3fcb6a1567a",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "50f49feeee71f2151b46f864c4aad3f09143327fdf724df343c510619c85ab40",
+          "source_csv_sha256": "35843ce7a503fa79c9f22bfa61de34608469f44cb5a18908fe1c8fe8b8e2377e"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "339f043951cad773b9e289766ee230d6b16b9bcfafec693cca3aed288d417f2c",
+          "source_csv_sha256": "a1d0031294bf7838e055da2ab65528713ff7cb6685810bf9777c5f18505c7f57"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9971,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_negative__d98db3458e_overhead.png",
+      "sha256": "53e62cc600f1a96e630402b3d401fd0c8df48aeb32cfa1bdda4445817e9345aa",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "50f49feeee71f2151b46f864c4aad3f09143327fdf724df343c510619c85ab40",
+          "source_csv_sha256": "35843ce7a503fa79c9f22bfa61de34608469f44cb5a18908fe1c8fe8b8e2377e"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "339f043951cad773b9e289766ee230d6b16b9bcfafec693cca3aed288d417f2c",
+          "source_csv_sha256": "a1d0031294bf7838e055da2ab65528713ff7cb6685810bf9777c5f18505c7f57"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9971,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_negative__d98db3458e_overhead_social.png",
+      "sha256": "79dae1a1d80b7d41cb7c07b390aab5e38b85173f42bed8b1f10ac12aa1f25db3",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "50f49feeee71f2151b46f864c4aad3f09143327fdf724df343c510619c85ab40",
+          "source_csv_sha256": "35843ce7a503fa79c9f22bfa61de34608469f44cb5a18908fe1c8fe8b8e2377e"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "339f043951cad773b9e289766ee230d6b16b9bcfafec693cca3aed288d417f2c",
+          "source_csv_sha256": "a1d0031294bf7838e055da2ab65528713ff7cb6685810bf9777c5f18505c7f57"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9971,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_positive__ef7aecbeeb_density_straight_social.png",
+      "sha256": "8c663a144d7eb2b4a7e90cfe49a3164536a2a8fb11be073fd22035b3c92fff52",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "95dac7e139ec36035b04ca030aacd04d382d0b88f7ee81997c2a8bcb5ee9f85d",
+          "source_csv_sha256": "6fd4a54350a8ecb15e4fcfa5009647c6e8b0677f6a735d2373f0354d8a9ed699"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "587405c1838afa0d2952206c8117db82016cb1c283d1ed1a96c536a9e776a822",
+          "source_csv_sha256": "bdc1b4fc1db795300ee7cf0aa18e9fb8ef14cbd37f99cc6a2935cecd88b64904"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9983,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_positive__ef7aecbeeb_density_draw_social.png",
+      "sha256": "64ed65dd3f030ee7f9da735735217c66fffdfecba5c4d231c4aa7343c178c60b",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "95dac7e139ec36035b04ca030aacd04d382d0b88f7ee81997c2a8bcb5ee9f85d",
+          "source_csv_sha256": "6fd4a54350a8ecb15e4fcfa5009647c6e8b0677f6a735d2373f0354d8a9ed699"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "587405c1838afa0d2952206c8117db82016cb1c283d1ed1a96c536a9e776a822",
+          "source_csv_sha256": "bdc1b4fc1db795300ee7cf0aa18e9fb8ef14cbd37f99cc6a2935cecd88b64904"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9983,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_positive__ef7aecbeeb_density_fade_social.png",
+      "sha256": "cafd30dd15490027786f31b5b11b10917d135d7a6563338b3c9dcb454bfc3f1f",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "95dac7e139ec36035b04ca030aacd04d382d0b88f7ee81997c2a8bcb5ee9f85d",
+          "source_csv_sha256": "6fd4a54350a8ecb15e4fcfa5009647c6e8b0677f6a735d2373f0354d8a9ed699"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "587405c1838afa0d2952206c8117db82016cb1c283d1ed1a96c536a9e776a822",
+          "source_csv_sha256": "bdc1b4fc1db795300ee7cf0aa18e9fb8ef14cbd37f99cc6a2935cecd88b64904"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9983,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_positive__ef7aecbeeb_density.png",
+      "sha256": "030839c09c1d243b08ccf184ee051fa1bde8d3f586b2973937a2af56ea92d128",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "95dac7e139ec36035b04ca030aacd04d382d0b88f7ee81997c2a8bcb5ee9f85d",
+          "source_csv_sha256": "6fd4a54350a8ecb15e4fcfa5009647c6e8b0677f6a735d2373f0354d8a9ed699"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "587405c1838afa0d2952206c8117db82016cb1c283d1ed1a96c536a9e776a822",
+          "source_csv_sha256": "bdc1b4fc1db795300ee7cf0aa18e9fb8ef14cbd37f99cc6a2935cecd88b64904"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9983,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_positive__ef7aecbeeb_overhead.png",
+      "sha256": "ffe8a0ba1d82076ec7b0dbcb59c7b86ec945807f100da000e0d8b06b24f698f1",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "95dac7e139ec36035b04ca030aacd04d382d0b88f7ee81997c2a8bcb5ee9f85d",
+          "source_csv_sha256": "6fd4a54350a8ecb15e4fcfa5009647c6e8b0677f6a735d2373f0354d8a9ed699"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "587405c1838afa0d2952206c8117db82016cb1c283d1ed1a96c536a9e776a822",
+          "source_csv_sha256": "bdc1b4fc1db795300ee7cf0aa18e9fb8ef14cbd37f99cc6a2935cecd88b64904"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9983,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation1_cov_facepath_positive__ef7aecbeeb_overhead_social.png",
+      "sha256": "039dab952a7f790e8b2df0f13b4d4b85a4d5bb25e216ab81a451e745cb5ac9e3",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "95dac7e139ec36035b04ca030aacd04d382d0b88f7ee81997c2a8bcb5ee9f85d",
+          "source_csv_sha256": "6fd4a54350a8ecb15e4fcfa5009647c6e8b0677f6a735d2373f0354d8a9ed699"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "587405c1838afa0d2952206c8117db82016cb1c283d1ed1a96c536a9e776a822",
+          "source_csv_sha256": "bdc1b4fc1db795300ee7cf0aa18e9fb8ef14cbd37f99cc6a2935cecd88b64904"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9983,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_only_108p027m_e8e08291c0_density_straight_social.png",
+      "sha256": "b14f4d351adf0c4d1692eb403c98725bfa555977976a55481d0652c2a64f4588",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "c5c14ba24c59a3e88313f94b58bfefcbfd11e68023064a316115cbb4c0660e3b",
+          "source_csv_sha256": "ed6ca446f4376dd9cf8d4c7cffc8057e6ae92c29e2e5784939ea35b29a9fe621"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "009f5e779b1b916376ceabcc13b181089b6fd4d4cc245fe46d2203ca71d27728",
+          "source_csv_sha256": "0d473f0ee950e5a505da17ceb3245b1c7c39e4254a448be69ac92d244e28b993"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_only_108p027m_e8e08291c0_density_draw_social.png",
+      "sha256": "124189b296da7f30ff53e3142d5dfad518c8b2b0f652704c20b0230d7cb21f61",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "c5c14ba24c59a3e88313f94b58bfefcbfd11e68023064a316115cbb4c0660e3b",
+          "source_csv_sha256": "ed6ca446f4376dd9cf8d4c7cffc8057e6ae92c29e2e5784939ea35b29a9fe621"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "009f5e779b1b916376ceabcc13b181089b6fd4d4cc245fe46d2203ca71d27728",
+          "source_csv_sha256": "0d473f0ee950e5a505da17ceb3245b1c7c39e4254a448be69ac92d244e28b993"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_only_108p027m_e8e08291c0_density_fade_social.png",
+      "sha256": "72ebdfd369dd4bd4f9bfdc341253b707083d090ff6aea9f1eefb80bea7cb5400",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "c5c14ba24c59a3e88313f94b58bfefcbfd11e68023064a316115cbb4c0660e3b",
+          "source_csv_sha256": "ed6ca446f4376dd9cf8d4c7cffc8057e6ae92c29e2e5784939ea35b29a9fe621"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "009f5e779b1b916376ceabcc13b181089b6fd4d4cc245fe46d2203ca71d27728",
+          "source_csv_sha256": "0d473f0ee950e5a505da17ceb3245b1c7c39e4254a448be69ac92d244e28b993"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_only_108p027m_e8e08291c0_density.png",
+      "sha256": "c6f6c4952cf3f25657597e5bfb68cf53d7ae7026d03cce02080eb8f0db7efbe3",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "c5c14ba24c59a3e88313f94b58bfefcbfd11e68023064a316115cbb4c0660e3b",
+          "source_csv_sha256": "ed6ca446f4376dd9cf8d4c7cffc8057e6ae92c29e2e5784939ea35b29a9fe621"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "009f5e779b1b916376ceabcc13b181089b6fd4d4cc245fe46d2203ca71d27728",
+          "source_csv_sha256": "0d473f0ee950e5a505da17ceb3245b1c7c39e4254a448be69ac92d244e28b993"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_only_108p027m_e8e08291c0_overhead.png",
+      "sha256": "9aca679fddf6cc607ac51800827edc5ada6e4dea516d46d2a75291c3d50a5a3c",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "c5c14ba24c59a3e88313f94b58bfefcbfd11e68023064a316115cbb4c0660e3b",
+          "source_csv_sha256": "ed6ca446f4376dd9cf8d4c7cffc8057e6ae92c29e2e5784939ea35b29a9fe621"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "009f5e779b1b916376ceabcc13b181089b6fd4d4cc245fe46d2203ca71d27728",
+          "source_csv_sha256": "0d473f0ee950e5a505da17ceb3245b1c7c39e4254a448be69ac92d244e28b993"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_only_108p027m_e8e08291c0_overhead_social.png",
+      "sha256": "302322e31c8335f4e14b9fcc797a915ad98e1be0d195eefb84cfd14c0ee6aec0",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "c5c14ba24c59a3e88313f94b58bfefcbfd11e68023064a316115cbb4c0660e3b",
+          "source_csv_sha256": "ed6ca446f4376dd9cf8d4c7cffc8057e6ae92c29e2e5784939ea35b29a9fe621"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "009f5e779b1b916376ceabcc13b181089b6fd4d4cc245fe46d2203ca71d27728",
+          "source_csv_sha256": "0d473f0ee950e5a505da17ceb3245b1c7c39e4254a448be69ac92d244e28b993"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_path_108p027m_ee963d692b_density_straight_social.png",
+      "sha256": "bf5b2d233b376106227c4052f3bdace74857c353a910cc4c4096e971c200dbb9",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d85c3b077b0884842f8e81eaf3cb85fcb9748e4a2d9baeb7b5a1becf21fdac01",
+          "source_csv_sha256": "be476443f3d2694bfda87c2c2c5a40a711bdf9797b47425ccf89f301871cf072"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "25acdc3fba1b1ce51511612f22c606585f481b9384507f5885ff6dd6c2e01fdf",
+          "source_csv_sha256": "f19b494254659759e94b0618c4987b7f0f90f2073242ed8d2fcfda8d3125d8db"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_path_108p027m_ee963d692b_density_draw_social.png",
+      "sha256": "ea79d9707584a4c1c0372c7bdf07b865ec2c0400f120af96af45da6687741595",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d85c3b077b0884842f8e81eaf3cb85fcb9748e4a2d9baeb7b5a1becf21fdac01",
+          "source_csv_sha256": "be476443f3d2694bfda87c2c2c5a40a711bdf9797b47425ccf89f301871cf072"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "25acdc3fba1b1ce51511612f22c606585f481b9384507f5885ff6dd6c2e01fdf",
+          "source_csv_sha256": "f19b494254659759e94b0618c4987b7f0f90f2073242ed8d2fcfda8d3125d8db"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_path_108p027m_ee963d692b_density_fade_social.png",
+      "sha256": "4f3122259d028984b459bdc8f42b8ad044b58a89813a92cbdb382227c088561a",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d85c3b077b0884842f8e81eaf3cb85fcb9748e4a2d9baeb7b5a1becf21fdac01",
+          "source_csv_sha256": "be476443f3d2694bfda87c2c2c5a40a711bdf9797b47425ccf89f301871cf072"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "25acdc3fba1b1ce51511612f22c606585f481b9384507f5885ff6dd6c2e01fdf",
+          "source_csv_sha256": "f19b494254659759e94b0618c4987b7f0f90f2073242ed8d2fcfda8d3125d8db"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_path_108p027m_ee963d692b_density.png",
+      "sha256": "04ef93a3667ea56100ff6a6346fa3c0eb486f248a72d923b1ba04c58c2f24921",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d85c3b077b0884842f8e81eaf3cb85fcb9748e4a2d9baeb7b5a1becf21fdac01",
+          "source_csv_sha256": "be476443f3d2694bfda87c2c2c5a40a711bdf9797b47425ccf89f301871cf072"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "25acdc3fba1b1ce51511612f22c606585f481b9384507f5885ff6dd6c2e01fdf",
+          "source_csv_sha256": "f19b494254659759e94b0618c4987b7f0f90f2073242ed8d2fcfda8d3125d8db"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_path_108p027m_ee963d692b_overhead.png",
+      "sha256": "b45293e83ab7e092c7588d95c209d9b2fcfb1082ae5bd2e57bfb5142ba07bf22",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d85c3b077b0884842f8e81eaf3cb85fcb9748e4a2d9baeb7b5a1becf21fdac01",
+          "source_csv_sha256": "be476443f3d2694bfda87c2c2c5a40a711bdf9797b47425ccf89f301871cf072"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "25acdc3fba1b1ce51511612f22c606585f481b9384507f5885ff6dd6c2e01fdf",
+          "source_csv_sha256": "f19b494254659759e94b0618c4987b7f0f90f2073242ed8d2fcfda8d3125d8db"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_path_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_path_108p027m_ee963d692b_overhead_social.png",
+      "sha256": "7cd23ac7878c5f884378030bff27f2dc0f562a08a9c6ec2f527a5871551c99a2",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d85c3b077b0884842f8e81eaf3cb85fcb9748e4a2d9baeb7b5a1becf21fdac01",
+          "source_csv_sha256": "be476443f3d2694bfda87c2c2c5a40a711bdf9797b47425ccf89f301871cf072"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "25acdc3fba1b1ce51511612f22c606585f481b9384507f5885ff6dd6c2e01fdf",
+          "source_csv_sha256": "f19b494254659759e94b0618c4987b7f0f90f2073242ed8d2fcfda8d3125d8db"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed1_108p027m_aa6dbf0ae4_density_straight_social.png",
+      "sha256": "8d0467be5b599bf6b11d1666f82c9d93247cb52934524872af936ad535d2a441",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8da809a1311c2d36ce2255433577a54d0cd60803441755b74a01f7af9bb97ad6",
+          "source_csv_sha256": "6794df1eec8849df7c080fbed38358b41dc10f51f7b968ea692df056ac829777"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "32728f0bf65bec10fb61814f5ec7ec2f0b2c755427246d1cf698ec20bb06fc74",
+          "source_csv_sha256": "b5b0fb3f294a18c836258f281963de58c1f57aec19d4131d31f4514641bfbcf4"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed1_108p027m_aa6dbf0ae4_density_draw_social.png",
+      "sha256": "62ea4dda3b6c97efc0ab4740853ffcc283cb9ebd49c75af20e7d900fab9fe0da",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8da809a1311c2d36ce2255433577a54d0cd60803441755b74a01f7af9bb97ad6",
+          "source_csv_sha256": "6794df1eec8849df7c080fbed38358b41dc10f51f7b968ea692df056ac829777"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "32728f0bf65bec10fb61814f5ec7ec2f0b2c755427246d1cf698ec20bb06fc74",
+          "source_csv_sha256": "b5b0fb3f294a18c836258f281963de58c1f57aec19d4131d31f4514641bfbcf4"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed1_108p027m_aa6dbf0ae4_density_fade_social.png",
+      "sha256": "4489bcb438999b110d6a4eec29b2138654a59842917668fae4c362eac938233d",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8da809a1311c2d36ce2255433577a54d0cd60803441755b74a01f7af9bb97ad6",
+          "source_csv_sha256": "6794df1eec8849df7c080fbed38358b41dc10f51f7b968ea692df056ac829777"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "32728f0bf65bec10fb61814f5ec7ec2f0b2c755427246d1cf698ec20bb06fc74",
+          "source_csv_sha256": "b5b0fb3f294a18c836258f281963de58c1f57aec19d4131d31f4514641bfbcf4"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed1_108p027m_aa6dbf0ae4_density.png",
+      "sha256": "a52df2ee7eb47d4ec303f0da18ade662756930c488be82d44aa387367b6d5718",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8da809a1311c2d36ce2255433577a54d0cd60803441755b74a01f7af9bb97ad6",
+          "source_csv_sha256": "6794df1eec8849df7c080fbed38358b41dc10f51f7b968ea692df056ac829777"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "32728f0bf65bec10fb61814f5ec7ec2f0b2c755427246d1cf698ec20bb06fc74",
+          "source_csv_sha256": "b5b0fb3f294a18c836258f281963de58c1f57aec19d4131d31f4514641bfbcf4"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed1_108p027m_aa6dbf0ae4_overhead.png",
+      "sha256": "b164c21a8327d87f4790eb8990ab7e6b628b8e99130b54cdaef8ecf62d8c904e",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8da809a1311c2d36ce2255433577a54d0cd60803441755b74a01f7af9bb97ad6",
+          "source_csv_sha256": "6794df1eec8849df7c080fbed38358b41dc10f51f7b968ea692df056ac829777"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "32728f0bf65bec10fb61814f5ec7ec2f0b2c755427246d1cf698ec20bb06fc74",
+          "source_csv_sha256": "b5b0fb3f294a18c836258f281963de58c1f57aec19d4131d31f4514641bfbcf4"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed1_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed1_108p027m_aa6dbf0ae4_overhead_social.png",
+      "sha256": "02e4cb4ee3e43f11f56a7b43a8839860cb53fb0070e1988d47cf257843743bfa",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8da809a1311c2d36ce2255433577a54d0cd60803441755b74a01f7af9bb97ad6",
+          "source_csv_sha256": "6794df1eec8849df7c080fbed38358b41dc10f51f7b968ea692df056ac829777"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "32728f0bf65bec10fb61814f5ec7ec2f0b2c755427246d1cf698ec20bb06fc74",
+          "source_csv_sha256": "b5b0fb3f294a18c836258f281963de58c1f57aec19d4131d31f4514641bfbcf4"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed2_108p027m_6dfc35bda7_density_straight_social.png",
+      "sha256": "447ff7ef847e48e4d991efb88acdcb0e966bb45934505e6c4adb76f4cc572b67",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "df750564a221e1177d6864187ede5eeee87223029a4a03dde39a1e9899dd0461",
+          "source_csv_sha256": "46347bfa92c289ce113d2e58a7d1156274786a2fc6722eedba88dba95191600c"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "2a65b09aeab92ddddee48cc3c132a50504146b73d16675e92ec06f39d72a0952",
+          "source_csv_sha256": "ae32b5af73d9549d84a4bacb076d404dfbea04c1cd3c9d5016cddbb0a1231fb0"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed2_108p027m_6dfc35bda7_density_draw_social.png",
+      "sha256": "46ecc9a5e3ee2c427c42b16440afe9d5abadb77b9dd733633ab707908f5f8a9f",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "df750564a221e1177d6864187ede5eeee87223029a4a03dde39a1e9899dd0461",
+          "source_csv_sha256": "46347bfa92c289ce113d2e58a7d1156274786a2fc6722eedba88dba95191600c"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "2a65b09aeab92ddddee48cc3c132a50504146b73d16675e92ec06f39d72a0952",
+          "source_csv_sha256": "ae32b5af73d9549d84a4bacb076d404dfbea04c1cd3c9d5016cddbb0a1231fb0"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed2_108p027m_6dfc35bda7_density_fade_social.png",
+      "sha256": "5662c7e40572dbae9f13e114d9b3c9ccdcd305462c1fbebf8a5706019c2ddc7e",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "df750564a221e1177d6864187ede5eeee87223029a4a03dde39a1e9899dd0461",
+          "source_csv_sha256": "46347bfa92c289ce113d2e58a7d1156274786a2fc6722eedba88dba95191600c"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "2a65b09aeab92ddddee48cc3c132a50504146b73d16675e92ec06f39d72a0952",
+          "source_csv_sha256": "ae32b5af73d9549d84a4bacb076d404dfbea04c1cd3c9d5016cddbb0a1231fb0"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed2_108p027m_6dfc35bda7_density.png",
+      "sha256": "c3aef27e59bc62128b499af63d2e1d8343f279cab57e7e5d73216757f35ed6bf",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "df750564a221e1177d6864187ede5eeee87223029a4a03dde39a1e9899dd0461",
+          "source_csv_sha256": "46347bfa92c289ce113d2e58a7d1156274786a2fc6722eedba88dba95191600c"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "2a65b09aeab92ddddee48cc3c132a50504146b73d16675e92ec06f39d72a0952",
+          "source_csv_sha256": "ae32b5af73d9549d84a4bacb076d404dfbea04c1cd3c9d5016cddbb0a1231fb0"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed2_108p027m_6dfc35bda7_overhead.png",
+      "sha256": "c72bf227826b63a0c8ac112ffaa8fe99b20385ddd8b174e6bd385e9075313320",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "df750564a221e1177d6864187ede5eeee87223029a4a03dde39a1e9899dd0461",
+          "source_csv_sha256": "46347bfa92c289ce113d2e58a7d1156274786a2fc6722eedba88dba95191600c"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "2a65b09aeab92ddddee48cc3c132a50504146b73d16675e92ec06f39d72a0952",
+          "source_csv_sha256": "ae32b5af73d9549d84a4bacb076d404dfbea04c1cd3c9d5016cddbb0a1231fb0"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_speed2_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_speed2_108p027m_6dfc35bda7_overhead_social.png",
+      "sha256": "ed0e79ec9fa6d7c710bf40491b255e7d9871b2b7fa7cc42d1405edf461be9a78",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "df750564a221e1177d6864187ede5eeee87223029a4a03dde39a1e9899dd0461",
+          "source_csv_sha256": "46347bfa92c289ce113d2e58a7d1156274786a2fc6722eedba88dba95191600c"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "2a65b09aeab92ddddee48cc3c132a50504146b73d16675e92ec06f39d72a0952",
+          "source_csv_sha256": "ae32b5af73d9549d84a4bacb076d404dfbea04c1cd3c9d5016cddbb0a1231fb0"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_strike_108p027m_055932453e_density_straight_social.png",
+      "sha256": "27c0df04c71b58d7a67a16f14e1eef69ac06d399607672ad77bee8dd8b56c885",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "5a561b4f3b2569bde4f290bc0e66e5998364c6c4d2d8b4dc0b174658e4c705ea",
+          "source_csv_sha256": "4d99f9ffee0c84442536dcaab61afa26dbabfe6eb0714be8aa5ff89af9ade26f"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "930ba07cf40ac9ea804c75ee14b53db52e73f08177b0ea04209762f68d4de092",
+          "source_csv_sha256": "41e938a02a75ae7969ca044e7eed715307b28eab92174b3aa35f599351eaf887"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9974,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_strike_108p027m_055932453e_density_draw_social.png",
+      "sha256": "e466acbb1a0b9f657f86c333f5ada2e91db08802f8df9e0d8539f71dc6abf04e",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "5a561b4f3b2569bde4f290bc0e66e5998364c6c4d2d8b4dc0b174658e4c705ea",
+          "source_csv_sha256": "4d99f9ffee0c84442536dcaab61afa26dbabfe6eb0714be8aa5ff89af9ade26f"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "930ba07cf40ac9ea804c75ee14b53db52e73f08177b0ea04209762f68d4de092",
+          "source_csv_sha256": "41e938a02a75ae7969ca044e7eed715307b28eab92174b3aa35f599351eaf887"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9974,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_strike_108p027m_055932453e_density_fade_social.png",
+      "sha256": "b3611e4ca63249b1e65e93d8fe1b8aa0a46352ac6424671c128963c417adcff9",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "5a561b4f3b2569bde4f290bc0e66e5998364c6c4d2d8b4dc0b174658e4c705ea",
+          "source_csv_sha256": "4d99f9ffee0c84442536dcaab61afa26dbabfe6eb0714be8aa5ff89af9ade26f"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "930ba07cf40ac9ea804c75ee14b53db52e73f08177b0ea04209762f68d4de092",
+          "source_csv_sha256": "41e938a02a75ae7969ca044e7eed715307b28eab92174b3aa35f599351eaf887"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9974,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_strike_108p027m_055932453e_density.png",
+      "sha256": "8cb122da3763dead22f93788c7a7500b3c2987db4fac1ef3a05432e2b50ca887",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "5a561b4f3b2569bde4f290bc0e66e5998364c6c4d2d8b4dc0b174658e4c705ea",
+          "source_csv_sha256": "4d99f9ffee0c84442536dcaab61afa26dbabfe6eb0714be8aa5ff89af9ade26f"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "930ba07cf40ac9ea804c75ee14b53db52e73f08177b0ea04209762f68d4de092",
+          "source_csv_sha256": "41e938a02a75ae7969ca044e7eed715307b28eab92174b3aa35f599351eaf887"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9974,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_strike_108p027m_055932453e_overhead.png",
+      "sha256": "38082dabf0932f0b5db16b4dcbd0e14b5c9bfc723c982cb1f0b9df604390a168",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "5a561b4f3b2569bde4f290bc0e66e5998364c6c4d2d8b4dc0b174658e4c705ea",
+          "source_csv_sha256": "4d99f9ffee0c84442536dcaab61afa26dbabfe6eb0714be8aa5ff89af9ade26f"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "930ba07cf40ac9ea804c75ee14b53db52e73f08177b0ea04209762f68d4de092",
+          "source_csv_sha256": "41e938a02a75ae7969ca044e7eed715307b28eab92174b3aa35f599351eaf887"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9974,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation1_shaft_strike_vs_original_primary_1_driver_lean5_curve2_rotation1_shaft_strike_108p027m_055932453e_overhead_social.png",
+      "sha256": "4893b41a7e6c8dfb4b5f081184f0d35152363df430b90f62b72586aed150d980",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "5a561b4f3b2569bde4f290bc0e66e5998364c6c4d2d8b4dc0b174658e4c705ea",
+          "source_csv_sha256": "4d99f9ffee0c84442536dcaab61afa26dbabfe6eb0714be8aa5ff89af9ade26f"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "930ba07cf40ac9ea804c75ee14b53db52e73f08177b0ea04209762f68d4de092",
+          "source_csv_sha256": "41e938a02a75ae7969ca044e7eed715307b28eab92174b3aa35f599351eaf887"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9974,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined1_vs_original_primary_1_driver_lean5_curve2_rotation2_combined1_108p027m_0b6d16094a_density_straight_social.png",
+      "sha256": "2b3312abe5a2b3e314f806a2917e8a37cc9d3b27915aa7b3125acaf7065a5d67",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "92b9363929ba279f8b9bbf9b3bcf49c617c29dfc9ba451f5d0c00ada85770df9",
+          "source_csv_sha256": "a9fe56b9985b8590cad363cfb242f4060c5e2deccc1283307a385e8322e60847"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d732b174926197c34524d3458bb0b5950e4390b98a21246e1ee2661f29279d48",
+          "source_csv_sha256": "6ff64b671a62209d1033b2492dab58c143ec6adf63c5d1fc67148cf9979b13f9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined1_vs_original_primary_1_driver_lean5_curve2_rotation2_combined1_108p027m_0b6d16094a_density_draw_social.png",
+      "sha256": "260f0fb49478aa48f741c129972eace40a77e451776ed8f7395a8b8c20e6225e",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "92b9363929ba279f8b9bbf9b3bcf49c617c29dfc9ba451f5d0c00ada85770df9",
+          "source_csv_sha256": "a9fe56b9985b8590cad363cfb242f4060c5e2deccc1283307a385e8322e60847"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d732b174926197c34524d3458bb0b5950e4390b98a21246e1ee2661f29279d48",
+          "source_csv_sha256": "6ff64b671a62209d1033b2492dab58c143ec6adf63c5d1fc67148cf9979b13f9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined1_vs_original_primary_1_driver_lean5_curve2_rotation2_combined1_108p027m_0b6d16094a_density_fade_social.png",
+      "sha256": "d2a98555ee2086befb67780e5576e5a9b0e2d7442e1f885fa86c74436f179000",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "92b9363929ba279f8b9bbf9b3bcf49c617c29dfc9ba451f5d0c00ada85770df9",
+          "source_csv_sha256": "a9fe56b9985b8590cad363cfb242f4060c5e2deccc1283307a385e8322e60847"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d732b174926197c34524d3458bb0b5950e4390b98a21246e1ee2661f29279d48",
+          "source_csv_sha256": "6ff64b671a62209d1033b2492dab58c143ec6adf63c5d1fc67148cf9979b13f9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined1_vs_original_primary_1_driver_lean5_curve2_rotation2_combined1_108p027m_0b6d16094a_density.png",
+      "sha256": "0329a8f55d4a7c989f0c2667914a27da58f784ab89a4820e842c07f22d08083a",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "92b9363929ba279f8b9bbf9b3bcf49c617c29dfc9ba451f5d0c00ada85770df9",
+          "source_csv_sha256": "a9fe56b9985b8590cad363cfb242f4060c5e2deccc1283307a385e8322e60847"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d732b174926197c34524d3458bb0b5950e4390b98a21246e1ee2661f29279d48",
+          "source_csv_sha256": "6ff64b671a62209d1033b2492dab58c143ec6adf63c5d1fc67148cf9979b13f9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined1_vs_original_primary_1_driver_lean5_curve2_rotation2_combined1_108p027m_0b6d16094a_overhead.png",
+      "sha256": "887845723627673c0068800bdb05e4c0ea815d58a8283f66eead4fae46305ad0",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "92b9363929ba279f8b9bbf9b3bcf49c617c29dfc9ba451f5d0c00ada85770df9",
+          "source_csv_sha256": "a9fe56b9985b8590cad363cfb242f4060c5e2deccc1283307a385e8322e60847"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d732b174926197c34524d3458bb0b5950e4390b98a21246e1ee2661f29279d48",
+          "source_csv_sha256": "6ff64b671a62209d1033b2492dab58c143ec6adf63c5d1fc67148cf9979b13f9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined1_vs_original_primary_1_driver_lean5_curve2_rotation2_combined1_108p027m_0b6d16094a_overhead_social.png",
+      "sha256": "7ff93edbf48f00ddce953b70e72be6f9571e4435b473b527a60f6949ecf3ebf4",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "92b9363929ba279f8b9bbf9b3bcf49c617c29dfc9ba451f5d0c00ada85770df9",
+          "source_csv_sha256": "a9fe56b9985b8590cad363cfb242f4060c5e2deccc1283307a385e8322e60847"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d732b174926197c34524d3458bb0b5950e4390b98a21246e1ee2661f29279d48",
+          "source_csv_sha256": "6ff64b671a62209d1033b2492dab58c143ec6adf63c5d1fc67148cf9979b13f9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined2_vs_original_primary_1_driver_lean5_curve2_rotation2_combined2_108p027m_bb37517723_density_straight_social.png",
+      "sha256": "08519f79692e1142cae2f1a1ffc3d89d01ba65c87449df6f5e7291b0e2fe568a",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42",
+          "source_csv_sha256": "ba3b9fc59fb114c6f5d3a23bd16a23e3b85ba4e94ed8e69b606b2654ba9b4feb"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+          "source_csv_sha256": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined2_vs_original_primary_1_driver_lean5_curve2_rotation2_combined2_108p027m_bb37517723_density_draw_social.png",
+      "sha256": "8f10c0e7965b1fb031419b1d329e98ae4feb523bd71669fb087829cf3bdcab2f",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42",
+          "source_csv_sha256": "ba3b9fc59fb114c6f5d3a23bd16a23e3b85ba4e94ed8e69b606b2654ba9b4feb"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+          "source_csv_sha256": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined2_vs_original_primary_1_driver_lean5_curve2_rotation2_combined2_108p027m_bb37517723_density_fade_social.png",
+      "sha256": "97eb534a4051e2481577e0eee9ad492b81faccf6c372c2ca6f1015ba84283135",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42",
+          "source_csv_sha256": "ba3b9fc59fb114c6f5d3a23bd16a23e3b85ba4e94ed8e69b606b2654ba9b4feb"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+          "source_csv_sha256": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined2_vs_original_primary_1_driver_lean5_curve2_rotation2_combined2_108p027m_bb37517723_density.png",
+      "sha256": "ad7d171f203076b1b8bca144b8990dcc4d9c41c133c54bff7770da3872ceb11d",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42",
+          "source_csv_sha256": "ba3b9fc59fb114c6f5d3a23bd16a23e3b85ba4e94ed8e69b606b2654ba9b4feb"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+          "source_csv_sha256": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined2_vs_original_primary_1_driver_lean5_curve2_rotation2_combined2_108p027m_bb37517723_overhead.png",
+      "sha256": "a89fed00b4cb33b29243a9576ad9409db59be8bce9cd24437d130a65083dee24",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42",
+          "source_csv_sha256": "ba3b9fc59fb114c6f5d3a23bd16a23e3b85ba4e94ed8e69b606b2654ba9b4feb"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+          "source_csv_sha256": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_combined2_vs_original_primary_1_driver_lean5_curve2_rotation2_combined2_108p027m_bb37517723_overhead_social.png",
+      "sha256": "6a7e701f334627739404adf07df7993cc98f59cabdb7ba85016eab2b46285772",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "89bffeba1e047ab86c07ec0cdb26d269bb8336d52f56397a91a3c7a786eedc42",
+          "source_csv_sha256": "ba3b9fc59fb114c6f5d3a23bd16a23e3b85ba4e94ed8e69b606b2654ba9b4feb"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "24c8f5cbca55bb2312a14b8d88160a59b2a55f69ac8b74425e16296a129e9746",
+          "source_csv_sha256": "709c88c2f76c051dd32d9bdb909da947b42dfcfa739fbb214f92ea61d9c28776"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9940,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_negative__33cc092803_density_straight_social.png",
+      "sha256": "5ef8dc443b2dae6df1d55d8282a178ec1bc760d628c4e3db87e4cac089d0650c",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "98b3da8c37e259fb9c26e05bb3b7104c90e1e426056b41edea0a80dc343cb687",
+          "source_csv_sha256": "e7b7a96b1a0d9983033c3282617053d361c25fb9e64ea79c48927336c26b3992"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "838c0d09118e1dbb1ac0d152b12b7346f205c6c21f429eb8507082dc9315c82f",
+          "source_csv_sha256": "a31e7f790de5811b7cdd0bc114e5e70d927dbebceb031135c258146450dc9507"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9933,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_negative__33cc092803_density_draw_social.png",
+      "sha256": "75ca38be8a8bef61bcfb4a522bae053b3240fe023518ba4962bb954c49ee2072",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "98b3da8c37e259fb9c26e05bb3b7104c90e1e426056b41edea0a80dc343cb687",
+          "source_csv_sha256": "e7b7a96b1a0d9983033c3282617053d361c25fb9e64ea79c48927336c26b3992"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "838c0d09118e1dbb1ac0d152b12b7346f205c6c21f429eb8507082dc9315c82f",
+          "source_csv_sha256": "a31e7f790de5811b7cdd0bc114e5e70d927dbebceb031135c258146450dc9507"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9933,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_negative__33cc092803_density_fade_social.png",
+      "sha256": "edf48d0a04e78e4736d59053d8de1ec592f69b7786fd3916fdcd9f7d4f6e01b6",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "98b3da8c37e259fb9c26e05bb3b7104c90e1e426056b41edea0a80dc343cb687",
+          "source_csv_sha256": "e7b7a96b1a0d9983033c3282617053d361c25fb9e64ea79c48927336c26b3992"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "838c0d09118e1dbb1ac0d152b12b7346f205c6c21f429eb8507082dc9315c82f",
+          "source_csv_sha256": "a31e7f790de5811b7cdd0bc114e5e70d927dbebceb031135c258146450dc9507"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9933,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_negative__33cc092803_density.png",
+      "sha256": "2bc4a20d847c478d1faa87490333f8445ca90115413518f6faf7ae872f40190a",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "98b3da8c37e259fb9c26e05bb3b7104c90e1e426056b41edea0a80dc343cb687",
+          "source_csv_sha256": "e7b7a96b1a0d9983033c3282617053d361c25fb9e64ea79c48927336c26b3992"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "838c0d09118e1dbb1ac0d152b12b7346f205c6c21f429eb8507082dc9315c82f",
+          "source_csv_sha256": "a31e7f790de5811b7cdd0bc114e5e70d927dbebceb031135c258146450dc9507"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9933,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_negative__33cc092803_overhead.png",
+      "sha256": "eae6d8c89f812d52f9813bd082422e35a83d98b69da6d357259e51effd0d6351",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "98b3da8c37e259fb9c26e05bb3b7104c90e1e426056b41edea0a80dc343cb687",
+          "source_csv_sha256": "e7b7a96b1a0d9983033c3282617053d361c25fb9e64ea79c48927336c26b3992"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "838c0d09118e1dbb1ac0d152b12b7346f205c6c21f429eb8507082dc9315c82f",
+          "source_csv_sha256": "a31e7f790de5811b7cdd0bc114e5e70d927dbebceb031135c258146450dc9507"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9933,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_negative__33cc092803_overhead_social.png",
+      "sha256": "36a42593ac665a20abf0251e4107d67fbb1d0292b08dcf141414240a396e41c3",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "98b3da8c37e259fb9c26e05bb3b7104c90e1e426056b41edea0a80dc343cb687",
+          "source_csv_sha256": "e7b7a96b1a0d9983033c3282617053d361c25fb9e64ea79c48927336c26b3992"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "838c0d09118e1dbb1ac0d152b12b7346f205c6c21f429eb8507082dc9315c82f",
+          "source_csv_sha256": "a31e7f790de5811b7cdd0bc114e5e70d927dbebceb031135c258146450dc9507"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9933,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_positive__13f873f279_density_straight_social.png",
+      "sha256": "9096d988a625c3193f6125d13cb79cc222ecb4d25ad3c246015fca9063610a64",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "dda2b28d44f88d70eadb915c51500170a1b2e66527d55e54f66dee1af8be1ee0",
+          "source_csv_sha256": "b9c3eee46221ebf987ddfda05eb92c6ea5546bf9f16940fafeea89e9da3c93aa"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "1942b7de131822d02958ef0441b11a5abd7700c1a7a718b08db3ab943c1e5228",
+          "source_csv_sha256": "ee0beb1d0ef6ac0d96d8544766123d8a51539a0a12625e3fb45873835629c6bf"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9943,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_positive__13f873f279_density_draw_social.png",
+      "sha256": "9931d1f134d86ea706da20ae37f9fca0650b93141450e4ee965fc48d50225e70",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "dda2b28d44f88d70eadb915c51500170a1b2e66527d55e54f66dee1af8be1ee0",
+          "source_csv_sha256": "b9c3eee46221ebf987ddfda05eb92c6ea5546bf9f16940fafeea89e9da3c93aa"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "1942b7de131822d02958ef0441b11a5abd7700c1a7a718b08db3ab943c1e5228",
+          "source_csv_sha256": "ee0beb1d0ef6ac0d96d8544766123d8a51539a0a12625e3fb45873835629c6bf"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9943,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_positive__13f873f279_density_fade_social.png",
+      "sha256": "22cac972b44309644750470fe6ccee3dc4bf9839ad13966034480a94cfa8e872",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "dda2b28d44f88d70eadb915c51500170a1b2e66527d55e54f66dee1af8be1ee0",
+          "source_csv_sha256": "b9c3eee46221ebf987ddfda05eb92c6ea5546bf9f16940fafeea89e9da3c93aa"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "1942b7de131822d02958ef0441b11a5abd7700c1a7a718b08db3ab943c1e5228",
+          "source_csv_sha256": "ee0beb1d0ef6ac0d96d8544766123d8a51539a0a12625e3fb45873835629c6bf"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9943,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_positive__13f873f279_density.png",
+      "sha256": "9c9c64a777c5af7604be2e884e42eda6b849d2ab61a8f386cb7db770f83ae970",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "dda2b28d44f88d70eadb915c51500170a1b2e66527d55e54f66dee1af8be1ee0",
+          "source_csv_sha256": "b9c3eee46221ebf987ddfda05eb92c6ea5546bf9f16940fafeea89e9da3c93aa"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "1942b7de131822d02958ef0441b11a5abd7700c1a7a718b08db3ab943c1e5228",
+          "source_csv_sha256": "ee0beb1d0ef6ac0d96d8544766123d8a51539a0a12625e3fb45873835629c6bf"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9943,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_positive__13f873f279_overhead.png",
+      "sha256": "aa4bb153e693eebb6b5edb07779aa787b568d8cbcdd3196f65bed4b01931d714",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "dda2b28d44f88d70eadb915c51500170a1b2e66527d55e54f66dee1af8be1ee0",
+          "source_csv_sha256": "b9c3eee46221ebf987ddfda05eb92c6ea5546bf9f16940fafeea89e9da3c93aa"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "1942b7de131822d02958ef0441b11a5abd7700c1a7a718b08db3ab943c1e5228",
+          "source_csv_sha256": "ee0beb1d0ef6ac0d96d8544766123d8a51539a0a12625e3fb45873835629c6bf"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9943,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean5_curve2_rotation2_cov_facepath_positive__13f873f279_overhead_social.png",
+      "sha256": "5927c34e1956a979b74bf933f14c00cee57a35aac68fc1a77d2beaf7273ecd9e",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "dda2b28d44f88d70eadb915c51500170a1b2e66527d55e54f66dee1af8be1ee0",
+          "source_csv_sha256": "b9c3eee46221ebf987ddfda05eb92c6ea5546bf9f16940fafeea89e9da3c93aa"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "1942b7de131822d02958ef0441b11a5abd7700c1a7a718b08db3ab943c1e5228",
+          "source_csv_sha256": "ee0beb1d0ef6ac0d96d8544766123d8a51539a0a12625e3fb45873835629c6bf"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 9943,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation2_shaft_only_108p027m_b6ed644ae6_density_straight_social.png",
+      "sha256": "e8a9e4c97354d2fa27becdc72d8357f1a89539885d38701e612f232480db25dc",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6fa415959704e217db28a5ef8aa1ff748b1edcd68bc0a50345cb1ab45f0d97a3",
+          "source_csv_sha256": "c9dd56786c49ffcfe025f300eb4958e8ab5210263a9f12aebd2884563a8d02a4"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "99082283eb1e8d911f3b9153afcb88ffca44a063263840f039a2b114d98d8e1e",
+          "source_csv_sha256": "f27b377eacc2b6a1c2ce044aa42fc4b8f5117a0687635b9625d957d235744bb9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation2_shaft_only_108p027m_b6ed644ae6_density_draw_social.png",
+      "sha256": "755113a9e5e633f3bfbf5f1b71c99ee928e4756a7768f41c0faf955dc45c9175",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6fa415959704e217db28a5ef8aa1ff748b1edcd68bc0a50345cb1ab45f0d97a3",
+          "source_csv_sha256": "c9dd56786c49ffcfe025f300eb4958e8ab5210263a9f12aebd2884563a8d02a4"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "99082283eb1e8d911f3b9153afcb88ffca44a063263840f039a2b114d98d8e1e",
+          "source_csv_sha256": "f27b377eacc2b6a1c2ce044aa42fc4b8f5117a0687635b9625d957d235744bb9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation2_shaft_only_108p027m_b6ed644ae6_density_fade_social.png",
+      "sha256": "96503e839c8c147629eac63b17934e08983500ff885368719dfd910004c9781a",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6fa415959704e217db28a5ef8aa1ff748b1edcd68bc0a50345cb1ab45f0d97a3",
+          "source_csv_sha256": "c9dd56786c49ffcfe025f300eb4958e8ab5210263a9f12aebd2884563a8d02a4"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "99082283eb1e8d911f3b9153afcb88ffca44a063263840f039a2b114d98d8e1e",
+          "source_csv_sha256": "f27b377eacc2b6a1c2ce044aa42fc4b8f5117a0687635b9625d957d235744bb9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation2_shaft_only_108p027m_b6ed644ae6_density.png",
+      "sha256": "1855499e10a9f58eb7290258cf656ad7dbbe9a0be7a4c695f0c4d61f4edd5a50",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6fa415959704e217db28a5ef8aa1ff748b1edcd68bc0a50345cb1ab45f0d97a3",
+          "source_csv_sha256": "c9dd56786c49ffcfe025f300eb4958e8ab5210263a9f12aebd2884563a8d02a4"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "99082283eb1e8d911f3b9153afcb88ffca44a063263840f039a2b114d98d8e1e",
+          "source_csv_sha256": "f27b377eacc2b6a1c2ce044aa42fc4b8f5117a0687635b9625d957d235744bb9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation2_shaft_only_108p027m_b6ed644ae6_overhead.png",
+      "sha256": "41c84f8c13e79fcb458b99873bbd84a161f34e451c47025428d3aad296df2a90",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6fa415959704e217db28a5ef8aa1ff748b1edcd68bc0a50345cb1ab45f0d97a3",
+          "source_csv_sha256": "c9dd56786c49ffcfe025f300eb4958e8ab5210263a9f12aebd2884563a8d02a4"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "99082283eb1e8d911f3b9153afcb88ffca44a063263840f039a2b114d98d8e1e",
+          "source_csv_sha256": "f27b377eacc2b6a1c2ce044aa42fc4b8f5117a0687635b9625d957d235744bb9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    },
+    {
+      "path": "figures/comparisons/curve_strength_original_primary_1_driver_lean5_curve1_rotation2_shaft_only_vs_original_primary_1_driver_lean5_curve2_rotation2_shaft_only_108p027m_b6ed644ae6_overhead_social.png",
+      "sha256": "2bf86ab6475de9f3271717f63e04fa905c2daf08071efec0f25bc416bae78a22",
+      "ordered_sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6fa415959704e217db28a5ef8aa1ff748b1edcd68bc0a50345cb1ab45f0d97a3",
+          "source_csv_sha256": "c9dd56786c49ffcfe025f300eb4958e8ab5210263a9f12aebd2884563a8d02a4"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "99082283eb1e8d911f3b9153afcb88ffca44a063263840f039a2b114d98d8e1e",
+          "source_csv_sha256": "f27b377eacc2b6a1c2ce044aa42fc4b8f5117a0687635b9625d957d235744bb9"
+        }
+      ],
+      "target_x_m": 108.02738606179851,
+      "common_supported_n": 10000,
+      "status": "accepted",
+      "method": "actual contact-sheet visual inspection"
+    }
+  ],
+  "prior_review_reuse": false,
+  "findings": [],
+  "observations": [
+    "All 36 contacts (72 PNGs) inspected for indices 48\u201359; indices 48\u201350 before context compaction, 51\u201359 afterward.",
+    "Long covariance captions fit without clipping; labels, shared condition axes, target, density colorbar, and shown/valid counts remain readable.",
+    "Full-size covariance-negative SD2 academic density and social overhead inspected; 6\u00d7 lateral enlargement and saved-path sampling explicitly labeled."
+  ]
+}

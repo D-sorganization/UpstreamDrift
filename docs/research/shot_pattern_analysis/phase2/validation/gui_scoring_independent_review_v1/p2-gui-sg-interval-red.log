@@ -1,0 +1,265 @@
+FFFF.FF.                                                                 [100%]
+=================================== FAILURES ===================================
+_ test_saved_interval_preserves_values_and_nonzero_width[0.004597062764879343-0.004531382987542545-0.004658536119213675] _
+
+estimate = 0.004597062764879343, low = 0.004531382987542545
+high = 0.004658536119213675
+
+    @pytest.mark.parametrize(
+        ("estimate", "low", "high"),
+        [
+            (0.004597062764879343, 0.004531382987542545, 0.004658536119213675),
+            (-0.00392726220708177, -0.003979629136146112, -0.003872946949009742),
+            (-0.003284521591238346, -0.0033180608278863878, -0.003246621472447612),
+            (0.5000015, 0.500001, 0.500002),
+            (0.0000746156, -0.0000710405, 0.000218961),
+        ],
+    )
+    def test_saved_interval_preserves_values_and_nonzero_width(estimate, low, high):
+        try:
+            from src.tools.shot_pattern_analysis.matched_gui import (
+                format_matched_course_scoring,
+            )
+        except (ImportError, OSError) as exc:
+            pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+        text = format_matched_course_scoring(
+            {
+                "status": "available",
+                "paired_n": 10000,
+                "total_n": 10000,
+                "paired_benefit_vs_straight": {
+                    "Draw": {"estimate": estimate, "lower_95": low, "upper_95": high}
+                },
+            }
+        )
+        match = re.search(r"Draw: ([^ ]+) \[([^,]+), ([^\]]+)\] strokes", text)
+        assert match is not None
+        shown = tuple(float(value) for value in match.groups())
+>       assert shown == pytest.approx((estimate, low, high), rel=0.01, abs=0)
+E       assert (0.005, 0.005, 0.005) == approx((0.004...75 ± 4.7e-05))
+E         
+E         comparison failed. Mismatched elements: 3 / 3:
+E         Max absolute difference: 0.00046861701245745537
+E         Max relative difference: 0.09372340249149107
+E         Index | Obtained | Expected                      
+E         0     | 0.005    | 0.004597062764879343 ± 4.6e-05
+E         1     | 0.005    | 0.004531382987542545 ± 4.5e-05
+E         2     | 0.005    | 0.004658536119213675 ± 4.7e-05
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:40: AssertionError
+_ test_saved_interval_preserves_values_and_nonzero_width[-0.00392726220708177--0.003979629136146112--0.003872946949009742] _
+
+estimate = -0.00392726220708177, low = -0.003979629136146112
+high = -0.003872946949009742
+
+    @pytest.mark.parametrize(
+        ("estimate", "low", "high"),
+        [
+            (0.004597062764879343, 0.004531382987542545, 0.004658536119213675),
+            (-0.00392726220708177, -0.003979629136146112, -0.003872946949009742),
+            (-0.003284521591238346, -0.0033180608278863878, -0.003246621472447612),
+            (0.5000015, 0.500001, 0.500002),
+            (0.0000746156, -0.0000710405, 0.000218961),
+        ],
+    )
+    def test_saved_interval_preserves_values_and_nonzero_width(estimate, low, high):
+        try:
+            from src.tools.shot_pattern_analysis.matched_gui import (
+                format_matched_course_scoring,
+            )
+        except (ImportError, OSError) as exc:
+            pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+        text = format_matched_course_scoring(
+            {
+                "status": "available",
+                "paired_n": 10000,
+                "total_n": 10000,
+                "paired_benefit_vs_straight": {
+                    "Draw": {"estimate": estimate, "lower_95": low, "upper_95": high}
+                },
+            }
+        )
+        match = re.search(r"Draw: ([^ ]+) \[([^,]+), ([^\]]+)\] strokes", text)
+        assert match is not None
+        shown = tuple(float(value) for value in match.groups())
+>       assert shown == pytest.approx((estimate, low, high), rel=0.01, abs=0)
+E       assert (-0.004, -0.004, -0.004) == approx((-0.00...42 ± 3.9e-05))
+E         
+E         comparison failed. Mismatched elements: 2 / 3:
+E         Max absolute difference: 0.00012705305099025826
+E         Max relative difference: 0.031763262747564566
+E         Index | Obtained | Expected                       
+E         0     | -0.004   | -0.00392726220708177 ± 3.9e-05 
+E         2     | -0.004   | -0.003872946949009742 ± 3.9e-05
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:40: AssertionError
+_ test_saved_interval_preserves_values_and_nonzero_width[-0.003284521591238346--0.0033180608278863878--0.003246621472447612] _
+
+estimate = -0.003284521591238346, low = -0.0033180608278863878
+high = -0.003246621472447612
+
+    @pytest.mark.parametrize(
+        ("estimate", "low", "high"),
+        [
+            (0.004597062764879343, 0.004531382987542545, 0.004658536119213675),
+            (-0.00392726220708177, -0.003979629136146112, -0.003872946949009742),
+            (-0.003284521591238346, -0.0033180608278863878, -0.003246621472447612),
+            (0.5000015, 0.500001, 0.500002),
+            (0.0000746156, -0.0000710405, 0.000218961),
+        ],
+    )
+    def test_saved_interval_preserves_values_and_nonzero_width(estimate, low, high):
+        try:
+            from src.tools.shot_pattern_analysis.matched_gui import (
+                format_matched_course_scoring,
+            )
+        except (ImportError, OSError) as exc:
+            pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+        text = format_matched_course_scoring(
+            {
+                "status": "available",
+                "paired_n": 10000,
+                "total_n": 10000,
+                "paired_benefit_vs_straight": {
+                    "Draw": {"estimate": estimate, "lower_95": low, "upper_95": high}
+                },
+            }
+        )
+        match = re.search(r"Draw: ([^ ]+) \[([^,]+), ([^\]]+)\] strokes", text)
+        assert match is not None
+        shown = tuple(float(value) for value in match.groups())
+>       assert shown == pytest.approx((estimate, low, high), rel=0.01, abs=0)
+E       assert (-0.003, -0.003, -0.003) == approx((-0.00...12 ± 3.2e-05))
+E         
+E         comparison failed. Mismatched elements: 3 / 3:
+E         Max absolute difference: 0.0003180608278863877
+E         Max relative difference: 0.10602027596212923
+E         Index | Obtained | Expected                        
+E         0     | -0.003   | -0.003284521591238346 ± 3.3e-05 
+E         1     | -0.003   | -0.0033180608278863878 ± 3.3e-05
+E         2     | -0.003   | -0.003246621472447612 ± 3.2e-05
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:40: AssertionError
+_ test_saved_interval_preserves_values_and_nonzero_width[0.5000015-0.500001-0.500002] _
+
+estimate = 0.5000015, low = 0.500001, high = 0.500002
+
+    @pytest.mark.parametrize(
+        ("estimate", "low", "high"),
+        [
+            (0.004597062764879343, 0.004531382987542545, 0.004658536119213675),
+            (-0.00392726220708177, -0.003979629136146112, -0.003872946949009742),
+            (-0.003284521591238346, -0.0033180608278863878, -0.003246621472447612),
+            (0.5000015, 0.500001, 0.500002),
+            (0.0000746156, -0.0000710405, 0.000218961),
+        ],
+    )
+    def test_saved_interval_preserves_values_and_nonzero_width(estimate, low, high):
+        try:
+            from src.tools.shot_pattern_analysis.matched_gui import (
+                format_matched_course_scoring,
+            )
+        except (ImportError, OSError) as exc:
+            pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+        text = format_matched_course_scoring(
+            {
+                "status": "available",
+                "paired_n": 10000,
+                "total_n": 10000,
+                "paired_benefit_vs_straight": {
+                    "Draw": {"estimate": estimate, "lower_95": low, "upper_95": high}
+                },
+            }
+        )
+        match = re.search(r"Draw: ([^ ]+) \[([^,]+), ([^\]]+)\] strokes", text)
+        assert match is not None
+        shown = tuple(float(value) for value in match.groups())
+        assert shown == pytest.approx((estimate, low, high), rel=0.01, abs=0)
+>       assert shown[1] < shown[2]
+E       assert 0.5 < 0.5
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:41: AssertionError
+_______________ test_small_mean_retains_numeric_accuracy[0.0015] _______________
+
+value = 0.0015
+
+    @pytest.mark.parametrize("value", [0.0015, -0.004597062764879343, 0.0000746156])
+    def test_small_mean_retains_numeric_accuracy(value):
+        try:
+            from src.tools.shot_pattern_analysis.matched_gui import (
+                format_matched_course_scoring,
+            )
+        except (ImportError, OSError) as exc:
+            pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+        text = format_matched_course_scoring(
+            {"status": "available", "patterns": {"Straight": {"mean_strokes_gained": value}}}
+        )
+        match = re.search(r"Mean Strokes Gained: Straight: ([^;]+);", text)
+        assert match is not None
+>       assert float(match.group(1)) == pytest.approx(value, rel=0.01, abs=0)
+E       assert 0.002 == 0.0015 ± 1.5e-05
+E         
+E         comparison failed
+E         Obtained: 0.002
+E         Expected: 0.0015 ± 1.5e-05
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:58: AssertionError
+_______ test_small_mean_retains_numeric_accuracy[-0.004597062764879343] ________
+
+value = -0.004597062764879343
+
+    @pytest.mark.parametrize("value", [0.0015, -0.004597062764879343, 0.0000746156])
+    def test_small_mean_retains_numeric_accuracy(value):
+        try:
+            from src.tools.shot_pattern_analysis.matched_gui import (
+                format_matched_course_scoring,
+            )
+        except (ImportError, OSError) as exc:
+            pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+        text = format_matched_course_scoring(
+            {"status": "available", "patterns": {"Straight": {"mean_strokes_gained": value}}}
+        )
+        match = re.search(r"Mean Strokes Gained: Straight: ([^;]+);", text)
+        assert match is not None
+>       assert float(match.group(1)) == pytest.approx(value, rel=0.01, abs=0)
+E       assert -0.005 == -0.0045970627...9343 ± 4.6e-05
+E         
+E         comparison failed
+E         Obtained: -0.005
+E         Expected: -0.004597062764879343 ± 4.6e-05
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py:58: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py::test_saved_interval_preserves_values_and_nonzero_width[0.004597062764879343-0.004531382987542545-0.004658536119213675]
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py::test_saved_interval_preserves_values_and_nonzero_width[-0.00392726220708177--0.003979629136146112--0.003872946949009742]
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py::test_saved_interval_preserves_values_and_nonzero_width[-0.003284521591238346--0.0033180608278863878--0.003246621472447612]
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py::test_saved_interval_preserves_values_and_nonzero_width[0.5000015-0.500001-0.500002]
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py::test_small_mean_retains_numeric_accuracy[0.0015]
+FAILED tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py::test_small_mean_retains_numeric_accuracy[-0.004597062764879343]
+6 failed, 2 passed, 6 warnings in 4.74s

@@ -1,0 +1,1402 @@
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:13: error: Unsupported operand types for ** ("Decimal" and "Literal['n']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:13: error: Unsupported operand types for ** ("Decimal" and "Literal['N']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:13: error: Unsupported operand types for ** ("Decimal" and "Literal['F']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py:13: note: Right operand is of type "Literal['n', 'N', 'F'] | int"
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:19: error: Need type annotation for "effects" (hint: "effects: dict[<type>, <type>] = ...")  [var-annotated]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:44: error: Unsupported operand types for ** ("Decimal" and "Literal['n']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:44: error: Unsupported operand types for ** ("Decimal" and "Literal['N']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:44: error: Unsupported operand types for ** ("Decimal" and "Literal['F']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:44: note: Right operand is of type "Literal['n', 'N', 'F'] | int"
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py:48: error: Need type annotation for "seen"  [var-annotated]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:18: error: Unsupported operand types for ** ("Decimal" and "Literal['n']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:18: error: Unsupported operand types for ** ("Decimal" and "Literal['N']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:18: error: Unsupported operand types for ** ("Decimal" and "Literal['F']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py:18: note: Right operand is of type "Literal['n', 'N', 'F'] | int"
+docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py:50: error: Item "None" of "QScrollBar | None" has no attribute "maximum"  [union-attr]
+docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py:53: error: Item "None" of "QScrollBar | None" has no attribute "setValue"  [union-attr]
+docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py:70: error: Item "None" of "QScrollBar | None" has no attribute "maximum"  [union-attr]
+docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py:24: error: Value of type "Collection[str]" is not indexable  [index]
+docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py:10: error: Argument 1 to "module_from_spec" has incompatible type "ModuleSpec | None"; expected "ModuleSpec"  [arg-type]
+docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py:11: error: Item "None" of "ModuleSpec | None" has no attribute "loader"  [union-attr]
+docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py:11: error: Item "None" of "Loader | Any | None" has no attribute "exec_module"  [union-attr]
+docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py:155: error: Module has no attribute "_report_source_hashes"  [attr-defined]
+docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py:160: error: Module has no attribute "_check_numeric_parity_reference"  [attr-defined]
+docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py:161: error: Module has no attribute "_load_numeric_parity_reference"  [attr-defined]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:25: error: Unsupported operand types for ** ("Decimal" and "Literal['n']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:25: error: Unsupported operand types for ** ("Decimal" and "Literal['N']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:25: error: Unsupported operand types for ** ("Decimal" and "Literal['F']")  [operator]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:25: note: Right operand is of type "Literal['n', 'N', 'F'] | int"
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:51: error: Incompatible types in assignment (expression has type "tuple[Any, Any]", variable has type "str")  [assignment]
+docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py:52: error: Invalid index type "str" for "dict[tuple[Any, Any], Any]"; expected type "tuple[Any, Any]"  [index]
+docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py:213: error: Value of type "dict[str, Any] | None" is not indexable  [index]
+docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py:241: error: Need type annotation for "pending" (hint: "pending: list[<type>] = ...")  [var-annotated]
+docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py:100: error: Incompatible types in assignment (expression has type "str", variable has type "dict[str, Any]")  [assignment]
+docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py:101: error: Argument 1 to "Path" has incompatible type "dict[str, Any]"; expected "str | PathLike[str]"  [arg-type]
+docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py:52: error: Argument 1 to "asdict" has incompatible type "DataclassInstance | type[DataclassInstance]"; expected "DataclassInstance"  [arg-type]
+docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py:264: error: Cannot assign to a method  [method-assign]
+docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py:264: error: Incompatible types in assignment (expression has type "def save(fig: Any, path: Any, *args: Any, **kwargs: Any) -> Any", variable has type "def savefig(self, self: Figure, fname: str | PathLike[Any] | IO[Any], *, transparent: bool | None = ..., **kwargs: Any) -> None")  [assignment]
+Found 33 errors in 10 files (checked 89 source files)
+================ pre_pr: Local CI Gate Runner ================
+Running diff-scoped pytest: /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py tests/analysis/test_cross_engine_provenance.py tests/api/test_physics_api.py tests/api/test_routes_cross_engine_provenance.py tests/api/wave5_api/test_utils_datetime_compat.py tests/api/wave5_api/test_utils_error_codes.py tests/api/wave5_api/test_utils_path_validation.py tests/api/wave5_api/test_utils_tracing.py tests/architecture/test_check_agent_docs_consistency.py tests/benchmarks/test_physics_benchmarks.py tests/bunkershot3d/geometry/test_wedge_trimesh_crosscheck.py tests/bunkershot3d/test_provenance_hashing.py tests/bunkershot3d/test_provenance_manifest.py tests/bunkershot3d/test_provenance_rng.py tests/ci/test_articulated_manufactured_authority_provenance_red.py tests/ci/test_assert_checkout_complete.py tests/ci/test_check_no_engine_loader.py tests/ci/test_check_workflow_contexts.py tests/ci/test_dependency_lock_provenance.py tests/ci/test_spec_check_workflow.py tests/ci/test_verify_impact_explorer_bundle.py tests/engines/simscape/test_tour_checkpoints.py tests/heavy_integration/test_physics_consistency.py tests/heavy_integration/test_pyqt6_gui_components.py tests/imports/test_gui_import_boundaries.py tests/integration/putting_green/putting_simulation/test_checkpoint_replay.py tests/integration/putting_green/putting_simulation/test_physics_accuracy.py tests/integration/test_physics_consistency.py tests/integration/test_physics_engines_strict.py tests/integration/test_physics_interfaces.py tests/launchers/test_shot_tracer_import_gui.py tests/launchers/test_simulation_guis.py tests/motion_capture/annotate/test_guide.py tests/motion_capture/test_provenance.py tests/opensim/test_golf_club_geometry.py tests/output/wave5_output/test_path_utils.py tests/research/test_event_robustness_noise.py tests/research/test_independent_supplement_audit.py tests/research/test_participant_twin_provenance.py tests/research/test_shot_pattern_archives.py tests/research/test_shot_pattern_final_figures.py tests/research/test_shot_pattern_final_report.py tests/research/test_shot_pattern_final_report_assets.py tests/research/test_shot_pattern_pdf.py tests/research/test_shot_pattern_pilot_preview.py tests/research/test_shot_pattern_report_synthesis.py tests/research/test_shot_pattern_report_table_layout.py tests/research/test_supplement_publication_revision.py tests/research/test_supplement_refinement.py tests/research/test_supplement_revision_adapter.py tests/research/test_supplement_revision_command.py tests/rust_bindings/test_physics_bindings.py tests/scripts/test_check_deleted_test_files.py tests/scripts/test_check_engine_loaders.py tests/scripts/test_check_forbidden_artifacts.py tests/scripts/test_check_github_actions_pinned.py tests/scripts/test_check_motion_runtime.py tests/scripts/test_check_phantom_guard_paths.py tests/scripts/test_check_pinocchio_dynamics_api.py tests/scripts/test_check_provider_compatibility.py tests/scripts/test_check_test_layout.py tests/scripts/test_check_tutorial_imports.py tests/scripts/test_check_vendor_updates.py tests/scripts/test_check_workflow_inventory.py tests/scripts/test_doc_governance_checks.py tests/scripts/test_script_utils.py tests/scripts/wave10_quality/test_check_architecture_budget.py tests/scripts/wave8_scripts/test_check_agent_docs_consistency.py tests/scripts/wave8_scripts/test_check_doc_size_budget.py tests/scripts/wave8_scripts/test_check_module_size_budget.py tests/scripts/wave8_scripts/test_check_no_print_calls.py tests/scripts/wave8_scripts/test_check_root_clutter.py tests/scripts/wave9_scripts_b/test_check_file_size_budget.py tests/scripts/wave9_scripts_b/test_check_lod.py tests/scripts/wave9_scripts_b/test_check_pip_audit_waivers.py tests/scripts/wave9_scripts_b/test_check_subsystem_status.py tests/scripts/wave9_scripts_b/test_verify_installation.py tests/scripts/wave9_scripts_b/test_verify_installation_model_submodules.py tests/shared/test_pose_estimation_gui.py tests/shared/wave7_model_generation/test_format_utils.py tests/shared/wave7_python_core/test_logger_utils.py tests/tools/ball_flight_gui/test_ball_flight_gui.py tests/tools/bunker_shot_gui/test_gui.py tests/tools/capture_rig/test_gui.py tests/tools/capture_rig/test_guided_capture_acceptance.py tests/tools/capture_rig/test_user_guide_fresh.py tests/tools/golf_environment/test_gui.py tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py tests/tools/matlab_utilities/test_matlab_quality_check.py tests/tools/motion_matching/test_motion_matching_gui.py tests/tools/putting_green_gui/test_putting_green_gui.py tests/tools/shadow_tracker/test_shadow_tracker_gui.py tests/tools/shot_pattern_analysis/test_academic_plots.py tests/tools/shot_pattern_analysis/test_club_geometry.py tests/tools/shot_pattern_analysis/test_course_score_vectors.py tests/tools/shot_pattern_analysis/test_course_scoring_delegation.py tests/tools/shot_pattern_analysis/test_figure_output_paths.py tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py tests/tools/shot_pattern_analysis/test_matched_bounds_native.py tests/tools/shot_pattern_analysis/test_matched_config.py tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py tests/tools/shot_pattern_analysis/test_matched_export.py tests/tools/shot_pattern_analysis/test_matched_formatting.py tests/tools/shot_pattern_analysis/test_matched_interpretation.py tests/tools/shot_pattern_analysis/test_matched_lean_control.py tests/tools/shot_pattern_analysis/test_matched_matrix.py tests/tools/shot_pattern_analysis/test_matched_pair_social.py tests/tools/shot_pattern_analysis/test_matched_physics.py tests/tools/shot_pattern_analysis/test_matched_report.py tests/tools/shot_pattern_analysis/test_matched_report_plots.py tests/tools/shot_pattern_analysis/test_matched_runner.py tests/tools/shot_pattern_analysis/test_matched_sensitivity.py tests/tools/shot_pattern_analysis/test_matched_social_integration.py tests/tools/shot_pattern_analysis/test_matched_supplement.py tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py tests/tools/shot_pattern_analysis/test_matched_supplement_report.py tests/tools/shot_pattern_analysis/test_noise.py tests/tools/shot_pattern_analysis/test_nominal_matching.py tests/tools/shot_pattern_analysis/test_original_protocol_compatibility.py tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py tests/tools/shot_pattern_analysis/test_pair_comparison_identity.py tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py tests/tools/shot_pattern_analysis/test_physics.py tests/tools/shot_pattern_analysis/test_provenance.py tests/tools/shot_pattern_analysis/test_reviewed_driver_curve_bounds.py tests/tools/shot_pattern_analysis/test_scenario_scoring.py tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py tests/tools/shot_pattern_analysis/test_social_review_contracts.py tests/tools/shot_pattern_analysis/test_supplement_numeric_parity_guard.py tests/tools/swing_flight_pipeline/test_gui.py tests/tools/terrain_engine/test_gui_coverage.py tests/tools/test_check_markdown_links.py tests/tools/test_code_quality_check.py tests/tools/test_model_explorer_gui.py tests/tools/test_terrain_engine_gui.py tests/tools/training_controller/test_gui_smoke.py tests/toplevel/wave8_toplevel/test_check_markdown_links.py tests/toplevel/wave8_toplevel/test_code_quality_check.py tests/ui/engines/opensim/test_opensim_gui_writable_state.py tests/ui/test_golf_gui_tabs.py tests/ui/tools/launch_monitor/test_gui.py tests/ui/tools/shot_pattern_analysis/test_matched_gui.py tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py tests/ui/tools/simulation_backends/test_gui.py tests/ui/tools/simulation_backends/test_gui_window.py tests/ui/tools/video_analyzer/test_gui.py tests/unit/api/security/test_security_manager_verify_password.py tests/unit/api/test_physics_cache.py tests/unit/api/test_routes_physics.py tests/unit/config/test_config_utils.py tests/unit/core/test_datetime_utils.py tests/unit/core/test_datetime_utils_extended.py tests/unit/core/test_error_utils.py tests/unit/core/test_error_utils_extended.py tests/unit/core/test_logger_utils.py tests/unit/core/test_physics_constants.py tests/unit/core/test_type_utils.py tests/unit/data_io/test_common_utils_units.py tests/unit/data_io/test_data_utils.py tests/unit/data_io/test_import_utils.py tests/unit/data_io/test_io_utils.py tests/unit/data_io/test_path_utils.py tests/unit/data_io/test_provenance.py tests/unit/engines/drake/test_drake_gui_force_overlay.py tests/unit/engines/myosuite/test_myosuite_physics_engine.py tests/unit/engines/pendulum/test_physics_correctness.py tests/unit/engines/physics_engines/drake/test_drake_gui_analysis.py tests/unit/engines/physics_engines/drake/test_drake_gui_app.py tests/unit/engines/physics_engines/drake/test_drake_gui_sim.py tests/unit/engines/physics_engines/drake/test_quality_checks.py tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_advanced_gui_methods.py tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_force_glyph_gui.py tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_jacobian_utils_coriolis.py tests/unit/engines/physics_engines/mujoco/test_golf_gui.py tests/unit/engines/physics_engines/mujoco/test_quality_checks.py tests/unit/engines/pinocchio/pinocchio_golf/test_gui.py tests/unit/engines/pinocchio/pinocchio_golf/test_gui_simulation.py tests/unit/engines/pinocchio/pinocchio_golf/test_gui_ui_setup.py tests/unit/engines/pinocchio/test_pinocchio_physics_engine.py tests/unit/engines/pinocchio/test_utils.py tests/unit/engines/putting_green/test_ball_roll_physics.py tests/unit/engines/putting_green/test_roll_model_provenance.py tests/unit/engines/test_checkpoint.py tests/unit/engines/test_common_physics.py tests/unit/engines/test_preflight.py tests/unit/grip_contact/test_couple_check.py tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py tests/unit/motion_matching/test_checkpoint_artifact_loading.py tests/unit/motion_matching/test_placeholder_provenance_10960.py tests/unit/motion_matching/test_provenance.py tests/unit/neural_motion/test_checkpoint_matrix_nm09.py tests/unit/pendulum_putter_model/test_pendulum_physics_analytical.py tests/unit/pendulum_putter_model/test_pendulum_putter_model_physics.py tests/unit/pendulum_simulator/test_gui_playback_perf.py tests/unit/pendulum_simulator/test_physics.py tests/unit/pendulum_simulator/test_physics_base.py tests/unit/pendulum_simulator/test_physics_triple.py tests/unit/pendulum_simulator/test_torque_utils.py tests/unit/perturbation/test_noise.py tests/unit/physics/test_impact_physics_value_assertions.py tests/unit/physics/test_incremental_contact.py tests/unit/physics/test_legacy_gear_flight_direction.py tests/unit/physics/test_physics_comprehensive.py tests/unit/physics/test_rigid_contact.py tests/unit/plot_style/test_color_utils.py tests/unit/process_calculators/test_analysis_utils.py tests/unit/repo_hygiene/test_no_tracked_asset_rewrite.py tests/unit/robotics/sensing/test_noise_models.py tests/unit/robotics/test_real_collision_checker.py tests/unit/scripts/test_check_coverage_gates.py tests/unit/scripts/test_check_docs_governance_root_allowlist.py tests/unit/scripts/test_check_gitignore_dotenv.py tests/unit/scripts/test_check_local_only_workflows.py tests/unit/scripts/test_check_mypy_exclusion_budget.py tests/unit/scripts/test_check_pytest_intree_testpaths.py tests/unit/scripts/test_check_seam_drift.py tests/unit/scripts/test_check_spec_changelog_duplicates.py tests/unit/scripts/test_check_spec_freshness.py tests/unit/scripts/test_check_tools_pins.py tests/unit/scripts/test_check_version_consistency.py tests/unit/scripts/test_gui_thread_blocking_ratchet.py tests/unit/scripts/test_verify_companion_screenshots.py tests/unit/security/test_subprocess_utils.py tests/unit/shadow_tracker/test_calibration_provenance.py tests/unit/shared_python/test_ball_flight_physics.py tests/unit/shared_python/test_checkpoint.py tests/unit/shared_python/test_common_utils.py tests/unit/shared_python/test_golf_physics_source_backed_validation.py tests/unit/shared_python/test_impact_model.py tests/unit/shared_python/test_openpose_gui_coverage.py tests/unit/shared_python/test_physics_parameters.py tests/unit/shared_python/test_physics_validation.py tests/unit/shared_python/test_security_utils_coverage.py tests/unit/shared_python/test_signal_toolkit_noise.py tests/unit/shared_python/test_simulation_gui_base.py tests/unit/shared_python/test_utils.py tests/unit/sidekick/test_analysis_utils.py tests/unit/sidekick/test_paths_utils.py tests/unit/signal_toolkit/test_noise.py tests/unit/simulation_backends/test_provenance.py tests/unit/test_ball_flight_physics.py tests/unit/test_check_alembic_drift.py tests/unit/test_check_engine_tiers.py tests/unit/test_checkpoint.py tests/unit/test_cli_utils.py tests/unit/test_common_utils.py tests/unit/test_common_utils_coverage.py tests/unit/test_dashboard_export_provenance.py tests/unit/test_datetime_utils.py tests/unit/test_dependency_direction_checker.py tests/unit/test_drake_gui_app.py tests/unit/test_drake_physics_engine.py tests/unit/test_gui_coverage.py tests/unit/test_gui_launcher_manifest_targets.py tests/unit/test_gui_launcher_registry.py tests/unit/test_mujoco_gui_tabs_smoke.py tests/unit/test_mujoco_physics_engine.py tests/unit/test_opensim_physics_engine.py tests/unit/test_path_utils.py tests/unit/test_pendulum_putter_physics.py tests/unit/test_pendulum_simulator_physics.py tests/unit/test_physics_constants_coverage.py tests/unit/test_physics_parameters.py tests/unit/test_physics_validation_extended.py tests/unit/test_pinned_tools_provenance.py tests/unit/test_pinocchio_gui.py tests/unit/test_pinocchio_physics_engine.py tests/unit/test_property_based_physics.py tests/unit/test_provenance.py tests/unit/test_shared_physics_parameters.py tests/unit/test_shared_security_utils.py tests/unit/test_sim_gui_honest_messaging_6641.py tests/unit/theme/test_icon_utils.py tests/unit/tools/bunker_shot_gui/test_no_fake_physics.py tests/unit/tools/model_explorer/test_assembly_panel_gui.py tests/unit/tools/pose_studio/test_gui.py tests/unit/tools/test_necromatcher_gui.py tests/unit/ui/test_provenance_value.py tests/unit/ux/test_preflight.py tests/unit/ux/test_provenance.py tests/unit/validation_pkg/test_validation_utils.py tests/wave10_assets_config/test_config_utils_extra.py tests/wave10_gap_audit/test_cli_utils.py -p no:pytestqt
+..........................................................FFFFFFFFFFFFFF [  1%]
+F....................................................................... [  3%]
+........................................................................ [  5%]
+........................................................................ [  7%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+...................................................F.................... [ 16%]
+........................................................................ [ 18%]
+........................................................................ [ 20%]
+........................................................................ [ 22%]
+..............................F..............F............s............. [ 24%]
+................................................................sssss.s. [ 25%]
+...sss...ss............................................................. [ 27%]
+.......................s................................................ [ 29%]
+........................................................................ [ 31%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+....F................................................................... [ 37%]
+..................................................................ss.... [ 38%]
+............................................................F..F........ [ 40%]
+........................................................................ [ 42%]
+.....F.................................................................. [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 48%]
+........................................................................ [ 50%]
+........................................................................ [ 51%]
+........................................................................ [ 53%]
+........................................................................ [ 55%]
+........................................................................ [ 57%]
+.........................................F.............................. [ 59%]
+........................................................................ [ 61%]
+........................................................................ [ 63%]
+........................................................................ [ 64%]
+...............s........................................................ [ 66%]
+........................................................................ [ 68%]
+........................................................................ [ 70%]
+........................................................................ [ 72%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 77%]
+........................................................................ [ 79%]
+........................................................................ [ 81%]
+........................................................................ [ 83%]
+........................................................................ [ 85%]
+........................................................................ [ 87%]
+...................EEEEEEE.............................................. [ 89%]
+..............F......................................................... [ 90%]
+........................................................................ [ 92%]
+...........................ssssssssss.........................X......... [ 94%]
+......................................................Traceback (most recent call last):
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/backends/backend_qt.py", line 523, in _draw_idle
+    self.draw()
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/backends/backend_agg.py", line 438, in draw
+    self.figure.draw(self.renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 94, in draw_wrapper
+    result = draw(artist, renderer, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/figure.py", line 3282, in draw
+    mimage._draw_list_compositing_images(
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/image.py", line 133, in _draw_list_compositing_images
+    a.draw(renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/mpl_toolkits/mplot3d/axes3d.py", line 532, in draw
+    super().draw(renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/axes/_base.py", line 3372, in draw
+    mimage._draw_list_compositing_images(
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/image.py", line 133, in _draw_list_compositing_images
+    a.draw(renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/mpl_toolkits/mplot3d/art3d.py", line 363, in draw
+    (len(self._verts3d), *self._verts3d[0].shape)
+                          ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'shape'
+...Traceback (most recent call last):
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/backends/backend_qt.py", line 523, in _draw_idle
+    self.draw()
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/backends/backend_agg.py", line 438, in draw
+    self.figure.draw(self.renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 94, in draw_wrapper
+    result = draw(artist, renderer, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/figure.py", line 3282, in draw
+    mimage._draw_list_compositing_images(
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/image.py", line 133, in _draw_list_compositing_images
+    a.draw(renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/mpl_toolkits/mplot3d/axes3d.py", line 532, in draw
+    super().draw(renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/axes/_base.py", line 3372, in draw
+    mimage._draw_list_compositing_images(
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/image.py", line 133, in _draw_list_compositing_images
+    a.draw(renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/mpl_toolkits/mplot3d/art3d.py", line 363, in draw
+    (len(self._verts3d), *self._verts3d[0].shape)
+                          ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'shape'
+.Traceback (most recent call last):
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/backends/backend_qt.py", line 523, in _draw_idle
+    self.draw()
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/backends/backend_agg.py", line 438, in draw
+    self.figure.draw(self.renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 94, in draw_wrapper
+    result = draw(artist, renderer, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/figure.py", line 3282, in draw
+    mimage._draw_list_compositing_images(
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/image.py", line 133, in _draw_list_compositing_images
+    a.draw(renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/mpl_toolkits/mplot3d/axes3d.py", line 532, in draw
+    super().draw(renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/axes/_base.py", line 3372, in draw
+    mimage._draw_list_compositing_images(
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/image.py", line 133, in _draw_list_compositing_images
+    a.draw(renderer)
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/mpl_toolkits/mplot3d/art3d.py", line 363, in draw
+    (len(self._verts3d), *self._verts3d[0].shape)
+                          ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'shape'
+.............. [ 96%]
+........................................................................ [ 98%]
+................................................................         [100%]
+==================================== ERRORS ====================================
+__________ ERROR at setup of test_drake_physics_engine_initialization __________
+ScopeMismatch: You tried to access the function scoped fixture mock_drake_dependencies with a module scoped request object. Requesting fixture stack:
+tests/unit/test_drake_physics_engine.py:59:  def DrakePhysicsEngineClass(mock_drake_dependencies) -> collections.abc.Generator[typing.Any, None, None]
+Requested fixture:
+tests/conftest.py:1065:  def mock_drake_dependencies() -> 'Generator[tuple[MagicMock, MagicMock], None, None]'
+__________ ERROR at setup of test_drake_physics_engine_load_from_path __________
+ScopeMismatch: You tried to access the function scoped fixture mock_drake_dependencies with a module scoped request object. Requesting fixture stack:
+tests/unit/test_drake_physics_engine.py:59:  def DrakePhysicsEngineClass(mock_drake_dependencies) -> collections.abc.Generator[typing.Any, None, None]
+Requested fixture:
+tests/conftest.py:1065:  def mock_drake_dependencies() -> 'Generator[tuple[MagicMock, MagicMock], None, None]'
+_________ ERROR at setup of test_drake_physics_engine_load_from_string _________
+ScopeMismatch: You tried to access the function scoped fixture mock_drake_dependencies with a module scoped request object. Requesting fixture stack:
+tests/unit/test_drake_physics_engine.py:59:  def DrakePhysicsEngineClass(mock_drake_dependencies) -> collections.abc.Generator[typing.Any, None, None]
+Requested fixture:
+tests/conftest.py:1065:  def mock_drake_dependencies() -> 'Generator[tuple[MagicMock, MagicMock], None, None]'
+_______________ ERROR at setup of test_drake_physics_engine_step _______________
+ScopeMismatch: You tried to access the function scoped fixture mock_drake_dependencies with a module scoped request object. Requesting fixture stack:
+tests/unit/test_drake_physics_engine.py:59:  def DrakePhysicsEngineClass(mock_drake_dependencies) -> collections.abc.Generator[typing.Any, None, None]
+Requested fixture:
+tests/conftest.py:1065:  def mock_drake_dependencies() -> 'Generator[tuple[MagicMock, MagicMock], None, None]'
+____________ ERROR at setup of test_drake_physics_engine_get_state _____________
+ScopeMismatch: You tried to access the function scoped fixture mock_drake_dependencies with a module scoped request object. Requesting fixture stack:
+tests/unit/test_drake_physics_engine.py:59:  def DrakePhysicsEngineClass(mock_drake_dependencies) -> collections.abc.Generator[typing.Any, None, None]
+Requested fixture:
+tests/conftest.py:1065:  def mock_drake_dependencies() -> 'Generator[tuple[MagicMock, MagicMock], None, None]'
+_______ ERROR at setup of test_drake_physics_engine_compute_mass_matrix ________
+ScopeMismatch: You tried to access the function scoped fixture mock_drake_dependencies with a module scoped request object. Requesting fixture stack:
+tests/unit/test_drake_physics_engine.py:59:  def DrakePhysicsEngineClass(mock_drake_dependencies) -> collections.abc.Generator[typing.Any, None, None]
+Requested fixture:
+tests/conftest.py:1065:  def mock_drake_dependencies() -> 'Generator[tuple[MagicMock, MagicMock], None, None]'
+_____ ERROR at setup of test_drake_physics_engine_compute_inverse_dynamics _____
+ScopeMismatch: You tried to access the function scoped fixture mock_drake_dependencies with a module scoped request object. Requesting fixture stack:
+tests/unit/test_drake_physics_engine.py:59:  def DrakePhysicsEngineClass(mock_drake_dependencies) -> collections.abc.Generator[typing.Any, None, None]
+Requested fixture:
+tests/conftest.py:1065:  def mock_drake_dependencies() -> 'Generator[tuple[MagicMock, MagicMock], None, None]'
+=================================== FAILURES ===================================
+______________ TestCameraPresetAPI.test_valid_preset_returns_200 _______________
+
+self = <test_physics_api.TestCameraPresetAPI object at 0x764d26533d10>
+client = <starlette.testclient.TestClient object at 0x764d2271e2a0>
+
+    def test_valid_preset_returns_200(self, client) -> None:
+        """POST /simulation/camera with valid preset returns 200."""
+        resp = client.post("/simulation/camera", json={"preset": "side"})
+>       assert resp.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:300: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:36,536 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+WARNING  src.api.database:database.py:229 SECURITY: No GOLF_ADMIN_PASSWORD environment variable set. Generated temporary admin password. Set GOLF_ADMIN_PASSWORD environment variable for production.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+WARNING  shared.python.ai.rag.simple_rag:simple_rag.py:27 scikit-learn not found. RAG functionality will be limited.
+_______________ TestCameraPresetAPI.test_all_presets_return_200 ________________
+
+self = <test_physics_api.TestCameraPresetAPI object at 0x764d26556240>
+client = <starlette.testclient.TestClient object at 0x764d21c97170>
+
+    def test_all_presets_return_200(self, client) -> None:
+        """All camera presets return valid responses."""
+        for preset in VALID_CAMERA_PRESETS:
+            resp = client.post("/simulation/camera", json={"preset": preset})
+>           assert resp.status_code == 200, f"Preset {preset} failed"
+E           AssertionError: Preset front failed
+E           assert 401 == 200
+E            +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:311: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:38,300 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+_____________ TestCameraPresetAPI.test_invalid_preset_returns_422 ______________
+
+self = <test_physics_api.TestCameraPresetAPI object at 0x764d265559a0>
+client = <starlette.testclient.TestClient object at 0x764d21cf45f0>
+
+    def test_invalid_preset_returns_422(self, client) -> None:
+        """Invalid preset returns 422 validation error."""
+        resp = client.post("/simulation/camera", json={"preset": "orbital"})
+>       assert resp.status_code == 422
+E       assert 401 == 422
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:316: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:38,562 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+________________ TestSpeedControlAPI.test_set_speed_returns_200 ________________
+
+self = <test_physics_api.TestSpeedControlAPI object at 0x764d26555010>
+client = <starlette.testclient.TestClient object at 0x764d21202ed0>
+
+    def test_set_speed_returns_200(self, client) -> None:
+        """POST /simulation/speed with valid factor returns 200."""
+        resp = client.post("/simulation/speed", json={"speed_factor": 2.0})
+>       assert resp.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:325: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:39,187 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+____________________ TestSpeedControlAPI.test_default_speed ____________________
+
+self = <test_physics_api.TestSpeedControlAPI object at 0x764d26554b60>
+client = <starlette.testclient.TestClient object at 0x764d21200680>
+
+    def test_default_speed(self, client) -> None:
+        """Default speed factor 1.0 is accepted."""
+        resp = client.post("/simulation/speed", json={"speed_factor": 1.0})
+>       assert resp.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:333: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:39,715 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+_______________ TestSpeedControlAPI.test_invalid_speed_rejected ________________
+
+self = <test_physics_api.TestSpeedControlAPI object at 0x764d26556ed0>
+client = <starlette.testclient.TestClient object at 0x764d21201790>
+
+    def test_invalid_speed_rejected(self, client) -> None:
+        """Speed out of range returns 422."""
+        resp = client.post("/simulation/speed", json={"speed_factor": 100.0})
+>       assert resp.status_code == 422
+E       assert 401 == 422
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:338: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:40,020 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+____________________ TestRecordingAPI.test_start_recording _____________________
+
+self = <test_physics_api.TestRecordingAPI object at 0x764d265572f0>
+client = <starlette.testclient.TestClient object at 0x764d211f3920>
+
+    def test_start_recording(self, client) -> None:
+        """POST /simulation/recording with start action works."""
+        resp = client.post(
+            "/simulation/recording",
+            json={"action": "start", "export_format": "json"},
+        )
+>       assert resp.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:350: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:40,460 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+_____________________ TestRecordingAPI.test_stop_recording _____________________
+
+self = <test_physics_api.TestRecordingAPI object at 0x764d26557710>
+client = <starlette.testclient.TestClient object at 0x764d211f2510>
+
+    def test_stop_recording(self, client) -> None:
+        """POST /simulation/recording with stop action works."""
+        # Start then stop
+        client.post(
+            "/simulation/recording",
+            json={"action": "start", "export_format": "json"},
+        )
+        resp = client.post(
+            "/simulation/recording",
+            json={"action": "stop", "export_format": "json"},
+        )
+>       assert resp.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:365: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:41,102 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+______________________ TestRecordingAPI.test_export_empty ______________________
+
+self = <test_physics_api.TestRecordingAPI object at 0x764d26557b30>
+client = <starlette.testclient.TestClient object at 0x764d21259760>
+
+    def test_export_empty(self, client) -> None:
+        """Export with no recorded frames returns message."""
+        resp = client.post(
+            "/simulation/recording",
+            json={"action": "export", "export_format": "json"},
+        )
+>       assert resp.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:375: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:41,547 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+________________ TestSimulationStatsAPI.test_stats_returns_200 _________________
+
+self = <test_physics_api.TestSimulationStatsAPI object at 0x764d26557fb0>
+client = <starlette.testclient.TestClient object at 0x764d2125b950>
+
+    def test_stats_returns_200(self, client) -> None:
+        """GET /simulation/stats returns 200."""
+        resp = client.get("/simulation/stats")
+>       assert resp.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:386: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:41,884 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+________ TestActuatorEndpoints.test_get_actuators_no_engine_returns_400 ________
+
+self = <test_physics_api.TestActuatorEndpoints object at 0x764d2656c440>
+client = <starlette.testclient.TestClient object at 0x764d2124cfe0>
+
+    def test_get_actuators_no_engine_returns_400(self, client) -> None:
+        """GET /simulation/control/actuators returns 400 when no engine loaded."""
+        resp = client.get("/simulation/control/actuators")
+        # Should be 400 since no engine is loaded
+>       assert resp.status_code == 400
+E       assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:403: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:42,697 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+_______ TestActuatorEndpoints.test_post_actuators_no_engine_returns_400 ________
+
+self = <test_physics_api.TestActuatorEndpoints object at 0x764d2656c860>
+client = <starlette.testclient.TestClient object at 0x764d2124ede0>
+
+    def test_post_actuators_no_engine_returns_400(self, client) -> None:
+        """POST /simulation/control/actuators returns 400 when no engine loaded."""
+        resp = client.post("/simulation/control/actuators", json={"strategy": "pd"})
+>       assert resp.status_code == 400
+E       assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:408: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:43,311 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+___________ TestForceEndpoints.test_get_forces_no_engine_returns_400 ___________
+
+self = <test_physics_api.TestForceEndpoints object at 0x764d2656ccb0>
+client = <starlette.testclient.TestClient object at 0x764d2124e0f0>
+
+    def test_get_forces_no_engine_returns_400(self, client) -> None:
+        """GET /simulation/control/forces returns 400 when no engine loaded."""
+        resp = client.get("/simulation/control/forces")
+>       assert resp.status_code == 400
+E       assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:417: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:43,952 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+_________ TestMetricsEndpoints.test_get_metrics_no_engine_returns_400 __________
+
+self = <test_physics_api.TestMetricsEndpoints object at 0x764d265578c0>
+client = <starlette.testclient.TestClient object at 0x764d212a7a10>
+
+    def test_get_metrics_no_engine_returns_400(self, client) -> None:
+        """GET /simulation/metrics returns 400 when no engine loaded."""
+        resp = client.get("/simulation/metrics")
+>       assert resp.status_code == 400
+E       assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:426: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:44,503 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+_____ TestControlFeaturesEndpoints.test_get_features_no_engine_returns_400 _____
+
+self = <test_physics_api.TestControlFeaturesEndpoints object at 0x764d265545f0>
+client = <starlette.testclient.TestClient object at 0x764d2110f980>
+
+    def test_get_features_no_engine_returns_400(self, client) -> None:
+        """GET /simulation/control-features returns 400 when no engine loaded."""
+        resp = client.get("/simulation/control-features")
+>       assert resp.status_code == 400
+E       assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/api/test_physics_api.py:435: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2026-10-10 09:47:45,163 - shared.python.config.model_registry - INFO - Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+------------------------------ Captured log setup ------------------------------
+WARNING  src.shared.python.security.env_validator:env_validator.py:501 Found 1 warnings (showing up to 5):
+WARNING  src.shared.python.security.env_validator:env_validator.py:505   - No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development.
+INFO     shared.python.config.model_registry:model_registry.py:295 Loaded 68 models from /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/config/models.yaml
+WARNING  src.shared.python.pose_estimation.mediapipe_estimator:mediapipe_estimator.py:160 MediaPipe Tasks API not available. MediaPipeEstimator will not function.
+ERROR    src.shared.python.gui_pkg.video_pose_pipeline:video_pose_pipeline.py:118 Failed to load estimator: mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe
+__________________ test_no_legacy_root_test_allowlist_remains __________________
+
+    def test_no_legacy_root_test_allowlist_remains() -> None:
+>       assert frozenset() == LEGACY_ROOT_TEST_FILES
+E       AssertionError: assert frozenset() == frozenset({'t...iff.py', ...})
+E
+E         Extra items in the right set:
+E         'tests/test_golf_humanoid_dimensions.py'
+E         'tests/test_opensim_club_attachment.py'
+E         'tests/test_setup_biomech_workspace.py'
+E         'tests/test_load_compact_swing_dataset.py'
+E         'tests/test_c3d_simscape_preview.py'...
+E
+E         ...Full output truncated (24 lines hidden), use '-vv' to show
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/scripts/test_check_test_layout.py:7: AssertionError
+_______________________ test_validate_mjcf_malformed_xml _______________________
+
+    def test_validate_mjcf_malformed_xml() -> None:
+>       errs = validate_mjcf("<mujoco><unclosed>")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/shared/wave7_model_generation/test_format_utils.py:127:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+source = '<mujoco><unclosed>'
+
+    def validate_mjcf(source: str | Path) -> list[str]:
+        """
+        Validate an MJCF file.
+
+        Args:
+            source: MJCF file path or XML string
+
+        Returns:
+            List of error messages (empty if valid)
+        """
+        try:
+            import mujoco
+
+            if isinstance(source, Path) or not source.strip().startswith("<"):
+                mujoco.MjModel.from_xml_path(str(source))
+            else:
+>               mujoco.MjModel.from_xml_string(source)
+E               ValueError: XML parse error 14:
+E               Error=XML_ERROR_MISMATCHED_ELEMENT ErrorID=14 (0xe) Line number=1: XMLElement name=unclosed
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/model_generation/converters/format_utils.py:259: ValueError
+____________ TestLogExecutionTime.test_rejects_empty_operation_name ____________
+
+self = <tests.shared.wave7_python_core.test_logger_utils.TestLogExecutionTime object at 0x764d258ceed0>
+
+    def test_rejects_empty_operation_name(self) -> None:
+        # Bug-fix coverage for the fallback implementation only: previously
+        # the duplicated `not (operation_name is not None)` check let empty
+        # strings slip through. Now empty strings raise. The full
+        # implementation (data_io.reproducibility) is wave-5 scope and not
+        # touched here.
+>       if lu._USING_FULL_IMPLEMENTATION:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'shared.python.logging_pkg.logger_utils' has no attribute '_USING_FULL_IMPLEMENTATION'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/shared/wave7_python_core/test_logger_utils.py:109: AttributeError
+_______ test_render_pair_figures_cross_protocol_passes_ordered_protocols _______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2348/test_render_pair_figures_cross0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x764d0447a600>
+
+    def test_render_pair_figures_cross_protocol_passes_ordered_protocols(
+        tmp_path, monkeypatch
+    ):
+        first = _fixture_ref(
+            "pitching_wedge_lean0_curve2_rotation1_combined2",
+            club="pitching_wedge",
+            lean=0.0,
+            rotation=1.0,
+            protocol="original_primary/1",
+        )
+        first["config"]["target_x_m"] = None  # Within-Lean Nominal Target
+
+        second = _fixture_ref(
+            "pitching_wedge_lean5_curve2_rotation1_combined2",
+            club="pitching_wedge",
+            lean=5.0,
+            rotation=2.0,
+            protocol="pw-control-face-bounds/1",
+        )
+        second["config"]["target_x_m"] = 180.0  # Fixed-Target Control
+
+        for ref in (first, second):
+            root = tmp_path / ref["cell"]
+            cell_dir = root / ref["cell"]
+            cell_dir.mkdir(parents=True)
+            (cell_dir / "flight_samples.json").write_text(
+                json.dumps(
+                    {
+                        "trajectories": {
+                            p: [[[0.0, 0.0], [180.0, 0.0]]]
+                            for p in ("Straight", "Draw", "Fade")
+                        }
+                    }
+                )
+            )
+            ref["source_root"] = str(root)
+
+        common_endpoints = {
+            p: [(i, 180.0 + i, 0.1 * i) for i in range(10)]
+            for p in ("Straight", "Draw", "Fade")
+        }
+        monkeypatch.setattr(
+            figures, "_supported_endpoints", lambda *args: (common_endpoints, {})
+        )
+
+        social_calls = []
+
+        def fake_social_density(point_sets, output_stem, **kwargs):
+            social_calls.append(kwargs)
+            out = {}
+            for p in ("straight", "draw", "fade"):
+                for ext in ("png", "pdf", "svg"):
+                    path = output_stem.with_name(f"{output_stem.name}_{p}.{ext}")
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(b"dummy")
+                    out[f"{p}_{ext}"] = path
+            return out
+
+        monkeypatch.setattr(figures, "write_pair_social_density", fake_social_density)
+
+        pair = {
+            "comparison_kind": "curve_strength",
+            "first": first,
+            "second": second,
+            "target_x_m": 180.0,
+        }
+        figures._render_pair_figures(pair, tmp_path / "comparisons")
+
+        assert len(social_calls) == 1
+        kwargs = social_calls[0]
+        assert kwargs["source_protocols"] == (
+            "original_primary/1",
+            "pw-control-face-bounds/1",
+        )
+        assert kwargs["target_modes"] == (
+            "Within-Lean Nominal Target",
+            "Fixed-Target Control",
+        )
+        assert kwargs["target_point_m"] == (180.0, 0.0)
+        assert "context" not in kwargs
+
+        # Missing actual protocol should fail clearly without protocol_id fallback
+        bad_pair_first = dict(first)
+        bad_pair_first.pop("source_protocol", None)
+        bad_pair_first["protocol_id"] = "original_primary/1"
+        with pytest.raises(ValueError, match="pair references lack source protocol"):
+>           figures._render_pair_figures(
+                {
+                    "comparison_kind": "curve_strength",
+                    "first": bad_pair_first,
+                    "second": second,
+                    "target_x_m": 180.0,
+                },
+                tmp_path / "comparisons_bad",
+            )
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_social_integration.py:650:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:866: in _render_pair_figures_core
+    _write_pair_density_figure(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+point_sets = {'Straight · Curve ×2': [(180.0, 0.0), (181.0, 0.1), (182.0, 0.2), (183.0, 0.30000000000000004), (184.0, 0.4), (185.0,...· Curve ×2': [(180.0, 0.0), (181.0, 0.1), (182.0, 0.2), (183.0, 0.30000000000000004), (184.0, 0.4), (185.0, 0.5), ...]}
+first = {'cell': 'pitching_wedge_lean0_curve2_rotation1_combined2', 'execution_kind': 'unique', 'status': 'completed', 'source...ytest-of-dieterolson/pytest-2348/test_render_pair_figures_cross0/pitching_wedge_lean0_curve2_rotation1_combined2', ...}
+second = {'cell': 'pitching_wedge_lean5_curve2_rotation2_combined2', 'source_protocol': 'pw-control-face-bounds/1', 'execution_kind': 'unique', 'status': 'completed', ...}
+comparison = 'curve_strength', first_label = 'Curve ×2'
+second_label = 'Curve ×2', target_x = 180.0, common_n = 10
+output_stem = PosixPath('/tmp/pytest-of-dieterolson/pytest-2348/test_render_pair_figures_cross0/comparisons_bad/comparisons/curve_st...rotation1_combined2_vs_pw-control-face-bounds_1_pitching_wedge_lean5_curve2_rotation2_combined2_18_0ed73ac69b_density')
+formats = ('png', 'pdf', 'svg')
+
+    def _write_pair_density_figure(
+        point_sets: dict[str, list[tuple[float, float]]],
+        *,
+        first: dict,
+        second: dict,
+        comparison: str,
+        first_label: str,
+        second_label: str,
+        target_x: float,
+        common_n: int,
+        output_stem: Path,
+        formats: tuple[str, ...] = ("png", "pdf", "svg"),
+    ) -> dict[str, Path]:
+        """Plot two conditions in six panels on common bins and density scale."""
+        import matplotlib.pyplot as plt
+        from matplotlib.lines import Line2D
+        from matplotlib.colors import Normalize
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+        estimate = shared_histogram_density(
+            point_sets, bins=64, target_point_m=(target_x, 0.0)
+        )
+        figure = plt.figure(figsize=(16, 9), facecolor="white")
+        canvas = FigureCanvasAgg(figure)
+        renderer = canvas.get_renderer()
+
+        t_title = figure.text(
+            0.06,
+            0.985,
+            "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
+            ha="left",
+            va="top",
+            fontsize=16,
+            fontweight="bold",
+        )
+        y_cursor = t_title.get_window_extent(renderer).y0 / figure.bbox.height
+
+        def _add_density_header(
+            text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 180
+        ) -> Any:
+            nonlocal y_cursor
+            gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
+            wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
+            t = figure.text(
+                0.06,
+                y_cursor - gap_frac,
+                wrapped,
+                ha="left",
+                va="top",
+                fontsize=fontsize,
+            )
+            y_cursor = t.get_window_extent(renderer).y0 / figure.bbox.height
+            return t
+
+        total_n = int(first["config"]["n_shots"])
+        comp_text = (
+            f"{comparison} · Target {target_x:.3f} m · Density uses all "
+            f"{common_n:,}/{total_n:,} shots common to six populations; "
+            f"{min(common_n, 600):,} evenly spaced dots per panel"
+        )
+        _add_density_header(comp_text, fontsize=8.5, gap_pt=5.0, wrap_chars=180)
+
+>       cap1 = f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}"
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'source_protocol'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:463: KeyError
+___________________________ test_check_magic_numbers ___________________________
+
+    def test_check_magic_numbers() -> None:
+        lines = ["x = 3.141 * r", "y = 9.80665 * m", "z = 6.67 * x"]
+        issues = check_magic_numbers(lines, Path("test_file.py"))
+>       assert len(issues) == 3
+E       AssertionError: assert 2 == 3
+E        +  where 2 = len([(1, 'Use math.pi instead of 3.141', 'x = 3.141 * r'), (3, 'Define gravitational constant', 'z = 6.67 * x')])
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/tools/test_code_quality_check.py:128: AssertionError
+_______________________ test_check_magic_numbers_gravity _______________________
+
+    def test_check_magic_numbers_gravity() -> None:
+        lines = ["g = 9.80665"]
+        issues = check_magic_numbers(lines, Path("physics.py"))
+>       assert any("GRAVITY" in i[1] for i in issues)
+E       assert False
+E        +  where False = any(<generator object test_check_magic_numbers_gravity.<locals>.<genexpr> at 0x764d061c5630>)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/tools/test_code_quality_check.py:148: AssertionError
+__________________ TestCheckMagicNumbers.test_detects_gravity __________________
+
+self = <tests.toplevel.wave8_toplevel.test_code_quality_check.TestCheckMagicNumbers object at 0x764d248086b0>
+py_file = PosixPath('/tmp/pytest-of-dieterolson/pytest-2348/test_detects_gravity0/module.py')
+
+    def test_detects_gravity(self, py_file: Path) -> None:
+        issues = cqc.check_magic_numbers(["g = 9.80665"], py_file)
+>       assert any("GRAVITY" in m for _, m, _ in issues)
+E       assert False
+E        +  where False = any(<generator object TestCheckMagicNumbers.test_detects_gravity.<locals>.<genexpr> at 0x764d0619bae0>)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/toplevel/wave8_toplevel/test_code_quality_check.py:135: AssertionError
+__________________________ TestDrakeSimApp.test_init ___________________________
+
+self = <tests.unit.engines.physics_engines.drake.test_drake_gui_app.TestDrakeSimApp object at 0x764d24440fe0>
+mock_timer_cls = <MagicMock name='QTimer' id='130073153359648'>
+mock_sync = <MagicMock name='_sync_kinematic_sliders' id='130073153370688'>
+mock_setup_ui = <MagicMock name='_setup_ui' id='130073153496192'>
+mock_init_sim = <MagicMock name='_init_simulation' id='130073153538432'>
+mock_scan = <MagicMock name='_scan_urdf_models' id='130073153542272'>
+mock_base_init = <MagicMock name='__init__' id='130073153499120'>
+
+    @patch(
+        "src.engines.physics_engines.drake.python.src.drake_gui_app.SimulationGUIBase.__init__"
+    )
+    @patch.object(DrakeSimApp, "_scan_urdf_models")
+    @patch.object(DrakeSimApp, "_init_simulation")
+    @patch.object(DrakeSimApp, "_setup_ui")
+    @patch.object(DrakeSimApp, "_sync_kinematic_sliders")
+    @patch("src.engines.physics_engines.drake.python.src.drake_gui_app.QtCore.QTimer")
+    def test_init(
+        self,
+        mock_timer_cls: MagicMock,
+        mock_sync: MagicMock,
+        mock_setup_ui: MagicMock,
+        mock_init_sim: MagicMock,
+        mock_scan: MagicMock,
+        mock_base_init: MagicMock,
+    ) -> None:
+        """Test application initialization."""
+        mock_timer = MagicMock()
+        mock_timer_cls.return_value = mock_timer
+
+>       DrakeSimApp()
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/engines/physics_engines/drake/test_drake_gui_app.py:42:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/engines/physics_engines/drake/python/src/drake_gui_app.py:194: in __init__
+    install_force_color_menu(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+window = <src.engines.physics_engines.drake.python.src.drake_gui_app.DrakeSimApp object at 0x764d041c25d0>
+targets = <function DrakeSimApp.__init__.<locals>.<lambda> at 0x764d041c2700>
+
+    def install_force_color_menu(
+        window: QMainWindow, targets: Callable[[], Iterable[ForceColorTarget]]
+    ) -> QAction:
+        """Install a validated View menu consistently across native main windows."""
+        if not isinstance(window, QMainWindow) or not callable(targets):
+            raise TypeError("main window and callable targets are required")
+>       menu_bar = window.menuBar()
+                   ^^^^^^^^^^^^^^^^
+E       RuntimeError: super-class __init__() of type DrakeSimApp was never called
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/body_part_viz/force_color_controls.py:42: RuntimeError
+_________________ test_opensim_physics_engine_load_from_string _________________
+
+self = <MagicMock name='load_from_path' id='130073066901280'>
+args = ('/tmp/fake.osim',), kwargs = {}
+
+    def assert_called_once_with(self, /, *args, **kwargs):
+        """assert that the mock was called exactly once and that that call was
+        with the specified arguments."""
+        if not self.call_count == 1:
+            msg = ("Expected '%s' to be called once. Called %s times.%s"
+                   % (self._mock_name or 'mock',
+                      self.call_count,
+                      self._calls_repr()))
+>           raise AssertionError(msg)
+E           AssertionError: Expected 'load_from_path' to be called once. Called 0 times.
+
+/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py:960: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+mock_named_temp = <MagicMock name='NamedTemporaryFile' id='130073067351088'>
+engine = OpenSimPhysicsEngine(model=TestModel, status=initialized)
+
+    @patch("tempfile.NamedTemporaryFile")
+    def test_opensim_physics_engine_load_from_string(mock_named_temp, engine) -> None:
+        # Setup mock temp file
+        mock_tmp = MagicMock(spec=["name", "write", "flush"])
+        mock_tmp.name = "/tmp/fake.osim"
+        # context manager return
+        mock_named_temp.return_value.__enter__.return_value = mock_tmp
+
+        # Mock load_from_path to avoid real loading logic
+        with patch.object(engine, "load_from_path") as mock_load:
+            engine.load_from_string("<osim/>")
+>           mock_load.assert_called_once_with("/tmp/fake.osim")
+E           AssertionError: Expected 'load_from_path' to be called once. Called 0 times.
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/test_opensim_physics_engine.py:115: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
+    from ...utils.state_manager import state_manager
+
+src/shared/python/signal_toolkit/__init__.py:43
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
+    from .polynomial_generator import PolynomialGeneratorWidget
+
+src/shared/python/signal_toolkit/__init__.py:52
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
+    from .widget import SignalToolkitWidget
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+src/shared/python/motion_matching/loaders/c3d_body.py:36
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
+    from ._optical import fill_short_gaps, y_up_to_z_up
+
+src/shared/python/motion_pipeline/orchestrator.py:147
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class PipelineConfig(BaseModel):
+
+src/shared/python/motion_pipeline/api.py:39
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class PipelineRequest(BaseModel):
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
+    import zmq.eventloop.ioloop
+
+tests/api/test_physics_api.py: 15 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+tests/api/test_physics_api.py: 15 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+tests/api/test_physics_api.py: 15 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_physics_engines_strict_jacobian_standardization_mocked
+tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_get_sensors_implemented
+tests/integration/test_physics_engines_strict.py::TestMuJoCoStrict::test_contact_forces_use_mujoco_grf_sign_convention
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/mujoco_version.py:63: UserWarning: Could not validate MuJoCo version: __version__. Proceeding with fallback Jacobian handling.
+    _check_mujoco_version()
+
+tests/integration/test_physics_engines_strict.py::TestOpenSimStrict::test_inverse_dynamics_implemented
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:226: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = OpenSimPhysicsEngine()
+
+tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_loading_uses_gym
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:258: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_loading_without_sim_raises_and_rolls_back_state
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:275: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_step_uses_env_step_and_preserves_timestep
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:290: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_engines_strict.py::TestMyoSuiteStrict::test_step_uses_last_control_action_when_available
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_engines_strict.py:315: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_interfaces.py::TestPhysicsEngines::test_myosuite_methods
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:56: ExperimentalTierWarning: MyoSuite engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = MyoSuitePhysicsEngine()
+
+tests/integration/test_physics_interfaces.py::TestPhysicsEngines::test_opensim_methods
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/integration/test_physics_interfaces.py:85: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    engine = OpenSimPhysicsEngine()
+
+tests/launchers/test_simulation_guis.py: 1 warning
+tests/ui/tools/launch_monitor/test_gui.py: 25 warnings
+tests/ui/tools/simulation_backends/test_gui.py: 11 warnings
+tests/ui/tools/simulation_backends/test_gui_window.py: 7 warnings
+tests/ui/tools/video_analyzer/test_gui.py: 7 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/integration.py:57: DeprecationWarning: __package__ != __spec__.parent
+    from .theme_manager import ThemeManager
+
+tests/tools/capture_rig/test_gui.py: 223 warnings
+tests/tools/capture_rig/test_guided_capture_acceptance.py: 251 warnings
+tests/tools/terrain_engine/test_gui_coverage.py: 8 warnings
+tests/tools/test_model_explorer_gui.py: 60 warnings
+tests/tools/test_terrain_engine_gui.py: 4 warnings
+tests/unit/tools/model_explorer/test_assembly_panel_gui.py: 5 warnings
+tests/unit/tools/test_necromatcher_gui.py: 35 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/palette.py:110: DeprecationWarning: __package__ != __spec__.parent
+    from .colors import THEME_COLOR_KEYS
+
+tests/tools/capture_rig/test_gui.py: 223 warnings
+tests/tools/capture_rig/test_guided_capture_acceptance.py: 251 warnings
+tests/tools/terrain_engine/test_gui_coverage.py: 8 warnings
+tests/tools/test_model_explorer_gui.py: 60 warnings
+tests/tools/test_terrain_engine_gui.py: 4 warnings
+tests/unit/tools/model_explorer/test_assembly_panel_gui.py: 5 warnings
+tests/unit/tools/test_necromatcher_gui.py: 35 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/vendor/ud-tools/src/shared/python/theme/palette.py:113: DeprecationWarning: __package__ != __spec__.parent
+    from .theme_manager import get_theme_manager
+
+tests/unit/test_opensim_physics_engine.py: 10 warnings
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/test_opensim_physics_engine.py:62: ExperimentalTierWarning: OpenSim engine is in the EXPERIMENTAL tier. API may change without notice; not covered by the core support SLA. See docs/operations/tier-policy.md for tier policy.
+    return OpenSimPhysicsEngine()
+
+tests/unit/tools/model_explorer/test_assembly_panel_gui.py::test_drop_refreshes_the_editor_window_3d_preview
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_pytest/unraisableexception.py:67: PytestUnraisableExceptionWarning: Exception ignored in: <function Renderer.__del__ at 0x764d6efb1a80>
+
+  Traceback (most recent call last):
+    File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/mujoco/rendering/classic/renderer.py", line 339, in __del__
+      self.close()
+    File "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/mujoco/rendering/classic/renderer.py", line 324, in close
+      if self._gl_context:
+         ^^^^^^^^^^^^^^^^
+  AttributeError: 'Renderer' object has no attribute '_gl_context'
+
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnraisableExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=================================== XPASSES ====================================
+[suite-markers:report-only] 1901 collected test(s) carry no suite marker (one of ['benchmark', 'e2e', 'gate', 'integration', 'live_simulation', 'motion_pipeline', 'parity', 'perf', 'scientific', 'slow', 'smoke', 'unit']); see issue #7158.
+
+--------------------------------------------------------------------------------------------------------- benchmark: 10 tests ----------------------------------------------------------------------------------------------------------
+Name (time in ns)                             Min                        Max                   Mean                  StdDev                 Median                   IQR            Outliers  OPS (Kops/s)            Rounds  Iterations
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_get_club_config                      91.1611 (1.0)         755,452.4314 (1.16)        239.6174 (1.0)        3,382.0585 (1.0)         152.7841 (1.0)         31.1081 (1.0)     235;28340    4,173.3196 (1.0)      193686          37
+test_gravity_on_slope_cached             105.3698 (1.16)        650,791.0503 (1.0)         525.7287 (2.19)       5,505.8324 (1.63)        243.7801 (1.60)        52.7198 (1.69)     272;3070    1,902.1217 (0.46)      42093         100
+test_gravity_on_slope                    230.9680 (2.53)      2,699,823.9919 (4.15)        456.1688 (1.90)       8,461.4324 (2.50)        395.9867 (2.59)        63.9702 (2.06)     49;11539    2,192.1711 (0.53)     119847           1
+test_air_density_at_altitude             261.9927 (2.87)     13,131,627.9876 (20.18)     1,680.7574 (7.01)      85,615.1754 (25.31)       535.9761 (3.51)       332.0165 (10.67)      24;395      594.9699 (0.14)      98367           1
+test_section_inertia                     270.0253 (2.96)      3,725,609.9749 (5.72)        585.1215 (2.44)      18,891.8548 (5.59)        436.0336 (2.85)        51.9794 (1.67)       8;5402    1,709.0466 (0.41)      51170           1
+test_physics_benchmarks_spin_decay       288.0115 (3.16)     10,042,948.9976 (15.43)       690.7153 (2.88)      34,199.5297 (10.11)       441.0394 (2.89)        85.9727 (2.76)     17;14504    1,447.7746 (0.35)     144593           1
+test_section_area                        292.9592 (3.21)      3,317,637.9511 (5.10)        627.6943 (2.62)      18,074.5005 (5.34)        440.0499 (2.88)        81.9564 (2.63)       8;7359    1,593.1321 (0.38)      33876           1
+test_slope_angle_query                 3,826.0478 (41.97)     2,465,386.0019 (3.79)      6,242.2633 (26.05)     16,810.4956 (4.97)      5,793.9906 (37.92)      773.0559 (24.85)    139;3453      160.1983 (0.04)      40982           1
+test_elevation_query                   4,054.9785 (44.48)    62,811,882.0023 (96.52)    10,174.3872 (42.46)    292,767.4452 (86.56)     6,505.9867 (42.58)      592.0301 (19.03)    51;11759       98.2860 (0.02)      48532           1
+test_surface_normal_query              6,660.9937 (73.07)    58,184,869.9949 (89.41)    27,895.9782 (116.42)   505,834.4837 (149.56)   13,559.9985 (88.75)    2,084.9984 (67.02)     61;3991       35.8475 (0.01)      19734           1
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+============================= slowest 20 durations =============================
+44.55s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_layout_visible_captions_and_nonoverlap_at_figsize
+35.34s call     tests/tools/shot_pattern_analysis/test_matched_physics.py::test_toe_strike_and_bulge_change_launch
+31.68s call     tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_pair_figures_cross_protocol_passes_ordered_protocols
+30.94s call     tests/tools/putting_green_gui/test_putting_green_gui.py::test_run_simulation_does_not_error_for_each_preset
+30.93s call     tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_pair_figures_exports_canonical_social_density_with_physical_patterns
+28.51s call     tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py::TestMatchedSwingBrowserWidget::test_export_buttons_trigger_export_dialogs
+19.61s call     tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[pitching_wedge_shaft_only_narrow-pitching_wedge-77.402-2.0-2.0]
+19.50s call     tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_actual_social_fonts_and_axis_legend_clearance[3]
+19.34s call     tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_combined_noise-seven_iron-148.5-5.0-3.8]
+17.65s call     tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_shaft_only_narrow-seven_iron-148.5-4.0-4.0]
+17.30s setup    tests/tools/motion_matching/test_motion_matching_gui.py::test_neural_availability_populated_from_qualified_registry
+16.90s setup    tests/tools/motion_matching/test_motion_matching_gui.py::test_disabling_fallback_is_honored_and_returns_named_reason
+16.82s call     tests/unit/engines/putting_green/test_roll_model_provenance.py::TestResultDocumentsNameTheirModel::test_scatter_results_name_the_model
+16.82s setup    tests/tools/motion_matching/test_motion_matching_gui.py::test_tour_baselines_tab_actions
+16.80s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_panel_titles_and_unavailable_reasons_fit_their_cells[False]
+16.73s call     tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_panel_titles_and_unavailable_reasons_fit_their_cells[True]
+16.42s setup    tests/tools/motion_matching/test_motion_matching_gui.py::test_neural_controls_change_captured_execution_request
+15.91s setup    tests/tools/motion_matching/test_motion_matching_gui.py::test_downswing_experiment_request_binding
+15.13s call     tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py::test_main_tick_neighbors_keep_readable_gutter[77.4-0.02-social]
+15.13s call     tests/tools/motion_matching/test_motion_matching_gui.py::test_get_dockable_ui
+=========================== short test summary info ============================
+SKIPPED [3] tests/unit/motion_matching/conftest.py:371: model_generation.models.pendulum_putter package not available
+SKIPPED [1] tests/tools/ball_flight_gui/test_ball_flight_gui.py:293: pyqtgraph.opengl not available in this environment
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:109: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:118: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:128: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:139: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:149: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:166: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:233: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:242: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:261: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:300: pyqtgraph not available
+SKIPPED [1] tests/tools/golf_environment/test_gui.py:313: pyqtgraph not available
+SKIPPED [1] tests/tools/putting_green_gui/test_putting_green_gui.py:96: pyqtgraph.opengl not installed
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: could not import 'pyqtgraph.opengl': No module named 'pyqtgraph'
+SKIPPED [1] tests/unit/motion_matching/conftest.py:371: could not import 'torch': No module named 'torch'
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:74: pinocchio not installed/broken (not_installed)
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:80: pinocchio not installed/broken (not_installed)
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:111: pinocchio not installed/broken (not_installed)
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:127: pinocchio not installed/broken (not_installed)
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:150: pinocchio not installed/broken (not_installed)
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:168: pinocchio not installed/broken (not_installed)
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:193: pinocchio not installed/broken (not_installed)
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:198: pinocchio not installed/broken (not_installed)
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:214: pinocchio not installed/broken (not_installed)
+SKIPPED [1] tests/unit/test_pinocchio_physics_engine.py:229: pinocchio not installed/broken (not_installed)
+XPASS tests/unit/test_shared_physics_parameters.py::TestPhysicsParameterRegistry::test_shared_physics_parameters_export_import_json - builtins.open mock races with log-file open in parallel test run (#1949)
+ERROR tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_initialization
+ERROR tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_load_from_path
+ERROR tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_load_from_string
+ERROR tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_step
+ERROR tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_get_state
+ERROR tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_compute_mass_matrix
+ERROR tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_compute_inverse_dynamics
+FAILED tests/api/test_physics_api.py::TestCameraPresetAPI::test_valid_preset_returns_200
+FAILED tests/api/test_physics_api.py::TestCameraPresetAPI::test_all_presets_return_200
+FAILED tests/api/test_physics_api.py::TestCameraPresetAPI::test_invalid_preset_returns_422
+FAILED tests/api/test_physics_api.py::TestSpeedControlAPI::test_set_speed_returns_200
+FAILED tests/api/test_physics_api.py::TestSpeedControlAPI::test_default_speed
+FAILED tests/api/test_physics_api.py::TestSpeedControlAPI::test_invalid_speed_rejected
+FAILED tests/api/test_physics_api.py::TestRecordingAPI::test_start_recording
+FAILED tests/api/test_physics_api.py::TestRecordingAPI::test_stop_recording
+FAILED tests/api/test_physics_api.py::TestRecordingAPI::test_export_empty - a...
+FAILED tests/api/test_physics_api.py::TestSimulationStatsAPI::test_stats_returns_200
+FAILED tests/api/test_physics_api.py::TestActuatorEndpoints::test_get_actuators_no_engine_returns_400
+FAILED tests/api/test_physics_api.py::TestActuatorEndpoints::test_post_actuators_no_engine_returns_400
+FAILED tests/api/test_physics_api.py::TestForceEndpoints::test_get_forces_no_engine_returns_400
+FAILED tests/api/test_physics_api.py::TestMetricsEndpoints::test_get_metrics_no_engine_returns_400
+FAILED tests/api/test_physics_api.py::TestControlFeaturesEndpoints::test_get_features_no_engine_returns_400
+FAILED tests/scripts/test_check_test_layout.py::test_no_legacy_root_test_allowlist_remains
+FAILED tests/shared/wave7_model_generation/test_format_utils.py::test_validate_mjcf_malformed_xml
+FAILED tests/shared/wave7_python_core/test_logger_utils.py::TestLogExecutionTime::test_rejects_empty_operation_name
+FAILED tests/tools/shot_pattern_analysis/test_matched_social_integration.py::test_render_pair_figures_cross_protocol_passes_ordered_protocols
+FAILED tests/tools/test_code_quality_check.py::test_check_magic_numbers - Ass...
+FAILED tests/tools/test_code_quality_check.py::test_check_magic_numbers_gravity
+FAILED tests/toplevel/wave8_toplevel/test_code_quality_check.py::TestCheckMagicNumbers::test_detects_gravity
+FAILED tests/unit/engines/physics_engines/drake/test_drake_gui_app.py::TestDrakeSimApp::test_init
+FAILED tests/unit/test_opensim_physics_engine.py::test_opensim_physics_engine_load_from_string
+24 failed, 3822 passed, 29 skipped, 26 deselected, 1 xpassed, 1307 warnings, 7 errors in 2044.37s (0:34:04)
+
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+src/shared/python/motion_matching/loaders/c3d_body.py:36
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_matching/loaders/c3d_body.py:36: DeprecationWarning: src.shared.python.motion_matching.loaders._optical is deprecated; import from src.shared.python.motion_matching.loaders._marker_clusters instead. The old module name will be removed in a future release.
+    from ._optical import fill_short_gaps, y_up_to_z_up
+
+src/shared/python/signal_toolkit/__init__.py:43
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
+    from .polynomial_generator import PolynomialGeneratorWidget
+
+src/shared/python/signal_toolkit/__init__.py:52
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
+    from .widget import SignalToolkitWidget
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+src/shared/python/motion_pipeline/orchestrator.py:147
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/orchestrator.py:147: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class PipelineConfig(BaseModel):
+
+src/shared/python/motion_pipeline/api.py:39
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/motion_pipeline/api.py:39: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class PipelineRequest(BaseModel):
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/meshcat/servers/zmqserver.py:18: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
+    import zmq.eventloop.ioloop
+
+src/shared/python/config/model_registry.py:242
+src/shared/python/config/model_registry.py:242
+src/shared/python/config/model_registry.py:242
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:242: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+src/shared/python/config/model_registry.py:413
+src/shared/python/config/model_registry.py:413
+src/shared/python/config/model_registry.py:413
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:413: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+src/shared/python/config/model_registry.py:459
+src/shared/python/config/model_registry.py:459
+src/shared/python/config/model_registry.py:459
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/model_registry.py:459: DeprecationWarning: __package__ != __spec__.parent
+    from ..core import setup_logging
+
+scripts/research/proximal_distal_energy/run_experiments.py:49
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/scripts/research/proximal_distal_energy/run_experiments.py:49: DeprecationWarning: DynamicsProvider is deprecated and will be removed in a future release; use EquationsOfMotionProvider instead.
+    from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
+
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
+    from ...utils.state_manager import state_manager
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/qpsolvers/solvers/__init__.py:1087
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/qpsolvers/solvers/__init__.py:1087: UserWarning: no QP solver found on your system, you can install solvers from PyPI by ``pip install qpsolvers[open_source_solvers]``
+    warnings.warn(
+
+tests/unit/motion_matching/test_full_body_markers.py:13
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/motion_matching/test_full_body_markers.py:13: DeprecationWarning: src.engines.physics_engines.mujoco.python.full_body_markers is deprecated; import from src.engines.physics_engines.mujoco.python.full_body_ik or src.shared.python.motion_matching.full_body_ik instead.
+    from src.engines.physics_engines.mujoco.python import full_body_markers as module
+
+tests/unit/motion_matching/test_full_body_simulation.py:11
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/motion_matching/test_full_body_simulation.py:11: DeprecationWarning: src.engines.physics_engines.mujoco.python.full_body_simulation is deprecated; import from src.shared.python.motion_matching.full_body_forward_dynamics instead.
+    from src.engines.physics_engines.mujoco.python import full_body_simulation as module
+
+tests/unit/sidekick/test_electrode_and_thermal.py:19
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/unit/sidekick/test_electrode_and_thermal.py:19: DeprecationWarning: Using pure-Python ElectrodeAdvancementCalculator
+    _CALC = ElectrodeAdvancementCalculator()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[suite-markers:report-only] 20591 collected test(s) carry no suite marker (one of ['benchmark', 'e2e', 'gate', 'integration', 'live_simulation', 'motion_pipeline', 'parity', 'perf', 'scientific', 'slow', 'smoke', 'unit']); see issue #7158.
+=========================== short test summary info ============================
+SKIPPED [1] tests/heavy_integration/test_pinocchio_diff_ik.py:18: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_force_adapter.py:13: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_force_mapping.py:15: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_pink_adapter_contract.py:31: native Pinocchio/Pink stack unavailable: No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_pink_tasks.py:46: native Pinocchio/Pink stack unavailable: No module named 'pinocchio'
+SKIPPED [1] tests/integration/engines/pinocchio/test_pink_trajectory.py:42: native Pinocchio/Pink stack unavailable: No module named 'pinocchio'
+SKIPPED [1] tests/integration/motion_matching/test_crocoddyl_polynomial.py:38: native Crocoddyl/Pinocchio stack unavailable: No module named 'crocoddyl'
+SKIPPED [1] tests/integration/motion_matching/test_full_body_fit_native.py:21: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/integration/pose_interchange/services/test_pinocchio_real.py:15: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests/launchers/test_golf_suite_launcher.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/launchers/test_launcher_env_injection.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/launchers/test_launcher_model_registry.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/launchers/test_unified_launcher.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/learning/test_rl_base_env.py:10: could not import 'gymnasium': No module named 'gymnasium'
+SKIPPED [1] tests/learning/test_rl_humanoid_envs.py:12: could not import 'gymnasium': No module named 'gymnasium'
+SKIPPED [1] tests/parity/test_simulate_contract_pinocchio.py:47: pinocchio not installed
+SKIPPED [1] tests/research/test_optimize_article_pdf.py:9: could not import 'fitz': No module named 'fitz'
+SKIPPED [1] tests/rust_bindings/test_mesh_convex_hull.py:17: upstream_mesh wheel not installed (run: maturin develop -m rust_core/upstream-mesh/Cargo.toml --features python)
+SKIPPED [1] tests/rust_bindings/test_mesh_decimation_primitives.py:21: upstream_mesh wheel not installed (run: maturin develop -m rust_core/upstream-mesh/Cargo.toml --features python)
+SKIPPED [1] tests/soak/realtime/test_24h_soak.py:52: soak tests gated on SOAK=1 (long-running; nightly only)
+SKIPPED [1] tests/unit/biomechanics/test_multi_muscle_rust_parity.py:14: could not import 'upstream_muscle': No module named 'upstream_muscle'
+SKIPPED [1] tests/unit/biomechanics/test_muscle_analysis.py:8: scikit-learn is required for muscle synergy analysis
+SKIPPED [1] tests/unit/body_part_viz/renderers/test_pyqtgl_renderer.py:22: could not import 'pyqtgraph': No module named 'pyqtgraph'
+SKIPPED [1] tests/unit/codemap_integration/test_codemap_smoke.py:21: codemap extras not installed (missing: ['tree_sitter']); install with `pip install tree-sitter tree-sitter-python blake3`
+SKIPPED [1] tests/unit/engines/drake/test_drake_model.py:26: pydrake not available: No module named 'python.src.drake_golf_model'
+SKIPPED [1] tests/unit/engines/mujoco/test_mjx_evidence_cli.py:11: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/engines/mujoco/test_mjx_knot_optimiser.py:10: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/engines/mujoco/test_mjx_tracking_plant.py:9: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/engines/pinocchio/test_pinocchio_force_torque.py:12: real pinocchio runtime required (found mock/stub)
+SKIPPED [1] tests/unit/engines/test_jaxsim_parameter_gradients.py:22: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/launchers/test_unified_launcher.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/unit/motion_matching/conftest.py:371: PyTorch not installed
+SKIPPED [32] tests/unit/motion_matching/conftest.py:371: could not import 'torch': No module named 'torch'
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/unit/motion_pipeline/matching_completeness/test_inverse_dyn_pinocchio.py:36: pinocchio in sys.modules is a MagicMock — real library absent
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: could not import 'upstream_mocap_preproc': No module named 'upstream_mocap_preproc'
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: could not import 'upstream_mocap_io': No module named 'upstream_mocap_io'
+SKIPPED [11] tests/unit/motion_matching/conftest.py:371: model_generation.models.pendulum_putter package not available
+SKIPPED [1] tests/unit/motion_matching/conftest.py:371: could not import 'pyqtgraph': No module named 'pyqtgraph'
+SKIPPED [3] tests/unit/motion_matching/conftest.py:371: could not import 'upstream_realtime': No module named 'upstream_realtime'
+SKIPPED [1] tests/unit/test_c3d_force_plate.py:17: c3d_reader module not available (requires c3d/ezc3d)
+SKIPPED [1] tests/unit/test_c3d_services.py:27: Could not import C3D apps
+SKIPPED [1] tests/unit/test_golf_suite_launcher.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/unit/test_unified_launcher_coverage.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [1] tests/unit/test_unified_launcher_status.py:13: target module removed in #8831 — tombstone pending post-merge cleanup
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: the VTK/PyVista viz3d extra is optional
+SKIPPED [2] tests/unit/motion_matching/conftest.py:371: could not import 'upstream_urdf': No module named 'upstream_urdf'
+[FAIL] Lint & Format
+       FAIL: ruff format check failed:
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py
+       Would reformat: docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_numeric_review_v1/verify_numeric.py
+       Would reformat: tests/research/test_independent_supplement_audit.py
+       12 files would be reformatted, 133 files already formatted
+[FAIL] Diff Mypy
+       FAIL: diff-scoped mypy exited with code 1
+[FAIL] Affected Tests
+       FAIL: affected tests failed (exit code 1)
+[PASS] Consistency Tests
+[PASS] Semgrep & Import Policy
+       PASS (semgrep not installed; advisory in CI, scan skipped)
+[FAIL] Policy & Fragment Validators
+       FAIL:
+         - docs/research/shot_pattern_analysis/phase2/TURNOVER.md:79 heading: 'Repository Readiness Repair In Progress' -> 'Repository Readiness Repair in Progress'
+         - docs/research/shot_pattern_analysis/phase2/validation/article_candidate_rejection_v1/candidate_p2-article-numeric-expansion-review.md:41 heading: '2. Seventy-Two Pattern Rows (Tables 2, 3, and 4)' -> '2. Seventy-Two Pattern Rows (Tables 2, 3, And 4)'
+         - docs/research/shot_pattern_analysis/phase2/validation/article_candidate_rejection_v1/candidate_p2-article-numeric-expansion-review.md:51 heading: '4. Fixed-Target Across-Lean Controls and Rematching Physics (Tables 6 and 7)' -> '4. Fixed-Target Across-Lean Controls and Rematching Physics (Tables 6 And 7)'
+         - docs/research/shot_pattern_analysis/phase2/validation/control_final_graphics_independent_review_v3/VISUAL_REVIEW.md:1 heading: 'Control v3 Graphics Visual Review' -> 'Control V3 Graphics Visual Review'
+         - docs/research/shot_pattern_analysis/phase2/validation/delivery_readiness_review_v1/AGY_REVIEW.md:26 heading: 'Category A: Actual Actionable Defects (Not covered by active jobs)' -> 'Category A: Actual Actionable Defects (Not Covered by Active Jobs)'
+         - docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v4/astra_driver_details/REVIEW.md:1 heading: 'Primary v4 Driver Detail Review' -> 'Primary V4 Driver Detail Review'
+         - divergence inventory check failed; run with --write to sync
+[FAIL] Fleet Policy Gate
+       FAIL:
+         - shared_scripts/development_log.py exited 1:
+                   Remediation: Include the verifying commit SHA in 'Last verified'.
+               - DEVELOPMENT_LOG.md:2708 [unusable_last_verified]: DL-#8869 'Last verified' has no commit SHA.
+                   Remediation: Include the verifying commit SHA in 'Last verified'.
+               - DEVELOPMENT_LOG.md:2722 [unusable_last_verified]: DL-#9193 'Last verified' has no commit SHA.
+                   Remediation: Include the verifying commit SHA in 'Last verified'.
+               - DEVELOPMENT_LOG.md:2735 [missing_state]: DL-#9349 has no State field.
+                   Remediation: Add '- **State:** <one of ['abandoned', 'in_progress', 'in_review', 'parked', 'proposed', 'shipped']>'.
+               - DEVELOPMENT_LOG.md:2735 [missing_field]: DL-#9349 is missing required field 'State'.
+                   Remediation: Add '- **State:** ...' to DL-#9349.
+               - DEVELOPMENT_LOG.md:2735 [missing_field]: DL-#9349 is missing required field 'Owner'.
+                   Remediation: Add '- **Owner:** ...' to DL-#9349.
+               - DEVELOPMENT_LOG.md [wip_ceiling]: 143 active entries exceeds the ceiling of 75. Work is being started faster than it is finished.
+                   Remediation: Park or ship entries before opening new ones.
+               - DEVELOPMENT_LOG.md [size_ceiling]: Development log exceeds 200000 bytes.
+                   Remediation: Move shipped entries to DEVELOPMENT_LOG_ARCHIVE_<year>.md.
+[PASS] Workflow Lint
+       PASS (no workflow files changed)
+==============================================================
+Pre-PR gates FAILED. Fix issues before pushing.

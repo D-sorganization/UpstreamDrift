@@ -1,0 +1,35 @@
+{
+  "status": "control_hashes_pass_visual_review_pending",
+  "checked_utc": "2026-10-10T10:53:56.191379+00:00",
+  "outputs_verified": 547,
+  "identical_png_count": 176,
+  "changed_png_count": 18,
+  "changed_png_sha256": {
+    "social/comparisons/driver/combined2/Draw/shaft_rotation_sd.png": "212f73fd3baf2a7f049cd03b114ac5288a0c242183bd8ac8e099152929336fc2",
+    "social/comparisons/driver/combined2/Fade/shaft_rotation_sd.png": "fd62080bdf8a25d303c142312f87adfb1f58bfd3d2b61be2c3747c06c2a5bdb1",
+    "social/comparisons/driver/combined2/Straight/shaft_rotation_sd.png": "acf8a9940fcf2f4f8ad73f4b94494f1985b1c6c239630f7e6f72d70ec7252c92",
+    "social/comparisons/driver/shaft_only/Draw/shaft_rotation_sd.png": "df33518293c3b5b7a9f5c27b423a9c0827ed50c432b67bb804c9a7802d55e1ad",
+    "social/comparisons/driver/shaft_only/Fade/shaft_rotation_sd.png": "5ec1192a452f46ba818d000cc059ebe63cae84862965b36199f8c9668898a611",
+    "social/comparisons/driver/shaft_only/Straight/shaft_rotation_sd.png": "36af6bc0b3d646927dad5277740c3f42af51b9cbb4b5e051203fb3d84396d653",
+    "social/comparisons/pitching_wedge/combined2/Draw/shaft_rotation_sd.png": "a9c7c81aebc2aab36ddb1dde50d0f2d410a5793f6d495e36d3d408dc631883ec",
+    "social/comparisons/pitching_wedge/combined2/Fade/shaft_rotation_sd.png": "a6a3d9717471fe3363a70e7c7ae8d4e1dadd160220a18c8fbf8961f144a3e382",
+    "social/comparisons/pitching_wedge/combined2/Straight/shaft_rotation_sd.png": "5466821fec96f7bd5000f4d411f5c5c22feb01594af8317b530af34646e364d1",
+    "social/comparisons/pitching_wedge/shaft_only/Draw/shaft_rotation_sd.png": "f842a496b2eb0462e40bafb1dd6ad1a7c27c99e011b0b221fb64b9fa1d9e3efb",
+    "social/comparisons/pitching_wedge/shaft_only/Fade/shaft_rotation_sd.png": "4e4dda247263a0edcad1d84088094e9d6c25b37816717d613816c26048606da5",
+    "social/comparisons/pitching_wedge/shaft_only/Straight/shaft_rotation_sd.png": "0a8af79cc697e08a4c131d391edac835f1440119de269e4b18e526ce0131bf48",
+    "social/comparisons/seven_iron/combined2/Draw/shaft_rotation_sd.png": "797e0584c2e922191e04528db8d97e240ece5e837aeb51041565e9af60a9fd2a",
+    "social/comparisons/seven_iron/combined2/Fade/shaft_rotation_sd.png": "acf1132aa8e80300565a7c563905096470d5b1228bea45eaf0c654f2fed96c7c",
+    "social/comparisons/seven_iron/combined2/Straight/shaft_rotation_sd.png": "87e6c3f2f36d4575fcf31834e51101f9b2944f49cfd3859c52c0a7e48875e244",
+    "social/comparisons/seven_iron/shaft_only/Draw/shaft_rotation_sd.png": "1cb5e189cf5c9a258ab7393cf94b5bdd146c274ecaab9578e7bfc437152ee2e1",
+    "social/comparisons/seven_iron/shaft_only/Fade/shaft_rotation_sd.png": "ee31dfec17766bf1c2d45e4eef40818660535738336d414a40508a3180d7c12c",
+    "social/comparisons/seven_iron/shaft_only/Straight/shaft_rotation_sd.png": "77ff719a24abce623cf46ea6ce5779a869f0b52c14ed68c35c85db985df4f49e"
+  },
+  "all_csv_byte_identical": true,
+  "primary_independently_revalidated_against_accepted_receipt": true,
+  "primary_outputs_verified": 689,
+  "manifest_sha256": "47ea6e292883ea5958651e6786d5b73f2f463ebd004488d75c77f385036f34fd",
+  "source_changes": [
+    "build_final_figures.py"
+  ],
+  "terminal_receipt_sha256": "b0ee88faff927e1b7779356fbd81fbf569f1e50153039fb1e3cfb1e47867622c"
+}

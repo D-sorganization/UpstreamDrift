@@ -1,0 +1,31 @@
+{
+  "status": "contract_and_report_adapter_checkpoint_not_execution_ready",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "196dd522869ceaa33d63f606b016abcaeabdd0d6cd91f81a103488d225c536d3",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "d651e71b3eb9bf17c08d70118d6b4d9d27aadda9094956614509b987ed28119c",
+    "scripts/research/shot_pattern_analysis/supplement_publication.py": "c482180cdc6bb67b0776a12bbf2da00978c166db752b90aed75d8790f43453ce",
+    "scripts/research/shot_pattern_analysis/supplement_parent_verifier.py": "054565b77c9585d0ea6bf4c19d1d803f2509ccfc1f7659292b2b7d7235cf91ac",
+    "tests/research/test_supplement_publication_revision.py": "4eb2122e826c8137c7942e68235c6f350ca3138ab4adbf5dc692347591fd73c0"
+  },
+  "tests": {
+    "integration_passed": 54,
+    "ruff": "passed",
+    "mypy": "4 source files passed",
+    "diff_check": "passed"
+  },
+  "red_evidence": [
+    "red.txt",
+    "pin-red.txt",
+    "identity-red.txt",
+    "review-gate-red.txt"
+  ],
+  "remaining": [
+    "Public selective renderer callback/adapter and CLI; no execution-ready claim",
+    "Reviewed expansion to academic/social overhead caption scope",
+    "Actual renderer parity/visual qualification and production inventory acceptance",
+    "Independent root review"
+  ],
+  "no_production_outputs_or_sources_modified": true,
+  "no_commits": true,
+  "qualification_gate": "Creation stages candidate only. Separate finalization requires accepted independent visual-and-contract review binding candidate hash, exact source delta, all revised asset hashes and evidence file hashes; public loader rejects candidate-only output."
+}

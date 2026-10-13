@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "tests_passed": 51,
+  "exit_code": 0,
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_gui.py": "91cf57e85c39d46643787bcf7c0f16ef52699b276106cb5b1dd94c66dd6256ab",
+    "src/tools/shot_pattern_analysis/README.md": "53854c73b35c025e862b3336e61160b9a1881afd7cb33b1ae41ae004a1fda2ae",
+    "tests/ui/tools/shot_pattern_analysis/test_matched_gui.py": "fba182a31f262e5b3ec2e72e43d620aade39f115194dfe0b1e6d3c9cad5b2be2",
+    "tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py": "5f89b4821212aca59e93b0d39a95be844369797c7626862e21066b1403d92bb9",
+    "src/tools/shot_pattern_analysis/gui.py": "7e43fbcc0c2a532883bbd30b1802624e9636ebe4f5e0cbfe9c74b4f0cbfc2e27"
+  },
+  "log_sha256": "4efcc5706bbfeed5a96e3cc7b88b2eb0bb11b0d0321bd9eacddccd0c3a758796",
+  "command": "QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg OPENBLAS_NUM_THREADS=1 /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest -o addopts='' -q tests/ui/tools/shot_pattern_analysis/test_matched_gui.py tests/ui/tools/shot_pattern_analysis/test_matched_sg_precision.py tests/ui/tools/shot_pattern_analysis/test_embed_adapter.py",
+  "scope": "Post-merge GUI regression verification; no new scientific qualification."
+}

@@ -1,0 +1,29 @@
+{
+  "status": "contract_and_report_adapter_checkpoint_not_execution_ready",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "196dd522869ceaa33d63f606b016abcaeabdd0d6cd91f81a103488d225c536d3",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "d651e71b3eb9bf17c08d70118d6b4d9d27aadda9094956614509b987ed28119c",
+    "scripts/research/shot_pattern_analysis/supplement_publication.py": "fd4311b87eb2f843abb74941939c08be0d9a6db934c4eb0143080ff53bb5bbbf",
+    "scripts/research/shot_pattern_analysis/supplement_parent_verifier.py": "054565b77c9585d0ea6bf4c19d1d803f2509ccfc1f7659292b2b7d7235cf91ac",
+    "tests/research/test_supplement_publication_revision.py": "ac3a189e42e7cf5892ec410b4d2c9c193d9a27a306fb0639a2df705d86d247cf"
+  },
+  "tests": {
+    "integration_passed": 47,
+    "core_final_passed": 20,
+    "ruff": "passed",
+    "mypy": "4 source files passed"
+  },
+  "red_evidence": [
+    "red.txt",
+    "pin-red.txt",
+    "identity-red.txt"
+  ],
+  "remaining": [
+    "Public selective renderer callback integration and saved-pair preparation adapter",
+    "CLI with pinned verifier binding and reviewed expanded figure-kind scope",
+    "Actual renderer parity/visual qualification and production inventory acceptance",
+    "Independent parent review before any real child rendering"
+  ],
+  "no_production_outputs_or_sources_modified": true,
+  "no_commits": true
+}

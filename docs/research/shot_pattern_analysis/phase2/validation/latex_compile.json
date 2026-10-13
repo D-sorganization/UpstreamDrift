@@ -1,0 +1,7 @@
+{
+  "status": "unverified_toolchain_unavailable",
+  "source": "matched_delivery_reference.tex",
+  "compiler": "Codex built-in Tectonic",
+  "reason": "Required default_bundle_v33 archive index is not cached and network fetch failed.",
+  "attempts": 1
+}

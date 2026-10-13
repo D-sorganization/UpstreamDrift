@@ -1,0 +1,74 @@
+[
+  {
+    "command": [
+      "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+      "-m",
+      "src.tools.shot_pattern_analysis.matched_supplement",
+      "pw_primary_face",
+      "docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+      "--stage",
+      "final",
+      "--shots",
+      "10000",
+      "--acceptance",
+      "docs/research/shot_pattern_analysis/phase2/supplement_final_acceptance.json",
+      "--shard-index",
+      "0",
+      "--shard-count",
+      "2",
+      "--figures",
+      "none"
+    ],
+    "started": "2026-10-10T01:19:38.579351+00:00",
+    "finished": "2026-10-10T01:48:27.070808+00:00",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+      "-m",
+      "src.tools.shot_pattern_analysis.matched_supplement",
+      "pw_control_face",
+      "docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face",
+      "--stage",
+      "final",
+      "--shots",
+      "10000",
+      "--acceptance",
+      "docs/research/shot_pattern_analysis/phase2/supplement_final_acceptance.json",
+      "--shard-index",
+      "0",
+      "--shard-count",
+      "2",
+      "--figures",
+      "none"
+    ],
+    "started": "2026-10-10T01:48:27.071812+00:00",
+    "finished": "2026-10-10T01:53:04.431014+00:00",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+      "-m",
+      "src.tools.shot_pattern_analysis.matched_supplement",
+      "driver_control_speed",
+      "docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed",
+      "--stage",
+      "final",
+      "--shots",
+      "10000",
+      "--acceptance",
+      "docs/research/shot_pattern_analysis/phase2/supplement_final_acceptance.json",
+      "--shard-index",
+      "0",
+      "--shard-count",
+      "2",
+      "--figures",
+      "none"
+    ],
+    "started": "2026-10-10T01:53:04.431456+00:00",
+    "finished": "2026-10-10T01:57:27.034232+00:00",
+    "exit_code": 0
+  }
+]

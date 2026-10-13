@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "scope": "Offscreen UI layout and existing UI regression suite; not final scientific acceptance",
+  "tests": {
+    "passed": 27,
+    "warnings": 7,
+    "command": "QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest tests/ui/tools/shot_pattern_analysis -o addopts='' -q"
+  },
+  "red_evidence": [
+    "Standalone window exceeded requested 760 px height",
+    "Host window expanded to 819 px from requested 760 px",
+    "Correlation header lacked export-field tooltip/readable width"
+  ],
+  "green_evidence": [
+    "Host and standalone fit 1000 x 760; controls scroll; Run remains visible",
+    "All seven correlation headers have readable labels and export-field tooltips",
+    "Root visually reviewed top and correlation screenshots; table and controls retain vertical scrolling"
+  ],
+  "ruff": "passed; final formatting only after passing suite",
+  "mypy": "passed for both GUI sources with Python 3.12 target",
+  "frozen_execution_snapshot": "unchanged, verified after GUI changes",
+  "files_sha256": {
+    "gui_controls_1000x760.png": "ef15840da7745acb6c2e9dccab11d89466f3ef6bd0141f00d6c0a64a20da6e3b",
+    "gui_correlations_1000x760.png": "01d02b775dec8bfed864d1e0b4cf173119a713418df727e54cebb635fd9053e0",
+    "gui_layout_test_log.txt": "43b46455f254f0d0ed05a0ef372cf91a924ba0aba36544b5ba6b4747b9aa07bc"
+  }
+}

@@ -1,0 +1,1398 @@
+{
+  "baseline": {
+    "contract_version": "launch-monitor-strokes-gained-baseline/2.0.0",
+    "baseline_id": "broadie-2011-historical-tour-approx",
+    "version": "table9-full-plus-anchor-reconciled-putting/2",
+    "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf",
+    "license": "Factual values transcribed for analysis; no publication license asserted",
+    "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+    "states": [
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 100.0,
+        "expected_strokes": 2.92,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 120.0,
+        "expected_strokes": 2.99,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 140.0,
+        "expected_strokes": 2.97,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 160.0,
+        "expected_strokes": 2.99,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 180.0,
+        "expected_strokes": 3.05,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 200.0,
+        "expected_strokes": 3.12,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 220.0,
+        "expected_strokes": 3.17,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 240.0,
+        "expected_strokes": 3.25,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 260.0,
+        "expected_strokes": 3.45,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 280.0,
+        "expected_strokes": 3.65,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 300.0,
+        "expected_strokes": 3.71,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 320.0,
+        "expected_strokes": 3.79,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 340.0,
+        "expected_strokes": 3.86,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 360.0,
+        "expected_strokes": 3.92,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 380.0,
+        "expected_strokes": 3.96,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 400.0,
+        "expected_strokes": 3.99,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 420.0,
+        "expected_strokes": 4.02,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 440.0,
+        "expected_strokes": 4.08,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 460.0,
+        "expected_strokes": 4.17,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 480.0,
+        "expected_strokes": 4.28,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 500.0,
+        "expected_strokes": 4.41,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 520.0,
+        "expected_strokes": 4.54,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 540.0,
+        "expected_strokes": 4.65,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 560.0,
+        "expected_strokes": 4.74,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 580.0,
+        "expected_strokes": 4.79,
+        "standard_error": null
+      },
+      {
+        "lie": "tee",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 600.0,
+        "expected_strokes": 4.82,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 10.0,
+        "expected_strokes": 2.18,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 20.0,
+        "expected_strokes": 2.4,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 30.0,
+        "expected_strokes": 2.52,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 40.0,
+        "expected_strokes": 2.6,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 50.0,
+        "expected_strokes": 2.66,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 60.0,
+        "expected_strokes": 2.7,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 70.0,
+        "expected_strokes": 2.72,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 80.0,
+        "expected_strokes": 2.75,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 90.0,
+        "expected_strokes": 2.77,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 100.0,
+        "expected_strokes": 2.8,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 120.0,
+        "expected_strokes": 2.85,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 140.0,
+        "expected_strokes": 2.91,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 160.0,
+        "expected_strokes": 2.98,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 180.0,
+        "expected_strokes": 3.08,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 200.0,
+        "expected_strokes": 3.19,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 220.0,
+        "expected_strokes": 3.32,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 240.0,
+        "expected_strokes": 3.45,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 260.0,
+        "expected_strokes": 3.58,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 280.0,
+        "expected_strokes": 3.69,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 300.0,
+        "expected_strokes": 3.78,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 320.0,
+        "expected_strokes": 3.84,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 340.0,
+        "expected_strokes": 3.88,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 360.0,
+        "expected_strokes": 3.95,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 380.0,
+        "expected_strokes": 4.03,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 400.0,
+        "expected_strokes": 4.11,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 420.0,
+        "expected_strokes": 4.19,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 440.0,
+        "expected_strokes": 4.27,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 460.0,
+        "expected_strokes": 4.34,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 480.0,
+        "expected_strokes": 4.42,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 500.0,
+        "expected_strokes": 4.5,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 520.0,
+        "expected_strokes": 4.58,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 540.0,
+        "expected_strokes": 4.66,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 560.0,
+        "expected_strokes": 4.74,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 580.0,
+        "expected_strokes": 4.82,
+        "standard_error": null
+      },
+      {
+        "lie": "fairway",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 600.0,
+        "expected_strokes": 4.89,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 10.0,
+        "expected_strokes": 2.34,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 20.0,
+        "expected_strokes": 2.59,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 30.0,
+        "expected_strokes": 2.7,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 40.0,
+        "expected_strokes": 2.78,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 50.0,
+        "expected_strokes": 2.87,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 60.0,
+        "expected_strokes": 2.91,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 70.0,
+        "expected_strokes": 2.93,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 80.0,
+        "expected_strokes": 2.96,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 90.0,
+        "expected_strokes": 2.99,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 100.0,
+        "expected_strokes": 3.02,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 120.0,
+        "expected_strokes": 3.08,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 140.0,
+        "expected_strokes": 3.15,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 160.0,
+        "expected_strokes": 3.23,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 180.0,
+        "expected_strokes": 3.31,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 200.0,
+        "expected_strokes": 3.42,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 220.0,
+        "expected_strokes": 3.53,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 240.0,
+        "expected_strokes": 3.64,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 260.0,
+        "expected_strokes": 3.74,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 280.0,
+        "expected_strokes": 3.83,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 300.0,
+        "expected_strokes": 3.9,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 320.0,
+        "expected_strokes": 3.95,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 340.0,
+        "expected_strokes": 4.02,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 360.0,
+        "expected_strokes": 4.11,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 380.0,
+        "expected_strokes": 4.21,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 400.0,
+        "expected_strokes": 4.3,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 420.0,
+        "expected_strokes": 4.4,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 440.0,
+        "expected_strokes": 4.49,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 460.0,
+        "expected_strokes": 4.58,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 480.0,
+        "expected_strokes": 4.68,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 500.0,
+        "expected_strokes": 4.77,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 520.0,
+        "expected_strokes": 4.87,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 540.0,
+        "expected_strokes": 4.96,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 560.0,
+        "expected_strokes": 5.06,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 580.0,
+        "expected_strokes": 5.15,
+        "standard_error": null
+      },
+      {
+        "lie": "rough",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 600.0,
+        "expected_strokes": 5.25,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 0.0,
+        "expected_strokes": 1.0,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 0.05902777777777778,
+        "expected_strokes": 1.0000001690819262,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 0.3333333333333333,
+        "expected_strokes": 1.000450180777824,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 0.6666666666666666,
+        "expected_strokes": 1.007711752283862,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 1.0,
+        "expected_strokes": 1.0474112553265438,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 1.3333333333333333,
+        "expected_strokes": 1.135556935744647,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 1.6666666666666667,
+        "expected_strokes": 1.2416408854435275,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 2.0,
+        "expected_strokes": 1.341864886840378,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 2.3333333333333335,
+        "expected_strokes": 1.428539272838804,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 2.6666666666666665,
+        "expected_strokes": 1.5014531695368882,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 3.0,
+        "expected_strokes": 1.5626098282852154,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 3.3333333333333335,
+        "expected_strokes": 1.6142316491803959,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 3.6666666666666665,
+        "expected_strokes": 1.6582014241174143,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 4.0,
+        "expected_strokes": 1.69599927562016,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 4.333333333333333,
+        "expected_strokes": 1.7287709766852606,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 4.666666666666667,
+        "expected_strokes": 1.7574095798892513,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 5.0,
+        "expected_strokes": 1.7826210593903193,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 5.333333333333333,
+        "expected_strokes": 1.8049718804521524,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 5.666666666666667,
+        "expected_strokes": 1.8249226286116202,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 6.0,
+        "expected_strokes": 1.8428519585125784,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 6.333333333333333,
+        "expected_strokes": 1.859074000639832,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 6.666666666666667,
+        "expected_strokes": 1.8738513178505005,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 7.0,
+        "expected_strokes": 1.8874047667547271,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 7.333333333333333,
+        "expected_strokes": 1.8999211454820735,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 7.666666666666667,
+        "expected_strokes": 1.9115592138448343,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 8.0,
+        "expected_strokes": 1.9224544872361118,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 8.333333333333334,
+        "expected_strokes": 1.9327230879971626,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 8.666666666666666,
+        "expected_strokes": 1.942464860897075,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 9.0,
+        "expected_strokes": 1.9517659071217157,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 9.333333333333334,
+        "expected_strokes": 1.9607006545653123,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 9.666666666666666,
+        "expected_strokes": 1.969333555789747,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 10.0,
+        "expected_strokes": 1.9777204854420085,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 10.333333333333334,
+        "expected_strokes": 1.9859098941192,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 10.666666666666666,
+        "expected_strokes": 1.9939437642945976,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 11.0,
+        "expected_strokes": 2.001858405061451,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 11.333333333333334,
+        "expected_strokes": 2.0096851154838364,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 11.666666666666666,
+        "expected_strokes": 2.0174507408151796,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 12.0,
+        "expected_strokes": 2.0251781414242997,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 12.333333333333334,
+        "expected_strokes": 2.032886590708698,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 12.666666666666666,
+        "expected_strokes": 2.0405921153876108,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 13.0,
+        "expected_strokes": 2.048307789209287,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 13.333333333333334,
+        "expected_strokes": 2.0560439891669713,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 13.666666666666666,
+        "expected_strokes": 2.0638086217102507,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 14.0,
+        "expected_strokes": 2.0716073250960076,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 14.333333333333334,
+        "expected_strokes": 2.07944365289451,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 14.666666666666666,
+        "expected_strokes": 2.0873192427111302,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 15.0,
+        "expected_strokes": 2.095233973371943,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 15.333333333333334,
+        "expected_strokes": 2.1031861131282703,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 15.666666666666666,
+        "expected_strokes": 2.1111724608429174,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 16.0,
+        "expected_strokes": 2.119188481615424,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 16.333333333333332,
+        "expected_strokes": 2.1272284378744026,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 16.666666666666668,
+        "expected_strokes": 2.1352855166035387,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 17.0,
+        "expected_strokes": 2.1433519530674165,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 17.333333333333332,
+        "expected_strokes": 2.151419151158446,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 17.666666666666668,
+        "expected_strokes": 2.1594778002919326,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 18.0,
+        "expected_strokes": 2.167517988628412,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 18.333333333333332,
+        "expected_strokes": 2.1755293122964496,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 18.666666666666668,
+        "expected_strokes": 2.1835009802210497,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 19.0,
+        "expected_strokes": 2.191421914128358,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 19.333333333333332,
+        "expected_strokes": 2.199280843292193,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 19.666666666666668,
+        "expected_strokes": 2.2070663936077413,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 20.0,
+        "expected_strokes": 2.2147671706181256,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 20.333333333333332,
+        "expected_strokes": 2.2223718361762255,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 20.666666666666668,
+        "expected_strokes": 2.2298691784929106,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 21.0,
+        "expected_strokes": 2.2372481753998263,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 21.333333333333332,
+        "expected_strokes": 2.2444980507363694,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 21.666666666666668,
+        "expected_strokes": 2.251608323853258,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 22.0,
+        "expected_strokes": 2.258568852306254,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 22.333333333333332,
+        "expected_strokes": 2.265369867890698,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 22.666666666666668,
+        "expected_strokes": 2.272002006238652,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 23.0,
+        "expected_strokes": 2.2784563302640173,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 23.333333333333332,
+        "expected_strokes": 2.284724347796122,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 23.666666666666668,
+        "expected_strokes": 2.2907980237880747,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 24.0,
+        "expected_strokes": 2.29666978752267,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 24.333333333333332,
+        "expected_strokes": 2.302332535265624,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 24.666666666666668,
+        "expected_strokes": 2.3077796288339583,
+        "standard_error": null
+      },
+      {
+        "lie": "green",
+        "context": "standard",
+        "target": "hole",
+        "distance_yards": 25.0,
+        "expected_strokes": 2.3130048905568428,
+        "standard_error": null
+      }
+    ]
+  },
+  "source_pdf_sha256": "f22c305ae47f3f2973882d16852b6f43dbde577c5e1c11b12bcb19d2956699e7",
+  "derivation": "Broadie 2011 Appendix A Table 9 factual tee/fairway/rough knots; approximate reconciled putting benchmark"
+}

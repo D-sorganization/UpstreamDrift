@@ -1,0 +1,29 @@
+{
+  "schema": "plot-source-equivalence/1",
+  "baseline_commit": "4fc22c694404217208534b78308d31ea8985e7d3",
+  "files": {
+    "src/tools/shot_pattern_analysis/density.py": {
+      "before_sha256": "127d1d249203efbddb3152e668e270dc54be5857e97377a344edc9d543c2d3ce",
+      "after_sha256": "d444779f6ba6179e0fd87348c9b60f901a853e4558afa4cae3e732ff675640ad",
+      "exact_ast_equal": false,
+      "normalized_ast_equal": true
+    },
+    "src/tools/shot_pattern_analysis/academic_plots.py": {
+      "before_sha256": "5822f2c2dd701582908f0157f98c093d1164c5ebe68b865e24bd94fe796f889c",
+      "after_sha256": "246b891faaa6e3512ecb9685d6cc6a84e2bea3ccadd1f0030a7afa5671978944",
+      "exact_ast_equal": true,
+      "normalized_ast_equal": true
+    },
+    "src/tools/shot_pattern_analysis/matched_report_plots.py": {
+      "before_sha256": "99753f1624d3b33716a4bebaf44517281f3ac662cc1fca12176abbc75752a377",
+      "after_sha256": "72515aef38a1c72b740f0c70a770a4c7db1124a62b4514bb424af7124d6dd8fc",
+      "exact_ast_equal": true,
+      "normalized_ast_equal": true
+    }
+  },
+  "density_comparisons_exact": 84,
+  "numpy_version": "2.2.6",
+  "script_sha256": "dfcf5bb441911dcb854f84a360ff5f3c78348f56aad2d9c00b51c5973c730c62",
+  "scope": "Isolated worktree only; no original execution snapshot rewritten",
+  "pass": true
+}

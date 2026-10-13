@@ -1,0 +1,59 @@
+{
+  "python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+  "module_files": {
+    "shared.python.launch_monitor.strokes_gained": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py",
+      "sha256": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1"
+    },
+    "shared.python.launch_monitor.strokes_gained_types": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained_types.py",
+      "sha256": "bf224159d8d3432f87e438ca0944ebde6cadd6052813a2dfeb52bcf68f043e2d"
+    },
+    "shared.python.logging_pkg.logging_config": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools/src/shared/python/logging_pkg/logging_config.py",
+      "sha256": "f87179d03ab2565ba0c270cca604f07d52904bff569af9dff5301f94d29e5de3"
+    },
+    "src.shared.python.logging_pkg.logging_config": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/vendor/ud-tools/src/shared/python/logging_pkg/logging_config.py",
+      "sha256": "f87179d03ab2565ba0c270cca604f07d52904bff569af9dff5301f94d29e5de3"
+    },
+    "src.tools.shot_pattern_analysis.matched_physics": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/src/tools/shot_pattern_analysis/matched_physics.py",
+      "sha256": "b18bd47a7b5998f69d417143678ffb8adfd7c6c5417b01d2f1ffb8ab29e6dd99"
+    },
+    "src.shared.python.physics.incremental_contact": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/src/shared/python/physics/incremental_contact.py",
+      "sha256": "209ad846191823dc2736a3cc26fe2722b6753c0e5581a38603c28353b03d196e"
+    },
+    "src.shared.python.physics.rigid_contact": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/src/shared/python/physics/rigid_contact.py",
+      "sha256": "09958560e72ddce9c5c80062e13d8e7d2c98f407042e99d9ec54fb3e77ee7f2f"
+    },
+    "src.shared.python.physics.ball_simulator": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/src/shared/python/physics/ball_simulator.py",
+      "sha256": "98d1db42577578501187c3b6042b715f3bb2d2ff77caa4807e26af931e2b1858"
+    },
+    "src.shared.python.physics.rust_kernel": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/src/shared/python/physics/rust_kernel.py",
+      "sha256": "f3ccf4e3bdaa74480edc3069e409169c510839a0649c2419493ce3923c5f1529"
+    },
+    "upstream_physics": {
+      "file": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/__init__.py",
+      "sha256": "9a30f4f30ea7a0c229c2b0175a27335b0245e98118e67b452464a93406169a50"
+    },
+    "src.tools.launch_monitor_model.strokes_gained_baseline": {
+      "file": "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift/src/tools/launch_monitor_model/strokes_gained_baseline.py",
+      "sha256": "24d37729ffeba6c6da973bab6b28094bdc132cbcd71fca21f80ed9c0fc4ed105"
+    }
+  },
+  "actual_scoring_function_and_type_identity": true,
+  "logger_alias_identity": true,
+  "matched_adapter_provider_identity": true,
+  "rust_available": true,
+  "native_files": {
+    "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce"
+  },
+  "tools_pin": "86d0f28b1cc5acf61185e07e320c816c2d005512",
+  "probe_sha256": "208a158f564f368eb3fdb37687aa12c07e414ace8d350e96c9a593e9f3ae1d1d",
+  "scope_note": "An initial probe incorrectly assumed launch_monitor was a general seam-redirect alias. It is not in REDIRECTED_ROOTS. Qualification here follows the real scoring consumer facade; no global alias identity is claimed. A second probe wrongly placed the validating baseline model in Tools strokes_gained_types; the actual facade imports it from UD strokes_gained_baseline, which is checked here."
+}

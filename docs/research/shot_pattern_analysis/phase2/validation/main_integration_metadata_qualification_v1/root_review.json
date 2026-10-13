@@ -1,0 +1,8 @@
+{
+  "independent_review_sha256": "fd444bb2a1ff6a0fc1a8fc88e5be022e892e552db33f26deae80cac470e88191",
+  "context_result_sha256": "80ff1ff062195f88d5964ebf8923db104407c874ae0ee4fe273b2c4038bfbe8c",
+  "unchanged_audited_paths_verified": 68,
+  "context_review_and_views_qualified": true,
+  "handoff_repair_pending": true,
+  "merge_committed": false
+}

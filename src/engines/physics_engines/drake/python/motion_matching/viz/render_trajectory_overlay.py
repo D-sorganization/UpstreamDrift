@@ -33,6 +33,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import NDArray
 
+from ._validation import validate_shared_timegrid
+
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from src.shared.python.motion_matching.club_target import ClubTarget
 
@@ -186,12 +188,7 @@ def render_trajectory_overlay(
             number of samples (the loader/sim contract guarantees they
             do, so this is a hard fail rather than a resample).
     """
-    if fit.time.shape[0] != target.time.shape[0]:
-        msg = (
-            "fit and target must share the canonical timegrid; got "
-            f"{fit.time.shape[0]} vs {target.time.shape[0]} samples"
-        )
-        raise ValueError(msg)
+    validate_shared_timegrid(fit, target)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     resolved_title = title or fit.swing_id or "Trajectory overlay"

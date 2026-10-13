@@ -1,0 +1,250 @@
+FFFFFFFFF                                                                [100%]
+=================================== FAILURES ===================================
+_______ test_toe_gear_force_points_left_of_forward_heading[0.0-0.00635] ________
+
+offset = 0.00635, yaw_deg = 0.0
+
+    @pytest.mark.parametrize("offset", [0.00635, -0.00635])
+    @pytest.mark.parametrize("yaw_deg", [0.0, 25.0, -30.0])
+    def test_toe_gear_force_points_left_of_forward_heading(offset, yaw_deg):
+        yaw = math.radians(yaw_deg)
+        forward = np.array([math.cos(yaw), math.sin(yaw), 0.0])
+        left = np.cross([0.0, 0.0, 1.0], forward)
+        spin = compute_gear_effect_spin(np.array([offset, 0.0]), 45 * forward, forward)
+        # Native Magnus direction is omega cross velocity. Toe is left for RH,
+        # heel is right; this tests the physical direction rather than its label.
+        magnus_direction = np.cross(spin, forward)
+>       assert float(np.dot(magnus_direction, left)) * offset > 0
+E       assert (-50.00625 * 0.00635) > 0
+E        +  where -50.00625 = float(np.float64(-50.00625))
+E        +    where np.float64(-50.00625) = <function dot at 0x7cb3b8489870>(array([  0.     , -50.00625,   0.     ]), array([0., 1., 0.]))
+E        +      where <function dot at 0x7cb3b8489870> = np.dot
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/unit/physics/test_legacy_gear_flight_direction.py:31: AssertionError
+_______ test_toe_gear_force_points_left_of_forward_heading[0.0--0.00635] _______
+
+offset = -0.00635, yaw_deg = 0.0
+
+    @pytest.mark.parametrize("offset", [0.00635, -0.00635])
+    @pytest.mark.parametrize("yaw_deg", [0.0, 25.0, -30.0])
+    def test_toe_gear_force_points_left_of_forward_heading(offset, yaw_deg):
+        yaw = math.radians(yaw_deg)
+        forward = np.array([math.cos(yaw), math.sin(yaw), 0.0])
+        left = np.cross([0.0, 0.0, 1.0], forward)
+        spin = compute_gear_effect_spin(np.array([offset, 0.0]), 45 * forward, forward)
+        # Native Magnus direction is omega cross velocity. Toe is left for RH,
+        # heel is right; this tests the physical direction rather than its label.
+        magnus_direction = np.cross(spin, forward)
+>       assert float(np.dot(magnus_direction, left)) * offset > 0
+E       assert (50.00625 * -0.00635) > 0
+E        +  where 50.00625 = float(np.float64(50.00625))
+E        +    where np.float64(50.00625) = <function dot at 0x7cb3b8489870>(array([ 0.     , 50.00625,  0.     ]), array([0., 1., 0.]))
+E        +      where <function dot at 0x7cb3b8489870> = np.dot
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/unit/physics/test_legacy_gear_flight_direction.py:31: AssertionError
+_______ test_toe_gear_force_points_left_of_forward_heading[25.0-0.00635] _______
+
+offset = 0.00635, yaw_deg = 25.0
+
+    @pytest.mark.parametrize("offset", [0.00635, -0.00635])
+    @pytest.mark.parametrize("yaw_deg", [0.0, 25.0, -30.0])
+    def test_toe_gear_force_points_left_of_forward_heading(offset, yaw_deg):
+        yaw = math.radians(yaw_deg)
+        forward = np.array([math.cos(yaw), math.sin(yaw), 0.0])
+        left = np.cross([0.0, 0.0, 1.0], forward)
+        spin = compute_gear_effect_spin(np.array([offset, 0.0]), 45 * forward, forward)
+        # Native Magnus direction is omega cross velocity. Toe is left for RH,
+        # heel is right; this tests the physical direction rather than its label.
+        magnus_direction = np.cross(spin, forward)
+>       assert float(np.dot(magnus_direction, left)) * offset > 0
+E       assert (-50.006249999999994 * 0.00635) > 0
+E        +  where -50.006249999999994 = float(np.float64(-50.006249999999994))
+E        +    where np.float64(-50.006249999999994) = <function dot at 0x7cb3b8489870>(array([ 21.13355445, -45.32105378,  -0.        ]), array([-0.42261826,  0.90630779,  0.        ]))
+E        +      where <function dot at 0x7cb3b8489870> = np.dot
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/unit/physics/test_legacy_gear_flight_direction.py:31: AssertionError
+______ test_toe_gear_force_points_left_of_forward_heading[25.0--0.00635] _______
+
+offset = -0.00635, yaw_deg = 25.0
+
+    @pytest.mark.parametrize("offset", [0.00635, -0.00635])
+    @pytest.mark.parametrize("yaw_deg", [0.0, 25.0, -30.0])
+    def test_toe_gear_force_points_left_of_forward_heading(offset, yaw_deg):
+        yaw = math.radians(yaw_deg)
+        forward = np.array([math.cos(yaw), math.sin(yaw), 0.0])
+        left = np.cross([0.0, 0.0, 1.0], forward)
+        spin = compute_gear_effect_spin(np.array([offset, 0.0]), 45 * forward, forward)
+        # Native Magnus direction is omega cross velocity. Toe is left for RH,
+        # heel is right; this tests the physical direction rather than its label.
+        magnus_direction = np.cross(spin, forward)
+>       assert float(np.dot(magnus_direction, left)) * offset > 0
+E       assert (50.006249999999994 * -0.00635) > 0
+E        +  where 50.006249999999994 = float(np.float64(50.006249999999994))
+E        +    where np.float64(50.006249999999994) = <function dot at 0x7cb3b8489870>(array([-21.13355445,  45.32105378,   0.        ]), array([-0.42261826,  0.90630779,  0.        ]))
+E        +      where <function dot at 0x7cb3b8489870> = np.dot
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/unit/physics/test_legacy_gear_flight_direction.py:31: AssertionError
+______ test_toe_gear_force_points_left_of_forward_heading[-30.0-0.00635] _______
+
+offset = 0.00635, yaw_deg = -30.0
+
+    @pytest.mark.parametrize("offset", [0.00635, -0.00635])
+    @pytest.mark.parametrize("yaw_deg", [0.0, 25.0, -30.0])
+    def test_toe_gear_force_points_left_of_forward_heading(offset, yaw_deg):
+        yaw = math.radians(yaw_deg)
+        forward = np.array([math.cos(yaw), math.sin(yaw), 0.0])
+        left = np.cross([0.0, 0.0, 1.0], forward)
+        spin = compute_gear_effect_spin(np.array([offset, 0.0]), 45 * forward, forward)
+        # Native Magnus direction is omega cross velocity. Toe is left for RH,
+        # heel is right; this tests the physical direction rather than its label.
+        magnus_direction = np.cross(spin, forward)
+>       assert float(np.dot(magnus_direction, left)) * offset > 0
+E       assert (-50.00625 * 0.00635) > 0
+E        +  where -50.00625 = float(np.float64(-50.00625))
+E        +    where np.float64(-50.00625) = <function dot at 0x7cb3b8489870>(array([-25.003125  , -43.30668285,  -0.        ]), array([ 0.5      ,  0.8660254, -0.       ]))
+E        +      where <function dot at 0x7cb3b8489870> = np.dot
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/unit/physics/test_legacy_gear_flight_direction.py:31: AssertionError
+______ test_toe_gear_force_points_left_of_forward_heading[-30.0--0.00635] ______
+
+offset = -0.00635, yaw_deg = -30.0
+
+    @pytest.mark.parametrize("offset", [0.00635, -0.00635])
+    @pytest.mark.parametrize("yaw_deg", [0.0, 25.0, -30.0])
+    def test_toe_gear_force_points_left_of_forward_heading(offset, yaw_deg):
+        yaw = math.radians(yaw_deg)
+        forward = np.array([math.cos(yaw), math.sin(yaw), 0.0])
+        left = np.cross([0.0, 0.0, 1.0], forward)
+        spin = compute_gear_effect_spin(np.array([offset, 0.0]), 45 * forward, forward)
+        # Native Magnus direction is omega cross velocity. Toe is left for RH,
+        # heel is right; this tests the physical direction rather than its label.
+        magnus_direction = np.cross(spin, forward)
+>       assert float(np.dot(magnus_direction, left)) * offset > 0
+E       assert (50.00625 * -0.00635) > 0
+E        +  where 50.00625 = float(np.float64(50.00625))
+E        +    where np.float64(50.00625) = <function dot at 0x7cb3b8489870>(array([25.003125  , 43.30668285, -0.        ]), array([ 0.5      ,  0.8660254, -0.       ]))
+E        +      where <function dot at 0x7cb3b8489870> = np.dot
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/unit/physics/test_legacy_gear_flight_direction.py:31: AssertionError
+_________ test_public_solver_preserves_correct_gear_increment[0.00635] _________
+
+offset = 0.00635
+
+    @pytest.mark.parametrize("offset", [0.00635, -0.00635])
+    def test_public_solver_preserves_correct_gear_increment(offset):
+        state = _state(offset)
+        params = ImpactParameters()
+        with_gear = ImpactSolverAPI(params=params).solve_pre_impact_state(
+            0.0, state, record=False
+        )
+        without_gear = ImpactSolverAPI(
+            params=replace(params, gear_effect_factor=0.0)
+        ).solve_pre_impact_state(0.0, state, record=False)
+        delta = with_gear.ball_angular_velocity - without_gear.ball_angular_velocity
+        expected = compute_gear_effect_spin(
+            state.impact_offset, state.clubhead_velocity, state.clubhead_orientation
+        )
+        np.testing.assert_allclose(delta, expected, atol=1e-12, rtol=0)
+>       assert delta[2] * offset > 0
+E       assert (np.float64(-50.00625) * 0.00635) > 0
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/unit/physics/test_legacy_gear_flight_direction.py:63: AssertionError
+________ test_public_solver_preserves_correct_gear_increment[-0.00635] _________
+
+offset = -0.00635
+
+    @pytest.mark.parametrize("offset", [0.00635, -0.00635])
+    def test_public_solver_preserves_correct_gear_increment(offset):
+        state = _state(offset)
+        params = ImpactParameters()
+        with_gear = ImpactSolverAPI(params=params).solve_pre_impact_state(
+            0.0, state, record=False
+        )
+        without_gear = ImpactSolverAPI(
+            params=replace(params, gear_effect_factor=0.0)
+        ).solve_pre_impact_state(0.0, state, record=False)
+        delta = with_gear.ball_angular_velocity - without_gear.ball_angular_velocity
+        expected = compute_gear_effect_spin(
+            state.impact_offset, state.clubhead_velocity, state.clubhead_orientation
+        )
+        np.testing.assert_allclose(delta, expected, atol=1e-12, rtol=0)
+>       assert delta[2] * offset > 0
+E       assert (np.float64(50.00625) * -0.00635) > 0
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/unit/physics/test_legacy_gear_flight_direction.py:63: AssertionError
+______ test_public_solver_to_native_flight_curves_toe_left_and_heel_right ______
+
+    def test_public_solver_to_native_flight_curves_toe_left_and_heel_right():
+        pytest.importorskip("upstream_physics", reason="Native flight kernel unavailable")
+        from src.shared.python.physics.ball_launch_conditions import LaunchConditions
+        from src.shared.python.physics.ball_simulator import BallFlightSimulator
+    
+        lateral = []
+        simulator = BallFlightSimulator()
+        for offset in (-0.00635, 0.0, 0.00635):
+            post = ImpactSolverAPI().solve_pre_impact_state(0.0, _state(offset), record=False)
+            velocity = post.ball_velocity
+            spin = post.ball_angular_velocity
+            spin_norm = float(np.linalg.norm(spin))
+            launch = LaunchConditions.from_user_units(
+                velocity=float(np.linalg.norm(velocity)),
+                launch_angle_deg=math.degrees(math.atan2(velocity[2], np.linalg.norm(velocity[:2]))),
+                azimuth_deg=math.degrees(math.atan2(velocity[1], velocity[0])),
+                spin_rate_rpm=spin_norm * 60 / (2 * math.pi),
+                spin_axis=spin / spin_norm,
+            )
+            landing = simulator.simulate_landing(launch, max_time=12.0, dt=0.01)
+            lateral.append(float(landing[1]))
+>       assert lateral[0] < lateral[1] < lateral[2]
+E       assert 11.293335056899744 < 0.0
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/unit/physics/test_legacy_gear_flight_direction.py:88: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py:38: DeprecationWarning: Use of global 'state_manager' is deprecated. Use 'get_state_manager()' instead.
+    from ...utils.state_manager import state_manager
+
+src/shared/python/signal_toolkit/__init__.py:43
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:43: DeprecationWarning: __package__ != __spec__.parent
+    from .polynomial_generator import PolynomialGeneratorWidget
+
+src/shared/python/signal_toolkit/__init__.py:52
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/signal_toolkit/__init__.py:52: DeprecationWarning: __package__ != __spec__.parent
+    from .widget import SignalToolkitWidget
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/physics/test_legacy_gear_flight_direction.py::test_toe_gear_force_points_left_of_forward_heading[0.0-0.00635]
+FAILED tests/unit/physics/test_legacy_gear_flight_direction.py::test_toe_gear_force_points_left_of_forward_heading[0.0--0.00635]
+FAILED tests/unit/physics/test_legacy_gear_flight_direction.py::test_toe_gear_force_points_left_of_forward_heading[25.0-0.00635]
+FAILED tests/unit/physics/test_legacy_gear_flight_direction.py::test_toe_gear_force_points_left_of_forward_heading[25.0--0.00635]
+FAILED tests/unit/physics/test_legacy_gear_flight_direction.py::test_toe_gear_force_points_left_of_forward_heading[-30.0-0.00635]
+FAILED tests/unit/physics/test_legacy_gear_flight_direction.py::test_toe_gear_force_points_left_of_forward_heading[-30.0--0.00635]
+FAILED tests/unit/physics/test_legacy_gear_flight_direction.py::test_public_solver_preserves_correct_gear_increment[0.00635]
+FAILED tests/unit/physics/test_legacy_gear_flight_direction.py::test_public_solver_preserves_correct_gear_increment[-0.00635]
+FAILED tests/unit/physics/test_legacy_gear_flight_direction.py::test_public_solver_to_native_flight_curves_toe_left_and_heel_right
+9 failed, 9 warnings in 28.60s

@@ -1,0 +1,185 @@
+FFFFFF                                                                   [100%]
+=================================== FAILURES ===================================
+_______ test_synthesis_rejects_missing_data_instead_of_inventing_claims ________
+
+    def test_synthesis_rejects_missing_data_instead_of_inventing_claims():
+>       with pytest.raises(ValueError, match='24|selection|resolved'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_synthesis.py:26: Failed
+______________ test_synthesis_actual_numeric_ranges_and_study_sd _______________
+
+    def test_synthesis_actual_numeric_ranges_and_study_sd():
+        cells = _cells()
+        text = '\n'.join(_conclusions_and_synthesis_lines({'resolved_selected_cells': cells}))
+        values = [c['course_scoring']['paired_benefit_vs_straight']['Fade']['estimate']
+                  for c in cells if c['config']['club']['club_id'] == 'seven_iron']
+>       assert format_sg_value(min(values)) in text
+E       AssertionError: assert '+8.934e-04' in '### Conclusions and Geometric Mechanism Synthesis\n\nThe qualified numerical outputs across zero-lean and fixed-targe...ng, not measured player outcomes, empirical golfer tendencies, or evidence of a causal shot-shape advantage in play.\n'
+E        +  where '+8.934e-04' = format_sg_value(0.0008933617862555983)
+E        +    where 0.0008933617862555983 = min([0.0010469558147421583, 0.0008933617862555983, 0.0010669555028524154, 0.0011109014711365183, 0.00255256876498472, 0.001974931464121476, ...])
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_synthesis.py:35: AssertionError
+_______________ test_synthesis_numbers_change_with_actual_input ________________
+
+    def test_synthesis_numbers_change_with_actual_input():
+        cells = _cells()
+        before = _conclusions_and_synthesis_lines({'resolved_selected_cells': cells})
+        changed = copy.deepcopy(cells)
+        for c in changed:
+            if c['config']['club']['club_id'] == 'seven_iron':
+                c['course_scoring']['paired_benefit_vs_straight']['Fade'] = {
+                    'estimate': -0.123, 'lower_95': -0.124, 'upper_95': -0.122}
+        after = _conclusions_and_synthesis_lines({'resolved_selected_cells': changed})
+>       assert before != after
+E       AssertionError: assert ['### Conclusions and Geometric Mechanism Synthesis', '', 'The qualified numerical outputs across zero-lean and fixed-...SG vs Straight), but loses its advantage under extreme combined noise (Combined 2.0° SD: -0.016 SG vs Straight).', ...] != ['### Conclusions and Geometric Mechanism Synthesis', '', 'The qualified numerical outputs across zero-lean and fixed-...SG vs Straight), but loses its advantage under extreme combined noise (Combined 2.0° SD: -0.016 SG vs Straight).', ...]
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_synthesis.py:53: AssertionError
+______ test_resolved_sg_table_uses_scored_population_not_geometric_count _______
+
+    def test_resolved_sg_table_uses_scored_population_not_geometric_count():
+        cell = copy.deepcopy(_cells()[0])
+        cell['paired_comparisons']['paired_n'] = 10000
+        cell['course_scoring']['paired_n'] = 9997
+        text = '\n'.join(_resolved_selected_comparison_lines([cell]))
+>       assert '9,997' in text
+E       AssertionError: assert '9,997' in '### Resolved Zero-Lean Curve and Variability Comparison\n\nThis resolved view integrates the qualified supplemental f... | 1 | 1 | original_primary/1 | 10,000 | +7.462e-05 [-7.104e-05, +2.190e-04] | +6.826e-05 [-5.228e-05, +1.705e-04] |\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_synthesis.py:62: AssertionError
+__________________ test_synthesis_rejects_duplicate_identity ___________________
+
+    def test_synthesis_rejects_duplicate_identity():
+        cells = _cells()
+        cells[-1] = cells[0]
+>       with pytest.raises(ValueError, match='duplicate|selection|identity'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_synthesis.py:69: Failed
+_____ test_resolved_selection_rejects_wrong_supplement_protocol_and_count ______
+
+    def test_resolved_selection_rejects_wrong_supplement_protocol_and_count():
+        cells = _cells()
+        primary = []
+        entries = []
+        for cell in cells:
+            if cell['source_protocol'] == 'pw-primary-face-bounds/1':
+                primary.append({**cell, 'status': 'unavailable'})
+                entries.append({'cell': cell['cell'], 'status':'completed',
+                                'source_protocol':cell['source_protocol'], 'summary':cell})
+            else:
+                primary.append(cell)
+        supplement = {'report': {'unique_cells': entries}}
+        assert len(assemble_resolved_selected_cells({'cells':primary}, supplement)) == 24
+        bad = copy.deepcopy(supplement)
+        bad['report']['unique_cells'][0]['source_protocol'] = 'unreviewed/1'
+>       with pytest.raises(ValueError, match='protocol'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_synthesis.py:88: Failed
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.69s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_missing_data_instead_of_inventing_claims
+0.05s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_numbers_change_with_actual_input
+0.03s call     tests/research/test_shot_pattern_report_synthesis.py::test_resolved_sg_table_uses_scored_population_not_geometric_count
+0.02s call     tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count
+0.02s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+0.02s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_actual_numeric_ranges_and_study_sd
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_numbers_change_with_actual_input
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_missing_data_instead_of_inventing_claims
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_resolved_sg_table_uses_scored_population_not_geometric_count
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_actual_numeric_ranges_and_study_sd
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_resolved_sg_table_uses_scored_population_not_geometric_count
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_actual_numeric_ranges_and_study_sd
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_numbers_change_with_actual_input
+
+(1 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_missing_data_instead_of_inventing_claims
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_actual_numeric_ranges_and_study_sd
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_numbers_change_with_actual_input
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_resolved_sg_table_uses_scored_population_not_geometric_count
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count
+/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.19s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_missing_data_instead_of_inventing_claims
+0.02s teardown tests/research/test_shot_pattern_report_synthesis.py::test_resolved_sg_table_uses_scored_population_not_geometric_count
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_resolved_sg_table_uses_scored_population_not_geometric_count
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_numbers_change_with_actual_input
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count
+
+(9 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_missing_data_instead_of_inventing_claims
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_actual_numeric_ranges_and_study_sd
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_numbers_change_with_actual_input
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_resolved_sg_table_uses_scored_population_not_geometric_count
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count

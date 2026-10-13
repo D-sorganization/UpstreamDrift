@@ -146,13 +146,13 @@ covers it.
 ## Validation
 
 - `src/shared/python/biomech/schemas/model_pack_v1.json` is exercised by
-  `tests/test_model_pack_schema.py`, covering valid model packs for each
+  `tests/unit/biomech/test_model_pack_schema.py`, covering valid model packs for each
   engine, a valid tool pack, and a representative set of invalid
   payloads.
-- `tests/test_model_source_providers.py` verifies the four-tier
+- `tests/unit/config/test_model_source_providers.py` verifies the four-tier
   resolution order for each of the five sibling providers with mocked
   filesystem and importlib state.
-- `tests/test_setup_biomech_workspace.py` smoke-tests the bootstrap
+- `tests/scripts/test_setup_biomech_workspace.py` smoke-tests the bootstrap
   shell script against synthesised sibling checkouts.
 - `src/launchers/launcher_diagnostics.py` reports the active resolution
   tier and the `model_pack.yaml` schema version for each sibling at

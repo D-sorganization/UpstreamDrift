@@ -1,0 +1,8 @@
+{
+  "local_id": "SPA-021",
+  "title": "Recognize Windows Native Extension Binaries in Scientific Provenance",
+  "body": "The canonical source snapshot searches only .so binaries, so an installed PyO3 module with a Windows .pyd extension would fail native provenance discovery before CLI/GUI execution.\n\n## Acceptance Criteria\n\nRecognize native Python extension layouts for direct and packaged .so/.pyd modules through one shared helper. Continue requiring exactly one native binary with an actual file hash. Add red\u2013green tests for both extension layouts and ambiguous/missing binaries. Do not claim real Windows flight validation from path-discovery unit tests.\n\n## Validation\n\nIndependent inspection found the .so-only suffix/glob. Focused cross-platform filename tests plus real Linux CLI/native regressions required.\n\n## Handoff\n\nBranch `codex/shot-pattern-analysis`; all saved experiment/native archive bytes remain unchanged. Keep open until merged implementing PR.",
+  "publication_status": "published",
+  "github_issue_number": 11937,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11937"
+}

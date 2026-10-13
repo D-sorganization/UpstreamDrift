@@ -1,0 +1,66 @@
+{
+  "schema": "partial-report-layout-review/2",
+  "accepted": true,
+  "scope": "Partial report composition only; complete final report and publication are not accepted by this receipt.",
+  "issue": 12129,
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "1cd9aa0a3019c2e525f2acc7b420c8b6c62e862dd76ef5be6beb4eb98a44540e",
+    "scripts/research/shot_pattern_analysis/report_tables.py": "9d7d41f2a97e50a075a06c5d7780f9dffa4474669201bbf47da7674b1c8c0902",
+    "tests/research/test_shot_pattern_report_table_layout.py": "c0151d99a199aa3b36cc2b7530736a3c85d9bf508cca5eb746aab16a9739d406"
+  },
+  "actual_data": {
+    "resolved_cells": 24,
+    "patterns": 72,
+    "exact_selected_pairs": 12,
+    "fixture_matches_saved_source_fields": true
+  },
+  "source_and_input_hashes_rechecked": true,
+  "tests": {
+    "red": "red.txt: two intended failures",
+    "green": "tests.txt: 49 passed",
+    "static": "static_checks.txt; mypy.txt"
+  },
+  "pages": 7,
+  "visual_review": {
+    "all_pages_inspected": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "findings": [
+      "Full condition and ordered A/B protocol/cell identities appear outside compact numerical tables.",
+      "Every selected interval remains at shared formatter precision; numeric tokens are intact and readable.",
+      "Individual endpoint support and common-three scoring populations have separate tables.",
+      "Common-six paired interaction populations and full interval precision are retained.",
+      "No observed clipping or unreadable numeric wrapping in the seven-page partial preview."
+    ],
+    "limits": [
+      "One ordered contrast identity continues across a page boundary; source A/B order remains explicit.",
+      "Final full-report pagination, links, figures and final pipeline provenance remain to be checked after complete assembly."
+    ]
+  },
+  "artifacts_sha256": {
+    "actual_corrected.json": "2d6c263e68d08e9fe2c587a74eeb44cb21ebf6d1dcf73c9cc856fc228c91e14e",
+    "actual_corrected_sections.md": "d390530034e1ea1624913fa2e6a3f70714411c14dad069e2e5b6ba314293aad9",
+    "executed_corrected_check.py.txt": "6fc746e0330056ca9b502aa2c4a171b69467d6d48a6467757522b88fb2735c37",
+    "green_initial.txt": "09d2a19ee81530ca00067a3366bc71d1cc1a2c1fa009365a59a8daf95c33bb07",
+    "mypy.txt": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+    "page-1.png": "031e54d8baa0671d75e0be7bba2d7139a79938d56c82850f986380e2ea96181a",
+    "page-2.png": "41cdbaca2ae639cfe8460e851d9e0700cf19a0717f1d9096399a6984b63ad89a",
+    "page-3.png": "1f990ef7267b1794a16e99c368d53bfe6f2e2c001bdeb18a33d4968c36b8c961",
+    "page-4.png": "36d80699b9cccba2597cc8bf2d67fa38b9f8511bc26681821a46bd94eb3a7fa0",
+    "page-5.png": "a55bb49f425e0dabbce7cf32e6a1c78de25608736895393309910f47d97739c5",
+    "page-6.png": "0d7caca8f04f2663c3209399fc1538d6e325da551d8c92d6c659156aa42e2b0c",
+    "page-7.png": "c8e2cbe598d087efd25374202ddec0b0f9d4766b9372fc2f03d105fa8dc41d5a",
+    "partial_composition.md": "0e2c615a74ee2434322431b9cad1d3035385709991257399cfc16f924182dc54",
+    "partial_composition.pdf": "acd19f0ba3dbb16b973f9bde9adecde358dc8ca4d4c43f2954fa7e6dffcde3c7",
+    "red.txt": "863fc9fa4046c8a4dc606ba4f244b8ab752cc20c01faa9f2b1eb9ab1f0588f6b",
+    "render.txt": "a2e9a3d8de255c2209c12e3af49eebe1b1cc9433a5b3a4a6e52b541dfb1bd301",
+    "static_checks.txt": "707ed434aafa52cbba5d449b47173629e6fea223f04feaaf7d6d56ff285b48ed",
+    "tests.txt": "9faf44fe36fde30b359dce3d97e946c984fceebd9be88a131691a7d2d01ea583"
+  }
+}

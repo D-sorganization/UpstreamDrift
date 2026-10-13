@@ -1,0 +1,11 @@
+{
+  "archive_sha256": "6aa1bae317d6d6285218767437ebee9197399f700300891d4fc6802e825ff1d1",
+  "scope": "Exact raw worker evidence is in worker_evidence_raw.zip; Git text normalization may change standalone readable copies. Original preservation receipt remains unchanged.",
+  "git_text_normalization": [
+    {
+      "path": "mypy_red.txt",
+      "original_sha256": "07c77a531bddd05a60cae2b1dbf6f9e2786f22898eaea1326135908e46c978d6",
+      "git_normalized_sha256": "7afb152c131a4ecb818024610128645c1ab187c7d3bccde92ab03df2a9184939"
+    }
+  ]
+}

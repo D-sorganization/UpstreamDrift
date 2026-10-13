@@ -1,0 +1,12 @@
+{
+  "checked_utc": "2026-10-10T13:33:59.106109+00:00",
+  "candidate_commit": "093ae7ae6c",
+  "tests": "12 passed, 6 warnings in59.19s",
+  "test_command": "QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg OPENBLAS_NUM_THREADS=1 /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest -o addopts= -q tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py tests/tools/shot_pattern_analysis/test_final_layout_review_contracts.py",
+  "ruff_check": "passed for producer and new test",
+  "ruff_format": "2 files already formatted",
+  "source_delta": "hspace0.24 to0.36 only",
+  "test_log_sha256": "92d76659c714847325cb017a0d1e599bfe785c4449a417391bc86006edf941ce",
+  "acceptance": "local regression pass; actual saved-data candidate visual review and full childpublication pending",
+  "main_source_integrated": false
+}

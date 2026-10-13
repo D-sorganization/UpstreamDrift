@@ -1,0 +1,53 @@
+{
+  "schema": "initial-pair-visual-review/1",
+  "accepted": true,
+  "scope": "Two completed PW across-lean sets only",
+  "full_pipeline_accepted": false,
+  "reviewed_at_utc": "2026-10-10T12:00:29.707129+00:00",
+  "pair_checks_sha256": "03e358bc166f5d0a389e2c4ff994a1203eb1844440a292cbcd67e2ede370ddbb",
+  "comparison_json_sha256": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+  "pairs": [
+    {
+      "prefix": "across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve1_rotation1_shaft_only_3acc690a50",
+      "common_supported_n": 10000,
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ]
+    },
+    {
+      "prefix": "across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve1_rotation2_combined2_eb6b85726e",
+      "common_supported_n": 9999,
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ]
+    }
+  ],
+  "asset_count": 32,
+  "pngs_contact_reviewed": 12,
+  "full_size_reviewed_sha256": {
+    "across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve1_rotation1_shaft_only_3acc690a50_density_draw_social.png": "e7e3482835a9466c0b873d34788596b55f20e6c5a21d9f284c8371c5921795fe",
+    "across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve1_rotation2_combined2_eb6b85726e_density.png": "b2544cd88f80aba4dd52bc702c6653834ff2865fb9a742077c4d50ad040c5456",
+    "across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean5_curve1_rotation1_shaft_only_3acc690a50_overhead.png": "e36533733ef25135eed9fc8867984533f0f334797e484ab53cd0a14233aaa1d9",
+    "across_lean_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean10_curve1_rotation2_combined2_eb6b85726e_overhead_social.png": "44c74b4359fee4d4c13f23e1ca5899d85cac32e08a5b4cc63d70aeef356b481f"
+  },
+  "contact_sha256": {
+    "contact_2.jpg": "22f61a460b673fa9205af7324ebda981894bc273548dc511cf4602213c7964f3",
+    "contact_1.jpg": "8610df1e484cc113c0c1ec8637684ca2ae7480f6c42e3f92ef1597233f560044"
+  },
+  "findings": [],
+  "hashes_stable_after_review": true,
+  "limitations": [
+    "Only across_lean sets were complete at selection time; curve_strength and shaft_rotation_sd comparisons are not qualified here.",
+    "PNG visual inspection and SVG caption checks; PDFs inventoried but not individually rendered.",
+    "Final pipeline receipt must reconcile exact reviewed asset hashes."
+  ],
+  "visual_notes": [
+    "No observed clipping, crowded tick labels or metadata/legend collisions.",
+    "Exact ordered lean conditions, original_control/1 protocols, fixed-target basis and 77.40 m target are disclosed on social densities.",
+    "Density captions accurately distinguish all-common-six endpoints from 600 displayed dots per panel.",
+    "Overhead captions disclose six saved raw paths per physical pattern and condition, not paired by shot index, with lateral magnification and shared physical limits.",
+    "Shared scales apply within each social physical-pattern figure; cross-pattern scales may differ explicitly."
+  ]
+}

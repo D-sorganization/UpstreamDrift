@@ -1,0 +1,222 @@
+{
+  "schema": "shot-study-builder-composition-independent-review/1",
+  "status": "accepted_component_contracts",
+  "reviewed_commit": "200fbf028f319b475e5cba6d6144b28ec94afb21",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "54c825b878d9f33453a0c35f3b7901c30161d19b602f8a6dfc903fda976f5f8a",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "c5664e4326ee215ca7c7003107d5c910901a12d20bedb7eb444986288c1aa771",
+    "tests/research/test_shot_pattern_final_report.py": "3a1a799f7543d9fd566e7a95a18b7b9de0b61f48024e3c883918e6a867c43880",
+    "tests/research/test_shot_pattern_final_report_assets.py": "e9043ca09fbf63d95c76cf53947afe316d8374b73a9a780ced0d38421a029578",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "82fe100f03508400e0c87b8a0c6c6055bb02c2bb7c8d10c80b4e9ef4bd1b6ff0",
+    "src/tools/shot_pattern_analysis/matched_supplement_pipeline.py": "f8dbd72014056d133d64252d0ccda8fb1a66654cc17e39e103bf635b58b93510",
+    "src/tools/shot_pattern_analysis/matched_supplement_report.py": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+    "src/tools/shot_pattern_analysis/matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "5c9364f6f8917a0c11beb97f00a341be53c6604dfdabc7556d49f8a0db490634",
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "8b80820cb16b2a4f975a3bfcfa960d30500d3aec3d08fabd6a949bf4f9e37694"
+  },
+  "exact_main_f265cf_composition": [
+    "scripts/research/shot_pattern_analysis/build_final_report.py",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py",
+    "tests/research/test_shot_pattern_final_report.py",
+    "tests/research/test_shot_pattern_final_report_assets.py"
+  ],
+  "tests": {
+    "focused": "32 passed, 2 deselected",
+    "publication_endguard": "1 passed",
+    "both_exit_codes": 0
+  },
+  "actual_v3_ledger_probe": {
+    "receipt_sha256": "8d3fd135987828c62e4772638468be70b302ef9e2963de2eae5c406f40068ab8",
+    "total_png_links": 10,
+    "paired_png_links": 6,
+    "exact_ordered_identities": true,
+    "all_three_social_patterns": true,
+    "distinct_png_paths": true,
+    "scope": "Consumer metadata compatibility with real v3 producer ledger; no visual or final artifact qualification",
+    "links": [
+      {
+        "club": "driver",
+        "kind": "density",
+        "presentation": "academic",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        "physical_pattern": null,
+        "comparison_kind": "shaft_rotation_sd",
+        "source_kind": "six_population_common_index_comparison",
+        "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density.png"
+      },
+      {
+        "club": "driver",
+        "kind": "density",
+        "presentation": "social",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        "physical_pattern": "Straight",
+        "comparison_kind": "shaft_rotation_sd",
+        "source_kind": "six_population_common_index_comparison",
+        "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_straight_social.png"
+      },
+      {
+        "club": "driver",
+        "kind": "density",
+        "presentation": "social",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        "physical_pattern": "Draw",
+        "comparison_kind": "shaft_rotation_sd",
+        "source_kind": "six_population_common_index_comparison",
+        "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_draw_social.png"
+      },
+      {
+        "club": "driver",
+        "kind": "density",
+        "presentation": "social",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        "physical_pattern": "Fade",
+        "comparison_kind": "shaft_rotation_sd",
+        "source_kind": "six_population_common_index_comparison",
+        "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_fade_social.png"
+      },
+      {
+        "club": "driver",
+        "kind": "overhead",
+        "presentation": "academic",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        "physical_pattern": null,
+        "comparison_kind": "shaft_rotation_sd",
+        "source_kind": "saved_illustrative_trajectory_samples",
+        "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead.png"
+      },
+      {
+        "club": "driver",
+        "kind": "overhead",
+        "presentation": "social",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1",
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2",
+          "driver_lean5_curve1_rotation2_combined2"
+        ],
+        "physical_pattern": null,
+        "comparison_kind": "shaft_rotation_sd",
+        "source_kind": "saved_illustrative_trajectory_samples",
+        "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead_social.png"
+      },
+      {
+        "club": "driver",
+        "kind": "density",
+        "presentation": "academic",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2"
+        ],
+        "physical_pattern": null,
+        "comparison_kind": null,
+        "source_kind": "individual_supported_endpoints",
+        "relative_path": "report-probe/figures/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.png"
+      },
+      {
+        "club": "driver",
+        "kind": "density",
+        "presentation": "social",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2"
+        ],
+        "physical_pattern": null,
+        "comparison_kind": null,
+        "source_kind": "individual_supported_endpoints",
+        "relative_path": "report-probe/figures/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.png"
+      },
+      {
+        "club": "driver",
+        "kind": "overhead",
+        "presentation": "academic",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2"
+        ],
+        "physical_pattern": null,
+        "comparison_kind": null,
+        "source_kind": "saved_illustrative_trajectories",
+        "relative_path": "report-probe/figures/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.png"
+      },
+      {
+        "club": "driver",
+        "kind": "overhead",
+        "presentation": "social",
+        "source_protocol": "original_primary/1",
+        "source_protocols": [
+          "original_primary/1"
+        ],
+        "source_cells": [
+          "driver_lean5_curve1_rotation1_combined2"
+        ],
+        "physical_pattern": null,
+        "comparison_kind": null,
+        "source_kind": "saved_illustrative_trajectories",
+        "relative_path": "report-probe/figures/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.png"
+      }
+    ]
+  },
+  "accepted_execution_source_count": 54,
+  "accepted_execution_source_hashes_exact": true,
+  "native_binary_hash_exact": true,
+  "transition_receipt_sha256": "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
+  "findings": [],
+  "limitations": [
+    "No final production dataset report was generated; control and supplemental prerequisites remain separate.",
+    "Visual/publication acceptance remains changes_required for known canonical marginal tick adjacency and phone-scale density readability.",
+    "Real v3 ledger probe qualifies producer/consumer metadata, not v3 captions or final scientific results.",
+    "This review confirms source/native hashes; it does not rerun the numerical runtime equivalence qualification."
+  ]
+}

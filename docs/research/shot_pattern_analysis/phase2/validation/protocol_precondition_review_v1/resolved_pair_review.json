@@ -1,0 +1,17 @@
+{
+  "scope": "All saved ordered references reconstruct and have explicit expected source_protocol; no statistics/rendering or live graphic acceptance",
+  "archive_sha256": "32744eba4f621d9776c6878a1c3de877dd639e5984ea9a46e1c06b940c35efb2",
+  "review_sha256": "2b7bfd9c5553ec5e5512088a616339f25d3818245c94b2826dc98848f705f9c7",
+  "comparisons": 384,
+  "unique_bound_cells": 328,
+  "alias_references": 16,
+  "failures": [],
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/supplement_revision_adapter.py": "e6448dc29fd2ce7da63d8b1a56d50204242983027182765ee35fb354952f0621",
+    "scripts/research/shot_pattern_analysis/supplement_publication.py": "7a3ee6f9ba8667c7887e817bf219a91b75cb28cbffdf605ed2e6cd82d7ad38f8"
+  },
+  "input_sha256": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+  }
+}

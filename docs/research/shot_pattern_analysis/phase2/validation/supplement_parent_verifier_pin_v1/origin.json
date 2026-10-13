@@ -1,0 +1,8 @@
+{
+  "source_start_sha256": "61b2172d1e3a93b6991b91ae0f5f65bfec88bf9003dcc79faaef4e04b644e960",
+  "source_start_relative_path": "../supplement_rendering_revision_v5/start.json",
+  "extracted_key": "execution",
+  "execution_sha256": "09cf3c9b39d88009eb50473a005369ac6686fa4414d19b27d51cde304717718e",
+  "candidate_commit": "14f27706e4e9e52ca1324a7a2bac59e86ab33ef9",
+  "scope": "Frozen parent environment only; no artifact acceptance"
+}

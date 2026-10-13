@@ -1,0 +1,29 @@
+from pathlib import Path
+import hashlib,json,sys
+r=Path.cwd();sys.path.insert(0,str(r));p=r/'docs/research/shot_pattern_analysis/phase2';out=p/'validation/final_report_composition_root_v1'
+from scripts.research.shot_pattern_analysis.final_report_inputs import assemble_resolved_selected_cells,select_representative_interaction_pairs
+from scripts.research.shot_pattern_analysis.report_synthesis import synthesis_lines
+from scripts.research.shot_pattern_analysis.build_final_report import _report_source_hashes
+from src.tools.shot_pattern_analysis.matched_formatting import format_sg_value
+reference=json.loads((p/'validation/selected_headline_traceability_v1/review.json').read_text());supp=json.loads((p/'supplement_report_v1/REPORT_SUPPLEMENT.json').read_text());pairs=json.loads((p/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons']
+primary=[dict(json.loads((p/'final_v1'/c['cell']/'summary.json').read_text()),cell=c['cell']) for c in reference['cells']]
+cells=assemble_resolved_selected_cells({'cells':primary},{'report':supp});byname={c['cell']:c for c in cells}
+for row in reference['rows']:
+ c=byname[row['cell']];pat=row['pattern'];geo=c['summary'][pat];sg=c['course_scoring']
+ assert row['source_protocol']==c['source_protocol']
+ assert row['supported_n']==geo['supported_n'] and row['attempted_n']==geo['total_n']
+ assert row['scoring_paired_n']==sg['paired_n']
+ if pat!='Straight':assert row['paired_sg_vs_straight']==sg['paired_benefit_vs_straight'][pat]
+ assert row['lateral_downrange_correlation']==geo['statistics']['corr_lateral_downrange_error']
+ assert abs(row['mean_downrange_m']-(c['target_x_m']+geo['statistics']['mean_downrange_error_m']))<1e-12
+text='\n'.join(synthesis_lines({'resolved_selected_cells':cells}))
+for club in ('driver','seven_iron','pitching_wedge'):
+ for pat in ('Draw','Fade'):
+  selected=[x for x in reference['rows'] if x['club']==club and x['pattern']==pat];vals=[x['paired_sg_vs_straight']['estimate'] for x in selected]
+  assert f'{format_sg_value(min(vals))} to {format_sg_value(max(vals))}' in text
+selected=select_representative_interaction_pairs(pairs);assert len(selected)==12;assert selected==select_representative_interaction_pairs(list(reversed(pairs)))
+for effect in selected:
+ identity=list(zip(effect['source_protocols'],effect['source_cells']));matches=[q for q in pairs if q['comparison_kind']==effect['comparison_kind'] and [(s['protocol_id'],s['cell']) for s in q['sources']]==identity];assert len(matches)==1
+from scripts.research.shot_pattern_analysis import report_synthesis
+assert any(k.endswith('report_synthesis.py') for k in _report_source_hashes())
+(out/'verification.json').write_text(json.dumps({'status':'accepted_report_composition_component_only','source_sha256':_report_source_hashes(),'reference_sha256':hashlib.sha256((p/'validation/selected_headline_traceability_v1/review.json').read_bytes()).hexdigest(),'verified_cells':len(cells),'verified_pattern_rows':len(reference['rows']),'exact_order_invariant_pairs':len(selected),'rendered_ranges_match_reference':True,'full_report_and_pdf_acceptance':False},indent=2)+'\n');(out/'executed_verification.py.txt').write_bytes(Path(__file__).read_bytes());print('Independent72row reconciliation,12exactpairs and rendered ranges passed')

@@ -1,0 +1,63 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____ test_default_markdown_uses_shared_precision_for_all_interval_columns _____
+
+    def test_default_markdown_uses_shared_precision_for_all_interval_columns():
+        from src.tools.shot_pattern_analysis.matched_formatting import format_sg_interval_record
+        from src.tools.shot_pattern_analysis.matched_supplement_pipeline import render_comparison_markdown
+    
+        # Actual saved 7-iron narrow interval and Driver near-zero effect.
+        narrow = {"estimate": -0.0005056061017231564, "lower_95": -0.0005136910470865477, "upper_95": -0.0004968345325920594}
+        tiny = {"estimate": 2.6911773453713884e-05, "lower_95": -0.00016417507301096237, "upper_95": 0.00022037368523597208}
+        pair = {"comparison_kind": "curve_strength", "status": "conditional_only", "common_supported_n": 19, "total_n_per_population": 20, "sources": [{"protocol_id": "primary", "cell": "a"}, {"protocol_id": "supplement", "cell": "b"}], "patterns": {"Draw": {"radial_error_difference_m": narrow, "course_sg_difference": tiny}}, "course_scoring_effect_modification": {"Draw": narrow}}
+        text = render_comparison_markdown([pair])
+        expected = format_sg_interval_record(narrow)
+        est, bounds = expected.split(" ", 1)
+>       assert f"{est} m {bounds}" in text
+E       AssertionError: assert '-5.056e-04 m [-5.137e-04, -4.968e-04]' in '# Supplemental Matched-Condition Comparisons\n\nThese are paired simulation contrasts on shot IDs supported in all si... saved Monte Carlo samples; they are not independent experimental replications or multiplicity-adjusted discoveries.\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py:898: AssertionError
+___________ test_pipeline_provenance_binds_shared_numeric_formatter ____________
+
+    def test_pipeline_provenance_binds_shared_numeric_formatter():
+        import hashlib
+        from pathlib import Path
+        from src.tools.shot_pattern_analysis import matched_formatting
+        from src.tools.shot_pattern_analysis.matched_supplement_pipeline import _report_source_hashes
+    
+        path = Path(matched_formatting.__file__)
+>       assert _report_source_hashes()["matched_formatting.py"] == hashlib.sha256(path.read_bytes()).hexdigest()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'matched_formatting.py'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py:913: KeyError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_default_markdown_uses_shared_precision_for_all_interval_columns
+FAILED tests/tools/shot_pattern_analysis/test_matched_supplement_pipeline.py::test_pipeline_provenance_binds_shared_numeric_formatter
+2 failed, 15 deselected, 6 warnings in 7.67s

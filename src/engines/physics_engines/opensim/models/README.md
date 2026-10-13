@@ -167,7 +167,7 @@ to enforce that the committed artifact matches the script.
 
 ## Validation
 
-`tests/test_opensim_model_loads.py` exercises the model in two layers:
+`tests/engines/opensim/test_opensim_model_loads.py` exercises the model in two layers:
 
 - **Pure-XML structural assertions** (always run): topology checks
   (Club body present, lead WeldJoint and trail WeldConstraint, one CoordinateActuator per

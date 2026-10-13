@@ -1,0 +1,160 @@
+{'verified_aliases': 4, 'new_executions': 0, 'reference_file_sha256': 'c77c84d0cc25535120ed48ad1dbc888ed28eec69a88abff0e842ee2ee8678090'}
+{
+  "scope": "Independent per-plan saved-data audit; partial runs do not establish final results",
+  "audit_version": "independent-saved-data/2",
+  "data_stage": "pilot",
+  "protocol_review": {
+    "protocol": "pw-primary-face-bounds/1",
+    "stage": "pilot",
+    "unique_cells": 18,
+    "scope": "Per-protocol unique executions; control aliases require separate verification"
+  },
+  "alias_review": {
+    "verified_aliases": 4,
+    "new_executions": 0,
+    "reference_file_sha256": "c77c84d0cc25535120ed48ad1dbc888ed28eec69a88abff0e842ee2ee8678090"
+  },
+  "acceptance_review": null,
+  "protocol_auditor_sha256": "63baf284e5354d59346b8ca00f782e07f1a0273a9beaad748d98a39d8dd77fa1",
+  "plan_sha256": "02db8f05f27e036a62ff209ecfa189bb4b3581e767a10c67a7914ed76942eba6",
+  "script_sha256": "1f3a6c5d4207bd328d74c7dd36c3a3a89b048dc97fb505ea5b75b1f83a0db829",
+  "audit_dependency_sha256": {
+    "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",
+    "src/tools/shot_pattern_analysis/scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+    "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1"
+  },
+  "planned_cells": 18,
+  "audited_cells": 18,
+  "complete": true,
+  "pass": true,
+  "partial_checks_pass": true,
+  "maxima": {
+    "input": 0.0,
+    "summary": 8.881784197001252e-16,
+    "covariance": 0.0,
+    "correlation": 0.0,
+    "paired": 2.220446049250313e-16,
+    "scoring": 0.0,
+    "direct_api": 1.1102230246251565e-16,
+    "bootstrap": 2.220446049250313e-16
+  },
+  "limits": {
+    "input": 1e-12,
+    "summary": 1e-10,
+    "covariance": 1e-08,
+    "correlation": 1e-10,
+    "paired": 1e-09,
+    "scoring": 1e-12,
+    "direct_api": 1e-12,
+    "bootstrap": 1e-08
+  },
+  "failures": []
+}
+pw_primary_face 18 True
+{
+  "scope": "Independent per-plan saved-data audit; partial runs do not establish final results",
+  "audit_version": "independent-saved-data/2",
+  "data_stage": "pilot",
+  "protocol_review": {
+    "protocol": "pw-control-face-bounds/1",
+    "stage": "pilot",
+    "unique_cells": 4,
+    "scope": "Per-protocol unique executions; control aliases require separate verification"
+  },
+  "alias_review": {
+    "verified_aliases": 4,
+    "new_executions": 0,
+    "reference_file_sha256": "c77c84d0cc25535120ed48ad1dbc888ed28eec69a88abff0e842ee2ee8678090"
+  },
+  "acceptance_review": null,
+  "protocol_auditor_sha256": "63baf284e5354d59346b8ca00f782e07f1a0273a9beaad748d98a39d8dd77fa1",
+  "plan_sha256": "9ed468a257ab3641c426c4ec40f28182599ff31fd387883946a6530dfdc55193",
+  "script_sha256": "1f3a6c5d4207bd328d74c7dd36c3a3a89b048dc97fb505ea5b75b1f83a0db829",
+  "audit_dependency_sha256": {
+    "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",
+    "src/tools/shot_pattern_analysis/scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+    "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1"
+  },
+  "planned_cells": 4,
+  "audited_cells": 4,
+  "complete": true,
+  "pass": true,
+  "partial_checks_pass": true,
+  "maxima": {
+    "input": 0.0,
+    "summary": 8.881784197001252e-16,
+    "covariance": 0.0,
+    "correlation": 0.0,
+    "paired": 1.1102230246251565e-16,
+    "scoring": 0.0,
+    "direct_api": 1.1102230246251565e-16,
+    "bootstrap": 2.220446049250313e-16
+  },
+  "limits": {
+    "input": 1e-12,
+    "summary": 1e-10,
+    "covariance": 1e-08,
+    "correlation": 1e-10,
+    "paired": 1e-09,
+    "scoring": 1e-12,
+    "direct_api": 1e-12,
+    "bootstrap": 1e-08
+  },
+  "failures": []
+}
+pw_control_face 4 True
+{
+  "scope": "Independent per-plan saved-data audit; partial runs do not establish final results",
+  "audit_version": "independent-saved-data/2",
+  "data_stage": "pilot",
+  "protocol_review": {
+    "protocol": "driver-control-speed-bounds/1",
+    "stage": "pilot",
+    "unique_cells": 4,
+    "scope": "Per-protocol unique executions; control aliases require separate verification"
+  },
+  "alias_review": {
+    "verified_aliases": 4,
+    "new_executions": 0,
+    "reference_file_sha256": "c77c84d0cc25535120ed48ad1dbc888ed28eec69a88abff0e842ee2ee8678090"
+  },
+  "acceptance_review": null,
+  "protocol_auditor_sha256": "63baf284e5354d59346b8ca00f782e07f1a0273a9beaad748d98a39d8dd77fa1",
+  "plan_sha256": "61a6c4b2cf989d8e6713d4a419433801ac13b785928a761d6fd8c12f03468512",
+  "script_sha256": "1f3a6c5d4207bd328d74c7dd36c3a3a89b048dc97fb505ea5b75b1f83a0db829",
+  "audit_dependency_sha256": {
+    "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",
+    "src/tools/shot_pattern_analysis/scoring.py": "4a536b0609a074b8f2c1bbd3d7dc628b0d4adcfcfcef7de17ca28e1f8c7f6a0b",
+    "src/tools/shot_pattern_analysis/scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1"
+  },
+  "planned_cells": 4,
+  "audited_cells": 4,
+  "complete": true,
+  "pass": true,
+  "partial_checks_pass": true,
+  "maxima": {
+    "input": 0.0,
+    "summary": 3.552713678800501e-15,
+    "covariance": 0.0,
+    "correlation": 0.0,
+    "paired": 0.0,
+    "scoring": 0.0,
+    "direct_api": 2.220446049250313e-16,
+    "bootstrap": 8.881784197001252e-16
+  },
+  "limits": {
+    "input": 1e-12,
+    "summary": 1e-10,
+    "covariance": 1e-08,
+    "correlation": 1e-10,
+    "paired": 1e-09,
+    "scoring": 1e-12,
+    "direct_api": 1e-12,
+    "bootstrap": 1e-08
+  },
+  "failures": []
+}
+driver_control_speed 4 True

@@ -1,11 +1,12 @@
 # ruff: noqa: E402
 """Unit tests for OpenSim Physics Engine."""
 
-import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+
+pytestmark = pytest.mark.unit
 
 # Explicit attribute lists for OpenSim C++ types (opensim-core bindings).
 _OSIM_MODEL_SPEC = [
@@ -34,32 +35,19 @@ _OSIM_MANAGER_SPEC = [
     "setFinalTime",
 ]
 
-# Mock opensim using patch.dict (auto-cleans) before importing the engine
+# Each engine instance receives a scoped mock; collection never patches sys.modules.
 mock_opensim = MagicMock()
-
-with (
-    patch.dict(sys.modules, {"opensim": mock_opensim}),
-    # Also patch OPENSIM_AVAILABLE so the engine module picks up the mock
-    patch("src.shared.python.engine_core.engine_availability.OPENSIM_AVAILABLE", True),
-):
-    from src.engines.physics_engines.opensim.python import (  # noqa: E402
-        opensim_physics_engine as osim_module,
-    )
-    from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
-        OpenSimPhysicsEngine,
-    )
-
-    # Force the module-level opensim reference to use our mock
-    osim_module.opensim = mock_opensim
 
 
 @pytest.fixture
-def engine() -> OpenSimPhysicsEngine:
-    # Reset mock_opensim for each test
+def engine(monkeypatch: pytest.MonkeyPatch):
+    from src.engines.physics_engines.opensim.python import (
+        opensim_physics_engine as osim_module,
+    )
+
     mock_opensim.reset_mock()
-    # Ensure the engine module's opensim ref points to our mock
-    osim_module.opensim = mock_opensim
-    return OpenSimPhysicsEngine()
+    monkeypatch.setattr(osim_module, "opensim", mock_opensim)
+    return osim_module.OpenSimPhysicsEngine()
 
 
 def test_opensim_physics_engine_initialization(engine) -> None:
@@ -109,8 +97,8 @@ def test_opensim_physics_engine_load_from_string(mock_named_temp, engine) -> Non
     # context manager return
     mock_named_temp.return_value.__enter__.return_value = mock_tmp
 
-    # Mock load_from_path to avoid real loading logic
-    with patch.object(engine, "load_from_path") as mock_load:
+    # String loading delegates to the engine-specific path hook.
+    with patch.object(engine, "_load_from_path_impl") as mock_load:
         engine.load_from_string("<osim/>")
         mock_load.assert_called_once_with("/tmp/fake.osim")
 

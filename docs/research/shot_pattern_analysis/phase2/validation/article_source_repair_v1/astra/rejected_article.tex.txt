@@ -1,0 +1,1083 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,booktabs,graphicx,hyperref}
+\title{Straight, Draw, and Fade: Shot Pattern Variance}
+\author{UpstreamDrift}
+\date{October 8, 2026}
+% Compilation Attempt: 2026-10-10, Built-In Codex Compiler.
+% Result: compile-failed before source parsing; Tectonic src/config.rs:154:18
+% panicked because default_bundle_v33.tar.index.gz was not cached and could
+% not be fetched from relay.fullyjustified.net. Source compilation unverified.
+\begin{document}
+\maketitle
+\section{Current Matched-Delivery Study}
+The current phase-two study supersedes the aimed, fixed-delivery comparisons
+recorded below. Its calculation-level design is maintained in
+\href{phase2/DESIGN.md}{the Matched-Delivery Design}; its accepted execution,
+independent audits, limitations, and remaining publication work are tracked in
+\href{phase2/TURNOVER.md}{the Study Turnover}. Reproduction instructions are in
+\href{phase2/REPRODUCING.md}{the Saved-Data Reproduction Guide}.
+
+For each feasible straight, draw, and fade condition, nominal face, path, and
+clubhead speed are solved so that the unadjusted zero-error landing reaches the
+same physical target within 0.05\,m. No post-flight aim rotation supplies that
+match. The reference static lofts are $10^\circ$, $34^\circ$, and $46^\circ$
+for driver, 7-iron, and pitching wedge, respectively. Each is evaluated at
+$0^\circ$, $5^\circ$, and $10^\circ$ forward shaft lean, with Gaussian shaft
+rotation standard deviations of $1^\circ$ and $2^\circ$, and two curve scales.
+These are geometric modeling assumptions, not measured player distributions.
+The earlier delivered-loft presets and lean sensitivity values below describe
+phase one only.
+
+Nine delivery-noise profiles include shaft rotation alone, path SD
+$0.5^\circ$, speed SD 1 or 2\,mph, horizontal and vertical strike SD
+0.25\,in each, combined perturbations, and signed shaft-rotation/path
+covariance. The interactive tool supports covariance across all seven modeled
+delivery variables. Each feasible condition uses 10,000 paired shot indices
+per pattern. Unsupported impacts and infeasible nominal matches remain explicit;
+they are not discarded from the experiment inventory.
+
+Driver scoring uses a hypothetical tee-shot fairway/rough context, while
+7-iron and wedge scoring use hypothetical approaches. First ground contact is
+treated as final lie. Individual-supported dispersion, common-three-pattern
+scoring, and common-six-population paired contrasts have different denominators
+and must not be conflated. The fixed-target control separates comparisons at a
+common distance from within-lean matching; re-matching delivery still prevents
+a causal claim that curvature or shaft lean alone improves accuracy.
+
+The saved original and supplemental simulations and independent data audits are
+complete. Final graphical and report acceptance remains pending. The numerical examples below are independently checked selected results; they
+do not confer final graphical or publication acceptance. Complete report
+assembly and review remain pending. The retained
+phase-one results below must not be presented as phase-two outcomes.
+
+
+\subsection{Phase-Two Inventory and Statistical Populations}
+The original within-lean inventory contains 324 planned cells: 270 completed
+and 54 explicitly unavailable, with 8,100,000 attempted shot rows in completed
+cells. The fixed-target inventory contains 72 planned cells: 52 completed and
+20 unavailable, with 1,560,000 attempted rows. The separately declared bounds
+supplement contains 26 distinct executed cells and 780,000 attempted rows;
+779,712 are supported and 288 remain unsupported. Four control aliases reuse
+existing zero-lean supplemental cells and add no shots. Original unavailable
+records remain unchanged. Expanded bounds resolve some nominal-search failures;
+an original bounded-search failure is not proof of physical impossibility.
+See the \href{phase2/validation/independent_primary_final_audit.json}{Primary Audit},
+\href{phase2/validation/independent_control_final_audit.json}{Control Audit}, and
+\href{phase2/validation/supplement_final_completion.json}{Supplement Completion}.
+
+Dispersion and directional statistics use each pattern's supported endpoints.
+Within-cell SG benefits use the common three-pattern supported indices.
+Between-condition relative benefits use the intersection of all six populations,
+with paired differences formed before bootstrap resampling. These denominators
+are different; unsupported shots are retained in accounting rather than retried.
+The selected examples below come from 24 zero-lean cells and 72 pattern rows,
+covering three clubs, two curve scales, two shaft SDs and shaft-only versus
+combined delivery noise. Four PW strong-curve cells use the explicitly labelled
+supplement. This selection is not the complete factorial inventory.
+
+\subsection{Rigid Shaft Twist, Delivered Loft, and Forward Lean}
+Phase two pitches a fixed physical club, unlike the historical phase-one
+axis-only lean control. Let static loft be $L$, lie be $\beta$, forward lean
+be $\ell$, nominal right-positive face direction be $f$, and shaft twist be
+$\theta$. In the native forward/left/up frame,
+\[
+ \mathbf n_0=(\cos L,0,\sin L)^T,\qquad
+ \mathbf s_0=(0,\cos\beta,\sin\beta)^T,
+\]
+\[
+ Q=R_z(-f)R_y(\ell),\qquad \mathbf s=Q\mathbf s_0,\qquad
+ \mathbf n=R_{\mathbf s}(\theta)Q\mathbf n_0.
+\]
+Here $R_{\mathbf s}$ is Rodrigues rotation about the delivered shaft axis.
+Zero twist gives delivered loft $\lambda=L-\ell$. The local sensitivities are
+\[
+ \frac{df}{d\theta}=-\frac{\sin\beta\cos L}{\cos(L-\ell)},\qquad
+ \frac{d\lambda}{d\theta}=-\cos\beta,\qquad
+ \frac{d\lambda}{df}=\cot\beta\frac{\cos(L-\ell)}{\cos L}.
+\]
+Thus closing the face by this assumed rotation tends to reduce loft. Fixed
+shaft-twist SD has the same first-order loft SD across lean, but not the same
+face-angle SD. Twist is an orientation error, not clubhead closure angular
+velocity. Finite-angle geometry and impact/flight determine the endpoints;
+these derivatives do not require every closed-face miss to travel farther.
+The \href{phase2/DESIGN.md}{Phase-Two Design} and
+\href{phase2/validation/GEOMETRY_DERIVATIVES.md}{Independent Derivative Checks}
+provide the equations and their numerical checks.
+
+\subsection{Club-Dependent Long-Left and Short-Right Behavior}
+For the straight, zero-lean, ordinary-curve reference with shaft-only noise,
+let $X$ be downrange distance and $Y$ the reported right-positive lateral
+coordinate. ``Left'' means $Y<0$, ``right'' means $Y>0$, and long/short refer
+to $X-X_T$, not total radial range. Each row below has 10,000 supported shots.
+The side-conditioned mean errors are descriptive sample quantities, not
+causal effects of selecting a side and not confidence intervals.
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Club & Twist SD & $\rho(Y,X)$ & Left Error & Right Error & Mean Error\\
+ & ($^\circ$) & & (m) & (m) & (m)\\
+\midrule
+Driver & 1 & +0.9788 & -4.214 & +3.190 & -0.505 \\
+Driver & 2 & +0.9186 & -9.513 & +5.473 & -2.005 \\
+7-Iron & 1 & -0.9960 & +0.878 & -0.984 & -0.055 \\
+7-Iron & 2 & -0.9841 & +1.637 & -2.069 & -0.220 \\
+Pitching Wedge & 1 & -0.9982 & +0.896 & -0.939 & -0.023 \\
+Pitching Wedge & 2 & -0.9930 & +1.740 & -1.922 & -0.095 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Targets are 178.949 m for driver, 127.882 m for 7-iron, and 77.402 m for PW.
+In this conditional model the 7-iron and PW exhibit long-left/short-right
+association, while the driver exhibits the opposite association. This is
+consistent with loft reduction affecting launch, spin and ball speed together;
+it is not evidence that a universal carry rule follows from face closure.
+Increasing shaft variability also shifts realized mean downrange distance,
+even though the zero-error nominal is matched to the same target. The
+\href{phase2/validation/selected_headline_traceability_v1/review.json}{Exact Selected Numeric Rows}
+and \href{phase2/validation/selected_headline_traceability_v1/astra_review.json}{Independent Field-by-Field Review}
+bind the source summaries and full-precision values. No new simulation or
+statistical fit supplies this table.
+
+\subsection{Distance Confounding and Scoring Interpretation}
+Nominal landing matching removes an initial target mismatch; it does not
+force equal realized carry distributions. Within-lean targets may differ
+across lean. Fixed-target controls hold the physical reference distance while
+rematching face, path and speed. Consequently, a change in spread or SG between
+these conditions cannot be uniquely attributed to shaft lean, curvature or
+distance alone. Lateral SD, downrange SD, bias and target error must be read
+together. Marginal statistics cannot partition their causal contributions.
+
+For example, the zero-lean driver, ordinary-curve, one-degree shaft-only
+Draw has relative SG $+7.46156\times10^{-5}$ per shot, with paired 95\%
+Monte Carlo interval $[-7.10405\times10^{-5},\;2.18961\times10^{-4}]$.
+Its sign alone does not establish an advantage; the interval includes zero.
+The estimate uses the hypothetical tee/fairway/rough context and the common
+three-pattern population of 10,000, not a measured golfer or a round score.
+Irons instead use the approach/green context. A smaller lateral width does
+not necessarily improve scoring when downrange error, target bias and lies
+change. Small sampling intervals do not include head-parameter uncertainty,
+impact discrepancy or the approximation in the historical SG benchmark.
+
+\subsection{Dependence on Assumed Head Properties}
+A separate deterministic sensitivity check holds face, path and shaft twist at
+zero, retains preset speed and attack angle, and does not rematch targets.
+It examines all three clubs and lean settings, with center strikes and
+0.5\,in toe, heel, high and low offsets. Of 300 variant evaluations, 268 are
+supported and 32 are unsupported. The offsets are fixed test positions,
+not the stochastic study's 0.25\,in per-axis strike standard deviation.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Club & CG Depth & Inertia & Face Radii & Contact Law\\
+\midrule
+Driver & 5.14 & 7.10 & 22.63 & 11.33\\
+7-Iron & 0.54 & 1.76 & --- & 1.22\\
+Pitching Wedge & 0.18 & 1.40 & --- & 0.33\\
+\bottomrule
+\end{tabular}
+\end{center}
+Values are maximum landing displacements in metres among comparable supported
+baseline/variant pairs. CG depth, principal inertias together, and driver
+bulge/roll radii together are varied by $\pm20\%$. These deliberately chosen
+ranges are not measured confidence intervals. The last column instead changes
+contact law: the primary energetic restitution and comparator Newton velocity
+coefficient both use the number 0.83 but have different definitions. Maxima
+can occur at different deliveries; they are not additive or dispersion SDs.
+The driver's largest face-radius response occurs at $5^\circ$ lean with a low
+strike and radius scale 0.8, illustrating sensitivity at low launch.
+
+The \href{phase2/validation/independent_head_sensitivity_summary.json}{saved
+summary} and \href{phase2/validation/independent_head_sensitivity.json}{full
+execution receipt} preserve these cases and their unsupported outcomes.
+This model dependence is distinct from finite-sample Monte Carlo uncertainty;
+small statistical intervals do not establish empirical impact-model accuracy.
+
+\subsection{Selected Zero-Lean Experimental Design and Condition Keys}
+The selected headline analysis examines twenty-four zero-lean conditions across
+driver, 7-iron, and pitching wedge, providing seventy-two simulated pattern
+outcomes. Each club is tested under two curve scales ($\times 1$ ordinary and
+$\times 2$ strong), two shaft-twist standard deviations ($1^\circ$ and
+$2^\circ$), and two delivery-noise profiles (\texttt{shaft\_only} and
+\texttt{combined2}). Pitching wedge strong-curve ($\times 2$) cells use the
+verified supplemental protocol \texttt{pw-primary-face-bounds/1}, which relaxed
+nominal face search bounds from $\pm 2.0^\circ$ to $\pm 6.0^\circ$ to achieve
+exact landing matching; all other twenty cells originate from the primary
+matrix \texttt{original\_primary/1}.
+
+To avoid wide, overflowing identifiers in comparative tables, each condition
+is assigned a compact key from \textbf{C01} to \textbf{C24} as defined in
+Table~\ref{tab:condition_keys}. The simulation directories follow the canonical
+naming convention \texttt{\detokenize{<club>_lean0_curve<C>_rotation<SD>_<profile>}}.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Selected Zero-Lean Condition Keys and Protocol Provenance}
+\label{tab:condition_keys}
+\begin{tabular}{llllccl}
+\toprule
+Key & Club & Target $X_T$ & Noise Profile & Curve & Twist SD & Source Protocol \\
+\midrule
+C01 & Driver & 178.949\,m & Shaft-only & $\times 1$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C02 & Driver & 178.949\,m & Combined-2 & $\times 1$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C03 & Driver & 178.949\,m & Shaft-only & $\times 1$ & $2^\circ$ & \texttt{original\_primary/1} \\
+C04 & Driver & 178.949\,m & Combined-2 & $\times 1$ & $2^\circ$ & \texttt{original\_primary/1} \\
+C05 & Driver & 178.949\,m & Shaft-only & $\times 2$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C06 & Driver & 178.949\,m & Combined-2 & $\times 2$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C07 & Driver & 178.949\,m & Shaft-only & $\times 2$ & $2^\circ$ & \texttt{original\_primary/1} \\
+C08 & Driver & 178.949\,m & Combined-2 & $\times 2$ & $2^\circ$ & \texttt{original\_primary/1} \\
+\midrule
+C09 & 7-Iron & 127.882\,m & Shaft-only & $\times 1$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C10 & 7-Iron & 127.882\,m & Combined-2 & $\times 1$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C11 & 7-Iron & 127.882\,m & Shaft-only & $\times 1$ & $2^\circ$ & \texttt{original\_primary/1} \\
+C12 & 7-Iron & 127.882\,m & Combined-2 & $\times 1$ & $2^\circ$ & \texttt{original\_primary/1} \\
+C13 & 7-Iron & 127.882\,m & Shaft-only & $\times 2$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C14 & 7-Iron & 127.882\,m & Combined-2 & $\times 2$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C15 & 7-Iron & 127.882\,m & Shaft-only & $\times 2$ & $2^\circ$ & \texttt{original\_primary/1} \\
+C16 & 7-Iron & 127.882\,m & Combined-2 & $\times 2$ & $2^\circ$ & \texttt{original\_primary/1} \\
+\midrule
+C17 & PW & 77.402\,m & Shaft-only & $\times 1$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C18 & PW & 77.402\,m & Combined-2 & $\times 1$ & $1^\circ$ & \texttt{original\_primary/1} \\
+C19 & PW & 77.402\,m & Shaft-only & $\times 1$ & $2^\circ$ & \texttt{original\_primary/1} \\
+C20 & PW & 77.402\,m & Combined-2 & $\times 1$ & $2^\circ$ & \texttt{original\_primary/1} \\
+C21 & PW & 77.402\,m & Shaft-only & $\times 2$ & $1^\circ$ & \texttt{pw-primary-face-bounds/1} \\
+C22 & PW & 77.402\,m & Combined-2 & $\times 2$ & $1^\circ$ & \texttt{pw-primary-face-bounds/1} \\
+C23 & PW & 77.402\,m & Shaft-only & $\times 2$ & $2^\circ$ & \texttt{pw-primary-face-bounds/1} \\
+C24 & PW & 77.402\,m & Combined-2 & $\times 2$ & $2^\circ$ & \texttt{pw-primary-face-bounds/1} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In all twenty-four conditions, nominal face, path, and clubhead speed are solved
+before sampling so that zero-error Straight, Draw, and Fade deliveries land at
+the exact same physical downrange target $X_T$ ($178.949$\,m for driver,
+$127.882$\,m for 7-iron, and $77.402$\,m for pitching wedge) within a residual
+tolerance of $0.05$\,m (all realized residuals $\le 1.6\times 10^{-13}$\,m).
+Nominal face-to-path angle separation is constrained to $0^\circ$ for
+Straight, $-1.5^\circ$ for Draw, and $+1.5^\circ$ for Fade under curve
+$\times 1$, doubled to $\pm 3.0^\circ$ under curve $\times 2$. In the
+\texttt{shaft\_only} profile, only shaft rotation varies ($\sigma_\theta =
+1^\circ$ or $2^\circ$), with all six other delivery variables held strictly at
+zero. In the \texttt{combined2} profile, shaft rotation noise is combined with
+path SD $0.5^\circ$, clubhead speed SD 2\,mph ($0.89408$\,m/s), and contact
+strike error SD 0.25\,in ($0.00635$\,m) along both horizontal (face-heel) and
+vertical axes.
+
+\subsection{Pattern Dispersion and Scoring Across the Twenty-Four Conditions}
+Tables~\ref{tab:dispersion_driver}, \ref{tab:dispersion_7iron}, and
+\ref{tab:dispersion_pw} present the complete numerical findings for the
+seventy-two pattern outcomes, separated by club. Each table reports individual
+supported endpoints ($n$), lateral standard deviation ($\sigma_Y$), downrange
+standard deviation ($\sigma_X$), radial target root-mean-square error
+(RMSE), absolute mean strokes gained against the historical Tour baseline,
+and paired relative $\Delta\text{SG}$ versus Straight with 95\% Monte Carlo
+bootstrap confidence intervals.
+
+Statistical populations must not be conflated. Individual supported endpoint
+statistics describe all physically valid simulated flights (unsupported shots
+such as nonairborne launches or ground collisions are retained in accounting
+and not retried). In the driver cells, all 10,000 attempted deliveries are
+supported. In 7-iron \texttt{combined2} cells (C10, C12, C14, C16), exactly 4
+shots per 10,000 fail support due to extreme low-contact ground scrapes, leaving
+9,996 supported shots. In pitching wedge \texttt{combined2} cells (C18, C20,
+C22, C24), exactly 1 shot per 10,000 fails support, leaving 9,999 supported
+shots. Absolute and paired strokes gained are evaluated exclusively on the
+intersection of mutually supported indices across all three patterns
+within each cell ($n=10{,}000$, $9{,}996$, or $9{,}999$).
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{Selected Driver Zero-Lean Dispersion and Scoring (Conditions C01--C08)}
+\label{tab:dispersion_driver}
+\begin{tabular}{llcccccc}
+\toprule
+Key & Pattern & Supp. / Att. & $\sigma_Y$ (m) & $\sigma_X$ (m) & RMSE (m) & Abs. SG & Paired $\Delta\text{SG}$ vs Straight [95\% MC] \\
+\midrule
+C01 & Straight & 10,000 / 10,000 & 6.177 & 4.672 & 7.764 & -0.396 & Baseline \\
+C01 & Draw     & 10,000 / 10,000 & 5.996 & 5.219 & 7.973 & -0.396 & +7.462e-05 [-7.104e-05, +2.190e-04] \\
+C01 & Fade     & 10,000 / 10,000 & 6.266 & 4.182 & 7.549 & -0.396 & +6.826e-05 [-5.228e-05, +1.705e-04] \\
+\midrule
+C02 & Straight & 10,000 / 10,000 & 6.686 & 8.561 & 11.181 & -0.413 & Baseline \\
+C02 & Draw     & 10,000 / 10,000 & 6.534 & 8.863 & 11.337 & -0.4126 & +2.691e-05 [-1.642e-04, +2.204e-04] \\
+C02 & Fade     & 10,000 / 10,000 & 6.777 & 8.290 & 11.018 & -0.4126 & +4.218e-05 [-1.739e-04, +2.646e-04] \\
+\midrule
+C03 & Straight & 10,000 / 10,000 & 12.011 & 9.781 & 15.648 & -0.443 & Baseline \\
+C03 & Draw     & 10,000 / 10,000 & 11.660 & 10.817 & 16.090 & -0.440 & +0.00289 [+0.00246, +0.00338] \\
+C03 & Fade     & 10,000 / 10,000 & 12.210 & 8.808 & 15.190 & -0.444 & -0.001225 [-0.00162, -8.629e-04] \\
+\midrule
+C04 & Straight & 10,000 / 10,000 & 12.133 & 12.236 & 17.746 & -0.458 & Baseline \\
+C04 & Draw     & 10,000 / 10,000 & 11.804 & 13.072 & 18.160 & -0.4555 & +0.002195 [+0.001695, +0.002636] \\
+C04 & Fade     & 10,000 / 10,000 & 12.328 & 11.461 & 17.313 & -0.459 & -9.277e-04 [-0.001382, -5.147e-04] \\
+\midrule
+C05 & Straight & 10,000 / 10,000 & 6.177 & 4.672 & 7.764 & -0.396 & Baseline \\
+C05 & Draw     & 10,000 / 10,000 & 5.713 & 5.800 & 8.168 & -0.3954 & +3.250e-04 [+1.042e-04, +5.513e-04] \\
+C05 & Fade     & 10,000 / 10,000 & 6.285 & 3.764 & 7.340 & -0.3955 & +2.344e-04 [+5.011e-05, +4.290e-04] \\
+\midrule
+C06 & Straight & 10,000 / 10,000 & 6.686 & 8.561 & 11.181 & -0.413 & Baseline \\
+C06 & Draw     & 10,000 / 10,000 & 6.312 & 9.186 & 11.476 & -0.412 & +5.626e-04 [+2.392e-04, +8.978e-04] \\
+C06 & Fade     & 10,000 / 10,000 & 6.824 & 8.048 & 10.854 & -0.4125 & +9.462e-05 [-2.218e-04, +4.419e-04] \\
+\midrule
+C07 & Straight & 10,000 / 10,000 & 12.011 & 9.781 & 15.648 & -0.443 & Baseline \\
+C07 & Draw     & 10,000 / 10,000 & 11.152 & 11.868 & 16.493 & -0.435 & +0.0078 [+0.00713, +0.00852] \\
+C07 & Fade     & 10,000 / 10,000 & 12.276 & 7.940 & 14.735 & -0.444 & -0.00146 [-0.001974, -9.630e-04] \\
+\midrule
+C08 & Straight & 10,000 / 10,000 & 12.133 & 12.236 & 17.746 & -0.458 & Baseline \\
+C08 & Draw     & 10,000 / 10,000 & 11.336 & 13.932 & 18.533 & -0.451 & +0.00668 [+0.00594, +0.00744] \\
+C08 & Fade     & 10,000 / 10,000 & 12.407 & 10.774 & 16.882 & -0.4585 & -8.347e-04 [-0.001478, -2.621e-04] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{Selected 7-Iron Zero-Lean Dispersion and Scoring (Conditions C09--C16)}
+\label{tab:dispersion_7iron}
+\begin{tabular}{llcccccc}
+\toprule
+Key & Pattern & Supp. / Att. & $\sigma_Y$ (m) & $\sigma_X$ (m) & RMSE (m) & Abs. SG & Paired $\Delta\text{SG}$ vs Straight [95\% MC] \\
+\midrule
+C09 & Straight & 10,000 / 10,000 & 2.559 & 1.164 & 2.812 & +0.537 & Baseline \\
+C09 & Draw     & 10,000 / 10,000 & 2.598 & 1.086 & 2.816 & +0.536 & -5.056e-04 [-5.137e-04, -4.968e-04] \\
+C09 & Fade     & 10,000 / 10,000 & 2.513 & 1.242 & 2.804 & +0.538 & +0.001047 [+0.0010332, +0.001059] \\
+\midrule
+C10 & Straight & 9,996 / 10,000 & 2.551 & 5.090 & 6.215 & +0.182 & Baseline \\
+C10 & Draw     & 9,996 / 10,000 & 2.588 & 5.074 & 6.217 & +0.181 & -7.450e-04 [-8.996e-04, -5.795e-04] \\
+C10 & Fade     & 9,996 / 10,000 & 2.509 & 5.107 & 6.211 & +0.1827 & +8.934e-04 [+7.090e-04, +0.001078] \\
+\midrule
+C11 & Straight & 10,000 / 10,000 & 5.104 & 2.330 & 5.617 & +0.295 & Baseline \\
+C11 & Draw     & 10,000 / 10,000 & 5.178 & 2.175 & 5.622 & +0.2946 & -4.992e-04 [-5.776e-04, -4.544e-04] \\
+C11 & Fade     & 10,000 / 10,000 & 5.015 & 2.483 & 5.602 & +0.296 & +0.001067 [+9.861e-04, +0.001182] \\
+\midrule
+C12 & Straight & 9,996 / 10,000 & 4.993 & 5.448 & 7.853 & +0.0722 & Baseline \\
+C12 & Draw     & 9,996 / 10,000 & 5.063 & 5.387 & 7.858 & +0.0714 & -8.053e-04 [-0.001038, -5.918e-04] \\
+C12 & Fade     & 9,996 / 10,000 & 4.909 & 5.513 & 7.844 & +0.0733 & +0.00111 [+8.442e-04, +0.001355] \\
+\midrule
+C13 & Straight & 10,000 / 10,000 & 2.559 & 1.164 & 2.812 & +0.537 & Baseline \\
+C13 & Draw     & 10,000 / 10,000 & 2.629 & 1.006 & 2.815 & +0.536 & -3.978e-04 [-4.106e-04, -3.851e-04] \\
+C13 & Fade     & 10,000 / 10,000 & 2.460 & 1.319 & 2.792 & +0.539 & +0.0025526 [+0.00252, +0.00258] \\
+\midrule
+C14 & Straight & 9,996 / 10,000 & 2.551 & 5.090 & 6.215 & +0.182 & Baseline \\
+C14 & Draw     & 9,996 / 10,000 & 2.619 & 5.058 & 6.219 & +0.1805 & -0.001356 [-0.00165, -0.001025] \\
+C14 & Fade     & 9,996 / 10,000 & 2.463 & 5.125 & 6.208 & +0.184 & +0.001975 [+0.001623, +0.002286] \\
+\midrule
+C15 & Straight & 10,000 / 10,000 & 5.104 & 2.330 & 5.617 & +0.295 & Baseline \\
+C15 & Draw     & 10,000 / 10,000 & 5.236 & 2.018 & 5.618 & +0.295 & -2.883e-04 [-4.426e-04, -1.306e-04] \\
+C15 & Fade     & 10,000 / 10,000 & 4.911 & 2.635 & 5.581 & +0.2977 & +0.002582 [+0.002453, +0.002736] \\
+\midrule
+C16 & Straight & 9,996 / 10,000 & 4.993 & 5.448 & 7.853 & +0.0722 & Baseline \\
+C16 & Draw     & 9,996 / 10,000 & 5.120 & 5.328 & 7.857 & +0.0712 & -0.001053 [-0.001428, -6.655e-04] \\
+C16 & Fade     & 9,996 / 10,000 & 4.812 & 5.579 & 7.831 & +0.0745 & +0.002294 [+0.00193, +0.002645] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{Selected Pitching Wedge Zero-Lean Dispersion and Scoring (Conditions C17--C24)}
+\label{tab:dispersion_pw}
+\begin{tabular}{llcccccc}
+\toprule
+Key & Pattern & Supp. / Att. & $\sigma_Y$ (m) & $\sigma_X$ (m) & RMSE (m) & Abs. SG & Paired $\Delta\text{SG}$ vs Straight [95\% MC] \\
+\midrule
+C17 & Straight & 10,000 / 10,000 & 1.102 & 1.145 & 1.589 & +0.569 & Baseline \\
+C17 & Draw     & 10,000 / 10,000 & 1.120 & 1.092 & 1.564 & +0.573 & +0.004434 [+0.004363, +0.004502] \\
+C17 & Fade     & 10,000 / 10,000 & 1.082 & 1.198 & 1.615 & +0.565 & -0.00445 [-0.004517, -0.00438] \\
+\midrule
+C18 & Straight & 9,999 / 10,000 & 1.074 & 4.001 & 4.512 & +0.191 & Baseline \\
+C18 & Draw     & 9,999 / 10,000 & 1.092 & 3.987 & 4.504 & +0.1913 & +9.508e-05 [-6.221e-05, +2.800e-04] \\
+C18 & Fade     & 9,999 / 10,000 & 1.056 & 4.015 & 4.520 & +0.1913 & +9.390e-05 [-3.145e-05, +2.411e-04] \\
+\midrule
+C19 & Straight & 10,000 / 10,000 & 2.201 & 2.286 & 3.176 & +0.344 & Baseline \\
+C19 & Draw     & 10,000 / 10,000 & 2.237 & 2.180 & 3.126 & +0.3495 & +0.005527 [+0.005466, +0.005576] \\
+C19 & Fade     & 10,000 / 10,000 & 2.161 & 2.392 & 3.227 & +0.3385 & -0.005487 [-0.005537, -0.005427] \\
+\midrule
+C20 & Straight & 9,999 / 10,000 & 2.138 & 4.431 & 5.260 & +0.1011 & Baseline \\
+C20 & Draw     & 9,999 / 10,000 & 2.172 & 4.380 & 5.232 & +0.1016 & +4.844e-04 [+3.075e-04, +6.523e-04] \\
+C20 & Fade     & 9,999 / 10,000 & 2.101 & 4.483 & 5.287 & +0.1008 & -3.337e-04 [-5.016e-04, -1.721e-04] \\
+\midrule
+C21 & Straight & 10,000 / 10,000 & 1.102 & 1.145 & 1.589 & +0.569 & Baseline \\
+C21 & Draw     & 10,000 / 10,000 & 1.137 & 1.038 & 1.540 & +0.578 & +0.008878 [+0.008738, +0.009015] \\
+C21 & Fade     & 10,000 / 10,000 & 1.060 & 1.252 & 1.640 & +0.560 & -0.008934 [-0.009068, -0.008798] \\
+\midrule
+C22 & Straight & 9,999 / 10,000 & 1.074 & 4.001 & 4.512 & +0.191 & Baseline \\
+C22 & Draw     & 9,999 / 10,000 & 1.109 & 3.971 & 4.495 & +0.1914 & +2.513e-04 [-3.605e-05, +5.326e-04] \\
+C22 & Fade     & 9,999 / 10,000 & 1.036 & 4.028 & 4.526 & +0.1915 & +2.919e-04 [+3.620e-05, +5.922e-04] \\
+\midrule
+C23 & Straight & 10,000 / 10,000 & 2.201 & 2.286 & 3.176 & +0.344 & Baseline \\
+C23 & Draw     & 10,000 / 10,000 & 2.268 & 2.073 & 3.076 & +0.355 & +0.011117 [+0.010994, +0.01122] \\
+C23 & Fade     & 10,000 / 10,000 & 2.118 & 2.498 & 3.278 & +0.333 & -0.010966 [-0.011068, -0.010844] \\
+\midrule
+C24 & Straight & 9,999 / 10,000 & 2.138 & 4.431 & 5.260 & +0.1011 & Baseline \\
+C24 & Draw     & 9,999 / 10,000 & 2.203 & 4.328 & 5.203 & +0.1022 & +0.001046 [+7.406e-04, +0.001332] \\
+C24 & Fade     & 9,999 / 10,000 & 2.060 & 4.535 & 5.315 & +0.1005 & -6.272e-04 [-9.681e-04, -2.936e-04] \\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsection{Direct Paired Common-Six Interaction Contrasts}
+To determine whether increasing shaft variability (SD $1^\circ \to 2^\circ$)
+or curve strength (Curve $\times 1 \to \times 2$) alters the relative benefit
+of curving versus hitting straight, twelve representative paired interaction
+contrasts (\textbf{E01}--\textbf{E12}) are evaluated. These contrasts span all
+three clubs and both delivery-noise profiles, as detailed in
+Table~\ref{tab:interaction_contrasts}.
+
+Crucially, each contrast estimates the direct paired change in relative benefit
+$\Delta_{B-A}(\text{Curved} - \text{Straight})$ evaluated on the exact
+intersection of supported indices across all six populations ($A$-Straight,
+$A$-Draw, $A$-Fade, $B$-Straight, $B$-Draw, $B$-Fade), with normalized
+primitive noise pairing. This interaction effect is \emph{never} obtained by
+subtracting separately conditioned table means or marginal confidence limits.
+In the driver and shaft-only iron/wedge contrasts, all 10,000 attempts are
+mutually supported ($n = 10{,}000$). In 7-iron \texttt{combined2} contrasts
+(E07, E08), mutual support is $n = 9{,}996$. In pitching wedge
+\texttt{combined2} contrasts (E11, E12), mutual support is $n = 9{,}999$.
+Condition $A$ and Condition $B$ protocol IDs correspond to \texttt{original\_control/1},
+except for pitching wedge strong curve $B$ conditions (E10, E12), which use the verified
+supplemental protocol \texttt{pw-primary-face-bounds/1}.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\caption{Direct Paired Common-Six Interaction Contrasts (Contrasts E01--E12)}
+\label{tab:interaction_contrasts}
+\begin{tabular}{lllccc}
+\toprule
+Contrast & Factor Tested & Conditions ($A \to B$) & Pattern & Common Six $n$ & $\Delta\text{SG}$ vs Straight [95\% MC] \\
+\midrule
+E01 & SD $1^\circ \to 2^\circ$ & C01 $\to$ C03 & Draw & 10,000 & +0.00282 [+0.002346, +0.00329] \\
+    &                          &               & Fade & 10,000 & -0.001293 [-0.001708, -8.956e-04] \\
+E02 & Curve $\times 1 \to \times 2$ & C03 $\to$ C07 & Draw & 10,000 & +0.004905 [+0.00438, +0.00545] \\
+    &                          &               & Fade & 10,000 & -2.354e-04 [-5.740e-04, +1.124e-04] \\
+E03 & SD $1^\circ \to 2^\circ$ & C02 $\to$ C04 & Draw & 10,000 & +0.00217 [+0.0016, +0.002706] \\
+    &                          &               & Fade & 10,000 & -9.699e-04 [-0.001502, -5.028e-04] \\
+E04 & Curve $\times 1 \to \times 2$ & C04 $\to$ C08 & Draw & 10,000 & +0.00449 [+0.00394, +0.00507] \\
+    &                          &               & Fade & 10,000 & +9.299e-05 [-2.735e-04, +4.642e-04] \\
+\midrule
+E05 & SD $1^\circ \to 2^\circ$ & C09 $\to$ C11 & Draw & 10,000 & +6.449e-06 [-7.089e-05, +4.934e-05] \\
+    &                          &               & Fade & 10,000 & +2.000e-05 [-5.979e-05, +1.358e-04] \\
+E06 & Curve $\times 1 \to \times 2$ & C11 $\to$ C15 & Draw & 10,000 & +2.109e-04 [+9.164e-05, +3.578e-04] \\
+    &                          &               & Fade & 10,000 & +0.001515 [+0.001433, +0.001629] \\
+E07 & SD $1^\circ \to 2^\circ$ & C10 $\to$ C12 & Draw & 9,996 & -6.028e-05 [-2.966e-04, +1.540e-04] \\
+    &                          &               & Fade & 9,996 & +2.175e-04 [-7.965e-05, +5.113e-04] \\
+E08 & Curve $\times 1 \to \times 2$ & C12 $\to$ C16 & Draw & 9,996 & -2.476e-04 [-4.948e-04, +2.780e-05] \\
+    &                          &               & Fade & 9,996 & +0.001183 [+9.817e-04, +0.001365] \\
+\midrule
+E09 & SD $1^\circ \to 2^\circ$ & C17 $\to$ C19 & Draw & 10,000 & +0.001093 [+0.001026, +0.001164] \\
+    &                          &               & Fade & 10,000 & -0.001037 [-0.001105, -9.711e-04] \\
+E10 & Curve $\times 1 \to \times 2$ & C19 $\to$ C23 & Draw & 10,000 & +0.00559 [+0.005529, +0.005643] \\
+    &                          &               & Fade & 10,000 & -0.005479 [-0.00553, -0.005418] \\
+E11 & SD $1^\circ \to 2^\circ$ & C18 $\to$ C20 & Draw & 9,999 & +3.893e-04 [+2.185e-04, +5.506e-04] \\
+    &                          &               & Fade & 9,999 & -4.276e-04 [-5.452e-04, -3.150e-04] \\
+E12 & Curve $\times 1 \to \times 2$ & C20 $\to$ C24 & Draw & 9,999 & +5.621e-04 [+4.164e-04, +7.167e-04] \\
+    &                          &               & Fade & 9,999 & -2.935e-04 [-4.911e-04, -8.723e-05] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In Table~\ref{tab:interaction_contrasts}, contrasts E01--E04 confirm that for
+the driver, doubling shaft-rotation SD significantly increases Draw's relative
+benefit over Straight ($+0.00282$ strokes in shaft-only; $+0.00217$ in
+combined-2), while increasing curve strength adds an even larger positive
+increment ($+0.00491$ in shaft-only; $+0.00449$ in combined-2). For the 7-iron
+(E05--E08), doubling shaft SD produces negligible relative changes
+($+6.45\times 10^{-6}$ for Draw, $+2.00\times 10^{-5}$ for Fade in shaft-only;
+both intervals span zero), whereas doubling curve strength substantially
+improves Fade's advantage ($+0.00151$ in shaft-only; $+0.00118$ in combined-2).
+For the pitching wedge (E09--E12), doubling shaft SD increases Draw's advantage
+and penalizes Fade, while doubling curve strength strongly amplifies Draw
+($+0.00559$ in shaft-only; $+5.62\times 10^{-4}$ in combined-2) and strongly
+penalizes Fade ($-0.00548$ in shaft-only; $-2.93\times 10^{-4}$ in combined-2).
+In all cases, the intervals represent pointwise Monte Carlo sampling
+uncertainty from bootstrap resampling on the shared pseudorandom seed; cells are
+correlated by design and do not represent independent empirical discoveries.
+
+\subsection{Fixed-Target Across-Lean Controls and Rematching Physics}
+To test whether pattern differences persist when comparing across forward
+shaft lean at a strictly identical physical distance, the study evaluated
+fixed-target across-lean controls. Unlike within-lean matching (where
+targets may differ across lean), the across-lean protocol holds the physical
+zero-error target distance constant while rematching nominal clubhead speed,
+face angle, and path angle.
+
+The public API selector \texttt{select\_bounds\_control\_pairs} specifies the
+two primary bounds-control comparisons, which evaluate lean $0^\circ \to 5^\circ$
+under curve $\times 2$, shaft SD $2^\circ$, and \texttt{combined2} delivery
+noise for driver and pitching wedge. Table~\ref{tab:fixed_target_nominals}
+presents the solved nominal delivery inputs required to match target distance
+across lean, and Table~\ref{tab:fixed_target_scoring} presents the resulting
+across-lean relative scoring changes alongside the companion within-control
+pitching wedge curve $\times 1$ contrast.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\caption{Fixed-Target Rematched Solved Nominal Delivery Inputs Across Lean}
+\label{tab:fixed_target_nominals}
+\begin{tabular}{llcccc}
+\toprule
+Contrast & Target & Lean & Straight Speed & Curved Speed & Curved Face \\
+\midrule
+Driver Curve $\times 2$ (Control Bounds) & 178.949\,m & $0^\circ$ & 45.00\,m/s & 45.25\,m/s & $\pm 4.03^\circ$ \\
+                                         &            & $5^\circ$ & 55.41\,m/s & 56.35\,m/s & $\pm 4.89^\circ$ \\
+\midrule
+PW Curve $\times 2$ (Face Bounds)       & 77.402\,m  & $0^\circ$ & 32.00\,m/s & 32.05\,m/s & $\mp 0.26^\circ$ \\
+                                         &            & $5^\circ$ & 29.12\,m/s & 29.16\,m/s & $\mp 0.08^\circ$ \\
+\midrule
+PW Curve $\times 1$ (Original Control)   & 77.402\,m  & $0^\circ$ & 32.00\,m/s & 32.01\,m/s & $\mp 0.13^\circ$ \\
+                                         &            & $5^\circ$ & 29.12\,m/s & 29.13\,m/s & $\mp 0.04^\circ$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{5pt}
+\caption{Fixed-Target Across-Lean Relative Scoring Effects ($0^\circ \to 5^\circ$ Lean)}
+\label{tab:fixed_target_scoring}
+\begin{tabular}{llccc}
+\toprule
+Contrast Identifier & Target & Common Six $n$ & Pattern & $\Delta\text{SG}$ ($0^\circ \to 5^\circ$ Lean) [95\% MC] \\
+\midrule
+Driver Curve $\times 2$ (Control Bounds) & 178.949\,m & 9,940 & Draw & +0.00598 [+0.00483, +0.00700] \\
+                                         &            &       & Fade & -0.001397 [-0.00234, -4.807e-04] \\
+\midrule
+PW Curve $\times 2$ (Face Bounds)       & 77.402\,m  & 9,999 & Draw & -3.513e-04 [-5.603e-04, -1.424e-04] \\
+                                         &            &       & Fade & +6.868e-04 [+4.851e-04, +8.859e-04] \\
+\midrule
+PW Curve $\times 1$ (Original Control)   & 77.402\,m  & 9,999 & Draw & -2.001e-04 [-3.759e-04, -2.492e-05] \\
+                                         &            &       & Fade & +3.139e-04 [+1.925e-04, +4.191e-04] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The physics of nominal rematching directly explains these results:
+\begin{enumerate}
+\item \textbf{Driver Rematching:} Forward shaft lean of $5^\circ$ reduces
+the driver's delivered static loft from $10^\circ$ to $5^\circ$ at zero twist.
+At this low loft, launch elevation drops significantly, requiring clubhead
+speed to be rematched from $45.000$\,m/s to $55.408$\,m/s ($+23.1\%$) to
+attain the required $178.949$\,m carry. In the curved deliveries, nominal
+speed reaches $56.345$\,m/s with nominal face angle adjusted to $\pm 4.895^\circ$
+(top sign Draw, bottom sign Fade). This substantially higher delivery velocity
+increases kinetic energy and magnifies realized downrange dispersion. Sixty
+shots ($0.60\%$) at lean $5^\circ$ fail support due to nonairborne launch
+angles resulting from extreme low contact, yielding a common-six intersection
+of $n = 9{,}940$. The protocol transitions from \texttt{original\_control/1}
+at lean $0^\circ$ to \texttt{driver-control-speed-bounds/1} at lean $5^\circ$.
+\item \textbf{Pitching Wedge Rematching:} In contrast, the pitching wedge has
+a static loft of $46^\circ$, which creates steep climb and high aerodynamic
+drag. Introducing $5^\circ$ forward lean reduces delivered loft to $41^\circ$,
+moving launch elevation closer to the aerodynamically optimal carry angle.
+Consequently, nominal clubhead speed must \emph{decrease} from $32.000$\,m/s
+to $29.118$\,m/s ($-9.0\%$) to avoid overshooting the $77.402$\,m target.
+Both PW curve $\times 1$ and curve $\times 2$ achieve $n = 9{,}999$ common-six
+support (only 1 shot failing support across all six populations). PW curve
+$\times 2$ transitions from \texttt{pw-primary-face-bounds/1} to
+\texttt{pw-control-face-bounds/1}, while PW curve $\times 1$ is evaluated entirely
+within \texttt{original\_control/1}.
+\end{enumerate}
+
+These fixed-target controls confirm that the model's pattern differences
+persist when target distance is held constant. However, because matching also
+alters nominal speed, face, and path, this comparison does not isolate a pure
+causal effect of curvature or shaft lean alone.
+
+\subsection{Course Context, Absolute Scoring Baselines, and Synthesis}
+Absolute strokes gained values in this study are derived from conditional
+simulation endpoints evaluated against an approximate historical Tour scoring
+benchmark. The simulation environments embody distinct hypothetical course
+contexts:
+\begin{itemize}
+\item \textbf{Driver (Tee Context):} Par 4/5 tee shot, initial distance
+$380$\,m to hole, fairway half-width $15.0$\,m (total fairway width $30$\,m)
+flanked by rough.
+\item \textbf{7-Iron and Pitching Wedge (Approach Context):} Fairway approach,
+pin positioned at the exact nominal target distance ($127.882$\,m for 7-iron;
+$77.402$\,m for PW), green radius $10.0$\,m (circular green diameter $20$\,m)
+surrounded by rough.
+\item \textbf{Carry-as-Stop Assumption:} First ground contact is treated as
+the final resting lie. Terrain roll, bounce, spin-back, fairway runout, and
+hazards are deliberately excluded.
+\item \textbf{Scoring Unit:} Values represent strokes gained per single
+identical hypothetical opportunity (or per 100 identical opportunities).
+They must not be multiplied or extrapolated to represent ``per round'' golfer
+handicaps.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Cross-Condition Synthesis of Relative Scoring Benefits and Dispersion}
+\label{tab:synthesis_summary}
+\begin{tabular}{llccc}
+\toprule
+Club & Pattern & SG Point Estimate Range & Sign Counts (+ / -- / 0) & Common-Three $n$ Range \\
+\midrule
+Driver & Draw & $+2.691\times 10^{-5}$ to $+0.00780$ & 6 / 0 / 2 & 10,000 to 10,000 \\
+Driver & Fade & $-0.00146$ to $+2.344\times 10^{-4}$ & 1 / 4 / 3 & 10,000 to 10,000 \\
+\midrule
+7-Iron & Draw & $-0.001356$ to $-2.883\times 10^{-4}$ & 0 / 8 / 0 & 9,996 to 10,000 \\
+7-Iron & Fade & $+8.934\times 10^{-4}$ to $+0.00258$ & 8 / 0 / 0 & 9,996 to 10,000 \\
+\midrule
+Pitching Wedge & Draw & $+9.508\times 10^{-5}$ to $+0.01112$ & 6 / 0 / 2 & 9,999 to 10,000 \\
+Pitching Wedge & Fade & $-0.01097$ to $+2.919\times 10^{-4}$ & 1 / 6 / 1 & 9,999 to 10,000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:synthesis_summary} synthesizes the relative scoring behavior
+across the eight selected conditions per club. The evidence decisively refutes
+any claim of a universal ``best shape'':
+\begin{itemize}
+\item In the 7-iron model, Fade demonstrates an unambiguous advantage over
+Straight across all eight conditions (8 positive intervals, 0 negative, 0
+spanning zero), while Draw is uniformly penalized (0 positive, 8 negative).
+\item In the pitching wedge model, the direction reverses: Draw is favorable
+in 6 conditions and spans zero in 2 (+6/0/2), while Fade is penalized in 6
+conditions, favorable in 1, and spans zero in 1 (1/-6/1).
+\item In the driver model, Draw is favorable in 6 conditions and spans zero in
+2 (+6/0/2), while Fade is negative in 4 conditions, positive in 1, and spans
+zero in 3 (1/-4/3).
+\end{itemize}
+
+This reversal is driven by the geometric coupling between face rotation and
+delivered loft ($\frac{d\lambda}{df} = \cot\beta \frac{\cos(L-\ell)}{\cos L} > 0$),
+in combination with club aerodynamics. Closing the face reduces delivered
+loft. In mid- and short-irons, reduced loft increases ball speed and reduces
+drag, producing longer carry on closed-face (leftward) misses (long-left /
+short-right behavior). For the low-lofted driver ($10^\circ$), reducing loft
+drops launch elevation below the carry optimum, producing shorter carry on
+leftward misses (short-left / long-right behavior).
+
+\subsection{Full Matrix Traceability and Scientific Limitations}
+The complete phase-two research repository provides full provenance across
+all experimental matrices and comparisons:
+\begin{itemize}
+\item \href{phase2/validation/independent_primary_final_audit.json}{Primary Matrix Audit}:
+324 planned cells (270 completed, 54 explicitly unavailable; 8,100,000 attempted
+rows).
+\item \href{phase2/validation/independent_control_final_audit.json}{Control Matrix Audit}:
+72 planned fixed-target cells (52 completed, 20 unavailable; 1,560,000 attempted
+rows).
+\item \href{phase2/validation/supplement_final_completion.json}{Supplement Completion}:
+26 executed supplemental cells (780,000 attempted rows; 779,712 supported, 288
+unsupported). Four control aliases (\href{phase2/supplement_report_v1/control_aliases.json}{\texttt{control\_aliases.json}})
+reuse zero-lean supplemental data without duplicating shots.
+\item \href{phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json}{Supplement Comparisons Ledger}:
+All 384 qualified comparisons (164 shaft rotation SD, 164 curve strength, 56
+across-lean), byte-reconciled to
+\href{phase2/validation/protocol_name_recovery_v6/expected_numeric_hashes.json}{\texttt{expected\_numeric\_hashes.json}}
+and independently reviewed in
+\href{phase2/validation/supplement_v6_numeric_review_v1/root_review.json}{\texttt{root\_review.json}}
+and \href{phase2/validation/supplement_v6_numeric_review_v1/astra_review.json}{\texttt{astra\_review.json}}.
+\item \href{phase2/validation/selected_headline_traceability_v1/review.json}{Headline Traceability}:
+The twenty-four cells and seventy-two pattern rows presented in this article
+map directly to fifty-two verified SHA256 summary and manifest records.
+\end{itemize}
+
+\paragraph{Scientific Limitations and Modeling Assumptions}
+\begin{enumerate}
+\item \textbf{Pending Full Publication Acceptance:} Final graphics rendering
+and complete narrative publication acceptance remain live and pending in the
+dedicated producer worktree. Only the numerical facts and exact data bindings
+reported herein are qualified.
+\item \textbf{No Empirical Validation Claimed:} These models do not qualify
+human golfer swing mechanics or specific commercial clubhead performance
+against tracked player distributions (deferred under issue \#11984).
+\item \textbf{Primitive Error Interpretation:} Primitive shaft-twist SD
+($1^\circ$ or $2^\circ$) represents an orientation perturbation about the
+delivered shaft axis. It is \emph{not} delivered face-angle SD, player
+accuracy, or closure angular velocity.
+\item \textbf{Correlated Grid Estimands:} Shared pseudorandom draws correlate
+grid cells; cells are not independent experimental replications. Pointwise
+Monte Carlo bootstrap intervals quantify simulation sampling noise only, not
+multiplicity-adjusted discoveries or physical certainty.
+\item \textbf{Uncertainty Bounds:} Assumed clubhead parameters ($\pm 20\%$ CG
+depth, inertia, and face radii) and contact law variations are deliberate
+sensitivity tests, not measured confidence bounds.
+\end{enumerate}
+
+\clearpage
+\section{Historical Phase-One Status and Scope}
+All sections from this point onward describe phase one. Their delivery
+geometry, impact model, aiming procedure, seed and results are historical;
+they are not the phase-two matched-delivery method or results.
+
+The original four driver result bundles are historical controls from a
+superseded impact approximation: tangential impulse changed spin but not
+linear velocity. The completed corrected three-club experiments replace their
+conclusions. Fixed loft also excluded face--loft covariance.
+
+This is an editable standalone experiment reference, separate from the governed
+engineering design manual. The canonical manual remains the QMD source under
+\texttt{manuals/upstreamdrift}. This experiment does not qualify the underlying
+impact or flight model against measured shot populations. It estimates
+conditional outcome variance from face-angle error, not a golfer's ability to
+produce a chosen pattern. All results are first ground contact (carry); bounce
+and roll are excluded.
+
+\section{Inputs, Frames, and Pairing}
+User-facing face and path angles are measured from the target, positive right
+for a right-handed golfer. Straight uses $(f,p)=(0,0)$ degrees, draw uses
+$(1.5,3)$, and fade uses $(-1.5,-3)$. The doubled-curve trials
+use $(3,6)$ and $(-3,-6)$ while retaining the straight baseline. The draw face is therefore $1.5$ degrees
+left of its path. The repository solver uses $x$ forward, $y$ left, and $z$ up;
+the adapter changes the sign of horizontal input and output angles once.
+The CSV diagnostic \texttt{spin\_axis\_tilt\_deg} instead retains the native
+axis tilt convention, positive toward draw/left curvature. It is not
+Trackman's right-positive spin-axis convention.
+Every pattern receives the same 10,000 independent errors
+$\epsilon_i\sim\mathcal{N}(0,\sigma_F^2)$, with separate trials at
+$\sigma_F=1$ and $2$ degrees. In each trial,
+$f_i=\bar f+\epsilon_i$ and $p_i=\bar p$. Shared errors provide paired
+comparisons; finite draw and fade samples need not be exact mirrors.
+The random seed is 20261008, using NumPy's default generator.
+
+The corrected study uses three illustrative hybrid delivery presets:
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Club & Speed (m/s) & Loft ($^\circ$) & Attack ($^\circ$) & Lie ($^\circ$) & Mass (kg)\\
+\midrule
+Driver &45&12.8&-0.9&58.5&0.200\\
+7-Iron &36&24.0&-4.0&63.0&0.272\\
+Pitching Wedge &32&36.7&-5.0&64.0&0.300\\
+\bottomrule
+\end{tabular}
+\end{center}
+These are assumptions for comparative modeling, not measured player inputs or
+reproduced specifications of one complete club. Trackman's dynamic-loft page
+reports driver $12.8^\circ$ as a Tour average; its PW $36.7^\circ$ is an
+optimizer example at 72 mph, not a measured Tour PW mean. The 7-iron
+$24^\circ$ delivered loft is an explicit assumption. Manufacturer static lie
+angles supply assumed shaft elevations. Speeds, attack angles, and masses
+are illustrative inputs unless the source receipt separately identifies a
+measurement. Nominal lean is zero; axis sensitivity explores 0, 10, and
+20 degrees where the geometry is valid.
+
+The experiment matrix is three clubs, two face standard deviations, two curve
+magnitudes, and two delivery modes (fixed loft and assumed shaft rotation):
+24 bundles, each with 10,000 shots per shape. The ball begins stationary
+without spin; strike is central. Restitution, friction, ball mass and radius,
+and atmospheric parameters are recorded in receipts. There is no wind,
+speed error, strike error, or path error. Driver scoring uses a hypothetical
+tee/fairway/rough context; 7-iron and PW scoring use approach/green contexts.
+The earlier $45\,\mathrm{m/s}$, $10.9^\circ$ loft, zero-attack driver case is
+retained only in superseded historical bundles.
+
+\section{Corrected Central-Contact Impact Equations}
+The experiment calls the public \texttt{ImpactSolverAPI} rigid-body model.
+For unit face normal $\mathbf n$, relative centre velocity
+$\mathbf v_r=\mathbf v_c^- -\mathbf v_b^-$, ball mass $m_b$, club mass $m_c$,
+restitution $e$, ball radius $R$, and inertia $I_b=2m_bR^2/5$:
+\[
+ m_*=(m_b^{-1}+m_c^{-1})^{-1},\qquad
+ J_n=(1+e)m_*\mathbf v_r\cdot\mathbf n.
+\]
+The ball contact point is $-R\mathbf n$ from its centre. Tangential surface
+slip, including initial ball spin, and its effective inverse mass are
+\[
+ \mathbf u_t=\mathbf v_r-(\mathbf v_r\cdot\mathbf n)\mathbf n
+                 +R(\boldsymbol\omega_b^-\times\mathbf n),\qquad
+ D=m_b^{-1}+m_c^{-1}+R^2/I_b.
+\]
+For positive normal approach, Coulomb friction supplies
+\[
+ \mathbf J_t=\min\{\mu J_n,\|\mathbf u_t\|/D\}
+                 \frac{\mathbf u_t}{\|\mathbf u_t\|},\qquad
+ \mathbf J=J_n\mathbf n+\mathbf J_t.
+\]
+The tangential impulse is zero at zero slip or zero friction. Both linear
+velocities and ball spin receive their corresponding impulse:
+\[
+ \mathbf v_b^+=\mathbf v_b^-+\mathbf J/m_b,\quad
+ \mathbf v_c^+=\mathbf v_c^- -\mathbf J/m_c,\quad
+ \boldsymbol\omega_b^+=\boldsymbol\omega_b^-+
+                 (R/I_b)(\mathbf J_t\times\mathbf n).
+\]
+Earlier result bundles omitted $\mathbf J_t$ from both translational updates
+and used the infinite-club sticking cap $(2/7)m_b\|\mathbf u_t\|$.
+Those bundles are superseded historical controls. Regression tests first
+failed against those defects, then passed with the correction. Independent
+arbitrary-3D tests check linear and angular momentum, normal restitution,
+nonincreasing kinetic energy, sticking contact, initial spin, and rotation
+covariance. These establish internal consistency of central contact with a
+translating club; off-centre club rotation, shaft response, and measured launch
+accuracy remain unqualified.
+
+\section{Geometric Face--Loft Coupling and Shaft Lean}
+This is an explicitly assumed rigid geometry, not observed player data.
+The native right-handed frame is $+X$ forward, $+Y$ left, and $+Z$ up.
+User face angle is positive right. At zero twist, the delivered face normal is
+$\mathbf n_0=(\cos L,0,\sin L)$ for nominal delivered loft $L$.
+Given assumed shaft elevation $\ell$ and forward lean $a$:
+\[
+ s_x=\sin\ell\tan a,\qquad
+ \mathbf s=(s_x,\sqrt{\cos^2\ell-s_x^2},\sin\ell).
+\]
+This construction is valid only when its square-root argument is nonnegative.
+Rodrigues rotation about the unit shaft axis gives
+\[
+ \mathbf n(\theta)=\mathbf n_0\cos\theta+
+ (\mathbf s\times\mathbf n_0)\sin\theta+
+ \mathbf s(\mathbf s\cdot\mathbf n_0)(1-\cos\theta).
+\]
+Delivered face and loft are extracted as
+\[
+ F=\operatorname{atan2}(-n_y,n_x),\qquad
+ L_d=\operatorname{atan2}(n_z,\sqrt{n_x^2+n_y^2}).
+\]
+Near zero twist,
+\[
+ \frac{dF}{d\theta}=-(s_z-s_x\tan L),\quad
+ \frac{dL_d}{d\theta}=-s_y,\quad
+ \frac{dL_d}{dF}=\frac{s_y}{s_z-s_x\tan L}.
+\]
+With zero lean, $dL_d/dF=\cot\ell$: closing tends to reduce loft in this
+specific rotation mode. Rotation about the vertical axis instead preserves
+loft. Face angle alone therefore does not identify delivered loft.
+
+The main comparison applies this geometry to the face error $F-F_0$ around
+each pattern's nominal face $F_0$, then rotates the axis and normal together
+by the nominal target yaw. All shapes share the same zero-error delivered
+loft, speed, attack angle, and strike. This isolates sensitivity to the assumed
+face--loft coupling without giving one shape a different baseline loft.
+Fixed-loft trials provide the corresponding control. Separate shaft-lean
+sensitivity holds nominal loft fixed and changes only the axis; it does not
+represent pitching a fixed physical club forward. That latter operation
+changes nominal loft as well and must be analyzed separately.
+
+Less delivered loft does not necessarily increase carry. Launch, spin, speed,
+and aerodynamic trajectory jointly determine carry, so long-left/short-right
+behavior is measured from the modeled endpoint covariance rather than imposed.
+Static manufacturer lie is used only as an assumed delivered shaft elevation;
+dynamic lie, shaft bending, and golfer covariance are unmeasured.
+
+\section{Flight Integration and Landing}
+Each shot calls the existing \texttt{BallFlightSimulator}, backed by the
+\texttt{upstream-physics} Rust kernel. Launch velocity uses metres per second,
+launch and azimuth angles radians, and spin magnitude RPM at the Python
+boundary, converted to radians per second inside the kernel. The spin axis
+is normalized. The solver integrates position, velocity and decaying spin
+with RK4, drag and spin-induced aerodynamic force:
+\[
+ \dot{\mathbf r}=\mathbf v,\qquad
+ m_b\dot{\mathbf v}=m_b\mathbf g+\mathbf F_D+\mathbf F_M,\qquad
+ \dot\omega=-\lambda\omega.
+\]
+The production step is $0.02\,\mathrm{s}$ with a $12\,\mathrm{s}$ horizon.
+Landing is linearly interpolated between the last above-ground and first
+nonpositive-height samples. Failure to land raises an error; it never
+silently treats the final airborne sample as a landing.
+The Rust coefficient path is distinct from the constant-spin Waterloo/Penner
+model in \texttt{flight\_models.py}; their calibrations must not be mixed.
+The kernel applies a single spin force (not separate additive backspin lift
+and sidespin Magnus forces). With $A=\pi R^2$ and relative airspeed $V$:
+\[
+ \mathbf F_D=-\tfrac12\rho C_D A V\mathbf v,\qquad
+ S=R|\boldsymbol\omega|/V,\qquad
+ C_L=\min(0.26,\;0.70 S^{0.645}),
+\]
+\[
+ \mathbf F_M=\tfrac12\rho C_L A V^2
+ \frac{\boldsymbol\omega\times\mathbf v}
+ {|\boldsymbol\omega\times\mathbf v|}.
+\]
+The zero-cross-product case returns zero spin force. The shared drag-crisis
+curve evaluates Reynolds number $\rho V(2R)/\mu$ with
+$\mu=1.81\times10^{-5}\,\mathrm{Pa\,s}$ and base drag coefficient $0.25$,
+using the exact source-bound constants in \texttt{aerodynamics.rs}.
+Spin decay uses $\lambda=0.05\,\mathrm{s}^{-1}$.
+
+\section{Aiming and Outcome Statistics}
+Raw outcomes keep the requested target-relative angles. A second comparison
+rotates each entire pattern by a single angle computed from its nominal,
+zero-error landing, placing that nominal landing on the target line. This is
+an aiming adjustment, not per-shot correction or a sample-mean fit. The
+fixed target distance is the straight nominal carry; differences in curved
+carry remain in the error metric.
+\[
+ \alpha=\operatorname{atan2}(y_0,x_0),\qquad
+ \begin{pmatrix}x'\\y'\end{pmatrix}=
+ \begin{pmatrix}\cos\alpha&\sin\alpha\\-\sin\alpha&\cos\alpha\end{pmatrix}
+ \begin{pmatrix}x\\y\end{pmatrix}.
+\]
+Lateral variance is the unbiased sample variance with denominator $n-1$;
+standard deviation is its square root. Central 90\% width is the empirical
+95th minus 5th percentile. Target RMSE is
+$\sqrt{n^{-1}\sum_i[(x_i-x_T)^2+y_i^2]}$. Target-hit probability counts
+landings within a $15\,\mathrm m$ radius circle, not a fairway strip.
+Paired percentile-bootstrap variance-ratio intervals resample common shot
+indices 500 times. These intervals describe Monte Carlo error only; they
+exclude model discrepancy and parameter uncertainty.
+
+\section{Distance Control}
+Carry is not fixed: face error changes impact and spin, and curved patterns
+have shorter mean carry. The supplementary common-range diagnostic maps each
+nominal-aimed endpoint to
+\[
+ (x'',y'')=\frac{x_T}{\sqrt{x'^2+y'^2}}(x',y').
+\]
+It preserves landing bearing and sets every radial range to the same straight
+nominal distance. It is geometric normalization, not a new flight simulation,
+and cannot isolate a causal physical mechanism. The superseded historical controls suggested a small residual effect after
+normalization. Their values do not establish the corrected-model result; all
+final shape comparisons require the corrected experiment matrix.
+
+\section{Club-Appropriate Scoring Estimates}
+The driver scenario is a tee shot on a hypothetical flat $400\,\mathrm m$
+hole with a fairway corridor of total width $30\,\mathrm m$. Endpoints inside
+that corridor use the fairway benchmark; outside use rough. Remaining distance
+is $d_i=\sqrt{(400-x_i)^2+y_i^2}$. Hole distances 350 and 450 m and corridor
+widths 20 and 40 m provide layout sensitivities. The tee starting benchmark
+must come from the published tee table, not a fairway approach substitute.
+
+For the 7-iron and pitching wedge, the scenario is an approach from fairway at
+the straight nominal carry, with the hole at that target and a circular green
+of radius $15\,\mathrm m$. Inside the green the benchmark uses putting distance;
+outside it uses unobstructed rough distance. Green radii 10 and 20 m provide
+layout sensitivities. There are no bunkers, water, out-of-bounds, slopes,
+bounce, or roll. Carry endpoints are assumed final resting locations in both
+contexts; actual driver total distance and wedge stopping behavior are not
+modeled. The original approximately 195 m driver-to-green experiment is only
+a superseded historical control.
+
+For historical-tour expected strokes $J(d,\ell)$ at distance $d$ and lie
+$\ell$, the existing source-backed Tools analysis computes
+\[
+ SG_i=J(d_{\rm start},\ell_{\rm start})-1-J(d_i,\ell_i).
+\]
+All patterns share the starting state, so their relative benefit depends only
+on the difference in expected strokes remaining. Reported benefits are per
+shot, not per round. Multiplying by an assumed number of identical
+approaches is an illustration, not a full-course simulation.
+The green benchmark represents an \emph{unholed} putting state. With valid
+one-, two-, and three-putt probabilities,
+\[
+ J_{\rm putt}=p_1+2p_2+3p_3=2-p_1+p_3\ge1,
+ \qquad \lim_{d\downarrow0}J_{\rm putt}(d)=1.
+\]
+A separately explicit already-holed terminal state has zero strokes remaining.
+No endpoint in this carry-only study is assumed holed; hole capture is not
+modeled. The original baseline incorrectly placed terminal zero in the same
+putting interpolation table. Between zero and its first positive knot at
+$5.3975\,\mathrm{cm}$, it awarded partial hole-outs. At $1\,\mathrm{cm}$ this
+produced approximately $0.815$ artificial extra SG. In the fixed-loft one-degree
+controls it inflated straight means by approximately $0.0053$ strokes for
+7-iron and $0.0103$ for PW. Direct API/cache parity reproduced this error and
+therefore did not establish physical validity. The corrected baseline uses the
+unholed tap-in anchor of one, a new version/digest, and rescoring of all saved
+endpoints. Pre-correction scoring artifacts are retained as failed experiments.
+
+The historical fairway and rough values come from Broadie's published
+benchmark table. The putting approximation and its source reconciliation are
+recorded in the scoring provenance. In the 2011 preprint, literal evaluation
+of the displayed three-putt formula with the listed coefficient order gives
+negative probabilities and conflicts with the stated anchors; that literal
+experiment was rejected. A reconciled approximation must not be represented
+as an independently verified exact reproduction of the author's fit.
+The implemented approximate three-putt expression uses putt distance $d_f$
+in feet:
+\[
+ \widetilde p_3=\frac{1}{1+\exp(5.49-0.106d_f+0.000563d_f^2)}-0.00398,
+ \qquad p_3=\min\{\widetilde p_3,1-p_1\}.
+\]
+The upper bound prevents a negative two-putt probability for tap-ins; the
+published one-putt expression uses yards. The baseline supports only its
+explicit distance range and rejects unsupported queries rather than extrapolating.
+Sampling intervals exclude putting-model uncertainty, green-layout error,
+and impact-model discrepancy.
+
+For the corrected matrix, the public Tools API evaluates every explicit
+benchmark distance knot for each fixed starting state and finishing lie.
+Endpoint SG is reconstructed by bounded piecewise-linear interpolation of
+those returned SG values. This reuses the public API's outputs without
+copying its expected-strokes formula. Knots, midpoints, and random supported
+queries are checked against direct API evaluation to $10^{-12}$ strokes.
+Receipts distinguish shots scored from API-evaluated states. Unsupported
+states are reported unavailable; neither starts nor endpoints are extrapolated.
+
+
+\section{Corrected Monte Carlo Results}
+All 24 cells and 720,000 flights completed. Baseline version 2 re-scores identical saved landings with the unholed tap-in correction. The adjacent README provides all 24 rows and the overview retains paired 95\% sampling intervals. Representative shaft-rotation, doubled-curve, two-degree-SD results follow; columns are straight/draw/fade lateral SD in metres and draw/fade relative SG per shot.
+\begin{center}\begin{tabular}{lrrr}
+\toprule Club & Lateral SD S/D/F & Draw $\Delta SG$ & Fade $\Delta SG$\\
+\midrule
+Driver & 16.29/15.63/15.98 & -0.0046 & -0.0053\\
+PW & 3.94/4.02/3.80 & +0.0037 & -0.0061\\
+7-Iron & 8.38/8.51/7.99 & -0.0084 & +0.0096\\
+\bottomrule\end{tabular}\end{center}
+Carry is not constant. A smaller lateral SD does not necessarily improve tee scoring when carry is lost. Equal-range normalization preserves bearing and diagnoses distance scaling, not a causal mechanism. These conditional predictions do not establish a universal curvature benefit or an empirically measured player effect.
+
+\section{Interpretation and Observability Limits}
+The relevant question is whether curved patterns reduce spread or target
+error after equal aiming treatment, not whether their nominal balls curve
+back toward the line. Fixed-loft centered still-air delivery is mirror symmetric. Keeping the same
+right-handed shaft axis in coupled mode does not preserve that reflection:
+$L_d(-\delta)\ne L_d(\delta)$ in general. Thus conditional draw/fade
+differences can arise structurally from assumed face--loft covariance and aiming
+as well as finite sampling; they do not establish a player-specific preference. A nonzero face-to-path mean also does
+not eliminate opposite curvature: a $1.5$-standard-deviation offset leaves
+about $6.68\%$ probability of crossing zero face-to-path under the assumed
+normal error distribution. At two degrees SD, the theoretical crossing
+probability rises to about $22.66\%$. Real golfers may have correlated face/path
+errors, different variability by intention, strike-dependent gear effect,
+wind, varying speed or loft, and asymmetric hazards. Those require measured
+inputs and additional experiments.
+With only one uncertain input, the landing set is a narrow one-dimensional
+curve in the horizontal plane, not a measured two-dimensional dispersion
+ellipse. No ellipse-area advantage is inferred from this experiment.
+For intuition, a local linear landing model
+$Y\simeq aF+b(F-P)$ with fixed path gives
+$\operatorname{Var}(Y)\simeq(a+b)^2\sigma_F^2$, independent of the mean
+face and path if the sensitivities are constant. Any simulated spread
+difference therefore arises from changing nonlinear sensitivities, not the
+mere existence of a nonzero curvature mean. This linearization explains the
+comparison; it is not used to generate any trajectory or landing.
+
+\section{Evidence and Reproduction}
+The adjacent README and checked-in result bundle record numerical results,
+validation commands, dependency/source hashes and graphic provenance.
+The graphics show a limited set of representative flights while the
+dispersion and statistics use all 10,000 shots per pattern. Full fresh reproduction uses a new output directory so preserved historical
+controls are never overwritten. Existing corrected bundles may instead be
+validated and summarized by the overview command.
+\begin{verbatim}
+python3 -m src.tools.shot_pattern_analysis.matrix \
+  shot_pattern_reproduction/corrected_results
+python3 -m src.tools.shot_pattern_analysis.overview \
+  shot_pattern_reproduction/corrected_results \
+  --output-dir shot_pattern_reproduction/overview
+python3 -m src.tools.shot_pattern_analysis.sensitivity \
+  --output shot_pattern_reproduction/sensitivity.json
+python3 -m src.tools.shot_pattern_analysis.numerics \
+  --output shot_pattern_reproduction/numerics.json
+\end{verbatim}
+The native Rust dependency must be installed from this checkout. Compilation
+of this reference is a document check, not scientific acceptance.
+
+\section{External Context}
+Trackman defines face-to-path as the horizontal difference between face and
+path and relates it to curvature; see
+\url{https://www.trackman.com/blog/face-to-path} and
+\url{https://www.trackman.com/blog/spin-axis}.
+Historical strokes-gained methodology and benchmarks are described in
+Broadie, \emph{Assessing Golfer Performance on the PGA TOUR},
+\url{https://business.columbia.edu/sites/default/files-efs/pubfiles/4996/assessing_golfer_performance.full.pdf}.
+These definitions support the input interpretation, not validation of this
+repository's numerical predictions.
+\end{document}

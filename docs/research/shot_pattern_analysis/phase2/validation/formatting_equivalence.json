@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "scope": "Non-frozen GUI and test formatting only; accepted numerical/render sources remain unchanged",
+  "files": {
+    "src/tools/shot_pattern_analysis/matched_gui.py": {
+      "before_sha256": "ee9449e3fe6f3937d2e4bb74ca18bde6b176ae9d6562878df01a42127642174f",
+      "after_sha256": "1d76162f6f72860a04f86aa2254c73a71c3b8eb349edccbbac7cd857938997e9",
+      "ast_equal": true,
+      "normalized_ast_sha256": "a48eacc39cc37d68069702bac02823e2fd2c7b33efc263dcfedf0c65c22f3678"
+    },
+    "tests/tools/shot_pattern_analysis/test_academic_plots.py": {
+      "before_sha256": "05d7b6884f4aed1ce1d5f8896bdab27f9737e9276938e23e8cfadcd8c1f137e9",
+      "after_sha256": "988ef00482e71eaa68dc26d2f097fc69e28d3e1cec25fb6a104fdb08d226c365",
+      "ast_equal": true,
+      "normalized_ast_sha256": "3bd3619c98a9d107e562f48ecf1a0dad3b17cdaff676b413b9a972cc4043e229"
+    },
+    "tests/tools/shot_pattern_analysis/test_matched_report_plots.py": {
+      "before_sha256": "f4211e357eb6e3a54fbeb0a5589a89a02a6f6754e85ed8ec6017c3a8b9f015c6",
+      "after_sha256": "dba2c3424d9599162075972ddb2a9bceffe015bf5e77ba68d4efa6e769911511",
+      "ast_equal": true,
+      "normalized_ast_sha256": "dd3afda7fa3298a8414c8e1020954e5e4160a5f954a046ed059ce4009da01a60"
+    }
+  }
+}

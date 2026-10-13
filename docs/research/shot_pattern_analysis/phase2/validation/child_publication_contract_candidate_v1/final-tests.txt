@@ -1,0 +1,97 @@
+...............................................                          [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+============================= slowest 20 durations =============================
+2.47s setup    tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.55s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+0.31s call     tests/research/test_shot_pattern_final_report.py::test_final_builder_requires_full_324_and_72_cell_protocols
+0.23s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+0.22s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+0.22s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+0.22s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+0.22s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+0.18s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+0.17s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+0.15s call     tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+0.14s setup    tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+0.13s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+0.12s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+0.12s call     tests/research/test_supplement_publication_revision.py::test_child_mutation_during_second_parent_validation_rejected
+0.12s call     tests/research/test_supplement_publication_revision.py::test_report_load_uses_child_receipt_identity
+0.10s call     tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+0.10s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+0.08s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+0.08s call     tests/research/test_supplement_publication_revision.py::test_tampering_rejected[source]
+=========================== short test summary info ============================
+PASSED tests/research/test_supplement_publication_revision.py::test_child_preserves_parent_and_reuses_exact_bytes
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[numeric]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[reused]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[extra]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[identity]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[duplicate]
+PASSED tests/research/test_supplement_publication_revision.py::test_tampering_rejected[source]
+PASSED tests/research/test_supplement_publication_revision.py::test_parent_mutation_during_render_rejected_without_receipt
+PASSED tests/research/test_supplement_publication_revision.py::test_wrong_renderer_scope_rejected
+PASSED tests/research/test_supplement_publication_revision.py::test_ordinary_dispatch_retains_public_parent_verifier
+PASSED tests/research/test_supplement_publication_revision.py::test_parent_executable_pin_rejects_tamper
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[runtime]
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[source]
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[commit]
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_rejects_drift[omitted_source]
+PASSED tests/research/test_supplement_publication_revision.py::test_frozen_subprocess_origin_and_runtime
+PASSED tests/research/test_supplement_publication_revision.py::test_child_mutation_during_second_parent_validation_rejected
+PASSED tests/research/test_supplement_publication_revision.py::test_report_load_uses_child_receipt_identity
+PASSED tests/research/test_supplement_publication_revision.py::test_final_receipt_retains_parent_and_child_identity
+PASSED tests/research/test_shot_pattern_final_report.py::test_report_shows_completed_and_unavailable_without_fabricating_effects
+PASSED tests/research/test_shot_pattern_final_report.py::test_report_rejects_incomplete_or_wrong_study_population
+PASSED tests/research/test_shot_pattern_final_report.py::test_course_sensitivity_is_reported_only_when_supplied
+PASSED tests/research/test_shot_pattern_final_report.py::test_main_report_uses_compact_tables_and_separate_complete_inventory
+PASSED tests/research/test_shot_pattern_final_report.py::test_unavailable_inventory_separates_planned_from_attempted_shots
+PASSED tests/research/test_shot_pattern_final_report.py::test_final_interpretation_uses_qualified_populations_and_additive_protocol
+PASSED tests/research/test_shot_pattern_final_report.py::test_final_interpretation_does_not_invent_unavailable_assets_or_shots
+PASSED tests/research/test_shot_pattern_final_report.py::test_verified_original_figures_require_both_presentations
+PASSED tests/research/test_shot_pattern_final_report.py::test_control_final_stage_assets_keep_control_protocol
+PASSED tests/research/test_shot_pattern_final_report.py::test_supplement_loader_return_cannot_rebind_old_data_to_new_receipt
+PASSED tests/research/test_shot_pattern_final_report.py::test_final_publication_receipt_binds_report_and_supplement
+PASSED tests/research/test_shot_pattern_final_report.py::test_compact_comparison_table_does_not_wrap_full_optimizer_failure
+PASSED tests/research/test_shot_pattern_final_report.py::test_matrix_input_change_is_rejected_before_publication
+PASSED tests/research/test_shot_pattern_final_report.py::test_final_builder_requires_full_324_and_72_cell_protocols
+PASSED tests/research/test_shot_pattern_final_report.py::test_select_bounds_control_pairs_strictly_identifies_sources_and_rejects_distractors
+PASSED tests/research/test_shot_pattern_final_report.py::test_final_report_renders_bounds_control_section_and_deterministic_head_sensitivity
+PASSED tests/research/test_shot_pattern_final_report.py::test_bounds_control_rejects_wrong_first_protocol_and_duplicate_identity
+PASSED tests/research/test_shot_pattern_final_report.py::test_bounds_control_preserves_actual_unavailable_reason_without_invention
+PASSED tests/research/test_shot_pattern_final_report.py::test_bounds_control_missing_relative_effect_is_explicitly_unavailable[None]
+PASSED tests/research/test_shot_pattern_final_report.py::test_bounds_control_missing_relative_effect_is_explicitly_unavailable[course state outside baseline support]
+PASSED tests/research/test_shot_pattern_final_report.py::test_f2_exact_12_representative_interaction_contrasts
+PASSED tests/research/test_shot_pattern_final_report.py::test_f4_speed_bounds_scoping_and_driver_supplement_disclosure
+PASSED tests/research/test_shot_pattern_final_report.py::test_f5_figure_population_prose_distinguishes_individual_and_paired_densities
+PASSED tests/research/test_shot_pattern_final_report.py::test_f6_draft_conclusions_provenance_truthful_v5_pending
+PASSED tests/research/test_shot_pattern_final_report_assets.py::test_selected_pair_keeps_all_three_physical_patterns_and_condition_identity
+PASSED tests/research/test_shot_pattern_final_report_assets.py::test_selected_asset_cannot_be_relabelled_or_escape_its_inventory[relabel]
+PASSED tests/research/test_shot_pattern_final_report_assets.py::test_selected_asset_cannot_be_relabelled_or_escape_its_inventory[escape]
+PASSED tests/research/test_shot_pattern_final_report_assets.py::test_selected_asset_cannot_be_relabelled_or_escape_its_inventory[missing_pattern]

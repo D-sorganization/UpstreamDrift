@@ -1,0 +1,155 @@
+FFFFFFFFF                                                                [100%]
+=================================== FAILURES ===================================
+_______________ test_reconstructs_exact_order_and_verified_alias _______________
+
+saved_pair = ({'receipt': {'source_cells_sha256': {'original_control/1:a': {'source_root': '/tmp/pytest-of-dieterolson/pytest-2218/...: 'a', 'second_cell': 'b', 'first_protocol': 'original_control/1', 'second_protocol': 'pw-primary-face-bounds/1', ...})
+
+    def test_reconstructs_exact_order_and_verified_alias(saved_pair):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_adapter'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_adapter.py:31: ModuleNotFoundError
+_____________ test_rejects_wrong_identity_or_changed_source[order] _____________
+
+saved_pair = ({'receipt': {'source_cells_sha256': {'original_control/1:a': {'source_root': '/tmp/pytest-of-dieterolson/pytest-2218/...: 'a', 'second_cell': 'b', 'first_protocol': 'original_control/1', 'second_protocol': 'pw-primary-face-bounds/1', ...})
+mutation = 'order'
+
+    @pytest.mark.parametrize('mutation',['order','protocol','target','population','csv','duplicate','unproved_alias'])
+    def test_rejects_wrong_identity_or_changed_source(saved_pair,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_adapter'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_adapter.py:44: ModuleNotFoundError
+___________ test_rejects_wrong_identity_or_changed_source[protocol] ____________
+
+saved_pair = ({'receipt': {'source_cells_sha256': {'original_control/1:a': {'source_root': '/tmp/pytest-of-dieterolson/pytest-2218/...: 'a', 'second_cell': 'b', 'first_protocol': 'original_control/1', 'second_protocol': 'pw-primary-face-bounds/1', ...})
+mutation = 'protocol'
+
+    @pytest.mark.parametrize('mutation',['order','protocol','target','population','csv','duplicate','unproved_alias'])
+    def test_rejects_wrong_identity_or_changed_source(saved_pair,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_adapter'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_adapter.py:44: ModuleNotFoundError
+____________ test_rejects_wrong_identity_or_changed_source[target] _____________
+
+saved_pair = ({'receipt': {'source_cells_sha256': {'original_control/1:a': {'source_root': '/tmp/pytest-of-dieterolson/pytest-2218/...: 'a', 'second_cell': 'b', 'first_protocol': 'original_control/1', 'second_protocol': 'pw-primary-face-bounds/1', ...})
+mutation = 'target'
+
+    @pytest.mark.parametrize('mutation',['order','protocol','target','population','csv','duplicate','unproved_alias'])
+    def test_rejects_wrong_identity_or_changed_source(saved_pair,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_adapter'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_adapter.py:44: ModuleNotFoundError
+__________ test_rejects_wrong_identity_or_changed_source[population] ___________
+
+saved_pair = ({'receipt': {'source_cells_sha256': {'original_control/1:a': {'source_root': '/tmp/pytest-of-dieterolson/pytest-2218/...: 'a', 'second_cell': 'b', 'first_protocol': 'original_control/1', 'second_protocol': 'pw-primary-face-bounds/1', ...})
+mutation = 'population'
+
+    @pytest.mark.parametrize('mutation',['order','protocol','target','population','csv','duplicate','unproved_alias'])
+    def test_rejects_wrong_identity_or_changed_source(saved_pair,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_adapter'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_adapter.py:44: ModuleNotFoundError
+______________ test_rejects_wrong_identity_or_changed_source[csv] ______________
+
+saved_pair = ({'receipt': {'source_cells_sha256': {'original_control/1:a': {'source_root': '/tmp/pytest-of-dieterolson/pytest-2218/...: 'a', 'second_cell': 'b', 'first_protocol': 'original_control/1', 'second_protocol': 'pw-primary-face-bounds/1', ...})
+mutation = 'csv'
+
+    @pytest.mark.parametrize('mutation',['order','protocol','target','population','csv','duplicate','unproved_alias'])
+    def test_rejects_wrong_identity_or_changed_source(saved_pair,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_adapter'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_adapter.py:44: ModuleNotFoundError
+___________ test_rejects_wrong_identity_or_changed_source[duplicate] ___________
+
+saved_pair = ({'receipt': {'source_cells_sha256': {'original_control/1:a': {'source_root': '/tmp/pytest-of-dieterolson/pytest-2218/...: 'a', 'second_cell': 'b', 'first_protocol': 'original_control/1', 'second_protocol': 'pw-primary-face-bounds/1', ...})
+mutation = 'duplicate'
+
+    @pytest.mark.parametrize('mutation',['order','protocol','target','population','csv','duplicate','unproved_alias'])
+    def test_rejects_wrong_identity_or_changed_source(saved_pair,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_adapter'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_adapter.py:44: ModuleNotFoundError
+________ test_rejects_wrong_identity_or_changed_source[unproved_alias] _________
+
+saved_pair = ({'receipt': {'source_cells_sha256': {'original_control/1:a': {'source_root': '/tmp/pytest-of-dieterolson/pytest-2218/...: 'a', 'second_cell': 'b', 'first_protocol': 'original_control/1', 'second_protocol': 'pw-primary-face-bounds/1', ...})
+mutation = 'unproved_alias'
+
+    @pytest.mark.parametrize('mutation',['order','protocol','target','population','csv','duplicate','unproved_alias'])
+    def test_rejects_wrong_identity_or_changed_source(saved_pair,mutation):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_adapter import reconstruct_pair
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_adapter'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_adapter.py:44: ModuleNotFoundError
+__________________ test_adapter_calls_only_selected_renderer ___________________
+
+saved_pair = ({'receipt': {'source_cells_sha256': {'original_control/1:a': {'source_root': '/tmp/pytest-of-dieterolson/pytest-2218/...: 'a', 'second_cell': 'b', 'first_protocol': 'original_control/1', 'second_protocol': 'pw-primary-face-bounds/1', ...})
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2218/test_adapter_calls_only_select0')
+
+    def test_adapter_calls_only_selected_renderer(saved_pair,tmp_path):
+>       from scripts.research.shot_pattern_analysis.supplement_revision_adapter import render_selected_records
+E       ModuleNotFoundError: No module named 'scripts.research.shot_pattern_analysis.supplement_revision_adapter'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_revision_adapter.py:58: ModuleNotFoundError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.40s setup    tests/research/test_supplement_revision_adapter.py::test_reconstructs_exact_order_and_verified_alias
+0.07s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[order]
+0.07s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[protocol]
+0.04s teardown tests/research/test_supplement_revision_adapter.py::test_reconstructs_exact_order_and_verified_alias
+0.02s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[target]
+0.02s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[unproved_alias]
+0.01s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[population]
+0.01s call     tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[protocol]
+0.01s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[duplicate]
+0.01s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[csv]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[order]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_adapter_calls_only_selected_renderer
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[unproved_alias]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[protocol]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[target]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[duplicate]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[population]
+0.01s call     tests/research/test_supplement_revision_adapter.py::test_reconstructs_exact_order_and_verified_alias
+0.01s setup    tests/research/test_supplement_revision_adapter.py::test_adapter_calls_only_selected_renderer
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[csv]
+=========================== short test summary info ============================
+FAILED tests/research/test_supplement_revision_adapter.py::test_reconstructs_exact_order_and_verified_alias
+FAILED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[order]
+FAILED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[protocol]
+FAILED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[target]
+FAILED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[population]
+FAILED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[csv]
+FAILED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[duplicate]
+FAILED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[unproved_alias]
+FAILED tests/research/test_supplement_revision_adapter.py::test_adapter_calls_only_selected_renderer

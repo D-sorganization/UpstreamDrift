@@ -1,0 +1,2156 @@
+{
+  "archives": {
+    "control_final_v1-001.zip": {
+      "bytes": 79352817,
+      "sha256": "7e60f040a4ecbd00bdd967eb1ea5103d6c12f48608643ef01fc6d8d26f10b39a"
+    },
+    "control_final_v1-002.zip": {
+      "bytes": 76505364,
+      "sha256": "da4a1f2ce00eaa0fc288dbc6597e54ce800935bb3f07a828e05c846650333032"
+    },
+    "control_final_v1-003.zip": {
+      "bytes": 45787502,
+      "sha256": "84fee9e292dec012feea7716b572175e9cdeb04b40407e0281237ef34f40cc25"
+    }
+  },
+  "files": {
+    "control_final_v1/driver_lean0_curve1_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58272,
+      "sha256": "e1783bde8253090ee9ff04e085ece3962ed2f7dd015093d044fc43ca6545d152"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "c81ec05db850fff61cc2e12d921ab003fbd8daab04a2db6c99cb6345f6a99c9c"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8085,
+      "sha256": "d23b61165a17b3c4228d1aad370800110cf99fc61f7ee6c4f2630dfbc310e919"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4570326,
+      "sha256": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 103678,
+      "sha256": "6e3d88ef84452cc53517688305cb1cc0105fc67a9e0355d57d8994f67dcf24b7"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58140,
+      "sha256": "81f2461ae42bf6d5e33cc141730b1951282cee3acaaef0965a2b67eef381060b"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "7f27353d289f3482a394b7e76583449286ed806be2f221f4c7048e86d077f4b7"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8073,
+      "sha256": "22a490d38d3bd43c0ada229740e1494f817906d953b92c5b18db0b2ca647839d"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3056864,
+      "sha256": "5361a0db5ec21a204065160b5c88be95cc9d88776c6ed22be6f2d11c6a69d8dc"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 93263,
+      "sha256": "fe41d09b4ef52690d39ed26115560cac62504f1064f3f957bc971579da16b82c"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58109,
+      "sha256": "f1304903884a12c61fdf4471600d310a885214375d14c2695cfc77babca5cb2a"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "e3c312ff56c6285e803348792cc8e520813cb4acdfcd402d0001718ac6c51073"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8085,
+      "sha256": "2e1ed11d94dade6f3f493a6512ecc3fe5dc8838da1dad4e468d0493648d5f2e9"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4585620,
+      "sha256": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 103509,
+      "sha256": "f99a696d92f27f5a4ebc14278b8d7a729f9802e63b0552c7c7e6c59649c63dc3"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58103,
+      "sha256": "eecc3b2e49289b292ddcd96dc15201af95b941c0ae55bc09c14424faad0cba20"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "1234076d52f81edbdbc0210661e437aabb5fbf009e16b361ca246a74490b03e6"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8073,
+      "sha256": "90822cb312ebffb0a8c233bb258b6fb79c25ca5b72d647df467b177f3143290c"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3077308,
+      "sha256": "24a3509c525869a000552a12a37f4def44fb908a25e6b19538d24735ec24dd24"
+    },
+    "control_final_v1/driver_lean0_curve1_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 93237,
+      "sha256": "9604e9e6cfa76106f31f336daa9d3dd85a2377e03ab5fa78ea913c84745e8bee"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58192,
+      "sha256": "641e87f3f67da7b1baa3940bfd3537a2fe49061d86ebdd5939be8c3db559969a"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "0a36fb6260db6fc663037adbe75cc43adaa39c80cb5aaaf1b212dcdc1c7a729a"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8085,
+      "sha256": "a3036b1090aec72146d752a348466cd69b78c650f82778c6ce1bdb5c30f2f019"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4558055,
+      "sha256": "c13f1d3965b83d977b6446486370a6fe1659e08b3d9737384696576928d96905"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 103531,
+      "sha256": "db19462e6cf3df7dbc440f491bd3528df4ee208f9f811894f7931ad88396be99"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58012,
+      "sha256": "b27bf85025f3f6af40043ca133b0d0b0f8cf069e84ed1ac86602a379c0b0a377"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "3316e68f72ac021d34350b9faca23af531e33dc01be4e518ca029b7aaa537837"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8073,
+      "sha256": "93b38ddbb3786a59e74c9d7f8b26ff4683282f65b899a02d49c3f777bf75096a"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3052661,
+      "sha256": "e3445a169312eaa9fad40c669e731efc9cdc8176163794f5c3573ae92a16bb1c"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 94171,
+      "sha256": "613afefd77bce2b20247ce2612bafda4323def79c06e3ac22d3231ac28364d97"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58102,
+      "sha256": "40df2781499a88ba199bdd60e5434f5a25d411fcfa24108511b681bbdcbceb40"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "b268743fd6b01fa887e647d6f1ab5d29c4657a6283254c5256396dcb15ae0dba"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8085,
+      "sha256": "7d2afeca54f3cdd28bebb89537f9da82a5a4a6330a1884126c37c89c92c19e0b"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4571449,
+      "sha256": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 103370,
+      "sha256": "e1313f8cf8c699e2536cc3ee1c2c430b5fac7d3f396219b025d315b19858de71"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58061,
+      "sha256": "9e5d4a38567915ba7e17fd32235f26340b596b017983646365cc7ed0847cd2be"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "b1b7b45851091bc7f34414ba3cf6cc57a055baa94fb582f8a8a045f615482ad1"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8073,
+      "sha256": "b6d274adbf777266ee7850f83e8500e12a20b84810fd8c39fc95d5441901f2fb"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3069445,
+      "sha256": "ea7f05fd5927b05acd076922aae4d99e448dd0ec261355deeafad973aaa4b3c0"
+    },
+    "control_final_v1/driver_lean0_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 94107,
+      "sha256": "da5e23f3d4d9fe8438f27295d1348eb40ebb35811281e2d27a1d71559acd1514"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "81ca2ca4ce982a72b6872e3a7af873d3c2042b01bb204e9614c59b8830298624"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8086,
+      "sha256": "007e26baff82fbe21ec67ed4d8f14f3566d6c82fdbee5e2678f3c5d3a4af3ce9"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8277,
+      "sha256": "553f91f252130e78aa0163e0d0e893b6a30af9a8be954388113553625773d852"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "f5e5e2b7268864d9eca7d411116d2e831fa83169c010d98d217417fe79dad989"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8074,
+      "sha256": "c1cd5c8837abfa1a15737e32a839e1f695eb6351614b7bbc0f967b666999d012"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8265,
+      "sha256": "55b1cf9c70dc16aecf68f9408cc4841c54a1c1a21ffa53ca1e8ed38418cc28f8"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "6b1863177e40368c32b8ee1656c5a906416330e58690d1957eba8a9bf4c86eae"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8086,
+      "sha256": "232ad6055ca449722e941414b1f8035a4efffc45f2fcdf5dfe8d58232ba69466"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8277,
+      "sha256": "b7078ab114ef0bafcc3d36edeaed8f1f26c7fd213259f5aa0cfa55b7a55a4c09"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "43471c14ccaf5d24904d68bc839214e85f242a431eb02787fb5ab860fe24d8af"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8074,
+      "sha256": "8743f83feec01e870eab3052a67fe8d157ea865c1e4aa71ceefe102b22d1556c"
+    },
+    "control_final_v1/driver_lean10_curve1_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8265,
+      "sha256": "af094f90eea6b6768a63ef0f48e4098fbbbac059b2e20a45a0fc3a995a350b23"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "5f6f2595ecd2d9191fa78c8d71a870e13a9bfa0b345c20c3a253a2deee26fa37"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8086,
+      "sha256": "35d02ddd2552f08f39d891a90ecf4ba6431224cc4bc264f154836124bae85911"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8277,
+      "sha256": "9cedede26895b4dbd72bce4cd646d61ea22b253930a2a66b96366246a516b645"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "3a27b023c2300b5bab01684694bfcc11e410ef1dcdd10bd18917c6b8d7cbabb6"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8074,
+      "sha256": "76f5638c529db144f50b779e110ec64c05ac462de99d894942f1e3c2e0304aff"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8265,
+      "sha256": "dd21cb6eb7e5075c13cb4fbb30911bf2a374dcc85f42d6edb16eab9241b9eaf0"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "62f0db56f8a7c1df892980249456dfa418c80f68e89ddcfb121e5135c19ff58c"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8086,
+      "sha256": "d3a4dc1ba6e6eee0ff1a9e13375eea12a87fb7f64a675a3ad072f450ae39fac7"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8277,
+      "sha256": "19ba9dec9735f65f0571d36c4b57aa714ff050f034b4f4209378b3938bce5deb"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "05c0d8067323fc008b178f5ab6679fd03eecd213ae4627fdd595b791b5f957da"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8074,
+      "sha256": "7748d8e305f2afb0825e8e014dd6c5406bc803b0194f13c52a4428001fb24d96"
+    },
+    "control_final_v1/driver_lean10_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8265,
+      "sha256": "55eba785327e64216b066537919b6248b8750a1b79c5f1e8606cabe0b78ac440"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58176,
+      "sha256": "d6233da09cfef992e0e036d5b25877706fd0a5374ebd61dd6767707f74019aba"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "3b6bed0401c8655030e749ab571ed429c52b2426d8893f4c975d0e9e36c5bb14"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8085,
+      "sha256": "c59dc91bd42c02ef6d7a8b49b9f137cd3f4d6caa6f31b9f9441497518e1c6ce8"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4566284,
+      "sha256": "59bfbd3b425e5d31329b0c85a236596513a9b3493531a6046eb44fb07ca61305"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 103119,
+      "sha256": "77f095418c66b59f391af14bbf9f8b673bc8a0ab0b69c28cec92fe636f2128fa"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58125,
+      "sha256": "cac91f541b1526e67ce1ec024cfffb40ea4249b69f3b07f9e25e62ef7f63e7bf"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "48d692223b98fd49c21e697ffc607eb473fec74ef68e0f17d22fe15d07cb6167"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8073,
+      "sha256": "99985480b23bf5bcef4d66efd5054f81e21f4f4cd16f5e225e085288d69edc90"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3064690,
+      "sha256": "992582783f6e4cf6ba876652fcbc32ad036203071201c2c2661e258baab60767"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 94191,
+      "sha256": "23aa48c9bc6ea6f6a63373c137aa6031071d1fa5d1f61740742a96e19fc48ca6"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58076,
+      "sha256": "36bfd66305683d0397900e8e9746294d342d867521a3b81a7d92b9cd0d4e3c41"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "8924f5947a0ecb2acc7eda60d0cad1f54c73c5be9667249c4142c5ab84c91fe1"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8085,
+      "sha256": "3ece099f3ad273117eb2f2a19ec6a106be8a3e29e86706d724b8cfd6b81649fa"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4574618,
+      "sha256": "2e1f1ea6c2a4325e80534333934497dbf1d8295479b806d7103a85d27966599b"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 102888,
+      "sha256": "d1c22c9934c73ddc9bd7ba2c9aeb5d28ffe80949efe12f85739676e5ca487864"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58091,
+      "sha256": "d034f7b3d3bc4e2a259ac70534f1c5cc7bcff643b026a54239349c7a56868f0b"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "e2b94ccdad42fcded9b01429b2dc727f21ff0097c8d73e583bbd70758ca5f288"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8073,
+      "sha256": "184b1e08f754fcf21d9f666565da7f3569e086de95009a3f5971aba8bd4b7db3"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3082355,
+      "sha256": "287bf772192060e61c8322b4369323dc289df85332e69070415d4035f0e5ae99"
+    },
+    "control_final_v1/driver_lean5_curve1_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 94043,
+      "sha256": "3ce64831e70afc186f7dbb35b0f365d580d1657203c4ce4c7cadb1aeb6e33ca7"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "5f64f4ff1076f1d01f41985c64b5cbca6af14e07911d2f05b01637d747dccd3b"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8085,
+      "sha256": "8a2adbc6ccdc4521b3dfccb7935bfb436a3baf4c37711476e26b473f4ea0cff1"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8320,
+      "sha256": "abb297776f844bbb8e3e84401545fe8eecc6ba2d717e59baa86cffb28d40f0ed"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "4d294da60f5109a8e67d249b474065d012c4c89a05cfa62285e6834581acf693"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8073,
+      "sha256": "d6e212075d84cee3e37f37b2c209daf4634cbf612edeed652c27f4afeace9b1b"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8308,
+      "sha256": "4d9573813f3701db961a8c86de55858867b527a451b8b03c8a2b086fa0cc8220"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "aa75c26ebe63c544b81e258ec1e29314e7fc0a67ee62cb59e9464ec45e91c153"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8085,
+      "sha256": "23ceae688179b71d906e74a2c98521e552f5ffef510e5cc4afc87435e2234840"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8320,
+      "sha256": "ad882161a432ad925b386b435688a7c0f05b597e3238a5e3478a99b439065d0a"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "f777ca1e74f0d6b65ed50a305008ff9d2973be303611fe9d1467c9d476378e77"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8073,
+      "sha256": "da6252280b65ae80b9c7ff95ea00b55b83314330d0f15ff54facd0c8e402dc63"
+    },
+    "control_final_v1/driver_lean5_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8308,
+      "sha256": "74258182b5d207a7cfb32a84f4f9a6f050c10172dfce7ef97faa1cf07e8335d3"
+    },
+    "control_final_v1/matrix_plan.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 97858,
+      "sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58547,
+      "sha256": "d27c46735c3566a816d8d056cf5082e9e40f2fcfd2949a205f159e1d2ae2e34d"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "ddfb29baa84601abc460d9a1f7134aa6bd60a1a108d275c3b2ba74ddcdd21f4e"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8095,
+      "sha256": "10bff301c3d7725d5809160a4ef5dc518d8e0f02fbbed7b294d9c0381ad24ad3"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4147901,
+      "sha256": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 101486,
+      "sha256": "b617232ad0efd25ea9a9b2dc5405f9807148001386012dbc30618f70213a9f2f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58460,
+      "sha256": "7fbb181686fb90afc3849d5a3e264d6c75ec5db355a4bb6213c4a84ec04b377e"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "a10d87e329e46e4edaf49b860f38b07dffbbd1acd80e755ccb3309b124389eff"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8083,
+      "sha256": "02bca9210d6ed27e7fea124397c2c964ab1c0234f0b8f78ce01d25a3110df26f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3038754,
+      "sha256": "75ba66e1a9463335ad422cc5ae1ca01c878a7cb2361bcea4d990c4dd839f424d"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 92679,
+      "sha256": "b37364421ef9ebbe42f40e22c2f79925510f7703c6fd4be33d62efbca1416d73"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58347,
+      "sha256": "c81eabe096f3c65619b0428e14fa31b455fd0482b16657e8572db679a3160899"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "ccc8a06f1c98fc08aa5ab70b2e27800d35506b1b17c349e4bf2e14554fdc3b4c"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8095,
+      "sha256": "ce9ff604660d3a67154994cae880d5539a3209cb1008e86f1af66f0c299512db"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4153541,
+      "sha256": "9d089f3b70b0cb5ddeeabe1ff309cfec960c5ed78368d4b764f3dea2315a3eee"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 101105,
+      "sha256": "478acb1c9fd60107c419181e72925770b72b60f694a721b625cea34ffa2c7f0d"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58306,
+      "sha256": "172f64f63d6dc582eb7363aa3f85d380a6788f503d94f3450e3d89ef2b1b946c"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "c50db5d761ec95e5fcdc4aaae0f3c87b747aa68e641a8a845fd506acffbbebf8"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8083,
+      "sha256": "a0e07a03df910042c91251db7fdb6ef40dd356f7427d34fe76fa9f9b90543844"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3055834,
+      "sha256": "86fa7a72e64b460436d4c5cc3dfe7b3992cd535276c74d606984334c4f485430"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve1_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 92524,
+      "sha256": "38f675bcf606b0bcae547c520a05706cad34dde268c7f5e99074941ab20a9265"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "799447d6ed6c263954a0774eec1ab3c9f761603400c7d125ae830066b35f368f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8095,
+      "sha256": "9026d8865731e4787c74f839b9525caa250ccfc9c2436731134f14f4ef05d31e"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8330,
+      "sha256": "907a47cb58a5eb485e886f8b647e2260edee9d902bfd42b4e88c7e224c08d4a8"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "63d69e281efac74e828f97dc8720a02e0239e7db0cf7393ec22e7ffd5212701f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8083,
+      "sha256": "80f246c35c0827ce3d666aaf83a970410e18900adca51ac3cc60ad0c1e63b6af"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8318,
+      "sha256": "52f8413beeadd1ff9363c0284e983609c1a45866fa8e5ef1ca0eca69bd0b644f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "15208f768e477682a359f911d6cfee7a4f4bf6dc5c1de9e0053468b5706ebf0f"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8095,
+      "sha256": "917be0232072f28240ac04d8a8e34e79c560ba2e6908ce51692cc3950e424e26"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8330,
+      "sha256": "ffe4d423bf2a9f6431a77f3dbf2f36ca853be1deb51876f103abdc8f0aed8c93"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 241,
+      "sha256": "06dc9179bfb5721cff04cc81f9c2419ed95eab40242cdeddf28ecd9a01987225"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8083,
+      "sha256": "89f5fd0d3eda6c2efb8de699af6663cdb77cf10e77a573af2713c3b99c94fa6e"
+    },
+    "control_final_v1/pitching_wedge_lean0_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8318,
+      "sha256": "8232c8e69521204e2d5ef5b0b82d9c7c30dcf5a6b39633477cc6542a380c78fd"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58528,
+      "sha256": "7fe06c41e5ed3e960ff91ae7e71db23e828fbeb7e440041fbe60044638e22359"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "7f8cf74171af868d1aafc01a4e911b38cb59639dcf6bb7a7001056b128fd545a"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8096,
+      "sha256": "08b1b31f5f6b5a8cf6edb1293de34bc5779da1f7d405e4fb6a6a6475848f2535"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4178036,
+      "sha256": "3021fa44d96c9fb4f623cd0d3aac17f9f0f1fd41ec060ba60bcc128ec25742e8"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 101511,
+      "sha256": "dc528530e06eb78384c80984675d16cbf734afa78cfb6610ab105429d4bb082a"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58504,
+      "sha256": "4ab6b8fc4d461224f7b3de64e9ee545c909f78079015c618f405e121c839eb45"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "5026ad1ea74dfee75263e2156afe7904f18775030d8abb2e0b3a0a4a8cf92e52"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8084,
+      "sha256": "a5d9f23b8bef71b18cb2f3d9cd036116ae5f19b16eaa4ec5964cfd461fff1e3f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3060366,
+      "sha256": "05cdfac88d6a7472ddf29155c8717c89d1ab9723e2e3802e7480d712e690badc"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 92367,
+      "sha256": "b11b9bf627a6942800361fb1436bd0dd35f7ff327ccc344cd8e431ae738e654f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58329,
+      "sha256": "e0e0a221458c76b3bb39eb2afc767b1be14151f92902276456d5d3ae90457d78"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "c1d5629718023ab580a002569f007c5bd75a2497ba56ebc101da43f5fcc8631f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8096,
+      "sha256": "03c627a4a6a8d9b27e8e0dd87a3ec1192237e534ef8ef2add26af7b0c9be86db"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 4184622,
+      "sha256": "17427dc8936735af9e98a6c0096d7df2c0aa9127c48c462dbc57c826d2a2f1f5"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 101228,
+      "sha256": "b4806c5670845090c47f9752d89b98b236b5d25fb2966b5126985e15357525a6"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58293,
+      "sha256": "102474f559e85707632e0e900500e9063456e333439db7a29f35c43516bf3aa0"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "cae3f8f00632fa7deb0481d1c75d920ff9c1bfa77be62de1cf1b8495a3d57e8f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8084,
+      "sha256": "4422c5fcc2c97feee8b33706a94b55a692f7a4fb359eac7c1f242f1d5f21fa2c"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 3080294,
+      "sha256": "37d6fb51e4575fb274ce3953f99e4699985ce21d6d69150fac4734030524c0b3"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve1_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 92183,
+      "sha256": "86e41bd3386a9cf718851000b959de6a77b15663ab6e9087a36b9fec6ecbcda2"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 58484,
+      "sha256": "84fefe9c4ff73347a0aa9030273dd07cf4190af7eb144eac5da6740dde2b0735"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 609,
+      "sha256": "f3286f4936c2cb4c98ca8bec44ff03bb0b8c8ea1b44bf7793ee2b31d185638c3"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 8096,
+      "sha256": "daa04e32146c6d260cc6266c1e535cb33f7c2aecf9900d4b6da9c59ca6498369"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4170894,
+      "sha256": "036a7f46ec1772977a9b7902f3f158694e1166945f4fd2ec6f454757d90b60ae"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101537,
+      "sha256": "d89144b23fa84fdd45d46a59502a6204c7403fda62579f23aca4fc264b273e38"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58452,
+      "sha256": "fe8ab98ff600d88229f88df64282e7ec053be380feaa6769ce61073c9eab7a9d"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "ec0db766d22ebb2de47148101b454bde89d917c44cfcaa2fecb7f6c2fef3ac26"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8084,
+      "sha256": "27b1cb68f99853bfae280f399514673e40d9009b9624117917e48aa21fbf88df"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3054461,
+      "sha256": "99ace15b62771e29b896fb40b2746a7a6d30826f3954385aa8b484f4ac3052dc"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 92369,
+      "sha256": "c545ab4a1cb368084172085ff495656b98a40433475eca944ba14850bf21e700"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58283,
+      "sha256": "b86be1fb904cd9dbd8481a2a8401fb6c3fb7154c95d3819288de3122bb2d1140"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "c58671484502324c509ebdb7a755a02a236f04b7f469a228e1f6169b13e779f7"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8096,
+      "sha256": "c85a085595a94af2c3085fed607be6e3e5f36cbe43ec23e9365aca9eb40b0bcb"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4177671,
+      "sha256": "44d66a937fefef7938ffa01c829d6189f9f31878995c4968d9d116cfc5731e4c"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101213,
+      "sha256": "859ee54732c53b05048a2938c61f4f7e5a9a6bcc07eb9eae8bb627285b29c045"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58291,
+      "sha256": "dc9cb5e055f68d1ec8b27c23253a4f87b2ba8ff05673e0a1e19174f50b33d92e"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "f370f6e02e1c57a34643e2a16d3e9b678de88cdc40f36e5e9d0013747d347e08"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8084,
+      "sha256": "30cbcb8d35b76c325277018b3619108ea30de79e55e62b24375def0972b1d8b9"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3073987,
+      "sha256": "67eb6a6fe8a0fa685e195bf3e0b39ea9a2481e6c99cd38738e17f5311ce42c1b"
+    },
+    "control_final_v1/pitching_wedge_lean10_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 92160,
+      "sha256": "443d47ef92925257f5190cb3094e8636549b08e4c130f52a366ba756193cb249"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58545,
+      "sha256": "a3709fd501f43586ec599ce088fefe63cb91611dc6456a932d7ab64ccaf720f1"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "9f4cd6a600960aad2531ba34b6c7f5113ddc1a5b791eb0c259fee5cf0063c294"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8095,
+      "sha256": "56f35e6f8fed29407c6cd7c73182dd0d963a2e2240e576d4152314360053f256"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4162173,
+      "sha256": "a2cf64839fb60bbe58e15573c9864017ea4ad9acbd11d2c28ab86b4baae372b4"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101411,
+      "sha256": "603cb4e75db6dc0a718cb65df89a6bfbb5d3a4920b866dc0428522164fb5c102"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58464,
+      "sha256": "2191c170d3a80427e900afd11f80f51b1f0e8ec28ff151804120f0ed5b11e5ce"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "8cc4799d633a54e08d343640fce4db13577c109fe5366272f105ae8b49835246"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8083,
+      "sha256": "592ebccf77a6cf398b4f4b5cb1feb49aa816d8b037a3a6d366a300e24ac18e64"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3047748,
+      "sha256": "58159a9b885381bf6084f25807c294b74d574b6591e03a1b561b0e5eedc3d342"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 92311,
+      "sha256": "02eb33ed5cbb74fceb3df31b4c798a1d2c7d5ddb76ef703d996fe55c75f1bd19"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58318,
+      "sha256": "dacb6d900a9fae79458741167738b710badb0459e7eb63f7ae39998292cbcd14"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "ed8dc50cd7767fb4536bbe24d18f95a8634fa94833696b5a8a8010c8675e6728"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8095,
+      "sha256": "c7fbb8f521994b53385ab0c2e793bf9761020fe13e8b88bae80e1a72d32bba3c"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4165641,
+      "sha256": "d797d2651aff7bedccf76255d909fbae086f6dfec9262d87a554551bd0ac6106"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101350,
+      "sha256": "28fb1b2dee91524b5a74d141c90851d0a0c0b2e17a3750e02eabf1e06af14367"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58301,
+      "sha256": "9ec371b3a78c33826197873f247743659de5a8863fc36e950c03184529e5fdae"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "6a355a0234ff50b3295b6bdc596670651213f39ee4868ebfc01e187f4f4658e9"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8083,
+      "sha256": "b81177b4b895ca4e2b4dbb14f4cb94c98ea14fbb129d793005bc3fb72df9a2c0"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3065874,
+      "sha256": "53ab74855a7ac2b598cdc11f4e94cb5dfb6f86e65a79e452093156bb87a8d18c"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve1_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 92197,
+      "sha256": "1bbdc78e4d8e31404559d5ea749faec0abbfacb0e0b15bf81eb767cccb5a734b"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 241,
+      "sha256": "90fe405e4604ad506a3361958b65a5b95b93afa860ab9173012023d21584f7a6"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8095,
+      "sha256": "8f366a115db170163b7392181de37c553a5cb4c7cc9d311214bf634b866ac2e7"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8330,
+      "sha256": "aea84ce00487264583965cf9de65f5c0ddf85baeb000518e788502d7050123b5"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 241,
+      "sha256": "b8fec7c6c144d8d1d3987d11af2afbb494e6543eac4840af072dd8336c931b26"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8083,
+      "sha256": "0fe69222bc02f67d407744e8cc17e0d8888837cf98b2e943a72acbcbe4587f9b"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8318,
+      "sha256": "09a4951c96186093828d55871ab71c27175f212557941cf1093bb135df5740c1"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 241,
+      "sha256": "c2be2f9ee39f2bd9e4d74649cff16baa4117cb789fa8a48e55710224543937fe"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8095,
+      "sha256": "ba5dcc9cc9e2b3d8ba9f4a1a9f8648f0720103b11ee7cdd8896f11282dd532c7"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8330,
+      "sha256": "fd0ae1509845804ba93d4a803423bc5ec3063334a6398ca486dfaf14788ef1d1"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 241,
+      "sha256": "bc0dad191a8b9f4ae182260c57c1fddc661d7627b05746f8ffc06f6c93f4dc7a"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8083,
+      "sha256": "d61ce7f9defb5db167c17409aa0b8943d7b4bbf15e249096dfe7453e684db8d1"
+    },
+    "control_final_v1/pitching_wedge_lean5_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8318,
+      "sha256": "7a0f61411263e2cfff7f58bd538f79e809c21917c051fccc82ed7945e6a7d63b"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58300,
+      "sha256": "021fe3df425c463ed2d7ed59aa6651886558fc5cc3b8b4b7c3c9a3d226af29c2"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "0e3b119e8b3842758fe614122f81d25d6d402ddc5a29b8ad653bbc9a2a2950fb"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8094,
+      "sha256": "6f6a57d111ba45a9a7bcdd2b712daf715a5d523a188ff202de0a8e6b0040abb5"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4161737,
+      "sha256": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101336,
+      "sha256": "9a16aa139d2a8d47c287f7077e22a2d8765d315e795a714cb316f24221e970c9"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58340,
+      "sha256": "f5a983706ce5358d34ae154174470da96614f9582c4c10db9eaccf508adb4bbb"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "6dd067c21dd6ad4c3c68f39ea6a1137f404077f084c4127c1e29232a7e44340d"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8082,
+      "sha256": "00a0bf5464d337e618020781f38cf22de5ff288bfade9361e4e21904c07407f3"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3048817,
+      "sha256": "dd3a8f4f94d3c6ed5d47984fea72b1409329ee622d8cd259f1f07c6ed15e1763"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 91840,
+      "sha256": "aedd40edc04b09ecc5f273f14236a901133f93bda95a9b3255005b25cab4353d"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58109,
+      "sha256": "92a7a9441c53f76e72c4a194f4fc0753ec8466974c109ea1ab3b8c1d1024fd28"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "3fd95f290c14757eebc963c932f0b283cd8207d50c43e05c661357d65bbfc102"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8094,
+      "sha256": "3c5c4c61b88f159765959194641943fdfd51ed5ed20d0edd6a38c0ca6f711e42"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4168809,
+      "sha256": "b16f41b07ae36f889aab9305669b725388f41d62e4cbbcf2c65b2f3df07d8953"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101170,
+      "sha256": "dcd274eb486fb99c0c917d355bd2473618def6db4edc3aabf85c5f26f9920ffa"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58172,
+      "sha256": "27499e8348b0743ba22a70ee54dc9e04d0612fa970818e4f389a3593c0630ac1"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "3580f65b4d4d19295d04cdd76cab89cdf3cf5998ac5c8f45478a3b8f0227520f"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8082,
+      "sha256": "2dda665e76d4f296b8ba148d925e436103e6f7719cb4abf91d06589cd31d5801"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3067748,
+      "sha256": "3046d2ac0e0521aca132b44b29d61faf6b4b87064b20ef8244d6f95e4444f57b"
+    },
+    "control_final_v1/seven_iron_lean0_curve1_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 91569,
+      "sha256": "5b27e5c7887e990c43ce262198db6e4382042e3d0a73e87f85a8cbb9f60f0359"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58276,
+      "sha256": "eb43d6a12b847385b03b29b0fc453b17a5f50f915389de20cd0062723eb6bf1e"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "6ec2cfe466b1c2af3f60b91312af178afcd5b973401a295cadbd2d107d614e1e"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8094,
+      "sha256": "41453bf0f8a95c45ae65a0e25d3d9a1aa1f1448bc4927a85512b9bf9084ec759"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4159770,
+      "sha256": "9cd2d4df0defb918ba89948c8ed9e42fcce930b1f4aac3c1cc4a0ff8bf24fdc2"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101204,
+      "sha256": "3b4b6c8ad332ba4ec5ae1a39689a170784195b68fbd2ddb5ba6d1b58e02baeb0"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58302,
+      "sha256": "12f176bf299a3257695ec46d7bbb94bb33e90acce1aca6f236bb27bbf1460501"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "3d9b18e62a0120cff76d4fa6acc45f739c136114a7f2b9c72f998475c4b8aed5"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8082,
+      "sha256": "cce4d12a1546ccd440a208962491c63aed489b64d103bc467503fde345988cf2"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3047667,
+      "sha256": "bdde65f94eca7be59901816d0d0074ddb5aa8f9194243b9107f827e960c1f81d"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 89838,
+      "sha256": "c920b29512baa380649971310044e6b68b31252ea4eac740328934a35d047336"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58110,
+      "sha256": "550a7b921db140f68272b73915596b8f9b17d800f9b6b40efef2aebf0eb4e913"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "58275723fba1a0e767a5d0a00928f850e265ddc210965073df7dab4718eddee1"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8094,
+      "sha256": "9a6aa5b6ce083349da5d1a062f3117a025fc845bc5b5054cbe590252a99b2684"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4169201,
+      "sha256": "d078ff414f85308ca32f58478da8d1006da5b79298e452df5be947f4f0c44e86"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101063,
+      "sha256": "d56bd918661d8ba07e012906748eecf22ef04f2ac29cd0eba3160de659da347e"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58125,
+      "sha256": "9f832a69abf5ce583ac6713a54e3f217a4f0b093fba816938b26878715fae9b4"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "e43c7cc3af83d433a9fc0825d904dcfa9b3def4a7fde214b48149ae269c7babd"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8082,
+      "sha256": "7d7254195f3c1c3a2118eb029894bfb460798ac5b7e5737fdc47ea42b20c53dc"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3069938,
+      "sha256": "ad0352190ef9d4db2f3be075db58bddd788ae8817cce07149546d73e51f9050f"
+    },
+    "control_final_v1/seven_iron_lean0_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 89683,
+      "sha256": "be3f25709db3f21c5871e78c0e1cfc9291106fe2b0f0b4ee91354abf0165a044"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58268,
+      "sha256": "25e0adf5d957f9a89e9aba38f0d64b83dafa484eb56faa1c47120eca59d95cf5"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "79ad0b4f0f10ba28e4afdaa8ea273607d77919470d847e44a0f17d3a68a47b05"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8095,
+      "sha256": "ecd065b7b003559c07ace3a4313e4062e9d1cb969f3d8200924cfc3e3d3fe919"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4179103,
+      "sha256": "ff9079037cb572908d6dbaec5e9c933b6d9ee0fa6a16cd4c9d877591f3259a2f"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101363,
+      "sha256": "45d9e11e73204e7122ff10361ebfac0be83d3cb2a5edde198baad26aa18f0d07"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58309,
+      "sha256": "3e4b03aa4feb94477535d911be4d71c21fbf826b9b1acdf73bb96d486e89ed0f"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "a03949b13caa177a215e427ef78859223eeb434ab7dc4894c1978b3a81d0ed7e"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8083,
+      "sha256": "3c84ef0dd39931a246c5e25b2a6fb663cf54f8b82c0479861da5af231ac1c01f"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3062059,
+      "sha256": "f9ddebd2faa25585fed33c8a04f74f706052524e38273e5bd5a35bf2b0fb17bb"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 92511,
+      "sha256": "891b42c7382e798b45adda441c3f8b44b43e771036342bd7424a5f63487fa56b"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58076,
+      "sha256": "db52b225bdb9489d97474a52e97dc8316d625106c02cb5bdf3eaac5dff343301"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "d0c6ddd496cc583d77a9fda99b5ad2b9b66d3c4ef3e9b9f64c1ea4c888862fe2"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8095,
+      "sha256": "206db58925d23be7e182608579971c7845d24690b168701512b6eef0b8cb218f"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 4187786,
+      "sha256": "b0a4bef2fedcfa24a9d18f3ea3fd71f5aaf31be5597cb4da000e254082e5b36b"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 101228,
+      "sha256": "a63ac8f1651dc8ed1f4a14b0391cee62c8cb54ee7a432e0fde9d3a3e8232da78"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58087,
+      "sha256": "c1fca74ab9787361e20b0bdf49867ea8d66dc91b4b1bf24776bc18f5a5bd566e"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "c4a1b25ac0618586904f83a5f0b243a24f2ec5a494cf2d95cc05b383955e22be"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8083,
+      "sha256": "0d58f2c9b202215dd2165c550d10a4215c8d98be7c902d6819971ac70e455c25"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 3081930,
+      "sha256": "7b6d65dab794097394ad36f6084f1e80d30c92aac4f74bf808443ddf8554dd70"
+    },
+    "control_final_v1/seven_iron_lean10_curve1_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 92125,
+      "sha256": "63a36cd84de50d2d9a5d137d9723b47905f4749c62fa2ef82c6bea58f3b554d1"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 58215,
+      "sha256": "69a0e242c0b4a81cc50b26e7aa76bda5a48eecf7521a83d0826cf04be97b795e"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 609,
+      "sha256": "135aa3742982b750e637c5bb20f2a6224fb8240fb292bda0268945e9cdf03d57"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 8095,
+      "sha256": "57899e5c5f7eaee48434f00ae84961fd3be5a49047c10d3904d5246041bdd5c3"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-002.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 4169727,
+      "sha256": "401da8aac9230df364411af6ce20810f4f5f639ea404018688e33572a8ac80f0"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 101448,
+      "sha256": "0d69f8c67750705448bcbd411acb9624e206ee28781367bd4500aa11022cf1d1"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58250,
+      "sha256": "d664b27e32074b8717b37a24cef5b2d61dcf1e476ed097421a60d3807cf3102f"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "98940550fda1f064660c48c21fb61dab46ea73392c504229c9897fc2f4fac22c"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8083,
+      "sha256": "fb8a64fa8625ea1d6a409d88d17bbc39daa3de7de0a593622f8360d71175b900"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 3056025,
+      "sha256": "080ac47034827d85cb15a5d949031958f3735419c119de0380e12d5f6644aed6"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 92471,
+      "sha256": "9b41838dac687ef0ec77ae81d69d268bdc7a3f3bdee0ceae250c92149bd15a77"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58088,
+      "sha256": "f9796507683cca159e94826ffea025968d14e2c82556aa4aaf00f16590265b40"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "f15b891ff3c75d52ff4dd095930b7585f50379e212cf925ab69609d8bb9655a9"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8095,
+      "sha256": "225682745d92b1d1cdb6e77c3728de3bbfa31ee5ee53490aece512bc887230fa"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 4180651,
+      "sha256": "9c8d5b8e3712c83db72a7368dc21cb3398b445741237c7cb4085cfc38d95c7dd"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 101225,
+      "sha256": "5df4941cfd8aed96bcfe131f8b76906b370f56e22fc8e613a592b0055a14de7e"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58075,
+      "sha256": "57e2876ec1465104c3ed84ed31d423f4f2bea6a8fa43156d6d6a4c898cd76c2c"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "8578c51528380927bbf7592fa063a198d424ea29c371e3a842bd795fa0885769"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8083,
+      "sha256": "bc31f9f3304fbe38f0626106161d9d13e11163464c32b7cec6a1a1afff2751e0"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 3078192,
+      "sha256": "2de0e5f886463e343136c04625a459ef4253f251d36552e79cc62443f36e914e"
+    },
+    "control_final_v1/seven_iron_lean10_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 92111,
+      "sha256": "c3011dd8c72e3acc7ae3211e6825b3dd3c32e8822445da5bd56d233e93f788b7"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58291,
+      "sha256": "7a2a68507a1a1f4399e7aa0e20f26a04a69d129af28bcfdccfff4ecd5cd84d5c"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "7f79a1b955828bca7801e757a50d286d4aa423444eee5d8bef3ebae4f4c5a9d8"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8094,
+      "sha256": "412790d6ef0d0f0ffc7b1b7bc06507a85c26a70f8afdc7cb1359a4ffb652276d"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 4169842,
+      "sha256": "ece4981c29e67defa503e961c1bf91083f34532563bf73d755fbb6b39524d88d"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 101334,
+      "sha256": "da992100dd34bba291543d7d71f56253ef2a30827e3dd656b40197a1ac35d39c"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58331,
+      "sha256": "59943ae51fb6e6be02cec59ff8cc5b4964cff691231106a168ad02697b71e072"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "015d7aa06b8457482f4b5453870da4a31cdcd76aa89c741894cb973d80b5ed65"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8082,
+      "sha256": "fc011312ecb8e34d87ef55decbe5f41b4c7ed505901e14b581b8b5db67e24909"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 3054897,
+      "sha256": "2204e9b8e8dd9e030655c7eab25404538298ca87367b0afb799020d4b591bbb3"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 90270,
+      "sha256": "22567f4cd4dc5fa0508c38ef7bbc22da9491c12a420c12264000c8dee01c452a"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58102,
+      "sha256": "b22f8a128e9a0195103bc610469e5e720f409d57ea2cbbdc0c04e3bfd5886e4a"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "14b2177f89da9bc5374870ac7e81bebb59550f4386a597a62fcbc3cbd05e270b"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8094,
+      "sha256": "bc93d3dcb149871da31ad39a7030b04e0f877e9be584b520bd2b233853dd5e5f"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 4176991,
+      "sha256": "4d2c71b33940556c07d187aacfd891a3133e77f69b3a256e115c02ee6f791383"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 101076,
+      "sha256": "8864a66db93d445c1eb5b0700643bbe46088eb8bd6d50eba7139e9ba20a2443a"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58144,
+      "sha256": "6603675c5bd511673b50bc3a549bf650afb4bc357a38978b6c2e8453dd8a168a"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "ca2418bbfa5c0c01f16f8d79a82620d717889a2fbcb0658e12d4f778cba76056"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8082,
+      "sha256": "116602c579c8e10540c01295f540bd94a7db75e9746e9ef5be01254335bd6e9c"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 3074752,
+      "sha256": "8057c5a08dcadff9a1a549da78557edc7be8384a4315ffd8a1ff6bc16f8de195"
+    },
+    "control_final_v1/seven_iron_lean5_curve1_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 90035,
+      "sha256": "a54c66779d457f3d11ec4d1cdc47ad46367e24c12b0b87855141c6acc4087c9e"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_combined2/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58231,
+      "sha256": "cd3828dc700fd6b9947d2982e07a39d88336b3fb96247a3ea5fe0a670a63dca5"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_combined2/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "6bcefc70f693664b2b3f1fda332e71e2f9d2f8bd1f517d6302a86e6119c0305e"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_combined2/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_combined2/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8094,
+      "sha256": "27468c01ec7d78415dfc64cec6ad348697da75ded1c753944133ca08f51246a9"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 4161115,
+      "sha256": "2dc931b15c3347246d9dd69fe70974c8f2224a877006dc3873fa1b978f7e74a2"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_combined2/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 101371,
+      "sha256": "2282b3b9d7b97a918a586ac0b2f70817de8964dbfd99c77456afa9f5d83405a2"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58284,
+      "sha256": "c168a2a1b29d8036555fb5c13a1816b6c6d93d705c912a1a2851b71cf0418bee"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "c625fa953135ff35ce7f072377f48e747c37236453087b18b91d89bd0046b436"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_shaft_only/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8082,
+      "sha256": "19a9da22b1cff20f48f335005e14672e20a7d839d26d66392037eb1b240eeac3"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 3050938,
+      "sha256": "9ab98121d439d741cbec52556fdbf2275ff06cf765e8b90bd8d571113bd7a4fa"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 90392,
+      "sha256": "7e983c0db786b64519cbdbf61139feeffa7c4971f273525d82ba659e576ebb74"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_combined2/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58088,
+      "sha256": "494eccc066dc044da85be295841c09121be98400233ef797a2327959b4ee045b"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_combined2/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "b7d3f1dceb12da7a4f0eaa32d146e8663d665d60bc1da66674b7f8fcb089b03c"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_combined2/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_combined2/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8094,
+      "sha256": "e912f1f07a812344b3b2ffbd1ce38712327bde203fb1f2942b7399a59fb69734"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_combined2/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_combined2/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 4171198,
+      "sha256": "ccc4fd4e8c2e50c7d481d59a0d438a9b60026bc824554df11e3818be5a0d93c4"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_combined2/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 101003,
+      "sha256": "1013f7423dbc501e946066b49e850eb9f12d1fe33da78bd66eea355a79f12e9c"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_shaft_only/flight_samples.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 58140,
+      "sha256": "b77533583decec7a5d910097fd3f47dc705bdf10093f8d7bf8bdfbf745a13a3f"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 609,
+      "sha256": "b1d7a2fa48c7dc9bec742d2049ab1a29e6f1c5c8dc8af5714cacfdc0698d612e"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_shaft_only/receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 7316,
+      "sha256": "35749ba6ed0f3232612ba4b495a9c09853e93b21d6ab4458cf4cfe8ed452f1a0"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8082,
+      "sha256": "87c2ba30abdf6a104973490f53523ebda1f5bc052e1d083113d659b4ee93e485"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 3073195,
+      "sha256": "15d5e77a6446b15d11bf7913102db06630273d147b557e660d4957ac980572ed"
+    },
+    "control_final_v1/seven_iron_lean5_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 90053,
+      "sha256": "3716c51c9cba4a01c37bc63e1c237b874f3e3b7b2e8b7ca87956c7c979c64dcb"
+    },
+    "control_final_v1/shard_0_receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8364,
+      "sha256": "6932af488128970e3b4746ca4aa2fff672f100a9a74bea52ee49e9a5f93a01a1"
+    },
+    "control_final_v1/shard_1_receipt.json": {
+      "archive": "control_final_v1-003.zip",
+      "bytes": 8328,
+      "sha256": "bb266069aac84eda88ffb9b3e18b13a30bb02d8a89b4a8da74377716a56b153d"
+    }
+  },
+  "max_bytes": 80000000,
+  "schema": "shot-study-archives/1",
+  "source_name": "control_final_v1"
+}

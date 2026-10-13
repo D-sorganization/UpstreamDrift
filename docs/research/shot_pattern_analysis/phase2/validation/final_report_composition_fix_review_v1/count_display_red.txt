@@ -1,0 +1,64 @@
+.........F.                                                              [100%]
+=================================== FAILURES ===================================
+_________ test_resolved_table_discloses_individual_counts_and_attempts _________
+
+    def test_resolved_table_discloses_individual_counts_and_attempts():
+        cell = copy.deepcopy(_cells()[0])
+        cell['course_scoring']['paired_n'] = 9997
+        cell['summary']['Straight']['supported_n'] = 9999
+        text = '\n'.join(_resolved_selected_comparison_lines([cell]))
+>       assert '9,999 / 10,000' in text
+E       AssertionError: assert '9,999 / 10,000' in '### Resolved Zero-Lean Curve and Variability Comparison\n\nThis resolved view integrates the qualified supplemental f...y | 1 | 1 | original_primary/1 | 9,997 | +7.462e-05 [-7.104e-05, +2.190e-04] | +6.826e-05 [-5.228e-05, +1.705e-04] |\n'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/tests/research/test_shot_pattern_report_synthesis.py:114: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.22s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_missing_data_instead_of_inventing_claims
+0.03s call     tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count
+0.02s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_numbers_change_with_actual_input
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_actual_numeric_ranges_and_study_sd
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+0.01s setup    tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_numbers_change_with_actual_input
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_or_missing_bounds[match_face_bounds_deg-None]
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_resolved_sg_table_uses_scored_population_not_geometric_count
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_report_source_receipt_binds_synthesis_module
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_or_missing_bounds[match_face_bounds_deg-value1]
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_synthesis_rejects_duplicate_identity
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_resolved_table_discloses_individual_counts_and_attempts
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_or_missing_bounds[match_speed_factors-value2]
+0.01s call     tests/research/test_shot_pattern_report_synthesis.py::test_report_source_receipt_binds_synthesis_module
+0.01s teardown tests/research/test_shot_pattern_report_synthesis.py::test_resolved_selection_rejects_wrong_supplement_protocol_and_count
+
+(4 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/research/test_shot_pattern_report_synthesis.py::test_resolved_table_discloses_individual_counts_and_attempts

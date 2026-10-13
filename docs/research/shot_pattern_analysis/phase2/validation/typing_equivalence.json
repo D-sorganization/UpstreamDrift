@@ -1,0 +1,42 @@
+{
+  "scope": "Typing-only audit-script cleanup; not numerical or empirical acceptance",
+  "historical_commit": "ed60f608f6de316ff937e9c7f6ec58deaec232dc",
+  "normalization": [
+    "Remove typing imports",
+    "Convert annotated assignments to assignments",
+    "Rename actual_digest, plus_shot, minus_shot to historical identifiers",
+    "Remove two cast alias assignments and replace references with original o.compression_work_j and o.rebound_work_j attributes"
+  ],
+  "files": [
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/independent_contact_audit.py",
+      "old_sha256": "c975258d9fce9c3915ff00bbb52d691a143ddfa3c797461bf4cdc2d532288b16",
+      "new_sha256": "127b83fac06b3266c0608a888820a73be72c32a5d74fac6ff338f4ea139182f6",
+      "normalized_ast_sha256": "d2060ad9275c65a035a14de5202e20e3e97337b129ebfc104e5a210b85652cfd",
+      "equal": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/independent_control_scoring.py",
+      "old_sha256": "dc2b5eaf8a6c9aa8fbc78ed7ac077bb3d520799881f9461310264e10493e99db",
+      "new_sha256": "7a17838b986978040d52aa3d9976131c3f0797dc684fd3f588d656acfe818934",
+      "normalized_ast_sha256": "0aea3ee4d7c68213449b9d6ffd2b6b0a761ed4d2c5b4c41322c7fe89dafde18f",
+      "equal": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/independent_geometry_derivatives.py",
+      "old_sha256": "d72537e5ffe8ebe3f1ed6dcda9df2735b293103bc85220febd216cc70557d855",
+      "new_sha256": "f688de8ab5eaa0cdd7db17986063ac618d9edcdaf610215f73b0284e89f4b023",
+      "normalized_ast_sha256": "83d758a8c3f643aaab5f66980e227530ac1e0e29e04db7508f5dab7fdba3e843",
+      "equal": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/independent_pilot_audit.py",
+      "old_sha256": "4435437fbd55ac7f3f07207825913a1b629f69ab9c6ad246a2e9f857e107306c",
+      "new_sha256": "17360a206ed4a7d08c33332f865a1f54040e46743ed8e52e55ee803ac23dc8a6",
+      "normalized_ast_sha256": "984984f1a8c161945e69ad2f015c9ed9037e4840892ff4cd1b2d13489afd8f94",
+      "equal": true
+    }
+  ],
+  "pass_all": true,
+  "historical_receipts_modified": false
+}

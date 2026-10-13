@@ -1,0 +1,8 @@
+{
+  "number": 11973,
+  "state": "OPEN",
+  "title": "Replace Heuristic Off-Center Shot Study Contact with Consistent Two-Body Impulses",
+  "url": "https://github.com/D-sorganization/UpstreamDrift/issues/11973",
+  "local_id": "P2-002",
+  "acceptance": "Existing off-center API uses scalar effective mass then additive gear spin without matching club rotation; toe spin sign conflicts with flight frame. Implement a separate explicit two-body inertia/contact law for research, independently test momentum, passivity, restitution, covariance, central limit and toe/high-face directions. Document assumed CG/inertias and lack of empirical qualification; no accuracy claim from conservation alone."
+}

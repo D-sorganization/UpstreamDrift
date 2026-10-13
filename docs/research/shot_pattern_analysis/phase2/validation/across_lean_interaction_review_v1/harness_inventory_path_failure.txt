@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/across_lean_interaction_review_v1/check_actual_controls.py", line 18, in <module>
+    qualified=load_supplement_sources({k:v for k,v in protocol_roots.items() if k != 'original_control/1'},PHASE/'SUPPLEMENTAL_EXECUTION_INVENTORY.json')
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_report.py", line 286, in load_supplement_sources
+    inventory_hash = _sha256(inventory_path)
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_report.py", line 32, in _sha256
+    with path.open("rb") as stream:
+         ^^^^^^^^^^^^^^^
+  File "/home/dieterolson/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/SUPPLEMENTAL_EXECUTION_INVENTORY.json'

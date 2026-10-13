@@ -1,0 +1,11 @@
+{
+  "scope": "Root rehashed all744 original vectors and reconciled every diagnostic against closed manifest inventories; no repeat parse or whole visual acceptance",
+  "astra_review_sha256": "61067a594fc050a3b22af3df10dd19f2867aae3e8b2800fa52d83950855c9ebb",
+  "raw_archive_sha256": "61896ad8f9ef987dd87928ca1d237b59a9751a76bf7dbcd1b15d8c3ffdafe05c",
+  "helper_sha256": "268742868c39d6d642c32ad9eae1fdda364bf66cf03ebb3a767f7d218699b51a",
+  "root_rehashed_vectors": 744,
+  "diagnostics_complete": true,
+  "errors": 0,
+  "warnings": 0,
+  "publication_accepted": false
+}

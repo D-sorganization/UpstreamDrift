@@ -1,0 +1,953 @@
+{
+  "archives": {
+    "supplement_pilot_v1-001.zip": {
+      "bytes": 5663598,
+      "sha256": "8f719c0831b8047245ab4fa663d413c8ae02b5eddfc1bae569c0068880c6eaa2"
+    }
+  },
+  "files": {
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58009,
+      "sha256": "cdc29f5c221775be809140c6d014ba0ba7d9ca636ad08728196ae92ed5107ee5"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "3ae91d7eea8799bf34f217aecfc85cc59e08ea6d8280b3bfe6ca94300182d805"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8589,
+      "sha256": "019ebb64edbc7fa146d528ca74a94df308e85cba401831b8c3e999a6bf873414"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 13060,
+      "sha256": "a46d07a542ee7d857c25996afd0129a76ebe7a1160ffda4ab64fdb727d078f1a"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_combined2/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 98485,
+      "sha256": "35cd8d884004d49f8962a01c084829718700fb26f100b39849b56f778161f09a"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_shaft_only/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58013,
+      "sha256": "17ef31b5b55e4a3848c0bf214c0b50c701a02c7274996c9bbf3ae0016013d23f"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "86298161dd8415d1e10cf2022730448152836a667d23b7f48394d6d7f11f2a34"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_shaft_only/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8577,
+      "sha256": "3fb77c3f863e58cd53c6a2c371da226c071c23fbacd51a6bc603858309296f81"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9732,
+      "sha256": "c73529e1b398d6087665d798bff60581a86d53241355a00136098b9eda6d14df"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 87000,
+      "sha256": "4683a05ec69c7b5d1a402bf80fe2562d977f78b69eaf460f772af51d77efb7e0"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 57979,
+      "sha256": "604e34264a019397d44c2168faf160ec54506f7fe8f4f664ee57b1c31db628e4"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "0ff9e5c449cc70576168d49778692c5712ed39446c1438738c9bbd0e3dcb1709"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8589,
+      "sha256": "7f0e71b8747b391ef4659b2b5b0a64dd22bbd8283b937e0cfb61a221b4b5af4f"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 13095,
+      "sha256": "27d07cdbe7f81420a2cfdcb6d0c2cb59cfc7a5c78e923e25fb693002142d6115"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_combined2/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 98188,
+      "sha256": "4e9e5570e7d532a09d4dd76e60f5b3dda5b45ca26f5de3447bd30737215e50db"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_shaft_only/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 57960,
+      "sha256": "f61ceedc04237fe1a17b259db17c4560dc7b3979840d6b154d6ca144db990d9d"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "41aadd63b5716a5866bf853826a0897d1bc0c3a9b4451500a7c06b9aa8203db3"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_shaft_only/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8577,
+      "sha256": "7d036f4267e1df634e06f6b9c5432028cf32775dc519071064ea5dcafd47ad7e"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9797,
+      "sha256": "b0fc06cd117ffcf43c2797c1343bf3fe099308856408fa9d45b28081117e597d"
+    },
+    "supplement_pilot_v1/driver_control_speed/driver_lean5_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 86664,
+      "sha256": "21f6d74627900e7464133cc20b2fcfa1fa7cdbede3bf9d2aa8a7a5a240803d7a"
+    },
+    "supplement_pilot_v1/driver_control_speed/matrix_plan.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 13224,
+      "sha256": "61a6c4b2cf989d8e6713d4a419433801ac13b785928a761d6fd8c12f03468512"
+    },
+    "supplement_pilot_v1/driver_control_speed/shard_0_receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 914,
+      "sha256": "d6d12cc69c05f00b6b30e468de0dee1afbcfb31871b3b16ef2265a7ac86edc9d"
+    },
+    "supplement_pilot_v1/pw_control_face/matrix_plan.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 13327,
+      "sha256": "9ed468a257ab3641c426c4ec40f28182599ff31fd387883946a6530dfdc55193"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_combined2/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58521,
+      "sha256": "578f5c3420e1d5f462244743adad0bee5b6c7b1ed68f6c568061b25e22bb9e20"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_combined2/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "56d2ed85f7389e47d3dc733e28aeff3747646bddce2af35b90f47aff86736a0d"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_combined2/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_combined2/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8600,
+      "sha256": "703b71ce8e5cab2d1f66a65a9935bee55c74071980ba3594b74f53f733afe7d4"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_combined2/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_combined2/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11955,
+      "sha256": "56651f297e7e61db51f6f8e0ff1b49f7f78f2fee398c8a6c4ab98f9c5f0d0a94"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_combined2/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 98533,
+      "sha256": "409c4af5710138cca812428e74229c9c1fa5f0397f0fd2c88aece6d5ab941c9f"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_shaft_only/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58503,
+      "sha256": "0e78d9c0316dc8daf2127dd41c9a9f13d1f1a9138cd081eb5b423bef5aa9332e"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "af0486be7a974bdb8aa214c8faff2a3f462502bef43d591c1d716d42c65d8bce"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_shaft_only/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8588,
+      "sha256": "090e816b6989f58029087522bcb14d1e0b4fadfe62ea0471283e667515c99fdb"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9735,
+      "sha256": "e254ec2cf686e302f42268842dcf08ca265187a4c6ac4faea9aff847d5f5c77a"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 86978,
+      "sha256": "f9ef43dddf0c5d859e3b68985ff9080f3682cb269e271183764904c6107bb9f1"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58295,
+      "sha256": "490170bcd02f316167ae9055447a0130954a0c8b23b0086d6473e2df08a57a83"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "660b13b79f0a050cfe34e3d0beefd04905263ec2045bb9ceaa53e35f6c904453"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8600,
+      "sha256": "053f927f7df4ba11ea7135c8d3f40f9c2e297d0a5fdacf458ca869b6b5ee53f8"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11938,
+      "sha256": "6f775f0a2159a591c54ac90a607cbfad22cc4d2dc913d2f69233a5474288c0bf"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_combined2/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 98280,
+      "sha256": "71debc609d58f52ac3e859e7aae5df53a3bfd5bd891c97446c9dc85351ab7bef"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_shaft_only/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58301,
+      "sha256": "576b7fedd16f9c8cf5fc7afbbfb52e7a6444764851c667cea6d3d5dc2bf6ca5e"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "e63c2e7b643ef9a02b4ca55f927c30844fe5f18498bdde607addda1d3a73295c"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_shaft_only/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8588,
+      "sha256": "325fb350073f453935e916260d79c89c84a466f9649c571bb7017077e144cf76"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9796,
+      "sha256": "6fa272bc6667575eb1dcf913788d80a0f68a59cbe37fd8142f3771c434220b1e"
+    },
+    "supplement_pilot_v1/pw_control_face/pitching_wedge_lean5_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 86830,
+      "sha256": "d1f21d1e04b5ee57a836192803a99d7bb61fe1431ae829a2687a41069f24fdfe"
+    },
+    "supplement_pilot_v1/pw_control_face/shard_0_receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 946,
+      "sha256": "c2790d0adc399014eb24582f3893cac02b2f9b44320ea058fa22457289f846d2"
+    },
+    "supplement_pilot_v1/pw_primary_face/matrix_plan.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 38239,
+      "sha256": "02db8f05f27e036a62ff209ecfa189bb4b3581e767a10c67a7914ed76942eba6"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined1/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58530,
+      "sha256": "f407aade1104904ff71e5dce449d238ed00b664cecf843f02a050293c1def955"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined1/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "ec7ebc621daccff83bc9b46eadcbf856b8afda693d02c8d6a1477a85300ab7ae"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined1/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined1/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8587,
+      "sha256": "7e68f5d9e820b0ca021bca4b6864c44938021ab7bfc68a6edb2be9dee0be2861"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined1/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined1/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11880,
+      "sha256": "f1db19570f6cacf6e350439490d1dfa0d86d272c60b405282b70988518ff0aad"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined1/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 98568,
+      "sha256": "3d47341022feff56b7488734b630b5861c2cf8760d7867def863bcc622f85ba0"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined2/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58534,
+      "sha256": "a4216e2cd395c45829ab954c7aeaad66c46566535b7b9b6b65897d267c574698"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined2/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "e5ada1d8efa50879dc451bd41fc73c5e177a47a247b6a907f6517910b4c82298"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined2/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined2/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8587,
+      "sha256": "e0b83da98a5f51f5b01288f23e650a6e870eaeffd335d441b642e3f955187013"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined2/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined2/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11857,
+      "sha256": "d57247cc965ad47dcce5465bcc97aaa2a5d69352e268166368ec758592bdd4b6"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_combined2/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 98629,
+      "sha256": "5cd6ec4de875be7a740f20fe012c951daa1a3e71b3702b474eba4b68763f4490"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58760,
+      "sha256": "8382350dafcbc422c54148ea508682cef36af2af4e6288791774307fab9df2a3"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "76189a4435ded6cb35fcf65fa77ae8d4c6af4194f261eae35cf7ff87ad4817a6"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9611,
+      "sha256": "16522f7a7037ddafeeb57462f1b30ec8828555f2277baf1f3200f31df9f75317"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11862,
+      "sha256": "5c09cda0bae201fc5b029b7e2f225a4ec77264fa99a3f953543f2c91374e0919"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 99670,
+      "sha256": "c2585329c4df9cc6130ff130c03df17371c7ce76184f8c0937e1c7fb9720094b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58527,
+      "sha256": "d528e70071ace0d13205486509a8f1212e7ffcc6fa8863563c38f4a4fe0f72a3"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "811d86d57ed53288cec7734ab309441daef41d5b59fa9b7e83c56cc916fa8f13"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9617,
+      "sha256": "ec2ed45cef238957a27bf7489e94541bc96020d7602f5aee7d544d0a0eab143e"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11873,
+      "sha256": "590c56c712a9e5b698a74007045159872c6755d8df9077093369924a14770629"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 99640,
+      "sha256": "e3d91e9ad0b5502b7a3dcebe89d3ab45c42f774be19f3036909de2f421e6f972"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_only/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58451,
+      "sha256": "660b6f971db7b2c04c7a9572e3e9804362cb159341b7977ead12ac7405e9a99b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_only/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "dc37dee9313961dbd7d28a5f2769ed42286e496056ea1226e3261356882ac4c1"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_only/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_only/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8575,
+      "sha256": "3879c28e01415e0b9afff4cfc0221ff87ea1196c053b9108a1760c3e8657759d"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_only/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_only/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9662,
+      "sha256": "2667e5eb42d3e71a00222ad8ca179686101b7959abf57356ea7852b3c554086a"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_only/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 87085,
+      "sha256": "a8a8e59659cc76cc5da253aa56c6e21a7170ba6f8246de6990372e84b0aef5cd"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_path/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58438,
+      "sha256": "ff470b56e5591ddcd620d258ae4e27de4876c9f0f3b5676c72a4e218be911e64"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_path/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "9289366d2a8d58fbfc897ab7d64a22a0cc2c1edd0102f845d33491a35f8fdec6"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_path/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_path/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8575,
+      "sha256": "300589b42b21b7a39cd45cc88a294e0d81ec4879439af6f3ba141de2d809ff8b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_path/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_path/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 10533,
+      "sha256": "f88f65d1551c2a120bed979f946f401da73f9064360b6323ea5dc51d73732001"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_path/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 89477,
+      "sha256": "59f7964f3de7ee89e5c5d7404c1acfb52868bdc7cbae92081c4903611f3b5ca5"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed1/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58420,
+      "sha256": "b43bf47391b6367a74617a9e821dfa9bfcba3c5be9b004034c24dc405f3e5e62"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed1/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "8a8f4cab1564c9b306a614f461164003a112388c02cd0086dc9097d88a5a726f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed1/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed1/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8579,
+      "sha256": "fadf9cfe47d85d51ebb1fd321a4512b39b1b54f9dc60dca44a9729b8e617b1ed"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed1/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed1/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 10358,
+      "sha256": "fc022887614bdf38a4c34ab512342ba6e5ac669aabd9d630bcc7d7f3144b24d8"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed1/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 89497,
+      "sha256": "0b511e826932e9ae004a4e2983b7ef621f6c58a8908742ac34e17b739a5b3f1b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed2/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58429,
+      "sha256": "693ca2a7bccb086d8198debdd3757c4c101003449e5730dabb3851bd463c9e51"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed2/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "ccf34b22a83a5fd9ca5702c27b39dd0db8062c2370c1afc0c9191e4ece3ca2bb"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed2/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed2/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8579,
+      "sha256": "14ee4f46766abbd8d93e9355acb7bd29c7479e04f564f0039d1c4e030705ab46"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed2/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed2/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 10323,
+      "sha256": "b4b7473c70e4a28286dbe182aed5add42a1b739178ab8705d1554eb9e0f1e9fd"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_speed2/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 89480,
+      "sha256": "e4074004ca2b567d3c35b1fb479d4a1dfe27d1e053f1759ac58a96ef32ca0598"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_strike/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58527,
+      "sha256": "ff438b5cb9dea3106f1d5b492485bcaf1474888c50fb50c026884d2886257f77"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_strike/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "dc85e5052f159894e8d59e094036f048703a318b8148104131b5d43c185cbf61"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_strike/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_strike/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8583,
+      "sha256": "581a49313539ec26bbfde5aeeabbf734d19d8f95997f413a0dcf813100dd44de"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_strike/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_strike/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 10495,
+      "sha256": "303e7bd6a6ca99a9553029a57876eab49fb0c4d77b96ef723d5803ea15a6615d"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation1_shaft_strike/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 92680,
+      "sha256": "6b4325c3c70de63699ae17da36c5c5085e38913f965ec1b962fa6b8cefdae7d8"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined1/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58302,
+      "sha256": "b6f64b097eb01652cabe6003b3cc133d911504b4c7fa8d2db795e406148cf8a0"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined1/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "48567aa7ac56a0c0471e2b8ec99117e7aab55860371f230404f1ba9c47c6d2e5"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined1/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined1/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8587,
+      "sha256": "175ad0feff051968950eeb196e9713db3836a34c474060fa4b1cd0486d121b9a"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined1/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined1/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11876,
+      "sha256": "9762206f64b0f064e925cd769d38f85fd4da1ee7c58527492d62ced01c30386c"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined1/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 98351,
+      "sha256": "2b2e93ec1459a175fd16c93a1e82fa0f115b6df00e3b62714bba3f23dd63aed3"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58297,
+      "sha256": "ee10819771352d7ceb86694a1284d4a505a2a3073b31f49ed434160f64a56dfb"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "4f1241ad5bb9844d6b4d2d2daf04330ff569359d67acbf17c4dcb5b35295061f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8587,
+      "sha256": "62cf9249e482ca82c54747986836b8facd61ebbb1f4500034947a4e3de69df1b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11883,
+      "sha256": "dbb133af2bb6e2e5bbc74cb071dd058926435e93c4d2c04f4eb37c9ccf809c9a"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_combined2/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 98440,
+      "sha256": "644f635e4aa9ca5e32c2d6afa5d3cd911b6cf49930699eecb0e64c52d6df253f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58637,
+      "sha256": "c674e6d78b4deb16c6da8d1b979eaeff106c83197937cf8ee27eb77bc436cc99"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "4a58f8ed25232bba49f6ec6d3222193823f246b738e1e1c1f328cd942a221307"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9611,
+      "sha256": "fe7a6237e0902d86377a8551aa3a840aedde81d1201d2ded418a82c4929aecbd"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11854,
+      "sha256": "0f964e7ee2409e846085205810a58c3f450f3cfaae88402d6a70994550e02b4e"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 99332,
+      "sha256": "41d6c0856e591a5b5fffaff1c37d3d69528bed85d2afefe40507dfcb0a7c84b4"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58405,
+      "sha256": "eaa7b6fc79f2a96b2f6bb6ef6f0d5454ad5afafed24a29c1e6e5bbaea9e8353b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "059abf1056bf1302cb7f4a8aa768e5093b359590ad2997c793e13a9e98456351"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9617,
+      "sha256": "281179d7f6137f1fe907917f6100394405a32148dbd94bc8293af6c1a214a1e4"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 11859,
+      "sha256": "555ab75f614b3063c8dfbf9c77572c74083fb4ee6007dfb3b25e4e2eb83ee664"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 99201,
+      "sha256": "203ad689851f42a7f4154ce79eb795d4f3615344dfaa68a8cde506ed6b665179"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_only/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58244,
+      "sha256": "4edc6ec91cae651e5badff782cc68792890ae8f5b3e47d7c9e98215947433708"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_only/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "65b6443de6b240bdf01c4f6c159d4cc42b01c859d4b224c1902fbb1119a8236e"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_only/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_only/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8575,
+      "sha256": "850f99b53e6d54100cfc401bd7b415af1230e8843fb451d6068d6bfd3c795f0f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_only/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_only/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 9744,
+      "sha256": "2c9f9efa9ada9d2ecd2c9fa81b02d7268ea0a9a38b22fc214e757c88b47f3083"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_only/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 87000,
+      "sha256": "20d087292de26798ae72825586144251e6ea63eeb739c7dc54a6005f97596316"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_path/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58264,
+      "sha256": "14bdde06a17b7fcb63ee3cc1731c9b1800130c33e0664d3376daddec92055674"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_path/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "5ee84fdd5daad5b0be6cc6b3788150338196bb65fe98d31fada82bacbfe6c3ea"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_path/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_path/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8575,
+      "sha256": "9f3416d1ae41ba7bed08bfa93980cecd9d30a407e85d2bfded6e331db462efd3"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_path/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_path/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 10585,
+      "sha256": "959a4a9e6231c7bc658266061b32eb48a5e43041c7cd8b1cfd16c2dc07fe71b4"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_path/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 89301,
+      "sha256": "ba04ede8adddcade89cbf4f8c9b2ccad9dde958be511ed5f9c83d2e862e6f9e3"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed1/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58243,
+      "sha256": "55ffbec062b34e81a671d9b91a1299afc6693ee8e67346769dd01aebe58c58a5"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed1/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "fcbe76f40d22e66e422c7be7f717b16163f46b2b986d9f3541393b93576ba930"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed1/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed1/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8579,
+      "sha256": "0d661284de8aae5dd4def918092a017218cf28b242eb46e9663a4d05c198bd61"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed1/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed1/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 10388,
+      "sha256": "615d27a6d75e7019a8b5ce18cced15d3a85f357485492ba49d9fb9c220d78217"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed1/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 89292,
+      "sha256": "7b6630b16a5901c16c7de4080e5485f5a4232c75c8bb5b54b8c32e5319f939bd"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed2/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58267,
+      "sha256": "3a02e17809714865630251de95d9fa7653609210cade237917aa22730412fe1b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed2/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "1f2a78a853cb485761f9c6ccf5b52ec15f35722c025d3b8b16f4e46dffbbf3ca"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed2/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed2/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8579,
+      "sha256": "b71533940f677da919283904e6ca44909fb6988c5b661aa1ab144ebda4a38e64"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed2/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed2/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 10387,
+      "sha256": "76891d45681460091dda3d5fc3d1d03be5eb5cd995be30d6101f67fa471ed344"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_speed2/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 89416,
+      "sha256": "e4af6ca575096c979aed96f9f13af33d10d5f01d363e4bc3a401e6fd76a4bd75"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_strike/flight_samples.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 58351,
+      "sha256": "c5b31b71dbd2b3b1d8b137ff5aa9cd7e6b225477db49dcc3a6db6e4c82900c40"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_strike/manifest.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 609,
+      "sha256": "d473b42276636c53e99f963c4355f0ff95b29765b78e578790fd11c2cd6065a1"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_strike/receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 7702,
+      "sha256": "c7b92e37a46ad5eeb79280e26f0d8cabf859deb4d96588edc964524c7998e39b"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_strike/run_start.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 8583,
+      "sha256": "c981ec19abc8813b92e4ea8dda54b8d27783a195c6d1a590d1629700381ebf13"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_strike/scoring_baseline.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 33266,
+      "sha256": "0e58d8bf42f42adfa67f5c7aa5a930c40d7ab2e41b3bad91cffb8cc1ea27770f"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_strike/shots.csv.gz": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 10514,
+      "sha256": "c56853d3e75152843191f0fc9d6afd1d2f42ec70b92d983c807b7eef8431a835"
+    },
+    "supplement_pilot_v1/pw_primary_face/pitching_wedge_lean0_curve2_rotation2_shaft_strike/summary.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 92501,
+      "sha256": "3c084fd53d9ff211249de6c5579e398a33a29cb0df8ad96a40dc9572640cf8c0"
+    },
+    "supplement_pilot_v1/pw_primary_face/shard_0_receipt.json": {
+      "archive": "supplement_pilot_v1-001.zip",
+      "bytes": 4108,
+      "sha256": "0368e3ddb9c2149f7b56002a7edb37c37ae5c013a25816c754b8afa5b70fb43b"
+    }
+  },
+  "max_bytes": 80000000,
+  "schema": "shot-study-archives/1",
+  "source_name": "supplement_pilot_v1"
+}

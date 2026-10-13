@@ -1,0 +1,1582 @@
+diff --git a/src/tools/shot_pattern_analysis/matched_supplement_figures.py b/src/tools/shot_pattern_analysis/matched_supplement_figures.py
+index ff970d5d86..3dfb410d06 100644
+--- a/src/tools/shot_pattern_analysis/matched_supplement_figures.py
++++ b/src/tools/shot_pattern_analysis/matched_supplement_figures.py
+@@ -5,6 +5,7 @@ from __future__ import annotations
+ import hashlib
+ import json
+ import re
++import textwrap
+ from pathlib import Path
+ from typing import Any, Literal, Mapping
+ 
+@@ -22,6 +23,24 @@ from .matched_sensitivity import _supported_endpoints
+ from .provenance import manifest_files_match
+ from .noise import NoiseSpec
+ 
++CLOSED_SELECTED_FIGURE_KINDS: frozenset[str] = frozenset(
++    {
++        "density_png",
++        "density_pdf",
++        "density_svg",
++        "overhead_png",
++        "overhead_pdf",
++        "overhead_svg",
++        "overhead_social_png",
++    }
++)
++
++__all__ = [
++    "CLOSED_SELECTED_FIGURE_KINDS",
++    "namespace_figure_paths",
++    "render_selected_pair_figures",
++]
++
+ _PATTERNS = ("Straight", "Draw", "Fade")
+ 
+ 
+@@ -344,10 +363,14 @@ def _slug(value: str) -> str:
+     return f"{clean[:160]}_{hashlib.sha256(value.encode()).hexdigest()[:10]}"
+ 
+ 
+-def _save_figure(figure: Any, stem: Path) -> dict[str, Path]:
++def _save_figure(
++    figure: Any, stem: Path, formats: tuple[str, ...] = ("png", "pdf", "svg")
++) -> dict[str, Path]:
+     stem.parent.mkdir(parents=True, exist_ok=True)
+     outputs = {}
+     for suffix, dpi in (("png", 300), ("pdf", None), ("svg", None)):
++        if suffix not in formats:
++            continue
+         path = stem.with_suffix(f".{suffix}")
+         options: dict[str, Any] = {"bbox_inches": "tight", "facecolor": "white"}
+         if dpi is not None:
+@@ -384,18 +407,104 @@ def _write_pair_density_figure(
+     target_x: float,
+     common_n: int,
+     output_stem: Path,
++    formats: tuple[str, ...] = ("png", "pdf", "svg"),
+ ) -> dict[str, Path]:
+     """Plot two conditions in six panels on common bins and density scale."""
+     import matplotlib.pyplot as plt
+     from matplotlib.lines import Line2D
+     from matplotlib.colors import Normalize
++    from matplotlib.backends.backend_agg import FigureCanvasAgg
+ 
+     estimate = shared_histogram_density(
+         point_sets, bins=64, target_point_m=(target_x, 0.0)
+     )
+     figure = plt.figure(figsize=(16, 9), facecolor="white")
++    FigureCanvasAgg(figure)
++    renderer = figure.canvas.get_renderer()
++
++    t_title = figure.text(
++        0.06,
++        0.985,
++        "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
++        ha="left",
++        va="top",
++        fontsize=16,
++        fontweight="bold",
++    )
++    y_cursor = t_title.get_window_extent(renderer).y0 / figure.bbox.height
++
++    def _add_density_header(
++        text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 180
++    ) -> Any:
++        nonlocal y_cursor
++        gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
++        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
++        t = figure.text(
++            0.06,
++            y_cursor - gap_frac,
++            wrapped,
++            ha="left",
++            va="top",
++            fontsize=fontsize,
++        )
++        y_cursor = t.get_window_extent(renderer).y0 / figure.bbox.height
++        return t
++
++    total_n = int(first["config"]["n_shots"])
++    comp_text = (
++        f"{comparison} · Target {target_x:.3f} m · Density uses all "
++        f"{common_n:,}/{total_n:,} shots common to six populations; "
++        f"{min(common_n, 600):,} evenly spaced dots per panel"
++    )
++    _add_density_header(comp_text, fontsize=8.5, gap_pt=5.0, wrap_chars=180)
++
++    cap1 = f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}"
++    _add_density_header(cap1, fontsize=7.7, gap_pt=3.5, wrap_chars=180)
++
++    cap2 = f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}"
++    _add_density_header(cap2, fontsize=7.7, gap_pt=3.5, wrap_chars=180)
++
++    disc_text = (
++        "Illustrative Simulation | Assumed Head Properties | Carry Only · "
++        "Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching."
++    )
++    _add_density_header(disc_text, fontsize=9.0, gap_pt=3.5, wrap_chars=180)
++
++    leg_gap_frac = (7.0 / 72.0) / (figure.bbox.height / figure.dpi)
++    legend_top = y_cursor - leg_gap_frac
++    hdr_styles: tuple[tuple[float, Literal["solid", "dashed", "dotted"]], ...] = (
++        (0.50, "solid"),
++        (0.80, "dashed"),
++        (0.95, "dotted"),
++    )
++    hdr = [
++        Line2D(
++            [0],
++            [0],
++            color="#222222",
++            linestyle=style,
++            label=f"{mass:.0%} Simulated-Sample HDR",
++        )
++        for mass, style in hdr_styles
++    ]
++    hdr.append(
++        Line2D(
++            [0], [0], marker="+", color="black", linestyle="none", label="Common Target"
++        )
++    )
++    legend = figure.legend(
++        handles=hdr,
++        loc="upper center",
++        bbox_to_anchor=(0.48, legend_top),
++        ncol=4,
++        frameon=False,
++    )
++    leg_bottom = legend.get_window_extent(renderer).y0 / figure.bbox.height
++    margin_frac = (8.0 / 72.0) / (figure.bbox.height / figure.dpi)
++    grid_top = min(0.76, leg_bottom - margin_frac)
++
+     grid = figure.add_gridspec(
+-        2, 3, left=0.06, right=0.91, top=0.76, bottom=0.13, hspace=0.36, wspace=0.24
++        2, 3, left=0.06, right=0.91, top=grid_top, bottom=0.13, hspace=0.36, wspace=0.24
+     )
+     first_condition, second_condition = _condition(first), _condition(second)
+     row_conditions = ((first_label, first_condition), (second_label, second_condition))
+@@ -466,67 +575,10 @@ def _write_pair_density_figure(
+             color_mesh, ax=figure.axes, fraction=0.018, pad=0.025
+         )
+         colorbar.set_label("Endpoint Probability Density (m⁻²); Common Scale")
+-    hdr_styles: tuple[tuple[float, Literal["solid", "dashed", "dotted"]], ...] = (
+-        (0.50, "solid"),
+-        (0.80, "dashed"),
+-        (0.95, "dotted"),
+-    )
+-    hdr = [
+-        Line2D(
+-            [0],
+-            [0],
+-            color="#222222",
+-            linestyle=style,
+-            label=f"{mass:.0%} Simulated-Sample HDR",
+-        )
+-        for mass, style in hdr_styles
+-    ]
+-    hdr.append(
+-        Line2D(
+-            [0], [0], marker="+", color="black", linestyle="none", label="Common Target"
+-        )
+-    )
+-    figure.legend(
+-        handles=hdr,
+-        loc="upper center",
+-        bbox_to_anchor=(0.48, 0.83),
+-        ncol=4,
+-        frameon=False,
+-    )
+-    figure.suptitle(
+-        "Matched Endpoint Density: Two Conditions, Shared Axes and Density Scale",
+-        x=0.06,
+-        y=0.97,
+-        ha="left",
+-        fontsize=16,
+-        fontweight="bold",
+-    )
+-    total_n = int(first["config"]["n_shots"])
+-    figure.text(
+-        0.06,
+-        0.915,
+-        f"{comparison} · Target {target_x:.3f} m · Density uses all {common_n:,}/{total_n:,} shots common to six populations; {min(common_n, 600):,} evenly spaced dots per panel",
+-        fontsize=8.5,
+-    )
+-    figure.text(
+-        0.06,
+-        0.895,
+-        f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}",
+-        fontsize=7.7,
+-    )
+-    figure.text(
+-        0.06,
+-        0.875,
+-        f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}",
+-        fontsize=7.7,
+-    )
+-    figure.text(
+-        0.06,
+-        0.855,
+-        "Illustrative Simulation | Assumed Head Properties | Carry Only · Raw coordinates; no aim correction. Matched-condition changes include nominal re-matching.",
+-        fontsize=9,
+-    )
+-    outputs = _save_figure(figure, output_stem)
++    if formats == ("png", "pdf", "svg"):
++        outputs = _save_figure(figure, output_stem)
++    else:
++        outputs = _save_figure(figure, output_stem, formats=formats)
+     plt.close(figure)
+     return outputs
+ 
+@@ -602,31 +654,57 @@ def _create_pair_overhead_figure(
+         # A disclosed 6× vertical display magnification keeps long carry paths legible.
+         axis.set_aspect(6.0, adjustable="box")
+ 
+-    figure.suptitle(
++    from matplotlib.backends.backend_agg import FigureCanvasAgg
++
++    FigureCanvasAgg(figure)
++    renderer = figure.canvas.get_renderer()
++
++    t_title = figure.text(
++        0.06,
++        0.975,
+         "Saved Raw Flight Paths by Pattern and Matched Condition",
+-        x=0.06,
+-        y=0.965,
+         ha="left",
++        va="top",
+         fontsize=17 * font_scale,
+         fontweight="bold",
+     )
+-    figure.text(
+-        0.06,
+-        0.92,
++    y_cursor = t_title.get_window_extent(renderer).y0 / figure.bbox.height
++
++    def _add_overhead_text(
++        text: str, fontsize: float, gap_pt: float = 3.5, wrap_chars: int = 175
++    ) -> Any:
++        nonlocal y_cursor
++        gap_frac = (gap_pt / 72.0) / (figure.bbox.height / figure.dpi)
++        wrapped = textwrap.fill(text, width=wrap_chars, break_long_words=False)
++        t = figure.text(
++            0.06,
++            y_cursor - gap_frac,
++            wrapped,
++            ha="left",
++            va="top",
++            fontsize=fontsize,
++        )
++        y_cursor = t.get_window_extent(renderer).y0 / figure.bbox.height
++        return t
++
++    wrap_w = 175 if not social else 165
++    _add_overhead_text(
+         f"{_comparison_title(comparison)} · Target {target_x:.3f} m",
+         fontsize=10 * font_scale,
++        gap_pt=5.0,
++        wrap_chars=wrap_w,
+     )
+-    figure.text(
+-        0.06,
+-        0.895,
++    _add_overhead_text(
+         f"{first_label}: {_condition_caption(first)} · {first['source_protocol']}",
+         fontsize=8.5 * font_scale,
++        gap_pt=3.5,
++        wrap_chars=wrap_w,
+     )
+-    figure.text(
+-        0.06,
+-        0.87,
++    _add_overhead_text(
+         f"{second_label}: {_condition_caption(second)} · {second['source_protocol']}",
+         fontsize=8.5 * font_scale,
++        gap_pt=3.5,
++        wrap_chars=wrap_w,
+     )
+     path_counts = {key: len(value) for key, value in trajectory_sets.items()}
+     first_counts = ", ".join(
+@@ -637,17 +715,17 @@ def _create_pair_overhead_figure(
+         f"{pattern} {path_counts[f'{pattern} · {second_label}']}"
+         for pattern in _PATTERNS
+     )
+-    figure.text(
+-        0.06,
+-        0.84,
++    _add_overhead_text(
+         f"Saved paths (not paired by shot index): {first_label} {first_counts} · {second_label} {second_counts}",
+         fontsize=8.5 * font_scale,
++        gap_pt=3.5,
++        wrap_chars=wrap_w,
+     )
+-    figure.text(
+-        0.06,
+-        0.815,
++    _add_overhead_text(
+         "Illustrative Simulation | Assumed Head Properties | Carry Only · Lateral display magnified 6×; physical axis limits are shared.",
+         fontsize=8.5 * font_scale,
++        gap_pt=3.5,
++        wrap_chars=wrap_w,
+     )
+     pattern_handles = [
+         Line2D([0], [0], color=colors[pattern], label=pattern) for pattern in _PATTERNS
+@@ -656,10 +734,12 @@ def _create_pair_overhead_figure(
+         Line2D([0], [0], color="#333333", linestyle=style, label=condition)
+         for condition, _, style in conditions
+     ]
++    leg_gap_frac = (7.0 / 72.0) / (figure.bbox.height / figure.dpi)
++    legend_top = y_cursor - leg_gap_frac
+     figure.legend(
+         handles=pattern_handles + condition_handles,
+         loc="upper center",
+-        bbox_to_anchor=(0.57, 0.785),
++        bbox_to_anchor=(0.57, legend_top),
+         ncol=5,
+         frameon=False,
+         fontsize=9 * font_scale,
+@@ -677,40 +757,52 @@ def _write_pair_overhead_figure(
+     second_label: str,
+     target_x: float,
+     output_stem: Path,
++    academic_formats: tuple[str, ...] = ("png", "pdf", "svg"),
++    include_social: bool = True,
+ ) -> dict[str, Path]:
+     """Write academic and dedicated 16:9 paired overhead exports."""
+-    plt, figure = _create_pair_overhead_figure(
+-        trajectory_sets,
+-        first=first,
+-        second=second,
+-        comparison=comparison,
+-        first_label=first_label,
+-        second_label=second_label,
+-        target_x=target_x,
+-        social=False,
+-    )
+-    outputs = _save_figure(figure, output_stem)
+-    plt.close(figure)
++    output_stem.parent.mkdir(parents=True, exist_ok=True)
++    outputs: dict[str, Path] = {}
++    if academic_formats:
++        plt, figure = _create_pair_overhead_figure(
++            trajectory_sets,
++            first=first,
++            second=second,
++            comparison=comparison,
++            first_label=first_label,
++            second_label=second_label,
++            target_x=target_x,
++            social=False,
++        )
++        if academic_formats == ("png", "pdf", "svg"):
++            outputs = _save_figure(figure, output_stem)
++        else:
++            outputs = _save_figure(figure, output_stem, formats=academic_formats)
++        plt.close(figure)
+ 
+-    plt, social_figure = _create_pair_overhead_figure(
+-        trajectory_sets,
+-        first=first,
+-        second=second,
+-        comparison=comparison,
+-        first_label=first_label,
+-        second_label=second_label,
+-        target_x=target_x,
+-        social=True,
+-    )
+-    social_path = output_stem.with_name(output_stem.name + "_social.png")
+-    social_figure.savefig(social_path, dpi=120, facecolor="white")
+-    plt.close(social_figure)
+-    outputs["social_png"] = social_path
++    if include_social:
++        plt, social_figure = _create_pair_overhead_figure(
++            trajectory_sets,
++            first=first,
++            second=second,
++            comparison=comparison,
++            first_label=first_label,
++            second_label=second_label,
++            target_x=target_x,
++            social=True,
++        )
++        social_path = output_stem.with_name(output_stem.name + "_social.png")
++        social_figure.savefig(social_path, dpi=120, facecolor="white")
++        plt.close(social_figure)
++        outputs["social_png"] = social_path
+     return outputs
+ 
+ 
+-def _render_pair_figures(
+-    pair: dict[str, Any], output_dir: Path
++def _render_pair_figures_core(
++    pair: dict[str, Any],
++    output_dir: Path,
++    *,
++    figure_kinds: frozenset[str] | None = None,
+ ) -> list[dict[str, Any]]:
+     first, second = pair["first"], pair["second"]
+     if first.get("status") != "completed" or second.get("status") != "completed":
+@@ -728,22 +820,7 @@ def _render_pair_figures(
+         raise ValueError(
+             f"pair references lack source protocol: {first['cell']} vs {second['cell']}"
+         )
+-    loaded = []
+-    for ref in (first, second):
+-        directory = Path(ref["source_root"]) / ref["cell"]
+-        endpoints, _ = _supported_endpoints(
+-            directory / "shots.csv.gz", int(ref["config"]["n_shots"])
+-        )
+-        loaded.append(endpoints)
+-    common = sorted(
+-        set.intersection(
+-            *(
+-                {index for index, _, _ in endpoint_map[pattern]}
+-                for endpoint_map in loaded
+-                for pattern in _PATTERNS
+-            )
+-        )
+-    )
++
+     comparison = pair["comparison_kind"]
+     first_label = _pair_condition_label(comparison, first)
+     second_label = _pair_condition_label(comparison, second)
+@@ -751,159 +828,253 @@ def _render_pair_figures(
+     stem = output_dir / "comparisons" / _slug(label)
+     target = pair["target_x_m"]
+     ledger: list[dict[str, Any]] = []
+-    if len(common) >= 2:
+-        point_sets: dict[str, list[tuple[float, float]]] = {}
+-        for condition_label, endpoint_map in zip(
+-            (first_label, second_label), loaded, strict=True
+-        ):
+-            by_pattern = {
+-                name: {idx: (x, y) for idx, x, y in endpoint_map[name]}
+-                for name in _PATTERNS
+-            }
+-            for pattern in _PATTERNS:
+-                name = f"{pattern} · {condition_label}"
+-                point_sets[name] = [by_pattern[pattern][index] for index in common]
+-        density_paths = namespace_figure_paths(
+-            "density",
+-            _write_pair_density_figure(
+-                point_sets,
+-                first=first,
+-                second=second,
+-                comparison=comparison,
+-                first_label=first_label,
+-                second_label=second_label,
+-                target_x=target,
+-                common_n=len(common),
+-                output_stem=stem.with_name(stem.name + "_density"),
+-            ),
++
++    needs_density = figure_kinds is None or bool(
++        {"density_png", "density_pdf", "density_svg"} & figure_kinds
++    )
++
++    if needs_density:
++        loaded = []
++        for ref in (first, second):
++            directory = Path(ref["source_root"]) / ref["cell"]
++            endpoints, _ = _supported_endpoints(
++                directory / "shots.csv.gz", int(ref["config"]["n_shots"])
++            )
++            loaded.append(endpoints)
++        common = sorted(
++            set.intersection(
++                *(
++                    {index for index, _, _ in endpoint_map[pattern]}
++                    for endpoint_map in loaded
++                    for pattern in _PATTERNS
++                )
++            )
+         )
+-        for kind, path in density_paths.items():
+-            ledger.append(
+-                {
+-                    "figure_kind": kind,
+-                    "presentation": "academic",
+-                    "physical_pattern": None,
+-                    "source_kind": "six_population_common_index_comparison",
+-                    "comparison_kind": comparison,
+-                    "first_cell": first["cell"],
+-                    "second_cell": second["cell"],
+-                    "first_protocol": first["source_protocol"],
+-                    "second_protocol": second["source_protocol"],
+-                    "common_supported_n": len(common),
+-                    "total_n_per_population": first["config"]["n_shots"],
+-                    "conditioning": "same shot indices supported in all six populations",
+-                    "target_x_m": target,
+-                    "relative_path": str(path.relative_to(output_dir)),
+-                    "sha256": _sha256(path),
++        if len(common) >= 2:
++            point_sets: dict[str, list[tuple[float, float]]] = {}
++            for condition_label, endpoint_map in zip(
++                (first_label, second_label), loaded, strict=True
++            ):
++                by_pattern = {
++                    name: {idx: (x, y) for idx, x, y in endpoint_map[name]}
++                    for name in _PATTERNS
+                 }
++                for pattern in _PATTERNS:
++                    name = f"{pattern} · {condition_label}"
++                    point_sets[name] = [by_pattern[pattern][index] for index in common]
++
++            density_formats = (
++                ("png", "pdf", "svg")
++                if figure_kinds is None
++                else tuple(
++                    k.removeprefix("density_")
++                    for k in ("density_png", "density_pdf", "density_svg")
++                    if k in figure_kinds
++                )
+             )
+-        pair_scenario = _pair_social_scenario(comparison, first, second)
+-        social_club = str(first["config"]["club"]["club_id"]).replace("_", " ").title()
+-        m0 = _cell_target_mode(first)
+-        m1 = _cell_target_mode(second)
+-        social_density_paths = write_pair_social_density(
+-            point_sets,
+-            stem.with_name(stem.name + "_density"),
+-            condition_labels=(first_label, second_label),
+-            scenario=pair_scenario,
+-            social_club=social_club,
+-            target_point_m=(target, 0.0),
+-            total_n=int(first["config"]["n_shots"]),
+-            delivery_noise=_noise_profile_description(
+-                _condition(first)["profile"], first["config"]["noise"]
+-            ),
+-            source_protocols=(p0, p1),
+-            target_modes=(m0, m1),
+-        )
+-        for key, path in social_density_paths.items():
+-            pattern_lower, ext = key.split("_", 1)
+-            pattern = pattern_lower.title()
++            if density_formats:
++                density_paths = namespace_figure_paths(
++                    "density",
++                    _write_pair_density_figure(
++                        point_sets,
++                        first=first,
++                        second=second,
++                        comparison=comparison,
++                        first_label=first_label,
++                        second_label=second_label,
++                        target_x=target,
++                        common_n=len(common),
++                        output_stem=stem.with_name(stem.name + "_density"),
++                        formats=density_formats,
++                    ),
++                )
++                for kind, path in density_paths.items():
++                    if figure_kinds is None or kind in figure_kinds:
++                        ledger.append(
++                            {
++                                "figure_kind": kind,
++                                "presentation": "academic",
++                                "physical_pattern": None,
++                                "source_kind": "six_population_common_index_comparison",
++                                "comparison_kind": comparison,
++                                "first_cell": first["cell"],
++                                "second_cell": second["cell"],
++                                "first_protocol": first["source_protocol"],
++                                "second_protocol": second["source_protocol"],
++                                "common_supported_n": len(common),
++                                "total_n_per_population": first["config"]["n_shots"],
++                                "conditioning": "same shot indices supported in all six populations",
++                                "target_x_m": target,
++                                "relative_path": str(path.relative_to(output_dir)),
++                                "sha256": _sha256(path),
++                            }
++                        )
++
++            if figure_kinds is None:
++                pair_scenario = _pair_social_scenario(comparison, first, second)
++                social_club = (
++                    str(first["config"]["club"]["club_id"]).replace("_", " ").title()
++                )
++                m0 = _cell_target_mode(first)
++                m1 = _cell_target_mode(second)
++                social_density_paths = write_pair_social_density(
++                    point_sets,
++                    stem.with_name(stem.name + "_density"),
++                    condition_labels=(first_label, second_label),
++                    scenario=pair_scenario,
++                    social_club=social_club,
++                    target_point_m=(target, 0.0),
++                    total_n=int(first["config"]["n_shots"]),
++                    delivery_noise=_noise_profile_description(
++                        _condition(first)["profile"], first["config"]["noise"]
++                    ),
++                    source_protocols=(p0, p1),
++                    target_modes=(m0, m1),
++                )
++                for key, path in social_density_paths.items():
++                    pattern_lower, ext = key.split("_", 1)
++                    pattern = pattern_lower.title()
++                    ledger.append(
++                        {
++                            "figure_kind": f"density_{pattern_lower}_social_{ext}",
++                            "presentation": "social",
++                            "physical_pattern": pattern,
++                            "source_kind": "six_population_common_index_comparison",
++                            "comparison_kind": comparison,
++                            "first_cell": first["cell"],
++                            "second_cell": second["cell"],
++                            "first_protocol": first["source_protocol"],
++                            "second_protocol": second["source_protocol"],
++                            "common_supported_n": len(common),
++                            "total_n_per_population": first["config"]["n_shots"],
++                            "conditioning": "same shot indices supported in all six populations",
++                            "target_x_m": target,
++                            "relative_path": str(path.relative_to(output_dir)),
++                            "sha256": _sha256(path),
++                        }
++                    )
++        else:
+             ledger.append(
+                 {
+-                    "figure_kind": f"density_{pattern_lower}_social_{ext}",
+-                    "presentation": "social",
+-                    "physical_pattern": pattern,
++                    "figure_kind": "paired_density",
+                     "source_kind": "six_population_common_index_comparison",
+                     "comparison_kind": comparison,
+                     "first_cell": first["cell"],
+                     "second_cell": second["cell"],
+-                    "first_protocol": first["source_protocol"],
+-                    "second_protocol": second["source_protocol"],
+-                    "common_supported_n": len(common),
+-                    "total_n_per_population": first["config"]["n_shots"],
+-                    "conditioning": "same shot indices supported in all six populations",
+-                    "target_x_m": target,
+-                    "relative_path": str(path.relative_to(output_dir)),
+-                    "sha256": _sha256(path),
++                    "status": "unavailable",
++                    "reason": "fewer than two indices supported in all six populations",
+                 }
+             )
+-    else:
+-        ledger.append(
+-            {
+-                "figure_kind": "paired_density",
+-                "source_kind": "six_population_common_index_comparison",
+-                "comparison_kind": comparison,
+-                "first_cell": first["cell"],
+-                "second_cell": second["cell"],
+-                "status": "unavailable",
+-                "reason": "fewer than two indices supported in all six populations",
+-            }
+-        )
+-    trajectory_sets: dict[str, list[Any]] = {}
+-    for label_condition, ref in zip(
+-        (first_label, second_label), (first, second), strict=True
+-    ):
+-        directory = Path(ref["source_root"]) / ref["cell"]
+-        flight = json.loads((directory / "flight_samples.json").read_text())
+-        paths_by_pattern = flight.get("trajectories", {})
+-        for pattern in _PATTERNS:
+-            key = f"{pattern} · {label_condition}"
+-            trajectory_sets[key] = paths_by_pattern.get(pattern, [])
+-    if any(not trajectory_sets[name] for name in trajectory_sets):
+-        ledger.append(
+-            {
+-                "figure_kind": "paired_overhead",
+-                "source_kind": "saved_illustrative_trajectory_samples",
+-                "comparison_kind": comparison,
+-                "first_cell": first["cell"],
+-                "second_cell": second["cell"],
+-                "status": "unavailable",
+-                "reason": "one source lacks saved raw trajectory samples",
+-            }
+-        )
+-    else:
+-        overhead_paths = namespace_figure_paths(
+-            "overhead",
+-            _write_pair_overhead_figure(
+-                trajectory_sets,
+-                first=first,
+-                second=second,
+-                comparison=comparison,
+-                first_label=first_label,
+-                second_label=second_label,
+-                target_x=target,
+-                output_stem=stem.with_name(stem.name + "_overhead"),
+-            ),
+-        )
+-        for kind, path in overhead_paths.items():
++
++    needs_overhead = figure_kinds is None or bool(
++        {"overhead_png", "overhead_pdf", "overhead_svg", "overhead_social_png"}
++        & figure_kinds
++    )
++
++    if needs_overhead:
++        trajectory_sets: dict[str, list[Any]] = {}
++        for label_condition, ref in zip(
++            (first_label, second_label), (first, second), strict=True
++        ):
++            directory = Path(ref["source_root"]) / ref["cell"]
++            flight = json.loads((directory / "flight_samples.json").read_text())
++            paths_by_pattern = flight.get("trajectories", {})
++            for pattern in _PATTERNS:
++                key = f"{pattern} · {label_condition}"
++                trajectory_sets[key] = paths_by_pattern.get(pattern, [])
++        if any(not trajectory_sets[name] for name in trajectory_sets):
+             ledger.append(
+                 {
+-                    "figure_kind": kind,
+-                    "presentation": "social" if "social" in kind else "academic",
+-                    "physical_pattern": None,
++                    "figure_kind": "paired_overhead",
+                     "source_kind": "saved_illustrative_trajectory_samples",
+                     "comparison_kind": comparison,
+                     "first_cell": first["cell"],
+                     "second_cell": second["cell"],
+-                    "first_protocol": first["source_protocol"],
+-                    "second_protocol": second["source_protocol"],
+-                    "conditioning": "saved raw trajectories, not paired by shot index",
+-                    "target_x_m": target,
+-                    "saved_trajectory_samples_by_pattern": {
+-                        key: len(paths) for key, paths in trajectory_sets.items()
+-                    },
+-                    "relative_path": str(path.relative_to(output_dir)),
+-                    "sha256": _sha256(path),
++                    "status": "unavailable",
++                    "reason": "one source lacks saved raw trajectory samples",
+                 }
+             )
++        else:
++            acad_formats = (
++                ("png", "pdf", "svg")
++                if figure_kinds is None
++                else tuple(
++                    k.removeprefix("overhead_")
++                    for k in ("overhead_png", "overhead_pdf", "overhead_svg")
++                    if k in figure_kinds
++                )
++            )
++            inc_social = (
++                True if figure_kinds is None else "overhead_social_png" in figure_kinds
++            )
++            if acad_formats or inc_social:
++                overhead_paths = namespace_figure_paths(
++                    "overhead",
++                    _write_pair_overhead_figure(
++                        trajectory_sets,
++                        first=first,
++                        second=second,
++                        comparison=comparison,
++                        first_label=first_label,
++                        second_label=second_label,
++                        target_x=target,
++                        output_stem=stem.with_name(stem.name + "_overhead"),
++                        academic_formats=acad_formats,
++                        include_social=inc_social,
++                    ),
++                )
++                for kind, path in overhead_paths.items():
++                    if figure_kinds is None or kind in figure_kinds:
++                        ledger.append(
++                            {
++                                "figure_kind": kind,
++                                "presentation": "social"
++                                if "social" in kind
++                                else "academic",
++                                "physical_pattern": None,
++                                "source_kind": "saved_illustrative_trajectory_samples",
++                                "comparison_kind": comparison,
++                                "first_cell": first["cell"],
++                                "second_cell": second["cell"],
++                                "first_protocol": first["source_protocol"],
++                                "second_protocol": second["source_protocol"],
++                                "conditioning": "saved raw trajectories, not paired by shot index",
++                                "target_x_m": target,
++                                "saved_trajectory_samples_by_pattern": {
++                                    key: len(paths)
++                                    for key, paths in trajectory_sets.items()
++                                },
++                                "relative_path": str(path.relative_to(output_dir)),
++                                "sha256": _sha256(path),
++                            }
++                        )
++
+     return ledger
++
++
++def _render_pair_figures(
++    pair: dict[str, Any], output_dir: Path
++) -> list[dict[str, Any]]:
++    return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
++
++
++def render_selected_pair_figures(
++    pair: dict[str, Any],
++    output_dir: Path,
++    *,
++    figure_kinds: frozenset[str],
++) -> list[dict[str, Any]]:
++    """Export explicitly requested subset of pair figures without extra files."""
++    if not isinstance(figure_kinds, frozenset):
++        raise TypeError(
++            f"figure_kinds must be a frozenset[str], got {type(figure_kinds).__name__}"
++        )
++    if not figure_kinds:
++        raise ValueError("figure_kinds must not be empty")
++    unknown = figure_kinds - CLOSED_SELECTED_FIGURE_KINDS
++    if unknown:
++        raise ValueError(
++            f"unsupported figure_kinds: {sorted(unknown)}; "
++            f"must be a subset of {sorted(CLOSED_SELECTED_FIGURE_KINDS)}"
++        )
++    return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
+diff --git a/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py b/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py
+index 46b510833f..f35deb173e 100644
+--- a/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py
++++ b/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py
+@@ -106,9 +106,11 @@ def test_academic_density_row_gutter_has_readable_positive_clearance(
+     captured_figures: list[Any] = []
+     original_save = msf._save_figure
+ 
+-    def capturing_save(figure: Any, stem: Path) -> dict[str, Path]:
++    def capturing_save(
++        figure: Any, stem: Path, *args: Any, **kwargs: Any
++    ) -> dict[str, Path]:
+         captured_figures.append(figure)
+-        return original_save(figure, stem)
++        return original_save(figure, stem, *args, **kwargs)
+ 
+     monkeypatch.setattr(msf, "_save_figure", capturing_save)
+ 
+diff --git a/tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py b/tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py
+new file mode 100644
+index 0000000000..258c9bda56
+--- /dev/null
++++ b/tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py
+@@ -0,0 +1,290 @@
++"""Regression tests for covariance caption wrapping, header layout, and containment (issue #12132).
++
++Verifies that long covariance captions in academic density, academic overhead,
++and social overhead figures:
++1. Do not inflate the figure bounding box beyond the standard width.
++2. Are fully contained within the canvas width without right-edge clipping.
++3. Maintain positive vertical clearance between all header elements, legend, and subplots.
++4. Preserve all scientific text, font sizes, data, axis limits, and disclosures.
++"""
++
++from __future__ import annotations
++
++from pathlib import Path
++from typing import Any
++
++import numpy as np
++import pytest
++
++pytestmark = pytest.mark.unit
++
++
++def _load_plotting_deps() -> tuple[Any, Any, Any]:
++    try:
++        from matplotlib.backends.backend_agg import FigureCanvasAgg
++        import matplotlib.pyplot as plt
++        from PIL import Image
++
++        return FigureCanvasAgg, plt, Image
++    except (ImportError, OSError) as exc:
++        pytest.skip(f"Plotting dependencies unavailable: {exc}")
++
++
++def _synthetic_covariance_pair(
++    club_id: str = "pitching_wedge",
++    target_x_m: float = 125.0,
++    n_shots: int = 10_000,
++) -> tuple[
++    dict[str, Any], dict[str, Any], dict[str, list[list[float]]], dict[str, list[Any]]
++]:
++    """Construct pair references and sample data with a full covariance profile."""
++    from src.tools.shot_pattern_analysis.matched_matrix import noise_profile
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        _pair_condition_label,
++    )
++
++    spec = noise_profile("cov_facepath_negative", 1.0)
++    first_ref = {
++        "cell": f"{club_id}_lean0_curve1_rotation1_cov_facepath_negative",
++        "source_protocol": "original_control/1",
++        "config": {
++            "club": {"club_id": club_id, "shaft_lean_deg": 0.0},
++            "curve_scale": 1.0,
++            "noise": {
++                "standard_deviations": list(spec.standard_deviations),
++                "correlation": spec.correlation,
++            },
++            "n_shots": n_shots,
++        },
++        "summary": {"target_x_m": target_x_m},
++    }
++    second_ref = {
++        "cell": f"{club_id}_lean0_curve2_rotation1_cov_facepath_negative",
++        "source_protocol": "original_control/1",
++        "config": {
++            "club": {"club_id": club_id, "shaft_lean_deg": 0.0},
++            "curve_scale": 2.0,
++            "noise": {
++                "standard_deviations": list(spec.standard_deviations),
++                "correlation": spec.correlation,
++            },
++            "n_shots": n_shots,
++        },
++        "summary": {"target_x_m": target_x_m},
++    }
++
++    first_label = _pair_condition_label("curve_strength", first_ref)
++    second_label = _pair_condition_label("curve_strength", second_ref)
++
++    point_sets: dict[str, list[list[float]]] = {}
++    trajectory_sets: dict[str, list[Any]] = {}
++    for pattern in ("Straight", "Draw", "Fade"):
++        for label in (first_label, second_label):
++            key = f"{pattern} · {label}"
++            # 10 synthetic points around target
++            point_sets[key] = [
++                [target_x_m + float(i) * 0.1, float(i) * 0.05] for i in range(10)
++            ]
++            # 1 representative flight sample
++            trajectory_sets[key] = [
++                np.array([[0.0, 0.0], [target_x_m * 0.5, 1.0], [target_x_m, 0.0]])
++            ]
++
++    return first_ref, second_ref, point_sets, trajectory_sets
++
++
++def test_academic_density_covariance_caption_containment_and_separation(
++    tmp_path: Path,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """Academic paired-density figure with covariance captions must not expand or overlap."""
++    canvas_agg_cls, plt, img_cls = _load_plotting_deps()
++    import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        _condition_caption,
++        _pair_condition_label,
++        _write_pair_density_figure,
++    )
++
++    first, second, point_sets, _ = _synthetic_covariance_pair()
++    first_label = _pair_condition_label("curve_strength", first)
++    second_label = _pair_condition_label("curve_strength", second)
++
++    captured_figures: list[Any] = []
++    orig_save = msf._save_figure
++
++    def capturing_save(
++        figure: Any, stem: Path, *args: Any, **kwargs: Any
++    ) -> dict[str, Path]:
++        captured_figures.append(figure)
++        return orig_save(figure, stem, *args, **kwargs)
++
++    monkeypatch.setattr(msf, "_save_figure", capturing_save)
++
++    output_stem = tmp_path / "density_cov_test"
++    outputs = _write_pair_density_figure(
++        point_sets,
++        first=first,
++        second=second,
++        comparison="curve_strength",
++        first_label=first_label,
++        second_label=second_label,
++        target_x=125.0,
++        common_n=10,
++        output_stem=output_stem,
++        formats=("png",),
++    )
++
++    # 1. Output PNG width must not be expanded by uncontained caption text.
++    # Standard 16-inch wide figure at 300 dpi with tight bbox is ~4400-4750 px.
++    # Unpatched covariance caption expands width to 6115-6449 px.
++    img = img_cls.open(outputs["png"])
++    assert img.size[0] <= 4850, (
++        f"Exported academic density PNG width expanded to {img.size[0]} px (> 4850 px); "
++        "indicates unwrapped caption text extending beyond the canvas."
++    )
++
++    figure = captured_figures[0]
++    canvas_agg_cls(figure)
++    renderer = figure.canvas.get_renderer()
++
++    # 2. Text containment: all rendered text boxes must stay within canvas width.
++    for text_obj in figure.texts:
++        bbox = text_obj.get_window_extent(renderer)
++        assert bbox.x1 <= figure.bbox.width, (
++            f"Text overflows right canvas boundary: x1={bbox.x1:.1f} > "
++            f"fig_width={figure.bbox.width:.1f}. Text: {text_obj.get_text()[:60]}..."
++        )
++
++    # 3. Header vertical separation: find header texts and verify positive clearance.
++    header_texts = [t for t in figure.texts if t.get_position()[1] > 0.70]
++    # Sort top to bottom by y position
++    header_texts.sort(key=lambda t: t.get_window_extent(renderer).y1, reverse=True)
++    assert len(header_texts) >= 4, "Expected at least 4 header text elements"
++
++    for i in range(len(header_texts) - 1):
++        upper = header_texts[i]
++        lower = header_texts[i + 1]
++        b_upper = upper.get_window_extent(renderer)
++        b_lower = lower.get_window_extent(renderer)
++        clearance_pt = (b_upper.y0 - b_lower.y1) * 72.0 / figure.dpi
++        assert clearance_pt >= 0.0, (
++            f"Header text overlap between '{upper.get_text()[:30]}...' and "
++            f"'{lower.get_text()[:30]}...': clearance is {clearance_pt:.2f} pt < 0.0 pt."
++        )
++
++    # 4. Legend must not overlap subplots top
++    if figure.legends:
++        leg = figure.legends[0]
++        leg_box = leg.get_window_extent(renderer)
++        # Check against subplots upper boundary
++        for ax in figure.axes:
++            ax_box = ax.get_window_extent(renderer)
++            leg_clearance_pt = (leg_box.y0 - ax_box.y1) * 72.0 / figure.dpi
++            assert leg_clearance_pt >= 0.0, (
++                f"Legend overlaps subplot top: clearance is {leg_clearance_pt:.2f} pt < 0.0 pt."
++            )
++
++    # 5. Scientific text preservation: all words of condition caption must appear.
++    full_text = " ".join(t.get_text() for t in figure.texts)
++    for ref in (first, second):
++        cap = _condition_caption(ref)
++        # Check essential scientific tokens
++        for token in (
++            "Covariance Profile",
++            "Shaft Twist–Path Correlation",
++            "Lean 0°",
++            "Curve",
++        ):
++            assert token in full_text, (
++                f"Missing token '{token}' in rendered density figure"
++            )
++
++
++def test_academic_and_social_overhead_covariance_caption_containment_and_separation(
++    tmp_path: Path,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """Academic and social overhead figures must contain text without clipping or overlap."""
++    canvas_agg_cls, plt, img_cls = _load_plotting_deps()
++    import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        _condition_caption,
++        _create_pair_overhead_figure,
++        _pair_condition_label,
++        _write_pair_overhead_figure,
++    )
++
++    first, second, _, trajectory_sets = _synthetic_covariance_pair()
++    first_label = _pair_condition_label("curve_strength", first)
++    second_label = _pair_condition_label("curve_strength", second)
++
++    output_stem = tmp_path / "overhead_cov_test"
++    outputs = _write_pair_overhead_figure(
++        trajectory_sets,
++        first=first,
++        second=second,
++        comparison="curve_strength",
++        first_label=first_label,
++        second_label=second_label,
++        target_x=125.0,
++        output_stem=output_stem,
++        academic_formats=("png",),
++        include_social=True,
++    )
++
++    # 1. Academic overhead PNG width must not be expanded (> 4850 px).
++    # Unpatched overhead PNG is ~6367-6450 px.
++    img_acad = img_cls.open(outputs["png"])
++    assert img_acad.size[0] <= 4850, (
++        f"Exported academic overhead PNG width expanded to {img_acad.size[0]} px (> 4850 px)."
++    )
++
++    # 2. Social overhead PNG must be exactly 1920x1080 and contain all text without clipping.
++    img_social = img_cls.open(outputs["social_png"])
++    assert img_social.size == (1920, 1080), (
++        f"Unexpected social PNG size: {img_social.size}"
++    )
++
++    # Inspect rendered text bounds on social figure
++    _, social_fig = _create_pair_overhead_figure(
++        trajectory_sets,
++        first=first,
++        second=second,
++        comparison="curve_strength",
++        first_label=first_label,
++        second_label=second_label,
++        target_x=125.0,
++        social=True,
++    )
++    canvas_agg_cls(social_fig)
++    renderer_social = social_fig.canvas.get_renderer()
++
++    for text_obj in social_fig.texts:
++        bbox = text_obj.get_window_extent(renderer_social)
++        assert bbox.x1 <= social_fig.bbox.width, (
++            f"Social overhead text clipped on right edge: x1={bbox.x1:.1f} > "
++            f"width={social_fig.bbox.width:.1f}. Text: {text_obj.get_text()[:60]}..."
++        )
++
++    # Header separation in social figure
++    header_texts_social = [t for t in social_fig.texts if t.get_position()[1] > 0.65]
++    header_texts_social.sort(
++        key=lambda t: t.get_window_extent(renderer_social).y1, reverse=True
++    )
++    for i in range(len(header_texts_social) - 1):
++        upper = header_texts_social[i]
++        lower = header_texts_social[i + 1]
++        b_upper = upper.get_window_extent(renderer_social)
++        b_lower = lower.get_window_extent(renderer_social)
++        clearance_pt = (b_upper.y0 - b_lower.y1) * 72.0 / social_fig.dpi
++        assert clearance_pt >= 0.0, (
++            f"Social header overlap between '{upper.get_text()[:30]}...' and "
++            f"'{lower.get_text()[:30]}...': clearance is {clearance_pt:.2f} pt < 0.0 pt."
++        )
++
++    # 3. Disclosures preserved
++    full_text_social = " ".join(t.get_text() for t in social_fig.texts)
++    assert "Lateral display magnified 6×" in full_text_social
++    assert "Saved paths (not paired by shot index)" in full_text_social
++    plt.close(social_fig)
+diff --git a/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py b/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py
+new file mode 100644
+index 0000000000..8565a0b6b0
+--- /dev/null
++++ b/tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py
+@@ -0,0 +1,428 @@
++"""Unit and integration tests for render_selected_pair_figures (issue #12132).
++
++Verifies that:
++1. figure_kinds accepts only a non-empty frozenset from the closed 7-kind catalog.
++2. Returns identical ledger metadata and path naming to _render_pair_figures.
++3. Writes ONLY requested formats on disk, with no extra untracked files.
++4. Never calls pair statistics, bootstrap, simulation, or writes social density pattern cards.
++5. Correctly handles incomplete cells or missing flight samples.
++"""
++
++from __future__ import annotations
++
++import gzip
++import json
++from pathlib import Path
++from typing import Any
++
++import numpy as np
++import pytest
++
++pytestmark = pytest.mark.unit
++
++CLOSED_7_KINDS = frozenset(
++    {
++        "density_png",
++        "density_pdf",
++        "density_svg",
++        "overhead_png",
++        "overhead_pdf",
++        "overhead_svg",
++        "overhead_social_png",
++    }
++)
++
++
++def _check_plotting_deps() -> None:
++    try:
++        import matplotlib.pyplot  # noqa: F401
++        from PIL import Image  # noqa: F401
++    except (ImportError, OSError) as exc:
++        pytest.skip(f"Plotting dependencies unavailable: {exc}")
++
++
++def _write_synthetic_cell(
++    cell_dir: Path,
++    *,
++    club_id: str = "pitching_wedge",
++    lean_deg: float = 0.0,
++    curve_scale: float = 1.0,
++    target_x_m: float = 125.0,
++    profile: str = "shaft_only",
++    n_shots: int = 20,
++) -> dict[str, Any]:
++    """Create a fully valid synthetic cell directory matching pipeline expectations."""
++    import hashlib
++
++    cell_dir.mkdir(parents=True, exist_ok=True)
++    shots_file = cell_dir / "shots.csv.gz"
++    # Write CSV with header and valid shots
++    lines = ["shot_index,pattern,status,carry_x_m,carry_y_m"]
++    for i in range(n_shots):
++        for pattern in ("Straight", "Draw", "Fade"):
++            lines.append(f"{i},{pattern},supported,{target_x_m + i * 0.1},{i * 0.05}")
++    csv_bytes = "\n".join(lines).encode("utf-8")
++    with gzip.open(shots_file, "wb") as gz:
++        gz.write(csv_bytes)
++
++    flight_file = cell_dir / "flight_samples.json"
++    flight_data = {
++        "trajectories": {
++            pattern: [[[0.0, 0.0], [target_x_m * 0.5, 2.0], [target_x_m, 0.0]]]
++            for pattern in ("Straight", "Draw", "Fade")
++        }
++    }
++    flight_bytes = json.dumps(flight_data).encode("utf-8")
++    flight_file.write_bytes(flight_bytes)
++
++    # Write manifest
++    manifest = {
++        "files": {
++            "shots.csv.gz": hashlib.sha256(csv_bytes).hexdigest(),
++            "flight_samples.json": hashlib.sha256(flight_bytes).hexdigest(),
++        }
++    }
++    (cell_dir / "manifest.json").write_text(json.dumps(manifest))
++
++    cell_name = (
++        f"{club_id}_lean{int(lean_deg)}_curve{int(curve_scale)}_rotation1_{profile}"
++    )
++    return {
++        "cell": cell_name,
++        "source_root": str(cell_dir.parent),
++        "source_protocol": "original_control/1",
++        "status": "completed",
++        "config": {
++            "club": {"club_id": club_id, "shaft_lean_deg": lean_deg},
++            "curve_scale": curve_scale,
++            "noise": {
++                "standard_deviations": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
++                "correlation": None,
++            },
++            "n_shots": n_shots,
++        },
++        "summary": {"target_x_m": target_x_m},
++    }
++
++
++def _synthetic_pair_bundle(
++    root: Path,
++) -> tuple[dict[str, Any], Path, Path]:
++    """Create a pair bundle with valid completed sources."""
++    c1_name = "pitching_wedge_lean0_curve1_rotation1_shaft_only"
++    c2_name = "pitching_wedge_lean10_curve1_rotation1_shaft_only"
++    c1_dir = root / c1_name
++    c2_dir = root / c2_name
++    r1 = _write_synthetic_cell(c1_dir, lean_deg=0.0, curve_scale=1.0)
++    r2 = _write_synthetic_cell(c2_dir, lean_deg=10.0, curve_scale=1.0)
++    pair = {
++        "comparison_kind": "across_lean",
++        "first": r1,
++        "second": r2,
++        "target_x_m": 125.0,
++    }
++    return pair, c1_dir, c2_dir
++
++
++def test_render_selected_pair_figures_closed_kind_rejection(tmp_path: Path) -> None:
++    """render_selected_pair_figures must reject unknown, invalid, or empty figure_kinds."""
++    _check_plotting_deps()
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        render_selected_pair_figures,
++    )
++
++    pair, _, _ = _synthetic_pair_bundle(tmp_path / "sources")
++    out_dir = tmp_path / "out"
++
++    # 1. Empty frozenset rejected
++    with pytest.raises(ValueError, match="figure_kinds"):
++        render_selected_pair_figures(pair, out_dir, figure_kinds=frozenset())
++
++    # 2. Unknown kinds rejected
++    with pytest.raises(ValueError, match="figure_kinds"):
++        render_selected_pair_figures(
++            pair, out_dir, figure_kinds=frozenset({"density_bmp"})
++        )
++
++    # 3. Social density pattern cards (9) not in the closed set of 7
++    with pytest.raises(ValueError, match="figure_kinds"):
++        render_selected_pair_figures(
++            pair, out_dir, figure_kinds=frozenset({"density_straight_social_png"})
++        )
++
++    # 4. Non-frozenset types rejected
++    with pytest.raises((ValueError, TypeError)):
++        render_selected_pair_figures(
++            pair,
++            out_dir,
++            figure_kinds=["density_png"],  # type: ignore[arg-type]
++        )
++
++
++def test_render_selected_pair_figures_exact_metadata_and_path_parity(
++    tmp_path: Path,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """Selected renderer ledger entries and file paths match ordinary renderer exactly."""
++    _check_plotting_deps()
++    import matplotlib.figure
++    import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        _render_pair_figures,
++        render_selected_pair_figures,
++    )
++
++    recorded_saves: list[tuple[str, tuple[str, ...]]] = []
++
++    def lightweight_save(
++        figure: Any, stem: Path, formats: tuple[str, ...] = ("png", "pdf", "svg")
++    ) -> dict[str, Path]:
++        stem.parent.mkdir(parents=True, exist_ok=True)
++        kind_prefix = "density" if "density" in stem.name else "overhead"
++        recorded_saves.append((kind_prefix, formats))
++        outputs = {}
++        for fmt in formats:
++            p = stem.with_suffix(f".{fmt}")
++            p.write_bytes(f"mock-{kind_prefix}-{fmt}".encode())
++            outputs[fmt] = p
++        return outputs
++
++    monkeypatch.setattr(msf, "_save_figure", lightweight_save)
++
++    def fast_savefig(self: Any, fname: Any, *args: Any, **kwargs: Any) -> None:
++        p = Path(fname)
++        p.parent.mkdir(parents=True, exist_ok=True)
++        p.write_bytes(b"mock-social-png")
++
++    monkeypatch.setattr(matplotlib.figure.Figure, "savefig", fast_savefig)
++
++    def fake_social_density(
++        point_sets: Any, output_stem: Path, **kwargs: Any
++    ) -> dict[str, Path]:
++        out = {}
++        for pattern in ("straight", "draw", "fade"):
++            for ext in ("png", "pdf", "svg"):
++                p = output_stem.with_name(f"{output_stem.name}_{pattern}_social.{ext}")
++                p.parent.mkdir(parents=True, exist_ok=True)
++                p.write_bytes(f"{pattern}_{ext}".encode())
++                out[f"{pattern}_{ext}"] = p
++        return out
++
++    monkeypatch.setattr(msf, "write_pair_social_density", fake_social_density)
++
++    pair, _, _ = _synthetic_pair_bundle(tmp_path / "sources")
++    out_ordinary = tmp_path / "out_ordinary"
++    out_selected = tmp_path / "out_selected"
++
++    ordinary_ledger = _render_pair_figures(pair, out_ordinary)
++    assert len(ordinary_ledger) == 16, (
++        f"Expected 16 ordinary entries, got {len(ordinary_ledger)}"
++    )
++
++    selected_ledger = render_selected_pair_figures(
++        pair, out_selected, figure_kinds=CLOSED_7_KINDS
++    )
++    assert len(selected_ledger) == 7, (
++        f"Expected 7 selected entries, got {len(selected_ledger)}"
++    )
++
++    # Build maps by figure_kind
++    ord_by_kind = {item["figure_kind"]: item for item in ordinary_ledger}
++    sel_by_kind = {item["figure_kind"]: item for item in selected_ledger}
++
++    for kind in CLOSED_7_KINDS:
++        assert kind in sel_by_kind, f"Missing kind {kind} in selected ledger"
++        ord_item = ord_by_kind[kind]
++        sel_item = sel_by_kind[kind]
++
++        # Verify all metadata keys match exactly except file paths (different output dirs)
++        for key in ord_item:
++            if key == "sha256":
++                continue
++            assert ord_item[key] == sel_item[key], (
++                f"Mismatch for key {key} in kind {kind}"
++            )
++
++        # Relative paths and filenames match
++        assert sel_item["relative_path"] == ord_item["relative_path"]
++        assert (
++            Path(sel_item["relative_path"]).name == Path(ord_item["relative_path"]).name
++        )
++        assert len(sel_item["sha256"]) == 64
++
++        # Verify file exists on disk at expected relative path
++        rel_path = sel_item["relative_path"]
++        assert (out_selected / rel_path).exists()
++        assert (out_selected / rel_path).stat().st_size > 0
++
++    # Format routing verification
++    assert any(
++        kind == "density" and fmts == ("png", "pdf", "svg")
++        for kind, fmts in recorded_saves
++    )
++    assert any(
++        kind == "overhead" and fmts == ("png", "pdf", "svg")
++        for kind, fmts in recorded_saves
++    )
++
++
++def test_render_selected_pair_figures_format_routing_subset(
++    tmp_path: Path,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """Format routing requests only the specified formats without untracked extras."""
++    _check_plotting_deps()
++    import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        render_selected_pair_figures,
++    )
++
++    recorded_saves: list[tuple[str, tuple[str, ...]]] = []
++
++    def lightweight_save(
++        figure: Any, stem: Path, formats: tuple[str, ...] = ("png", "pdf", "svg")
++    ) -> dict[str, Path]:
++        stem.parent.mkdir(parents=True, exist_ok=True)
++        kind_prefix = "density" if "density" in stem.name else "overhead"
++        recorded_saves.append((kind_prefix, formats))
++        outputs = {}
++        for fmt in formats:
++            p = stem.with_suffix(f".{fmt}")
++            p.write_bytes(f"mock-{kind_prefix}-{fmt}".encode())
++            outputs[fmt] = p
++        return outputs
++
++    monkeypatch.setattr(msf, "_save_figure", lightweight_save)
++
++    pair, _, _ = _synthetic_pair_bundle(tmp_path / "sources")
++    out_dir = tmp_path / "out_subset"
++
++    subset = frozenset({"density_png", "overhead_pdf"})
++    ledger = render_selected_pair_figures(pair, out_dir, figure_kinds=subset)
++
++    assert len(ledger) == 2
++    kinds = {item["figure_kind"] for item in ledger}
++    assert kinds == {"density_png", "overhead_pdf"}
++
++    assert ("density", ("png",)) in recorded_saves
++    assert ("overhead", ("pdf",)) in recorded_saves
++
++    all_files = [f for f in out_dir.rglob("*") if f.is_file()]
++    assert len(all_files) == 2
++
++
++def test_render_selected_pair_figures_preserves_common_points_and_no_numerical_calls(
++    tmp_path: Path,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """Selected renderer preserves identical points and common indices without numerical recomputation."""
++    _check_plotting_deps()
++    import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        _render_pair_figures,
++        render_selected_pair_figures,
++    )
++
++    recorded_points: list[dict[str, Any]] = []
++
++    def spy_density(point_sets: Any, **kwargs: Any) -> dict[str, Path]:
++        recorded_points.append(dict(point_sets))
++        stem = kwargs["output_stem"]
++        p = stem.with_suffix(".png")
++        p.parent.mkdir(parents=True, exist_ok=True)
++        p.write_bytes(b"mock")
++        return {"png": p}
++
++    def fake_social(
++        point_sets: Any, output_stem: Path, **kwargs: Any
++    ) -> dict[str, Path]:
++        return {}
++
++    def dummy_overhead(*a: Any, **kw: Any) -> dict[str, Path]:
++        output_stem = kw["output_stem"]
++        p = output_stem.with_suffix(".png")
++        p.parent.mkdir(parents=True, exist_ok=True)
++        p.write_bytes(b"dummy")
++        return {"png": p}
++
++    monkeypatch.setattr(msf, "_write_pair_density_figure", spy_density)
++    monkeypatch.setattr(msf, "write_pair_social_density", fake_social)
++    monkeypatch.setattr(msf, "_write_pair_overhead_figure", dummy_overhead)
++
++    pair, _, _ = _synthetic_pair_bundle(tmp_path / "sources")
++
++    _render_pair_figures(pair, tmp_path / "ord")
++    render_selected_pair_figures(
++        pair, tmp_path / "sel", figure_kinds=frozenset({"density_png"})
++    )
++
++    assert len(recorded_points) == 2
++    ord_pts = recorded_points[0]
++    sel_pts = recorded_points[1]
++    assert ord_pts.keys() == sel_pts.keys()
++    for k in ord_pts:
++        assert ord_pts[k] == sel_pts[k]
++
++
++def test_render_selected_pair_figures_selective_generation_no_extra_files(
++    tmp_path: Path,
++) -> None:
++    """Only requested figure kinds are written to disk; no extra untracked files."""
++    _check_plotting_deps()
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        render_selected_pair_figures,
++    )
++
++    pair, _, _ = _synthetic_pair_bundle(tmp_path / "sources")
++    out_dir = tmp_path / "out_single"
++
++    # Select single kind: density_png
++    selected_kinds = frozenset({"density_png"})
++    ledger = render_selected_pair_figures(pair, out_dir, figure_kinds=selected_kinds)
++
++    assert len(ledger) == 1
++    assert ledger[0]["figure_kind"] == "density_png"
++
++    # Check disk contents
++    all_files = list(out_dir.rglob("*"))
++    actual_files = [f for f in all_files if f.is_file()]
++    assert len(actual_files) == 1, f"Expected exactly 1 file, found {actual_files}"
++    assert actual_files[0].name.endswith("_density.png")
++
++
++def test_render_selected_pair_figures_overhead_social_only(tmp_path: Path) -> None:
++    """Requesting only overhead_social_png writes only that single file."""
++    _check_plotting_deps()
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        render_selected_pair_figures,
++    )
++
++    pair, _, _ = _synthetic_pair_bundle(tmp_path / "sources")
++    out_dir = tmp_path / "out_overhead_social"
++
++    selected_kinds = frozenset({"overhead_social_png"})
++    ledger = render_selected_pair_figures(pair, out_dir, figure_kinds=selected_kinds)
++
++    assert len(ledger) == 1
++    assert ledger[0]["figure_kind"] == "overhead_social_png"
++
++    all_files = [f for f in out_dir.rglob("*") if f.is_file()]
++    assert len(all_files) == 1
++    assert all_files[0].name.endswith("_overhead_social.png")
++
++
++def test_render_selected_pair_figures_incomplete_returns_empty(tmp_path: Path) -> None:
++    """Pair with uncompleted status returns empty list without error."""
++    _check_plotting_deps()
++    from src.tools.shot_pattern_analysis.matched_supplement_figures import (
++        render_selected_pair_figures,
++    )
++
++    pair, _, _ = _synthetic_pair_bundle(tmp_path / "sources")
++    pair["first"]["status"] = "failed"
++    out_dir = tmp_path / "out_failed"
++
++    ledger = render_selected_pair_figures(
++        pair, out_dir, figure_kinds=frozenset({"density_png"})
++    )
++    assert ledger == []

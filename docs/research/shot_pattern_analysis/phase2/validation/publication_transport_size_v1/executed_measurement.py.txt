@@ -1,0 +1,13 @@
+import subprocess,json,datetime,hashlib
+from pathlib import Path
+base='10c7d61aa686e456b7962f1d9aa9ecfda4e8405f'
+head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+p=subprocess.Popen(['git','pack-objects','--stdout','--revs','--threads=1','--window=0','--compression=1'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+p.stdin.write((head+'\n^'+base+'\n').encode());p.stdin.close()
+size=0;sha=hashlib.sha256()
+while data:=p.stdout.read(1024*1024): size+=len(data);sha.update(data)
+error=p.stderr.read().decode();rc=p.wait()
+record={'created_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'head':head,'excluded_base':base,'command':'git pack-objects --stdout --revs --threads=1 --window=0 --compression=1','pack_bytes':size,'pack_sha256':sha.hexdigest(),'exit_code':rc,'stderr':error,'scope':'Committed history only; includes saved data archives and evidence, excludes untracked live publication graphics. Complete non-delta Git pack measurement, not remote push acceptance; default negotiated push may differ. No network or Git reference mutation.'}
+Path('/tmp/p2-publication-pack-size-nondelta.json').write_text(json.dumps(record,indent=2)+'\n')
+print(json.dumps(record,indent=2))
+raise SystemExit(rc)

@@ -1,0 +1,24 @@
+{
+  "excluded": [
+    "final_visual_acceptance",
+    "final_data_acceptance",
+    "supplemental_execution_authorization"
+  ],
+  "log_sha256": "12ccf7eddd3c696da2da7c265acf927f9c050aa1328f0a2ae12b371594a33000",
+  "reviewed_checkpoint": "559c345e8c",
+  "schema": "independent-postprocessing-review/1",
+  "source_sha256": {
+    "matched_lean_control.py": "be60d94559eec95279d685b0cb0b9bc030c9ffeb165a2e724b932b6833f82912",
+    "matched_report.py": "3e190b43c4c8da337eeb73ea8825d3d69c128f684931f15406e02f243c21e94b",
+    "matched_supplement_pipeline.py": "75fef91faa7d60e537fe78ee253f2ec2f22f953a83122f7d42fabf611508120b",
+    "matched_supplement_report.py": "493a7584ec5ffd938070cc1470d565af66610b9746133a6095ee66d5fe860a34"
+  },
+  "status": "pair_contracts_pass_pipeline_fixes_pending",
+  "test_exit_code": 0,
+  "test_modules": [
+    "test_matched_explicit_source_pair.py",
+    "test_matched_supplement_report.py",
+    "test_matched_lean_control.py",
+    "test_matched_report.py"
+  ]
+}

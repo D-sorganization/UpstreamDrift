@@ -1,0 +1,38 @@
+{
+  "actual_schema_compatible": true,
+  "resolved_n": 24,
+  "selected_pair_n": 12,
+  "selection_order_invariant": true,
+  "claims_identical_for_empty_vs_unrelated_input": true,
+  "actual_selected_sg_ranges": {
+    "driver/Draw": {
+      "minimum": 2.6911773453713884e-05,
+      "maximum": 0.0077976550468906
+    },
+    "driver/Fade": {
+      "minimum": -0.0014605392519033656,
+      "maximum": 0.00023438701772961358
+    },
+    "seven_iron/Draw": {
+      "minimum": -0.0013557199204084474,
+      "maximum": -0.00028827142960523414
+    },
+    "seven_iron/Fade": {
+      "minimum": 0.0008933617862555983,
+      "maximum": 0.0025816340316445357
+    },
+    "pitching_wedge/Draw": {
+      "minimum": 9.508286074337285e-05,
+      "maximum": 0.011117100245477964
+    },
+    "pitching_wedge/Fade": {
+      "minimum": -0.010965967983168904,
+      "maximum": 0.0002919227777893537
+    }
+  },
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "001e66e7703718e0bb426747e684a271dfe804532887df713bb4565734c4c058",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "128f0094e4bd7da7bd4fc80bb389cf5469a2713248d418f2cd7a00551b4f4a28",
+    "tests/research/test_shot_pattern_final_report.py": "d214c277a2567de2e2869f8b886297b4236c69e6223982ed494b98160b168019"
+  }
+}

@@ -1,0 +1,185 @@
+[
+  {
+    "group": "pairs",
+    "record": {
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ddfb29baa84601abc460d9a1f7134aa6bd60a1a108d275c3b2ba74ddcdd21f4e",
+          "source_csv_sha256": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "7f8cf74171af868d1aafc01a4e911b38cb59639dcf6bb7a7001056b128fd545a",
+          "source_csv_sha256": "3021fa44d96c9fb4f623cd0d3aac17f9f0f1fd41ec060ba60bcc128ec25742e8"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000
+    },
+    "text": "0.04 0.08 Density Lean 0\u00b0  (n=9,999) 55 60 65 70 75 80 85 90 95 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.04 0.08 Density Lean 10\u00b0  (n=9,999) 55 60 65 70 75 80 85 90 95 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.00 0.01 0.02 0.03 0.04 0.05 Endpoint Probability Density (m\u207b\u00b2) Pitching Wedge: Shot Dispersion Draw: Varying Across Lean in Panels \u00b7 Fixed: Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0 Protocol: Lean 0\u00b0: original_control/1 \u00b7 Lean 10\u00b0: original_control/1  | Matched Target: 77.40 m downrange (Lean 0\u00b0: Fixed-Target Control \u00b7 Lean 10\u00b0: Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Same Shot Indices Supported in All Six Populations  |  Scales: Shared Within This Figure; Other Pattern Figures May Differ  |  Valid/Total: Lean 0\u00b0 9,999/10,000 valid; Lean 10\u00b0 9,999/10,000 valid Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Lean 0\u00b0 600/9,999; Lean 10\u00b0 600/9,999. Density, HDR, and marginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR. Simulated-Sample Highest-Density Regions 50% HDR 80% HDR 95% HDR Target",
+    "source": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v5/supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean10_curve1_rotation1_combined2_fa53d1eb03_density_draw_social.svg",
+    "sha256": "2e2ed44bba9dba8e156f3cf996a9abf9c885facda95c795c3078e5f22abb8708"
+  },
+  {
+    "group": "pairs",
+    "record": {
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ddfb29baa84601abc460d9a1f7134aa6bd60a1a108d275c3b2ba74ddcdd21f4e",
+          "source_csv_sha256": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "9f4cd6a600960aad2531ba34b6c7f5113ddc1a5b791eb0c259fee5cf0063c294",
+          "source_csv_sha256": "a2cf64839fb60bbe58e15573c9864017ea4ad9acbd11d2c28ab86b4baae372b4"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 9999,
+      "total_n_per_population": 10000
+    },
+    "text": "0.04 0.08 Density Lean 0\u00b0  (n=9,999) 55 60 65 70 75 80 85 90 95 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.04 0.08 Density Lean 5\u00b0  (n=9,999) 55 60 65 70 75 80 85 90 95 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.00 0.01 0.02 0.03 0.04 0.05 Endpoint Probability Density (m\u207b\u00b2) Pitching Wedge: Shot Dispersion Draw: Varying Across Lean in Panels \u00b7 Fixed: Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0 Protocol: Lean 0\u00b0: original_control/1 \u00b7 Lean 5\u00b0: original_control/1  | Matched Target: 77.40 m downrange (Lean 0\u00b0: Fixed-Target Control \u00b7 Lean 5\u00b0: Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Same Shot Indices Supported in All Six Populations  |  Scales: Shared Within This Figure; Other Pattern Figures May Differ  |  Valid/Total: Lean 0\u00b0 9,999/10,000 valid; Lean 5\u00b0 9,999/10,000 valid Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Lean 0\u00b0 600/9,999; Lean 5\u00b0 600/9,999. Density, HDR, and marginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR. Simulated-Sample Highest-Density Regions 50% HDR 80% HDR 95% HDR Target",
+    "source": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v5/supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean5_curve1_rotation1_combined2_a3193a32ce_density_draw_social.svg",
+    "sha256": "9eaaa2e139ab2d093f02901e833670c48cd5e46f7b3a00f265b12d767a275fdb"
+  },
+  {
+    "group": "pairs",
+    "record": {
+      "source_protocols": [
+        "original_control/1",
+        "original_control/1"
+      ],
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "a10d87e329e46e4edaf49b860f38b07dffbbd1acd80e755ccb3309b124389eff",
+          "source_csv_sha256": "75ba66e1a9463335ad422cc5ae1ca01c878a7cb2361bcea4d990c4dd839f424d"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "5026ad1ea74dfee75263e2156afe7904f18775030d8abb2e0b3a0a4a8cf92e52",
+          "source_csv_sha256": "05cdfac88d6a7472ddf29155c8717c89d1ab9723e2e3802e7480d712e690badc"
+        }
+      ],
+      "target_x_m": 77.40247724866299,
+      "common_supported_n": 10000,
+      "total_n_per_population": 10000
+    },
+    "text": "0.2 0.4 Density Lean 0\u00b0  (n=10,000) 73 74 75 76 77 78 79 80 81 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.2 0.4 Density Lean 10\u00b0  (n=10,000) 73 74 75 76 77 78 79 80 81 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.0 0.5 1.0 1.5 2.0 Endpoint Probability Density (m\u207b\u00b2) Pitching Wedge: Shot Dispersion Draw: Varying Across Lean in Panels \u00b7 Fixed: Curve \u00d71 \u00b7 Shaft Twist SD 1\u00b0 Protocol: Lean 0\u00b0: original_control/1 \u00b7 Lean 10\u00b0: original_control/1  | Matched Target: 77.40 m downrange (Lean 0\u00b0: Fixed-Target Control \u00b7 Lean 10\u00b0: Fixed-Target Control)  |  Delivery Noise: Shaft Only  |  Population: Same Shot Indices Supported in All Six Populations  |  Scales: Shared Within This Figure; Other Pattern Figures May Differ  |  Valid/Total: Lean 0\u00b0 10,000/10,000 valid; Lean 10\u00b0 10,000/10,000 valid Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Lean 0\u00b0 600/10,000; Lean 10\u00b0 600/10,000. Density, HDR, and marginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR. Simulated-Sample Highest-Density Regions 50% HDR 80% HDR 95% HDR Target",
+    "source": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v5/supplement_report_v1/figures/comparisons/across_lean_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean10_curve1_rotation1_shaft_only_9a7f95d848_density_draw_social.svg",
+    "sha256": "acab5c5c0fef4d3f9c35d26c831ded01110d2214d808af9ae7ac123c50b556a5"
+  },
+  {
+    "group": "cells",
+    "record": {
+      "source_protocol": "pw-primary-face-bounds/1",
+      "config": {
+        "n_shots": 10000
+      },
+      "summary": {
+        "target_x_m": 77.40247724866299,
+        "summary": {
+          "Straight": {
+            "supported_n": 9999
+          },
+          "Draw": {
+            "supported_n": 9999
+          },
+          "Fade": {
+            "supported_n": 9999
+          }
+        }
+      }
+    },
+    "text": "0.06 0.12 Density Straight  (n=9,999) 63 66 69 72 75 78 81 84 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.06 0.12 Density Draw  (n=9,999) 63 66 69 72 75 78 81 84 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.06 0.12 Density Fade  (n=9,999) 63 66 69 72 75 78 81 84 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 Endpoint Probability Density (m\u207b\u00b2) Pitching Wedge: Shot Dispersion Pitching Wedge \u00b7 Lean 0\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 1\u00b0 Protocol: pw-primary-face-bounds/1  |  Matched Target: 77.40 m downrange (Within-Lean Nominal Target)  |  Delivery Noise: Combined 1 (Path SD 0.5\u00b0, Speed SD 1 mph, Strike SD 0.25 in on Each Axis)  |  Population: Individually Supported Endpoints by Physical Pattern  |  Valid/Total: Straight 9,999/10,000 valid; Draw 9,999/10,000 valid; Fade 9,999/10,000 valid Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999. Density, HDR, and marginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR. Simulated-Sample Highest-Density Regions 50% HDR 80% HDR 95% HDR Target",
+    "source": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v5/supplement_report_v1/figures/cells/pitching_wedge_lean0_curve2_rotation1_combined1_dd970d80dc_density_social.svg",
+    "sha256": "43bc1bce5932c7d19df5daa30fff00a80f909ff851de5ec29877c312cb038202"
+  },
+  {
+    "group": "cells",
+    "record": {
+      "source_protocol": "pw-control-face-bounds/1",
+      "config": {
+        "n_shots": 10000
+      },
+      "summary": {
+        "target_x_m": 77.40247724866299,
+        "summary": {
+          "Straight": {
+            "supported_n": 9999
+          },
+          "Draw": {
+            "supported_n": 9999
+          },
+          "Fade": {
+            "supported_n": 9999
+          }
+        }
+      }
+    },
+    "text": "0.04 0.08 Density Straight  (n=9,999) 55 60 65 70 75 80 85 90 95 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.04 0.08 Density Draw  (n=9,999) 55 60 65 70 75 80 85 90 95 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.04 0.08 Density Fade  (n=9,999) 55 60 65 70 75 80 85 90 95 Downrange Endpoint (m) \u22124 \u22122 0 2 4 Lateral Endpoint (m; Right Positive) 0.15 0.30 Density 0.00 0.01 0.02 0.03 0.04 0.05 Endpoint Probability Density (m\u207b\u00b2) Pitching Wedge: Shot Dispersion Pitching Wedge \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 1\u00b0 Protocol: pw-control-face-bounds/1  |  Matched Target: 77.40 m downrange (Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Individually Supported Endpoints by Physical Pattern  |  Valid/Total: Straight 9,999/10,000 valid; Draw 9,999/10,000 valid; Fade 9,999/10,000 valid Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Straight 600/9,999; Draw 600/9,999; Fade 600/9,999. Density, HDR, and marginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR. Simulated-Sample Highest-Density Regions 50% HDR 80% HDR 95% HDR Target",
+    "source": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v5/supplement_report_v1/figures/cells/pitching_wedge_lean5_curve2_rotation1_combined2_ce0581aa48_density_social.svg",
+    "sha256": "7ed4bbf6df114b151f8a4aeb85167333991b8619748b089ceee4588c75721cd7"
+  },
+  {
+    "group": "cells",
+    "record": {
+      "source_protocol": "driver-control-speed-bounds/1",
+      "config": {
+        "n_shots": 10000
+      },
+      "summary": {
+        "target_x_m": 178.94875782337786,
+        "summary": {
+          "Straight": {
+            "supported_n": 9974
+          },
+          "Draw": {
+            "supported_n": 9974
+          },
+          "Fade": {
+            "supported_n": 9974
+          }
+        }
+      }
+    },
+    "text": "0.015 0.030 Density Straight  (n=9,974) 60 80 100 120 140 160 180 200 220 Downrange Endpoint (m) \u221220 \u221210 0 10 20 30 40 Lateral Endpoint (m; Right Positive) 0.03 0.06 Density 0.015 0.030 Density Draw  (n=9,974) 60 80 100 120 140 160 180 200 220 Downrange Endpoint (m) \u221220 \u221210 0 10 20 30 40 Lateral Endpoint (m; Right Positive) 0.03 0.06 Density 0.015 0.030 Density Fade  (n=9,974) 60 80 100 120 140 160 180 200 220 Downrange Endpoint (m) \u221220 \u221210 0 10 20 30 40 Lateral Endpoint (m; Right Positive) 0.03 0.06 Density 0.0000 0.0005 0.0010 0.0015 0.0020 0.0025 Endpoint Probability Density (m\u207b\u00b2) Driver: Shot Dispersion Driver \u00b7 Lean 5\u00b0 \u00b7 Curve \u00d72 \u00b7 Shaft Twist SD 1\u00b0 Protocol: driver-control-speed-bounds/1  |  Matched Target: 178.95 m downrange (Fixed-Target Control)  |  Delivery Noise: Combined 2 (Path SD 0.5\u00b0, Speed SD 2 mph, Strike SD 0.25 in on Each Axis)  |  Population: Individually Supported Endpoints by Physical Pattern  |  Valid/Total: Straight 9,974/10,000 valid; Draw 9,974/10,000 valid; Fade 9,974/10,000 valid Model-Conditional Simulation \u2022 Carry Only \u2022 Not Calibrated Player Precision. Colored Dots Shown/Valid: Straight 600/9,974; Draw 600/9,974; Fade 600/9,974. Density, HDR, and marginals use every valid endpoint. Shared axes and density scale; contours are simulated-sample HDR. Simulated-Sample Highest-Density Regions 50% HDR 80% HDR 95% HDR Target",
+    "source": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v5/supplement_report_v1/figures/cells/driver_lean5_curve2_rotation1_combined2_deedbe331c_density_social.svg",
+    "sha256": "6140fc1dd1991aa9c35aad8a968abe9d6372d74a52ce7a190d2d42e6a7147911"
+  }
+]

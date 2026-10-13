@@ -1,0 +1,52 @@
+{
+  "after": {
+    "draw_png": {
+      "rgba_sha256": "2d90fc8437d69705a183e2dd30f1520fa96b6266945cc5fb783f1dea88a94471",
+      "size": [
+        2992,
+        3976
+      ]
+    },
+    "fade_png": {
+      "rgba_sha256": "12abdb95bf8ed2f35fed0f6e5ee9a3b276abf8f114dcab2d06116e1ae26cca8a",
+      "size": [
+        2992,
+        3976
+      ]
+    },
+    "straight_png": {
+      "rgba_sha256": "27b3ca00e6c4ff7f81cd1e1b19e436faeefbba013982777bc4d5e0d8c5d31cad",
+      "size": [
+        2992,
+        3976
+      ]
+    }
+  },
+  "before": {
+    "draw_png": {
+      "rgba_sha256": "2d90fc8437d69705a183e2dd30f1520fa96b6266945cc5fb783f1dea88a94471",
+      "size": [
+        2992,
+        3976
+      ]
+    },
+    "fade_png": {
+      "rgba_sha256": "12abdb95bf8ed2f35fed0f6e5ee9a3b276abf8f114dcab2d06116e1ae26cca8a",
+      "size": [
+        2992,
+        3976
+      ]
+    },
+    "straight_png": {
+      "rgba_sha256": "27b3ca00e6c4ff7f81cd1e1b19e436faeefbba013982777bc4d5e0d8c5d31cad",
+      "size": [
+        2992,
+        3976
+      ]
+    }
+  },
+  "historical_source_sha256": "61ab226ee31d9d36b4e81024c7de8875d68ccb2e085857eea91a932cee8b9efb",
+  "input": "20 deterministic paired points per pattern/condition: x=linspace(175,185,20)+pattern_index+condition_index*0.3; y=linspace(-5,5,20)+condition_index-pattern_index; labels A/B; target=(180,3.5); total_n=30; protocol original/control; modes Within-Lean/Fixed.",
+  "renderer": "write_pair_social_density -> write_academic_dispersion_figure; MPLBACKEND=Agg; PNG decoded to RGBA bytes",
+  "schema": "pair-social-rgba-parity/1"
+}

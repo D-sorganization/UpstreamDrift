@@ -1,0 +1,24 @@
+{
+  "status": "producer_catalog_matches_independent_predeclared_inventory",
+  "results": [
+    {
+      "protocol": "pw-primary-face-bounds/1",
+      "stage": "final",
+      "unique_cells": 18,
+      "scope": "Per-protocol unique executions; control aliases require separate verification"
+    },
+    {
+      "protocol": "pw-control-face-bounds/1",
+      "stage": "final",
+      "unique_cells": 4,
+      "scope": "Per-protocol unique executions; control aliases require separate verification"
+    },
+    {
+      "protocol": "driver-control-speed-bounds/1",
+      "stage": "final",
+      "unique_cells": 4,
+      "scope": "Per-protocol unique executions; control aliases require separate verification"
+    }
+  ],
+  "catalog_sha256": "2486f64e5126cc55c92a2d2d2b3bb9e28b3e41dfc60f23d08a5f0099c8df10d4"
+}

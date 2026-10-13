@@ -1,0 +1,32 @@
+{
+  "status": "intentional_stop_of_superseded_reporting_run",
+  "time_utc": "2026-10-10T07:27:56.956385+00:00",
+  "pid": 2509013,
+  "command": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "-m",
+    "src.tools.shot_pattern_analysis.matched_supplement_pipeline",
+    "--original-primary",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1",
+    "--original-control",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1",
+    "--pw-primary-face-bounds",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+    "--pw-control-face-bounds",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face",
+    "--driver-control-speed-bounds",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed",
+    "--inventory",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json",
+    "--transition-receipt",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/source_transition_supplement.json",
+    "--transition-sha256",
+    "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
+    "--output-dir",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1",
+    ""
+  ],
+  "reason": "Confirmed missing across-lean relative interactions, fixed-decimal precision defect, and rejected density tick layouts require a full fresh publication. All384 comparisons are computed, but only28 comparison PNGs exist; hundreds of known-obsolete figures remain. Stop avoids finishing unusable output. No shot simulations are stopped or changed. Partial output remains unaccepted and will be preserved.",
+  "intended_signal": "SIGTERM",
+  "replacement_scope": "All original studies and all384 comparisons retained; no reduced scientific scope."
+}

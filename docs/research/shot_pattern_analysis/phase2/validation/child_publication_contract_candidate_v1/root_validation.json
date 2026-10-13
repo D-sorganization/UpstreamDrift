@@ -1,0 +1,10 @@
+{
+  "checked_utc": "2026-10-10T13:43:19.746175+00:00",
+  "candidate_commit": "0654993415",
+  "checkpoint_sha256": "982256a72c14c86dfc60f230fcc86059ad30a2e37a4739c57c6b287dd8491a92",
+  "all_five_source_hashes_independently_verified": true,
+  "tests": "55 passed, 6 warnings in17.59s; terminal exit0",
+  "scope": "Core contract, review gate and ordinary report compatibility; CLI/selected renderer/production output remain unqualified",
+  "production_outputs_modified": false,
+  "main_source_integrated": false
+}

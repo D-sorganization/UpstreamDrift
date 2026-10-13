@@ -1,0 +1,36 @@
+{
+  "schema": "legacy-gear-sign-validation/1",
+  "issue": 12006,
+  "scope": "Isolated bounds worktree; original active numerical sources untouched",
+  "old_helper_commit": "22747504f3f529a0a9b46460a6c319674484028b",
+  "old_helper_sha256": "06a79b5414370f502d32f36f99ba04eabb5ff2f6dd6587f5f284ea4beba9eca9",
+  "current_source_sha256": {
+    "src/shared/python/physics/impact_model/utils.py": "6653a01ae8412b7fc52942267033ad03dc459b2f267ce1c5a3cab7d08a5ed4b3",
+    "tests/unit/physics/test_legacy_gear_flight_direction.py": "efc671d7a529a15b7b9706c3e47896faf7f597250c9f6c492f56781c2de4dacb",
+    "tests/unit/physics/test_impact_physics_value_assertions.py": "433e5093a1fed5cd44ee43fe56dffdbc98ae4fadd379f5f8da343d0b731c915b",
+    "tests/unit/shared_python/test_impact_model.py": "8dd35a1e80ff2b188e43ecc99beaf639658a545d5382694547c8e1c85d3315af"
+  },
+  "tests": {
+    "pre_fix_new_regressions_failed": 9,
+    "final_relevant_suite_passed": 58,
+    "native_flight_tests_executed": true,
+    "final_skipped": 0,
+    "red_log_sha256": "be51fda13fa5d840e8ea75875deaf7c1c49a353d5e0752fc707946ccb02c5879",
+    "green_log_sha256": "97fcb2293532dc92a0294e08e89a9b7266d28c33a99c55ef309240e6c4325639",
+    "post_test_change": "Ruff formatting only in regression test; production source unchanged"
+  },
+  "ruff": "pass",
+  "mypy_production_source": "pass; Python3.12 fresh cache, follow-imports=silent",
+  "manual_governance": "structural pass; release remains blocked-inventory-required, zero registered calculations",
+  "latex": {
+    "source": "docs/research/shot_pattern_analysis/phase2/review_followups/LEGACY_GEAR_SIGN_REFERENCE.tex",
+    "generated_by": "Pandoc",
+    "compilation": "unverified: built-in Tectonic could not fetch uncached bundle; source subsequently regenerated with explicit math notation",
+    "pdf_generated": false
+  },
+  "limitations": [
+    "Legacy magnitude remains uncalibrated heuristic; not coupled rotational contact",
+    "Sign correction is RH frame convention, not validation of equipment or all impact physics",
+    "Independent review passed original nine tests; added boundary test included in final58"
+  ]
+}

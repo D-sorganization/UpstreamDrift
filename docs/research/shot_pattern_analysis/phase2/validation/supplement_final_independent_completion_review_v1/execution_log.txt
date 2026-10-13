@@ -1,0 +1,11 @@
+{
+  "status": "accepted_complete_saved_data_and_packaging_evidence",
+  "total_rows": 780000,
+  "supported_rows": 779712,
+  "unsupported_rows_retained": 288,
+  "alias_review": {
+    "verified_aliases": 4,
+    "new_executions": 0,
+    "reference_file_sha256": "dcd7097475a1a0b67ceceaf1509e4c780655c7ec5f0cd0e041e25fcdcad2b87b"
+  }
+}

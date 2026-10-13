@@ -1,0 +1,29 @@
+{
+  "renderer_sha256": "7527d00ff5e6ca5913bbf14cd14e7d73e6d323725d104a9bdb074b5b4ea63da3",
+  "cell": "driver_lean5_curve2_rotation2_combined2",
+  "rows": {
+    "Straight": 9940,
+    "Draw": 9940,
+    "Fade": 9940
+  },
+  "measurement": [
+    {
+      "pattern": "Straight",
+      "main_tick": "180",
+      "marginal_tick": "0.00",
+      "gap_points": -2.600902460818602
+    },
+    {
+      "pattern": "Draw",
+      "main_tick": "180",
+      "marginal_tick": "0.00",
+      "gap_points": -2.600902460818643
+    },
+    {
+      "pattern": "Fade",
+      "main_tick": "180",
+      "marginal_tick": "0.00",
+      "gap_points": -2.600902460818561
+    }
+  ]
+}

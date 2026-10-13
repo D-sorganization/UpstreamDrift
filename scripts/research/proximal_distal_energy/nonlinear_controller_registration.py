@@ -14,7 +14,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
-REPORT_PATH = ARTICLE / "data/nonlinear_controller_comparison_registration.json"
+REPORT_PATH = (
+    ARTICLE / "data/nonlinear_controller_comparison_registration_20261011.json"
+)
 ENVIRONMENT_LOCK_PATH = ROOT / "requirements.lock"
 SCHEMA_VERSION = "proximal-distal-nonlinear-controller-registration/v2"
 

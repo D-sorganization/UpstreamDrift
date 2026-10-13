@@ -1,0 +1,546 @@
+{
+  "scope": "First12 completed curve pairs; not full publication acceptance",
+  "comparison_sha256": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+  "pairs": [
+    {
+      "index": 1,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "e8e11945d1cf51032635d152d82764509ff4b4b558b441d45833a3c9972a8e82",
+          "source_csv_sha256": "c1a8b1311aea7ab76c5c02c2319cf67bc67b8578504650cc574de55568ca0349"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "959c51c0b1c5a5934a3e95330b2f16f7df74e0b32536c66c7f622119c1781329",
+          "source_csv_sha256": "865ee7d36bd2e16b1cf9977bcbcc444c6d6298d1138482625c4a2847312a52c6"
+        }
+      ],
+      "common_supported_n": 9999,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density.pdf": "8c214259474cf7ab9c964109007478a7751d9c17283c8847b36033ffbdb910ab",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density.png": "ad904f6899bfcda2ed298cd9801b71fe1a13766735310b84f6e90682ed3e480a",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density.svg": "eaacf3f11c11a396d60916a067426534e60a4a47f480d079c7ba86a74ed48325",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_draw_social.pdf": "c05012a92c4c65918ebab94670850fb3e7b06d1664cb18f9b2236c68fef84ddb",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_draw_social.png": "8f76d789fc98eb1a236c5b0e2cf5731a9def1573b96411da4b14e8babcfff0b0",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_draw_social.svg": "c69924e595947934bdc1bba202c92059d7805c2c401b6604026d913d21f8790d",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_fade_social.pdf": "173bb0aa08107b13cb39702398f83013ce6acefaae0d8cf8c3f87a37ccb47e85",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_fade_social.png": "af4bc9de92b28b1a6906abcc76aaf422b6de40568854b1b9ff70b2e04579aa53",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_fade_social.svg": "06b3d04027f7131aa1501b806c25e8d27ffc3df4a93649f058f82d17d6201486",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_straight_social.pdf": "4659bc5e55b392b6c376e02f81acfd2b7e43e94f018f485ea3d0d5789a70c444",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_straight_social.png": "f4438bbc97f7ad6e860a62e03926c219126092fd8272a23b8d073f41b732e936",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_density_straight_social.svg": "007a594ac37ff19d497511262a69c352c9d33d0d10e24f3ad3dfb426ad49a724",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_overhead.pdf": "db5745e09b8d3826ed8d726aac0c49fc89026c2015d8d28b83753d0365d62a40",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_overhead.png": "bf3c47290072c224cf93d86f9b4098b34e04c110c85a22a2434d65d0e50f6ba8",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_overhead.svg": "21c822621554a2df3b73cb2694e71ad3ee8c4c634a3519e00064190d503a8423",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined1_vs_pitching_wedge_lean0_curve2_rotation1_combined1_88f723a013_overhead_social.png": "711b28a8b0ad42b315bde1cf3644d80213a4bfeb73c1dcc58aaedb979c4a4c7a"
+      },
+      "contact_sha256": "e94a3176e1de17f6764ef2923931d1a674e3587fd1dac688139a28a09adbf996",
+      "contact": "contact_01.jpg"
+    },
+    {
+      "index": 2,
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ddfb29baa84601abc460d9a1f7134aa6bd60a1a108d275c3b2ba74ddcdd21f4e",
+          "source_csv_sha256": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        }
+      ],
+      "common_supported_n": 9999,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density.pdf": "72462db776b8669f2c80f657da9ab527bcbe3d3228766906f78f5bb35d4a06ca",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density.png": "6bd19ff1b99df5d9648b1d44e095bb878b5c331f22d997d8f7a66ed741865988",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density.svg": "3580892275ef6445fcb19df2534e13195d78b5af6826e9e81ffea476c4aa4755",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_draw_social.pdf": "e0d7d113944e10ae69a7c9fc323356e1a443f889980311b5c9959cf97f2b4ddd",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_draw_social.png": "c3882852c4a1517e0c4fccb89b298a796329ea7c49409ba28d03d72a438336ac",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_draw_social.svg": "538e81fb12dd0afe7b6f0a3f787b05cf8c76755ae803ad9be412da74b8c5d3f9",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_fade_social.pdf": "b5e43fea72a0bf804e3de11bc5a47014ca92ac8ad7299adb2a78091591341e06",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_fade_social.png": "5c535c8c1c41bec2d55574c37422a7ba1f2d0175f31cc2508c6cbd028e8e5bcd",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_fade_social.svg": "b7c75a7ee6a6b730749ed91d6207733c9aa1cbe3193ef24ed37ce619824ac135",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_straight_social.pdf": "57ee99460452b2d9cacaa2ea1d9318f11f8785813e248ee0c60fac9b97177d96",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_straight_social.png": "ae5623e23c54ab99fe25721b8a093af706d5b607eeb525713119fb1b388ec7c2",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_density_straight_social.svg": "d2484b05c725f630b416148889d5ee69418f593deab9157707bccf35873b2f1c",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_overhead.pdf": "3a929974bd3cff7747d0eaaed9d8f4ac65212c72dbc2953f939c2da53fcda515",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_overhead.png": "2f291c4740eda8aa9f1e0d13d01d0088d4823c520e16690a56fe55483327139c",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_overhead.svg": "825da2b19d7d372c9dd5d9f32a209f12e9940c31c70b70f127605a47ac58ced5",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_combined2_vs_pitching_wedge_lean0_curve2_rotation1_combined2_f8e7ec4e3c_overhead_social.png": "f71fb18a1fa7b8caa72584043c9737ad0e3ffff475dd28c8498c84d5a618f47d"
+      },
+      "contact_sha256": "272473a6b035248a56d8c19559c9d3b4819c84d4d400a151d28735364fa309a5",
+      "contact": "contact_02.jpg"
+    },
+    {
+      "index": 3,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6197d7abceafb9a831486843dddeaa553949a68849c31d5b882fcf370325d70f",
+          "source_csv_sha256": "ffe065e523f4fc4ecfd2e0949caf053ca65d258898e1cec822f173f0df5cae13"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "7a0a5e2cd0e0b7e4a9d2a76a587515a1fcdae2b08831048bff3d1c951997cead",
+          "source_csv_sha256": "2fac097254ff9d00aa16659a96cb9493e5621778206e60c4a84a427c93a57a5d"
+        }
+      ],
+      "common_supported_n": 10000,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density.pdf": "91bd0798497b85d82571a22d9598612b5d218304af0cb332601786e0b5ec5aed",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density.png": "40963303760fcfceeee0e916f2397e0b173d2e6f584818ac441d8d87b12879be",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density.svg": "e1ce0aa4c181bffde9c849996570bc4c25b124772539d64c4bcb2f3b22854a80",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_draw_social.pdf": "bcbe95a61e2608de9d403bfd23dffc2e1971ab74a5f5dd6097adeb533a9978fd",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_draw_social.png": "a3073bbf2b1e1e8357382ffd4fb05bfdb9b40ff3a78cc715638c2990f8886306",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_draw_social.svg": "f98c33aab983d2c0f2e9a96ee1da1c2a283281672de5f89b5dcb443f20e0d8c8",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_fade_social.pdf": "57541dcadd008250562840032d59bfd43b62b43bb56bedeccc3630c661b47a8d",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_fade_social.png": "0bfe71023af1c9c6bf6abb018ec8b603e2f705147403f06128a68e5e11659953",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_fade_social.svg": "8638be707446b2172bf37f3de5f830b7bf43e85d6f46ba879c98c3551e848381",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_straight_social.pdf": "e22425bf7d1e20d2842572f560cfeb2f3b6c39a21ec6f3518ec25dd2e73089d4",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_straight_social.png": "22c4a227ad21a3794194516aa599c3282d8161f1dd76c2bb92e1e1816391cb99",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_density_straight_social.svg": "b7d9c3251b5657cbe389c0b5942c3a1c1065c0e98f2832677def186fb958a381",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_overhead.pdf": "9cee5466cecac107c22a58eac879b5a106e27522e3ae14cd335a637dfb2a2947",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_overhead.png": "37baf9466703e83097439fb04b0a0fd37be0ee472976eb1e0a9ae15a7c23de4f",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_overhead.svg": "dbb3244763112d1c3492e1cbeb44288e0edad2ebf7a8dd1141d3c03420202ce0",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_negative_edfeeda1b4_overhead_social.png": "8f959e3cb6e56576e59da41cb24712c34c850b464cc9e809174bc5133055184c"
+      },
+      "contact_sha256": "896195aa2b8507a31fb2d35462d97654a732944de3af396fef3aa5f78596ad26",
+      "contact": "contact_03.jpg"
+    },
+    {
+      "index": 4,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "3bc1ed01c1a83fc00658bbe36a2adee06bba3b4b7c9cc453d3f6c3beca199245",
+          "source_csv_sha256": "3a856e5cd7bfb39e4dd41806ed7e13a47a800953efebd504ef855b0e46af91e1"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "75e705b13fddb9cb4019a6b71b8c9d8d46a6a6da4bc9a2511663f27a7aee743b",
+          "source_csv_sha256": "6a1bd08bc2a08f75adc43b73dc5e07ef4c178b91e81fa3d86f2fdd04f3b857ff"
+        }
+      ],
+      "common_supported_n": 9999,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density.pdf": "8c5715cd8d1a694f97354faef9929a3b7ed63d5c8b9371e13f6a2f7ff712d50e",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density.png": "e4f93b4b399baf8f94cd4e55980f761703925188fb6fb5b88e7fdf4ce528b366",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density.svg": "914738ef0e2d171a2f5a3abb7e395c031d5f1497245fec5179255a8be4c13664",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_draw_social.pdf": "067b523dcfb3d9ebe71b69205cc165e41aa09aa720444ff7e3e6ffb25f0e1a0e",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_draw_social.png": "48836bb1e2681f7740ab00bf5c9c5cb97431596f5500c39eb4f29f1cd547ae8d",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_draw_social.svg": "5bc21f0f44d89be30b794ac497d85f5d22781b500fe869789b61d820c88c9496",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_fade_social.pdf": "d939b3a9d85b7192b987a0e0eadebf79e35643767ce3c13f263a6b1181be7f23",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_fade_social.png": "c1afbad5b7974f1c4adf0f3f66327b815ccf7c1999f1461db10552bdb13c0bb2",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_fade_social.svg": "794a4a23586b5a4af950189acff8ec188e8605cb1ac50eda30de092774b94ee6",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_straight_social.pdf": "0dab0c83a53ba4fad14145910dc412babca90a9969a83cd2cff7e7a6e89c8108",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_straight_social.png": "8f749a28a659b2da7b0d9420d8c53b7ef842b79feee55f36db715e00ee51e423",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_density_straight_social.svg": "1dd3b34f78aaabd187970b65782201b013db6a6b9df290bc792ab29d687f80b9",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_overhead.pdf": "5df416f976e2f2c7518636804a318e6c37e8c060ffe9c9636cde4141e1f86626",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_overhead.png": "30af6e932587735b14ed8af22f71965e2273a556eb2e9606ef6a6959cf9082a4",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_overhead.svg": "611f139751cfa9dbd656c2062e1615f06efba08de4a1789d7255050c294e550d",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_cov_facepath_positive_vs_pitching_wedge_lean0_curve2_rotation1_cov_facepath_positive_af7c49b58e_overhead_social.png": "65d610dc2adc087e0017838962c0f94712218b65696e6fb6972efe9f82fc2f68"
+      },
+      "contact_sha256": "ab0cfd2f5ead143fa3fcc94d116d89ecf29afe475c7a63b176c810d2b2be8770",
+      "contact": "contact_04.jpg"
+    },
+    {
+      "index": 5,
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "a10d87e329e46e4edaf49b860f38b07dffbbd1acd80e755ccb3309b124389eff",
+          "source_csv_sha256": "75ba66e1a9463335ad422cc5ae1ca01c878a7cb2361bcea4d990c4dd839f424d"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "8358f840099b7f30bd3d34179c34241c166b92cbffbce63ed5afdfd5321bdad7",
+          "source_csv_sha256": "94752fb3f7cd636eec8112256be352f9f4e255f52db70d7a70c1affcd61b7f92"
+        }
+      ],
+      "common_supported_n": 10000,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density.pdf": "2c5ed471f89004542c572029002677a3137511500e1cd1ffb3878bf64f9e93ef",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density.png": "3140016b2d37a69e9f9a8465f59cf903fe607f7b2ca27528adbfe064f746a651",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density.svg": "20db2fe36579979cece62be56343947804bb6ff70dbb59ea5e0e5c1f88f12356",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_draw_social.pdf": "38a8d15619573ac396f09a2ec18c9ec8c8cd1ca03b36a59cbe2728dfd5370988",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_draw_social.png": "4a45d1b228a9fadb1169d1d2f297ad1c690b516e1241a52bf064fa78b00db450",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_draw_social.svg": "1ec5dd1717ed95968e23820f4cb07562793f35bfbe41670d7a6a35db645a8313",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_fade_social.pdf": "ddec75b468ba08383b939bcc0883c1011e5d5aac583a4acac21514e11590dbd5",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_fade_social.png": "5cb30d69495d9f6b8d9fdd74ad4e99df73abc82f57a5349cb8e1cae743ae5c1a",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_fade_social.svg": "5281202e0301942a716e7d333c79a1aeb94505c10a54e8f9c2d8bc59f8f54532",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_straight_social.pdf": "5dbefbb7b71b1371e94a68abdb9b35da33f9d089b763cb0e9f28abe45d40654e",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_straight_social.png": "2b985d22eabac21667321541a079582f5f8062e4614e16fb11846ad5836694b1",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_density_straight_social.svg": "786bbe61b43c8d9f8a5efc7aad673a802f3dd559d1dd2aeedcf9794bdd1b7686",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_overhead.pdf": "ec5a2a68f7e59e938c05c88efa7818287acb2710536c50b0d8bf628f8c3cd835",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_overhead.png": "de87b83d945c9fa73c37a8603e651c5722a0a405018738b203322ba80b1b582f",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_overhead.svg": "a09642b59a850b9642b12fe0da90c9b4c0f3915685a6aaad3fc858fb29fe8974",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_only_vs_pitching_wedge_lean0_curve2_rotation1_shaft_only_5bad587a42_overhead_social.png": "8862cc308b9d03776fe9826d6a6c4cf5f3cbc75d040ed714b34ea90e2e539a43"
+      },
+      "contact_sha256": "3a048aad44b8c806400b3c876eecc7a1c96e36c69a392e1108eadbaccb092a60",
+      "contact": "contact_05.jpg"
+    },
+    {
+      "index": 6,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6b70547a07d1f09bbefa71edac02770fd861a35a27bf700f49cc90eb5bc0b8a8",
+          "source_csv_sha256": "4aed692a1c3f5af8cd54dd4b79aedcaafa78a21826cc7a58c3d3925cfe4d3ce0"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "d71bd0b85614d97ee82ccefcdb75763226374e2097575aa049cf81d1d8512b45",
+          "source_csv_sha256": "ea1d5b4dd40509214b9f52e1cea39bb255a1263ffd5f8da68b3effb09dfc18c3"
+        }
+      ],
+      "common_supported_n": 10000,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density.pdf": "1cf7e54dda2c7b179db413acad02d46622c9e548f84484b937694fcc3ba94010",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density.png": "962758b52b49f1ff15991a8e106dd1899bca09c9f2bf9c48a7a10e2e98a555f4",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density.svg": "6e00fd801c716225b16906368ea46082bcc8062b3d59c913b9c8461c558aecc2",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_draw_social.pdf": "e1845343b143bba985adcaee21e5dd46269e4554589dd44dff29a24ca8770a12",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_draw_social.png": "18082a30f5a275c11ec8de77167497538ab39b222d272ea8aba839417545ba89",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_draw_social.svg": "c268f6d0089e3a1789f6dcc2626e12632e22005fb0bdce082e06133bacf7804d",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_fade_social.pdf": "1c8edc5f78646c3bd91b893dcaffdfdeddcfbc567ddc8d7d4870ca6ca267506f",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_fade_social.png": "54eee52be7143d733b06b5ebdf3c9810c50ce773734b6eca2b41fbefc5ff0552",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_fade_social.svg": "dd873a6a595acb3d306c73a09892e153ea26830840fcaf07da94a1df3eb36f3d",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_straight_social.pdf": "78dd9a65f2fa490d02f1c499100901eba110590e8ad0376de8d5141fec68062e",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_straight_social.png": "331303b45e383a45076ad54b026ee4f84a0d7dea19b443ec2f6240b7394b81c4",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_density_straight_social.svg": "855a948a68b939a4965bebe7a9f629c51fbfed42c66b14fb1b5af3aeb32ad0b0",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_overhead.pdf": "5997eef3e4133ad0ee75febdefeae51623609b3fd89fb0428541ae2da45c3e6d",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_overhead.png": "0e9b78110394f2371324b65261a0ac0bc271f6bafb689f47375b44748b6f19fb",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_overhead.svg": "59625d1e2640592f6bd06e117005dc45920f4858f4146aa96fd5ad51c2f48182",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_path_vs_pitching_wedge_lean0_curve2_rotation1_shaft_path_8da46f2a19_overhead_social.png": "f4c765cc4dce58643b946d34d42369800cae8a9f6b7bc84ae6dcc59698fdc2ff"
+      },
+      "contact_sha256": "c7b132d90192999e26fda030604c44ca5f97d8c26066d42d8ea27bc604f50734",
+      "contact": "contact_06.jpg"
+    },
+    {
+      "index": 7,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "b19350b15fd208b72ccdd356dae54102277082ea6855d3676e218eec55e33a0b",
+          "source_csv_sha256": "e31785e47270cfb7579b38c89f62e10dedbd258394cecc6fb46b467baf798514"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "a5af0201fcc0f4c42734751c9f319af534db2506bd6318c12cf247739d4a0211",
+          "source_csv_sha256": "eab26a93590254837449692c388110b42e629865fde814cc9a44d3189070c8c3"
+        }
+      ],
+      "common_supported_n": 10000,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density.pdf": "598c284fd1dd2f3cdd1ea43ec1e9d966123aa4a01f2b482446894515c0438678",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density.png": "a1fb734eb1e22e89d8dc405f59b38074e6ec7672e172063037b29ff942797003",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density.svg": "ce69b4201abb07dd304514a48d82c83c198231c57f7ac0686043ce8320aa9cbf",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_draw_social.pdf": "1de34cfa90dfc5394f282f182cbd8d841840c20aa89f188917867c9b38fb3e76",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_draw_social.png": "7b7112fba2fb09a60c868f90e00dcd1fbbf0efb17ba8fc2dca1f9cdcb52a06a3",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_draw_social.svg": "0d1b2baed9fa00076fc51c3b30cda080c6794f208abce8dbf731f7567bf29938",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_fade_social.pdf": "c2a56a6e5fd8aaab5c556b6b002b0245b7e961fee310e0787a215ef75c73005e",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_fade_social.png": "6164db4e97241d0b4fc1be8b1d4732821e9d7c337914982b590a10adf0e577a8",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_fade_social.svg": "79f49e461411b673e1efb6aa7fe4cdb436c49715973b653cf122b6e68507e461",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_straight_social.pdf": "cbe9ebed407d5e8347e8cb6e81ac3f393119f63d52443f3e1fbdf96c8d5314ad",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_straight_social.png": "53da0ad253fc79d8945445855f9cf3d74e839a5de2c19ebd5612f3567437dbaf",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_density_straight_social.svg": "a2a47674e8b743380eb64edf8b03670e86c59038f9dda8a6170d259318a46c58",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_overhead.pdf": "9ec39965e11e1ab5b3e666af8ce8621ea1ae35ba686f8fc81380cda2a191c6fa",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_overhead.png": "c286a24917fe2d03d7ccc419a2660384a7672dc79133a66eb8fad994553a90fb",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_overhead.svg": "113469b70dfba399c08822a568f85ab38be028640e297dade2c2dc486e509262",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed1_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed1_283cf5ba4a_overhead_social.png": "2af7ab899d332b3ab8c917311e18b762d252b15b3edc107bd0f40338e044f8ce"
+      },
+      "contact_sha256": "7427bff1003e88bc9c20c2d5b45bc9ac3eeffe829e00e0b6be2ceb0482c2c61a",
+      "contact": "contact_07.jpg"
+    },
+    {
+      "index": 8,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "1d2469fb8450fedb072f31a761324de56679750fad447bdd86250063b12bcf22",
+          "source_csv_sha256": "ff3759a0452a886c80e3f626028d76ef19c71c6eeaa1cb26bbee94725350a9d9"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "4bb72ea7d1df5821f1d6a8a655ec782f89e51dcc6d0930859c567979797124a5",
+          "source_csv_sha256": "439ab73b9ec1ba9da7255fdb0ef112ac8c146bbc79b77bd61d52df26ee12b694"
+        }
+      ],
+      "common_supported_n": 10000,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density.pdf": "833ca36937f8b468737700c794cb7e8e1780e9b332fea9b0ba6a1831c5b8c0e9",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density.png": "b755225c861a6641c55088e488a670eac60fa2ad619596af1341d75c167e1856",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density.svg": "cdf16e3b9ba21ba6ca5cd0788d0a775b984fae7bb955bd45e084f6987a89c52f",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_draw_social.pdf": "0b51a91ca58b90957d6d20d443408a018abfcf30f47d0e22b799971d40665910",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_draw_social.png": "101b0ed511a849b87d3293b1a6acc48c80a02674019ec8f47e79903df59598c7",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_draw_social.svg": "17c417baef7bd82411cd5a6e81db03104e69c3ee51c32b41e1f1ebae7e3510c4",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_fade_social.pdf": "cb27e49e094736770b699204e038ec6dfd783525ce8d63c77e8871436f7d90ac",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_fade_social.png": "a730a6155a03779b4e4a92921641b225d6e9f8c9ef136d739341778f233be6e0",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_fade_social.svg": "6dd639594d0a27e83e9c2b7a2a147237c3c975c832c2b44774eb1b2ae91a6175",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_straight_social.pdf": "3abf1fbbcbd4787fc0200b1d46bb948344f7b35895cac717b0476a56d2b3dca9",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_straight_social.png": "1d803bdcf540b8a73dc06ea608b92b503e653bd32a2f57a29973bba4c328d730",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_density_straight_social.svg": "72f4f0c2fcaac7923ab550de329c26bd66ec855739c48ae19c31ba2011b5681a",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_overhead.pdf": "61d1a28e2bfe3eec8d90555c51126461054965333b28ab065bc45f0d75c18eff",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_overhead.png": "1a87ec7c05e9a98ed632c40d64e33d23abe6b5cc14102dc8c7e65d11410bcc44",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_overhead.svg": "c207b244bff8261d995db04f6d6b2d756270ee963d30e86bb2c1a139d47ddf5a",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_speed2_vs_pitching_wedge_lean0_curve2_rotation1_shaft_speed2_5dd3c79189_overhead_social.png": "8765c9ef071e83c435ca42343e956665a674ba43bfc0cd168ef00d87181f602b"
+      },
+      "contact_sha256": "58fe72e46775568b8b68bf3649f09dcb4594805a0b7d8292875e2c4f586f2e9f",
+      "contact": "contact_08.jpg"
+    },
+    {
+      "index": 9,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "e46c334d4d3ae5ee2803af1457aa064df720cc7befda7b05b9c46c385c3989e2",
+          "source_csv_sha256": "a5ef954f733f78270f8b2b8d56f114c7c9c4e29b4d6c3d9736cf8168aaf712cb"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_strike",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "f52936daa8d3bf06ef956b0c4a151ba8f89cfa42c386a5b0d308b8d0edfd9987",
+          "source_csv_sha256": "40bf740e226c73138d1489f71ad924fd3838691a33be1f84a550d2218eb781f3"
+        }
+      ],
+      "common_supported_n": 9999,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density.pdf": "554d1d5acc4b2c53f83c99976abd0b0a17a7190d8e728fe7861560d192e4a625",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density.png": "1639af760a68891930313c034466f2b780069249c8dba2f17bc9aab38e1afe55",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density.svg": "65da0ec2be4d0093f392c8bddb67746eadadea4ff250676bf844334714132a51",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_draw_social.pdf": "b2640898f18ef0decada0455186feff048a5ace8c34815ec60a6e9099a321512",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_draw_social.png": "89b8f0996bfb00cd88284a9abb6fca7cd28ebaf7feba5bb236e548db534f258f",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_draw_social.svg": "08b5e78e2a94374e5156c5c4b7eb9bcff64e12b6a3bd4d40d0171189e9fc6fa1",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_fade_social.pdf": "c88bfa66ff462472a98634915a828d7dbd4af9a6490fa1413cfbf9ef0509b46c",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_fade_social.png": "84df8a109dac57f0da62e00cf2fe9dfae86914660256b319883d7fcc5cfd5c06",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_fade_social.svg": "14962d6259055a0ff3fdd5262ba08634a58d75f8685fd8e028caf96cfccc5839",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_straight_social.pdf": "fceb203d5be27046bf6d0f08b12b6a23fcafe99ffb51217970a46ebaeeb8a212",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_straight_social.png": "e1357b8bdcfb7dd2a23f29f1d2f8bd682693be34bee823c4737cbef7a02605a4",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_density_straight_social.svg": "a0c6257be23be90f9dee777da42f89833d61aa666433d7ec9b216ec83d04c317",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_overhead.pdf": "eb22f8b76ceaf59ac90f01149c8b7f49dcfbc9a0210a2b604e0eb51339b672e6",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_overhead.png": "94a194bb3f888d129d7a0e4fd370e3029d2b4e12d49e34a311cee023ac7fac2f",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_overhead.svg": "ac7015248c5b3e1435b05f100ee718be4d4d0415bb41c1c730d30087c4801f7a",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation1_shaft_strike_vs_pitching_wedge_lean0_curve2_rotation1_shaft_strike_e0e0008194_overhead_social.png": "191db8bb7dad4d5fd311adb8c679d8be1568979abe7e2ceea8ac4824914d5e85"
+      },
+      "contact_sha256": "a76a66af7eef7587c97cd5b7a2522e6abeb820e1e51cddae508e0bb94e3d40af",
+      "contact": "contact_09.jpg"
+    },
+    {
+      "index": 10,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "fba29fac2e69aedae36c9f60d2a98b381fc2c97b328839cb9d428700542e3237",
+          "source_csv_sha256": "563496df7991d0e3a59fa2af2b77738eced4d0d876785eeb47ad715c3423b7e2"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b44ad15a245784372626321e55a9c862da25d4154895aeb08de07b1f78923ae",
+          "source_csv_sha256": "bdbc0089763896c25f94364677ee35bcdc3a32e980e6ac38cc2946dec9a294dd"
+        }
+      ],
+      "common_supported_n": 9999,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density.pdf": "67d63615d74f9d891fd3a6021db05faf2123ffaa650a6b03e0fcf12bfc1c879e",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density.png": "08493d74d73c8ad5a294c6f1f0191eb60fbb7925f010ad63449f0f14449d8e03",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density.svg": "c0873cf368172ade6a851cdce2fdf34498870d66073c4078566df14b6d1d3d62",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_draw_social.pdf": "5388f27ddd84d8e63116505300bb3959977f802b81c6b2c1ecf6b6d132a9b78b",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_draw_social.png": "b71869204c267875f26f9a017b38afc1f5287669e8ef5fa8faac49c1c1ffe5a3",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_draw_social.svg": "705c9886d40a0e9b43150221422dec7d3f05145fce493960ce792e118c7b1fd1",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_fade_social.pdf": "e89f978d464372ea2ac1a069a24a51c0ccdab6d01ff97e944eb4414d2810bc41",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_fade_social.png": "3c10447ab5a0cb9e3fae58ec3d7d04ab5e0496fef59277310884a37cd92c9856",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_fade_social.svg": "0ff3e68f97c9f564c6faa81293336c97a072f032469191e3f8ececb46c02a159",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_straight_social.pdf": "2b944633e5a92ded90633e5bfd15e4993899039f8a33d148570ef908ca11c93a",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_straight_social.png": "112f368db6ff16f71cd6f4c809c94bff9c6943ec49dd93b7289b9f6fd6c80911",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_density_straight_social.svg": "efe193f8251015902d31d1e5b874fa0be6714f90c962c5f2aece18528e18407f",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_overhead.pdf": "12ca642adfb50c9e6afcf0c830af228de67e9486d7ff45cc8ff302991f20b7bd",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_overhead.png": "5ba9efb928ffb1770b7fe1d2202da8e3fb0f35e32e833be15bf74c4fcfd76c33",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_overhead.svg": "e2b74b3aa878f993596929c49305f9411af01f95ca48b3b30fdc2101a77ca912",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined1_vs_pitching_wedge_lean0_curve2_rotation2_combined1_088a985e55_overhead_social.png": "c4009e81a39292f90c35567e014baa1978b25d3804bd738057b4a840420b84b5"
+      },
+      "contact_sha256": "f97cab716378efe2bd1a99b8b82622767766fa39006f870e17f6675768799437",
+      "contact": "contact_10.jpg"
+    },
+    {
+      "index": 11,
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ccc8a06f1c98fc08aa5ab70b2e27800d35506b1b17c349e4bf2e14554fdc3b4c",
+          "source_csv_sha256": "9d089f3b70b0cb5ddeeabe1ff309cfec960c5ed78368d4b764f3dea2315a3eee"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        }
+      ],
+      "common_supported_n": 9999,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.pdf": "414f69e4570c6479625bd415fd789782df903007f029337494bc357938218c73",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.png": "3229c5ef4d33f0bba9936241746a8c60e582059f9b01230abb5a6b76bdbd60e8",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density.svg": "03039ad2b0acd55472f2702bf1459fcfc492b109ed9121199d90ac4db3e881a6",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.pdf": "d565067f976285b838acaf52de58f870091c9d3070d5398a3e94417c694cf751",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.png": "fd6f3d4675ea6ca04d0bca3f8489999430dd9ccad85b6ff092511417618f99b4",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_draw_social.svg": "3a6a328fc607b6beea7a0151bc2df8ad2f58f916bcf85168213b5cd8acd47bef",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.pdf": "dded338e4398c7d21b0a8a4dd4b2cabcfa5d7557b3e4565db15e26dca8989fc4",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.png": "df47c723754dba239d7633fc9a91fe52c80c796f267a091cedd4c217f1bd5526",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_fade_social.svg": "81b2591dd81933dcd30bb6a6939966bf80f6ef42f91af688594da616b580f5c1",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.pdf": "c8a0dee442df5ebab555c9feb95154930fcad2ff4e377f9e369b6e8f37683875",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.png": "d2f57411233a07c17eec4b430273b383866484e11741bdb9b150126ae2eec23b",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_density_straight_social.svg": "98c2d0774b09b8c58625309e7665ba567e3af0873196240e1e65b665a50d5dec",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.pdf": "68fc017bb27ed2ad681ad71c3d532c2d642542c6ddeab5f6e5ed334dd2a9269f",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.png": "d56ea2a8cf0eb7f5504056d2c7144415b4bfecbbed12d9a183fde3f4673b8b9c",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead.svg": "e09c05e10101c3c270c048ba69f6d872a5d73bcc323beaaa1a781a609cc8d45d",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_combined2_vs_pitching_wedge_lean0_curve2_rotation2_combined2_1282aec4dd_overhead_social.png": "3adc810604d369756110e352a01e17cde896f47f2fc72431c9a0b330b12e74d0"
+      },
+      "contact_sha256": "f67ca302c20a7e0e6f858b9a4bf975f34ea78c7ff9c3091d4edb0dfa1ab12a7a",
+      "contact": "contact_11.jpg"
+    },
+    {
+      "index": 12,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "70e7aaa4e7af61a4254376f4f4b0c9578e956f1b4417f72d389991b6d7331d3b",
+          "source_csv_sha256": "e2e929c9fb17fc9d964a48da7c79952c65f14ba6be5b83b67766a791fd319db9"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "edd5980a4f7a1eb089f6e4675c5b96a6ebbcfd34c3b554c7a84ace60368bd883",
+          "source_csv_sha256": "80547398ee884237cacf285ec01129236aa97e845c0ca6cc6ea74cbe4bc34dec"
+        }
+      ],
+      "common_supported_n": 10000,
+      "target_x_m": 77.40247724866299,
+      "assets_sha256": {
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density.pdf": "69c39d5e9ffcf962aacdb730225d68ead97ec7e351bade1c5d62376b86e9090d",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density.png": "e42d66dc4330c0f7feb30f1b4a260e1a2938fdf259231c6f42f9c382568f2949",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density.svg": "b41bd2440132fa0ba35f714ff9047630f84230fa2a7963c7fa2d9ae688e086da",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_draw_social.pdf": "f44a2ba506c9dabd237d36436f8f9bf12ad3b6154c6247a7b8a4f3abe3a6c362",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_draw_social.png": "7b6b2c001ae4ee474695c899c3af9e75b8a528ebaea721ba365894ab29db2937",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_draw_social.svg": "5887d76d1977d71f29f991280be3524b79673d78bc598c3d7cf5489984f4811b",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_fade_social.pdf": "0eb133e8e88e55a212c8b1ae6b8d75a9ad893745b095d68923cb008408350887",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_fade_social.png": "24957e5d53f8146d040738284decaa45cadc1572abb8feffa67f8fd684d9a006",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_fade_social.svg": "7890bc03855fef888dcb4ac48c24afcc1fa53cd75f56ae00e259f329a32ab6cb",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_straight_social.pdf": "9837ea0544e23dfbfd6d4964e44ffe8e88e34f52f705002ae65e82fc1fd12fa7",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_straight_social.png": "1c37eada7c32cce6c33a30ceb28890a0b405e0ab819633df6257cc48c9fd94d9",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_density_straight_social.svg": "d504d90a37e2bc35fd6c65f6c3a2a15b1f7172c3852cad0489e30e9bca9cfa8f",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_overhead.pdf": "f2290f7993af439c1d41ebf4f3a11da9df7dd6cb1f27efc47539bb7fa185cca3",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_overhead.png": "8d599124cf21d1887c91786d5f80af2e76ba64772d0603f2bbab66662f182528",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_overhead.svg": "a2bab8543352354f94d1f24be7e41e3256d5ac7d1272d59dd325a9e1de18b87a",
+        "curve_strength_pitching_wedge_lean0_curve1_rotation2_cov_facepath_negative_vs_pitching_wedge_lean0_curve2_rotation2_cov_facepath_negative_2a46768764_overhead_social.png": "ebf1dba88d2feb38671275918c8b8186f6387cd98ea109215e2912beb60fef9c"
+      },
+      "contact_sha256": "cecbe6c278b7c19cc8b4c4756514e7f7522a3ee13bee3c8483120c3d9fad3039",
+      "contact": "contact_12.jpg"
+    }
+  ]
+}

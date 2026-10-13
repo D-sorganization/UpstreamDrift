@@ -1,0 +1,27 @@
+from pathlib import Path
+import json,hashlib,re,csv
+from datetime import datetime,timezone
+p=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2'); f=p/'control_final_figures_v1';o=p/'validation/original_final_graphics_independent_review_v4/astra_control_remaining';h=lambda x:hashlib.sha256(x.read_bytes()).hexdigest();a=json.loads((o/'inventory.json').read_text());m=json.loads((f/'figure_manifest.json').read_text());assert h(f/'figure_manifest.json')==a['manifest_sha256'];before={k:h(f/k) for k in m['outputs']};assert before==m['outputs'];checks=[]
+def text(x):return re.sub(r'\s+',' ',' '.join(re.findall(r'<!--(.*?)-->',x.read_text(),re.S)))
+for r in a['files']:
+ assert h(f/r['path'])==r['sha256']==m['outputs'][r['path']]
+ if r['group']!='social_details':continue
+ x=f/r['path'];cell=x.parent.name;s=json.loads((p/'control_final_v1'/cell/'summary.json').read_text());c=s['config'];n=c['noise']['standard_deviations'];t=text(x.with_suffix('.svg'))
+ for token in [f"Lean {c['club']['shaft_lean_deg']:g}°",f'Shaft Twist SD {n[0]:g}°',f"Curve ×{c['curve_scale']:g}",f"{s['target_x_m']:.2f} m downrange",f'Path SD {n[1]:g}°','Speed SD','mph','horizontal/vertical','Model-Conditional Simulation']:
+  assert token in t,(cell,token)
+ assert c['target_x_m']==s['target_x_m']
+ for name,v in s['summary'].items():
+  count=v['supported_n'];assert f'{name} {count:,}/10,000 valid' in t
+  if x.stem=='density':assert f'{name} (n={count:,})' in t and f'{name} 600/{count:,}' in t
+  else:assert f'{name} 6' in t and 'Raw trajectories; no aim-line rotation' in t
+ checks.append({'cell':cell,'asset':r['path'],'summary_sha256':h(p/'control_final_v1'/cell/'summary.json'),'target_x_m':s['target_x_m'],'caption_verified':True})
+rows=list(csv.DictReader((f/'comparison_availability.csv').open()));assert len(rows)==36;assert sum(r['status']=='completed' for r in rows)==30
+for r in rows:
+ if r['status']!='completed':continue
+ t=text(f/r['svg'])
+ for side in ['first','second']:
+  s=json.loads((p/'control_final_v1'/r[side+'_cell']/'summary.json').read_text());n=s['summary'][r['pattern']]['supported_n'];assert f"{r['pattern']} | {r[side+'_condition']} (n={n:,})" in t
+  assert s['target_x_m']==float(r['target_x_m'])
+assert before=={k:h(f/k) for k in m['outputs']};assert h(f/'figure_manifest.json')==a['manifest_sha256']
+record={'schema':'independent-control-remaining-graphics-review/1','utc':datetime.now(timezone.utc).isoformat(),'status':'changes_required_known_caption_only','whole_study_accepted':False,'manifest_sha256':a['manifest_sha256'],'all_manifest_output_hashes_verified_before_after':len(before),'files':a['files'],'contact_sheets_reviewed':12,'full_size_reviewed':[{'group':g,'index':i} for g,i in [('social_details',21),('social_details',37),('social_details',40),('comparisons',13),('comparisons',19),('matrix',11),('matrix',19)]],'caption_checks':checks,'comparison_rows_verified':30,'matrix_visual_contact_review_count':20,'findings':[{'status':'previously_identified_repair_qualified_in_c9c0fb194f','affected_png_count':18,'paths':[r['path'] for r in a['files'] if r['group']=='comparisons' and r['path'].endswith('shaft_rotation_sd.png')],'description':'Standalone varying-SD comparison caption does not identify the variable as shaft twist. No additional graphical defect found.'}],'coverage':'40 social detail PNGs represent 20 cells. PW curve2 original control cells complete only at lean10; selector intentionally uses lean0 then PW lean5, so these have academic details and matrix cells but no social detail or curve card. Supplemental resolved PW curve comparisons remain a separate publication requirement; its producer is still live.','scope':'All 90 PNGs reviewed through 12 contact sheets, with seven representative originals viewed. Shared scales are within each figure. No pixel-level exhaustive review or new statistical/physical qualification is claimed.','safe_to_relocate_reviewed_v4_outputs':True}
+(o/'review.json').write_text(json.dumps(record,indent=2)+'\n');(o/'executed_check.py.txt').write_text(Path(__file__).read_text());print(h(o/'review.json'))

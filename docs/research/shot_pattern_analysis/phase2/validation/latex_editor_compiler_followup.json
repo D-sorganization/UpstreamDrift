@@ -1,0 +1,118 @@
+{
+  "status": "unresolved_builtin_compiler_initialization_failure",
+  "checked_utc": "2026-10-10T00:43:27.345300+00:00",
+  "document": "docs/research/shot_pattern_analysis/shot_pattern_analysis.tex",
+  "source_sha256": "b79a12f5d4293c3f7c7b64c6b06407cf7907298fe759f95d7fbf8319f6398e50",
+  "source_changed": false,
+  "editor_replaced": false,
+  "separate_pdf_compiled": false,
+  "built_in_retry_after_new_cache_evidence": "compile-failed; same Tectonic src/config.rs:154:18 panic before parsing; uncached bundle and HTTP request failure",
+  "host_followup": {
+    "cache_directory": "/home/dieterolson/.cache/Tectonic",
+    "cache_present": true,
+    "bundle_index_get_status": 200,
+    "downloaded_bytes": 1276215,
+    "decompressed_bytes": 5143485,
+    "download_sha256": "979a52178eb353c803dde1f66efe43ff7ae2ab908000323d4fef29e98e382ebd",
+    "download_seconds": 1.458796
+  },
+  "conclusion": "Host GET and gzip decoding succeed; this does not establish access from the built-in compiler environment. No cache mutations or application settings changes made. The exposed compile API accepts only document path, with no bundle/cache configuration. Source compilation remains unverified.",
+  "latest_user_requested_recheck": {
+    "checked_utc": "2026-10-10T07:45:33.650019+00:00",
+    "source_sha256": "a4913d2c23351ce4c0a83185fb4c63895c577b1d3c195b5ebd8a350e00846a8d",
+    "result": "compile-failed",
+    "failure_stage": "Tectonic bundle initialization before document parsing",
+    "diagnostic": "thread main (2) panicked at src/config.rs:154:18: called Result::unwrap() on an Err value: this bundle is not cached, and could not be obtained from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+    "official_troubleshooting": "https://learn.chatgpt.com/docs/reference/troubleshooting",
+    "supported_repair_found": false,
+    "next_action": "App-level compiler bundle/network repair is required; available compile tool exposes only a source path. After repair, compile the same source and address any document diagnostics.",
+    "source_changed": false,
+    "editor_replaced": false,
+    "separate_pdf_compiled": false
+  },
+  "subsequent_user_requested_rechecks": [
+    {
+      "checked_utc": "2026-10-10T08:18:27.745651+00:00",
+      "source_sha256": "a4913d2c23351ce4c0a83185fb4c63895c577b1d3c195b5ebd8a350e00846a8d",
+      "result": "compile-failed",
+      "failure_stage": "Tectonic bundle initialization before document parsing",
+      "diagnostic": "thread main (2) panicked at src/config.rs:154:18: called Result::unwrap() on an Err value: this bundle is not cached, and could not be obtained from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+      "official_troubleshooting": "https://learn.chatgpt.com/docs/reference/troubleshooting",
+      "supported_repair_found": false,
+      "next_action": "App-level compiler bundle/network repair is required; available compile tool exposes only a source path. After repair, compile the same source and address any document diagnostics.",
+      "source_changed": false,
+      "editor_replaced": false,
+      "separate_pdf_compiled": false
+    },
+    {
+      "checked_utc": "2026-10-10T08:47:10.619722+00:00",
+      "source_sha256": "a4913d2c23351ce4c0a83185fb4c63895c577b1d3c195b5ebd8a350e00846a8d",
+      "result": "compile-failed",
+      "failure_stage": "Tectonic bundle initialization before document parsing",
+      "diagnostic": "thread main (2) panicked at src/config.rs:154:18: called Result::unwrap() on an Err value: this bundle is not cached, and could not be obtained from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+      "official_troubleshooting": "https://learn.chatgpt.com/docs/reference/troubleshooting",
+      "supported_repair_found": false,
+      "next_action": "App-level compiler bundle/network repair is required; available compile tool exposes only a source path. After repair, compile the same source and address any document diagnostics.",
+      "source_changed": false,
+      "editor_replaced": false,
+      "separate_pdf_compiled": false,
+      "check_context": "Resumed publication checkpoint; same compiler initialization failure"
+    },
+    {
+      "checked_utc": "2026-10-10T09:21:59.091961+00:00",
+      "source_sha256": "a4913d2c23351ce4c0a83185fb4c63895c577b1d3c195b5ebd8a350e00846a8d",
+      "result": "compile-failed",
+      "failure_stage": "Tectonic bundle initialization before document parsing",
+      "diagnostic": "thread main (2) panicked at src/config.rs:154:18: called Result::unwrap() on an Err value: this bundle isn't cached, and we couldn't get it from the internet. Error: error sending request for url (https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz)",
+      "supported_repair_found": false,
+      "next_action": "Repair built-in compiler bundle/network access, then compile the same open source. Tool accepts only path; no exposed compiler configuration or cache controls.",
+      "source_changed": false,
+      "editor_replaced": false,
+      "separate_pdf_compiled": false,
+      "check_context": "User asks to address Rust backtrace in right-panel article preview; reproduced through built-in compiler."
+    },
+    {
+      "checked_utc": "2026-10-10T10:11:25.441948+00:00",
+      "source_sha256": "9b136fb6d73ff240ceceb250b3ba701a2c0d1db7b8b607c8febb60e8bf91d4eb",
+      "result": "compile-failed",
+      "failure_stage": "Tectonic bundle initialization before document parsing",
+      "diagnostic": "src/config.rs:154:18 Result::unwrap on Err: uncached bundle cannot be fetched from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+      "source_changed": true,
+      "editor_replaced": false,
+      "separate_pdf_compiled": false,
+      "check_context": "Compiled existing article after source-backed phase-two geometric and directional findings were added; no source diagnostics reached."
+    },
+    {
+      "checked_utc": "2026-10-10T13:13:56.250540+00:00",
+      "source_sha256": "9b136fb6d73ff240ceceb250b3ba701a2c0d1db7b8b607c8febb60e8bf91d4eb",
+      "result": "compile-failed",
+      "failure_stage": "Tectonic bundle initialization before document parsing",
+      "diagnostic": "src/config.rs:154:18 Result::unwrap on Err: uncached bundle cannot be fetched from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+      "supported_repair_found": false,
+      "next_action": "Repair app-owned compiler bundle/network access, then compile the same open source. The exposed compiler API accepts only a source path and offers no cache or network settings.",
+      "source_changed": false,
+      "editor_replaced": false,
+      "separate_pdf_compiled": false,
+      "check_context": "User-requested investigation of right-panel Rust backtrace; failure reproduced. Official troubleshooting reviewed; no specific bundle repair documented."
+    }
+  ],
+  "tracking_issue": {
+    "url": "https://github.com/D-sorganization/UpstreamDrift/issues/12120",
+    "state": "open",
+    "author": "dieterolson",
+    "filed_by": "AGY Gemini 3.8 Flash High",
+    "root_rest_verified": true,
+    "source_and_evidence_link_corrections_applied": true
+  },
+  "latest_compiler_recheck": {
+    "checked_utc": "2026-10-10T14:51:38.568258+00:00",
+    "source_sha256": "9b136fb6d73ff240ceceb250b3ba701a2c0d1db7b8b607c8febb60e8bf91d4eb",
+    "result": "compile-failed",
+    "failure_stage": "Tectonic bundle initialization before document parsing",
+    "diagnostic": "src/config.rs:154:18 Result::unwrap on Err: uncached bundle cannot be fetched from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+    "source_changed": false,
+    "editor_replaced": false,
+    "separate_pdf_compiled": false,
+    "next_action": "App-level bundle/network repair is required. Do not repeatedly retry without changed compiler-environment evidence. Issue #12120 remains open."
+  }
+}

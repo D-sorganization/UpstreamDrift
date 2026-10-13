@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-018",
+  "title": "Preserve Exact Shot Evidence Bytes Across Git Checkouts",
+  "body": "Git line-ending normalization changed committed CSV bytes from the frozen experiment manifest. A clone could therefore fail otherwise valid evidence hash checks.\n\n## Acceptance Criteria\n\nScope a CSV -text Git attribute to this research package, retain the original frozen CSV bytes, and verify all 24 indexed CSV hashes match their manifests. Do not alter the flight outputs or expected hashes.\n\n## Validation\n\nRed: committed CSV hash differed from frozen manifest. Green: all 24 indexed CSV hashes match after scoped attribute and re-add. Commit 1601ac294c preserves all exact bytes.\n\n## Handoff\n\nBranch `codex/shot-pattern-analysis`. Keep open until merged implementing PR.",
+  "publication_status": "published",
+  "github_issue_number": 11865,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11865",
+  "issue_number": 11865,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11865"
+}

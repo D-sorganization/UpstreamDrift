@@ -1,0 +1,12 @@
+{
+  "scope": "Root full-size visual spot-check; does not substitute for complete independent set review",
+  "reviewer": "root",
+  "figure_manifest_sha256": "f4929abc3c34a7eb6005f92616d05bf08e2e4ec607a6bdaacce34b5111ecb41f",
+  "files_sha256": {
+    "details/driver_lean5_curve2_rotation2_combined2/density.png": "1968a5a57e32114963696a51e30a90c1b2ddb96ce5df8c1f950a5385ba24056d",
+    "details/pitching_wedge_lean10_curve1_rotation2_shaft_only/density.png": "3b5442a150b1dbee9184c73d5f7646fea438d5ce8cf84f346cbbbcd6c0fb376a",
+    "social/details/seven_iron_lean0_curve2_rotation1_combined2/density.png": "94929a6a923a52038455701f5e7a7f43ac0d1f9a9960a6ec893b72847aa0106a",
+    "matrix/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_conditional_sg.png": "b11bf9d2cc19cfb413f93ba088301478a884b750408a567928801ccc706ee767"
+  },
+  "findings": "No new layout defect in these four images. Academic main/marginal ticks remain distinct in the formerly crowded Driver case; PW shaft-only narrow density and 7-iron social combined-noise panels remain legible; matrix covariance caption, units, scoring context, unavailable reasons and dark-cell contrast are readable. Existing numerical/population qualifications remain visible."
+}

@@ -134,8 +134,11 @@ class TestSphereRollingCapFactor:
 
         # v_tangent is the +Y component of v_rel (ball at rest); n is +X.
         v_t = 6.0
-        # Rolling-without-slip ceiling for a uniform solid sphere.
-        expected_omega = (5.0 / 7.0) * v_t / R_BALL
+        # Rolling-without-slip ceiling with finite clubhead mass:
+        # J_f = v_t / (1/M_BALL + 1/m_club + R_BALL^2 / I_BALL).
+        inv_m_eff = 1.0 / M_BALL + 1.0 / state.clubhead_mass + (R_BALL**2) / I_BALL
+        j_tangent = v_t / inv_m_eff
+        expected_omega = j_tangent * R_BALL / I_BALL
         # spin_axis = tangent_dir x n = +Y x +X = -Z (friction torque about
         # the ball center: (-R n) x (J_f t)).
         omega_z = float(post.ball_angular_velocity[2])

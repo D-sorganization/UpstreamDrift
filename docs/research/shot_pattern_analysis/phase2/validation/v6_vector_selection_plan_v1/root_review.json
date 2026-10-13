@@ -1,0 +1,13 @@
+{
+  "source_hashes_verified": true,
+  "plan_sha256": "cf6383d4f6a1e462cabf51bb712fc3753981e920a28a99cce1fce5f547aa3769",
+  "scope": "Deterministic metadata-only selection after terminal verification, before views",
+  "schema_and_boundary_review": true,
+  "executed_selection": false,
+  "graphic_acceptance": false,
+  "initial_vector_sample_bounds": [
+    114,
+    182
+  ],
+  "uncapped_anomaly_expansion": true
+}

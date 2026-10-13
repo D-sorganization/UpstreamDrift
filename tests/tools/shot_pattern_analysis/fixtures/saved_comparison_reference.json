@@ -1,0 +1,2592 @@
+{
+  "description": "Pre-refactor synthetic saved populations, actual scoring and paired intervals. Only changing input/runtime hashes replaced by inventory markers; no frozen study recomputed.",
+  "original_source_sha256": {
+    "matched_sensitivity.py": "95b2aa389be3a21ee30b3a56ef49d5a07ccf2e649f7299fb9189aaad086729cf",
+    "matched_report.py": "0509d3bd122b6c5eec38b90921cd851840d6184534da248c9faeec9cae72e93c",
+    "scenario_scoring.py": "af27ab8357aeb92755c2d25a2d383cbe77f8585eed8fcb894b8ea8bc333edc48",
+    "scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "scoring.py": "6fe34757f75480e0844cfb4d6e6c697ca052d4bb49aea3777feaa05290780f9e",
+    "uncertainty.py": "fb62f5b8a98208bfac3756f692a8d2eb95ce38d0d042c31faa3fea2781857265",
+    "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1",
+    "matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "course_score_vectors.py": "6c7dbe509c6100c217f421ab30a10cc9c46bf5b6ccf4a04682a3e00f27402c2a"
+  },
+  "receipts": {
+    "driver": {
+      "schema": "matched-course-sensitivity/1",
+      "cell": "driver_cell",
+      "input_sha256": {
+        "matrix_plan.json": "<run-specific SHA-256>",
+        "manifest.json": "<run-specific SHA-256>",
+        "run_start.json": "<run-specific SHA-256>",
+        "summary.json": "<run-specific SHA-256>",
+        "shots.csv.gz": "<run-specific SHA-256>"
+      },
+      "execution": {
+        "source_sha256": {
+          "frozen.py": "abc"
+        }
+      },
+      "source_sha256": {
+        "matched_sensitivity.py": "<run-specific SHA-256>",
+        "matched_report.py": "<run-specific SHA-256>",
+        "scenario_scoring.py": "<run-specific SHA-256>",
+        "scoring_cache.py": "<run-specific SHA-256>",
+        "scoring.py": "<run-specific SHA-256>",
+        "uncertainty.py": "<run-specific SHA-256>",
+        "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "<run-specific SHA-256>"
+      },
+      "population": {
+        "total_per_pattern": 3,
+        "common_supported_n": 2,
+        "unsupported_by_pattern": {
+          "Straight": 0,
+          "Draw": 1,
+          "Fade": 0
+        },
+        "supported_by_pattern": {
+          "Straight": 3,
+          "Draw": 2,
+          "Fade": 3
+        },
+        "supported_but_unpaired_by_pattern": {
+          "Straight": 1,
+          "Draw": 0,
+          "Fade": 1
+        },
+        "conditioning": "common_supported_indices_only",
+        "full_population_status": "unavailable_unsupported_terminal_lies"
+      },
+      "limitations": "Historical source-backed strokes gained on hypothetical flat courses; carry treated as final lie, no roll or hazards; unsupported terminal lies are counted but cannot be scored. Intervals cover paired sampling, not model or course uncertainty.",
+      "status": "conditional_only",
+      "scenarios": {
+        "width10_hole350": {
+          "status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "scenario": "Historical PGA tee shot on a flat 350 m hole with a 20 m fairway corridor",
+          "club_id": "driver",
+          "start_lie": "tee",
+          "start_distance_m": 350.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": 350.0,
+          "fairway_half_width_m": 10.0,
+          "green_radius_m": null,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 70,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": -0.14540939613055004,
+              "fairway_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": -0.14540939613055004,
+              "fairway_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": -0.14540939613055004,
+              "fairway_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "width10_hole400": {
+          "status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "scenario": "Historical PGA tee shot on a flat 400 m hole with a 20 m fairway corridor",
+          "club_id": "driver",
+          "start_lie": "tee",
+          "start_distance_m": 400.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": 400.0,
+          "fairway_half_width_m": 10.0,
+          "green_radius_m": null,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 70,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": -0.3780091260325106,
+              "fairway_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": -0.3780091260325106,
+              "fairway_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": -0.3780091260325106,
+              "fairway_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "width10_hole450": {
+          "status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "scenario": "Historical PGA tee shot on a flat 450 m hole with a 20 m fairway corridor",
+          "club_id": "driver",
+          "start_lie": "tee",
+          "start_distance_m": 450.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": 450.0,
+          "fairway_half_width_m": 10.0,
+          "green_radius_m": null,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 70,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": -0.3974788565595462,
+              "fairway_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": -0.3974788565595462,
+              "fairway_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": -0.3974788565595462,
+              "fairway_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "width15_hole350": {
+          "status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "scenario": "Historical PGA tee shot on a flat 350 m hole with a 30 m fairway corridor",
+          "club_id": "driver",
+          "start_lie": "tee",
+          "start_distance_m": 350.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": 350.0,
+          "fairway_half_width_m": 15.0,
+          "green_radius_m": null,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 70,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": -0.14540939613055004,
+              "fairway_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": -0.14540939613055004,
+              "fairway_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": -0.14540939613055004,
+              "fairway_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "width15_hole400": {
+          "status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+          "club_id": "driver",
+          "start_lie": "tee",
+          "start_distance_m": 400.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": 400.0,
+          "fairway_half_width_m": 15.0,
+          "green_radius_m": null,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 70,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": -0.3780091260325106,
+              "fairway_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": -0.3780091260325106,
+              "fairway_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": -0.3780091260325106,
+              "fairway_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "width15_hole450": {
+          "status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "scenario": "Historical PGA tee shot on a flat 450 m hole with a 30 m fairway corridor",
+          "club_id": "driver",
+          "start_lie": "tee",
+          "start_distance_m": 450.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": 450.0,
+          "fairway_half_width_m": 15.0,
+          "green_radius_m": null,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 70,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": -0.3974788565595462,
+              "fairway_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": -0.3974788565595462,
+              "fairway_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": -0.3974788565595462,
+              "fairway_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "width20_hole350": {
+          "status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "scenario": "Historical PGA tee shot on a flat 350 m hole with a 40 m fairway corridor",
+          "club_id": "driver",
+          "start_lie": "tee",
+          "start_distance_m": 350.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": 350.0,
+          "fairway_half_width_m": 20.0,
+          "green_radius_m": null,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 70,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": -0.14540939613055004,
+              "fairway_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": -0.14540939613055004,
+              "fairway_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": -0.14540939613055004,
+              "fairway_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "width20_hole400": {
+          "status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "scenario": "Historical PGA tee shot on a flat 400 m hole with a 40 m fairway corridor",
+          "club_id": "driver",
+          "start_lie": "tee",
+          "start_distance_m": 400.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": 400.0,
+          "fairway_half_width_m": 20.0,
+          "green_radius_m": null,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 70,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": -0.3780091260325106,
+              "fairway_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": -0.3780091260325106,
+              "fairway_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": -0.3780091260325106,
+              "fairway_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "width20_hole450": {
+          "status": "available",
+          "scenario_id": "tee_fairway_rough",
+          "scenario": "Historical PGA tee shot on a flat 450 m hole with a 40 m fairway corridor",
+          "club_id": "driver",
+          "start_lie": "tee",
+          "start_distance_m": 450.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": 450.0,
+          "fairway_half_width_m": 20.0,
+          "green_radius_m": null,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 70,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": -0.3974788565595462,
+              "fairway_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": -0.3974788565595462,
+              "fairway_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": -0.3974788565595462,
+              "fairway_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        }
+      }
+    },
+    "seven_iron": {
+      "schema": "matched-course-sensitivity/1",
+      "cell": "seven_iron_cell",
+      "input_sha256": {
+        "matrix_plan.json": "<run-specific SHA-256>",
+        "manifest.json": "<run-specific SHA-256>",
+        "run_start.json": "<run-specific SHA-256>",
+        "summary.json": "<run-specific SHA-256>",
+        "shots.csv.gz": "<run-specific SHA-256>"
+      },
+      "execution": {
+        "source_sha256": {
+          "frozen.py": "abc"
+        }
+      },
+      "source_sha256": {
+        "matched_sensitivity.py": "<run-specific SHA-256>",
+        "matched_report.py": "<run-specific SHA-256>",
+        "scenario_scoring.py": "<run-specific SHA-256>",
+        "scoring_cache.py": "<run-specific SHA-256>",
+        "scoring.py": "<run-specific SHA-256>",
+        "uncertainty.py": "<run-specific SHA-256>",
+        "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "<run-specific SHA-256>"
+      },
+      "population": {
+        "total_per_pattern": 3,
+        "common_supported_n": 2,
+        "unsupported_by_pattern": {
+          "Straight": 0,
+          "Draw": 1,
+          "Fade": 0
+        },
+        "supported_by_pattern": {
+          "Straight": 3,
+          "Draw": 2,
+          "Fade": 3
+        },
+        "supported_but_unpaired_by_pattern": {
+          "Straight": 1,
+          "Draw": 0,
+          "Fade": 1
+        },
+        "conditioning": "common_supported_indices_only",
+        "full_population_status": "unavailable_unsupported_terminal_lies"
+      },
+      "limitations": "Historical source-backed strokes gained on hypothetical flat courses; carry treated as final lie, no roll or hazards; unsupported terminal lies are counted but cannot be scored. Intervals cover paired sampling, not model or course uncertainty.",
+      "status": "conditional_only",
+      "scenarios": {
+        "radius10": {
+          "status": "available",
+          "scenario_id": "approach_green_rough",
+          "scenario": "Historical PGA approach to a centered circular green with rough outside",
+          "club_id": "seven_iron",
+          "start_lie": "fairway",
+          "start_distance_m": 180.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": null,
+          "fairway_half_width_m": null,
+          "green_radius_m": 10.0,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 112,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "radius15": {
+          "status": "available",
+          "scenario_id": "approach_green_rough",
+          "scenario": "Historical PGA approach to a centered circular green with rough outside",
+          "club_id": "seven_iron",
+          "start_lie": "fairway",
+          "start_distance_m": 180.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": null,
+          "fairway_half_width_m": null,
+          "green_radius_m": 15.0,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 112,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "radius20": {
+          "status": "available",
+          "scenario_id": "approach_green_rough",
+          "scenario": "Historical PGA approach to a centered circular green with rough outside",
+          "club_id": "seven_iron",
+          "start_lie": "fairway",
+          "start_distance_m": 180.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": null,
+          "fairway_half_width_m": null,
+          "green_radius_m": 20.0,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 112,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        }
+      }
+    },
+    "pitching_wedge": {
+      "schema": "matched-course-sensitivity/1",
+      "cell": "pitching_wedge_cell",
+      "input_sha256": {
+        "matrix_plan.json": "<run-specific SHA-256>",
+        "manifest.json": "<run-specific SHA-256>",
+        "run_start.json": "<run-specific SHA-256>",
+        "summary.json": "<run-specific SHA-256>",
+        "shots.csv.gz": "<run-specific SHA-256>"
+      },
+      "execution": {
+        "source_sha256": {
+          "frozen.py": "abc"
+        }
+      },
+      "source_sha256": {
+        "matched_sensitivity.py": "<run-specific SHA-256>",
+        "matched_report.py": "<run-specific SHA-256>",
+        "scenario_scoring.py": "<run-specific SHA-256>",
+        "scoring_cache.py": "<run-specific SHA-256>",
+        "scoring.py": "<run-specific SHA-256>",
+        "uncertainty.py": "<run-specific SHA-256>",
+        "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "<run-specific SHA-256>"
+      },
+      "population": {
+        "total_per_pattern": 3,
+        "common_supported_n": 2,
+        "unsupported_by_pattern": {
+          "Straight": 0,
+          "Draw": 1,
+          "Fade": 0
+        },
+        "supported_by_pattern": {
+          "Straight": 3,
+          "Draw": 2,
+          "Fade": 3
+        },
+        "supported_but_unpaired_by_pattern": {
+          "Straight": 1,
+          "Draw": 0,
+          "Fade": 1
+        },
+        "conditioning": "common_supported_indices_only",
+        "full_population_status": "unavailable_unsupported_terminal_lies"
+      },
+      "limitations": "Historical source-backed strokes gained on hypothetical flat courses; carry treated as final lie, no roll or hazards; unsupported terminal lies are counted but cannot be scored. Intervals cover paired sampling, not model or course uncertainty.",
+      "status": "conditional_only",
+      "scenarios": {
+        "radius10": {
+          "status": "available",
+          "scenario_id": "approach_green_rough",
+          "scenario": "Historical PGA approach to a centered circular green with rough outside",
+          "club_id": "pitching_wedge",
+          "start_lie": "fairway",
+          "start_distance_m": 180.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": null,
+          "fairway_half_width_m": null,
+          "green_radius_m": 10.0,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 112,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "radius15": {
+          "status": "available",
+          "scenario_id": "approach_green_rough",
+          "scenario": "Historical PGA approach to a centered circular green with rough outside",
+          "club_id": "pitching_wedge",
+          "start_lie": "fairway",
+          "start_distance_m": 180.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": null,
+          "fairway_half_width_m": null,
+          "green_radius_m": 15.0,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 112,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        },
+        "radius20": {
+          "status": "available",
+          "scenario_id": "approach_green_rough",
+          "scenario": "Historical PGA approach to a centered circular green with rough outside",
+          "club_id": "pitching_wedge",
+          "start_lie": "fairway",
+          "start_distance_m": 180.0,
+          "target_x_m": 180.0,
+          "hole_distance_m": null,
+          "fairway_half_width_m": null,
+          "green_radius_m": 20.0,
+          "source_backed_status": "available",
+          "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+          "api_evaluated_states": 112,
+          "scored_shots": 6,
+          "interpolation_tolerance_strokes": 1e-12,
+          "baseline": {
+            "id": "broadie-2011-historical-tour-approx",
+            "version": "table9-full-plus-anchor-reconciled-putting/2",
+            "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+            "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+          },
+          "patterns": {
+            "Straight": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Draw": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            },
+            "Fade": {
+              "n": 2,
+              "mean_strokes_gained": 0.9413200569895049,
+              "green_fraction": 1.0
+            }
+          },
+          "paired_benefit_vs_straight": {
+            "Draw": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "Fade": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            }
+          },
+          "limitations": [
+            "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+            "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+            "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+          ]
+        }
+      }
+    },
+    "lean_True": {
+      "schema": "matched-across-lean/1",
+      "status": "partial",
+      "input_sha256": {
+        "matrix_plan.json": "<run-specific SHA-256>",
+        "cell_manifests": {
+          "seven_iron_lean0_curve1_rotation1_shaft_only": "<run-specific SHA-256>",
+          "seven_iron_lean5_curve1_rotation1_shaft_only": "<run-specific SHA-256>",
+          "seven_iron_lean10_curve1_rotation1_shaft_only": "<run-specific SHA-256>"
+        }
+      },
+      "source_sha256": {
+        "matched_sensitivity.py": "<run-specific SHA-256>",
+        "matched_report.py": "<run-specific SHA-256>",
+        "scenario_scoring.py": "<run-specific SHA-256>",
+        "scoring_cache.py": "<run-specific SHA-256>",
+        "scoring.py": "<run-specific SHA-256>",
+        "uncertainty.py": "<run-specific SHA-256>",
+        "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "<run-specific SHA-256>",
+        "matched_lean_control.py": "<run-specific SHA-256>"
+      },
+      "execution": {
+        "source_sha256": {
+          "frozen.py": "abc"
+        }
+      },
+      "population": {
+        "planned_groups": 1,
+        "planned_pairs": 3
+      },
+      "pairs": [
+        {
+          "club_id": "seven_iron",
+          "profile": "shaft_only",
+          "rotation_sd_deg": 1,
+          "curve_scale": 1.0,
+          "target_x_m": 180.0,
+          "target_radius_m": 15.0,
+          "leans_deg": [
+            0.0,
+            5.0
+          ],
+          "difference_direction": "later_lean_minus_earlier_lean",
+          "total_per_physical_population": 4,
+          "cells": [
+            "seven_iron_lean0_curve1_rotation1_shaft_only",
+            "seven_iron_lean5_curve1_rotation1_shaft_only"
+          ],
+          "status": "conditional_only",
+          "common_supported_n": 3,
+          "physical_eligible_rows": 18,
+          "unsupported_by_cell_and_pattern": {
+            "seven_iron_lean0_curve1_rotation1_shaft_only": {
+              "Straight": 0,
+              "Draw": 0,
+              "Fade": 0
+            },
+            "seven_iron_lean5_curve1_rotation1_shaft_only": {
+              "Straight": 0,
+              "Draw": 1,
+              "Fade": 0
+            }
+          },
+          "conditioning": "same shot indices supported in all six physical populations",
+          "patterns": {
+            "Straight": {
+              "radial_error_difference_m": {
+                "estimate": 0.7801410816805617,
+                "lower_95": 0.41421356237309515,
+                "upper_95": 1.0
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 3.0,
+                "lower_95": 1.0000000000000004,
+                "upper_95": 5.000000000000001
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.209103951655907,
+                "lower_95": -0.3183820588076036,
+                "upper_95": -0.13126424569893425
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.9735492655050427,
+                "later_lean": 0.7644453138491357
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Straight",
+              "earlier_lean_deg": 0.0,
+              "later_lean_deg": 5.0
+            },
+            "Draw": {
+              "radial_error_difference_m": {
+                "estimate": 0.7801410816805617,
+                "lower_95": 0.41421356237309515,
+                "upper_95": 1.0
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 3.0,
+                "lower_95": 1.0000000000000004,
+                "upper_95": 5.000000000000001
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.209103951655907,
+                "lower_95": -0.3183820588076036,
+                "upper_95": -0.13126424569893425
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.9735492655050427,
+                "later_lean": 0.7644453138491357
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Draw",
+              "earlier_lean_deg": 0.0,
+              "later_lean_deg": 5.0
+            },
+            "Fade": {
+              "radial_error_difference_m": {
+                "estimate": 0.7801410816805617,
+                "lower_95": 0.41421356237309515,
+                "upper_95": 1.0
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 3.0,
+                "lower_95": 1.0000000000000004,
+                "upper_95": 5.000000000000001
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.209103951655907,
+                "lower_95": -0.3183820588076036,
+                "upper_95": -0.13126424569893425
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.9735492655050427,
+                "later_lean": 0.7644453138491357
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Fade",
+              "earlier_lean_deg": 0.0,
+              "later_lean_deg": 5.0
+            }
+          }
+        },
+        {
+          "club_id": "seven_iron",
+          "profile": "shaft_only",
+          "rotation_sd_deg": 1,
+          "curve_scale": 1.0,
+          "target_x_m": 180.0,
+          "target_radius_m": 15.0,
+          "leans_deg": [
+            0.0,
+            10.0
+          ],
+          "difference_direction": "later_lean_minus_earlier_lean",
+          "total_per_physical_population": 4,
+          "cells": [
+            "seven_iron_lean0_curve1_rotation1_shaft_only",
+            "seven_iron_lean10_curve1_rotation1_shaft_only"
+          ],
+          "status": "unavailable",
+          "reason": "one_or_both_cells_unavailable",
+          "cell_statuses": [
+            "completed",
+            "unavailable"
+          ]
+        },
+        {
+          "club_id": "seven_iron",
+          "profile": "shaft_only",
+          "rotation_sd_deg": 1,
+          "curve_scale": 1.0,
+          "target_x_m": 180.0,
+          "target_radius_m": 15.0,
+          "leans_deg": [
+            5.0,
+            10.0
+          ],
+          "difference_direction": "later_lean_minus_earlier_lean",
+          "total_per_physical_population": 4,
+          "cells": [
+            "seven_iron_lean5_curve1_rotation1_shaft_only",
+            "seven_iron_lean10_curve1_rotation1_shaft_only"
+          ],
+          "status": "unavailable",
+          "reason": "one_or_both_cells_unavailable",
+          "cell_statuses": [
+            "completed",
+            "unavailable"
+          ]
+        }
+      ],
+      "limitations": "Conditional geometric model; shared supported indices only; historical hypothetical course SG with sampling-only paired intervals."
+    },
+    "lean_False": {
+      "schema": "matched-across-lean/1",
+      "status": "complete",
+      "input_sha256": {
+        "matrix_plan.json": "<run-specific SHA-256>",
+        "cell_manifests": {
+          "seven_iron_lean0_curve1_rotation1_shaft_only": "<run-specific SHA-256>",
+          "seven_iron_lean5_curve1_rotation1_shaft_only": "<run-specific SHA-256>",
+          "seven_iron_lean10_curve1_rotation1_shaft_only": "<run-specific SHA-256>"
+        }
+      },
+      "source_sha256": {
+        "matched_sensitivity.py": "<run-specific SHA-256>",
+        "matched_report.py": "<run-specific SHA-256>",
+        "scenario_scoring.py": "<run-specific SHA-256>",
+        "scoring_cache.py": "<run-specific SHA-256>",
+        "scoring.py": "<run-specific SHA-256>",
+        "uncertainty.py": "<run-specific SHA-256>",
+        "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "<run-specific SHA-256>",
+        "matched_lean_control.py": "<run-specific SHA-256>"
+      },
+      "execution": {
+        "source_sha256": {
+          "frozen.py": "abc"
+        }
+      },
+      "population": {
+        "planned_groups": 1,
+        "planned_pairs": 3
+      },
+      "pairs": [
+        {
+          "club_id": "seven_iron",
+          "profile": "shaft_only",
+          "rotation_sd_deg": 1,
+          "curve_scale": 1.0,
+          "target_x_m": 180.0,
+          "target_radius_m": 15.0,
+          "leans_deg": [
+            0.0,
+            5.0
+          ],
+          "difference_direction": "later_lean_minus_earlier_lean",
+          "total_per_physical_population": 4,
+          "cells": [
+            "seven_iron_lean0_curve1_rotation1_shaft_only",
+            "seven_iron_lean5_curve1_rotation1_shaft_only"
+          ],
+          "status": "conditional_only",
+          "common_supported_n": 3,
+          "physical_eligible_rows": 18,
+          "unsupported_by_cell_and_pattern": {
+            "seven_iron_lean0_curve1_rotation1_shaft_only": {
+              "Straight": 0,
+              "Draw": 0,
+              "Fade": 0
+            },
+            "seven_iron_lean5_curve1_rotation1_shaft_only": {
+              "Straight": 0,
+              "Draw": 1,
+              "Fade": 0
+            }
+          },
+          "conditioning": "same shot indices supported in all six physical populations",
+          "patterns": {
+            "Straight": {
+              "radial_error_difference_m": {
+                "estimate": 0.7801410816805617,
+                "lower_95": 0.41421356237309515,
+                "upper_95": 1.0
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 3.0,
+                "lower_95": 1.0000000000000004,
+                "upper_95": 5.000000000000001
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.209103951655907,
+                "lower_95": -0.3183820588076036,
+                "upper_95": -0.13126424569893425
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.9735492655050427,
+                "later_lean": 0.7644453138491357
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Straight",
+              "earlier_lean_deg": 0.0,
+              "later_lean_deg": 5.0
+            },
+            "Draw": {
+              "radial_error_difference_m": {
+                "estimate": 0.7801410816805617,
+                "lower_95": 0.41421356237309515,
+                "upper_95": 1.0
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 3.0,
+                "lower_95": 1.0000000000000004,
+                "upper_95": 5.000000000000001
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.209103951655907,
+                "lower_95": -0.3183820588076036,
+                "upper_95": -0.13126424569893425
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.9735492655050427,
+                "later_lean": 0.7644453138491357
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Draw",
+              "earlier_lean_deg": 0.0,
+              "later_lean_deg": 5.0
+            },
+            "Fade": {
+              "radial_error_difference_m": {
+                "estimate": 0.7801410816805617,
+                "lower_95": 0.41421356237309515,
+                "upper_95": 1.0
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 3.0,
+                "lower_95": 1.0000000000000004,
+                "upper_95": 5.000000000000001
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.209103951655907,
+                "lower_95": -0.3183820588076036,
+                "upper_95": -0.13126424569893425
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.9735492655050427,
+                "later_lean": 0.7644453138491357
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Fade",
+              "earlier_lean_deg": 0.0,
+              "later_lean_deg": 5.0
+            }
+          }
+        },
+        {
+          "club_id": "seven_iron",
+          "profile": "shaft_only",
+          "rotation_sd_deg": 1,
+          "curve_scale": 1.0,
+          "target_x_m": 180.0,
+          "target_radius_m": 15.0,
+          "leans_deg": [
+            0.0,
+            10.0
+          ],
+          "difference_direction": "later_lean_minus_earlier_lean",
+          "total_per_physical_population": 4,
+          "cells": [
+            "seven_iron_lean0_curve1_rotation1_shaft_only",
+            "seven_iron_lean10_curve1_rotation1_shaft_only"
+          ],
+          "status": "available",
+          "common_supported_n": 4,
+          "physical_eligible_rows": 24,
+          "unsupported_by_cell_and_pattern": {
+            "seven_iron_lean0_curve1_rotation1_shaft_only": {
+              "Straight": 0,
+              "Draw": 0,
+              "Fade": 0
+            },
+            "seven_iron_lean10_curve1_rotation1_shaft_only": {
+              "Straight": 0,
+              "Draw": 0,
+              "Fade": 0
+            }
+          },
+          "conditioning": "same shot indices supported in all six physical populations",
+          "patterns": {
+            "Straight": {
+              "radial_error_difference_m": {
+                "estimate": 1.7256797893220437,
+                "lower_95": 1.39881039515431,
+                "upper_95": 1.9449033829176288
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 10.0,
+                "lower_95": 6.0,
+                "upper_95": 14.0
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.3382482319611322,
+                "lower_95": -0.45741080613537477,
+                "upper_95": -0.2057355106860208
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.8509450452179346,
+                "later_lean": 0.5126968132568024
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Straight",
+              "earlier_lean_deg": 0.0,
+              "later_lean_deg": 10.0
+            },
+            "Draw": {
+              "radial_error_difference_m": {
+                "estimate": 1.7256797893220437,
+                "lower_95": 1.39881039515431,
+                "upper_95": 1.9449033829176288
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 10.0,
+                "lower_95": 6.0,
+                "upper_95": 14.0
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.3382482319611322,
+                "lower_95": -0.45741080613537477,
+                "upper_95": -0.2057355106860208
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.8509450452179346,
+                "later_lean": 0.5126968132568024
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Draw",
+              "earlier_lean_deg": 0.0,
+              "later_lean_deg": 10.0
+            },
+            "Fade": {
+              "radial_error_difference_m": {
+                "estimate": 1.7256797893220437,
+                "lower_95": 1.39881039515431,
+                "upper_95": 1.9449033829176288
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 10.0,
+                "lower_95": 6.0,
+                "upper_95": 14.0
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.3382482319611322,
+                "lower_95": -0.45741080613537477,
+                "upper_95": -0.2057355106860208
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.8509450452179346,
+                "later_lean": 0.5126968132568024
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Fade",
+              "earlier_lean_deg": 0.0,
+              "later_lean_deg": 10.0
+            }
+          }
+        },
+        {
+          "club_id": "seven_iron",
+          "profile": "shaft_only",
+          "rotation_sd_deg": 1,
+          "curve_scale": 1.0,
+          "target_x_m": 180.0,
+          "target_radius_m": 15.0,
+          "leans_deg": [
+            5.0,
+            10.0
+          ],
+          "difference_direction": "later_lean_minus_earlier_lean",
+          "total_per_physical_population": 4,
+          "cells": [
+            "seven_iron_lean5_curve1_rotation1_shaft_only",
+            "seven_iron_lean10_curve1_rotation1_shaft_only"
+          ],
+          "status": "conditional_only",
+          "common_supported_n": 3,
+          "physical_eligible_rows": 18,
+          "unsupported_by_cell_and_pattern": {
+            "seven_iron_lean5_curve1_rotation1_shaft_only": {
+              "Straight": 0,
+              "Draw": 1,
+              "Fade": 0
+            },
+            "seven_iron_lean10_curve1_rotation1_shaft_only": {
+              "Straight": 0,
+              "Draw": 0,
+              "Fade": 0
+            }
+          },
+          "conditioning": "same shot indices supported in all six physical populations",
+          "patterns": {
+            "Straight": {
+              "radial_error_difference_m": {
+                "estimate": 0.9275607935253252,
+                "lower_95": 0.8218544151266945,
+                "upper_95": 1.0
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 4.999999999999999,
+                "lower_95": 3.0000000000000004,
+                "upper_95": 6.999999999999997
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.192776293172348,
+                "lower_95": -0.24962121696585782,
+                "upper_95": -0.1131535717528323
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.7644453138491357,
+                "later_lean": 0.5716690206767877
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Straight",
+              "earlier_lean_deg": 5.0,
+              "later_lean_deg": 10.0
+            },
+            "Draw": {
+              "radial_error_difference_m": {
+                "estimate": 0.9275607935253252,
+                "lower_95": 0.8218544151266945,
+                "upper_95": 1.0
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 4.999999999999999,
+                "lower_95": 3.0000000000000004,
+                "upper_95": 6.999999999999997
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.192776293172348,
+                "lower_95": -0.24962121696585782,
+                "upper_95": -0.1131535717528323
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.7644453138491357,
+                "later_lean": 0.5716690206767877
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Draw",
+              "earlier_lean_deg": 5.0,
+              "later_lean_deg": 10.0
+            },
+            "Fade": {
+              "radial_error_difference_m": {
+                "estimate": 0.9275607935253252,
+                "lower_95": 0.8218544151266945,
+                "upper_95": 1.0
+              },
+              "squared_target_error_difference_m2": {
+                "estimate": 4.999999999999999,
+                "lower_95": 3.0000000000000004,
+                "upper_95": 6.999999999999997
+              },
+              "containment_fraction_difference": {
+                "estimate": 0.0,
+                "lower_95": 0.0,
+                "upper_95": 0.0
+              },
+              "role_mapping": {
+                "Straight": "physical pattern at earlier lean",
+                "Draw": "same physical pattern at later lean",
+                "Fade": "duplicate of earlier lean for scorer API shape only; not an observation"
+              },
+              "course_sg_difference": {
+                "estimate": -0.192776293172348,
+                "lower_95": -0.24962121696585782,
+                "upper_95": -0.1131535717528323
+              },
+              "course_sg_means": {
+                "earlier_lean": 0.7644453138491357,
+                "later_lean": 0.5716690206767877
+              },
+              "course_sg": {
+                "status": "available",
+                "scenario": "Historical PGA approach to a centered circular green with rough outside",
+                "baseline": {
+                  "id": "broadie-2011-historical-tour-approx",
+                  "version": "table9-full-plus-anchor-reconciled-putting/2",
+                  "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+                  "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+                },
+                "api_evaluated_states": 112
+              },
+              "physical_pattern": "Fade",
+              "earlier_lean_deg": 5.0,
+              "later_lean_deg": 10.0
+            }
+          }
+        }
+      ],
+      "limitations": "Conditional geometric model; shared supported indices only; historical hypothetical course SG with sampling-only paired intervals."
+    },
+    "across_lean": {
+      "schema": "matched-explicit-source-pair/1",
+      "comparison_kind": "across_lean",
+      "status": "conditional_only",
+      "reason": "",
+      "target_x_m": 77.40247724866299,
+      "total_n_per_population": 4,
+      "common_supported_n": 3,
+      "conditioning": "same_indices_supported_in_all_six_populations",
+      "input_error_tolerance": 1e-12,
+      "input_error_max_abs_difference": 4.2674197509029455e-16,
+      "input_error_comparison": "all centered primitive input errors compared directly",
+      "analysis_source_sha256": {
+        "matched_sensitivity.py": "<run-specific SHA-256>",
+        "matched_report.py": "<run-specific SHA-256>",
+        "scenario_scoring.py": "<run-specific SHA-256>",
+        "scoring_cache.py": "<run-specific SHA-256>",
+        "scoring.py": "<run-specific SHA-256>",
+        "uncertainty.py": "<run-specific SHA-256>",
+        "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "<run-specific SHA-256>",
+        "matched_lean_control.py": "<run-specific SHA-256>",
+        "course_score_vectors.py": "<run-specific SHA-256>"
+      },
+      "source_protocols": [
+        "original_primary/1",
+        "original_primary/1"
+      ],
+      "source_transition_receipt_sha256": null,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "<run-specific SHA-256>",
+          "source_cell_manifest_sha256": "<run-specific SHA-256>",
+          "source_csv_sha256": "<run-specific SHA-256>"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "<run-specific SHA-256>",
+          "source_cell_manifest_sha256": "<run-specific SHA-256>",
+          "source_csv_sha256": "<run-specific SHA-256>"
+        }
+      ],
+      "unsupported_by_source_and_pattern": {
+        "first": {
+          "Straight": 0,
+          "Draw": 0,
+          "Fade": 0
+        },
+        "second": {
+          "Straight": 0,
+          "Draw": 1,
+          "Fade": 0
+        }
+      },
+      "allowed_config_differences": [
+        "club.shaft_lean_deg"
+      ],
+      "patterns": {
+        "Straight": {
+          "radial_error_difference_m": {
+            "estimate": -0.02702174896585798,
+            "lower_95": -0.04999999999999716,
+            "upper_95": 0.003112887414927157
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": -0.017499999999999415,
+            "lower_95": -0.037499999999998535,
+            "upper_95": 0.0024999999999997247
+          },
+          "containment_fraction_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": 0.0002766021374543219,
+            "lower_95": -7.416159630491137e-05,
+            "upper_95": 0.0008142617003058517
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.7560814515119008,
+            "later_lean": 0.7563580536493549
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Straight",
+          "first_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 5,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "first_curve_scale": 1.0,
+          "second_curve_scale": 1.0
+        },
+        "Draw": {
+          "radial_error_difference_m": {
+            "estimate": -0.02702174896585798,
+            "lower_95": -0.04999999999999716,
+            "upper_95": 0.003112887414927157
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": -0.017499999999999415,
+            "lower_95": -0.037499999999998535,
+            "upper_95": 0.0024999999999997247
+          },
+          "containment_fraction_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": 0.0002766021374543219,
+            "lower_95": -7.416159630491137e-05,
+            "upper_95": 0.0008142617003058517
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.7560814515119008,
+            "later_lean": 0.7563580536493549
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Draw",
+          "first_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 5,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "first_curve_scale": 1.0,
+          "second_curve_scale": 1.0
+        },
+        "Fade": {
+          "radial_error_difference_m": {
+            "estimate": -0.02702174896585798,
+            "lower_95": -0.04999999999999716,
+            "upper_95": 0.003112887414927157
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": -0.017499999999999415,
+            "lower_95": -0.037499999999998535,
+            "upper_95": 0.0024999999999997247
+          },
+          "containment_fraction_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": 0.0002766021374543219,
+            "lower_95": -7.416159630491137e-05,
+            "upper_95": 0.0008142617003058517
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.7560814515119008,
+            "later_lean": 0.7563580536493549
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Fade",
+          "first_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 5,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "first_curve_scale": 1.0,
+          "second_curve_scale": 1.0
+        }
+      },
+      "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
+      "course_scoring_effect_modification": {
+        "Draw": {
+          "estimate": 0.0,
+          "lower_95": 0.0,
+          "upper_95": 0.0
+        },
+        "Fade": {
+          "estimate": 0.0,
+          "lower_95": 0.0,
+          "upper_95": 0.0
+        }
+      },
+      "course_scoring_effect_modification_scope": "(curve\u2212Straight) in the second condition minus (curve\u2212Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit",
+      "course_scoring_provenance": {
+        "source_backed_status": "available",
+        "scenario_id": "approach_green_rough",
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "api_evaluated_states_per_condition": 112,
+        "index_order": "ascending_common_shot_index"
+      }
+    },
+    "curve_strength": {
+      "schema": "matched-explicit-source-pair/1",
+      "comparison_kind": "curve_strength",
+      "status": "conditional_only",
+      "reason": "",
+      "target_x_m": 77.40247724866299,
+      "total_n_per_population": 4,
+      "common_supported_n": 3,
+      "conditioning": "same_indices_supported_in_all_six_populations",
+      "input_error_tolerance": 1e-12,
+      "input_error_max_abs_difference": 0.0,
+      "input_error_comparison": "all centered primitive input errors compared directly",
+      "analysis_source_sha256": {
+        "matched_sensitivity.py": "<run-specific SHA-256>",
+        "matched_report.py": "<run-specific SHA-256>",
+        "scenario_scoring.py": "<run-specific SHA-256>",
+        "scoring_cache.py": "<run-specific SHA-256>",
+        "scoring.py": "<run-specific SHA-256>",
+        "uncertainty.py": "<run-specific SHA-256>",
+        "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "<run-specific SHA-256>",
+        "matched_lean_control.py": "<run-specific SHA-256>",
+        "course_score_vectors.py": "<run-specific SHA-256>"
+      },
+      "source_protocols": [
+        "original_primary/1",
+        "original_primary/1"
+      ],
+      "source_transition_receipt_sha256": null,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "<run-specific SHA-256>",
+          "source_cell_manifest_sha256": "<run-specific SHA-256>",
+          "source_csv_sha256": "<run-specific SHA-256>"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "<run-specific SHA-256>",
+          "source_cell_manifest_sha256": "<run-specific SHA-256>",
+          "source_csv_sha256": "<run-specific SHA-256>"
+        }
+      ],
+      "unsupported_by_source_and_pattern": {
+        "first": {
+          "Straight": 0,
+          "Draw": 0,
+          "Fade": 0
+        },
+        "second": {
+          "Straight": 0,
+          "Draw": 1,
+          "Fade": 0
+        }
+      },
+      "allowed_config_differences": [
+        "curve_scale"
+      ],
+      "patterns": {
+        "Straight": {
+          "radial_error_difference_m": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "containment_fraction_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.7560814515119008,
+            "later_lean": 0.7560814515119008
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Straight",
+          "first_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "first_curve_scale": 1.0,
+          "second_curve_scale": 2.0
+        },
+        "Draw": {
+          "radial_error_difference_m": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "containment_fraction_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.7560814515119008,
+            "later_lean": 0.7560814515119008
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Draw",
+          "first_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "first_curve_scale": 1.0,
+          "second_curve_scale": 2.0
+        },
+        "Fade": {
+          "radial_error_difference_m": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "containment_fraction_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.7560814515119008,
+            "later_lean": 0.7560814515119008
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Fade",
+          "first_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "first_curve_scale": 1.0,
+          "second_curve_scale": 2.0
+        }
+      },
+      "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
+      "course_scoring_effect_modification": {
+        "Draw": {
+          "estimate": 0.0,
+          "lower_95": 0.0,
+          "upper_95": 0.0
+        },
+        "Fade": {
+          "estimate": 0.0,
+          "lower_95": 0.0,
+          "upper_95": 0.0
+        }
+      },
+      "course_scoring_effect_modification_scope": "(curve\u2212Straight) in the second condition minus (curve\u2212Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit",
+      "course_scoring_provenance": {
+        "source_backed_status": "available",
+        "scenario_id": "approach_green_rough",
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "api_evaluated_states_per_condition": 112,
+        "index_order": "ascending_common_shot_index"
+      }
+    },
+    "shaft_rotation_sd": {
+      "schema": "matched-explicit-source-pair/1",
+      "comparison_kind": "shaft_rotation_sd",
+      "status": "conditional_only",
+      "reason": "",
+      "target_x_m": 77.40247724866299,
+      "total_n_per_population": 4,
+      "common_supported_n": 3,
+      "conditioning": "same_indices_supported_in_all_six_populations",
+      "input_error_tolerance": 1e-12,
+      "input_error_max_abs_difference": 0.0,
+      "input_error_comparison": "shaft_rotation_deg divided by its configured SD; remaining centered primitive errors compared directly",
+      "analysis_source_sha256": {
+        "matched_sensitivity.py": "<run-specific SHA-256>",
+        "matched_report.py": "<run-specific SHA-256>",
+        "scenario_scoring.py": "<run-specific SHA-256>",
+        "scoring_cache.py": "<run-specific SHA-256>",
+        "scoring.py": "<run-specific SHA-256>",
+        "uncertainty.py": "<run-specific SHA-256>",
+        "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "<run-specific SHA-256>",
+        "matched_lean_control.py": "<run-specific SHA-256>",
+        "course_score_vectors.py": "<run-specific SHA-256>"
+      },
+      "source_protocols": [
+        "original_primary/1",
+        "original_primary/1"
+      ],
+      "source_transition_receipt_sha256": null,
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "<run-specific SHA-256>",
+          "source_cell_manifest_sha256": "<run-specific SHA-256>",
+          "source_csv_sha256": "<run-specific SHA-256>"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "<run-specific SHA-256>",
+          "source_cell_manifest_sha256": "<run-specific SHA-256>",
+          "source_csv_sha256": "<run-specific SHA-256>"
+        }
+      ],
+      "unsupported_by_source_and_pattern": {
+        "first": {
+          "Straight": 0,
+          "Draw": 0,
+          "Fade": 0
+        },
+        "second": {
+          "Straight": 0,
+          "Draw": 1,
+          "Fade": 0
+        }
+      },
+      "allowed_config_differences": [
+        "noise.standard_deviations[0]"
+      ],
+      "patterns": {
+        "Straight": {
+          "radial_error_difference_m": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "containment_fraction_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.7560814515119008,
+            "later_lean": 0.7560814515119008
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Straight",
+          "first_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "first_curve_scale": 1.0,
+          "second_curve_scale": 1.0
+        },
+        "Draw": {
+          "radial_error_difference_m": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "containment_fraction_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.7560814515119008,
+            "later_lean": 0.7560814515119008
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Draw",
+          "first_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "first_curve_scale": 1.0,
+          "second_curve_scale": 1.0
+        },
+        "Fade": {
+          "radial_error_difference_m": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "containment_fraction_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.7560814515119008,
+            "later_lean": 0.7560814515119008
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Fade",
+          "first_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 1.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 0,
+            "curve_scale": 1.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "first_curve_scale": 1.0,
+          "second_curve_scale": 1.0
+        }
+      },
+      "limitations": "Paired conditional geometric simulation; matched-condition changes include nominal re-matching and do not isolate causal curvature; no inference of mirrored outcome symmetry; source protocols remain separate.",
+      "course_scoring_effect_modification": {
+        "Draw": {
+          "estimate": 0.0,
+          "lower_95": 0.0,
+          "upper_95": 0.0
+        },
+        "Fade": {
+          "estimate": 0.0,
+          "lower_95": 0.0,
+          "upper_95": 0.0
+        }
+      },
+      "course_scoring_effect_modification_scope": "(curve\u2212Straight) in the second condition minus (curve\u2212Straight) in the first; paired on the same six-population shot-index intersection; positive means increased relative benefit",
+      "course_scoring_provenance": {
+        "source_backed_status": "available",
+        "scenario_id": "approach_green_rough",
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "api_evaluated_states_per_condition": 112,
+        "index_order": "ascending_common_shot_index"
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schema": "shot-pattern-pre-pr-preliminary/1",
+  "status": "failed_incomplete_preliminary",
+  "purpose": "Read-only early gate audit while final Monte Carlo cells were running; not final PR acceptance",
+  "base_ref": "10c7d61aa686e456b7962f1d9aa9ecfda4e8405f",
+  "to_ref_argument": "HEAD",
+  "caveat": "HEAD advanced during the long run as independent evidence/type commits landed; rerun against a fixed final SHA after final results and report changes. The two pytest selections were interrupted deliberately to bound CPU use during production simulation.",
+  "entrypoint": "/home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py",
+  "working_directory": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift",
+  "python": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+  "environment": {
+    "PYTHONPATH": "/home/dieterolson/Repositories/Repository_Management:/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift",
+    "MYPYPATH": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift",
+    "QT_QPA_PLATFORM": "offscreen",
+    "MPLBACKEND": "Agg",
+    "MUJOCO_GL": "egl",
+    "SDL_VIDEODRIVER": "dummy",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "exit_code": 1,
+  "log": "pre_pr_preliminary_log.txt",
+  "log_sha256": "dcb09c97f1f2097229fc6c18eaf8c91db04d4a97657f403513c89021ea7577ab",
+  "gates": {
+    "lint_and_format": {
+      "status": "fail",
+      "detail": "Six changed files need Ruff format: academic_plots.py, matched_gui.py, matched_report_plots.py, test_shot_pattern_archives.py, test_academic_plots.py, test_matched_report_plots.py. Scientific/plot sources remain frozen during final runs."
+    },
+    "diff_mypy": {
+      "status": "fail",
+      "detail": "15 errors in five changed files: density.py lines 202-203; independent_pilot_audit.py lines 40, 41, 140, 151; independent_control_scoring.py line 110; independent_geometry_derivatives.py lines 76, 82, 92, 94, 110; independent_contact_audit.py lines 90 and 94 (four type complaints). Density is frozen until final runs finish; audit scripts are outside the frozen simulation source."
+    },
+    "affected_tests": {
+      "status": "fail_incomplete",
+      "detail": "SIGINT after 368.41 s and 14% displayed progress: 217 passed, 15 failed, 4 skipped, 21 deselected. The 15 visible failures are unchanged tests/api/test_physics_api.py endpoints returning 401 Unauthorized instead of expected 200/400/422. Neither that test nor src/api changed in this branch. No conclusion about unexecuted tests."
+    },
+    "consistency_tests": {
+      "status": "interrupted_incomplete",
+      "detail": "The runner selected pytest -m consistency -q tests/ and was interrupted after more than 2 minutes of collection beside production simulations; no pass claim."
+    },
+    "semgrep_and_import_policy": {
+      "status": "pass_with_skip",
+      "detail": "Import-policy checks passed; Semgrep was not installed and its advisory scan was skipped."
+    },
+    "policy_and_fragment_validators": {
+      "status": "fail",
+      "detail": "Divergence inventory check failed and requested --write synchronization; source review is required before refreshing generated metadata."
+    },
+    "fleet_policy_gate": {
+      "status": "fail",
+      "detail": "Shared DEVELOPMENT_LOG.md has existing unusable Last verified fields, missing DL-#9349 State/Owner, 143 active entries above ceiling 75, and size above 200000 bytes. File is unchanged by this branch; baseline remains to be independently verified."
+    },
+    "workflow_lint": {
+      "status": "pass",
+      "detail": "No workflow files changed."
+    }
+  },
+  "publication_gate": "blocked; final canonical pre-PR run required after immutable study completion and reviewed source transition"
+}

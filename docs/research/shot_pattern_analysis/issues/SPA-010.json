@@ -1,0 +1,10 @@
+{
+  "local_id": "SPA-010",
+  "title": "Reject Incompatible Delivery Baselines in Saved Experiment Comparisons",
+  "body": "## Problem\n\nSaved comparison validated seed, shot count, and target but could accept differing clubs, speeds, or lofts at an identical target.\n\n## Acceptance Criteria\n\nRequire matching club, nominal delivery, numerical integration, and target radius. Permit the deliberately compared face variability, curve magnitude, and coupling mode. Write failing mismatch tests before the contract.\n\n## Validation\n\ntests/tools/shot_pattern_analysis/test_comparison.py\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11849,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11849",
+  "issue_number": 11849,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11849"
+}

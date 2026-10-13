@@ -1,0 +1,59 @@
+.........                                                                [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+============================= slowest 20 durations =============================
+0.33s setup    tests/research/test_supplement_revision_adapter.py::test_reconstructs_exact_order_and_verified_alias
+0.05s call     tests/research/test_supplement_revision_adapter.py::test_adapter_calls_only_selected_renderer
+0.03s call     tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[unproved_alias]
+0.03s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[protocol]
+0.02s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[population]
+0.02s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[unproved_alias]
+0.02s call     tests/research/test_supplement_revision_adapter.py::test_reconstructs_exact_order_and_verified_alias
+0.02s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[target]
+0.02s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[duplicate]
+0.02s setup    tests/research/test_supplement_revision_adapter.py::test_adapter_calls_only_selected_renderer
+0.02s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[csv]
+0.02s setup    tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[order]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[duplicate]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[protocol]
+0.01s call     tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[csv]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[order]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[population]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_adapter_calls_only_selected_renderer
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[csv]
+0.01s teardown tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[unproved_alias]
+=========================== short test summary info ============================
+PASSED tests/research/test_supplement_revision_adapter.py::test_reconstructs_exact_order_and_verified_alias
+PASSED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[order]
+PASSED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[protocol]
+PASSED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[target]
+PASSED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[population]
+PASSED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[csv]
+PASSED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[duplicate]
+PASSED tests/research/test_supplement_revision_adapter.py::test_rejects_wrong_identity_or_changed_source[unproved_alias]
+PASSED tests/research/test_supplement_revision_adapter.py::test_adapter_calls_only_selected_renderer

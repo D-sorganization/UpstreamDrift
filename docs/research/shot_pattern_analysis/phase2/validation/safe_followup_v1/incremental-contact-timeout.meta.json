@@ -1,0 +1,28 @@
+{
+  "source_commit_after_merge": "cb4948eb1b694c525435cb42281eed1a04f06b55",
+  "source_sha256": {
+    "src/shared/python/physics/incremental_contact_kernel.py": "4a5707a445254245567400c5cff273ca85dd360e90b305c6d02995020e28a939",
+    "tests/unit/physics/test_incremental_contact.py": "89eef21300abba2b9fa3f101be554d4142773e98c711b67a564b5aa6927d0af8"
+  },
+  "command": "env -u GH_TOKEN -u GITHUB_TOKEN -u GITHUB_PERSONAL_ACCESS_TOKEN PYTHONPATH=<own checkout> QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy /tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest tests/unit/physics/test_incremental_contact.py::test_offcenter_contact_conserves_momentum_and_remains_passive -p no:pytestqt --no-cov -q --tb=short",
+  "exit_code": 1,
+  "outcome": "Configured pytest timeout while Numba compiled the contact integrator; no numerical assertion completed.",
+  "log": "incremental-contact-timeout.txt.gz",
+  "log_gzip_sha256": "a6ea212e561d81a93b39b7a97932c34ba8f020f044644837f84ea459b3da98e4",
+  "warmup": {
+    "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python -c 'from tests.unit.physics.test_incremental_contact import test_offcenter_contact_conserves_momentum_and_remains_passive as warm; warm(); print(\"warmup_completed\")'",
+    "environment": "Same checkout PYTHONPATH and offscreen variables as the test command; GitHub token variables unset",
+    "start_utc": "2026-10-11T23:35:09Z",
+    "end_utc": "2026-10-11T23:37:16Z",
+    "exit_code": 0,
+    "log": "incremental-contact-warmup.txt.gz",
+    "log_gzip_sha256": "65328612835d2842dc05113b025f09ce765c5d3ebda70f22e266f258c8fc42eb"
+  },
+  "after_warmup": {
+    "command": "Same pytest node and environment as initial command, with original configured timeout",
+    "exit_code": 1,
+    "outcome": "Timeout again during Numba contact-integrator typing; no numerical assertion completed.",
+    "log": "incremental-contact-after-warmup.txt.gz",
+    "log_gzip_sha256": "b2dd0fba3158a75f15a99b12cf9b00c0fba312dd3c25ee6a1ba355c8132719a4"
+  }
+}

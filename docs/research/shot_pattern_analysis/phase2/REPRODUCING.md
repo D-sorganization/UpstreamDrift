@@ -1,0 +1,299 @@
+# Reproducing the Matched Study Publication
+
+This workflow rebuilds figures, statistics, and the narrative from the preserved
+final shot rows. It does not run new Monte Carlo trials or replace the accepted
+simulation evidence. Use the [Archive Restoration Instructions](data_archives/README.md)
+to restore `final_v1`, `control_final_v1`, `supplement_final_v1`, and the
+`control_pilot_v1` provenance prerequisite first. The archive bundle names differ
+from the first two restored directory names; use the explicit mapping in that
+guide. Keep tracked `common_targets.json`, `FINAL_RUN_ACCEPTANCE.md`, and
+`validation/independent_control_pilot_audit.json` in the study directory layout.
+The [Turnover](TURNOVER.md) identifies current publication acceptance and blockers.
+
+## Environment and Source Identity
+
+Run from the repository root with the pinned Tools submodule initialized and the
+study dependencies installed. The accepted environment used Python 3.12.13,
+NumPy 2.2.6, SciPy 1.18.1, Numba 0.68.0, and llvmlite 0.50.0. Exact simulation
+source, native-library, runtime, input, and protocol hashes remain in the saved
+receipts; installing similarly named packages does not reproduce those identities.
+
+The supplemental numerical snapshot was verified at commit `256745676e`.
+Subsequent renderer and GUI changes are reporting revisions, not new execution
+snapshots. Keep the original and adapted-bound protocols separate. Never rewrite
+historical manifests to make them match newer code. See the
+[Supplemental Completion Review](validation/supplement_final_independent_completion_review_v1/REVIEW.md).
+
+The current publication regeneration started from `4bb2be7362`. Its
+[Start Receipt and Frozen Source Inventory](validation/publication_regeneration_v4_start/start.json)
+and adjacent executable wrapper copies document the actual invocation. A start
+receipt proves neither completion nor graphical acceptance. The original-figure
+wrapper checks the accepted execution snapshot, native library and runtime;
+only `academic_plots.py` and `matched_report_plots.py` are permitted reporting
+differences in that execution snapshot. The FINAL_LAYOUT supplemental job was stopped after protocol filename collisions
+were identified. Retain that checkout unchanged as historical execution evidence;
+do not resume its renderer or accept its incomplete outputs.
+The original MAIN/BOUNDS source freezes ended after control recovery completed.
+
+The caption-only original-figure revision uses BOUNDS candidate `c9c0fb194f` and the [V6 Preflight and Wrapper](validation/original_final_figures_rendering_v6_preflight/README.md). The first v5 launch failed its output-name contract before rendering; the corrected invocation keeps canonical names. Historical v4 outputs are retained under `presentation_preview_rejected_final_v4`, with [Exact-Byte Relocation Evidence](validation/original_final_figures_v4_preservation/relocation.json). A source/input preflight alone does not establish final graphical acceptance;
+completed primary/control review receipts now provide that separate evidence.
+
+The supplemental caption candidate is `14f27706e4` (including parent
+`b9f1ad05b4`) in the isolated FINAL_LAYOUT checkout. Its
+[Actual-Card Qualification](validation/supplement_social_context_candidate_v1/actual_card_review.json)
+precedes the [V4 Source-Bound Preflight](validation/supplement_rendering_revision_v4/preflight.json).
+V4 later terminated without publishing its statistics or an exit receipt.
+The [Interruption Record](validation/supplement_rendering_revision_v4_interruption/interruption.json)
+confirms both processes were absent and all bound source/input hashes were unchanged.
+The [V5 Restart](validation/supplement_rendering_revision_v5/launcher.json)
+was intentionally stopped with process exit code -15 after the naming defect was
+confirmed. The [Stop Receipt and Partial Inventory](validation/supplement_v5_protocol_collision_stop/)
+preserve 2,594 incomplete output files. No final pipeline acceptance receipt was
+published. The numerical artifacts remain byte-identical to the preserved v3 set.
+The retired v3 outputs are preserved under
+`presentation_preview_rejected_supplement_v3/supplement_report_v1`, with
+[Terminal and Exact-Byte Preservation Evidence](validation/supplement_v3_retirement_for_caption_revision/retirement.json).
+
+Original v6 primary outputs passed the
+[Primary Manifest and Visual Review](validation/original_final_graphics_independent_review_v6/primary_review.json).
+The outer job later terminated without a control terminal receipt. The
+[Guarded Control-Only Recovery](validation/original_control_recovery_v6/completion.json)
+preserved incomplete control output and completed the control set with exit zero.
+Its [Independent Control Review](validation/original_final_graphics_independent_review_v6/control_review.json)
+accepted the changed cards after complete output reconciliation. No main figures
+or simulated shots were regenerated by this recovery.
+
+The supplemental pipeline separately binds 15 postprocessing source files,
+including `matched_formatting.py` and the exact filename-identity helper `matched_figure_identity.py`, in
+`REPORT_SUPPLEMENT_PIPELINE.json`. This reporting identity does not replace the
+historical 54-source execution identity. The final receipt is written only after
+all statistics and figures finish and the source/input checks pass. A directory
+containing tables but lacking that receipt is incomplete.
+
+For this saved inventory, expect 384 paired comparisons: 164 curve-strength,
+164 shaft-SD and 56 across-lean contrasts. The across-lean records now include
+the direct change in Draw/Fade-versus-Straight scoring benefit on the same
+six-population intersection. For this across-lean interaction addition, existing
+per-pattern estimates and populations must remain unchanged from the preserved
+earlier tables. New interaction fields and
+their reporting provenance are expected additions; subtracting separately
+conditioned means or confidence limits is not an equivalent reproduction.
+
+## Qualified Recovery From the Rejected V5 Output
+
+The v6 producer is frozen at PRESENTATION commit `4023111d2a`. Its
+[Component Qualification](validation/protocol_identity_final_qualification_v1/review.json),
+[Source and Input Snapshot](validation/protocol_name_recovery_v6/frozen_snapshot.json),
+and [Executed Wrapper](validation/supplement_rendering_revision_v6/executed_wrapper.py.txt)
+record the reviewed configuration. Its launcher records the live process identities;
+only a terminal receipt plus independent output review can establish completion.
+Rejected v5 was moved with exact before/after hashes to
+`presentation_preview_rejected_supplement_v5/supplement_report_v1`.
+
+The recovery adds `--expected-numeric-hashes` to the existing supplemental CLI.
+Its value is `validation/protocol_name_recovery_v6/expected_numeric_hashes.json`:
+exactly seven filename-to-SHA256 entries. This guard binds the historical source
+locations and numerical bytes, checks them before graphics, and rechecks before
+publication. Reproduction at different source paths may change JSON provenance;
+the general recipe below therefore leaves this optional recovery guard unset.
+Preserve historical hashes rather than replacing them to pass a mismatch.
+The wrapper also binds the exact native/runtime snapshot and all 60 study/report
+Python sources. Set `PYTHONPATH` to the frozen producer checkout when invoking
+its saved `/tmp` wrapper, as recorded in the launcher environment correction.
+
+## Rebuild From Saved Final Data
+
+Use a separate working copy for reproduction. Preserve its existing published
+figure directories, supplemental-report directory, report and companion inventories
+in a backup location before running these commands. The figure builders reject
+nonempty destinations. Keep the study directory layout below: the narrative
+links its scientific design, original plan, and validation references relative
+to that directory. These commands are for rebuilding, not for appending to an
+active publication run.
+
+The CLI recipe below invokes the builders directly. It does not reproduce the
+outer original-figure wrapper's runtime/native snapshot checks by itself. To
+reproduce those guarantees, apply the snapshot comparison in the preserved
+wrapper before rendering and verify the frozen Python inventory again after
+rendering. Its absolute paths identify the recorded run; adapt those paths to
+the separate reproduction checkout while retaining the comparison logic and
+unchanged accepted hashes. A different runtime is a new reproduction environment
+and must be disclosed rather than silently accepted as the original one.
+
+The current jobs preserve superseded original graphics under
+`presentation_preview_rejected_final_v3/{final_figures_v1,control_final_figures_v1}`
+and the intentionally stopped supplemental output under
+`presentation_preview_rejected_supplement_v2/supplement_report_v1`. These are
+rejected or partial evidence, not publication inputs. Their exact file hashes
+and stop receipts are retained in
+[Preservation Evidence](validation/reporting_revision_preservation_v4/).
+Historical receipts may still name the original absolute output locations;
+use the preservation inventory to locate the identical bytes without rewriting
+those receipts. Restore sparse historical checkouts before running commands
+that depend on their omitted files.
+
+```bash
+set -e
+export QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg
+export MUJOCO_GL=egl SDL_VIDEODRIVER=dummy OPENBLAS_NUM_THREADS=1
+study_phase=docs/research/shot_pattern_analysis/phase2
+study_output="$study_phase"
+test ! -e "$study_output/final_figures_v1"
+test ! -e "$study_output/control_final_figures_v1"
+test ! -e "$study_output/supplement_report_v1"
+
+python -m scripts.research.shot_pattern_analysis.build_final_figures \
+  "$study_phase/final_v1" "$study_output/final_figures_v1"
+python -m scripts.research.shot_pattern_analysis.build_final_figures \
+  "$study_phase/control_final_v1" "$study_output/control_final_figures_v1"
+
+python -m src.tools.shot_pattern_analysis.matched_supplement_pipeline \
+  --original-primary "$study_phase/final_v1" \
+  --original-control "$study_phase/control_final_v1" \
+  --pw-primary-face-bounds "$study_phase/supplement_final_v1/pw_primary_face" \
+  --pw-control-face-bounds "$study_phase/supplement_final_v1/pw_control_face" \
+  --driver-control-speed-bounds "$study_phase/supplement_final_v1/driver_control_speed" \
+  --inventory "$study_phase/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json" \
+  --transition-receipt "$study_phase/source_transition_supplement.json" \
+  --transition-sha256 cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981 \
+  --output-dir "$study_output/supplement_report_v1"
+
+python -m scripts.research.shot_pattern_analysis.build_final_report \
+  "$study_phase/final_v1" "$study_phase/control_final_v1" \
+  "$study_output/REPORT.md" \
+  --supplement-dir "$study_output/supplement_report_v1" \
+  --primary-figures "$study_output/final_figures_v1" \
+  --control-figures "$study_output/control_final_figures_v1"
+python -m scripts.research.shot_pattern_analysis.build_pdf \
+  "$study_output/REPORT.md" "$study_output/REPORT.pdf"
+```
+
+The report builder checks saved input identities and figure hashes and produces
+`REPORT_CELLS.csv`, `REPORT_LEAN.csv`, and `REPORT_PUBLICATION_RECEIPT.json`.
+The supplemental receipt binds its separate inventories, common-population
+contrasts, figures, and postprocessing sources. Preserve failed or unavailable
+conditions and unsupported rows: a conditional result is not a result for all
+attempted deliveries.
+
+The supplemental pipeline computes all paired statistics before creating its
+output directory, then renders each unique supplemental cell and every available
+comparison. A quiet log or an absent output directory during that calculation
+does not establish a stalled or terminated job. Check the actual process handle;
+do not restart from an observation timeout. Allow the full run to produce its
+terminal receipt before invoking the narrative builder.
+
+The PDF builder uses Pandoc and ReportLab, separately from the app's LaTeX editor.
+Its success cannot resolve or establish acceptance of the recorded Tectonic
+bundle-download failure. Keep the user's existing LaTeX editor open and record
+its actual compilation result separately.
+
+## Revise Saved Figures Without Recomputing Statistics
+
+**This workflow requires a valid completed parent.** Interrupted v5 has confirmed protocol filename collisions and must not be used as that parent. Its seven numerical artifacts remain byte-identical to the reviewed v3 outputs. The recovery will use a fresh run of the existing saved-data pipeline after protocol-qualified naming and pre-render numeric-parity checks are qualified. It does not rerun Monte Carlo shots. See [Current Turnover](TURNOVER.md) and [Collision Evidence](validation/supplement_v5_protocol_collision_stop/collision_findings.json).
+
+The qualified child-publication capability can apply the caption/gutter repair
+only to a completed, valid parent. It is not the recovery route for interrupted v5.
+For a valid parent, this route reuses its seven
+numeric/table/alias files byte-for-byte and revises only academic paired density
+and overhead PNG/PDF/SVG plus paired social overhead PNG. The other nine paired
+social-density formats and all supplemental cell figures are copied unchanged.
+The completed ledger, rather than a hard-coded count, defines coverage.
+
+The [Frozen Parent Pin](validation/supplement_parent_verifier_pin_v1/REVIEW.md)
+records source commit `14f27706e4e9e52ca1324a7a2bac59e86ab33ef9`, the exact
+interpreter and its execution snapshot. The public `pin` command verified that
+identity; it did not validate unfinished output. Keep the preserved checkout and
+interpreter available. For another machine, reconstruct those identities and
+create a separately reviewed pin with `revise_supplement_figures pin`; do not edit
+an existing pin and retain its former checksum.
+
+Run the following from the qualified revision checkout only after the parent
+pipeline completes. The staging command invokes the unchanged parent verifier
+inside the pinned environment, reconstructs the exact ordered saved pairs and
+checks the complete original ledger before writing a new child directory. It
+never calls Monte Carlo simulation or statistical bootstrapping.
+
+```bash
+study_phase=docs/research/shot_pattern_analysis/phase2
+study_pin="$study_phase/validation/supplement_parent_verifier_pin_v1/parent_pin.json"
+study_child="$study_phase/supplement_publication_v1"
+python -m scripts.research.shot_pattern_analysis.revise_supplement_figures stage \
+  "$study_phase/supplement_report_v1" "$study_child" \
+  --pin "$study_pin" \
+  --pin-sha256 d018db37c950e3e4999cad223a78dd9853f8336416d50b40646002901243ed64
+```
+
+Staging writes `REPORT_SUPPLEMENT_PUBLICATION_CANDIDATE.json`. This is not an
+accepted publication, and the report loader rejects a candidate-only directory.
+An independent reviewer must inspect all revised graphics and verify the unchanged
+outputs. The review JSON must use schema `matched-supplement-publication-review/1`,
+`accepted: true`, `review_scope: "visual_and_contract"`, a named `reviewer`, the
+exact `candidate_sha256`, actual old/new `source_delta`, every revised file's
+`revised_asset_sha256`, and nonempty hash-bound `evidence_files`. The verifier
+checks this content; the CLI does not generate or approve its own review.
+
+Only after that review exists, set `study_review` to its JSON path and
+`study_review_sha256` to its independently verified SHA-256. Finalize and verify:
+
+```bash
+: "${study_review:?Set the completed independent review JSON path}"
+: "${study_review_sha256:?Set the verified review SHA-256}"
+python -m scripts.research.shot_pattern_analysis.revise_supplement_figures finalize \
+  "$study_child" --review "$study_review" --review-sha256 "$study_review_sha256"
+python -m scripts.research.shot_pattern_analysis.revise_supplement_figures verify \
+  "$study_child"
+```
+
+Successful finalization writes `REPORT_SUPPLEMENT_PUBLICATION_REVISION.json`.
+Then use `--supplement-dir "$study_child"` in the final-report command above.
+The report records both child and immutable parent receipt identities. Preserve
+the parent, child, verifier pin, approved review and its evidence for restoration.
+That was the earlier v5 recovery checkpoint. The completed v6 parent and accepted
+`phase2/supplement_report_v2_layout_repair/` child now have strict-loader,
+measured-clearance, visual, and native-format review receipts in
+[Current Resume Handoff](RESUME_HANDOFF.md). This historical procedure is not an
+instruction to rerun or replace the accepted child.
+
+## Acceptance After Rebuilding
+
+A process exit or matching manifest is necessary but insufficient. Review the
+[Scientific Narrative Checklist](review_followups/FINAL_NARRATIVE_ACCEPTANCE.md),
+inspect rendered academic and social figures and every PDF page, and verify the
+actual output population and condition labels. Keep the immutable original
+execution receipts and the new reporting-source receipt together. Independent
+empirical qualification remains deferred in
+[DV-11984](../../../development/planning/DV-11984.md).
+
+## Downloadable Publication Bundles
+
+The complete graphics collection is packaged separately from Git history; no
+selected-image subset replaces the full deliverable. Each deterministic ZIP is
+at most 500,000,000 bytes. The existing archive API preserves all PNG, PDF, SVG,
+CSV and manifest members under their original canonical directory names.
+[Primary Archive Inventory](validation/publication_primary_bundles_v1/archive_manifest.json)
+and [Fresh-Restoration Evidence](validation/publication_primary_bundles_v1/restoration.json)
+currently qualify the local primary bundle: 690 members and 689 figure outputs.
+[Control Fresh-Restoration Evidence](validation/publication_control_bundles_v1/restoration.json)
+qualifies all 548 control members and 547 figure outputs. The repaired
+supplemental bundle passes local verification and fresh offline restoration for
+all 6,465 files. In addition, the 21-asset research prerelease has passed fresh
+remote-download verification, including all restored bundle members and source
+archive figures. See [Remote Restoration Evidence](validation/artifact_delivery_v3/remote-restoration-v3.json.gz)
+and the [published release](https://github.com/D-sorganization/UpstreamDrift/releases/tag/shot-pattern-phase2-research-2026-10-10).
+This transport verification does not repeat visual review or clear repository
+gates.
+
+After downloading every ZIP named by a bundle's manifest, place the ZIPs and
+its `archive_manifest.json` together. Use the existing
+[Verification and Restoration Procedure](data_archives/README.md#verification-and-restoration),
+with the bundle's `source_name` as the directory to restore. Expected publication
+names are `final_figures_v1`, `control_final_figures_v1`, and
+`supplement_report_v1`; restore them beside `REPORT.md` to preserve report links.
+Always verify archive hashes and complete membership before extracting into a
+fresh destination. Then check each restored figure against its producer manifest.
+
+Historical execution and pipeline receipts can contain original absolute paths.
+Retain those receipts unchanged as provenance. A fresh computation from restored
+shot data uses the rebuild recipe above and produces a new reporting receipt for
+that checkout; a copied historical start or completion receipt is not evidence
+that the new checkout executed the pipeline.

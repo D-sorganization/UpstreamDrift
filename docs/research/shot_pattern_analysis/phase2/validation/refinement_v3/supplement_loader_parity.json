@@ -1,0 +1,11 @@
+{
+  "before_commit": "af8513ce0a",
+  "source": "src/tools/shot_pattern_analysis/matched_supplement_report.py",
+  "source_sha256_before": "048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d",
+  "source_sha256_after": "f60200624b3b415a1ec8ab674898c358cdf79724456e369acb6b15af59081c8a",
+  "comparison": "Exact JSON including ordering, hash inventory, source references and alias rows for the same26-cell synthetic fixture tree; no scientific simulations rerun. Temporary root normalized only for recorded digest.",
+  "fixture": "tests/tools/shot_pattern_analysis/test_matched_supplement_report.py::_make_roots",
+  "unique_cells": 26,
+  "aliases": 4,
+  "normalized_result_sha256": "5ed85a48cccb813ce0a1fe3cbbcbb8db81fe442e5126f1c3ff5303b7d99755e8"
+}

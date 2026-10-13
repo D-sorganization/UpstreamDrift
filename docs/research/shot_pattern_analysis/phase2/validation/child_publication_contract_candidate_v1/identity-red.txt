@@ -1,0 +1,49 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_final_receipt_retains_parent_and_child_identity _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2200/test_final_receipt_retains_par0')
+
+    def test_final_receipt_retains_parent_and_child_identity(tmp_path):
+        from scripts.research.shot_pattern_analysis.build_final_report import final_publication_receipt
+        paths=tuple(tmp_path/name for name in ('report.md','cells.csv','lean.csv'))
+        for path in paths:path.write_text('output')
+        identity={'kind':'academic_pair_density_row_gutter','receipt_filename':'REPORT_SUPPLEMENT_PUBLICATION_REVISION.json','receipt_sha256':'child','parent_receipt_sha256':'parent'}
+>       receipt=final_publication_receipt(output_paths=paths,source_sha256={},primary_plan_sha256='a',control_plan_sha256='b',figure_manifest_sha256={},supplement_receipt_sha256='child',supplement_publication_identity=identity)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: final_publication_receipt() got an unexpected keyword argument 'supplement_publication_identity'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/research/test_supplement_publication_revision.py:366: TypeError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+1.02s call     tests/research/test_supplement_publication_revision.py::test_final_receipt_retains_parent_and_child_identity
+0.17s setup    tests/research/test_supplement_publication_revision.py::test_final_receipt_retains_parent_and_child_identity
+
+(1 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/research/test_supplement_publication_revision.py::test_final_receipt_retains_parent_and_child_identity

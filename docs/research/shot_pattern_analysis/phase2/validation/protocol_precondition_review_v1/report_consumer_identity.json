@@ -1,0 +1,31 @@
+{
+  "scope": "Report composition source comparison only; no final report or graphics accepted",
+  "frozen_commit": "4023111d2aaf8b20449a36f8691a295f4a94ceff",
+  "files": [
+    {
+      "path": "scripts/research/shot_pattern_analysis/build_final_report.py",
+      "main_sha256": "196dd522869ceaa33d63f606b016abcaeabdd0d6cd91f81a103488d225c536d3",
+      "frozen_sha256": "196dd522869ceaa33d63f606b016abcaeabdd0d6cd91f81a103488d225c536d3"
+    },
+    {
+      "path": "scripts/research/shot_pattern_analysis/build_pdf.py",
+      "main_sha256": "9f1daaeb2d47cc5ba61b4edabc6dc55c3ceed6130ceed608931a75b469b90a03",
+      "frozen_sha256": "9f1daaeb2d47cc5ba61b4edabc6dc55c3ceed6130ceed608931a75b469b90a03"
+    },
+    {
+      "path": "scripts/research/shot_pattern_analysis/final_report_inputs.py",
+      "main_sha256": "d651e71b3eb9bf17c08d70118d6b4d9d27aadda9094956614509b987ed28119c",
+      "frozen_sha256": "d651e71b3eb9bf17c08d70118d6b4d9d27aadda9094956614509b987ed28119c"
+    },
+    {
+      "path": "scripts/research/shot_pattern_analysis/report_synthesis.py",
+      "main_sha256": "b30aea47fdebe1149075a955a39cbb742d11b5577a5029fc0a0e2377d789e58c",
+      "frozen_sha256": "b30aea47fdebe1149075a955a39cbb742d11b5577a5029fc0a0e2377d789e58c"
+    },
+    {
+      "path": "scripts/research/shot_pattern_analysis/report_tables.py",
+      "main_sha256": "9d7d41f2a97e50a075a06c5d7780f9dffa4474669201bbf47da7674b1c8c0902",
+      "frozen_sha256": "9d7d41f2a97e50a075a06c5d7780f9dffa4474669201bbf47da7674b1c8c0902"
+    }
+  ]
+}

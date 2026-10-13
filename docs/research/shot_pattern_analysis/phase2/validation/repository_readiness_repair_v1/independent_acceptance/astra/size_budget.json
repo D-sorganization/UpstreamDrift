@@ -1,0 +1,20 @@
+{
+  "docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py": 158,
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py": 247,
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py": 71,
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py": 109,
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py": 298,
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py": 33,
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py": 134,
+  "docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py": 320,
+  "docs/research/shot_pattern_analysis/phase2/validation/capture_bounds_gui.py": 107,
+  "docs/research/shot_pattern_analysis/phase2/validation/driver_curve_bounds_reporting_review_v1/preflight.py": 123,
+  "docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py": 87,
+  "docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py": 105,
+  "docs/research/shot_pattern_analysis/phase2/validation/selected_renderer_representative_v1/qualify.py": 384,
+  "docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_numeric_review_v1/verify_numeric.py": 144,
+  "docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/review_batch.py": 345,
+  "docs/research/shot_pattern_analysis/phase2/validation/v6_output_review_harness_v1/test_review_batch.py": 268,
+  "tests/research/test_independent_supplement_audit.py": 316,
+  "tests/research/test_validation_helper_contracts.py": 256
+}

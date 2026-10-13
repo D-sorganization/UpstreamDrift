@@ -1,0 +1,4 @@
+Ruff check and format --check: pass (3 files).
+Mypy Python 3.12, follow-imports=silent: pass (2 sources; mypy.txt).
+Git diff --check: pass.
+Changed-file line counts: {"scripts/research/shot_pattern_analysis/build_final_report.py": 1115, "scripts/research/shot_pattern_analysis/report_tables.py": 102, "tests/research/test_shot_pattern_report_table_layout.py": 105}

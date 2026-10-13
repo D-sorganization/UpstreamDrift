@@ -1,0 +1,151 @@
+.......FFFFF......FFF                                                    [100%]
+=================================== FAILURES ===================================
+_________________ test_completed_source_bound_boundary_passes __________________
+
+completed = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2333/test_completed_source_bound_bo0'), PosixPath('/tmp/pytest-of-dieter...-2333/test_completed_source_bound_bo0/start.json'), '3bd55071dc372b4aa55b8a6b406607698e7e2ef0807e36208f45f9ad3b569c7a')
+
+    def test_completed_source_bound_boundary_passes(completed):
+        root,boundary,start,start_sha=completed
+>       assert m.completion_boundary(root,boundary,{'x':'hash'},(start,start_sha)) is not None
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: completion_boundary() takes 3 positional arguments but 4 were given
+
+/tmp/shot-pattern-v6-output-review/test_review_batch.py:54: TypeError
+___________________ test_boundary_tampering_rejected[source] ___________________
+
+completed = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2333/test_boundary_tampering_reject0'), PosixPath('/tmp/pytest-of-dieter...-2333/test_boundary_tampering_reject0/start.json'), '3d592b7bb072b13aedf76ccb84f5b64bb405cbffcf9cd61089e754e7d0ef4d6b')
+mutation = 'source'
+
+    @pytest.mark.parametrize('mutation',['source','receipt','ledger','output'])
+    def test_boundary_tampering_rejected(completed,mutation):
+        root,boundary,start,start_sha=completed
+        if mutation=='source':
+            sources={'x':'other'}
+        else:
+            sources={'x':'hash'}
+        if mutation=='receipt':(root/'REPORT_SUPPLEMENT_PIPELINE.json').write_text('{}')
+        if mutation=='ledger':(root/'REPORT_SUPPLEMENT_FIGURES.json').write_text('{}')
+        if mutation=='output':
+            record=json.loads(boundary.read_text());record['command'][-1]=str(root/'other');boundary.write_text(json.dumps(record))
+>       with pytest.raises(ValueError):m.completion_boundary(root,boundary,sources,(start,start_sha))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: completion_boundary() takes 3 positional arguments but 4 were given
+
+/tmp/shot-pattern-v6-output-review/test_review_batch.py:68: TypeError
+__________________ test_boundary_tampering_rejected[receipt] ___________________
+
+completed = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2333/test_boundary_tampering_reject1'), PosixPath('/tmp/pytest-of-dieter...-2333/test_boundary_tampering_reject1/start.json'), '52ea7e84c81180006819a35cca3f36e992413adf376cdd94e03cce123769e73d')
+mutation = 'receipt'
+
+    @pytest.mark.parametrize('mutation',['source','receipt','ledger','output'])
+    def test_boundary_tampering_rejected(completed,mutation):
+        root,boundary,start,start_sha=completed
+        if mutation=='source':
+            sources={'x':'other'}
+        else:
+            sources={'x':'hash'}
+        if mutation=='receipt':(root/'REPORT_SUPPLEMENT_PIPELINE.json').write_text('{}')
+        if mutation=='ledger':(root/'REPORT_SUPPLEMENT_FIGURES.json').write_text('{}')
+        if mutation=='output':
+            record=json.loads(boundary.read_text());record['command'][-1]=str(root/'other');boundary.write_text(json.dumps(record))
+>       with pytest.raises(ValueError):m.completion_boundary(root,boundary,sources,(start,start_sha))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: completion_boundary() takes 3 positional arguments but 4 were given
+
+/tmp/shot-pattern-v6-output-review/test_review_batch.py:68: TypeError
+___________________ test_boundary_tampering_rejected[ledger] ___________________
+
+completed = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2333/test_boundary_tampering_reject2'), PosixPath('/tmp/pytest-of-dieter...-2333/test_boundary_tampering_reject2/start.json'), '868ef0221598cf9c849df36aab1d0c749a5b143a4054908beda2a970c40c099f')
+mutation = 'ledger'
+
+    @pytest.mark.parametrize('mutation',['source','receipt','ledger','output'])
+    def test_boundary_tampering_rejected(completed,mutation):
+        root,boundary,start,start_sha=completed
+        if mutation=='source':
+            sources={'x':'other'}
+        else:
+            sources={'x':'hash'}
+        if mutation=='receipt':(root/'REPORT_SUPPLEMENT_PIPELINE.json').write_text('{}')
+        if mutation=='ledger':(root/'REPORT_SUPPLEMENT_FIGURES.json').write_text('{}')
+        if mutation=='output':
+            record=json.loads(boundary.read_text());record['command'][-1]=str(root/'other');boundary.write_text(json.dumps(record))
+>       with pytest.raises(ValueError):m.completion_boundary(root,boundary,sources,(start,start_sha))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: completion_boundary() takes 3 positional arguments but 4 were given
+
+/tmp/shot-pattern-v6-output-review/test_review_batch.py:68: TypeError
+___________________ test_boundary_tampering_rejected[output] ___________________
+
+completed = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2333/test_boundary_tampering_reject3'), PosixPath('/tmp/pytest-of-dieter...-2333/test_boundary_tampering_reject3/start.json'), 'e24031058725ff7fde8233683f8eeffd50361eb47c240c6b09641742a5001ec6')
+mutation = 'output'
+
+    @pytest.mark.parametrize('mutation',['source','receipt','ledger','output'])
+    def test_boundary_tampering_rejected(completed,mutation):
+        root,boundary,start,start_sha=completed
+        if mutation=='source':
+            sources={'x':'other'}
+        else:
+            sources={'x':'hash'}
+        if mutation=='receipt':(root/'REPORT_SUPPLEMENT_PIPELINE.json').write_text('{}')
+        if mutation=='ledger':(root/'REPORT_SUPPLEMENT_FIGURES.json').write_text('{}')
+        if mutation=='output':
+            record=json.loads(boundary.read_text());record['command'][-1]=str(root/'other');boundary.write_text(json.dumps(record))
+>       with pytest.raises(ValueError):m.completion_boundary(root,boundary,sources,(start,start_sha))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: completion_boundary() takes 3 positional arguments but 4 were given
+
+/tmp/shot-pattern-v6-output-review/test_review_batch.py:68: TypeError
+__________________ test_wrong_cell_population_count_rejected ___________________
+
+    def test_wrong_cell_population_count_rejected():
+        rows=json.loads(Path(__file__).with_name('saved_caption_fixtures.json').read_text())
+        row=next(r for r in rows if r['group']=='cells')
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/tmp/shot-pattern-v6-output-review/test_review_batch.py:118: Failed
+__________ test_terminal_claim_cannot_override_pinned_start[command] ___________
+
+completed = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2333/test_terminal_claim_cannot_ove0'), PosixPath('/tmp/pytest-of-dieter...-2333/test_terminal_claim_cannot_ove0/start.json'), 'dd22f76b6e64979a065d3589c56d6fecaaebfa83e00082413b42638996fdb543')
+mutation = 'command'
+
+    @pytest.mark.parametrize("mutation", ["command", "start_hash"])
+    def test_terminal_claim_cannot_override_pinned_start(completed,mutation):
+        root,boundary,start,start_sha=completed
+        if mutation == "command":
+            record=json.loads(boundary.read_text());record["command"].extend(["--inventory", "forged.json"]);boundary.write_text(json.dumps(record))
+        else:
+            start.write_text(start.read_text()+" ")
+        with pytest.raises(ValueError):
+>           m.completion_boundary(root,boundary,{"x":"hash"},(start,start_sha))
+E           TypeError: completion_boundary() takes 3 positional arguments but 4 were given
+
+/tmp/shot-pattern-v6-output-review/test_review_batch.py:130: TypeError
+_________ test_terminal_claim_cannot_override_pinned_start[start_hash] _________
+
+completed = (PosixPath('/tmp/pytest-of-dieterolson/pytest-2333/test_terminal_claim_cannot_ove1'), PosixPath('/tmp/pytest-of-dieter...-2333/test_terminal_claim_cannot_ove1/start.json'), '125451cb209f2895ac06fd6fd5b4a54c8f0acef7f4afaa3d90c009d48746eeac')
+mutation = 'start_hash'
+
+    @pytest.mark.parametrize("mutation", ["command", "start_hash"])
+    def test_terminal_claim_cannot_override_pinned_start(completed,mutation):
+        root,boundary,start,start_sha=completed
+        if mutation == "command":
+            record=json.loads(boundary.read_text());record["command"].extend(["--inventory", "forged.json"]);boundary.write_text(json.dumps(record))
+        else:
+            start.write_text(start.read_text()+" ")
+        with pytest.raises(ValueError):
+>           m.completion_boundary(root,boundary,{"x":"hash"},(start,start_sha))
+E           TypeError: completion_boundary() takes 3 positional arguments but 4 were given
+
+/tmp/shot-pattern-v6-output-review/test_review_batch.py:130: TypeError
+=========================== short test summary info ============================
+FAILED ../../../../tmp/shot-pattern-v6-output-review/test_review_batch.py::test_completed_source_bound_boundary_passes
+FAILED ../../../../tmp/shot-pattern-v6-output-review/test_review_batch.py::test_boundary_tampering_rejected[source]
+FAILED ../../../../tmp/shot-pattern-v6-output-review/test_review_batch.py::test_boundary_tampering_rejected[receipt]
+FAILED ../../../../tmp/shot-pattern-v6-output-review/test_review_batch.py::test_boundary_tampering_rejected[ledger]
+FAILED ../../../../tmp/shot-pattern-v6-output-review/test_review_batch.py::test_boundary_tampering_rejected[output]
+FAILED ../../../../tmp/shot-pattern-v6-output-review/test_review_batch.py::test_wrong_cell_population_count_rejected
+FAILED ../../../../tmp/shot-pattern-v6-output-review/test_review_batch.py::test_terminal_claim_cannot_override_pinned_start[command]
+FAILED ../../../../tmp/shot-pattern-v6-output-review/test_review_batch.py::test_terminal_claim_cannot_override_pinned_start[start_hash]
+8 failed, 13 passed in 0.64s

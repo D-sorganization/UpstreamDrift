@@ -1,0 +1,710 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-True-first] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76dc99c7cec0>
+ref_key = 'first', missing = True, renderer_kind = 'canonical'
+
+    @pytest.mark.parametrize("ref_key", ["first", "second"])
+    @pytest.mark.parametrize("missing", [True, False])
+    @pytest.mark.parametrize("renderer_kind", ["canonical", "selective"])
+    def test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        ref_key: str,
+        missing: bool,
+        renderer_kind: str,
+    ) -> None:
+        """Reject either malformed reference before any data, figure or directory access."""
+        pair: dict[str, Any] = {
+            "comparison_kind": "curve_strength",
+            "target_x_m": 180.0,
+            "first": {
+                "status": "completed",
+                "cell": "first",
+                "source_protocol": "original_primary/1",
+            },
+            "second": {
+                "status": "completed",
+                "cell": "second",
+                "source_protocol": "pw-primary-face-bounds/1",
+            },
+        }
+        pair[ref_key]["protocol_id"] = "serialized-fallback/1"
+        if missing:
+            pair[ref_key].pop("source_protocol")
+        else:
+            pair[ref_key]["source_protocol"] = None
+        accessed: list[str] = []
+
+        def forbidden(*args: Any, **kwargs: Any) -> Any:
+            accessed.append("side effect")
+            raise AssertionError(
+                "Malformed renderer references must fail before side effects"
+            )
+
+        for name in (
+            "_supported_endpoints",
+            "_write_pair_density_figure",
+            "_write_pair_overhead_figure",
+            "write_pair_social_density",
+        ):
+            monkeypatch.setattr(figures, name, forbidden)
+        from matplotlib.figure import Figure
+
+        monkeypatch.setattr(Figure, "__init__", forbidden)
+        monkeypatch.setattr(Path, "mkdir", forbidden)
+        monkeypatch.setattr(Path, "open", forbidden)
+        out_dir = tmp_path / "out"
+        with pytest.raises(ValueError, match="pair references lack source protocol"):
+            if renderer_kind == "canonical":
+>               _render_pair_figures(pair, out_dir)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+    first_label = _pair_condition_label(comparison, first)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+    condition = _condition(ref)
+                ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ref = {'status': 'completed', 'cell': 'first', 'protocol_id': 'serialized-fallback/1'}
+
+    def _condition(ref: dict[str, Any]) -> dict[str, Any]:
+>       config = ref["config"]
+                 ^^^^^^^^^^^^^
+E       KeyError: 'config'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+_ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-True-second] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76dcb507ab10>
+ref_key = 'second', missing = True, renderer_kind = 'canonical'
+
+    @pytest.mark.parametrize("ref_key", ["first", "second"])
+    @pytest.mark.parametrize("missing", [True, False])
+    @pytest.mark.parametrize("renderer_kind", ["canonical", "selective"])
+    def test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        ref_key: str,
+        missing: bool,
+        renderer_kind: str,
+    ) -> None:
+        """Reject either malformed reference before any data, figure or directory access."""
+        pair: dict[str, Any] = {
+            "comparison_kind": "curve_strength",
+            "target_x_m": 180.0,
+            "first": {
+                "status": "completed",
+                "cell": "first",
+                "source_protocol": "original_primary/1",
+            },
+            "second": {
+                "status": "completed",
+                "cell": "second",
+                "source_protocol": "pw-primary-face-bounds/1",
+            },
+        }
+        pair[ref_key]["protocol_id"] = "serialized-fallback/1"
+        if missing:
+            pair[ref_key].pop("source_protocol")
+        else:
+            pair[ref_key]["source_protocol"] = None
+        accessed: list[str] = []
+
+        def forbidden(*args: Any, **kwargs: Any) -> Any:
+            accessed.append("side effect")
+            raise AssertionError(
+                "Malformed renderer references must fail before side effects"
+            )
+
+        for name in (
+            "_supported_endpoints",
+            "_write_pair_density_figure",
+            "_write_pair_overhead_figure",
+            "write_pair_social_density",
+        ):
+            monkeypatch.setattr(figures, name, forbidden)
+        from matplotlib.figure import Figure
+
+        monkeypatch.setattr(Figure, "__init__", forbidden)
+        monkeypatch.setattr(Path, "mkdir", forbidden)
+        monkeypatch.setattr(Path, "open", forbidden)
+        out_dir = tmp_path / "out"
+        with pytest.raises(ValueError, match="pair references lack source protocol"):
+            if renderer_kind == "canonical":
+>               _render_pair_figures(pair, out_dir)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+    first_label = _pair_condition_label(comparison, first)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+    condition = _condition(ref)
+                ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ref = {'status': 'completed', 'cell': 'first', 'source_protocol': 'original_primary/1'}
+
+    def _condition(ref: dict[str, Any]) -> dict[str, Any]:
+>       config = ref["config"]
+                 ^^^^^^^^^^^^^
+E       KeyError: 'config'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+_ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-False-first] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76dc938bf3b0>
+ref_key = 'first', missing = False, renderer_kind = 'canonical'
+
+    @pytest.mark.parametrize("ref_key", ["first", "second"])
+    @pytest.mark.parametrize("missing", [True, False])
+    @pytest.mark.parametrize("renderer_kind", ["canonical", "selective"])
+    def test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        ref_key: str,
+        missing: bool,
+        renderer_kind: str,
+    ) -> None:
+        """Reject either malformed reference before any data, figure or directory access."""
+        pair: dict[str, Any] = {
+            "comparison_kind": "curve_strength",
+            "target_x_m": 180.0,
+            "first": {
+                "status": "completed",
+                "cell": "first",
+                "source_protocol": "original_primary/1",
+            },
+            "second": {
+                "status": "completed",
+                "cell": "second",
+                "source_protocol": "pw-primary-face-bounds/1",
+            },
+        }
+        pair[ref_key]["protocol_id"] = "serialized-fallback/1"
+        if missing:
+            pair[ref_key].pop("source_protocol")
+        else:
+            pair[ref_key]["source_protocol"] = None
+        accessed: list[str] = []
+
+        def forbidden(*args: Any, **kwargs: Any) -> Any:
+            accessed.append("side effect")
+            raise AssertionError(
+                "Malformed renderer references must fail before side effects"
+            )
+
+        for name in (
+            "_supported_endpoints",
+            "_write_pair_density_figure",
+            "_write_pair_overhead_figure",
+            "write_pair_social_density",
+        ):
+            monkeypatch.setattr(figures, name, forbidden)
+        from matplotlib.figure import Figure
+
+        monkeypatch.setattr(Figure, "__init__", forbidden)
+        monkeypatch.setattr(Path, "mkdir", forbidden)
+        monkeypatch.setattr(Path, "open", forbidden)
+        out_dir = tmp_path / "out"
+        with pytest.raises(ValueError, match="pair references lack source protocol"):
+            if renderer_kind == "canonical":
+>               _render_pair_figures(pair, out_dir)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+    first_label = _pair_condition_label(comparison, first)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+    condition = _condition(ref)
+                ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ref = {'status': 'completed', 'cell': 'first', 'source_protocol': None, 'protocol_id': 'serialized-fallback/1'}
+
+    def _condition(ref: dict[str, Any]) -> dict[str, Any]:
+>       config = ref["config"]
+                 ^^^^^^^^^^^^^
+E       KeyError: 'config'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+_ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-False-second] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76dc93957530>
+ref_key = 'second', missing = False, renderer_kind = 'canonical'
+
+    @pytest.mark.parametrize("ref_key", ["first", "second"])
+    @pytest.mark.parametrize("missing", [True, False])
+    @pytest.mark.parametrize("renderer_kind", ["canonical", "selective"])
+    def test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        ref_key: str,
+        missing: bool,
+        renderer_kind: str,
+    ) -> None:
+        """Reject either malformed reference before any data, figure or directory access."""
+        pair: dict[str, Any] = {
+            "comparison_kind": "curve_strength",
+            "target_x_m": 180.0,
+            "first": {
+                "status": "completed",
+                "cell": "first",
+                "source_protocol": "original_primary/1",
+            },
+            "second": {
+                "status": "completed",
+                "cell": "second",
+                "source_protocol": "pw-primary-face-bounds/1",
+            },
+        }
+        pair[ref_key]["protocol_id"] = "serialized-fallback/1"
+        if missing:
+            pair[ref_key].pop("source_protocol")
+        else:
+            pair[ref_key]["source_protocol"] = None
+        accessed: list[str] = []
+
+        def forbidden(*args: Any, **kwargs: Any) -> Any:
+            accessed.append("side effect")
+            raise AssertionError(
+                "Malformed renderer references must fail before side effects"
+            )
+
+        for name in (
+            "_supported_endpoints",
+            "_write_pair_density_figure",
+            "_write_pair_overhead_figure",
+            "write_pair_social_density",
+        ):
+            monkeypatch.setattr(figures, name, forbidden)
+        from matplotlib.figure import Figure
+
+        monkeypatch.setattr(Figure, "__init__", forbidden)
+        monkeypatch.setattr(Path, "mkdir", forbidden)
+        monkeypatch.setattr(Path, "open", forbidden)
+        out_dir = tmp_path / "out"
+        with pytest.raises(ValueError, match="pair references lack source protocol"):
+            if renderer_kind == "canonical":
+>               _render_pair_figures(pair, out_dir)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:244:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1046: in _render_pair_figures
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+    first_label = _pair_condition_label(comparison, first)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+    condition = _condition(ref)
+                ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ref = {'status': 'completed', 'cell': 'first', 'source_protocol': 'original_primary/1'}
+
+    def _condition(ref: dict[str, Any]) -> dict[str, Any]:
+>       config = ref["config"]
+                 ^^^^^^^^^^^^^
+E       KeyError: 'config'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+_ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-True-first] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76dc938bf8f0>
+ref_key = 'first', missing = True, renderer_kind = 'selective'
+
+    @pytest.mark.parametrize("ref_key", ["first", "second"])
+    @pytest.mark.parametrize("missing", [True, False])
+    @pytest.mark.parametrize("renderer_kind", ["canonical", "selective"])
+    def test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        ref_key: str,
+        missing: bool,
+        renderer_kind: str,
+    ) -> None:
+        """Reject either malformed reference before any data, figure or directory access."""
+        pair: dict[str, Any] = {
+            "comparison_kind": "curve_strength",
+            "target_x_m": 180.0,
+            "first": {
+                "status": "completed",
+                "cell": "first",
+                "source_protocol": "original_primary/1",
+            },
+            "second": {
+                "status": "completed",
+                "cell": "second",
+                "source_protocol": "pw-primary-face-bounds/1",
+            },
+        }
+        pair[ref_key]["protocol_id"] = "serialized-fallback/1"
+        if missing:
+            pair[ref_key].pop("source_protocol")
+        else:
+            pair[ref_key]["source_protocol"] = None
+        accessed: list[str] = []
+
+        def forbidden(*args: Any, **kwargs: Any) -> Any:
+            accessed.append("side effect")
+            raise AssertionError(
+                "Malformed renderer references must fail before side effects"
+            )
+
+        for name in (
+            "_supported_endpoints",
+            "_write_pair_density_figure",
+            "_write_pair_overhead_figure",
+            "write_pair_social_density",
+        ):
+            monkeypatch.setattr(figures, name, forbidden)
+        from matplotlib.figure import Figure
+
+        monkeypatch.setattr(Figure, "__init__", forbidden)
+        monkeypatch.setattr(Path, "mkdir", forbidden)
+        monkeypatch.setattr(Path, "open", forbidden)
+        out_dir = tmp_path / "out"
+        with pytest.raises(ValueError, match="pair references lack source protocol"):
+            if renderer_kind == "canonical":
+                _render_pair_figures(pair, out_dir)
+            else:
+>               render_selected_pair_figures(
+                    pair, out_dir, figure_kinds=CLOSED_SELECTED_FIGURE_KINDS
+                )
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+    first_label = _pair_condition_label(comparison, first)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+    condition = _condition(ref)
+                ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ref = {'status': 'completed', 'cell': 'first', 'protocol_id': 'serialized-fallback/1'}
+
+    def _condition(ref: dict[str, Any]) -> dict[str, Any]:
+>       config = ref["config"]
+                 ^^^^^^^^^^^^^
+E       KeyError: 'config'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+_ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-True-second] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76dc938bd400>
+ref_key = 'second', missing = True, renderer_kind = 'selective'
+
+    @pytest.mark.parametrize("ref_key", ["first", "second"])
+    @pytest.mark.parametrize("missing", [True, False])
+    @pytest.mark.parametrize("renderer_kind", ["canonical", "selective"])
+    def test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        ref_key: str,
+        missing: bool,
+        renderer_kind: str,
+    ) -> None:
+        """Reject either malformed reference before any data, figure or directory access."""
+        pair: dict[str, Any] = {
+            "comparison_kind": "curve_strength",
+            "target_x_m": 180.0,
+            "first": {
+                "status": "completed",
+                "cell": "first",
+                "source_protocol": "original_primary/1",
+            },
+            "second": {
+                "status": "completed",
+                "cell": "second",
+                "source_protocol": "pw-primary-face-bounds/1",
+            },
+        }
+        pair[ref_key]["protocol_id"] = "serialized-fallback/1"
+        if missing:
+            pair[ref_key].pop("source_protocol")
+        else:
+            pair[ref_key]["source_protocol"] = None
+        accessed: list[str] = []
+
+        def forbidden(*args: Any, **kwargs: Any) -> Any:
+            accessed.append("side effect")
+            raise AssertionError(
+                "Malformed renderer references must fail before side effects"
+            )
+
+        for name in (
+            "_supported_endpoints",
+            "_write_pair_density_figure",
+            "_write_pair_overhead_figure",
+            "write_pair_social_density",
+        ):
+            monkeypatch.setattr(figures, name, forbidden)
+        from matplotlib.figure import Figure
+
+        monkeypatch.setattr(Figure, "__init__", forbidden)
+        monkeypatch.setattr(Path, "mkdir", forbidden)
+        monkeypatch.setattr(Path, "open", forbidden)
+        out_dir = tmp_path / "out"
+        with pytest.raises(ValueError, match="pair references lack source protocol"):
+            if renderer_kind == "canonical":
+                _render_pair_figures(pair, out_dir)
+            else:
+>               render_selected_pair_figures(
+                    pair, out_dir, figure_kinds=CLOSED_SELECTED_FIGURE_KINDS
+                )
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+    first_label = _pair_condition_label(comparison, first)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+    condition = _condition(ref)
+                ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ref = {'status': 'completed', 'cell': 'first', 'source_protocol': 'original_primary/1'}
+
+    def _condition(ref: dict[str, Any]) -> dict[str, Any]:
+>       config = ref["config"]
+                 ^^^^^^^^^^^^^
+E       KeyError: 'config'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+_ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-False-first] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76dc93955eb0>
+ref_key = 'first', missing = False, renderer_kind = 'selective'
+
+    @pytest.mark.parametrize("ref_key", ["first", "second"])
+    @pytest.mark.parametrize("missing", [True, False])
+    @pytest.mark.parametrize("renderer_kind", ["canonical", "selective"])
+    def test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        ref_key: str,
+        missing: bool,
+        renderer_kind: str,
+    ) -> None:
+        """Reject either malformed reference before any data, figure or directory access."""
+        pair: dict[str, Any] = {
+            "comparison_kind": "curve_strength",
+            "target_x_m": 180.0,
+            "first": {
+                "status": "completed",
+                "cell": "first",
+                "source_protocol": "original_primary/1",
+            },
+            "second": {
+                "status": "completed",
+                "cell": "second",
+                "source_protocol": "pw-primary-face-bounds/1",
+            },
+        }
+        pair[ref_key]["protocol_id"] = "serialized-fallback/1"
+        if missing:
+            pair[ref_key].pop("source_protocol")
+        else:
+            pair[ref_key]["source_protocol"] = None
+        accessed: list[str] = []
+
+        def forbidden(*args: Any, **kwargs: Any) -> Any:
+            accessed.append("side effect")
+            raise AssertionError(
+                "Malformed renderer references must fail before side effects"
+            )
+
+        for name in (
+            "_supported_endpoints",
+            "_write_pair_density_figure",
+            "_write_pair_overhead_figure",
+            "write_pair_social_density",
+        ):
+            monkeypatch.setattr(figures, name, forbidden)
+        from matplotlib.figure import Figure
+
+        monkeypatch.setattr(Figure, "__init__", forbidden)
+        monkeypatch.setattr(Path, "mkdir", forbidden)
+        monkeypatch.setattr(Path, "open", forbidden)
+        out_dir = tmp_path / "out"
+        with pytest.raises(ValueError, match="pair references lack source protocol"):
+            if renderer_kind == "canonical":
+                _render_pair_figures(pair, out_dir)
+            else:
+>               render_selected_pair_figures(
+                    pair, out_dir, figure_kinds=CLOSED_SELECTED_FIGURE_KINDS
+                )
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+    first_label = _pair_condition_label(comparison, first)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+    condition = _condition(ref)
+                ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ref = {'status': 'completed', 'cell': 'first', 'source_protocol': None, 'protocol_id': 'serialized-fallback/1'}
+
+    def _condition(ref: dict[str, Any]) -> dict[str, Any]:
+>       config = ref["config"]
+                 ^^^^^^^^^^^^^
+E       KeyError: 'config'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+_ test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-False-second] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2379/test_no_endpoints_or_figures_a7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76dc93954290>
+ref_key = 'second', missing = False, renderer_kind = 'selective'
+
+    @pytest.mark.parametrize("ref_key", ["first", "second"])
+    @pytest.mark.parametrize("missing", [True, False])
+    @pytest.mark.parametrize("renderer_kind", ["canonical", "selective"])
+    def test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        ref_key: str,
+        missing: bool,
+        renderer_kind: str,
+    ) -> None:
+        """Reject either malformed reference before any data, figure or directory access."""
+        pair: dict[str, Any] = {
+            "comparison_kind": "curve_strength",
+            "target_x_m": 180.0,
+            "first": {
+                "status": "completed",
+                "cell": "first",
+                "source_protocol": "original_primary/1",
+            },
+            "second": {
+                "status": "completed",
+                "cell": "second",
+                "source_protocol": "pw-primary-face-bounds/1",
+            },
+        }
+        pair[ref_key]["protocol_id"] = "serialized-fallback/1"
+        if missing:
+            pair[ref_key].pop("source_protocol")
+        else:
+            pair[ref_key]["source_protocol"] = None
+        accessed: list[str] = []
+
+        def forbidden(*args: Any, **kwargs: Any) -> Any:
+            accessed.append("side effect")
+            raise AssertionError(
+                "Malformed renderer references must fail before side effects"
+            )
+
+        for name in (
+            "_supported_endpoints",
+            "_write_pair_density_figure",
+            "_write_pair_overhead_figure",
+            "write_pair_social_density",
+        ):
+            monkeypatch.setattr(figures, name, forbidden)
+        from matplotlib.figure import Figure
+
+        monkeypatch.setattr(Figure, "__init__", forbidden)
+        monkeypatch.setattr(Path, "mkdir", forbidden)
+        monkeypatch.setattr(Path, "open", forbidden)
+        out_dir = tmp_path / "out"
+        with pytest.raises(ValueError, match="pair references lack source protocol"):
+            if renderer_kind == "canonical":
+                _render_pair_figures(pair, out_dir)
+            else:
+>               render_selected_pair_figures(
+                    pair, out_dir, figure_kinds=CLOSED_SELECTED_FIGURE_KINDS
+                )
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py:246:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:1068: in render_selected_pair_figures
+    return _render_pair_figures_core(pair, output_dir, figure_kinds=figure_kinds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:815: in _render_pair_figures_core
+    first_label = _pair_condition_label(comparison, first)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:170: in _pair_condition_label
+    condition = _condition(ref)
+                ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ref = {'status': 'completed', 'cell': 'first', 'source_protocol': 'original_primary/1'}
+
+    def _condition(ref: dict[str, Any]) -> dict[str, Any]:
+>       config = ref["config"]
+                 ^^^^^^^^^^^^^
+E       KeyError: 'config'
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/tools/shot_pattern_analysis/matched_supplement_figures.py:70: KeyError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py::test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-True-first]
+FAILED tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py::test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-True-second]
+FAILED tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py::test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-False-first]
+FAILED tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py::test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[canonical-False-second]
+FAILED tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py::test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-True-first]
+FAILED tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py::test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-True-second]
+FAILED tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py::test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-False-first]
+FAILED tests/tools/shot_pattern_analysis/test_pair_protocol_preconditions.py::test_no_endpoints_or_figures_accessed_when_protocol_precondition_fails[selective-False-second]
+8 failed, 20 deselected, 6 warnings in 8.08s

@@ -1,0 +1,32 @@
+from pathlib import Path
+import json, hashlib, collections, datetime
+b=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+v=b/'validation/supplement_v5_cell_graphics_review_v1'; n=b/'supplement_report_v1/figures/cells'
+def h(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+old=v/'checks.json'; new=v/'cell_checks.json'
+if old.exists():
+ assert not new.exists()
+ old.rename(new)
+c=json.loads(new.read_text())
+assert {p.name:h(p) for p in n.iterdir() if p.is_file()}==c['asset_sha256']
+assert h(b/'supplement_report_v1/REPORT_SUPPLEMENT.json')==c['report_sha256']
+source=Path('/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift')
+sources={'src/tools/shot_pattern_analysis/matched_pair_social.py':'16a4a48eb32432cbbb39648150b5e428c014af920845e006ddf12be0375fe369','src/tools/shot_pattern_analysis/matched_supplement_figures.py':'9254d7aede64f5aed19bd32f7cd5a8fb1b1899f6e18d000ba2096b228fc18246'}
+for p,s in sources.items(): assert h(source/p)==s
+full=['driver_lean5_curve2_rotation1_shaft_only_2d0cf66cda_density_social.png','driver_lean5_curve2_rotation2_combined2_6f4910bfcd_overhead_social.png','pitching_wedge_lean0_curve2_rotation2_cov_facepath_positive_dfcbd16b13_density_social.png','pitching_wedge_lean0_curve2_rotation1_shaft_only_fad2619401_overhead_social.png','pitching_wedge_lean5_curve2_rotation1_shaft_only_0d15b623ca_density_social.png','pitching_wedge_lean5_curve2_rotation2_combined2_b0e454ea24_overhead_social.png']
+r={'schema':'independent-supplement-cell-graphics-review/1','reviewed_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'accepted':True,'scope':'All 26 supplemental cell graphics only','full_pipeline_accepted':False,'final_manifest_reconciliation_pending':True,'source_commit':'14f27706e4e9e52ca1324a7a2bac59e86ab33ef9','source_sha256':sources,'cell_checks_sha256':h(new),'report_sha256':c['report_sha256'],'protocol_counts':dict(collections.Counter(x['protocol'] for x in c['cells'])),'asset_counts':dict(collections.Counter(Path(x).suffix for x in c['asset_sha256'])),'all_312_asset_hashes_unchanged_after_review':True,'social_pngs_contact_reviewed':52,'academic_pngs_identical_to_previously_reviewed_v3':52,'contact_sheets_sha256':{p.name:h(p) for p in sorted(v.glob('contact_*.jpg'))},'full_size_social_pngs_reviewed':{p:c['asset_sha256'][p] for p in full},'findings':[],'checks':['All social SVG captions identify exact protocol, numeric target and within-lean/fixed-target basis.','Individual supported/total density counts agree with hash-verified source summaries.','Overhead labels identify saved raw trajectories and disclose that paths are not paired by shot index.','All 52 social PNGs visually inspected in 13 contact sheets; six representative full-size images inspected.','No observed clipping, legend/footer overlap or crowded quantitative tick labels in reviewed images.','All 52 academic PNGs exactly match preserved v3 bytes; prior visual review reused.'],'limitations':['This is component acceptance while the production pipeline remains live. Final output receipt must reconcile these exact hashes.','PDF and SVG bytes are inventoried; SVG caption content is checked. PDF/SVG pages were not each visually inspected.','All 26 supplemental cells use curve scale 2; no curve-1 graphical coverage is claimed by this receipt.','Conditional model results do not establish empirical golf performance.'],'receipt_rename_note':'The original executed check wrote checks.json; it was renamed byte-for-byte to cell_checks.json because the repository ignores checks.json.'}
+(v/'review.json').write_text(json.dumps(r,indent=2)+'\n')
+(v/'REVIEW.md').write_text('''# Supplemental V5 Cell Graphics Review
+
+Accepted for the **26-cell graphics component only**. Full pipeline and publication acceptance remain pending the final manifest and remaining pair-figure review.
+
+The inventory contains 312 assets: 104 PNGs, 104 PDFs and 104 SVGs. The 52 academic PNGs are byte-identical to the previously reviewed preserved v3 versions. All 52 updated social PNGs were inspected through 13 contact sheets, with six full-size examples spanning PW primary, PW fixed-target control and Driver fixed-target control, both shaft-twist SD levels, and simple/combined/correlated noise. No new caption or layout defect was observed.
+
+Exact protocol, actual numeric target, within-lean or fixed-target basis and individual support counts agree with the source-bound inventory. Raw-flight cards distinguish their sampled trajectories from paired endpoint populations. Noise units, scale magnification, density/trajectory counts and model-conditional qualification remain legible. All cells here are curve-scale 2.
+
+`cell_checks.json` records every asset SHA256 and source-summary identity; `review.json` binds that inventory, all contact sheets, six full-size images and both producer sources. Every asset and the numerical report remained unchanged after review. PDF/SVG byte integrity and SVG caption content were checked; individual PDF/SVG visual acceptance is not claimed.
+
+The original check script is preserved verbatim as `executed_check.py.txt`; its `checks.json` output was renamed without modifying bytes to avoid the repository ignore rule. The finalizer is preserved separately. No simulation, bootstrap, rendering or live output modification was performed.
+''')
+(v/'executed_finalize.py.txt').write_bytes(Path(__file__).read_bytes())
+print(json.dumps({'review_sha256':h(v/'review.json'),'cell_checks_sha256':h(new),'counts':r['protocol_counts'],'accepted':True},indent=2))

@@ -1,0 +1,36 @@
+{
+  "scope": "Byte and inventory checks; visual verdict recorded separately",
+  "manifest_sha256": "f4929abc3c34a7eb6005f92616d05bf08e2e4ec607a6bdaacce34b5111ecb41f",
+  "exit_record": {
+    "command": [
+      "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+      "-m",
+      "scripts.research.shot_pattern_analysis.build_final_figures",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1",
+      "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_figures_v1"
+    ],
+    "started": "2026-10-10T05:44:22.343541+00:00",
+    "finished": "2026-10-10T06:32:48.668478+00:00",
+    "exit_code": 0
+  },
+  "exit_record_sha256": "0e3d9332d4fbbc1bb25a27949ab2980d63d74a21a84e9bfb07666a50abcafcfa",
+  "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+  "outputs_verified": 689,
+  "pngs": 288,
+  "extensions": {
+    ".csv": 5,
+    ".pdf": 198,
+    ".png": 288,
+    ".svg": 198
+  },
+  "cell_manifest_count": 324,
+  "ledger_rows": {
+    "availability": 324,
+    "comparison_availability": 36,
+    "facebook_ready": 36,
+    "facebook_overhead": 24,
+    "facebook_pattern_density": 24
+  },
+  "contact_sheets": 18,
+  "script_sha256": "b1dfa89e8076e4895eda6d3cdd26d73ff07ea5f7497739883bb73a94aca2fcda"
+}

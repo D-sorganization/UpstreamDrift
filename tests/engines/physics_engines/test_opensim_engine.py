@@ -44,7 +44,13 @@ class TestLoadUnavailable:
     def test_load_from_path_without_opensim_raises(
         self, engine: OpenSimPhysicsEngine
     ) -> None:
-        with pytest.raises(ImportError):
+        with (
+            patch(
+                "src.engines.physics_engines.opensim.python.opensim_physics_engine.opensim",
+                None,
+            ),
+            pytest.raises(ImportError),
+        ):
             engine.load_from_path("/tmp/fake.osim")
 
     def test_load_from_path_nonexistent_when_opensim_present(
@@ -69,7 +75,13 @@ class TestLoadUnavailable:
     def test_load_from_string_without_opensim_raises(
         self, engine: OpenSimPhysicsEngine
     ) -> None:
-        with pytest.raises(ImportError):
+        with (
+            patch(
+                "src.engines.physics_engines.opensim.python.opensim_physics_engine.opensim",
+                None,
+            ),
+            pytest.raises(ImportError),
+        ):
             engine.load_from_string("<xml/>", extension="osim")
 
     def test_load_from_string_creates_tempfile(

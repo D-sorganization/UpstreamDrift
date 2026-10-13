@@ -1,0 +1,52 @@
+................                                                         [100%]
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+../../../../Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487
+  /home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/_hypothesis_pytestplugin.py:487: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+0.23s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_completed_cell_reports_spread_bias_quadrants_and_optional_geometry
+0.20s call     tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_geometry_table_does_not_claim_face_causes_long_left
+0.03s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_delivered_mean_cannot_be_claimed_from_incomplete_supported_rows
+0.03s teardown tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_saved_cell_means_use_only_supported_rows
+0.03s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_geometry_table_does_not_claim_face_causes_long_left
+0.03s teardown tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_scoring_table_states_absolute_context_and_individual_population
+0.03s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_scoring_table_states_absolute_context_and_individual_population
+0.03s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_saved_cell_means_use_only_supported_rows
+0.03s teardown tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_delivered_mean_cannot_be_claimed_from_incomplete_supported_rows
+0.02s teardown tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_effect_modification_requires_common_six_pair_and_explicit_scope
+0.02s teardown tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_asset_link_refuses_uninventoried_cell_or_changed_bytes
+0.02s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_saved_unavailable_cell_does_not_read_nonexistent_csv
+0.02s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_report_tables_keep_denominators_and_noncausal_scope
+0.02s teardown tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_saved_cell_rejects_replacement_inside_loader
+0.02s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_asset_link_refuses_uninventoried_cell_or_changed_bytes
+0.02s teardown tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_report_tables_keep_denominators_and_noncausal_scope
+0.02s setup    tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_assets_must_be_in_manifest_and_exist
+0.02s call     tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_delivered_mean_cannot_be_claimed_from_incomplete_supported_rows
+0.02s call     tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_saved_cell_means_use_only_supported_rows
+0.02s teardown tests/tools/shot_pattern_analysis/test_matched_interpretation.py::test_assets_must_be_in_manifest_and_exist

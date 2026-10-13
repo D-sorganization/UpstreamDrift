@@ -1,0 +1,544 @@
+{
+  "schema": "supplement-all-density-svg-title-legend-clearance/1",
+  "created_utc": "2026-10-11T01:56:44.526963+00:00",
+  "command": "/tmp/shot-pattern-validation-venv-20261009/bin/python /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/all_density_layout_diagnostic.py",
+  "method": "All 384 saved density SVGs; exact saved text anchors with Matplotlib DejaVu Sans 10 pt TextPath outline-intersection calculation.",
+  "svg_count": 384,
+  "collision_svg_count": 14,
+  "source_script_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/curve_strength_144_layout_diagnostic.py",
+  "source_script_sha256": "4d479d8ea71baf3dbb78dc39206fc81f5dbeb2288b1fb7c3c6893bfd8366a073",
+  "collisions": [
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.svg",
+      "svg_sha256": "24654b5df6f684809dbb3bfae15bf950f65fb84ee73b4a16e98c51ba836d469b",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            471.771373,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            472.75262299999997,
+            142.97457,
+            553.9229355,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            134.0741015,
+            512.3689065,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            472.75262299999997,
+            142.97457,
+            512.3689065,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.svg",
+      "svg_sha256": "8952c94c621b3301aee4b773303aaaf43b1d54dff32c5e6499c32e777be311a9",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            468.239765,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            469.22101499999997,
+            142.97457,
+            550.3913275,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            134.0741015,
+            512.3689065,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            469.22101499999997,
+            142.97457,
+            512.3689065,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.svg",
+      "svg_sha256": "ae38938f6d5642157ede61e6c04eb0b5b76006cf388f530867f509174c65309f",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            470.656305,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            370.267344,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            471.63755499999996,
+            142.97457,
+            552.8078674999999,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            370.945469,
+            134.0741015,
+            512.3689065,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            471.63755499999996,
+            142.97457,
+            512.3689065,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.svg",
+      "svg_sha256": "4954a67d407082628e615ea6f89449216b00dcd842c7322f64cb073ce7828a27",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            799.450535,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            768.954145,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            800.431785,
+            142.7980075,
+            878.9489725,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            769.5150825000001,
+            134.250664,
+            847.8713325000001,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            800.431785,
+            142.7980075,
+            847.8713325000001,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.svg",
+      "svg_sha256": "dd77049bd8227fae4373ef0872dc1a9ff6c47d802f72f76284cee76e1de182b2",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            802.068559,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            774.190193,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            803.0498090000001,
+            142.7980075,
+            881.5669965000001,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            774.7511305,
+            134.250664,
+            853.1073805000001,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            803.0498090000001,
+            142.7980075,
+            853.1073805000001,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.svg",
+      "svg_sha256": "30681de549838cdcf36fec9d095bb96a57603e2e8e530d01cbaac537b660c9cb",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            476.244671,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            412.231816,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            477.22592099999997,
+            142.97457,
+            558.3962335,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            412.909941,
+            134.0741015,
+            554.3333785,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            477.22592099999997,
+            142.97457,
+            554.3333785,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.svg",
+      "svg_sha256": "3f645d54697ebbc6889168ab802108005c38ecec955a338ef9f83a739def6284",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            476.315169,
+            150.494695
+          ],
+          "legend_anchor_pt": [
+            412.372813,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            477.296419,
+            143.07282,
+            558.4667315,
+            150.6368825
+          ],
+          "legend_glyph_bounds_pt": [
+            413.05093800000003,
+            134.0741015,
+            554.4743755,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            477.296419,
+            143.07282,
+            554.4743755,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.svg",
+      "svg_sha256": "cbe9cc3757912065c359bb19fa2f22b95e8c13a691bcce9300471e3a015756c3",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Fade \u00b7 Curve \u00d71",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            798.711159,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            799.692409,
+            142.7980075,
+            878.2095965,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            134.250664,
+            829.9626565000001,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            799.692409,
+            142.7980075,
+            829.9626565000001,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.svg",
+      "svg_sha256": "283cd54ccc63bcf8259fe73715e10c888e376d396dbaf7a12f413da690e87640",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Draw \u00b7 Curve \u00d71",
+          "legend_label": "80% Simulated-Sample HDR",
+          "panel_title_anchor_pt": [
+            475.331005,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            410.404485,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            476.312255,
+            142.97457,
+            557.4825675,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            411.08261000000005,
+            134.0741015,
+            552.5060475,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            476.312255,
+            142.97457,
+            552.5060475,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.svg",
+      "svg_sha256": "5ee3967fe06f91d058c832cbdabf6e27d2cd873a50255df1887dedd371268342",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_6f6c1ff731_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Fade \u00b7 Rotation SD 1\u00b0",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            798.466119,
+            151.242679
+          ],
+          "legend_anchor_pt": [
+            793.150938,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            799.4473690000001,
+            143.64424150000002,
+            904.1020565000001,
+            151.38486650000002
+          ],
+          "legend_glyph_bounds_pt": [
+            793.7118755,
+            134.250664,
+            872.0681255,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            799.4473690000001,
+            143.64424150000002,
+            872.0681255,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.svg",
+      "svg_sha256": "b3a4c7e07d0f347a31a3ee0df23c9eb8356640205c858d7da956346e0db934d8",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_ff20bee33e_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Fade \u00b7 Rotation SD 1\u00b0",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            798.466119,
+            150.590518
+          ],
+          "legend_anchor_pt": [
+            793.150938,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            799.4473690000001,
+            142.99208050000001,
+            904.1020565000001,
+            150.7327055
+          ],
+          "legend_glyph_bounds_pt": [
+            793.7118755,
+            134.250664,
+            872.0681255,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            799.4473690000001,
+            142.99208050000001,
+            872.0681255,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.svg",
+      "svg_sha256": "e8b8e1c0451ea8bb0f3ae12ab8e2ba6d406de4d70e5d61a22d09dbfba442fc63",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_1430cd7a7c_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Fade \u00b7 Rotation SD 1\u00b0",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            798.466119,
+            150.494695
+          ],
+          "legend_anchor_pt": [
+            793.150938,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            799.4473690000001,
+            142.89625750000002,
+            904.1020565000001,
+            150.6368825
+          ],
+          "legend_glyph_bounds_pt": [
+            793.7118755,
+            134.250664,
+            872.0681255,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            799.4473690000001,
+            142.89625750000002,
+            872.0681255,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.svg",
+      "svg_sha256": "e76576a4092f27c2fd7449d6c99af7177a0dbfa1cc34746d76e8685283c96d7b",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepat_f0357599d7_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Fade \u00b7 Rotation SD 1\u00b0",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            816.123592,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            817.1048420000001,
+            142.7980075,
+            921.7595295000001,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            134.250664,
+            829.9626565000001,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            817.1048420000001,
+            142.7980075,
+            829.9626565000001,
+            143.7522265
+          ]
+        }
+      ]
+    },
+    {
+      "svg_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.svg",
+      "svg_sha256": "f4bf13b4547bfe0640e00f7330610ecef23e0afb91944753ebed88c96e20e3c4",
+      "matching_png_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.png",
+      "matching_pdf_path": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/shaft_rotation_sd_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepat_2af3259458_density.pdf",
+      "collisions": [
+        {
+          "panel_title": "Fade \u00b7 Rotation SD 1\u00b0",
+          "legend_label": "Common Target",
+          "panel_title_anchor_pt": [
+            815.867442,
+            150.396445
+          ],
+          "legend_anchor_pt": [
+            751.045469,
+            141.672539
+          ],
+          "panel_title_glyph_bounds_pt": [
+            816.848692,
+            142.7980075,
+            921.5033794999999,
+            150.5386325
+          ],
+          "legend_glyph_bounds_pt": [
+            751.6064065,
+            134.250664,
+            829.9626565000001,
+            143.7522265
+          ],
+          "bounding_box_intersection_pt": [
+            816.848692,
+            142.7980075,
+            829.9626565000001,
+            143.7522265
+          ]
+        }
+      ]
+    }
+  ]
+}

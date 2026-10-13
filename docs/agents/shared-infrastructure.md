@@ -60,6 +60,23 @@ for the golf double-pendulum behind one Protocol. See
   measured trajectory — _not_ forward-integrated. Do not "fix" them into a time
   integration (see the `# AGENT-NOTE:` in that module).
 
+### Shot Pattern Experiments
+
+`src/tools/shot_pattern_analysis/` exposes `AnalysisConfig`, `run_analysis`, and
+`export_analysis` for paired straight/draw/fade Monte Carlo studies. Reuse its
+`ShotPhysics` adapter to the existing impact and Rust flight solvers; do not
+copy flight equations. See the [Experiment Reference](../research/shot_pattern_analysis/README.md)
+for frames, aiming, uncertainty and the simplified-impact limitation.
+
+The matched-delivery extension exposes `MatchedConfig`, `ExperimentConfig`,
+`run_matched_analysis`, and `execute_and_export` from its named modules.
+Reuse `club_geometry.club_delivery`, `noise.NoiseSpec`, and the shared
+`physics.incremental_contact.solve_incremental_contact` rather than copying
+rotation, covariance, or impulse logic. The [Matched Study Design](../research/shot_pattern_analysis/phase2/DESIGN.md)
+documents raw-target matching, energetic restitution, conditional populations,
+and empirical limitations. The full-tensor Newton impulse solver remains an
+explicit comparator.
+
 ### Tools Ground-Model Consumer Boundary
 
 `src/shared/python/ground_model/` is UpstreamDrift's thin, headless gateway to
@@ -68,6 +85,20 @@ the exact request, result, and reference-execution schema versions before
 binding parsers or execution. Keep physics and wire records in Tools; build
 UpstreamDrift API, PyQt, and React presenters on this gateway without copying
 the solver or relabeling provenance.
+
+### Data Processing Provider Boundary
+
+`src/shared/python/sidekick_data_processing_bridge.py` binds legacy Sidekick
+core and exception imports to the pinned Tools provider. Use the public
+`sidekick.data_processing` exports; the [boundary reference](../development/data_processing_provider_boundary.md)
+records class identity, calculation behavior, and reproduction checks.
+
+### Signal Provider Boundary
+
+Use the pinned Tools `signal_toolkit` public exports through the canonical
+shared namespace. UpstreamDrift's split seam retains its biomechanical
+`signal_processing.py` extension; the [boundary reference](../development/signal_provider_boundary.md)
+records import identity, fitting compatibility and reproduction checks.
 
 ### Motion Matching (The Big One)
 

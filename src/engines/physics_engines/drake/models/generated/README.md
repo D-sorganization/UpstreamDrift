@@ -26,7 +26,7 @@ python3 scripts/build_humanoid_models.py --engine drake
 python3 scripts/build_humanoid_models.py --engine drake --check
 
 # pytest mirror of the gate
-python3 -m pytest tests/test_drake_urdf_drift.py -v
+python3 -m pytest tests/engines/drake/test_drake_urdf_drift.py -v
 ```
 
 ## How to fix a failing CI gate

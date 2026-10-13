@@ -1,0 +1,19 @@
+{
+  "scope": "Independent isolated implementation/software review; not MC authorization",
+  "reviewed_commit": "926dc6bada3d218e4099df7b73ad536314135dc7",
+  "tests": {
+    "focused_selected": {
+      "passed": 34,
+      "exit_code": 0,
+      "log_sha256": "559f001e150c0177e0f4e3329734a2fdb44e1565dc726caa5fe184ff248dbec1"
+    },
+    "explicit_native": {
+      "passed": 2,
+      "exit_code": 0,
+      "log_sha256": "aeb6a68d1decbc81bacab8c60c7c68de266ca92e11585e4bd8fcb6e74efef7bf"
+    }
+  },
+  "open_gate": "Supplement final acceptance must bind protocol inventory covered by pilot",
+  "draw_fade_full_distribution_symmetry_established": false,
+  "new_monte_carlo_executed": false
+}

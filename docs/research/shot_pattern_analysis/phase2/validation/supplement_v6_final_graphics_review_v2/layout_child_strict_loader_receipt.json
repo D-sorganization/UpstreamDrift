@@ -1,0 +1,12 @@
+{
+  "child": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair",
+  "comparison_count": 384,
+  "elapsed_seconds": 214.737,
+  "figure_count": 6456,
+  "figure_ledger_sha256": "88df51839e5531725d30b9e327c9ed1960324afc653eb519cd3701d69453ac12",
+  "pipeline_sha256": "033224c948fabee2cb77fd2b85d7daf11a52730fa96afd02d77259125723f702",
+  "producer_checkout": "/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift",
+  "public_loader": "src.tools.shot_pattern_analysis.matched_supplement_pipeline.load_verified_supplement_artifacts",
+  "schema": "shot-pattern-layout-child-strict-loader/1",
+  "verdict": "pass"
+}

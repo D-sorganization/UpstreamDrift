@@ -1,0 +1,59 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+___________ test_serialized_zero_correlation_overrides_profile_name ____________
+
+    def test_serialized_zero_correlation_overrides_profile_name():
+        label = figures._noise_profile_description("cov_facepath_positive", noise())
+>       assert "Correlation r" not in label
+E       AssertionError: assert 'Correlation r' not in 'Cov Facepat...on r = -0.6)'
+E         
+E         'Correlation r' is contained here:
+E           Face-Path Correlation r = -0.6)
+
+/tmp/test_p2_social_review_contracts.py:17: AssertionError
+_____________ test_nonzero_correlation_names_primitive_shaft_twist _____________
+
+    def test_nonzero_correlation_names_primitive_shaft_twist():
+        label = figures._noise_profile_description("combined2", noise(.35))
+>       assert "Shaft Twist–Path Correlation r = +0.35" in label
+E       AssertionError: assert 'Shaft Twist–Path Correlation r = +0.35' in 'Combined 2 (Path SD 0.5°, Speed SD 2 mph, Strike SD 0.25 in on Each Axis, Face-Path Correlation r = +0.35)'
+
+/tmp/test_p2_social_review_contracts.py:22: AssertionError
+_________ test_unequal_strike_standard_deviations_are_not_called_equal _________
+
+    def test_unequal_strike_standard_deviations_are_not_called_equal():
+        label = figures._noise_profile_description("combined2", noise())
+>       assert "Each Axis" not in label
+E       AssertionError: assert 'Each Axis' not in 'Combined 2 ...n Each Axis)'
+E         
+E         'Each Axis' is contained here:
+E           .25 in on Each Axis)
+
+/tmp/test_p2_social_review_contracts.py:28: AssertionError
+________________ test_available_figure_without_path_is_rejected ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1773/test_available_figure_without_0')
+
+    def test_available_figure_without_path_is_rejected(tmp_path):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/tmp/test_p2_social_review_contracts.py:34: Failed
+_________ test_unavailable_figure_cannot_claim_an_unverified_artifact __________
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1773/test_unavailable_figure_cannot0')
+
+    def test_unavailable_figure_cannot_claim_an_unverified_artifact(tmp_path):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/tmp/test_p2_social_review_contracts.py:39: Failed
+=========================== short test summary info ============================
+FAILED ../../../../../../tmp/test_p2_social_review_contracts.py::test_serialized_zero_correlation_overrides_profile_name
+FAILED ../../../../../../tmp/test_p2_social_review_contracts.py::test_nonzero_correlation_names_primitive_shaft_twist
+FAILED ../../../../../../tmp/test_p2_social_review_contracts.py::test_unequal_strike_standard_deviations_are_not_called_equal
+FAILED ../../../../../../tmp/test_p2_social_review_contracts.py::test_available_figure_without_path_is_rejected
+FAILED ../../../../../../tmp/test_p2_social_review_contracts.py::test_unavailable_figure_cannot_claim_an_unverified_artifact
+5 failed in 25.18s

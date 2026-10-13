@@ -1,0 +1,16 @@
+{
+  "status": "local_fresh_restoration_pass_remote_delivery_pending",
+  "checked_utc": "2026-10-10T10:10:57.109881+00:00",
+  "bundle_root": "/tmp/shot-pattern-publication-bundles-v1/primary",
+  "restored_root": "/tmp/shot-pattern-publication-restored-v1",
+  "files_verified": 690,
+  "figure_outputs_verified": 689,
+  "manifest_sha256": "16e0a645fe840c24712c42467bffed59f3cb9204fabbeb8c5ce7289b3b9b2449",
+  "archives": {
+    "final_figures_v1-001.zip": {
+      "bytes": 223739795,
+      "sha256": "6ba794355bf4575e2a6fb24a3dc7473dbd0279a628c3e99bbe191ce2a4785cc2"
+    }
+  },
+  "max_bundle_bytes": 500000000
+}

@@ -1,0 +1,45 @@
+{
+  "status": "component_qualified",
+  "scope": "Main-to-marginal tick boundary repair only; not final graphic-set acceptance",
+  "reviewer_implemented_fix": true,
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/academic_plots.py": "ed1b840b0b19df5c4e73ccb9dfef0c1ca826c5f0d3ff7ff4ac7913396013df54",
+    "tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py": "467d1b425f0c73e47f3dd8df94184c3639b56fabd9c3d2f3c5fcfd8d8f91bad0"
+  },
+  "old_renderer_sha256": "7527d00ff5e6ca5913bbf14cd14e7d73e6d323725d104a9bdb074b5b4ea63da3",
+  "red": "New academic regression fails with -2.6012pt overlap; social passes. Three exploratory synthetic fixtures passed before the failing fixture was selected; logs retained. Actual saved-data failure independently measured -2.60090246pt.",
+  "green": "23 tests passed including slow tests; Ruff check/format, scoped Mypy and diff-check passed.",
+  "actual_render_receipt_sha256": "b65932b24b67567035357f7bb48adf264d116a1059a2b7fb2e26fee2eeee64a1",
+  "visual_inspection": "All six 1080px previews plus full-size offending Driver academic figure inspected; no boundary collision remains. Diagnostic captions identify saved cells, not final publication captions.",
+  "minimum_boundary_gutter_points": 11.467764616542118,
+  "driver_boundary_gutter_points": 20.77959769215686,
+  "invariants": "Existing density arrays, axis limits, font floors and marginal spacing regressions pass exactly. Only crowded final main ticks are pruned across shared panels; at least two in-range anchors retained. No simulations/data changes.",
+  "file_lines": {
+    "src/tools/shot_pattern_analysis/academic_plots.py": 876,
+    "tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py": 164
+  },
+  "evidence_sha256": {
+    "seven_iron_lean10_curve2_rotation2_shaft_only_academic.png": "174141f7f837bb4ced1f3dad76f105fcecdc6462fa97aadd32f945f94aea0741",
+    "actual_render.json": "b65932b24b67567035357f7bb48adf264d116a1059a2b7fb2e26fee2eeee64a1",
+    "driver_lean5_curve2_rotation2_combined2_social_1080.png": "2880ed8478c9e73cd8fe927fbaf6ebf3e717183509bc9926f56e1c29b10406cc",
+    "seven_iron_lean10_curve2_rotation2_shaft_only_social_1080.png": "8505a27df9c959077ec0487d6638ab3fa82ecbd80905abfc257f9bcb242266e6",
+    "pitching_wedge_lean5_curve2_rotation2_combined2_social.png": "f1a9062c20a3284b4edb3693c96b1aae7c2d6dc643558b24ccb556b1e80b2573",
+    "exploratory_red2.txt": "c21e1412b380f0890cc63cf34ff0b9b7c27e3aa463ed56db6f7b55df4e7fbd61",
+    "driver_lean5_curve2_rotation2_combined2_academic.png": "901181aa5dbb04cea4bc5b9e6c43e003befaa0ffa2954abec16a898bda491546",
+    "full_green.txt": "f28e283f4849f1f2ac984f227ae24b753a47999815e111e4fb641df245f0ddbd",
+    "driver_lean5_curve2_rotation2_combined2_academic_1080.png": "a9f7b425c8e8ebf5c800836c167e31c15709260cf87b7ddc5ad7f7090e4edb59",
+    "pitching_wedge_lean5_curve2_rotation2_combined2_social_1080.png": "4909053e6bce19d547138be03502c6e27eaa552cb42afa86593ca83f9856fe35",
+    "pitching_wedge_lean5_curve2_rotation2_combined2_academic_1080.png": "0c10b6398ca48b73aee16e45230e93ee128fccfb2631ee3d6dad3b698864ad60",
+    "regression_red.txt": "7e424a54a2e0fb2ffea168f6b068bd311e8e3e2b8f80a92c0c8d01d6e98ea995",
+    "exploratory_red.txt": "ace2a616a8c94dea18bfa428fb563b4360e91710224f0ae393444b9d9c4c1bd5",
+    "pitching_wedge_lean5_curve2_rotation2_combined2_academic.png": "04b9aef35246b2377cf37146744382ba86d7421d2c87bbd0af49c6cc7f7de7bf",
+    "executed_render.py.txt": "ab75bd0f14b6f82f1153bafcd8e211b2fb4b94958914a6e5e4cfa34a144aa156",
+    "exploratory_red3.txt": "ef2aed55c4289b51190885e5dbadec08344f539a453d3e49998202794efcd8f1",
+    "driver_lean5_curve2_rotation2_combined2_social.png": "bf10ccce7d4dcda7441a4c93884e21950ab0bc6b569ea9c7a0a04f214dfe512c",
+    "mypy.txt": "5d4b6d285b77932e3d08212c3b4974d0a803f98ec60408ac6ccf6a063fa6c19e",
+    "seven_iron_lean10_curve2_rotation2_shaft_only_social.png": "11c19890408ded0fdea5744c2e4974f84cbda28d4b67e42d626dfbfe6a0f9dcb",
+    "focused_green.txt": "94728b45cf9072ddd7e862a5525b6de590748c5a3c2887f4369a20a5f8be5463",
+    "seven_iron_lean10_curve2_rotation2_shaft_only_academic_1080.png": "d18a65d20123e5bf46271d4301db46f818fcf299c4e7eb19f255cc63caf6cb15",
+    "render_log.txt": "7c156b45ef55b99ae87dbd26ae1d36e1594c51574ad44bf988cecf33344402d4"
+  }
+}

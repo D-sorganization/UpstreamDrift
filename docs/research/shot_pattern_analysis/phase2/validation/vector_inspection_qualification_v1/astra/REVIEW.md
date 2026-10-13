@@ -1,0 +1,11 @@
+# Vector Inspection Component Review
+
+The operational helper is accepted for its bounded parsing and diagnostic contract. It does not approve graphical layout, visible glyphs, scientific captions or the full publication. The original AGY snapshot is preserved separately; its claimed initial red/green chronology was not verified from raw logs.
+
+Independent testing produced seven actual failures before correction. The final suite passes 37 tests, with Ruff, format and scoped Mypy clean. It includes real compact Matplotlib PDF/SVG exports, malformed/encrypted/multipage/empty PDF rejection, resource and box validation, hash mutations, lazy PDF warnings, restored logging handlers, exact SVG root namespace, forbidden stylesheet instructions, duplicate IDs, invalid non-image data URIs, valid local references, metadata separation, coherent text/tspan extraction, and inert standard Matplotlib DOCTYPE support. An incomplete viewport without a viewBox is unsupported by this qualification contract; it is not described as universally malformed SVG.
+
+PDF warning capture now surrounds the full lazy inspection. The reader helper retains its existing interface; no nested warning-capture implementation remains. SVG parsing disables external parameter-entity parsing, rejects entity declarations and custom DTD dependencies, preserves comments separately and restricts embedded image resources to the PNG/base64 form produced by these Matplotlib exports. Extracted text is not asserted visible. Font resources are inventoried without labeling Type3/path glyphs invalid.
+
+The specified completed primary seven-iron social density PDF and SVG both passed with identical before/after bytes and source bindings. Both expose seven embedded image resources. PDF extraction returned 1,235 characters with no parser warnings. SVG uses path glyphs: zero text-element strings and 89 separate comments, which is valid and not a missing-text finding. Full diagnostic output and hashes are in `completed_sample.json`.
+
+No repository, producer, live v6 asset, simulation or statistical calculation was modified. The coordinator must still enforce terminal success, strict source/manifest identity and scientific-caption checks before applying this helper to the final set. Raster/vector rendering and human visual review remain separate gates.

@@ -1,0 +1,183 @@
+{
+  "receipt_sha256": "8d3fd135987828c62e4772638468be70b302ef9e2963de2eae5c406f40068ab8",
+  "total_png_links": 10,
+  "paired_png_links": 6,
+  "exact_ordered_identities": true,
+  "all_three_social_patterns": true,
+  "distinct_png_paths": true,
+  "scope": "Consumer metadata compatibility with real v3 producer ledger; no visual or final artifact qualification",
+  "links": [
+    {
+      "club": "driver",
+      "kind": "density",
+      "presentation": "academic",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1",
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2",
+        "driver_lean5_curve1_rotation2_combined2"
+      ],
+      "physical_pattern": null,
+      "comparison_kind": "shaft_rotation_sd",
+      "source_kind": "six_population_common_index_comparison",
+      "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density.png"
+    },
+    {
+      "club": "driver",
+      "kind": "density",
+      "presentation": "social",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1",
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2",
+        "driver_lean5_curve1_rotation2_combined2"
+      ],
+      "physical_pattern": "Straight",
+      "comparison_kind": "shaft_rotation_sd",
+      "source_kind": "six_population_common_index_comparison",
+      "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_straight_social.png"
+    },
+    {
+      "club": "driver",
+      "kind": "density",
+      "presentation": "social",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1",
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2",
+        "driver_lean5_curve1_rotation2_combined2"
+      ],
+      "physical_pattern": "Draw",
+      "comparison_kind": "shaft_rotation_sd",
+      "source_kind": "six_population_common_index_comparison",
+      "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_draw_social.png"
+    },
+    {
+      "club": "driver",
+      "kind": "density",
+      "presentation": "social",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1",
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2",
+        "driver_lean5_curve1_rotation2_combined2"
+      ],
+      "physical_pattern": "Fade",
+      "comparison_kind": "shaft_rotation_sd",
+      "source_kind": "six_population_common_index_comparison",
+      "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_density_fade_social.png"
+    },
+    {
+      "club": "driver",
+      "kind": "overhead",
+      "presentation": "academic",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1",
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2",
+        "driver_lean5_curve1_rotation2_combined2"
+      ],
+      "physical_pattern": null,
+      "comparison_kind": "shaft_rotation_sd",
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead.png"
+    },
+    {
+      "club": "driver",
+      "kind": "overhead",
+      "presentation": "social",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1",
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2",
+        "driver_lean5_curve1_rotation2_combined2"
+      ],
+      "physical_pattern": null,
+      "comparison_kind": "shaft_rotation_sd",
+      "source_kind": "saved_illustrative_trajectory_samples",
+      "relative_path": "report-probe/figures/comparisons/shaft_rotation_sd_driver_lean5_curve1_rotation1_combined2_vs_driver_lean5_curve1_rotation2_combined2_af19ce16d0_overhead_social.png"
+    },
+    {
+      "club": "driver",
+      "kind": "density",
+      "presentation": "academic",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2"
+      ],
+      "physical_pattern": null,
+      "comparison_kind": null,
+      "source_kind": "individual_supported_endpoints",
+      "relative_path": "report-probe/figures/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density.png"
+    },
+    {
+      "club": "driver",
+      "kind": "density",
+      "presentation": "social",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2"
+      ],
+      "physical_pattern": null,
+      "comparison_kind": null,
+      "source_kind": "individual_supported_endpoints",
+      "relative_path": "report-probe/figures/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_density_social.png"
+    },
+    {
+      "club": "driver",
+      "kind": "overhead",
+      "presentation": "academic",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2"
+      ],
+      "physical_pattern": null,
+      "comparison_kind": null,
+      "source_kind": "saved_illustrative_trajectories",
+      "relative_path": "report-probe/figures/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead.png"
+    },
+    {
+      "club": "driver",
+      "kind": "overhead",
+      "presentation": "social",
+      "source_protocol": "original_primary/1",
+      "source_protocols": [
+        "original_primary/1"
+      ],
+      "source_cells": [
+        "driver_lean5_curve1_rotation1_combined2"
+      ],
+      "physical_pattern": null,
+      "comparison_kind": null,
+      "source_kind": "saved_illustrative_trajectories",
+      "relative_path": "report-probe/figures/cells/driver_lean5_curve1_rotation1_combined2_511ff5d398_overhead_social.png"
+    }
+  ]
+}

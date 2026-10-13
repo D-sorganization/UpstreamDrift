@@ -1,0 +1,6 @@
+{
+  "pid": 249846,
+  "start_ticks": "51980827",
+  "reason": "Worker repeatedly waits for completed Mypy task; baseline log already terminal and no edits made. Stop only owned AGY worker to restart with synchronous command instructions.",
+  "mypy_log_sha256": "07c77a531bddd05a60cae2b1dbf6f9e2786f22898eaea1326135908e46c978d6"
+}

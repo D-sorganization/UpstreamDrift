@@ -1,0 +1,366 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_academic_density_row_gutter_has_readable_positive_clearance[pitching_wedge_shaft_only_narrow-pitching_wedge-77.402-2.0-2.0] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2193/test_academic_density_row_gutt0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72801abe4320>
+case_name = 'pitching_wedge_shaft_only_narrow', club_id = 'pitching_wedge'
+target_x_m = 77.402, scale_x_m = 2.0, scale_y_m = 2.0
+
+    @pytest.mark.parametrize(
+        "case_name,club_id,target_x_m,scale_x_m,scale_y_m",
+        [
+            ("pitching_wedge_shaft_only_narrow", "pitching_wedge", 77.402, 2.0, 2.0),
+            ("seven_iron_shaft_only_narrow", "seven_iron", 148.5, 4.0, 4.0),
+            ("seven_iron_combined_noise", "seven_iron", 148.5, 5.0, 3.8),
+        ],
+    )
+    def test_academic_density_row_gutter_has_readable_positive_clearance(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        case_name: str,
+        club_id: str,
+        target_x_m: float,
+        scale_x_m: float,
+        scale_y_m: float,
+    ) -> None:
+        """Academic 6-panel density layout must maintain positive decorated row clearance."""
+        canvas_agg_cls, _ = _load_plotting_deps()
+    
+        import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
+        from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            _write_pair_density_figure,
+        )
+    
+        first_ref, second_ref, point_sets = _synthetic_condition(
+            club_id=club_id,
+            target_x_m=target_x_m,
+            scale_x_m=scale_x_m,
+            scale_y_m=scale_y_m,
+        )
+    
+        captured_figures: list[Any] = []
+        original_save = msf._save_figure
+    
+        def capturing_save(figure: Any, stem: Path) -> dict[str, Path]:
+            captured_figures.append(figure)
+            return original_save(figure, stem)
+    
+        monkeypatch.setattr(msf, "_save_figure", capturing_save)
+    
+        output_stem = tmp_path / case_name
+        outputs = _write_pair_density_figure(
+            point_sets,
+            first=first_ref,
+            second=second_ref,
+            comparison="across_lean",
+            first_label="Lean 0°",
+            second_label="Lean 10°",
+            target_x=target_x_m,
+            common_n=600,
+            output_stem=output_stem,
+        )
+    
+        # 1. Output files are created on disk
+        for ext in ("png", "pdf", "svg"):
+            assert ext in outputs, f"Missing output format {ext}"
+            assert outputs[ext].exists(), f"File does not exist: {outputs[ext]}"
+            assert outputs[ext].stat().st_size > 0, f"File is empty: {outputs[ext]}"
+    
+        assert len(captured_figures) == 1
+        figure = captured_figures[0]
+    
+        # 2. Figure dimensions are preserved (16x9 inches)
+        assert tuple(figure.get_size_inches()) == (16.0, 9.0)
+    
+        # 3. Re-draw onto Agg canvas to obtain exact window bounding boxes
+        canvas_agg_cls(figure)
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+    
+        # 4. Measure decorated vertical clearance across all 3 columns
+        for col_index in range(3):
+            top_axis = figure.axes[col_index]
+            bot_axis = figure.axes[3 + col_index]
+    
+            # Typography standards: retained font sizes
+            assert top_axis.xaxis.label.get_fontsize() == 10.0
+            assert bot_axis.title.get_fontsize() == 10.0
+    
+            # Equal aspect ratio preserved (equal maps to 1.0 in matplotlib)
+            assert top_axis.get_aspect() in ("equal", 1.0)
+            assert bot_axis.get_aspect() in ("equal", 1.0)
+    
+            # Shared limits preserved
+            assert top_axis.get_xlim() == bot_axis.get_xlim()
+            assert top_axis.get_ylim() == bot_axis.get_ylim()
+    
+            top_xlabel_box = top_axis.xaxis.label.get_window_extent(renderer)
+            bot_title_box = bot_axis.title.get_window_extent(renderer)
+    
+            # Clearance: bottom edge of upper row's xlabel minus top edge of lower row's title
+            clearance_pt = (top_xlabel_box.y0 - bot_title_box.y1) * 72.0 / figure.dpi
+    
+            # Minimum required readable positive clearance: >= 6.0 pt
+>           assert clearance_pt >= 6.0, (
+                f"Case {case_name}, column {col_index}: decorated vertical clearance "
+                f"is cramped/negative ({clearance_pt:.2f} pt < 6.0 pt). "
+                f"Upper xlabel bbox: {top_xlabel_box}, lower title bbox: {bot_title_box}."
+            )
+E           AssertionError: Case pitching_wedge_shaft_only_narrow, column 0: decorated vertical clearance is cramped/negative (-1.50 pt < 6.0 pt). Upper xlabel bbox: Bbox(x0=311.11985801649763, y0=387.37174479166663, x1=421.11985801649763, y1=401.7083333333333), lower title bbox: Bbox(x0=300.24485801649763, y0=375.12174479166663, x1=431.99485801649763, y1=389.4583333333333).
+E           assert np.float64(-1.5023437500000136) >= 6.0
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py:169: AssertionError
+_ test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_shaft_only_narrow-seven_iron-148.5-4.0-4.0] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2193/test_academic_density_row_gutt1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x727ff91d8320>
+case_name = 'seven_iron_shaft_only_narrow', club_id = 'seven_iron'
+target_x_m = 148.5, scale_x_m = 4.0, scale_y_m = 4.0
+
+    @pytest.mark.parametrize(
+        "case_name,club_id,target_x_m,scale_x_m,scale_y_m",
+        [
+            ("pitching_wedge_shaft_only_narrow", "pitching_wedge", 77.402, 2.0, 2.0),
+            ("seven_iron_shaft_only_narrow", "seven_iron", 148.5, 4.0, 4.0),
+            ("seven_iron_combined_noise", "seven_iron", 148.5, 5.0, 3.8),
+        ],
+    )
+    def test_academic_density_row_gutter_has_readable_positive_clearance(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        case_name: str,
+        club_id: str,
+        target_x_m: float,
+        scale_x_m: float,
+        scale_y_m: float,
+    ) -> None:
+        """Academic 6-panel density layout must maintain positive decorated row clearance."""
+        canvas_agg_cls, _ = _load_plotting_deps()
+    
+        import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
+        from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            _write_pair_density_figure,
+        )
+    
+        first_ref, second_ref, point_sets = _synthetic_condition(
+            club_id=club_id,
+            target_x_m=target_x_m,
+            scale_x_m=scale_x_m,
+            scale_y_m=scale_y_m,
+        )
+    
+        captured_figures: list[Any] = []
+        original_save = msf._save_figure
+    
+        def capturing_save(figure: Any, stem: Path) -> dict[str, Path]:
+            captured_figures.append(figure)
+            return original_save(figure, stem)
+    
+        monkeypatch.setattr(msf, "_save_figure", capturing_save)
+    
+        output_stem = tmp_path / case_name
+        outputs = _write_pair_density_figure(
+            point_sets,
+            first=first_ref,
+            second=second_ref,
+            comparison="across_lean",
+            first_label="Lean 0°",
+            second_label="Lean 10°",
+            target_x=target_x_m,
+            common_n=600,
+            output_stem=output_stem,
+        )
+    
+        # 1. Output files are created on disk
+        for ext in ("png", "pdf", "svg"):
+            assert ext in outputs, f"Missing output format {ext}"
+            assert outputs[ext].exists(), f"File does not exist: {outputs[ext]}"
+            assert outputs[ext].stat().st_size > 0, f"File is empty: {outputs[ext]}"
+    
+        assert len(captured_figures) == 1
+        figure = captured_figures[0]
+    
+        # 2. Figure dimensions are preserved (16x9 inches)
+        assert tuple(figure.get_size_inches()) == (16.0, 9.0)
+    
+        # 3. Re-draw onto Agg canvas to obtain exact window bounding boxes
+        canvas_agg_cls(figure)
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+    
+        # 4. Measure decorated vertical clearance across all 3 columns
+        for col_index in range(3):
+            top_axis = figure.axes[col_index]
+            bot_axis = figure.axes[3 + col_index]
+    
+            # Typography standards: retained font sizes
+            assert top_axis.xaxis.label.get_fontsize() == 10.0
+            assert bot_axis.title.get_fontsize() == 10.0
+    
+            # Equal aspect ratio preserved (equal maps to 1.0 in matplotlib)
+            assert top_axis.get_aspect() in ("equal", 1.0)
+            assert bot_axis.get_aspect() in ("equal", 1.0)
+    
+            # Shared limits preserved
+            assert top_axis.get_xlim() == bot_axis.get_xlim()
+            assert top_axis.get_ylim() == bot_axis.get_ylim()
+    
+            top_xlabel_box = top_axis.xaxis.label.get_window_extent(renderer)
+            bot_title_box = bot_axis.title.get_window_extent(renderer)
+    
+            # Clearance: bottom edge of upper row's xlabel minus top edge of lower row's title
+            clearance_pt = (top_xlabel_box.y0 - bot_title_box.y1) * 72.0 / figure.dpi
+    
+            # Minimum required readable positive clearance: >= 6.0 pt
+>           assert clearance_pt >= 6.0, (
+                f"Case {case_name}, column {col_index}: decorated vertical clearance "
+                f"is cramped/negative ({clearance_pt:.2f} pt < 6.0 pt). "
+                f"Upper xlabel bbox: {top_xlabel_box}, lower title bbox: {bot_title_box}."
+            )
+E           AssertionError: Case seven_iron_shaft_only_narrow, column 0: decorated vertical clearance is cramped/negative (-1.50 pt < 6.0 pt). Upper xlabel bbox: Bbox(x0=311.11985801649763, y0=387.37174479166663, x1=421.11985801649763, y1=401.7083333333333), lower title bbox: Bbox(x0=300.24485801649763, y0=375.12174479166663, x1=431.99485801649763, y1=389.4583333333333).
+E           assert np.float64(-1.5023437500000136) >= 6.0
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py:169: AssertionError
+_ test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_combined_noise-seven_iron-148.5-5.0-3.8] _
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2193/test_academic_density_row_gutt2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x727ff8c5b9b0>
+case_name = 'seven_iron_combined_noise', club_id = 'seven_iron'
+target_x_m = 148.5, scale_x_m = 5.0, scale_y_m = 3.8
+
+    @pytest.mark.parametrize(
+        "case_name,club_id,target_x_m,scale_x_m,scale_y_m",
+        [
+            ("pitching_wedge_shaft_only_narrow", "pitching_wedge", 77.402, 2.0, 2.0),
+            ("seven_iron_shaft_only_narrow", "seven_iron", 148.5, 4.0, 4.0),
+            ("seven_iron_combined_noise", "seven_iron", 148.5, 5.0, 3.8),
+        ],
+    )
+    def test_academic_density_row_gutter_has_readable_positive_clearance(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        case_name: str,
+        club_id: str,
+        target_x_m: float,
+        scale_x_m: float,
+        scale_y_m: float,
+    ) -> None:
+        """Academic 6-panel density layout must maintain positive decorated row clearance."""
+        canvas_agg_cls, _ = _load_plotting_deps()
+    
+        import src.tools.shot_pattern_analysis.matched_supplement_figures as msf
+        from src.tools.shot_pattern_analysis.matched_supplement_figures import (
+            _write_pair_density_figure,
+        )
+    
+        first_ref, second_ref, point_sets = _synthetic_condition(
+            club_id=club_id,
+            target_x_m=target_x_m,
+            scale_x_m=scale_x_m,
+            scale_y_m=scale_y_m,
+        )
+    
+        captured_figures: list[Any] = []
+        original_save = msf._save_figure
+    
+        def capturing_save(figure: Any, stem: Path) -> dict[str, Path]:
+            captured_figures.append(figure)
+            return original_save(figure, stem)
+    
+        monkeypatch.setattr(msf, "_save_figure", capturing_save)
+    
+        output_stem = tmp_path / case_name
+        outputs = _write_pair_density_figure(
+            point_sets,
+            first=first_ref,
+            second=second_ref,
+            comparison="across_lean",
+            first_label="Lean 0°",
+            second_label="Lean 10°",
+            target_x=target_x_m,
+            common_n=600,
+            output_stem=output_stem,
+        )
+    
+        # 1. Output files are created on disk
+        for ext in ("png", "pdf", "svg"):
+            assert ext in outputs, f"Missing output format {ext}"
+            assert outputs[ext].exists(), f"File does not exist: {outputs[ext]}"
+            assert outputs[ext].stat().st_size > 0, f"File is empty: {outputs[ext]}"
+    
+        assert len(captured_figures) == 1
+        figure = captured_figures[0]
+    
+        # 2. Figure dimensions are preserved (16x9 inches)
+        assert tuple(figure.get_size_inches()) == (16.0, 9.0)
+    
+        # 3. Re-draw onto Agg canvas to obtain exact window bounding boxes
+        canvas_agg_cls(figure)
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+    
+        # 4. Measure decorated vertical clearance across all 3 columns
+        for col_index in range(3):
+            top_axis = figure.axes[col_index]
+            bot_axis = figure.axes[3 + col_index]
+    
+            # Typography standards: retained font sizes
+            assert top_axis.xaxis.label.get_fontsize() == 10.0
+            assert bot_axis.title.get_fontsize() == 10.0
+    
+            # Equal aspect ratio preserved (equal maps to 1.0 in matplotlib)
+            assert top_axis.get_aspect() in ("equal", 1.0)
+            assert bot_axis.get_aspect() in ("equal", 1.0)
+    
+            # Shared limits preserved
+            assert top_axis.get_xlim() == bot_axis.get_xlim()
+            assert top_axis.get_ylim() == bot_axis.get_ylim()
+    
+            top_xlabel_box = top_axis.xaxis.label.get_window_extent(renderer)
+            bot_title_box = bot_axis.title.get_window_extent(renderer)
+    
+            # Clearance: bottom edge of upper row's xlabel minus top edge of lower row's title
+            clearance_pt = (top_xlabel_box.y0 - bot_title_box.y1) * 72.0 / figure.dpi
+    
+            # Minimum required readable positive clearance: >= 6.0 pt
+>           assert clearance_pt >= 6.0, (
+                f"Case {case_name}, column {col_index}: decorated vertical clearance "
+                f"is cramped/negative ({clearance_pt:.2f} pt < 6.0 pt). "
+                f"Upper xlabel bbox: {top_xlabel_box}, lower title bbox: {bot_title_box}."
+            )
+E           AssertionError: Case seven_iron_combined_noise, column 0: decorated vertical clearance is cramped/negative (-1.50 pt < 6.0 pt). Upper xlabel bbox: Bbox(x0=278.31560265328653, y0=387.37174479166663, x1=388.31560265328653, y1=401.7083333333333), lower title bbox: Bbox(x0=267.44060265328653, y0=375.12174479166663, x1=399.19060265328653, y1=389.4583333333333).
+E           assert np.float64(-1.5023437500000136) >= 6.0
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py:169: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[pitching_wedge_shaft_only_narrow-pitching_wedge-77.402-2.0-2.0]
+FAILED tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_shaft_only_narrow-seven_iron-148.5-4.0-4.0]
+FAILED tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py::test_academic_density_row_gutter_has_readable_positive_clearance[seven_iron_combined_noise-seven_iron-148.5-5.0-3.8]
+3 failed, 6 warnings in 29.35s

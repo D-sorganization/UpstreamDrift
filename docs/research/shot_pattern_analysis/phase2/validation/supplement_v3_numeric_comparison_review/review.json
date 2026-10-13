@@ -1,0 +1,124 @@
+{
+  "schema": "independent-supplement-v3-numeric-review/1",
+  "status": "provisional_numeric_parity_pass",
+  "producer_complete": false,
+  "utc": "2026-10-10T08:43:12.297034+00:00",
+  "input_sha256": {
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json": "b00388b9f12f4e2556bebad3a401ee6087f80790a779cf2eaf9afcf73a9e0981",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.csv": "4c24d24a6c82f00ddcbea3f2fa4559e8417dd1b24f5ec71354ed645f3d02112e",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.md": "6e64efa96bc03c84591019f82bcf57b5e2eaea394dc389ec3f3c8fb0ad83243b",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v2/supplement_report_v1/REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/presentation_preview_rejected_supplement_v2/supplement_report_v1/REPORT_SUPPLEMENT.csv": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.csv": "39a08d071373a6a30c0bbc2b06e4dd01630432ee5fe529ff24a858db6a20b9c8",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.md": "b1693ff7268f1cb6c901dff1fee39a3135a80ca688b193079411e0d2fe9b3721",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT.csv": "fe7f9e671f97122042e6a578b2aa8f21fe9a3eb4490831cb38bc3a1e88935848",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/across_lean_interaction_review_v1/actual_control_effects.json": "d44140d51ffcd18fecf6d43243cf67135c90f8621f04cc66c9087cc35154fb7c"
+  },
+  "inputs_unchanged_after_review": true,
+  "pair_counts": {
+    "across_lean": 56,
+    "curve_strength": 164,
+    "shaft_rotation_sd": 164
+  },
+  "total_pairs": 384,
+  "per_pattern_objects_exactly_preserved": 384,
+  "comparison_csv_rows": 1152,
+  "json_difference_paths": {
+    "/course_scoring_effect_modification_scope": 56,
+    "/course_scoring_provenance": 56,
+    "/analysis_source_sha256/matched_lean_control.py": 384,
+    "/course_scoring_effect_modification": 56
+  },
+  "csv_difference_columns": {
+    "analysis_source_sha256": 1152,
+    "sg_effect_upper_95_strokes": 112,
+    "sg_effect_lower_95_strokes": 112,
+    "sg_effect_modification_strokes": 112
+  },
+  "supplement_inventory_json_equal": true,
+  "supplement_inventory_csv_bytes_equal": true,
+  "selected_controls": [
+    {
+      "club": "driver",
+      "common_supported_n": 9940,
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b268743fd6b01fa887e647d6f1ab5d29c4657a6283254c5256396dcb15ae0dba",
+          "source_csv_sha256": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76"
+        },
+        {
+          "protocol_id": "driver-control-speed-bounds/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+          "source_cell_manifest_sha256": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+          "source_csv_sha256": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758"
+        }
+      ],
+      "effect": {
+        "Draw": {
+          "estimate": 0.005980075434717972,
+          "lower_95": 0.004831457740921157,
+          "upper_95": 0.006995761867452044
+        },
+        "Fade": {
+          "estimate": -0.0013974497727458593,
+          "lower_95": -0.0023379644288098514,
+          "upper_95": -0.0004807455866901034
+        }
+      },
+      "exact_full_pair_object_parity": true
+    },
+    {
+      "club": "pitching_wedge",
+      "common_supported_n": 9999,
+      "sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ],
+      "effect": {
+        "Draw": {
+          "estimate": -0.0003513244825749287,
+          "lower_95": -0.0005602611928363378,
+          "upper_95": -0.00014244297263490242
+        },
+        "Fade": {
+          "estimate": 0.0006868011750515057,
+          "lower_95": 0.00048511943852345713,
+          "upper_95": 0.0008858668665014652
+        }
+      },
+      "exact_full_pair_object_parity": true
+    }
+  ],
+  "findings": [],
+  "limits": [
+    "Live output; final production receipt and artifact hashes must reconcile these same bytes.",
+    "Markdown is hash-bound but not independently re-rendered here; comparison checks target numeric JSON/CSV.",
+    "No simulation, scoring calculation or bootstrap was rerun."
+  ]
+}

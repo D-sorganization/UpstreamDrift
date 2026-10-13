@@ -1,0 +1,372 @@
+{
+  "schema": "shot-pattern-base-exact-failed-node-reproduction/1",
+  "source_gate_commit": "dac6618c58834b671acc7cf7e1137f7a548cee73",
+  "source_gate_log_compressed_sha256": "373391d91bb4a5fc6ffe246a5a72827e582d0cb2b8c827cff7da5f4608708b18",
+  "baseline_commit": "fa7ee92f5cddd753099d7418fc974b142b7ebb54",
+  "tools_pin": "86d0f28b1cc5acf61185e07e320c816c2d005512",
+  "baseline_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-baseline-test-audit/UpstreamDrift",
+  "command_argv": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "-m",
+    "pytest",
+    "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_initialization",
+    "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_load_from_path",
+    "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_load_from_string",
+    "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_step",
+    "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_get_state",
+    "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_compute_mass_matrix",
+    "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_compute_inverse_dynamics",
+    "tests/research/test_articulated_ground_posthoc_sensitivity.py::test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs",
+    "tests/research/test_nonlinear_controller_comparison_registration.py::test_registration_is_committed_and_deterministic",
+    "tests/research/test_uncertainty_stability_audit.py::test_committed_stability_audit_is_fresh",
+    "tests/scripts/test_check_test_layout.py::test_no_legacy_root_test_allowlist_remains",
+    "tests/shared/wave7_model_generation/test_format_utils.py::test_validate_mjcf_malformed_xml",
+    "tests/shared/wave7_python_core/test_logger_utils.py::TestLogExecutionTime::test_rejects_empty_operation_name",
+    "tests/test_build_humanoid_models.py::test_mujoco_check_passes_on_canonical_constants",
+    "tests/test_build_humanoid_models.py::test_opensim_check_handles_missing_submodule",
+    "tests/tools/test_code_quality_check.py::test_check_magic_numbers",
+    "tests/tools/test_code_quality_check.py::test_check_magic_numbers_gravity",
+    "tests/toplevel/wave8_toplevel/test_code_quality_check.py::TestCheckMagicNumbers::test_detects_gravity",
+    "tests/ui/engines/drake/test_drake_embed_adapter.py::test_create_main_widget_returns_qwidget",
+    "tests/ui/engines/pinocchio/test_pinocchio_embed_adapter.py::test_create_main_widget_returns_qwidget",
+    "tests/unit/engines/physics_engines/drake/test_drake_gui_app.py::TestDrakeSimApp::test_init",
+    "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros(3), values=np.zeros(4))]",
+    "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros((2, 2)), values=np.zeros(4))]",
+    "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros(3), values=np.zeros((3, 2, 2)))]",
+    "tests/unit/test_core_install_isolation.py::test_config_import_does_not_require_pandas",
+    "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_gt_returns_filtered_rows",
+    "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_eq_returns_matching_rows",
+    "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_lt_returns_filtered_rows",
+    "tests/unit/test_data_processing_core_extended.py::TestCalculatedAndTransform::test_add_calculated_column_creates_new_column",
+    "tests/unit/test_opensim_physics_engine.py::test_opensim_physics_engine_load_from_string",
+    "tests/unit/theme/test_api_models.py::TestThemeOperationResponse::test_success_true",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_lists_builtin_themes_and_filters_empty_color_sets",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_lists_custom_themes_and_filters_empty_color_sets",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_lists_all_themes_with_builtin_flags",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_get_active_theme_reports_builtin_status",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_set_active_theme_changes_available_theme",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_set_active_theme_rejects_unknown_theme_with_available_names",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_save_custom_theme_delegates_name_colors_and_apply_flag",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_save_custom_theme_converts_manager_value_error_to_bad_request",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_delete_custom_theme_returns_success_for_existing_theme",
+    "tests/unit/theme/test_api_models.py::TestThemeRouter::test_delete_custom_theme_returns_not_found_for_missing_theme",
+    "-p",
+    "no:pytestqt",
+    "-ra",
+    "--tb=short"
+  ],
+  "environment_overrides": {
+    "QT_QPA_PLATFORM": "offscreen",
+    "MPLBACKEND": "Agg",
+    "MUJOCO_GL": "egl",
+    "SDL_VIDEODRIVER": "dummy",
+    "PYTHONPATH": "/home/dieterolson/.codex/worktrees/shot-pattern-baseline-test-audit/UpstreamDrift"
+  },
+  "interpreter": "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+  "pytest_plugin_option": "-p no:pytestqt",
+  "baseline_exit_code": 1,
+  "baseline_log_sha256": "21099a20778716d95f49104de3c22aed8994367323e65cace694722a17c9beed",
+  "original_unique_nodes": 41,
+  "original_failed": 34,
+  "original_error": 7,
+  "original_unique_test_paths": 18,
+  "original_paths_changed_in_gate_diff": 0,
+  "baseline_failed": 31,
+  "baseline_error": 7,
+  "baseline_passed": 3,
+  "could_not_execute": 0,
+  "same_status_nodes": 38,
+  "interpretation": "Only exact-node status categories were compared. 38 nonpassing nodes reproduce at the base under the recorded interpreter and headless settings. Three nodes pass at base; their original failures are not established as source-caused by this check. Neither the original canonical pre-PR gate nor its present state is green. This is not a full-suite rerun or empirical physics acceptance.",
+  "nodes": [
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_initialization",
+      "path": "tests/unit/test_drake_physics_engine.py",
+      "baseline_status": "ERROR",
+      "same_status": true
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_load_from_path",
+      "path": "tests/unit/test_drake_physics_engine.py",
+      "baseline_status": "ERROR",
+      "same_status": true
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_load_from_string",
+      "path": "tests/unit/test_drake_physics_engine.py",
+      "baseline_status": "ERROR",
+      "same_status": true
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_step",
+      "path": "tests/unit/test_drake_physics_engine.py",
+      "baseline_status": "ERROR",
+      "same_status": true
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_get_state",
+      "path": "tests/unit/test_drake_physics_engine.py",
+      "baseline_status": "ERROR",
+      "same_status": true
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_compute_mass_matrix",
+      "path": "tests/unit/test_drake_physics_engine.py",
+      "baseline_status": "ERROR",
+      "same_status": true
+    },
+    {
+      "original_status": "ERROR",
+      "nodeid": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_compute_inverse_dynamics",
+      "path": "tests/unit/test_drake_physics_engine.py",
+      "baseline_status": "ERROR",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/research/test_articulated_ground_posthoc_sensitivity.py::test_ground_posthoc_sensitivity_preserves_primary_failure_and_mixed_signs",
+      "path": "tests/research/test_articulated_ground_posthoc_sensitivity.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/research/test_nonlinear_controller_comparison_registration.py::test_registration_is_committed_and_deterministic",
+      "path": "tests/research/test_nonlinear_controller_comparison_registration.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/research/test_uncertainty_stability_audit.py::test_committed_stability_audit_is_fresh",
+      "path": "tests/research/test_uncertainty_stability_audit.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/scripts/test_check_test_layout.py::test_no_legacy_root_test_allowlist_remains",
+      "path": "tests/scripts/test_check_test_layout.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/shared/wave7_model_generation/test_format_utils.py::test_validate_mjcf_malformed_xml",
+      "path": "tests/shared/wave7_model_generation/test_format_utils.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/shared/wave7_python_core/test_logger_utils.py::TestLogExecutionTime::test_rejects_empty_operation_name",
+      "path": "tests/shared/wave7_python_core/test_logger_utils.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/test_build_humanoid_models.py::test_mujoco_check_passes_on_canonical_constants",
+      "path": "tests/test_build_humanoid_models.py",
+      "baseline_status": "PASSED",
+      "same_status": false
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/test_build_humanoid_models.py::test_opensim_check_handles_missing_submodule",
+      "path": "tests/test_build_humanoid_models.py",
+      "baseline_status": "PASSED",
+      "same_status": false
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/tools/test_code_quality_check.py::test_check_magic_numbers",
+      "path": "tests/tools/test_code_quality_check.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/tools/test_code_quality_check.py::test_check_magic_numbers_gravity",
+      "path": "tests/tools/test_code_quality_check.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/toplevel/wave8_toplevel/test_code_quality_check.py::TestCheckMagicNumbers::test_detects_gravity",
+      "path": "tests/toplevel/wave8_toplevel/test_code_quality_check.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/ui/engines/drake/test_drake_embed_adapter.py::test_create_main_widget_returns_qwidget",
+      "path": "tests/ui/engines/drake/test_drake_embed_adapter.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/ui/engines/pinocchio/test_pinocchio_embed_adapter.py::test_create_main_widget_returns_qwidget",
+      "path": "tests/ui/engines/pinocchio/test_pinocchio_embed_adapter.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/engines/physics_engines/drake/test_drake_gui_app.py::TestDrakeSimApp::test_init",
+      "path": "tests/unit/engines/physics_engines/drake/test_drake_gui_app.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros(3), values=np.zeros(4))]",
+      "path": "tests/unit/shared_python/test_signal_toolkit_core.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros((2, 2)), values=np.zeros(4))]",
+      "path": "tests/unit/shared_python/test_signal_toolkit_core.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros(3), values=np.zeros((3, 2, 2)))]",
+      "path": "tests/unit/shared_python/test_signal_toolkit_core.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_core_install_isolation.py::test_config_import_does_not_require_pandas",
+      "path": "tests/unit/test_core_install_isolation.py",
+      "baseline_status": "PASSED",
+      "same_status": false
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_gt_returns_filtered_rows",
+      "path": "tests/unit/test_data_processing_core_extended.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_eq_returns_matching_rows",
+      "path": "tests/unit/test_data_processing_core_extended.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_lt_returns_filtered_rows",
+      "path": "tests/unit/test_data_processing_core_extended.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_data_processing_core_extended.py::TestCalculatedAndTransform::test_add_calculated_column_creates_new_column",
+      "path": "tests/unit/test_data_processing_core_extended.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/test_opensim_physics_engine.py::test_opensim_physics_engine_load_from_string",
+      "path": "tests/unit/test_opensim_physics_engine.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeOperationResponse::test_success_true",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_lists_builtin_themes_and_filters_empty_color_sets",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_lists_custom_themes_and_filters_empty_color_sets",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_lists_all_themes_with_builtin_flags",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_get_active_theme_reports_builtin_status",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_set_active_theme_changes_available_theme",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_set_active_theme_rejects_unknown_theme_with_available_names",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_save_custom_theme_delegates_name_colors_and_apply_flag",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_save_custom_theme_converts_manager_value_error_to_bad_request",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_delete_custom_theme_returns_success_for_existing_theme",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    },
+    {
+      "original_status": "FAILED",
+      "nodeid": "tests/unit/theme/test_api_models.py::TestThemeRouter::test_delete_custom_theme_returns_not_found_for_missing_theme",
+      "path": "tests/unit/theme/test_api_models.py",
+      "baseline_status": "FAILED",
+      "same_status": true
+    }
+  ],
+  "git_status_short_after_run": "",
+  "started_utc": "2026-10-11T04:54:06.005074+00:00",
+  "finished_utc": "2026-10-11T04:54:49.515526+00:00"
+}

@@ -1,0 +1,72 @@
+{
+  "schema": "independent-across-lean-qualification/1",
+  "created_utc": "2026-10-10T07:24:13.307651+00:00",
+  "status": "accepted_component_candidate",
+  "source_worktree": "/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift",
+  "candidate_sources": {
+    "src/tools/shot_pattern_analysis/matched_lean_control.py": "0c57f3c1a2535f63ba059b5c6fb5c3414f83cc6b9a1169a429cf14a19bbd12c0",
+    "tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py": "cd52f6fe0535c1163e2ed0bf05a8a6846219424cd791f7dae30c2ba20b5c59c9",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "084f580b117bb4a8b3049a7bb497eeef84d4cd70bf269a908ba0bf5e78de1b75",
+    "tests/research/test_shot_pattern_final_report.py": "dbc25ec607aef5129fe88f208f1a42ddbfa0b269adf7928752a50b1624824823"
+  },
+  "line_counts": {
+    "src/tools/shot_pattern_analysis/matched_lean_control.py": 1089,
+    "tests/tools/shot_pattern_analysis/test_matched_explicit_source_pair.py": 1177,
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": 431,
+    "tests/research/test_shot_pattern_final_report.py": 944
+  },
+  "checks": {
+    "focused_tests_passed": 45,
+    "narrative_regressions_red": 2,
+    "ruff": "passed",
+    "format": "passed",
+    "mypy": "passed, two source files",
+    "git_diff_check": "passed"
+  },
+  "actual_saved_data": {
+    "driver_common_six": 9940,
+    "pitching_wedge_common_six": 9999,
+    "independent_rowwise_mean_agreement_absolute_tolerance": 1e-12,
+    "all_existing_per_pattern_metrics_exactly_equal": true,
+    "actual_producer_results_render_selected_control_table": true,
+    "actual_receipt_sha256": "d44140d51ffcd18fecf6d43243cf67135c90f8621f04cc66c9087cc35154fb7c",
+    "table_sha256": "491bf7c55c3cb752457aa85027330c87ea255096a10bdac660ddfe6b8e7bae42"
+  },
+  "scope": [
+    "One-line extension to the existing common-six scoring-vector and paired interaction pathway for across_lean.",
+    "Narrow final-report selection guard exposes absent/failed relative scoring as unavailable, preserving actual failure reason.",
+    "No numerical simulation, physical model, matching protocol or saved study data changes."
+  ],
+  "limitations": [
+    "Acceptance applies to this source-bound component candidate; MAIN integration and full saved-data pipeline rerun are pending.",
+    "The prior live supplemental output remains unchanged and provisional; all 56 across-lean relative effects require regeneration, not retrospective relabeling.",
+    "Driver 0\u21925 control rematches delivery and uses a separately declared speed-bound extension; this is not a causal shaft-lean or distance decomposition.",
+    "Pointwise Monte Carlo intervals describe this conditional simulation, not empirical player uncertainty."
+  ],
+  "harness_failures_preserved": [
+    "unverified alias rejected (harness corrected to public loader verified reference)",
+    "incorrect inventory location rejected (path corrected)",
+    "unnecessary transition receipt rejected for identical PW execution snapshots (conditional receipt use corrected)"
+  ],
+  "reproduce": "cd /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift && QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg PYTHONPATH=. /tmp/shot-pattern-validation-venv-20261009/bin/python /home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/across_lean_interaction_review_v1/check_actual_controls.py.txt",
+  "evidence_sha256": {
+    "ACTUAL_CONTROL_TABLE.md": "491bf7c55c3cb752457aa85027330c87ea255096a10bdac660ddfe6b8e7bae42",
+    "REVIEW.md": "e2beaa6afc9e15880f1c84917c3996a856ccfc0b35d869832d5ec42ccc9b6c49",
+    "actual_control_effects.json": "d44140d51ffcd18fecf6d43243cf67135c90f8621f04cc66c9087cc35154fb7c",
+    "actual_control_success.txt": "63278d5e70f7659f0fe0106da90c66f4a0d24d79381c2127c37be54e5c155e46",
+    "agy_evidence/p2-lean-interaction-agy.txt": "4b3f5f4ab4d7032f5d0ff15feecac1fb70f939a93aa4ad1ece90581458059767",
+    "agy_evidence/p2-lean-interaction-checks.txt": "d72475b6577793c0c2b760cd25652dfc8986d1519912a6da44c0cf99bd48a4e8",
+    "agy_evidence/p2-lean-interaction-green.txt": "7b0f76bfd93e2f50f106c76e33ed11a88dfcfe1756693a4df1e608028d01c0d7",
+    "agy_evidence/p2-lean-interaction-red.txt": "52e8d8deb124ccc45c005a5b8115c5baf6e4ce9158d5febb661c38b1b35104f9",
+    "agy_evidence/p2-lean-interaction-review.md": "a6672a113b1c0e82ee6fe376e79ff75ce007580676f4d8a112a92d02772c8c23",
+    "check_actual_controls.py.txt": "1423e6ea888defb99e363e0b3c28eec5fc59259776357fb0b0d033366d49e4b0",
+    "harness_inventory_path_failure.txt": "17878556f0987bec4ef8978c2636a8907ab566007dbab32dcfd544afd718cbb1",
+    "harness_unnecessary_transition_failure.txt": "bb8954b9df6d3774b68950022e9d961f8261f45b83a3e0902c8ec64c397e89ac",
+    "harness_unverified_alias_failure.txt": "6cf884e71cefb90a355b82e7b17f5a59754a54b0744a729472bdcd83764cc100",
+    "independent_green.txt": "6d998aee956718cab9a33f38a6b0141dbf6fa090f37fe8c8c21f342c7ff0988f",
+    "independent_mypy.txt": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+    "independent_ruff.txt": "4bd8248f4985e327cd636d5b563aa46d1d34db2021498c8d8b37613b35f181d1",
+    "narrative_red.txt": "c74782d5f5f405ccdec1c42432b00e418ac35422a2d8b6debcdd75c96b78a5ec",
+    "provisional_findings.json": "cfaf062f7f89bbabf10c6749ef583e7e28ea7a6e64bbe93a06ba219530e4a599"
+  }
+}

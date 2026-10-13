@@ -1,0 +1,36 @@
+from pathlib import Path
+import hashlib,json,re,runpy,sys
+ROOT=Path('/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift')
+MAIN=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift')
+PHASE=MAIN/'docs/research/shot_pattern_analysis/phase2'
+OUT=Path('/tmp/shot-pattern-protocol-identity-final-review')
+def sha(p):
+    with Path(p).open('rb') as f: return hashlib.file_digest(f,'sha256').hexdigest()
+paths=[ROOT/'src/tools/shot_pattern_analysis'/n for n in ['matched_figure_identity.py','matched_supplement_figures.py','matched_supplement_pipeline.py','matched_pair_social.py','academic_plots.py']]
+sources={str(p):sha(p) for p in paths}
+expected=json.loads((PHASE/'validation/protocol_name_recovery_v6/expected_numeric_hashes.json').read_text())
+inputs={str(PHASE/'supplement_report_v1'/name):digest for name,digest in expected.items()}
+assert all(sha(p)==digest for p,digest in inputs.items())
+sys.path.insert(0,str(ROOT))
+from src.tools.shot_pattern_analysis.matched_supplement_figures import _slug,validate_planned_figure_identities
+comparisons=json.loads((PHASE/'supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons']
+cells=json.loads((PHASE/'supplement_report_v1/REPORT_SUPPLEMENT.json').read_text())['unique_cells']
+validate_planned_figure_identities(comparisons,cells)
+assert len(cells)==26
+cell_paths=[]
+for ref in cells:
+    name=ref.get('alias_cell') or ref['cell']
+    old=f"{re.sub(r'[^A-Za-z0-9._-]+','_',name).strip('_.-')[:160]}_{hashlib.sha256(name.encode()).hexdigest()[:10]}"
+    assert _slug(name)==old
+    for kind in ['density','density_social','overhead','overhead_social']:
+        for ext in ['png','pdf','svg']:
+            cell_paths.append(str((Path('cells')/(_slug(name)+'_'+kind)).with_suffix('.'+ext)))
+assert len(set(cell_paths))==312
+api=runpy.run_path(str(OUT/'verify_384_inventory.py'))
+summary=api['verify_384_inventory']()
+assert summary['distinct_stems']==384 and summary['total_distinct_relative_paths']==6144
+assert sources=={str(p):sha(p) for p in paths}
+assert all(sha(p)==digest for p,digest in inputs.items())
+receipt={'scope':'Planned Output Identity Verification; Not Rendered Asset Acceptance','source_sha256':sources,'input_sha256':inputs,'script_sha256':{p.name:sha(p) for p in [Path(__file__),OUT/'verify_384_inventory.py']},'comparison_count':384,'planned_pair_paths':6144,'cell_count':26,'planned_cell_paths':312,'existing_cell_stems_unchanged':True,'public_full_selection_preflight_passed':True,'seven_numeric_files_byte_identical':True,'planned_total_paths':6456,'actual_rendered_assets_verified':False}
+(OUT/'bound_plan_review.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print('PASS:384 pairs,26 cells,6456 planned paths; exact seven numerical files unchanged')

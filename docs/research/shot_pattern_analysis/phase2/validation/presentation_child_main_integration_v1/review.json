@@ -1,0 +1,32 @@
+{
+  "checked_utc": "2026-10-10T14:34:51.408363+00:00",
+  "tests_passed": 96,
+  "warnings": 7,
+  "exit_code": 0,
+  "elapsed_seconds": 277.52,
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "196dd522869ceaa33d63f606b016abcaeabdd0d6cd91f81a103488d225c536d3",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "d651e71b3eb9bf17c08d70118d6b4d9d27aadda9094956614509b987ed28119c",
+    "scripts/research/shot_pattern_analysis/revise_supplement_figures.py": "f29c2d9c1e0d8eb75765afccdb6994ccb4ec0adb56fdfd722b36accfd7841ea1",
+    "scripts/research/shot_pattern_analysis/supplement_parent_verifier.py": "2af3611a596f32c8d473b7ea5425e3de1a4eb7c673158dd437775f789bdce064",
+    "scripts/research/shot_pattern_analysis/supplement_publication.py": "7a3ee6f9ba8667c7887e817bf219a91b75cb28cbffdf605ed2e6cd82d7ad38f8",
+    "scripts/research/shot_pattern_analysis/supplement_revision_adapter.py": "e6448dc29fd2ce7da63d8b1a56d50204242983027182765ee35fb354952f0621",
+    "scripts/research/shot_pattern_analysis/supplement_revision_pin.py": "cfe117ccfcff9942401eca5e8870525f8de6a8d9440b27dcd4410fd39c7e07ec",
+    "src/tools/shot_pattern_analysis/matched_supplement_figures.py": "3f01a910900ff0897e9dece06b057c812ac0dc5254cd8944cf203d1780232ae5",
+    "tests/research/test_supplement_publication_revision.py": "48519d231ff4a7dad357b2c5f1be5b3fa9c0ed49e00850f6a1ced5ad8a196bd9",
+    "tests/research/test_supplement_revision_adapter.py": "01215372dfc05df8af672bc183982c1245910a8966dfa3ee454784d545c1ca28",
+    "tests/research/test_supplement_revision_command.py": "a59c4690de1f9bc8b46ad6610ead5b7e8b10d6fab67390bd2cb2e14313c9be23",
+    "tests/tools/shot_pattern_analysis/test_pair_caption_overflow.py": "df41a1e769971a01374f08aa20373d18a541231ed1e347ef236afa216c5909f6",
+    "tests/tools/shot_pattern_analysis/test_pair_density_row_gutter.py": "62f659035976a0c27994ef7d637678ab7b162f5325d60deabaad4d72df0eb3f6",
+    "tests/tools/shot_pattern_analysis/test_selected_pair_renderer.py": "eae68bc232d2d762a189eebedcb2d6d594408b13ead800659714e68a306bae9c"
+  },
+  "presentation_source_parity": true,
+  "frozen_parent_all_52_source_hashes_unchanged": true,
+  "integrated_commits": [
+    "547eea0c53",
+    "f11a821227",
+    "ddc3c98dd4",
+    "29bfb31cfd"
+  ],
+  "full_publication_accepted": false
+}

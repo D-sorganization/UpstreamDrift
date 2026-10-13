@@ -1,0 +1,7 @@
+# Main-to-Marginal Tick Boundary Repair Review
+
+**Component Qualified; Final Publication Still Requires Regeneration and Review.** The actual saved Driver lean5 / curve2 / shaft SD2 / combined2 figure had a −2.6009pt overlap between downrange180 and marginal0.00. A new portable synthetic regression reproduced the defect before repair. The helper now removes a crowded final main-axis tick consistently across panels, preserving the full numeric axes limits, density arrays and typography. It retains at least two in-range main anchors and fails if that cannot be done.
+
+All23 focused tests, including slow cases, pass; Ruff, formatting, scoped Mypy and diff checks pass. Both files remain below1200lines. Six actual saved-data figures cover Driver,7-Iron andPW in academic/social forms. Allsix1080px previews and the full offending academic image were inspected. The minimum measured boundary gutter is11.4678pt; the repaired Driver gutter is20.7796pt. Source and input hashes remained unchanged during rendering. No physical simulations ran.
+
+The reviewer implemented this repair; this receipt is not a claim of a second independent implementation audit. Earlier passing exploratory fixtures and the actual failing regression are retained. The diagnostic captions are deliberately limited to cell identity and counts; acceptance covers the tick boundary, not complete final captions or all output assets.

@@ -1,0 +1,348 @@
+{
+  "schema": "shot-pattern-layout-child-visual-review/1",
+  "reviewer": "root",
+  "utc": "2026-10-11T02:56:27.612250+00:00",
+  "scope": "19 curve-strength replacement PNGs only; native PDF/SVG acceptance is separate",
+  "status": "accepted",
+  "inventory_sha256": "8c914bfb4f82c179490bee0f79222c6eeb3242ab5eda3607759c05c54026fff6",
+  "gate_receipt_sha256": {
+    "layout_child_strict_loader_receipt.json": "d7c60ea4c99f5e0d9dfc9225788adb0531cb77080fd62a26478a331422b01ac8",
+    "layout_child_reconciliation_receipt.json": "4362a99963fbf8c35b5fd3988c8215856b9b9c7976b1376c3b3386b8f80a8918",
+    "layout_child_clearance_receipt.json": "decbca752833ccd2a2ac959ecbfdfa9f964301fc66812248d4382c0357177052"
+  },
+  "contacts_actually_viewed": 19,
+  "full_size_child_original_indices_actually_viewed": [
+    0,
+    6,
+    18
+  ],
+  "records": [
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.png",
+      "baseline_png_sha256": "96b6e67a5fdabd5595a7d5bfe4a518bc76b5d1b20a60fdbb8e01297c4998fbf9",
+      "baseline_svg_sha256": "24654b5df6f684809dbb3bfae15bf950f65fb84ee73b4a16e98c51ba836d469b",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_negative__838c78daa1_density.png",
+      "child_png_sha256": "447309dc1789eb18048846e4573350c7028bece5b4aedabca08d74abeea458d0",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/00_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "23691324ad8512b5f727f788b7d17d13fbe406f6cdfd9524134580fa4acf079f",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 0,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive__8ea5caf30c_density.png",
+      "baseline_png_sha256": "69cad0f08f33e3f3b4589b7fa88e390c1587aa1b8165c3a181c2c3d508667a4d",
+      "baseline_svg_sha256": "6279ac2a378a5b507405d0d321c0c3704219123fc5b72d6d6d191d8f0b3194bc",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation1_cov_facepath_positive__8ea5caf30c_density.png",
+      "child_png_sha256": "21bd368d68b9050c5e2d59c1e86473d502da053c272ed6624ebcd2a910eb32a1",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/01_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "dfd57b77e124a943f8637d4bf0105ec61d506897b51e719f79780a9313a0537c",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 1,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.png",
+      "baseline_png_sha256": "87650be42aa869922e2295b4ecc03616e9cc60531648e086070e0af209cb899f",
+      "baseline_svg_sha256": "8952c94c621b3301aee4b773303aaaf43b1d54dff32c5e6499c32e777be311a9",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_negative__17b24ecc36_density.png",
+      "child_png_sha256": "781e03660e24d0cbfa0408c9e3c4fe53ce8724f67a3805c6506dbfe3cfa7ba94",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/02_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "ef54040ef7de8471dcc37945322777dd251b1ffffd50368949dec15fad1142f0",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 2,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.png",
+      "baseline_png_sha256": "a70be774abf9ba2af5bf65df651581c822bb708d0c190056d32ad4ef4428a4bd",
+      "baseline_svg_sha256": "ae38938f6d5642157ede61e6c04eb0b5b76006cf388f530867f509174c65309f",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_driver_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_driver_lean0_curve2_rotation2_cov_facepath_positive__d0b26b4574_density.png",
+      "child_png_sha256": "db867fffc38998d6e537c1cff677f4409a6a0b5e9616826cdb5f3d44cdff5911",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/03_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "694043b22af9ed0e7ed777735bb379200c37d21acb95fbce15bdbff33e494e91",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 3,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.png",
+      "baseline_png_sha256": "4141cf79bb4c174c26314e6679a3120d639b75dacebeb61a79b1fede80eaa391",
+      "baseline_svg_sha256": "4954a67d407082628e615ea6f89449216b00dcd842c7322f64cb073ce7828a27",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__e5334b6978_density.png",
+      "child_png_sha256": "8a8ac7a51d20b39de06738c9a7fe981c7dd9052fefb633584c0cebe2d41c3afc",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/04_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "9583ef310c17ae42bf8cec74e6ca7e3ffb2123d51c7b5567130bbbd9eb7657dc",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 4,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.png",
+      "baseline_png_sha256": "3809ce7efa20bdecec95854a8589f88c9a0744544b250612a074b16521029053",
+      "baseline_svg_sha256": "dd77049bd8227fae4373ef0872dc1a9ff6c47d802f72f76284cee76e1de182b2",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean10_curve2_rotation2_cov__775ddd5af0_density.png",
+      "child_png_sha256": "6d902ce0cc27778a33ef696553d0b457a96e497ff82cd05ad36ba42025ae3d2e",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/05_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "d84e60cc0fa74964c90354628cd89e90918270ddc89e9b55a2d163ed5056e5e5",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 5,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.png",
+      "baseline_png_sha256": "4bcd7bc6748ffed1549b5949e217aec1eb86957a78f8089bbfc588872170a25c",
+      "baseline_svg_sha256": "30681de549838cdcf36fec9d095bb96a57603e2e8e530d01cbaac537b660c9cb",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_5ab5fdecf1_density.png",
+      "child_png_sha256": "950da22a7742798aefa82ef510de7dbbfeb31810fb9d266185d4c7e675de4fed",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/06_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "a7856e790b84609ba7229f70706439c22ddd32b624458dd4a24ad4a31462b561",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 6,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.png",
+      "baseline_png_sha256": "a9abcaa8da4fa20bf13299cfe27639e5e46a0b9d8353a8d825f9f55f4f56cf85",
+      "baseline_svg_sha256": "3f645d54697ebbc6889168ab802108005c38ecec955a338ef9f83a739def6284",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_pitching_wedge_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_pitching_wedge_lean5_curve2_rotation2_cov_fa_9c25ef1409_density.png",
+      "child_png_sha256": "ce9ed97c4cc515b35d8bac07b9978a25361d240ce3b7e565511f5f209e117c33",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/07_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "fa859e4d8cd1f87ac0e9ee3b6a48305006f0a6ac72c04f866248e83e2818c1c7",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 7,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_n_5b82526b18_density.png",
+      "baseline_png_sha256": "59c540f531e2f0e0e50befd19482cea855e3878fe0caaf16a24d6f49528ff4c1",
+      "baseline_svg_sha256": "22a9d64b2f289f0bfdbce05be716106921441377b7c49018fa99559e978ab9d4",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation1_cov_facepath_n_5b82526b18_density.png",
+      "child_png_sha256": "fa8a72d390d9ff701d00a783a100ca9cad95dfd14e0f92ec75c8a9d44cb0a01c",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/08_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "5400b093fb58163b032409c7f9cb1fc0bb1ba6bf74adad0ff845f66804b76e04",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 8,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_n_f3698df9e4_density.png",
+      "baseline_png_sha256": "9a0ac25321448aa10fff475a5479878e93a1038f6aa072d338d115eebdc664da",
+      "baseline_svg_sha256": "09290a74c74f56829ffeb5c2f1092dc7b2d62c39c612cae9356bcdc31d33a81c",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_n_f3698df9e4_density.png",
+      "child_png_sha256": "f03b99c6e699941f7185034917fabe7ea3d3a23b5893396f2666839591fdc26a",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/09_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "e9e752c96ae29006a7c7860b4c29b731accce8dbf1101ddc04c714d7176b7ea1",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 9,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_p_c779ac069a_density.png",
+      "baseline_png_sha256": "63611b0f01ba54c7e1e62df2688d0636e8b7d969659ebe5476d3916f675f4c5a",
+      "baseline_svg_sha256": "8b42ca4078e9984165dbeb1c4fb0ba6787ea995888449fcc5b36cbf385740f41",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean0_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean0_curve2_rotation2_cov_facepath_p_c779ac069a_density.png",
+      "child_png_sha256": "9be0737b7c69dd2ea0157b2a859658722de2fcc9e4f6a93830e0cc76918e30b8",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/10_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "3e9766b32a10a453cb73f5edcd1f5b269353f5b4901f1a2a47d7baf8613d0e93",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 10,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.png",
+      "baseline_png_sha256": "27da19d25e51be22d602e364768d7cc18c1db05bd28e2a7a9312217b1a8da344",
+      "baseline_svg_sha256": "cbe9cc3757912065c359bb19fa2f22b95e8c13a691bcce9300471e3a015756c3",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_847a757ebc_density.png",
+      "child_png_sha256": "f80fa244748518460c68aabd1233b3054c81325484a34800c9c718a4c6b739c7",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/11_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "dc80df3170d767cae43cd969cf590babbf922d6f2d095e71105b2a641d837137",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 11,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_5e6ca5fac4_density.png",
+      "baseline_png_sha256": "e2de27324e644ff22e9932860c20d9c1c38697a072164e5db8f740764fcc2b45",
+      "baseline_svg_sha256": "a52ece63fa1700faa12c4e97edd247f3221e43d2ce48776a0d8480b464bfc0ad",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation1_cov_facepath_5e6ca5fac4_density.png",
+      "child_png_sha256": "5556eaf9b9b15bc6b2d9d64b0f342e4d37fb418e7b8839d294de103d8b590656",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/12_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "6f4e86e303702b8fd0272c45d220eb0f69e312dea249f1e6a09f6dd5ac348dcd",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 12,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_f8e8b97766_density.png",
+      "baseline_png_sha256": "0e4c5b5924269117b5227f4c9e4987357555c16bae490649ffd84375f22812bc",
+      "baseline_svg_sha256": "70aa466f6139dfd4c808b63069c00f993cb3fb7a2dd57c19505d85f7794080fc",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_f8e8b97766_density.png",
+      "child_png_sha256": "afeec6113c3e58754c4125b658bd87367a3bf243765acf1966a56fde69f40bb4",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/13_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "07ce648153bbf0e85ad1a175cd7b11db0a0282d7f8a467f1efe5ba53838cdb98",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 13,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_c9441357f0_density.png",
+      "baseline_png_sha256": "9247db74c87726b901db359730aae7c57bc9f0b9c03bce38c562c072f479a2b6",
+      "baseline_svg_sha256": "b92819d7089243095809e118cb2eccde7f7d8b3631670b4bd06d7d7b9d8365a9",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean10_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean10_curve2_rotation2_cov_facepath_c9441357f0_density.png",
+      "child_png_sha256": "b73fd26dd68013e7692a44958a4ecf58a94111d442b9778dd3259483bff75a98",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/14_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "f201baddd5964e548507db6fc098719ad73d2b0640ab9cbce1fa30142f91f00c",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 14,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_n_6b7044781d_density.png",
+      "baseline_png_sha256": "61aecc0b01abbb42dbfb99326fd828043f7ca0b3b6b7226bcf54bb15e23dd268",
+      "baseline_svg_sha256": "da2c4156605147c0c49307cda6e49a1565880b8016607971ae1b1439c65fed6f",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_n_6b7044781d_density.png",
+      "child_png_sha256": "2124af9fb9deb2a7258f05110e888040d085959c737831628fa5bc2f9951f222",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/15_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "ce5af8845b6ae05eb98b19d838ae7c54cc114535e26f5600c8a57d9d2a436a13",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 15,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.png",
+      "baseline_png_sha256": "9c96e0d425b120f39680d303e5026f50449315ff114d7e83fbcb03cb4d04feac",
+      "baseline_svg_sha256": "283cd54ccc63bcf8259fe73715e10c888e376d396dbaf7a12f413da690e87640",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation1_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation1_cov_facepath_p_93fd88fe40_density.png",
+      "child_png_sha256": "615359eb251cb43f4141a11942a2b98f0bb4477bd2e953c128ff8109e91a2200",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/16_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "c5f46fde3a41a164519f76c23db0f268866a9407eeac175d5bd31f47d8ea951c",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 16,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_n_7ec9af0963_density.png",
+      "baseline_png_sha256": "a7ab04546bc2fe6e1b83d6bdb278a15d44a6a907755472e574f25e63717ef43b",
+      "baseline_svg_sha256": "2fffc65387bc750a6ab6705ebed9ca67b971879d21eb5ccc2a58c9878ed79c00",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_negative_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_n_7ec9af0963_density.png",
+      "child_png_sha256": "c4c779e90dc2d51bfcfb21229054a2580533ad57d85a4b3051dee73daa70dbf4",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/17_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "54924538d064c11ecd36375ceafcf635b4afab4023bb987b5f308d7dde7caca4",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 17,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    },
+    {
+      "baseline_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_p_d3fd9156d1_density.png",
+      "baseline_png_sha256": "8c3d1a130f1bad71934d3ddc32c2242fd3b38d105a0f0362c27fbfb77e21d2cc",
+      "baseline_svg_sha256": "4ac1bb155be77c76b2b117e052fc84d56cff1d2ff25058fd419f8c14dc3b456f",
+      "child_png": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v2_layout_repair/figures/comparisons/curve_strength_original_primary_1_seven_iron_lean5_curve1_rotation2_cov_facepath_positive_vs_original_primary_1_seven_iron_lean5_curve2_rotation2_cov_facepath_p_d3fd9156d1_density.png",
+      "child_png_sha256": "32b198e22c03de81845b36ff40cfce6a68e7d2733fb0e13e27faa3ccf95380b3",
+      "contact": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_final_graphics_review_v2/layout_child_png_contacts/18_root_curve.jpg",
+      "contact_description": "reduced full images, native-pixel upper-left and lower-right crops",
+      "contact_sha256": "2371dda5a5c4f5ddb46d460fbeb6c918776a5ceeac36a36287e983393fd82317",
+      "failed_gates": [
+        "all_density_clearance_diagnostic.json"
+      ],
+      "index": 18,
+      "reviewer": "root_curve",
+      "status": "accepted",
+      "observations": "Before/after full views and detail crops inspected. Legend/top-row titles separated; contours, targets, axis ranges and labels retained; no new visible clipping or overlap."
+    }
+  ],
+  "limitations": [
+    "Contact crops intentionally cut image regions; full views were used to assess page boundaries.",
+    "This receipt does not imply all publication formats or overall repository acceptance."
+  ]
+}

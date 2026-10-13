@@ -1,0 +1,124 @@
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+_____ test_neighboring_marginal_tick_labels_have_readable_gutter[academic] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1841/test_neighboring_marginal_tick0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7259a0da8260>
+presentation = 'academic'
+
+    @pytest.mark.parametrize("presentation", ["academic", "social"])
+    def test_neighboring_marginal_tick_labels_have_readable_gutter(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, presentation: str
+    ) -> None:
+        try:
+            from matplotlib.backends.backend_agg import FigureCanvasAgg
+    
+            from src.tools.shot_pattern_analysis import academic_plots
+        except (ImportError, OSError) as exc:
+            pytest.skip(f"Matplotlib unavailable: {exc}")
+    
+        captured = []
+    
+        def capture(figure, _stem, *, dpi):
+            captured.append(figure)
+            return {}
+    
+        monkeypatch.setattr(academic_plots, "_save_formats", capture)
+        rng = np.random.default_rng(20261009)
+        points = {
+            name: rng.normal([180, 0], [12, 6], (10_000, 2))
+            for name in ("Straight", "Draw", "Fade")
+        }
+        academic_plots.write_academic_dispersion_figure(
+            points,
+            tmp_path / presentation,
+            scenario="Marginal Tick Readability Review",
+            metadata={"social_club": "Driver"},
+            target_point_m=(180, 0),
+            presentation=presentation,
+            dpi=180,
+        )
+        estimate = academic_plots.shared_histogram_density(
+            points, bins=64, target_point_m=(180, 0), region_masses=(0.50, 0.80, 0.95)
+        )
+        expected_marginals = {
+            name: np.sum(item.density_per_m2, axis=0) * np.diff(estimate.x_edges_m)[0]
+            for name, item in estimate.patterns.items()
+        }
+        expected_limit = max(float(np.max(v)) for v in expected_marginals.values()) * 1.05
+        figure = captured[0]
+        FigureCanvasAgg(figure)
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        for panel in range(3):
+            right = figure.axes[3 * panel + 2]
+            np.testing.assert_allclose(
+                right.get_xlim(), (0, expected_limit), rtol=0, atol=0
+            )
+            name = tuple(points)[panel]
+            np.testing.assert_array_equal(
+                right.patches[0].get_data().values, expected_marginals[name]
+            )
+            labels = [
+                text
+                for text in right.get_xticklabels()
+                if text.get_visible() and text.get_text()
+            ]
+            labels.sort(key=lambda text: text.get_window_extent(renderer).x0)
+            assert len(labels) >= 2, "Retain a quantitatively interpretable marginal axis"
+            for left, right_label in zip(labels, labels[1:], strict=False):
+                gap_points = (
+                    (
+                        right_label.get_window_extent(renderer).x0
+                        - left.get_window_extent(renderer).x1
+                    )
+                    * 72
+                    / figure.dpi
+                )
+>               assert gap_points >= 4.0, (
+                    presentation,
+                    panel,
+                    left.get_text(),
+                    right_label.get_text(),
+                    gap_points,
+                )
+E               AssertionError: ('academic', 0, '0.025', '0.050', np.float64(-0.13104767564127998))
+E               assert np.float64(-0.13104767564127998) >= 4.0
+
+/home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py:80: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-final-layout/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 20 durations =============================
+3.70s call     tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_neighboring_marginal_tick_labels_have_readable_gutter[academic]
+3.38s call     tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_neighboring_marginal_tick_labels_have_readable_gutter[social]
+0.18s setup    tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_neighboring_marginal_tick_labels_have_readable_gutter[academic]
+0.01s teardown tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_neighboring_marginal_tick_labels_have_readable_gutter[academic]
+0.01s setup    tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_neighboring_marginal_tick_labels_have_readable_gutter[social]
+
+(1 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_marginal_tick_gutter.py::test_neighboring_marginal_tick_labels_have_readable_gutter[academic]

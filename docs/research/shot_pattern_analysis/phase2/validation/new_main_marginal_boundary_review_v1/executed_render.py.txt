@@ -1,0 +1,45 @@
+import csv,gzip,json,hashlib
+from pathlib import Path
+import numpy as np
+from PIL import Image
+from src.tools.shot_pattern_analysis import academic_plots as ap
+ROOT=Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+OUT=ROOT/'validation/new_main_marginal_boundary_review_v1'
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+source_sha=sha(Path(ap.__file__));records=[]
+def save(fig,stem,*,dpi):
+ fig.canvas.draw();ren=fig.canvas.get_renderer();panels=[]
+ for i in range(3):
+  main,right=fig.axes[i*3+1:i*3+3]
+  a=[t.get_window_extent(ren) for t in main.get_xticklabels() if t.get_visible() and t.get_text()]
+  b=[t.get_window_extent(ren) for t in right.get_xticklabels() if t.get_visible() and t.get_text()]
+  gap=(min(t.x0 for t in b)-max(t.x1 for t in a))*72/fig.dpi
+  assert gap>=4,gap
+  ordered=sorted(b,key=lambda b:b.x0)
+  gaps=[(r.x0-l.x1)*72/fig.dpi for l,r in zip(ordered,ordered[1:])]
+  assert not gaps or min(gaps)>=4,gaps
+  panels.append({'boundary_gutter_points':gap,'marginal_neighbor_gaps_points':gaps,'xlim':list(main.get_xlim()),'ylim':list(main.get_ylim()),'main_ticks':list(main.get_xticks()),'marginal_ticks':list(right.get_xticks())})
+ path=stem.with_suffix('.png');fig.savefig(path,dpi=dpi,bbox_inches='tight');preview=stem.with_name(stem.name+'_1080').with_suffix('.png')
+ with Image.open(path) as im:im.resize((1080,round(im.height*1080/im.width)),Image.Resampling.LANCZOS).save(preview)
+ records.append({'file':path.name,'sha256':sha(path),'preview':preview.name,'preview_sha256':sha(preview),'panels':panels})
+ return {'png':path}
+ap._save_formats=save
+inputs={}
+for cellname in ['driver_lean5_curve2_rotation2_combined2','seven_iron_lean10_curve2_rotation2_shaft_only','pitching_wedge_lean5_curve2_rotation2_combined2']:
+ cell=ROOT/'final_v1'/cellname
+ for f in ('manifest.json','summary.json','shots.csv.gz'):inputs[str(cell/f)]=sha(cell/f)
+ summary=json.loads((cell/'summary.json').read_text());points={n:[] for n in ('Straight','Draw','Fade')}
+ with gzip.open(cell/'shots.csv.gz','rt') as stream:
+  for row in csv.DictReader(stream):
+   if row['status']=='supported':points[row['pattern']].append([float(row['carry_x_m']),float(row['carry_y_m'])])
+ points={n:np.asarray(p) for n,p in points.items()}
+ for mode in ('academic','social'):
+  estimate=ap.shared_histogram_density(points,bins=64,target_point_m=(summary['target_x_m'],0),region_masses=(.5,.8,.95))
+  ap.write_academic_dispersion_figure(points,OUT/f'{cellname}_{mode}',scenario=cellname,metadata={'social_club':summary['config']['club']['club_id'],'valid_shots_by_pattern':{k:len(v) for k,v in points.items()},'total_shots_by_pattern':{k:10000 for k in points}},target_point_m=(summary['target_x_m'],0),presentation=mode,dpi=180)
+  for panel in records[-1]['panels']:
+   assert panel['xlim']==list(estimate.x_limits_m)
+   assert panel['ylim']==list(estimate.y_limits_m)
+for p,h in inputs.items():assert sha(Path(p))==h
+assert sha(Path(ap.__file__))==source_sha
+(OUT/'actual_render.json').write_text(json.dumps({'renderer_sha256':source_sha,'inputs':inputs,'outputs':records,'status':'numerical_geometry_checks_passed_visual_review_separate'},indent=2)+'\n')
+print('Six saved-data renders passed; inputs and source unchanged.')

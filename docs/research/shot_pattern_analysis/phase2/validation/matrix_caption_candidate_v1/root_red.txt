@@ -1,0 +1,96 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____ test_sg_context_derives_tee_fairway_approach_and_carry_as_final_lie ______
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-1955/test_sg_context_derives_tee_fa0')
+
+    def test_sg_context_derives_tee_fairway_approach_and_carry_as_final_lie(
+        tmp_path,
+    ) -> None:
+        from src.tools.shot_pattern_analysis.matched_report_plots import (
+            _derive_course_context,
+            _has_carry_as_final_lie,
+            export_matched_matrix_heatmaps,
+        )
+    
+        cells = _realistic_cells()
+        assert _derive_course_context(cells, "driver") == "Tee, 400 m, 30 m Fairway"
+>       assert _derive_course_context(cells, "seven_iron") == "Fairway Approach, 15 m Green Radius"
+E       AssertionError: assert 'Fairway Approach, 15 m Green' == 'Fairway Appr... Green Radius'
+E         
+E         - Fairway Approach, 15 m Green Radius
+E         ?                             -------
+E         + Fairway Approach, 15 m Green
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:343: AssertionError
+_______________ test_matrix_caption_rejects_mixed_noise_profiles _______________
+
+    def test_matrix_caption_rejects_mixed_noise_profiles() -> None:
+        from src.tools.shot_pattern_analysis.matched_report_plots import _derive_delivery_noise
+    
+        cells = _realistic_cells()
+        from copy import deepcopy
+    
+        cells[-1]["config"]["noise"] = deepcopy(cells[-1]["config"]["noise"])
+        cells[-1]["config"]["noise"]["standard_deviations"][0] = 2.0
+>       with pytest.raises(ValueError, match="one noise profile"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:421: Failed
+____________ test_matrix_annotation_contrast_across_entire_palettes ____________
+
+    def test_matrix_annotation_contrast_across_entire_palettes() -> None:
+        _load_api()
+        import matplotlib
+        from matplotlib.colors import Normalize, to_rgb
+        from src.tools.shot_pattern_analysis.matched_report_plots import _cell_text_color
+    
+        def luminance(rgb):
+            linear = [v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4 for v in rgb]
+            return sum(v * w for v, w in zip(linear, (0.2126, 0.7152, 0.0722), strict=True))
+    
+        for name in ("Greens", "viridis", "coolwarm"):
+            cmap = matplotlib.colormaps[name]
+            for index in range(256):
+                value = index / 255
+                bg = luminance(cmap(value)[:3])
+                fg = luminance(to_rgb(_cell_text_color(cmap, Normalize(0, 1), value)))
+>               assert (max(bg, fg) + 0.05) / (min(bg, fg) + 0.05) >= 4.5, (name, value)
+E               AssertionError: ('Greens', 0.6901960784313725)
+E               assert ((1.0 + 0.05) / (np.float64(0.24461725904288592) + 0.05)) >= 4.5
+E                +  where 1.0 = max(np.float64(0.24461725904288592), 1.0)
+E                +  and   np.float64(0.24461725904288592) = min(np.float64(0.24461725904288592), 1.0)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/tests/tools/shot_pattern_analysis/test_matched_report_plots.py:441: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-bounds/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_sg_context_derives_tee_fairway_approach_and_carry_as_final_lie
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_matrix_caption_rejects_mixed_noise_profiles
+FAILED tests/tools/shot_pattern_analysis/test_matched_report_plots.py::test_matrix_annotation_contrast_across_entire_palettes
+3 failed, 9 deselected, 6 warnings in 2.84s

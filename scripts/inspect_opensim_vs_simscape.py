@@ -2,7 +2,7 @@
 
 Prints a per-pose comparison table of grip and clubhead positions /
 orientations between the OpenSim engine and the Simscape ground-truth
-fixture used by ``tests/test_opensim_simscape_equivalence.py``.
+fixture used by ``tests/engines/opensim/test_opensim_simscape_equivalence.py``.
 
 Run from repo root::
 
@@ -24,6 +24,7 @@ import importlib
 import math
 import sys
 from pathlib import Path
+from typing import Any, Callable
 
 import numpy as np
 
@@ -57,14 +58,15 @@ def _quat_geodesic_deg(q1: np.ndarray, q2: np.ndarray) -> float:
     return math.degrees(2.0 * math.acos(dot))
 
 
-def _try_import_simulate() -> object | None:
+def _try_import_simulate() -> Callable[..., Any] | None:
     try:
         module = importlib.import_module(
             "src.engines.physics_engines.opensim.python.motion_matching.simulate"
         )
     except ModuleNotFoundError:
         return None
-    return getattr(module, "simulate_with_coefficients", None)
+    candidate = getattr(module, "simulate_with_coefficients", None)
+    return candidate if callable(candidate) else None
 
 
 def _try_import_coord_map() -> object | None:
@@ -89,7 +91,7 @@ def _print_pose_comparison(
     pose: str,
     fixture: dict[str, np.ndarray],
     coord_map: object,
-    simulate_fn: object,
+    simulate_fn: Callable[..., Any] | None,
     *,
     verbose: bool,
 ) -> None:
@@ -120,7 +122,7 @@ def _print_pose_comparison(
     }
 
     try:
-        sim_out = simulate_fn(theta=theta, initial_pose=initial_pose)  # type: ignore[misc]
+        sim_out = simulate_fn(theta=theta, initial_pose=initial_pose)
     except Exception as exc:  # noqa: BLE001 — debug script
         print(f"  simulate_with_coefficients raised: {exc}")
         _print_simscape_only(fixture, pose)

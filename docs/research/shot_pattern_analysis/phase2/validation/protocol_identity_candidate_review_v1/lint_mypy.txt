@@ -1,0 +1,5 @@
+=== RUFF CHECK ===
+All checks passed!
+
+=== MYPY CHECK ===
+Success: no issues found in 3 source files

@@ -1,0 +1,76 @@
+This plugin does not support propagateSizeHints()
+This plugin does not support propagateSizeHints()
+[
+  {
+    "cell": "driver_lean0_curve1_rotation1_shaft_only",
+    "main_height": 760,
+    "labels": {
+      "result_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102
+      },
+      "scoring_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102
+      }
+    }
+  },
+  {
+    "cell": "driver_lean5_curve1_rotation2_cov_facepath_negative",
+    "main_height": 760,
+    "labels": {
+      "result_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102
+      },
+      "scoring_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102
+      }
+    }
+  },
+  {
+    "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+    "main_height": 760,
+    "labels": {
+      "result_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102
+      },
+      "scoring_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102
+      }
+    }
+  },
+  {
+    "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+    "main_height": 760,
+    "labels": {
+      "result_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102
+      },
+      "scoring_label": {
+        "width": 978,
+        "height": 102,
+        "height_for_width": 102
+      }
+    }
+  },
+  {
+    "failure_retains_identical_score": true,
+    "status": "Matched study failed: Independent non-simulation test failure"
+  },
+  {
+    "cancellation_retains_identical_score": true,
+    "status": "Matched study cancelled; staged outputs were discarded."
+  }
+]

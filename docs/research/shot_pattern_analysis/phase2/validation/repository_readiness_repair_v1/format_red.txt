@@ -1,0 +1,13 @@
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/actual_pair_adapter_preflight_v1/check.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_candidate.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/audit_interactions.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/final_check.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/rewrite.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/tidy_article.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/astra/verify_repair.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/article_source_repair_v1/root/verify.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/original_final_graphics_independent_review_v1/review_inventory.py
+Would reformat: docs/research/shot_pattern_analysis/phase2/validation/supplement_v6_numeric_review_v1/verify_numeric.py
+Would reformat: tests/research/test_independent_supplement_audit.py
+12 files would be reformatted, 133 files already formatted

@@ -1,0 +1,223 @@
+{
+  "schema": "final-report-composition-audit/1",
+  "checked_utc": "2026-10-10T12:11:25.339070+00:00",
+  "method": "Read-only source and existing numerical-JSON selection inspection; no builder execution, statistics recomputation or figure generation",
+  "final_report_ready": false,
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "13f0b30d8c9b4c75f5e6cbf3b769ebc6f832cf6f737088d85692dcca5d08a180",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "084f580b117bb4a8b3049a7bb497eeef84d4cd70bf269a908ba0bf5e78de1b75",
+    "src/tools/shot_pattern_analysis/matched_interpretation.py": "4ed78414a6daefa6e5215a376cdea5e36c03274c2190d3c823104fa180f3ce80",
+    "src/tools/shot_pattern_analysis/matched_formatting.py": "67971a489527c9bfe43d6948afc6248746a81d5124917032e56238907e1a472f",
+    "docs/research/shot_pattern_analysis/phase2/review_followups/FINAL_NARRATIVE_ACCEPTANCE.md": "62c06308cd4d483c535b7189d923f5c35a5741e65388d029485f0b22bb876abe",
+    "docs/research/shot_pattern_analysis/phase2/review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md": "b1f5388746933ea925f254b39c2f5e0ea6514085c6d71a1f3bff7e5ea69ec55f",
+    "docs/research/shot_pattern_analysis/phase2/validation/selected_headline_traceability_v1/review.json": "f4cc8ab15c65167617ecda4be1ae408c47b1039171cb44ffd4a63d5f3cd515cd",
+    "docs/research/shot_pattern_analysis/phase2/supplement_report_v1/REPORT_SUPPLEMENT_COMPARISONS.json": "c46738a38bb35ab86ba2163260e31a225aca07c807e021225d3c38fd09f0cf46"
+  },
+  "actual_current_representative_selection": [
+    {
+      "kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c81ec05db850fff61cc2e12d921ab003fbd8daab04a2db6c99cb6345f6a99c9c",
+          "source_csv_sha256": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "0a36fb6260db6fc663037adbe75cc43adaa39c80cb5aaaf1b212dcdc1c7a729a",
+          "source_csv_sha256": "c13f1d3965b83d977b6446486370a6fe1659e08b3d9737384696576928d96905"
+        }
+      ],
+      "common_supported_n": 10000
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c81ec05db850fff61cc2e12d921ab003fbd8daab04a2db6c99cb6345f6a99c9c",
+          "source_csv_sha256": "cf076fb9349171dab46a68313936681a29869ae1c5f850673c51eba34ae9a484"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "e3c312ff56c6285e803348792cc8e520813cb4acdfcd402d0001718ac6c51073",
+          "source_csv_sha256": "c6f0a2f0ecbeeadda676333f2e7abffc89f940ec829e3a6f176643452405ea4d"
+        }
+      ],
+      "common_supported_n": 10000
+    },
+    {
+      "kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "0e3b119e8b3842758fe614122f81d25d6d402ddc5a29b8ad653bbc9a2a2950fb",
+          "source_csv_sha256": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "6ec2cfe466b1c2af3f60b91312af178afcd5b973401a295cadbd2d107d614e1e",
+          "source_csv_sha256": "9cd2d4df0defb918ba89948c8ed9e42fcce930b1f4aac3c1cc4a0ff8bf24fdc2"
+        }
+      ],
+      "common_supported_n": 9996
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "0e3b119e8b3842758fe614122f81d25d6d402ddc5a29b8ad653bbc9a2a2950fb",
+          "source_csv_sha256": "63a36dfe3709520f999a0b715c7c1a146c2ebf994ec914bd14a5d0efa81f77a9"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3fd95f290c14757eebc963c932f0b283cd8207d50c43e05c661357d65bbfc102",
+          "source_csv_sha256": "b16f41b07ae36f889aab9305669b725388f41d62e4cbbcf2c65b2f3df07d8953"
+        }
+      ],
+      "common_supported_n": 9996
+    },
+    {
+      "kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ddfb29baa84601abc460d9a1f7134aa6bd60a1a108d275c3b2ba74ddcdd21f4e",
+          "source_csv_sha256": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e"
+        },
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation1_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6b6a30d278069a30d2db514f209788d58ecf14b7bf506a3411366f2913ef1546",
+          "source_csv_sha256": "faff3c6a2683f1ab965f36cde83f70b5b842959a0d734f33880c043687b0e159"
+        }
+      ],
+      "common_supported_n": 9999
+    },
+    {
+      "kind": "shaft_rotation_sd",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ddfb29baa84601abc460d9a1f7134aa6bd60a1a108d275c3b2ba74ddcdd21f4e",
+          "source_csv_sha256": "3cd45d5c7f835e72911362e092b38ce4ff01c9d75eb4281dc6dd87bb6b4ffc5e"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "pitching_wedge_lean0_curve1_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ccc8a06f1c98fc08aa5ab70b2e27800d35506b1b17c349e4bf2e14554fdc3b4c",
+          "source_csv_sha256": "9d089f3b70b0cb5ddeeabe1ff309cfec960c5ed78368d4b764f3dea2315a3eee"
+        }
+      ],
+      "common_supported_n": 9999
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "material narrative gap",
+      "source": "build_final_report.py:_selected_comparison_lines; final_report_inputs.py:assemble_qualified_interpretation",
+      "finding": "The zero-lean within-cell SG table reads original primary cells only. Four PW curve2 selections remain unavailable; supplemental resolved within-cell SG results are not rendered in an equivalent selected table. Original unavailable records must remain, but the qualified 24-cell/72-pattern resolved selection is not integrated.",
+      "action": "Add an explicitly protocol-labelled resolved selected-results view from verified supplemental cells alongside original accounting; bind it through existing qualified inputs. Do not overwrite original statuses."
+    },
+    {
+      "id": "F2",
+      "severity": "material narrative gap",
+      "source": "final_report_inputs.py:assemble_qualified_interpretation representative_effects",
+      "finding": "next() selects six combined2-only contrasts by input order. Actual curve1\u21922 contrasts use SD1, while the independently qualified draft presents SD2 curve contrasts and both shaft_only/combined2 profiles (12 pairs). Valid current results are not the draft selection, and order is an implicit selection rule.",
+      "action": "Use exact explicit ordered source/protocol identities for the intended 12 draft pairs, or clearly revise the narrative selection and its independently checked evidence. Missing/duplicate identities should fail or be explicit unavailable; do not infer interaction by marginal subtraction."
+    },
+    {
+      "id": "F3",
+      "severity": "material explanatory gap",
+      "source": "build_final_report.py:render_final_report and _qualified_interpretation_lines; matched_interpretation.py:render_geometry_table",
+      "finding": "Production tables show delivered means/quadrants and state geometry limitations, but no actual club-level answer synthesizes SD/curve effects or the accepted shaft-only long-left/right-short contrast. PHASE_TWO_CONCLUSIONS_DRAFT.md and selected_headline_traceability are not referenced or consumed. DESIGN is linked, so mechanism exists elsewhere, but the final narrative does not integrate it.",
+      "action": "Add bounded source-bound conclusions using qualified selected cells and paired contrasts, including opposite Driver versus iron/wedge correlation, realized carry shifts and the local shaft/face/loft mechanism. Keep nominal matching distinct from noisy mean carry and causal decomposition. Link the existing editable LaTeX reference."
+    },
+    {
+      "id": "F4",
+      "severity": "factual scope ambiguity",
+      "source": "build_final_report.py:_experimental_control_lines",
+      "finding": "Controlled Inputs states nominal speeds are searched within75\u2013125% without qualifying original matrices or disclosing the Driver supplemental75\u2013130% bound. Later bounds section names adapted bounds but does not supply the numerical exception.",
+      "action": "Scope75\u2013125% to original protocols and state the explicit Driver control speed exception, common absolute face bounds and actual protocol identifiers."
+    },
+    {
+      "id": "F5",
+      "severity": "population wording ambiguity",
+      "source": "build_final_report.py:_qualified_interpretation_lines Verified Academic and Social Figures paragraph",
+      "finding": "The blanket sentence \u201cDensity contours use all supported endpoints\u201d precedes both individual-cell and paired figures; paired densities use the common-six subset, which can exclude otherwise supported endpoints. Individual images are explicit, but the report sentence is overbroad.",
+      "action": "Say individual cell densities use individually supported endpoints and paired densities use the shared six-population supported-index intersection; keep point/path subsampling distinct."
+    },
+    {
+      "id": "F6",
+      "severity": "draft provenance wording",
+      "source": "review_followups/PHASE_TWO_CONCLUSIONS_DRAFT.md final paragraph",
+      "finding": "The draft correctly links V5 numerical reconciliation earlier, but ends pending reconciliation with the completed v4 receipt. V4 terminated without completion; final integration must cite V5 successful receipt once available.",
+      "action": "Correct only the final publication revision reference when integrating the draft; preserve historical v3 numerical provenance and avoid claiming a nonexistent v4 final receipt."
+    }
+  ],
+  "already_wired": [
+    "Nine club/lean selected geometry and absolute-SG conditions, with unavailable cells preserved.",
+    "Individual endpoint, common-three SG and common-six effect populations distinguished in table renderers.",
+    "Driver/PW curve2 SD2 combined2 fixed-target0\u21925 selections require exact ordered protocols, reject duplicates and missing relative effects.",
+    "Adaptive shared SG precision used for values/intervals.",
+    "Source-bound academic/social density and overhead links for all three clubs plus full inventory links.",
+    "No-causal-decomposition, nominal versus realized carry and contact-model sensitivity limitations.",
+    "Historical scoring context includes actual start lie/distance and hypothetical course dimensions.",
+    "Complete qualified supplemental receipt required and source/artifact inputs rechecked before final write."
+  ],
+  "pending_final_render_checks": [
+    "Successful V5 receipt and complete figure ledger before production builder.",
+    "All headline numbers/intervals/denominators trace to final source-bound tables.",
+    "Generated Markdown links and PDF table wrapping/page legibility; no final rendering evaluated here.",
+    "Complete final graphics acceptance and transport/restore inventory."
+  ],
+  "no_source_edits": true
+}

@@ -1,0 +1,67 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____ test_fractional_cells_keep_distinct_final_density_and_overhead_paths _____
+
+tmp_path = PosixPath('/tmp/pytest-of-dieterolson/pytest-2316/test_fractional_cells_keep_dis0')
+
+    def test_fractional_cells_keep_distinct_final_density_and_overhead_paths(tmp_path):
+        outputs = []
+        for label in ("driver_rotation1.5_combined2", "driver_rotation1.6_combined2"):
+            stem = tmp_path / figures._slug(label)
+            for kind in ("density", "overhead"):
+                normalized = academic._validate_stem(stem.with_name(stem.name + "_" + kind))
+                paths = academic._save_formats(RecordingFigure(), normalized, dpi=100)
+>               assert all(f"_{kind}." in path.name for path in paths.values())
+E               assert False
+E                +  where False = all(<generator object test_fractional_cells_keep_distinct_final_density_and_overhead_paths.<locals>.<genexpr> at 0x77ebcb71f300>)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_figure_output_paths.py:24: AssertionError
+__________________ test_cell_name_only_reference_is_rejected ___________________
+
+    def test_cell_name_only_reference_is_rejected():
+>       with pytest.raises((ValueError, TypeError)):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE any of (ValueError, TypeError)
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_figure_output_paths.py:30: Failed
+________________ test_naming_helper_is_bound_to_report_sources _________________
+
+    def test_naming_helper_is_bound_to_report_sources():
+        from src.tools.shot_pattern_analysis.matched_supplement_pipeline import _report_source_hashes
+    
+>       assert "src/tools/shot_pattern_analysis/matched_figure_identity.py" in _report_source_hashes()
+E       AssertionError: assert 'src/tools/shot_pattern_analysis/matched_figure_identity.py' in {'matched_supplement_pipeline.py': 'fd2cd044ff470da13749c20e5e6b439cd514494069c8b9bbe0ed9940dfc35737', 'matched_format...153584ca476d', 'matched_supplement_report.py': '048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d', ...}
+E        +  where {'matched_supplement_pipeline.py': 'fd2cd044ff470da13749c20e5e6b439cd514494069c8b9bbe0ed9940dfc35737', 'matched_format...153584ca476d', 'matched_supplement_report.py': '048455151fc708504c7baa64160a245ccd526a034755e09a343601f0674dac8d', ...} = <function _report_source_hashes at 0x77ebcb7ee160>()
+
+/home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/tests/tools/shot_pattern_analysis/test_figure_output_paths.py:39: AssertionError
+=============================== warnings summary ===============================
+src/shared/python/config/__init__.py:68
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:68: DeprecationWarning: __package__ != __spec__.parent
+    from .model_variant_grouping import (
+
+src/shared/python/config/__init__.py:76
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:76: DeprecationWarning: __package__ != __spec__.parent
+    from .model_source_providers import (
+
+src/shared/python/config/__init__.py:89
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:89: DeprecationWarning: __package__ != __spec__.parent
+    from .provider_catalog import (
+
+src/shared/python/config/__init__.py:99
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:99: DeprecationWarning: __package__ != __spec__.parent
+    from .setup_wizard import (
+
+src/shared/python/config/__init__.py:107
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:107: DeprecationWarning: __package__ != __spec__.parent
+    from .standard_models import StandardModelManager
+
+src/shared/python/config/__init__.py:108
+  /home/dieterolson/.codex/worktrees/shot-pattern-presentation/UpstreamDrift/src/shared/python/config/__init__.py:108: DeprecationWarning: __package__ != __spec__.parent
+    from .settings import get_setting, load_settings, save_settings
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/tools/shot_pattern_analysis/test_figure_output_paths.py::test_fractional_cells_keep_distinct_final_density_and_overhead_paths
+FAILED tests/tools/shot_pattern_analysis/test_figure_output_paths.py::test_cell_name_only_reference_is_rejected
+FAILED tests/tools/shot_pattern_analysis/test_figure_output_paths.py::test_naming_helper_is_bound_to_report_sources
+3 failed, 6 warnings in 4.09s

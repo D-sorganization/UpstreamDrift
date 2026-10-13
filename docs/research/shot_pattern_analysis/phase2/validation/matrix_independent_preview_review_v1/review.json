@@ -1,0 +1,77 @@
+{
+  "status": "changes_required_caption_only",
+  "reviewed_commit": "56ea967f53116e2035630d15f4c8ed7576a9336c",
+  "sources_sha256": {
+    "src/tools/shot_pattern_analysis/matched_report_plots.py": "3eb79503d9390046622cbb9bf6b2da94253b7831ec46df8526d59e82c02aaa54",
+    "tests/tools/shot_pattern_analysis/test_matched_report_plots.py": "902b011ed6360b99d1cf394ee7bb737715015c45852c633f8a94d32cf2899b4c"
+  },
+  "tests": {
+    "passed": 14,
+    "exit_code": 0,
+    "log_sha256": "e9323d39528cf43e522b845530f258f034614830e5cba6e65442cfe0ffbe4903"
+  },
+  "assets": [
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/matrix_covariance_header_v1/actual_previews/final_v1/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "39ab26c8ce106cdffa290afac4af6df4afffc654c03bacba4d9e15b1f5d90c47",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/matrix_covariance_header_v1/actual_previews/final_v1/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "5e8e22e2a81d346eb128feaa6d4cb9caa9637626c511d30c405c06f0d41e0790",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/matrix_covariance_header_v1/actual_previews/final_v1/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "1e06464453e5b61cb731a7691edfdada004c50ce089eede658a5bd34604d711a",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/matrix_covariance_header_v1/actual_previews/final_v1/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-2c6e2729__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "7d7d854dc27e52fd8c9b72cacd06401a6064fd353f196abc4779b99d1798493f",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/matrix_covariance_header_v1/actual_previews/final_v1/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "3b7f2ef7017678a31b63bed40bc6dace9108c53144b392ee290e36fadc9e50bf",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/matrix_covariance_header_v1/actual_previews/final_v1/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.44704_contactx0.00635_contacty0.00635_lean0_attack0__corr-7a926fba__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "8a951e298d65dacd1069faa4895ef271edb331622e259b63c53aa4c1719a1487",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/matrix_covariance_header_v1/actual_previews/control_final_v1/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_conditional_sg.png",
+      "sha256": "1775eecb2e826a69f73e856f569cd51f8bed29ccfe1b3e91b00c2cd70b795427",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/research/shot_pattern_analysis/phase2/validation/matrix_covariance_header_v1/actual_previews/control_final_v1/matched-raw-landing__incremental_coulomb_energetic__rot2_path0.5_speed0.89408_contactx0.00635_contacty0.00635_lean0_attack0__corr-74234e98__n10000/matched_matrix_target_hit_fraction.png",
+      "sha256": "d4fabb4c86d1e02639a3e12b91037cbf62f821ef8d08e232cbb4e089af3dd3d3",
+      "visually_inspected": true
+    }
+  ],
+  "visual_findings": {
+    "resolved": [
+      "All eight previews have separated production subtitles/panel titles, including five-line covariance disclosure.",
+      "Unavailable-cell reasons remain within cells.",
+      "Black/white numeric annotations are legible on displayed palettes.",
+      "SG images disclose tee/fairway versus approach contexts, green radius, carry-as-final-lie and conditional population.",
+      "Noise units distinguish primitive shaft twist from delivered face and disclose actual correlations."
+    ],
+    "remaining": [
+      {
+        "severity": "presentation_meaning",
+        "finding": "Target Containment Fraction does not disclose circular target radius; Driver could be mistaken for fairway containment.",
+        "evidence": "Actual Driver lean0 curve1 rotation2 combined2 config.target_radius_m=15; displayed fraction59% (saved0.5886). The containment images contain neither target radius nor circle definition.",
+        "remedy": "Derive explicit circular target radius from config for this metric; preserve/reject mixed radii truthfully."
+      }
+    ]
+  },
+  "limitations": [
+    "Eight selected preview PNGs inspected, not the future full production matrix inventory.",
+    "No Monte Carlo run or new numerical acceptance.",
+    "Other current component repairs have separate receipts."
+  ]
+}

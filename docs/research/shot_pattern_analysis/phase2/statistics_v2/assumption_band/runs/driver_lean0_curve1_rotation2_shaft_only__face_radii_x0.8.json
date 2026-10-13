@@ -1,0 +1,89 @@
+{
+  "cell": "driver_lean0_curve1_rotation2_shaft_only",
+  "variant": "face_radii_x0.8",
+  "config": {
+    "club": {
+      "club_id": "driver",
+      "club_speed_mps": 45.0,
+      "loft_deg": 10.0,
+      "lie_deg": 58.5,
+      "shaft_lean_deg": 0.0,
+      "attack_angle_deg": -0.9,
+      "clubhead_mass_kg": 0.2,
+      "inertia_diagonal_kg_m2": [
+        0.00025,
+        0.0004,
+        0.00045
+      ],
+      "cg_depth_m": 0.035,
+      "face_half_width_m": 0.05,
+      "face_half_height_m": 0.027,
+      "bulge_radius_m": 0.24,
+      "roll_radius_m": 0.24,
+      "cor": 0.83,
+      "friction_coefficient": 0.4,
+      "contact_law": "incremental_coulomb_energetic",
+      "steps_per_compression": 128,
+      "contact_backend": "auto",
+      "dt_s": 0.02,
+      "max_time_s": 12.0,
+      "loft_source": "https://www.titleist.com/golf-clubs/drivers/gt2"
+    },
+    "noise": {
+      "standard_deviations": [
+        2.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "correlation": null
+    },
+    "n_shots": 10000,
+    "seed": 20261009,
+    "curve_scale": 1.0,
+    "target_x_m": null,
+    "match_tolerance_m": 0.05,
+    "target_radius_m": 15.0,
+    "match_face_bounds_deg": null,
+    "match_speed_factors": [
+      0.75,
+      1.25
+    ]
+  },
+  "resamples": 2000,
+  "status": "available",
+  "target_x_m": 178.94875782337786,
+  "paired_n": 10000,
+  "paired_benefit_vs_straight": {
+    "Draw": {
+      "estimate": 0.002892622455209583,
+      "lower_95": 0.0024768671735503163,
+      "upper_95": 0.003348873775747698
+    },
+    "Fade": {
+      "estimate": -0.0012251198782864715,
+      "lower_95": -0.0015786252191621354,
+      "upper_95": -0.0008756249690195445
+    }
+  },
+  "mean_radial_error_difference_vs_straight": {
+    "Draw": {
+      "estimate": 0.3442558314032193,
+      "lower_95": 0.3388023872983519,
+      "upper_95": 0.3498490099752242
+    },
+    "Fade": {
+      "estimate": -0.35590612815518224,
+      "lower_95": -0.36174746662167306,
+      "upper_95": -0.35030671751314246
+    }
+  },
+  "supported_by_pattern": {
+    "Straight": 10000,
+    "Draw": 10000,
+    "Fade": 10000
+  }
+}

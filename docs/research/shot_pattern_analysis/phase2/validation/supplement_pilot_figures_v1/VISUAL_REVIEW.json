@@ -1,0 +1,86 @@
+{
+  "schema": "supplement-pilot-visual-review/1",
+  "status": "accepted_for_execution_diagnostics_only",
+  "render_receipt_sha256": "a90ece46883b132a6dfeb6a07fcd2525483424247f52a56a9bdcabc0d4298821",
+  "process_exit_code": 0,
+  "inspected_png_sha256": {
+    "pw_primary_face/density.png": "78b80e24ee7f9e30a62b245b997766c300cd404a9bc9369d5b752c258ab8a00c",
+    "pw_primary_face/overhead.png": "a18527b10e8eeea229f292c893c9c18b827ccabf4f3fad4d5e1d963cf705f504",
+    "pw_control_face/density.png": "abec42e0ff7848bac728d8acdf4d7c8d2b12adcb5050dac6b50ba752f2a57017",
+    "pw_control_face/overhead.png": "e7bbfd6f0e4258e34a6bde6d01bc0dc06979745bd29d6a39aeed78815bb7d65d",
+    "driver_control_speed/density.png": "ede18921d86f6bc67224dfea8205f7e206ad7c21aa6ff09156408f376efb4b41",
+    "driver_control_speed/overhead.png": "aabff37aebbdd9fe536dad754eb673f68d5668a484458c3fa99c295bc762e9ce"
+  },
+  "all_18_artifact_hashes_verified": true,
+  "protocols": {
+    "pw_primary_face": {
+      "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+      "protocol": "pw-primary-face-bounds/1",
+      "supported_counts": {
+        "Straight": 32,
+        "Draw": 32,
+        "Fade": 32
+      },
+      "total_counts": {
+        "Straight": 32,
+        "Draw": 32,
+        "Fade": 32
+      },
+      "saved_trajectory_counts": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      }
+    },
+    "pw_control_face": {
+      "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+      "protocol": "pw-control-face-bounds/1",
+      "supported_counts": {
+        "Straight": 32,
+        "Draw": 32,
+        "Fade": 32
+      },
+      "total_counts": {
+        "Straight": 32,
+        "Draw": 32,
+        "Fade": 32
+      },
+      "saved_trajectory_counts": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      }
+    },
+    "driver_control_speed": {
+      "cell": "driver_lean5_curve2_rotation2_combined2",
+      "protocol": "driver-control-speed-bounds/1",
+      "supported_counts": {
+        "Straight": 32,
+        "Draw": 32,
+        "Fade": 32
+      },
+      "total_counts": {
+        "Straight": 32,
+        "Draw": 32,
+        "Fade": 32
+      },
+      "saved_trajectory_counts": {
+        "Straight": 6,
+        "Draw": 6,
+        "Fade": 6
+      }
+    }
+  },
+  "findings": [
+    "All six PNGs inspected: explicit32-shot Pilot labels, exact protocol/lean/curve/shaftSD and32/32 individual endpoint counts.",
+    "All overhead views disclose six saved raw paths per pattern, no aim-line rotation and lateral magnification; they do not claim paired Monte Carlo populations.",
+    "Sparse32-shot histogram/HDR is diagnostic only; achieved discrete HDR masses and no-final-inference labels are visible.",
+    "Known accepted2e driver-density main/marginal tick adjacency persists; final-publication typography remains separately qualified in isolated layout branch."
+  ],
+  "limitations": [
+    "No final scientific conclusions from32shots.",
+    "This gate qualifies source-matched diagnostic rendering for numerical execution only, not share-card publication.",
+    "PDF/SVG hashes verified but not independently rendered.",
+    "Initial harness run failed before rendering because it used matching_tolerance_m instead of actual match_tolerance_m; preserved INITIAL_HARNESS_FAILURE.txt, corrected helper rerun exited0."
+  ]
+}

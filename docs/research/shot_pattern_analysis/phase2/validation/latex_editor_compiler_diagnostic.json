@@ -1,0 +1,20 @@
+{
+  "document": "docs/research/shot_pattern_analysis/shot_pattern_analysis.tex",
+  "source_sha256": "b79a12f5d4293c3f7c7b64c6b06407cf7907298fe759f95d7fbf8319f6398e50",
+  "status": "unverified_compiler_dependency_download_failure",
+  "built_in_compile_attempts": 2,
+  "diagnostic": "Tectonic panicked at src/config.rs:154:18: called Result::unwrap() on an Err value: this bundle is not cached and could not be fetched from https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz; RUST_BACKTRACE=1 suggested by runtime.",
+  "host_network_probe": {
+    "method": "curl -I --location --max-time 20",
+    "requested_url": "https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz",
+    "redirect_url": "https://data1b.fullyjustified.net/tlextras-2022.0r0.tar.index.gz",
+    "response_status": 200,
+    "observation_date_utc": "2026-10-09"
+  },
+  "assessment": "Observed compiler dependency initialization failure before document parsing, not evidence of a LaTeX syntax error. Host reachability does not prove embedded compiler reachability.",
+  "source_changed": false,
+  "editor_replaced": false,
+  "separate_pdf_compiled": false,
+  "remaining_action": "Restore built-in compiler bundle/cache access through app support, then rerun compilation of this same source and address any resulting document errors. Current tools expose compilation but not compiler cache repair.",
+  "official_troubleshooting": "https://learn.chatgpt.com/docs/reference/troubleshooting"
+}

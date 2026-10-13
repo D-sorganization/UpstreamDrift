@@ -1,0 +1,474 @@
+{
+  "schema": "shot-pattern-rescored-statistics/1",
+  "matrix": "driver_control_speed",
+  "resamples": 2000,
+  "matrix_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+  "source_sha256": {
+    "matched_sensitivity.py": "677f90946494558cb5959af5af2c7ee0e5d940599191998c268e6e1ce33dd9de",
+    "matched_report.py": "33d92a099123259fa8f456b9bd674aad4bb569bbd34953ebac03f767b205d151",
+    "scenario_scoring.py": "730eb5dfe289e507dd1228e5b6af5d218e6904259b40967ea0fa74e9fadba9a2",
+    "scoring_cache.py": "3a37f836546beca416475c266f59859b40e843446411ac16fabd6580e74cd19c",
+    "scoring.py": "d1670fe47397d885e5365c9402f28e2a1784485d19ef04fe94ba6362fff48fd2",
+    "uncertainty.py": "15901419993c758cdce4a7108a439e1dc769995b71476bff36e668d30bc75035",
+    "vendor/ud-tools/src/shared/python/launch_monitor/strokes_gained.py": "4b3eca9d3b86e5b65f2fd073fa60b785c19186b35953b44bd143370752bb40f1"
+  },
+  "scope": "Paired bootstrap over common supported shots; Monte Carlo sampling only. Excludes model, course and golfer uncertainty.",
+  "cells": {
+    "driver_lean5_curve2_rotation1_shaft_only": {
+      "status": "completed",
+      "course_scoring": {
+        "status": "available",
+        "scenario_id": "tee_fairway_rough",
+        "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+        "club_id": "driver",
+        "start_lie": "tee",
+        "start_distance_m": 400.0,
+        "target_x_m": 178.94875782337786,
+        "hole_distance_m": 400.0,
+        "fairway_half_width_m": 15.0,
+        "green_radius_m": null,
+        "source_backed_status": "available",
+        "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+        "api_evaluated_states": 70,
+        "scored_shots": 30000,
+        "interpolation_tolerance_strokes": 1e-12,
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "patterns": {
+          "Straight": {
+            "n": 10000,
+            "mean_strokes_gained": -0.4053821548073955,
+            "fairway_fraction": 0.968
+          },
+          "Draw": {
+            "n": 10000,
+            "mean_strokes_gained": -0.40172404072312545,
+            "fairway_fraction": 0.9807
+          },
+          "Fade": {
+            "n": 10000,
+            "mean_strokes_gained": -0.40290487633215244,
+            "fairway_fraction": 0.9652
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.003658114084269981,
+            "lower_95": 0.002903567454538142,
+            "upper_95": 0.004401941522972166
+          },
+          "Fade": {
+            "estimate": 0.002477278475243012,
+            "lower_95": 0.0021156353048093534,
+            "upper_95": 0.002823484920323992
+          }
+        },
+        "limitations": [
+          "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+          "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+          "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+        ],
+        "paired_n": 10000,
+        "total_n": 10000,
+        "conditioning": "all_samples",
+        "bootstrap_resamples": 2000,
+        "full_population_status": "available_under_hypothetical_course_assumptions"
+      },
+      "paired_comparisons": {
+        "paired_n": 10000,
+        "total_n": 10000,
+        "conditioning": "all_samples",
+        "bootstrap_resamples": 2000,
+        "mean_radial_error_difference_vs_straight": {
+          "Draw": {
+            "estimate": 2.269825543459127,
+            "lower_95": 2.2389979797037074,
+            "upper_95": 2.302093700000982
+          },
+          "Fade": {
+            "estimate": -1.5956944082008246,
+            "lower_95": -1.6240831361138328,
+            "upper_95": -1.5683330304432814
+          }
+        },
+        "mean_squared_target_error_difference_m2": {
+          "Draw": {
+            "estimate": 88.33501129835184,
+            "lower_95": 86.08267299878835,
+            "upper_95": 90.64691412385902
+          },
+          "Fade": {
+            "estimate": -56.39622410138145,
+            "lower_95": -58.263671016262286,
+            "upper_95": -54.54674367161994
+          }
+        },
+        "containment_fraction_difference": {
+          "Draw": {
+            "estimate": -0.0887,
+            "lower_95": -0.0944025,
+            "upper_95": -0.0832
+          },
+          "Fade": {
+            "estimate": 0.07,
+            "lower_95": 0.0652,
+            "upper_95": 0.075
+          }
+        },
+        "uncertainty_scope": "paired bootstrap; sampling only; excludes model and course uncertainty"
+      },
+      "input_sha256": {
+        "manifest.json": "ca113bc8625bc577d72a05c59514582d8241e4ae4b75c68231146e3abd0c7eef",
+        "run_start.json": "8a1363ddf0a89f6dc3004e66d91aee09aa3d7f58fd96b9218505e99d9b07ed56",
+        "summary.json": "29a8d4c89fe5cc348cd14c0ca81ab62705d089316c58a0127f4e167b8c7b047f",
+        "shots.csv.gz": "cc9e84eabd517de44525ec698008dcbdd76b9873da9f2dc6b76e843b1500409b"
+      }
+    },
+    "driver_lean5_curve2_rotation1_combined2": {
+      "status": "completed",
+      "course_scoring": {
+        "status": "conditional_only",
+        "scenario_id": "tee_fairway_rough",
+        "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+        "club_id": "driver",
+        "start_lie": "tee",
+        "start_distance_m": 400.0,
+        "target_x_m": 178.94875782337786,
+        "hole_distance_m": 400.0,
+        "fairway_half_width_m": 15.0,
+        "green_radius_m": null,
+        "source_backed_status": "available",
+        "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+        "api_evaluated_states": 70,
+        "scored_shots": 29922,
+        "interpolation_tolerance_strokes": 1e-12,
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "patterns": {
+          "Straight": {
+            "n": 9974,
+            "mean_strokes_gained": -0.42716475354218264,
+            "fairway_fraction": 0.9607980749949869
+          },
+          "Draw": {
+            "n": 9974,
+            "mean_strokes_gained": -0.4224539602471254,
+            "fairway_fraction": 0.9734309203930218
+          },
+          "Fade": {
+            "n": 9974,
+            "mean_strokes_gained": -0.42454618142538175,
+            "fairway_fraction": 0.9540806095849208
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.004710793295057291,
+            "lower_95": 0.003997392498369603,
+            "upper_95": 0.005450494299140533
+          },
+          "Fade": {
+            "estimate": 0.0026185721168009647,
+            "lower_95": 0.002041407008455473,
+            "upper_95": 0.003219643856884257
+          }
+        },
+        "limitations": [
+          "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+          "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+          "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+        ],
+        "paired_n": 9974,
+        "total_n": 10000,
+        "conditioning": "common_supported_indices_only",
+        "bootstrap_resamples": 2000,
+        "full_population_status": "unavailable_unsupported_terminal_lies"
+      },
+      "paired_comparisons": {
+        "paired_n": 9974,
+        "total_n": 10000,
+        "conditioning": "common_supported_indices_only",
+        "bootstrap_resamples": 2000,
+        "mean_radial_error_difference_vs_straight": {
+          "Draw": {
+            "estimate": 1.7302739035048385,
+            "lower_95": 1.6836799497973263,
+            "upper_95": 1.7805643895669256
+          },
+          "Fade": {
+            "estimate": -1.4452301042876883,
+            "lower_95": -1.4953917176349394,
+            "upper_95": -1.3953822561622362
+          }
+        },
+        "mean_squared_target_error_difference_m2": {
+          "Draw": {
+            "estimate": 86.670489841692,
+            "lower_95": 83.34409592833842,
+            "upper_95": 89.96514421039535
+          },
+          "Fade": {
+            "estimate": -67.25420780166706,
+            "lower_95": -70.65898211667131,
+            "upper_95": -63.95743238239465
+          }
+        },
+        "containment_fraction_difference": {
+          "Draw": {
+            "estimate": -0.061961098857028274,
+            "lower_95": -0.06737517545618608,
+            "upper_95": -0.05624624022458392
+          },
+          "Fade": {
+            "estimate": 0.05333868056948065,
+            "lower_95": 0.048024864648085024,
+            "upper_95": 0.058351714457589736
+          }
+        },
+        "uncertainty_scope": "paired bootstrap; sampling only; excludes model and course uncertainty"
+      },
+      "input_sha256": {
+        "manifest.json": "b58753e9e89bc47f22d3c37595faf77f796affdfa9d0905b665a8051168a51c4",
+        "run_start.json": "68025c501b53e29990df145ed4902e8f6041585aa20cd02044ce2b86244af02d",
+        "summary.json": "ac9f328de946ace9321abcededc156eb0c84d44b64e587461bf6afb58eba29c8",
+        "shots.csv.gz": "8235000b7ee71a6ec3e56cc71c9539db7a4b83e62c959a0375c51a8d3c05c0ee"
+      }
+    },
+    "driver_lean5_curve2_rotation2_shaft_only": {
+      "status": "completed",
+      "course_scoring": {
+        "status": "available",
+        "scenario_id": "tee_fairway_rough",
+        "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+        "club_id": "driver",
+        "start_lie": "tee",
+        "start_distance_m": 400.0,
+        "target_x_m": 178.94875782337786,
+        "hole_distance_m": 400.0,
+        "fairway_half_width_m": 15.0,
+        "green_radius_m": null,
+        "source_backed_status": "available",
+        "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+        "api_evaluated_states": 70,
+        "scored_shots": 30000,
+        "interpolation_tolerance_strokes": 1e-12,
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "patterns": {
+          "Straight": {
+            "n": 10000,
+            "mean_strokes_gained": -0.4562591822639056,
+            "fairway_fraction": 0.8229
+          },
+          "Draw": {
+            "n": 10000,
+            "mean_strokes_gained": -0.44566256838893453,
+            "fairway_fraction": 0.8498
+          },
+          "Fade": {
+            "n": 10000,
+            "mean_strokes_gained": -0.46202636834096367,
+            "fairway_fraction": 0.7266
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.010596613874971067,
+            "lower_95": 0.00959168692811845,
+            "upper_95": 0.011673014386093705
+          },
+          "Fade": {
+            "estimate": -0.005767186077058064,
+            "lower_95": -0.006393579048716326,
+            "upper_95": -0.005141642542212732
+          }
+        },
+        "limitations": [
+          "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+          "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+          "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+        ],
+        "paired_n": 10000,
+        "total_n": 10000,
+        "conditioning": "all_samples",
+        "bootstrap_resamples": 2000,
+        "full_population_status": "available_under_hypothetical_course_assumptions"
+      },
+      "paired_comparisons": {
+        "paired_n": 10000,
+        "total_n": 10000,
+        "conditioning": "all_samples",
+        "bootstrap_resamples": 2000,
+        "mean_radial_error_difference_vs_straight": {
+          "Draw": {
+            "estimate": 3.8837531042566944,
+            "lower_95": 3.8404514303061377,
+            "upper_95": 3.9288324253374
+          },
+          "Fade": {
+            "estimate": -3.3800667861399822,
+            "lower_95": -3.445719375872095,
+            "upper_95": -3.315869196439642
+          }
+        },
+        "mean_squared_target_error_difference_m2": {
+          "Draw": {
+            "estimate": 281.49312402796136,
+            "lower_95": 275.5500051039521,
+            "upper_95": 287.4502796467456
+          },
+          "Fade": {
+            "estimate": -257.02131119782587,
+            "lower_95": -266.13420872787884,
+            "upper_95": -247.73535250106337
+          }
+        },
+        "containment_fraction_difference": {
+          "Draw": {
+            "estimate": -0.0652,
+            "lower_95": -0.0702,
+            "upper_95": -0.0602
+          },
+          "Fade": {
+            "estimate": 0.0542,
+            "lower_95": 0.0498975,
+            "upper_95": 0.0586
+          }
+        },
+        "uncertainty_scope": "paired bootstrap; sampling only; excludes model and course uncertainty"
+      },
+      "input_sha256": {
+        "manifest.json": "2663e3b66d3286d8b57d214e00dd984fb225bb7c907046067b470f564c5c4137",
+        "run_start.json": "d312184cb47f6d02893a8b989f86a1c2403b7724bf9d0f98ad3a61d3d522a6a7",
+        "summary.json": "4ba1a89317a07155802c981988379aaf34323598b1ba4d64ce8d56a0f1d83d6e",
+        "shots.csv.gz": "ea059344175e0334ebc0ed75c9be0fc68058a339e0b249aa44cb8307c1d4d112"
+      }
+    },
+    "driver_lean5_curve2_rotation2_combined2": {
+      "status": "completed",
+      "course_scoring": {
+        "status": "conditional_only",
+        "scenario_id": "tee_fairway_rough",
+        "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+        "club_id": "driver",
+        "start_lie": "tee",
+        "start_distance_m": 400.0,
+        "target_x_m": 178.94875782337786,
+        "hole_distance_m": 400.0,
+        "fairway_half_width_m": 15.0,
+        "green_radius_m": null,
+        "source_backed_status": "available",
+        "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
+        "api_evaluated_states": 70,
+        "scored_shots": 29820,
+        "interpolation_tolerance_strokes": 1e-12,
+        "baseline": {
+          "id": "broadie-2011-historical-tour-approx",
+          "version": "table9-full-plus-anchor-reconciled-putting/2",
+          "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+          "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+        },
+        "patterns": {
+          "Straight": {
+            "n": 9940,
+            "mean_strokes_gained": -0.4747703321818092,
+            "fairway_fraction": 0.8079476861167002
+          },
+          "Draw": {
+            "n": 9940,
+            "mean_strokes_gained": -0.46215344973481354,
+            "fairway_fraction": 0.8450704225352113
+          },
+          "Fade": {
+            "n": 9940,
+            "mean_strokes_gained": -0.47696933635823696,
+            "fairway_fraction": 0.740543259557344
+          }
+        },
+        "paired_benefit_vs_straight": {
+          "Draw": {
+            "estimate": 0.01261688244699568,
+            "lower_95": 0.011647615570441232,
+            "upper_95": 0.013625964948314945
+          },
+          "Fade": {
+            "estimate": -0.0021990041764278065,
+            "lower_95": -0.00301950304434254,
+            "upper_95": -0.0013557198497051476
+          }
+        },
+        "limitations": [
+          "2003-2010 PGA benchmark and approximate reconciled putting fit; not a current or player-specific estimate.",
+          "Flat hypothetical geometry; landing is treated as final lie with no roll, hazards, or recovery obstruction.",
+          "Bootstrap intervals include Monte Carlo sampling only, not club delivery, course, or model uncertainty."
+        ],
+        "paired_n": 9940,
+        "total_n": 10000,
+        "conditioning": "common_supported_indices_only",
+        "bootstrap_resamples": 2000,
+        "full_population_status": "unavailable_unsupported_terminal_lies"
+      },
+      "paired_comparisons": {
+        "paired_n": 9940,
+        "total_n": 10000,
+        "conditioning": "common_supported_indices_only",
+        "bootstrap_resamples": 2000,
+        "mean_radial_error_difference_vs_straight": {
+          "Draw": {
+            "estimate": 3.4621721266161463,
+            "lower_95": 3.4010462785783493,
+            "upper_95": 3.5211293766801735
+          },
+          "Fade": {
+            "estimate": -3.2204249168490158,
+            "lower_95": -3.2983606037292437,
+            "upper_95": -3.1377003850051755
+          }
+        },
+        "mean_squared_target_error_difference_m2": {
+          "Draw": {
+            "estimate": 282.56799529135947,
+            "lower_95": 275.0141278990131,
+            "upper_95": 290.18935891059624
+          },
+          "Fade": {
+            "estimate": -273.5655200461016,
+            "lower_95": -284.67595237252175,
+            "upper_95": -262.66020565832235
+          }
+        },
+        "containment_fraction_difference": {
+          "Draw": {
+            "estimate": -0.04889336016096579,
+            "lower_95": -0.053722334004024146,
+            "upper_95": -0.04396378269617706
+          },
+          "Fade": {
+            "estimate": 0.04698189134808853,
+            "lower_95": 0.04235412474849094,
+            "upper_95": 0.05191146881287726
+          }
+        },
+        "uncertainty_scope": "paired bootstrap; sampling only; excludes model and course uncertainty"
+      },
+      "input_sha256": {
+        "manifest.json": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+        "run_start.json": "5148a691e1025a0f730b691c98d0605b97c4945297c3853904a0880567e7c5b4",
+        "summary.json": "038055a639246c267964e62b2f5f73683b3502b733a4246c0ab7f7740dabae4c",
+        "shots.csv.gz": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758"
+      }
+    }
+  }
+}

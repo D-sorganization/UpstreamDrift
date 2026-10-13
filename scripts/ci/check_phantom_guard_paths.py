@@ -42,6 +42,7 @@ ISSUE_PATH_PATTERN = re.compile(
     r"(?<![\w/.-])(?:src|tests|rust_core|api|scripts|\.github(?:/workflows)?)/[A-Za-z0-9_/.-]+"
 )
 ENV_CHANGED_FILES = "PR_CHANGED_FILES"
+ENV_CHANGED_FILES_PATH = "PR_CHANGED_FILES_PATH"
 MAX_PATHS_SHOWN = 5
 
 _PATH_EXTENSIONS = (
@@ -137,6 +138,16 @@ def _env_changed_files(env_value: str | None) -> list[str]:
     return [line.strip() for line in env_value.splitlines() if line.strip()]
 
 
+def _file_changed_files(path_value: str | None) -> list[str]:
+    """Read a newline-separated changed-file list from a file path."""
+    if not path_value:
+        return []
+    path = Path(path_value)
+    if not path.is_file():
+        return []
+    return _env_changed_files(path.read_text(encoding="utf-8"))
+
+
 def _api_changed_files(pr_number: str, repo: str) -> list[str] | None:
     """Return the PR changed-file list via the GitHub CLI, or None."""
     result = subprocess.run(
@@ -166,6 +177,7 @@ def _resolve_changed_files(
     base_sha: str | None,
     head_sha: str | None,
     env_list: str,
+    env_list_path: str,
     api_loader: ApiListLoader,
 ) -> tuple[list[str], str]:
     """Resolve the PR changed files; raise when every source is unusable.
@@ -174,6 +186,7 @@ def _resolve_changed_files(
         base_sha: PR base SHA (empty disables the git source).
         head_sha: PR head SHA.
         env_list: Raw ``PR_CHANGED_FILES`` value (newline-separated).
+        env_list_path: Path to a newline-separated changed-file list.
         api_loader: Zero-arg loader returning the API file list or None.
 
     Returns:
@@ -186,6 +199,9 @@ def _resolve_changed_files(
         git_files = _git_changed_files(base_sha, head_sha, _repo_root())
         if git_files is not None:
             return git_files, "git"
+    file_files = _file_changed_files(env_list_path)
+    if file_files:
+        return file_files, "file"
     env_files = _env_changed_files(env_value=env_list)
     if env_files:
         return env_files, "env"
@@ -325,6 +341,12 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=f"Optional newline-separated API changed-file list "
         f"(env: {ENV_CHANGED_FILES}).",
     )
+    parser.add_argument(
+        "--changed-files-path",
+        default=os.environ.get(ENV_CHANGED_FILES_PATH, ""),
+        help=f"Optional path to a newline-separated changed-file list "
+        f"(env: {ENV_CHANGED_FILES_PATH}).",
+    )
     return parser.parse_args(argv)
 
 
@@ -341,7 +363,11 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         changed_files, source = _resolve_changed_files(
-            args.base_sha, args.head_sha, args.changed_files, api_loader
+            args.base_sha,
+            args.head_sha,
+            args.changed_files,
+            args.changed_files_path,
+            api_loader,
         )
     except ChangedFilesUnavailableError as exc:
         logger.error("FAIL: %s", exc)

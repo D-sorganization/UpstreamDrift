@@ -1,0 +1,145 @@
+{
+  "scope": "Layout-object refactor only; accepted report and frozen replay outputs unchanged",
+  "before_commit": "d121798373b5b529237d3d12f63650576d66d096",
+  "source_sha256_before": {
+    "docs/research/shot_pattern_analysis/phase2/presentation_v2/flight_panel.py": "e11fb9bbd1b1c603a05573f49337b804c0300e3f51184fe4998ddbaa083a2d94",
+    "docs/research/shot_pattern_analysis/phase2/presentation_v2/render.py": "2b79a72f7760144baf72e6248defe009bf1b94b66c463bd5599346c6047e39e5"
+  },
+  "source_sha256_after": {
+    "docs/research/shot_pattern_analysis/phase2/presentation_v2/flight_panel.py": "bbabcad7a64e70bc04e6f750c4b912760047282ff95817b895b6152c37b6fee2",
+    "docs/research/shot_pattern_analysis/phase2/presentation_v2/render.py": "c61973376e0737dcd306eddde32b3215bbdea3d5e88839ff1afba7330b369d41"
+  },
+  "before": [
+    {
+      "supplemental": false,
+      "index": 0,
+      "rgba": "fc3f19bb6952f9f5cce15866334f3115befe0d72884fc2eb9c51e9d631f64b9c",
+      "xlabel": "",
+      "ylabel": "Downrange Distance (m)",
+      "xlim": [
+        -10.0,
+        10.0
+      ],
+      "ylim": [
+        0.0,
+        110.0
+      ],
+      "lines": 4
+    },
+    {
+      "supplemental": false,
+      "index": 4,
+      "rgba": "e2e6b82693c2a12dc32b3988d85f9bf181c9051fd8159dcccaeb993bf29e28e5",
+      "xlabel": "Lateral Position (m; Right Positive)",
+      "ylabel": "",
+      "xlim": [
+        -10.0,
+        10.0
+      ],
+      "ylim": [
+        0.0,
+        110.0
+      ],
+      "lines": 4
+    },
+    {
+      "supplemental": true,
+      "index": 0,
+      "rgba": "3d4c1d86c32c08aaf9d120e8d760423aeb2b6bd24555a066c4debbb3033dd042",
+      "xlabel": "",
+      "ylabel": "Downrange Distance (m)",
+      "xlim": [
+        -10.0,
+        10.0
+      ],
+      "ylim": [
+        0.0,
+        110.0
+      ],
+      "lines": 4
+    },
+    {
+      "supplemental": true,
+      "index": 4,
+      "rgba": "645a9f9e7117fb08df639ccd867f154b688b0fe32a799978e48eeaf7d5f56699",
+      "xlabel": "Lateral Position (m; Right Positive)",
+      "ylabel": "",
+      "xlim": [
+        -10.0,
+        10.0
+      ],
+      "ylim": [
+        0.0,
+        110.0
+      ],
+      "lines": 4
+    }
+  ],
+  "after": [
+    {
+      "supplemental": false,
+      "index": 0,
+      "rgba": "fc3f19bb6952f9f5cce15866334f3115befe0d72884fc2eb9c51e9d631f64b9c",
+      "xlabel": "",
+      "ylabel": "Downrange Distance (m)",
+      "xlim": [
+        -10.0,
+        10.0
+      ],
+      "ylim": [
+        0.0,
+        110.0
+      ],
+      "lines": 4
+    },
+    {
+      "supplemental": false,
+      "index": 4,
+      "rgba": "e2e6b82693c2a12dc32b3988d85f9bf181c9051fd8159dcccaeb993bf29e28e5",
+      "xlabel": "Lateral Position (m; Right Positive)",
+      "ylabel": "",
+      "xlim": [
+        -10.0,
+        10.0
+      ],
+      "ylim": [
+        0.0,
+        110.0
+      ],
+      "lines": 4
+    },
+    {
+      "supplemental": true,
+      "index": 0,
+      "rgba": "3d4c1d86c32c08aaf9d120e8d760423aeb2b6bd24555a066c4debbb3033dd042",
+      "xlabel": "",
+      "ylabel": "Downrange Distance (m)",
+      "xlim": [
+        -10.0,
+        10.0
+      ],
+      "ylim": [
+        0.0,
+        110.0
+      ],
+      "lines": 4
+    },
+    {
+      "supplemental": true,
+      "index": 4,
+      "rgba": "645a9f9e7117fb08df639ccd867f154b688b0fe32a799978e48eeaf7d5f56699",
+      "xlabel": "Lateral Position (m; Right Positive)",
+      "ylabel": "",
+      "xlim": [
+        -10.0,
+        10.0
+      ],
+      "ylim": [
+        0.0,
+        110.0
+      ],
+      "lines": 4
+    }
+  ],
+  "comparison": "Exact RGBA hashes, axis text/ranges, and line counts in four synthetic render cases; environment-specific observation, not a cross-platform font guarantee."
+}

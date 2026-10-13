@@ -1,0 +1,322 @@
+#!/usr/bin/env python3
+"""Verify a downloaded shot-pattern release against committed v3 receipts.
+
+This is a one-off, read-only verifier. It does not contact a remote service,
+compile the paper, or rerun simulations. It writes only its receipt and
+temporary restoration files beneath the supplied work directory.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import re
+import shutil
+import sys
+import zipfile
+from pathlib import Path, PurePosixPath, PureWindowsPath
+from typing import Any
+
+
+DEFAULT_REPO = Path(
+    "/home/dieterolson/.codex/worktrees/shot-pattern-main-integration/UpstreamDrift"
+)
+STAGE = Path("/tmp/shot-pattern-delivery-resume/release-assets-v2")
+INVENTORY = Path(
+    "docs/research/shot_pattern_analysis/phase2/validation/"
+    "artifact_delivery_v3/release_staging_inventory_v3.json"
+)
+SOURCE_RESTORE = Path(
+    "docs/research/shot_pattern_analysis/phase2/validation/"
+    "artifact_delivery_v3/illustrated_report_source_restore_v3.json"
+)
+SELECTION = Path(
+    "docs/research/shot_pattern_analysis/phase2/validation/"
+    "illustrated_article_v1/figure_selection.json"
+)
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def safe_member(name: str) -> None:
+    path = PurePosixPath(name)
+    if (
+        not name
+        or path.is_absolute()
+        or PureWindowsPath(name).drive
+        or ".." in path.parts
+        or "\\" in name
+    ):
+        raise ValueError(f"unsafe ZIP member path: {name!r}")
+
+
+def extract_verified_zip(archive: Path, destination: Path) -> list[str]:
+    """Extract only regular files with safe names into a new directory."""
+    destination.mkdir(parents=True, exist_ok=False)
+    names: list[str] = []
+    with zipfile.ZipFile(archive) as bundle:
+        for info in bundle.infolist():
+            safe_member(info.filename)
+            file_type = (info.external_attr >> 16) & 0o170000
+            # ZIP producers commonly omit Unix type bits for regular files.
+            # Accept that representation and explicit regular files only.
+            if info.is_dir() or file_type not in (0, 0o100000):
+                raise ValueError(f"non-regular ZIP member: {info.filename}")
+            target = destination.joinpath(*PurePosixPath(info.filename).parts)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with bundle.open(info) as source, target.open("xb") as output:
+                shutil.copyfileobj(source, output)
+            names.append(info.filename)
+    if len(names) != len(set(names)):
+        raise ValueError("duplicate ZIP members")
+    return sorted(names)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("download_dir", type=Path, help="flat directory of downloaded release assets")
+    parser.add_argument(
+        "--repo-root", type=Path, default=DEFAULT_REPO,
+        help="checkout containing the committed inventory and verifier source",
+    )
+    parser.add_argument(
+        "--receipt", type=Path,
+        default=Path("/tmp/shot-pattern-delivery-resume/remote-restoration-v3.json"),
+    )
+    parser.add_argument(
+        "--work-dir", type=Path,
+        default=Path("/tmp/shot-pattern-delivery-resume/remote-restore-work-v3"),
+    )
+    args = parser.parse_args()
+    download = args.download_dir.resolve()
+    repo = args.repo_root.resolve()
+    if not download.is_dir():
+        raise SystemExit(f"download directory does not exist: {download}")
+    inventory_path = repo / INVENTORY
+    inventory_bytes = inventory_path.read_bytes()
+    inventory = json.loads(inventory_bytes)
+    if inventory.get("schema") != "shot-pattern-release-staging-inventory/3":
+        raise SystemExit("unexpected inventory schema")
+    expected_assets = {entry["name"]: entry for entry in inventory["assets"]}
+    actual_files = {p.name: p for p in download.iterdir() if p.is_file()}
+    actual_names = set(actual_files)
+    if actual_names != set(expected_assets) or any(p.is_dir() for p in download.iterdir()):
+        raise SystemExit(
+            f"asset set mismatch; missing={sorted(set(expected_assets)-actual_names)}, "
+            f"extra={sorted(actual_names-set(expected_assets))}"
+        )
+
+    file_records: list[dict[str, Any]] = []
+    for name, expected in sorted(expected_assets.items()):
+        path = actual_files[name]
+        observed = {"name": name, "bytes": path.stat().st_size, "sha256": sha256(path)}
+        if observed["bytes"] != expected["bytes"] or observed["sha256"] != expected["sha256"]:
+            raise SystemExit(f"downloaded asset differs from committed inventory: {name}")
+        file_records.append({**observed, "matches_inventory": True})
+
+    work = args.work_dir.resolve()
+    if work.exists():
+        raise SystemExit(f"work directory must be new (preserving prior evidence): {work}")
+    work.mkdir(parents=True)
+    stage = STAGE
+    if not stage.is_dir():
+        raise SystemExit(f"accepted local staging directory is missing: {stage}")
+
+    # Check downloaded manifests against the committed per-asset digest and the
+    # corresponding accepted staged bytes before using them as archive authority.
+    bundles: dict[str, Any] = {}
+    archive_data_path = repo / "scripts/research/shot_pattern_analysis/archive_data.py"
+    spec = importlib.util.spec_from_file_location("shot_pattern_archive_data", archive_data_path)
+    if spec is None or spec.loader is None:
+        raise SystemExit("cannot load archive_data.py")
+    archive_data = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = archive_data
+    spec.loader.exec_module(archive_data)
+    for label in ("primary", "control", "supplement"):
+        manifest_name = f"{label}__archive_manifest.json"
+        downloaded_manifest = actual_files[manifest_name]
+        staged_manifest = stage / manifest_name
+        if downloaded_manifest.read_bytes() != staged_manifest.read_bytes():
+            raise SystemExit(f"downloaded manifest bytes differ from accepted local copy: {label}")
+        bundle_dir = work / "bundles" / label
+        bundle_dir.mkdir(parents=True)
+        shutil.copyfile(downloaded_manifest, bundle_dir / "archive_manifest.json")
+        # Release filenames are presentation aliases; bind each archive by its
+        # verified size and digest, then restore its manifest-declared name.
+        manifest = json.loads(downloaded_manifest.read_text())
+        candidates = {
+            name: expected_assets[name] for name in actual_files
+            if name.startswith(label + "__") and name.endswith(".zip")
+        }
+        used: set[str] = set()
+        for archive_name, expected in manifest["archives"].items():
+            safe_member(archive_name)
+            matches = [
+                name for name, record in candidates.items()
+                if record["sha256"] == expected["sha256"]
+                and record["bytes"] == expected["bytes"]
+            ]
+            if len(matches) != 1 or matches[0] in used:
+                raise SystemExit(f"archive alias mapping is not one-to-one: {label}/{archive_name}")
+            used.add(matches[0])
+            shutil.copyfile(actual_files[matches[0]], bundle_dir / archive_name)
+        if used != set(candidates):
+            raise SystemExit(f"unmapped release archives: {label}")
+        count = archive_data.verify_archives(bundle_dir)
+        manifest = json.loads((bundle_dir / "archive_manifest.json").read_text())
+        extracted = work / "extracted" / label
+        extracted.mkdir(parents=True)
+        member_inventory: list[dict[str, Any]] = []
+        for zip_name in sorted(manifest["archives"]):
+            zip_path = bundle_dir / zip_name
+            with zipfile.ZipFile(zip_path) as zf:
+                for info in zf.infolist():
+                    safe_member(info.filename)
+                    target = extracted.joinpath(*PurePosixPath(info.filename).parts)
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    with zf.open(info) as src, target.open("xb") as dst:
+                        shutil.copyfileobj(src, dst)
+                    entry = manifest["files"][info.filename]
+                    member_inventory.append({
+                        "path": info.filename,
+                        "bytes": target.stat().st_size,
+                        "sha256": sha256(target),
+                        "matches_manifest": (
+                            target.stat().st_size == entry["bytes"]
+                            and sha256(target) == entry["sha256"]
+                        ),
+                    })
+        extracted_names = {item["path"] for item in member_inventory}
+        if (
+            len(member_inventory) != count
+            or extracted_names != set(manifest["files"])
+            or any(not m["matches_manifest"] for m in member_inventory)
+        ):
+            raise SystemExit(f"restored member inventory mismatch: {label}")
+        bundles[label] = {
+            "verify_archives_member_count": count,
+            "archive_count": len(manifest["archives"]),
+            "archive_manifest_sha256": sha256(bundle_dir / "archive_manifest.json"),
+            "restored_member_count": len(member_inventory),
+            "restored_members": sorted(member_inventory, key=lambda x: x["path"]),
+            "extract_root": str(extracted),
+        }
+
+    # Source bundle: use the accepted restore receipt as the exact member/hash
+    # inventory, then bind all 13 embedded figures to the committed selection.
+    source_receipt = json.loads((repo / SOURCE_RESTORE).read_text())
+    selection = json.loads((repo / SELECTION).read_text())
+    source_zip = actual_files["illustrated-report-source.zip"]
+    source_root = work / "source"
+    source_names = extract_verified_zip(source_zip, source_root)
+    restored = {item["path"]: item for item in source_receipt["restored_members"]}
+    if source_names != sorted(restored) or len(source_names) != 15:
+        raise SystemExit("illustrated source ZIP member inventory differs from accepted restore receipt")
+    source_members = []
+    for name in source_names:
+        path = source_root.joinpath(*PurePosixPath(name).parts)
+        record = restored[name]
+        observed = {"path": name, "bytes": path.stat().st_size, "sha256": sha256(path)}
+        if observed["bytes"] != record["bytes"] or observed["sha256"] != record["sha256"]:
+            raise SystemExit(f"source ZIP restored member differs from accepted receipt: {name}")
+        source_members.append({**observed, "matches_accepted_restore": True})
+    selected = {f["path"]: f["sha256"] for f in selection["figures"]}
+    selected_checks = []
+    for name, expected_sha in sorted(selected.items()):
+        path = source_root.joinpath(*PurePosixPath(name).parts)
+        got = sha256(path)
+        if got != expected_sha:
+            raise SystemExit(f"source figure differs from frozen selection: {name}")
+        selected_checks.append({"path": name, "sha256": got, "matches_selection": True})
+    tex_path = source_root / source_receipt["tex_path"]
+    if sha256(tex_path) != source_receipt["accepted_build_source_sha256"]:
+        raise SystemExit("restored TeX source differs from accepted build source hash")
+    if len(selected_checks) != 13:
+        raise SystemExit("expected exactly 13 selected source figures")
+
+    # Assemble report links at their published relative location. The accepted
+    # report points at phase2/supplement_report_v1; route that alias to the
+    # verified v2 child bundle and check every occurrence and unique target.
+    report_root = work / "publication"
+    phase2 = report_root / "phase2"
+    phase2.mkdir(parents=True)
+    shutil.copyfile(actual_files["report__REPORT.md"], phase2 / "REPORT.md")
+    shutil.copyfile(actual_files["ILLUSTRATED_REPORT.pdf"], phase2 / "ILLUSTRATED_REPORT.pdf")
+    shutil.copyfile(actual_files["report__REPORT.pdf"], phase2 / "REPORT_historical_text_only.pdf")
+    primary_dest = phase2 / "final_figures_v1"
+    shutil.copytree(work / "extracted/primary/final_figures_v1", primary_dest)
+    supplement_source = work / "extracted/supplement/supplement_report_v2_layout_repair"
+    supplement_alias = phase2 / "supplement_report_v1"
+    shutil.copytree(supplement_source, supplement_alias)
+    report_text = (phase2 / "REPORT.md").read_text(encoding="utf-8")
+    link_targets = re.findall(r"\]\((supplement_report_v1/[^)]+)\)", report_text)
+    unique_targets = sorted(set(link_targets))
+    if len(link_targets) != 98:
+        raise SystemExit(f"expected 98 report link occurrences, got {len(link_targets)}")
+    missing = [p for p in unique_targets if not (phase2 / p).is_file()]
+    if missing:
+        raise SystemExit(f"report links missing from restored publication tree: {missing[:10]}")
+
+    receipt = {
+        "schema": "shot-pattern-remote-restoration-verification/3",
+        "status": "passed",
+        "download_dir": str(download),
+        "inventory_path": str(inventory_path),
+        "inventory_sha256": hashlib.sha256(inventory_bytes).hexdigest(),
+        "inventory_asset_count": len(file_records),
+        "assets": file_records,
+        "manifest_comparisons": {
+            label: {
+                "downloaded_bytes_equal_accepted_stage": True,
+                "committed_inventory_sha256_match": True,
+            }
+            for label in ("primary", "control", "supplement")
+        },
+        "bundles": bundles,
+        "source_zip": {
+            "archive_sha256": sha256(source_zip),
+            "member_count": len(source_members),
+            "members": source_members,
+            "selected_figure_count": len(selected_checks),
+            "selected_figures": selected_checks,
+            "tex_sha256": sha256(tex_path),
+            "accepted_build_source_sha256": source_receipt["accepted_build_source_sha256"],
+            "tex_matches_accepted_build_source": True,
+            "compile_or_simulation_rerun": False,
+        },
+        "report_publication": {
+            "report_markdown": "phase2/REPORT.md",
+            "illustrated_pdf": "phase2/ILLUSTRATED_REPORT.pdf",
+            "historical_text_only_pdf": "phase2/REPORT_historical_text_only.pdf",
+            "supplement_report_v1_alias_target": "supplement_report_v2_layout_repair",
+            "link_occurrences": len(link_targets),
+            "unique_link_targets": len(unique_targets),
+            "existing_unique_targets": len(unique_targets) - len(missing),
+            "publication_root": str(report_root),
+        },
+        "work_dir": str(work),
+    }
+    args.receipt.parent.mkdir(parents=True, exist_ok=True)
+    args.receipt.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    print(json.dumps({
+        "status": receipt["status"],
+        "asset_count": len(file_records),
+        "bundle_members": {k: v["restored_member_count"] for k, v in bundles.items()},
+        "source_members": len(source_members),
+        "selected_figures": len(selected_checks),
+        "report_links": len(link_targets),
+        "receipt": str(args.receipt.resolve()),
+    }, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

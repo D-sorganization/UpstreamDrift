@@ -1,0 +1,1076 @@
+{
+  "schema": "across-lean-interaction-provisional-review/1",
+  "reviewer": "Astra",
+  "reviewed_at_utc": "2026-10-10T07:04:39.409918+00:00",
+  "status": "provisional_changes_required",
+  "scope": "Read-only scientific coverage review; live producer output has no terminal acceptance receipt yet. Hashes bind only bytes inspected at this checkpoint. No statistical recomputation or Monte Carlo.",
+  "inputs_sha256": {
+    "REPORT_SUPPLEMENT.json": "6cdf53ca15bebb8829f42b5b3a1013571f1d8d4df83d054ab9935fa1bb5a8f0d",
+    "REPORT_SUPPLEMENT_COMPARISONS.json": "b00388b9f12f4e2556bebad3a401ee6087f80790a779cf2eaf9afcf73a9e0981"
+  },
+  "comparison_counts": {
+    "across_lean": 56,
+    "curve_strength": 164,
+    "shaft_rotation_sd": 164
+  },
+  "missing_effect_modification_by_kind": {
+    "across_lean": 56,
+    "curve_strength": 0,
+    "shaft_rotation_sd": 0
+  },
+  "selected_curve2_sd2_combined2_controls": [
+    {
+      "comparison_kind": "across_lean",
+      "status": "conditional_only",
+      "target_x_m": 77.40247724866299,
+      "total_n_per_population": 10000,
+      "common_supported_n": 9999,
+      "conditioning": "same_indices_supported_in_all_six_populations",
+      "source_protocols": [
+        "pw-primary-face-bounds/1",
+        "pw-control-face-bounds/1"
+      ],
+      "sources": [
+        {
+          "protocol_id": "pw-primary-face-bounds/1",
+          "cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "execution_kind": "provenance_alias",
+          "alias_cell": "pitching_wedge_lean0_curve2_rotation2_combined2",
+          "source_plan_sha256": "885cbd7d9d86c67cfc433610ade374ee061d49ab44b73a474978306734d95a44",
+          "source_cell_manifest_sha256": "6c67ca324d4f16c1b4e1a5411a6bdd0c201c53ea1453029e9a4b8fdcbcb49077",
+          "source_csv_sha256": "571127e890703b8724c2825c001c40eb3d43a2419c68e0c176f892cdb1ae7c60"
+        },
+        {
+          "protocol_id": "pw-control-face-bounds/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "541f3d1ed651dc364c695182d38d116885e428e2806f30e25d72444221c73091",
+          "source_cell_manifest_sha256": "68eeea2d318a744f486741582457dc916510107c5d02272c9ed4829d3bb3f4a0",
+          "source_csv_sha256": "78de99b76c1699807ed24d0c42edbdcf24cfb5cceed73ee1c9d32553df1394ef"
+        }
+      ],
+      "patterns": {
+        "Straight": {
+          "radial_error_difference_m": {
+            "estimate": 0.22292216264780676,
+            "lower_95": 0.2120454417031974,
+            "upper_95": 0.23239437267357071
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 2.804008195039592,
+            "lower_95": 2.6571627562111946,
+            "upper_95": 2.947499758944505
+          },
+          "containment_fraction_difference": {
+            "estimate": -0.0014001400140014,
+            "lower_95": -0.0022002200220022,
+            "upper_95": -0.0007000700070007
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": -0.01894986232540289,
+            "lower_95": -0.01993849546208185,
+            "upper_95": -0.01791752889710579
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.10111118029419923,
+            "later_lean": 0.08216131796879635
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Straight",
+          "first_condition": {
+            "shaft_lean_deg": 0.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 5.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "first_curve_scale": 2.0,
+          "second_curve_scale": 2.0
+        },
+        "Draw": {
+          "radial_error_difference_m": {
+            "estimate": 0.2319849289488776,
+            "lower_95": 0.2211972091010594,
+            "upper_95": 0.24125542795261778
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 2.9148784123571563,
+            "lower_95": 2.769457675648475,
+            "upper_95": 3.05542367123415
+          },
+          "containment_fraction_difference": {
+            "estimate": -0.001000100010001,
+            "lower_95": -0.0018001800180018,
+            "upper_95": -0.00030003000300030005
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": -0.019301186807977818,
+            "lower_95": -0.02026577747095483,
+            "upper_95": -0.01832445976398611
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.10215766411041799,
+            "later_lean": 0.08285647730244017
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Draw",
+          "first_condition": {
+            "shaft_lean_deg": 0.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 5.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "first_curve_scale": 2.0,
+          "second_curve_scale": 2.0
+        },
+        "Fade": {
+          "radial_error_difference_m": {
+            "estimate": 0.21176544451210327,
+            "lower_95": 0.2009075724326743,
+            "upper_95": 0.22117001769848024
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 2.663467623193015,
+            "lower_95": 2.5162436782271906,
+            "upper_95": 2.8072931846586657
+          },
+          "containment_fraction_difference": {
+            "estimate": -0.0013001300130013002,
+            "lower_95": -0.0022002200220022,
+            "upper_95": -0.0005000500050005
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": -0.018263061150351385,
+            "lower_95": -0.019234752476802067,
+            "upper_95": -0.017270489835003764
+          },
+          "course_sg_means": {
+            "earlier_lean": 0.10048400585001513,
+            "later_lean": 0.08222094469966373
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA approach to a centered circular green with rough outside",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 112
+          },
+          "physical_pattern": "Fade",
+          "first_condition": {
+            "shaft_lean_deg": 0.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 5.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "first_curve_scale": 2.0,
+          "second_curve_scale": 2.0
+        }
+      }
+    },
+    {
+      "comparison_kind": "across_lean",
+      "status": "conditional_only",
+      "target_x_m": 178.94875782337786,
+      "total_n_per_population": 10000,
+      "common_supported_n": 9940,
+      "conditioning": "same_indices_supported_in_all_six_populations",
+      "source_protocols": [
+        "original_control/1",
+        "driver-control-speed-bounds/1"
+      ],
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "driver_lean0_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b268743fd6b01fa887e647d6f1ab5d29c4657a6283254c5256396dcb15ae0dba",
+          "source_csv_sha256": "379f0fbea717171816f69f04244cbb9c9647df6441d894b262517009c4caba76"
+        },
+        {
+          "protocol_id": "driver-control-speed-bounds/1",
+          "cell": "driver_lean5_curve2_rotation2_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "1adf7ae296cc1a3779f6563314b0878682c16299b697e2dc11def601132d4fc6",
+          "source_cell_manifest_sha256": "9d369a8b6987169316a0856833fb754763014dddefa95725c829701146262ede",
+          "source_csv_sha256": "6093c37e33595fff5593091b411e31b09d9e7ed7cd74d40d0ea3cf2360007758"
+        }
+      ],
+      "patterns": {
+        "Straight": {
+          "radial_error_difference_m": {
+            "estimate": 10.98040199906425,
+            "lower_95": 10.729651984700354,
+            "upper_95": 11.220926256425416
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 781.0382515800294,
+            "lower_95": 749.6424180372222,
+            "upper_95": 811.9493033127027
+          },
+          "containment_fraction_difference": {
+            "estimate": -0.2243460764587525,
+            "lower_95": -0.23189134808853118,
+            "upper_95": -0.21538229376257548
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": -0.01824287841852806,
+            "lower_95": -0.019702931256560717,
+            "upper_95": -0.016580509632295997
+          },
+          "course_sg_means": {
+            "earlier_lean": -0.45652745376328113,
+            "later_lean": -0.4747703321818092
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 70
+          },
+          "physical_pattern": "Straight",
+          "first_condition": {
+            "shaft_lean_deg": 0.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 5.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "first_curve_scale": 2.0,
+          "second_curve_scale": 2.0
+        },
+        "Draw": {
+          "radial_error_difference_m": {
+            "estimate": 13.884352663314145,
+            "lower_95": 13.600170617317968,
+            "upper_95": 14.16245063573361
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 1036.0832816001018,
+            "lower_95": 999.2740578567402,
+            "upper_95": 1071.9879530193898
+          },
+          "containment_fraction_difference": {
+            "estimate": -0.2532193158953722,
+            "lower_95": -0.2610186116700201,
+            "upper_95": -0.24391096579476862
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": -0.012262802983810089,
+            "lower_95": -0.014170641440842239,
+            "upper_95": -0.0102427196435991
+          },
+          "course_sg_means": {
+            "earlier_lean": -0.44989064675100343,
+            "later_lean": -0.46215344973481354
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 70
+          },
+          "physical_pattern": "Draw",
+          "first_condition": {
+            "shaft_lean_deg": 0.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 5.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "first_curve_scale": 2.0,
+          "second_curve_scale": 2.0
+        },
+        "Fade": {
+          "radial_error_difference_m": {
+            "estimate": 8.4041831738389,
+            "lower_95": 8.221663194717387,
+            "upper_95": 8.594217154254073
+          },
+          "squared_target_error_difference_m2": {
+            "estimate": 536.4454524160419,
+            "lower_95": 514.5445493822516,
+            "upper_95": 557.8555225695352
+          },
+          "containment_fraction_difference": {
+            "estimate": -0.2022132796780684,
+            "lower_95": -0.20946177062374244,
+            "upper_95": -0.19406438631790746
+          },
+          "role_mapping": {
+            "Straight": "physical pattern at first condition",
+            "Draw": "same physical pattern at second condition",
+            "Fade": "duplicate of first condition for paired scorer shape only; not an observation"
+          },
+          "course_sg_difference": {
+            "estimate": -0.01964032819127392,
+            "lower_95": -0.020928228273856733,
+            "upper_95": -0.018052908344258437
+          },
+          "course_sg_means": {
+            "earlier_lean": -0.45732900816696304,
+            "later_lean": -0.47696933635823696
+          },
+          "course_sg": {
+            "status": "available",
+            "scenario": "Historical PGA tee shot on a flat 400 m hole with a 30 m fairway corridor",
+            "baseline": {
+              "id": "broadie-2011-historical-tour-approx",
+              "version": "table9-full-plus-anchor-reconciled-putting/2",
+              "table_sha256": "7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1",
+              "source_url": "https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf"
+            },
+            "api_evaluated_states": 70
+          },
+          "physical_pattern": "Fade",
+          "first_condition": {
+            "shaft_lean_deg": 0.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "second_condition": {
+            "shaft_lean_deg": 5.0,
+            "curve_scale": 2.0,
+            "shaft_rotation_sd_deg": 2.0
+          },
+          "first_curve_scale": 2.0,
+          "second_curve_scale": 2.0
+        }
+      }
+    }
+  ],
+  "known_precision_affected_per_pattern_records": 20,
+  "known_precision_records": [
+    {
+      "comparison_kind": "across_lean",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "015d7aa06b8457482f4b5453870da4a31cdcd76aa89c741894cb973d80b5ed65",
+          "source_csv_sha256": "2204e9b8e8dd9e030655c7eab25404538298ca87367b0afb799020d4b591bbb3"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean10_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "a03949b13caa177a215e427ef78859223eeb434ab7dc4894c1978b3a81d0ed7e",
+          "source_csv_sha256": "f9ddebd2faa25585fed33c8a04f74f706052524e38273e5bd5a35bf2b0fb17bb"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 9.346886102743099e-05,
+        "lower_95": 8.747873384878533e-05,
+        "upper_95": 9.922430451414912e-05
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "across_lean",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c625fa953135ff35ce7f072377f48e747c37236453087b18b91d89bd0046b436",
+          "source_csv_sha256": "9ab98121d439d741cbec52556fdbf2275ff06cf765e8b90bd8d571113bd7a4fa"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean10_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "98940550fda1f064660c48c21fb61dab46ea73392c504229c9897fc2f4fac22c",
+          "source_csv_sha256": "080ac47034827d85cb15a5d949031958f3735419c119de0380e12d5f6644aed6"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -0.0006944080452384772,
+        "lower_95": -0.0007022022452670899,
+        "upper_95": -0.0006855474574482136
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "across_lean",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b1d7a2fa48c7dc9bec742d2049ab1a29e6f1c5c8dc8af5714cacfdc0698d612e",
+          "source_csv_sha256": "15d5e77a6446b15d11bf7913102db06630273d147b557e660d4957ac980572ed"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean10_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "8578c51528380927bbf7592fa063a198d424ea29c371e3a842bd795fa0885769",
+          "source_csv_sha256": "2de0e5f886463e343136c04625a459ef4253f251d36552e79cc62443f36e914e"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -0.0005964761066248044,
+        "lower_95": -0.0006051476874530035,
+        "upper_95": -0.0005871610535825847
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "09d828ebb76bfad208bd496c646fc33c5489974bc1f9f06b4af125e0770f2ff7",
+          "source_csv_sha256": "afc28c0d060c59959090215ec4c80b7b04c59241a0781294ba1f5dafed53f4db"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_combined2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "54dd648b22afe8ade65c01e571b28596b23080ce1a16034a105183c35b7727b7",
+          "source_csv_sha256": "08ef53cab37566d4e211cc56a7d0c520a995bb6341dd7bf54c144b2818fe2ced"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -4.992703467619882e-05,
+        "lower_95": -0.00020713409231600682,
+        "upper_95": 0.00012289527698874052
+      },
+      "nonzero_estimate_prints_zero": true,
+      "nonzero_interval_prints_collapsed": false
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "79e200b2fcf1239715a2fccbe3c89396ac55f6db347a115ca76e0adbc845862a",
+          "source_csv_sha256": "1ccfe3ffad7324669801a8f8f525d25e1bddb78fc4a9ce6df42db78b1b45d756"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_cov_facepath_positive",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "3694b33d2583643d1622fc4404e6f0e0fba175616630803f3520d30db777025e",
+          "source_csv_sha256": "2761215f26a17d09a56ee556f7b9bcddda79f54f65e7ece11f6e75a784358ddd"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 2.364359967372998e-05,
+        "lower_95": -8.926994547227441e-05,
+        "upper_95": 0.0001479749986792417
+      },
+      "nonzero_estimate_prints_zero": true,
+      "nonzero_interval_prints_collapsed": false
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "00d313fd357b02686e3b135708e1b93a131e211a88d6d0c84b0297af836795a6",
+          "source_csv_sha256": "5e2d4f9b602a8e23e0b0c022209ce91cce0a30a4267393fe4af36d60741f67e4"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean5_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "dfa571c2701cfd6fde6455571b4d0b23f74494229fdf20a3546cd114840482e1",
+          "source_csv_sha256": "54a789cc9c212ba65cfba2b366a10d738f0f9d733108a743b39cff7aba57d463"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 2.5647246319769486e-05,
+        "lower_95": -7.313651540833751e-05,
+        "upper_95": 0.00014787991396686908
+      },
+      "nonzero_estimate_prints_zero": true,
+      "nonzero_interval_prints_collapsed": false
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "b7ddb6bdac5def569acefe7be8f93c4e96bf3ebda94b7ec4d68db6808578f5c2",
+          "source_csv_sha256": "ec4ad542089671279fe0a1ed1bafa4fd5bce9d49f553569a743f12cffc0a1cb1"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6e70d3f805cfbe7908f75f1621e48394de6a940485368f636fa2d0a1d45b4567",
+          "source_csv_sha256": "5bb58f8080f94342e1954338fe00cbebd3a1b0bc4ae3d5dadf5a29f635c0feca"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 0.002411315598891702,
+        "lower_95": 0.0023762835983760756,
+        "upper_95": 0.0024437400651799632
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean10_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "b7ddb6bdac5def569acefe7be8f93c4e96bf3ebda94b7ec4d68db6808578f5c2",
+          "source_csv_sha256": "ec4ad542089671279fe0a1ed1bafa4fd5bce9d49f553569a743f12cffc0a1cb1"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "6e70d3f805cfbe7908f75f1621e48394de6a940485368f636fa2d0a1d45b4567",
+          "source_csv_sha256": "5bb58f8080f94342e1954338fe00cbebd3a1b0bc4ae3d5dadf5a29f635c0feca"
+        }
+      ],
+      "pattern": "Fade",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -0.001908566167638102,
+        "lower_95": -0.0019345379641829681,
+        "upper_95": -0.001882342706728388
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean10_curve1_rotation2_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "47279105c2f3d1f7651a3396624c96bc9c8b41ff3ac3388010e4d9ea0d6aeef6",
+          "source_csv_sha256": "50b3605b0ecdc16aa8c4d8edf8f7e2490e55bad9c22560fdfe785a14718582ca"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "pitching_wedge_lean10_curve2_rotation2_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "5fc890546f2d6e9ec10174d36589f24cfc909c44b896edec3397a980b8c784bb",
+          "source_csv_sha256": "12750dc5ed5b05c695e463515a4d495943ecb9a417d1b111e0a8c5c708d249be"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -1.5049279934324494e-05,
+        "lower_95": -0.00012838104340687868,
+        "upper_95": 0.0001061760738399631
+      },
+      "nonzero_estimate_prints_zero": true,
+      "nonzero_interval_prints_collapsed": false
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve1_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d85c3b077b0884842f8e81eaf3cb85fcb9748e4a2d9baeb7b5a1becf21fdac01",
+          "source_csv_sha256": "be476443f3d2694bfda87c2c2c5a40a711bdf9797b47425ccf89f301871cf072"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean5_curve2_rotation1_shaft_path",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "25acdc3fba1b1ce51511612f22c606585f481b9384507f5885ff6dd6c2e01fdf",
+          "source_csv_sha256": "f19b494254659759e94b0618c4987b7f0f90f2073242ed8d2fcfda8d3125d8db"
+        }
+      ],
+      "pattern": "Fade",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 0.0003082516264976454,
+        "lower_95": 0.00026883960045499507,
+        "upper_95": 0.0003497626167279654
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean0_curve1_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "5af2540fe4a95079a9e6ecd7574404b6392a62bf0775adfefc65c1adad0ff57d",
+          "source_csv_sha256": "342e9f1bfebb8ce03f23a26bc398e8b09e5add8a1a7d9bf0a9d137c5f75c66fd"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean0_curve2_rotation1_cov_facepath_negative",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "d63d9b6f4ff974e4ad159bea7b8f955fe2ada81c4332c78c8650cd0bee363b57",
+          "source_csv_sha256": "66d97b30129ed8164167dcf8356de9fb3c0243c11de088899a4af3d6561c7378"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 2.0190773853868743e-05,
+        "lower_95": -0.00013832558654184573,
+        "upper_95": 0.00017954636032770866
+      },
+      "nonzero_estimate_prints_zero": true,
+      "nonzero_interval_prints_collapsed": false
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "6dd067c21dd6ad4c3c68f39ea6a1137f404077f084c4127c1e29232a7e44340d",
+          "source_csv_sha256": "dd3a8f4f94d3c6ed5d47984fea72b1409329ee622d8cd259f1f07c6ed15e1763"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3d9b18e62a0120cff76d4fa6acc45f739c136114a7f2b9c72f998475c4b8aed5",
+          "source_csv_sha256": "bdde65f94eca7be59901816d0d0074ddb5aa8f9194243b9107f827e960c1f81d"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 0.00010778929336891081,
+        "lower_95": 0.00010190755922381097,
+        "upper_95": 0.00011376382698405348
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "6dd067c21dd6ad4c3c68f39ea6a1137f404077f084c4127c1e29232a7e44340d",
+          "source_csv_sha256": "dd3a8f4f94d3c6ed5d47984fea72b1409329ee622d8cd259f1f07c6ed15e1763"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean0_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "3d9b18e62a0120cff76d4fa6acc45f739c136114a7f2b9c72f998475c4b8aed5",
+          "source_csv_sha256": "bdde65f94eca7be59901816d0d0074ddb5aa8f9194243b9107f827e960c1f81d"
+        }
+      ],
+      "pattern": "Fade",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 0.0015056129502425616,
+        "lower_95": 0.0014874651466383797,
+        "upper_95": 0.001521651376641542
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "015d7aa06b8457482f4b5453870da4a31cdcd76aa89c741894cb973d80b5ed65",
+          "source_csv_sha256": "2204e9b8e8dd9e030655c7eab25404538298ca87367b0afb799020d4b591bbb3"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "c625fa953135ff35ce7f072377f48e747c37236453087b18b91d89bd0046b436",
+          "source_csv_sha256": "9ab98121d439d741cbec52556fdbf2275ff06cf765e8b90bd8d571113bd7a4fa"
+        }
+      ],
+      "pattern": "Fade",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 0.002406506830931211,
+        "lower_95": 0.0023777547512884084,
+        "upper_95": 0.0024321366365709883
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean5_curve1_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "ca2418bbfa5c0c01f16f8d79a82620d717889a2fbcb0658e12d4f778cba76056",
+          "source_csv_sha256": "8057c5a08dcadff9a1a549da78557edc7be8384a4315ffd8a1ff6bc16f8de195"
+        },
+        {
+          "protocol_id": "original_control/1",
+          "cell": "seven_iron_lean5_curve2_rotation2_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ed182a08a2b2afa80b6e726b3c0f5730c7f19001791c3f22ad2d3d4429cb8d9d",
+          "source_cell_manifest_sha256": "b1d7a2fa48c7dc9bec742d2049ab1a29e6f1c5c8dc8af5714cacfdc0698d612e",
+          "source_csv_sha256": "15d5e77a6446b15d11bf7913102db06630273d147b557e660d4957ac980572ed"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -3.791218730229399e-05,
+        "lower_95": -0.00017501405787212647,
+        "upper_95": 0.00011569912492518586
+      },
+      "nonzero_estimate_prints_zero": true,
+      "nonzero_interval_prints_collapsed": false
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean5_curve1_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8bc491aa8a6b6a423ff8c15b4b0b79676cd4ccb2c0db25428c1380a81616adf7",
+          "source_csv_sha256": "be548f084c71c3e974f4ac1e49fe5f98613ca8ade377cd0954e8e343aa4efe77"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean5_curve2_rotation1_shaft_only",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "2c62da1f7f9c354acacc228f330e6057cd0128891ca849858caa84ff36d7e75c",
+          "source_csv_sha256": "cc9bc6c14626c5e3d17c328b64ed1a621f54fb4a6589bb58ac34e1c90a10cbbd"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -0.0008759771954544185,
+        "lower_95": -0.0008884513403981731,
+        "upper_95": -0.0008627575871497321
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean5_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "b11e4849a1903edf14ddb95a5853650cf04002c2887d0fa0582dca987279103a",
+          "source_csv_sha256": "08e9fe0f76d89af7aa5ddd29c4fcada458e30c04d2be800c3311904aa7a2363e"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean5_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "b04a8fb2c024d401faa93a4db7b58462ab57382153525c5556e348a9ea05a681",
+          "source_csv_sha256": "14401a0b30844175abe4e626d2ef6ad54fb55b8e776e6112f4f6aaec41f65d45"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -0.0010048718380684396,
+        "lower_95": -0.0010425860266803863,
+        "upper_95": -0.000968552820793872
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean5_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "e1cdb6e1542927181734746f64821d68e8ea079a75508e87ca79c80d7b4030d6",
+          "source_csv_sha256": "83f38a587890a04f36f45f6ce4223bb8651163b1dc4ac6b6d35d0388271b7992"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean5_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "4e50937c3be3f2ec683f971875a3d9104a0eae356a5534f84c5188524a4e45fc",
+          "source_csv_sha256": "1938f992527a9e9dba9a329bc5113c364fe590e216fa0683dcc17be42182cb00"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -0.0008027357446930901,
+        "lower_95": -0.0008361344713067985,
+        "upper_95": -0.0007697494069865437
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean10_curve1_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "69fb97790954774a8af4f7eed4cc156abeb75b4fdfd23bc485451a5194cdf966",
+          "source_csv_sha256": "637408446c108ede01bb6169b1a098557446961ee71c68621787be4f5b5e2510"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "seven_iron_lean10_curve2_rotation1_shaft_speed1",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "f6fae4b2f897b68a410ae6e8b168655c2051a1683c4c48896430277f5c44f597",
+          "source_csv_sha256": "a060f287d0aa1f890ca0c33503f7ae3f778ec89bbaf5998d808e371d45e71cdc"
+        }
+      ],
+      "pattern": "Draw",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": -0.001400543083396722,
+        "lower_95": -0.0014390393447736786,
+        "upper_95": -0.0013624952536527746
+      },
+      "nonzero_estimate_prints_zero": false,
+      "nonzero_interval_prints_collapsed": true
+    },
+    {
+      "comparison_kind": "curve_strength",
+      "sources": [
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean0_curve1_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "8c4f3e5772d563561a1c18983a96de6a95f561f22db89980d279ba810cef8657",
+          "source_csv_sha256": "b0bcc36bcb84bfdac3a7212241af77c3f9ce51d950800bfbfba08c20e8efd5de"
+        },
+        {
+          "protocol_id": "original_primary/1",
+          "cell": "driver_lean0_curve2_rotation1_shaft_speed2",
+          "execution_kind": "unique",
+          "alias_cell": null,
+          "source_plan_sha256": "ae84ed2ac2ee62bb9be3e0742d1c1d447b8a21e40493c74dfa27a03db4ac8ce0",
+          "source_cell_manifest_sha256": "b221e1f714bf4a9971fe3d19c8f91db8f2ae31f809b83dead1c50bc33c4fafad",
+          "source_csv_sha256": "2f149d44dc1b51d67b2c296ef55322a4da82c8b7afbd4edcc83f24e653f11965"
+        }
+      ],
+      "pattern": "Fade",
+      "metric": "course_sg_difference",
+      "value": {
+        "estimate": 4.3502758741191896e-05,
+        "lower_95": -9.817879251242093e-05,
+        "upper_95": 0.00019691237366637872
+      },
+      "nonzero_estimate_prints_zero": true,
+      "nonzero_interval_prints_collapsed": false
+    }
+  ],
+  "required_fix": "Extend the existing paired common-six score-vector effect-modification calculation to across_lean, preserving source checks and conditioning. Validate actual emitted Driver/PW controls and their final rendered table; synthetic fixtures with invented effect fields are insufficient.",
+  "already_appropriate": [
+    "Within-lean nominal landing matching removes initial range mismatch, not realized carry differences.",
+    "Across-lean fixed-target delivery rematching prevents causal decomposition into lean or distance effects.",
+    "Primitive shaft-twist variability is distinguished from realized face variability and empirical player precision."
+  ],
+  "remaining_acceptance": [
+    "Producer terminal receipt and complete artifact hashes",
+    "Across-lean interaction implementation and actual-output rendering regression",
+    "Known precision repair and regenerated saved-data publication",
+    "Final narrative and editable LaTeX acceptance"
+  ]
+}

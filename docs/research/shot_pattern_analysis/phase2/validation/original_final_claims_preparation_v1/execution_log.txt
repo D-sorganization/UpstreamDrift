@@ -1,0 +1,128 @@
+{
+  "final_v1": {
+    "statuses": {
+      "completed": 270,
+      "unavailable": 54
+    },
+    "attempted_pattern_rows": 8100000,
+    "club_ranges": {
+      "driver": {
+        "supported_n": {
+          "min": 9933,
+          "max": 10000
+        },
+        "common_three_n": {
+          "min": 9933,
+          "max": 10000
+        },
+        "draw_delta_sg": {
+          "min": 7.480944755938856e-06,
+          "max": 0.008821557760962067
+        },
+        "fade_delta_sg": {
+          "min": -0.001468571890629088,
+          "max": 0.0028089221820005983
+        }
+      },
+      "seven_iron": {
+        "supported_n": {
+          "min": 9996,
+          "max": 10000
+        },
+        "common_three_n": {
+          "min": 9996,
+          "max": 10000
+        },
+        "draw_delta_sg": {
+          "min": -0.006095418994989556,
+          "max": 0.00021792958687232272
+        },
+        "fade_delta_sg": {
+          "min": 0.0003053508656350258,
+          "max": 0.01279585543363908
+        }
+      },
+      "pitching_wedge": {
+        "supported_n": {
+          "min": 9999,
+          "max": 10000
+        },
+        "common_three_n": {
+          "min": 9999,
+          "max": 10000
+        },
+        "draw_delta_sg": {
+          "min": -0.0008669169977198025,
+          "max": 0.00825954348522537
+        },
+        "fade_delta_sg": {
+          "min": -0.007931465697171911,
+          "max": 0.001822992776630641
+        }
+      }
+    }
+  },
+  "control_final_v1": {
+    "statuses": {
+      "completed": 52,
+      "unavailable": 20
+    },
+    "attempted_pattern_rows": 1560000,
+    "club_ranges": {
+      "driver": {
+        "supported_n": {
+          "min": 9940,
+          "max": 10000
+        },
+        "common_three_n": {
+          "min": 9940,
+          "max": 10000
+        },
+        "draw_delta_sg": {
+          "min": 2.6911773453713884e-05,
+          "max": 0.0077976550468906
+        },
+        "fade_delta_sg": {
+          "min": -0.0031588487138982995,
+          "max": 0.0014857605563132427
+        }
+      },
+      "seven_iron": {
+        "supported_n": {
+          "min": 9996,
+          "max": 10000
+        },
+        "common_three_n": {
+          "min": 9996,
+          "max": 10000
+        },
+        "draw_delta_sg": {
+          "min": -0.0030747123644692823,
+          "max": -0.00028827142960523414
+        },
+        "fade_delta_sg": {
+          "min": 0.0008933617862555983,
+          "max": 0.007531413788447551
+        }
+      },
+      "pitching_wedge": {
+        "supported_n": {
+          "min": 9999,
+          "max": 10000
+        },
+        "common_three_n": {
+          "min": 9999,
+          "max": 10000
+        },
+        "draw_delta_sg": {
+          "min": -0.00010823117076650361,
+          "max": 0.009940526157120494
+        },
+        "fade_delta_sg": {
+          "min": -0.009853899803009568,
+          "max": 0.0006959393101018138
+        }
+      }
+    }
+  }
+}

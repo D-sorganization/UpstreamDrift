@@ -233,8 +233,9 @@
     },
     "signal_toolkit": {
       "ruling": "split",
-      "status": "pending-cleanup",
-      "rationale": "Overlap is tools-canonical (io/polynomial_generator Tools newer, calculus/__init__ spelling-only) except fitting.py (+935, UD 2026-08-18 vs Tools 2026-08-24, two-way) which needs a merge; UD-only signal_processing.py (imported by dashboard/pose_estimation) stays."
+      "status": "cleaned",
+      "ud_only_paths": ["signal_processing.py"],
+      "rationale": "All 27 overlapping files retired in the shot-pattern integration. Tools #5569 preserves optimized-Python structural invariants, #5571 preserves UD's six empty-input guards and four ndarray fallbacks, and #5572 binds aliases before child imports. Remaining divergences were equivalent guards/annotations or newer provider logging and typing. Fresh-process import-order checks require one provider package and Signal class across public and legacy spellings. UD-only signal_processing.py stays as a split extension. Final acceptance requires the protected provider merge and its published pin."
     },
     "swing_sim": {
       "ruling": "tools-canonical",

@@ -1,0 +1,14 @@
+{
+  "status": "component_tests_passed",
+  "source_commit": "f265cf7839aea47e6ca24afa394f1a9b8c11d45f",
+  "files": {
+    "scripts/research/shot_pattern_analysis/build_final_report.py": "54c825b878d9f33453a0c35f3b7901c30161d19b602f8a6dfc903fda976f5f8a",
+    "scripts/research/shot_pattern_analysis/final_report_inputs.py": "c5664e4326ee215ca7c7003107d5c910901a12d20bedb7eb444986288c1aa771",
+    "tests/research/test_shot_pattern_final_report.py": "3a1a799f7543d9fd566e7a95a18b7b9de0b61f48024e3c883918e6a867c43880",
+    "tests/research/test_shot_pattern_final_report_assets.py": "e9043ca09fbf63d95c76cf53947afe316d8374b73a9a780ced0d38421a029578"
+  },
+  "execution_snapshot_matches_accepted_transition": true,
+  "red": "Expected collection failure: missing final_report_inputs module before composition",
+  "green": "19 passed; Ruff check/format and scoped Mypy (two source files) pass",
+  "scope": "Exact composition of reviewed reporting code only; no final publication acceptance"
+}

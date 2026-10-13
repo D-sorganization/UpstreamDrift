@@ -374,8 +374,8 @@
       "bytes": 33386
     },
     "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md": {
-      "sha256": "e1601a7329c88a936519ceaec81e887635322517c41de21c11360455942209cf",
-      "bytes": 2897
+      "sha256": "e795b4617a91c9240d39c2adbbc7d655ff17294050315b738d18e6b01ac2c486",
+      "bytes": 3319
     },
     "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md": {
       "sha256": "04fb0b0fa3039f397987d25077ad1bf5081c693550d45f0d2a5d7387f3ee48cc",
@@ -402,8 +402,8 @@
       "bytes": 9004
     },
     "docs/research/proximal_distal_energy_transfer/README.md": {
-      "sha256": "ad6fd22bae6f500ac923c4ddac9ebf1a0c429c7650df415cde29e350606af7a1",
-      "bytes": 46775
+      "sha256": "f5693b023181d7ac1cdf8fc474da81ea9216d99b3dcffcf91d58209df027607c",
+      "bytes": 47716
     },
     "docs/research/proximal_distal_energy_transfer/REVIEWER_WORKBENCH.md": {
       "sha256": "ce8ec161c7d387626899b3fc17ad9ba6228b2934139db4f4459c85b1db952778",
@@ -993,9 +993,17 @@
       "sha256": "4856de8cabd4a820c22c2bb3e25f9f97852c22bbb7f08d405702f9b10d64d7bf",
       "bytes": 15632
     },
+    "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration_20261011.json": {
+      "sha256": "892f1dedc18707a551c64b97154c262bc2cc7bb83c7d290ac0e337209b8b88f0",
+      "bytes": 15632
+    },
     "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json": {
       "sha256": "a1fd4ea64b9eed217ca0a901ede90703802ea4dfd76f9ef7f436b07803e68878",
       "bytes": 6337
+    },
+    "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_registration_amendment_20261011.json": {
+      "sha256": "a0c1eacf533fdf3e79f106bab8b1104f0cb5a47f489abb5053d848fdf240fd04",
+      "bytes": 2335
     },
     "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json": {
       "sha256": "abb8870ba97a2d490ced50eed39495c8f8327bd612681dd01ae21546ef03e977",
@@ -2254,8 +2262,8 @@
       "bytes": 3348
     },
     "scripts/research/proximal_distal_energy/audit_uncertainty_stability.py": {
-      "sha256": "dd0ff9e3f3ae2c0f2b6c57d040fb57ea689fa1c195afaab1571b3cf637d5628f",
-      "bytes": 4960
+      "sha256": "e7b7c1056de353e90138025c2640fed7f7c112f2552f2b93dd79a1676bf054ac",
+      "bytes": 7101
     },
     "scripts/research/proximal_distal_energy/bilateral_wrench_identifiability.py": {
       "sha256": "bf9e965ba04f0dcfacd611588e7ce377ba5b8688c66c140b3f083ec671690cd1",
@@ -2634,8 +2642,8 @@
       "bytes": 12413
     },
     "scripts/research/proximal_distal_energy/nonlinear_controller_registration.py": {
-      "sha256": "c60c4b37d6d72358e3347f2d756192323f1fb00940411165672643c3bc90f364",
-      "bytes": 15759
+      "sha256": "f0e1d9cd5c94a0ad106497f7c396dc87f3d05cb3f84b001cdebd887d3bcf53f0",
+      "bytes": 15776
     },
     "scripts/research/proximal_distal_energy/numeric_contract_scaffold_matching.py": {
       "sha256": "72f72db3436e6fa8f823c3ef5939a6ea230db06f69e675c712bfe62d74292323",

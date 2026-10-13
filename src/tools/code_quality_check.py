@@ -62,7 +62,7 @@ PASS_PATTERNS = [
 
 MAGIC_NUMBERS = [
     (re.compile(r"(?<![0-9])3\.141"), "Use math.pi instead of 3.141"),
-    (re.compile(r"(?<![0-9])9\.8[0-9]?(?![0-9])"), "Define GRAVITY_M_S2 constant"),
+    (re.compile(r"(?<![0-9])9\.8[0-9]*(?![0-9])"), "Define GRAVITY_M_S2 constant"),
     (re.compile(r"(?<![0-9])6\.67[0-9]?(?![0-9])"), "Define gravitational constant"),
 ]
 

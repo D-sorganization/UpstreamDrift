@@ -1,0 +1,6 @@
+{
+  "article_sha256": "4da27a01c2c1f5046233b912cdc57a0422535f8eb2c8f496d7a45bab4964ba10",
+  "line_count": 941,
+  "generated_numeric_tokens_checked": 577,
+  "traceability_source_files_verified": 52
+}

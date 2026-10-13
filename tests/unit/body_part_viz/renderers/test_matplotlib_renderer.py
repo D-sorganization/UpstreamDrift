@@ -236,6 +236,17 @@ def test_face_polys_is_one_contiguous_gather(ax, theme, monkeypatch) -> None:
     np.testing.assert_array_equal(received[0], expected)
 
 
+@pytest.mark.unit
+def test_empty_triangle_batch_is_accepted_by_matplotlib() -> None:
+    vertices = np.empty((0, 3), dtype=float)
+    faces = np.empty((0, 3), dtype=np.intp)
+    polygons = MatplotlibRenderer._face_polys(vertices, faces)
+    assert polygons.shape == (0, 3, 3)
+
+    collection = Poly3DCollection([])
+    collection.set_verts(polygons)
+
+
 def test_update_frame_unknown_handle_raises(ax) -> None:
     renderer = MatplotlibRenderer(ax)
     with pytest.raises(KeyError):

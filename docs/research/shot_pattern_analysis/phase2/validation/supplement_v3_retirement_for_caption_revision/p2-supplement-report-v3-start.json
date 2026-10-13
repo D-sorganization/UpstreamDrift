@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/tmp/shot-pattern-validation-venv-20261009/bin/python",
+    "-m",
+    "src.tools.shot_pattern_analysis.matched_supplement_pipeline",
+    "--original-primary",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/final_v1",
+    "--original-control",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/control_final_v1",
+    "--pw-primary-face-bounds",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_primary_face",
+    "--pw-control-face-bounds",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/pw_control_face",
+    "--driver-control-speed-bounds",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_final_v1/driver_control_speed",
+    "--inventory",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/review_followups/SUPPLEMENTAL_EXECUTION_INVENTORY.json",
+    "--transition-receipt",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/source_transition_supplement.json",
+    "--transition-sha256",
+    "cf622694964b0dc6c2ca0c24b92f9fa8ee5365721219069283aca1f6804a8981",
+    "--output-dir",
+    "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2/supplement_report_v1"
+  ],
+  "started": "2026-10-10T07:39:36.936778+00:00",
+  "source_commit": "4bb2be7362a04fc1af04a3662adae674d50916b7"
+}

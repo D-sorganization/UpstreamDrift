@@ -1,0 +1,27 @@
+{
+  "accepted": true,
+  "scope": "Scientific narrative and selected numeric display/identity/population contracts of REPORT.md only",
+  "full_publication_accepted": false,
+  "report_sha256": "ff281f76ee649c44c88afda58701329e7898e8964f9efb6d8aeec73dcd77d79b",
+  "numeric_check_sha256": "3c44c40a5c7d53fd56e45cc74a03cdfbfaa28bb350dbb709c67692f2614fad59",
+  "executed_check_sha256": "4093b1ef19491be9ee1a76b2a004d8bf57ec8f4d30240cf881c087ca37366702",
+  "traceability_source_files_rehashed": 52,
+  "scientific_blockers": [],
+  "decisions": {
+    "distance_and_matching": "Pass: nominal versus realized distance and complete rematched-delivery estimand separated; no causal decomposition.",
+    "geometry": "Pass: local rigid face/loft derivative, shaft twist versus face-angle SD, and club-dependent carry association correctly qualified.",
+    "selected_results": "Pass: exact 24 conditions/72 pattern rows, four supplemented PW cells explicitly identified; 12 ordered direct and two fixed-target paired contrasts agree with saved results at display precision.",
+    "population_and_scoring": "Pass: individual support, common-three course scoring, and common-six interaction populations distinct; per-opportunity historical hypothetical-course context explicit.",
+    "inference": "Pass: pointwise Monte Carlo intervals, dependence, non-equivalence of zero-spanning intervals, model sensitivity and absent empirical qualification stated.",
+    "coverage": "Pass for narrative: full primary/control inventories and supplemental records linked; selected strata expressly limited; original unavailability preserved.",
+    "graphics": "Separate pending acceptance; source-bound links do not establish complete visual quality.",
+    "pdf": "Root reports v9 all-page visual acceptance; this receipt does not assert independent PDF visual review."
+  },
+  "optional_traceability_improvement": "Link deferred empirical qualification issue11984 from a companion interpretation/README; current prose already denies empirical validation, so this is not a scientific blocker.",
+  "remaining_gates": [
+    "Complete graphical acceptance, including confirmed density149 legend/title issue reported by root/Sol.",
+    "Final delivery/provenance and repository gates remain parent-owned.",
+    "Existing editable article compiler external initialization blocker remains separately tracked."
+  ],
+  "article_stale_text_proposal": "Replace only the last sentence of the numerical-source paragraph at article line566 with: This is numerical qualification only. Graphical production has completed; full graphical publication acceptance remains a separate gate."
+}

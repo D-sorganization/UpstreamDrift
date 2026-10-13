@@ -1,0 +1,64 @@
+Writer API Compatibility Validation (2026-10-11)
+
+Scope: Restore the historical keyword-call surface for figure writers while routing
+through the current FigureOptions and PairSocialContext implementations. This did
+not change the frozen reproduction scripts or regenerate any study output.
+
+Red command (before source changes):
+/tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest tests/research/test_shot_pattern_writer_legacy_api.py -q
+Observed:
+FF                                                                       [100%]
+E   TypeError: write_pair_social_density() got an unexpected keyword argument 'condition_labels'
+E   TypeError: write_academic_dispersion_figure() got an unexpected keyword argument 'presentation'
+FAILED tests/research/test_shot_pattern_writer_legacy_api.py::test_pair_social_writer_accepts_frozen_keyword_context
+FAILED tests/research/test_shot_pattern_writer_legacy_api.py::test_academic_writer_accepts_frozen_presentation_and_dpi
+
+Green command (after source changes and added resolver coverage):
+/tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest tests/research/test_shot_pattern_writer_legacy_api.py -q
+Observed:
+....                                                                     [100%]
+Exit code: 0 (4 tests).
+
+Scoped supplemental type-check command:
+/tmp/shot-pattern-validation-venv-20261009/bin/python -m mypy --follow-imports=skip --cache-dir=/tmp/shot-pattern-writer-mypy-cache docs/research/shot_pattern_analysis/phase2/validation/render_canonical_pair_social.py docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py src/tools/shot_pattern_analysis/matched_pair_social.py src/tools/shot_pattern_analysis/academic_plots.py
+Observed:
+Success: no issues found in 4 source files
+Exit code: 0. This scoped check is supplementary, not canonical pre-PR acceptance.
+
+Broader transitive type-check command:
+/tmp/shot-pattern-validation-venv-20261009/bin/python -m mypy docs/research/shot_pattern_analysis/phase2/validation/render_canonical_pair_social.py docs/research/shot_pattern_analysis/phase2/validation/final_figure_marginal_gutter_review/reproduce_saved_cell.py src/tools/shot_pattern_analysis/matched_pair_social.py src/tools/shot_pattern_analysis/academic_plots.py
+Observed:
+src/shared/python/ui/qt/widgets/document_reader.py:43: error: Cannot assign to a method  [method-assign]
+src/shared/python/ui/qt/widgets/document_reader.py:43: error: Incompatible types in assignment (expression has type "QVBoxLayout", variable has type "Callable[[], QLayout | None]")  [assignment]
+src/shared/python/ui/qt/widgets/document_reader.py:44: error: "Callable[[], QLayout | None]" has no attribute "setContentsMargins"  [attr-defined]
+src/shared/python/ui/qt/widgets/document_reader.py:63: error: "Callable[[], QLayout | None]" has no attribute "addLayout"  [attr-defined]
+src/shared/python/ui/qt/widgets/document_reader.py:67: error: "Callable[[], QLayout | None]" has no attribute "addWidget"  [attr-defined]
+src/shared/python/ui/qt/widgets/document_reader.py:287: error: Cannot assign to a method  [method-assign]
+src/shared/python/ui/qt/widgets/document_reader.py:287: error: Incompatible types in assignment (expression has type "QVBoxLayout", variable has type "Callable[[], QLayout | None]")  [assignment]
+src/shared/python/ui/qt/widgets/document_reader.py:289: error: "Callable[[], QLayout | None]" has no attribute "addWidget"  [attr-defined]
+src/launchers/_shot_tracer_gui.py:604: error: "QCoreApplication" has no attribute "setStyleSheet"  [attr-defined]
+Found 9 errors in 2 files (checked 4 source files)
+Exit code: 1. No errors were reported in either frozen caller or either changed writer.
+This noncanonical invocation followed transitive imports into unrelated GUI files;
+root's changed-file pre-PR command after commit is the authoritative gate.
+
+Existing #12309 render-regression command:
+/tmp/shot-pattern-validation-venv-20261009/bin/python -m pytest tests/research/test_shot_pattern_final_figures.py::test_final_builder_calls_native_figure_options_for_detail_and_pair tests/research/test_historical_graphics_helpers_refactor.py::test_pilot_diagnostic_uses_native_density_bins_option -q
+Observed: pytest timed out at 120 seconds in the first test while Matplotlib
+was drawing axis tick labels in academic_plots._space_shared_x_ticks. It did not
+reach an API assertion; the second selected test did not run. The full timeout
+stack is retained in this agent's tool transcript. The timeout was not widened
+and the render test was not repeated.
+
+Ruff commands:
+/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python -m ruff check src/tools/shot_pattern_analysis/academic_plots.py src/tools/shot_pattern_analysis/matched_pair_social.py tests/research/test_shot_pattern_writer_legacy_api.py
+Observed: All checks passed!
+/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python -m ruff format --check src/tools/shot_pattern_analysis/academic_plots.py src/tools/shot_pattern_analysis/matched_pair_social.py tests/research/test_shot_pattern_writer_legacy_api.py
+Observed: 3 files already formatted
+
+Local source context for the broader type-check (at HEAD cb4948eb1b694c525435cb42281eed1a04f06b55,
+with the two writer edits staged but not committed):
+- document_reader.py SHA256 c7e330eaa4dde08a80bb5466aff1d0e6827895d3f55b10958604601583d8bcf5
+- _shot_tracer_gui.py SHA256 843a71cbb1b73adc5c9c05c09c09765633e51f2d7ce5240e5abbfbc4aa0c883c
+- academic_plots.py SHA256 c8a7454f648b584bbe3f4a8bfecbe4ab2d0ebc671fa82978598052c6af2a5f11
+- matched_pair_social.py SHA256 1e1323f82c9c0088a13a3cfbd5394fc1c8fb5a7c2781d83ded3dc22dd344e855

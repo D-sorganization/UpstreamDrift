@@ -1,0 +1,17 @@
+{
+  "head": "5f365b6abf",
+  "from_ref": "cb5eff6dcd9df7d878f10578078b6fea69c8b681",
+  "scope": "Final documentation and verification receipts only; no affected pytest tests mapped. Does not replace earlier full gate.",
+  "exit_code": 1,
+  "failed_gate": "Fleet Policy Gate: existing development-log fields, WIP and size ceilings",
+  "passed_gates": [
+    "Lint & Format",
+    "Diff Mypy",
+    "Affected Tests (no mapped tests)",
+    "Consistency Tests",
+    "Semgrep & Import Policy",
+    "Policy & Fragment Validators",
+    "Workflow Lint"
+  ],
+  "log_sha256": "4483f6891fb2eb1a94a26ab4d81556f03759f0b34f111461a9e0c5b204ec43e2"
+}

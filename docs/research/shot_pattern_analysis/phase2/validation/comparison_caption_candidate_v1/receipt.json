@@ -1,0 +1,8 @@
+{
+  "status": "unit_and_static_checks_passed_pending_actual_render_review",
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/build_final_figures.py": "39c086c382c1ad876d8b739edeef3cf89d9a629f0b39646730177c1909c737f5",
+    "tests/research/test_shot_pattern_final_figures.py": "beed0d164514c59bc5a2c20452ec03af5459e7bddeed40fecb3b3610ef99cee7"
+  },
+  "issue_comment": "https://github.com/D-sorganization/UpstreamDrift/issues/11988#issuecomment-6092897915"
+}

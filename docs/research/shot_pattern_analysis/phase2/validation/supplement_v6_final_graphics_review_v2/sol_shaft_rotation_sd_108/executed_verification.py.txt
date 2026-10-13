@@ -1,0 +1,109 @@
+import datetime
+import hashlib
+import json
+from pathlib import Path
+
+P = Path('/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/phase2')
+B = P / 'validation/supplement_v6_final_graphics_review_v2'
+D = B / 'shaft_rotation_sd_108'
+O = B / 'sol_shaft_rotation_sd_108'
+R = P / 'supplement_report_v1'
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+tracked = {}
+
+
+def verify(path, expected=None):
+    digest = sha(path)
+    if expected is not None:
+        require(digest == expected, str(path))
+    tracked[str(path)] = digest
+    return digest
+
+
+inventory = json.loads((D / 'batch_inventory.json').read_text())
+command = json.loads((B / 'shaft_rotation_sd_108_command.json').read_text())
+require(command['exit_code'] == 0, 'batch command failed')
+verify(D / 'batch_inventory.json', command['batch_inventory_sha256'])
+verify(B / 'shaft_rotation_sd_108_command.json')
+scope_path = B / 'density_layout_repair_scope.json'
+scope = json.loads(scope_path.read_text())
+verify(scope_path)
+held_names = {Path(item['matching_png_path']).name for item in scope['affected']}
+for relative, digest in inventory['numeric_sha256'].items():
+    verify(R / relative, digest)
+records = json.loads((R / 'REPORT_SUPPLEMENT_COMPARISONS.json').read_text())['comparisons']
+require(len(inventory['selected']) == 12 and not inventory['pending'], 'batch incomplete')
+
+
+def identity(record):
+    return [record['comparison_kind'], [[source['protocol_id'], source['cell'], source['source_csv_sha256']] for source in record['sources']], record['target_x_m'], record['common_supported_n']]
+
+
+representatives = {(111, 'density.png'), (117, 'overhead.png'), (119, 'density.png')}
+entries = []
+contacts = []
+full = []
+for selected in inventory['selected']:
+    record = selected['record']
+    require(sum(other == record for other in records) == 1, 'numeric record not exact unique match')
+    scientific_identity = identity(record)
+    for contact in selected['contacts']:
+        verify(D / contact['path'], contact['sha256'])
+        contacts.append({'path': str(D / contact['path']), 'sha256': contact['sha256'], 'visually_inspected': True})
+    for relative, digest in selected['asset_sha256'].items():
+        verify(R / relative, digest)
+        if not relative.endswith('.png'):
+            continue
+        suffix = Path(relative).name.removeprefix(selected['stem'] + '_')
+        contact_number = 1 if suffix in ('density_straight_social.png', 'density_draw_social.png') else 2 if suffix in ('density_fade_social.png', 'density.png') else 3
+        held = Path(relative).name in held_names
+        entry = {
+            'path': relative,
+            'sha256': digest,
+            'scientific_identity': scientific_identity,
+            'decision': 'held_for_selective_layout_repair' if held else 'accepted_within_this_png_batch',
+            'fresh_contact_inspection': selected['contacts'][contact_number - 1]['path'],
+            'full_size_inspected': (selected['index'], suffix) in representatives,
+            'observations': 'Known legend/title gutter below 2 pt; selective child review required.' if held else 'Condition identities, target, units, populations and scales legible; no new clipping or overlap observed.',
+        }
+        if entry['full_size_inspected']:
+            full.append({'path': str(R / relative), 'sha256': digest})
+        entries.append(entry)
+require(len(entries) == 72 and len(contacts) == 36 and len(full) == 3, 'coverage count mismatch')
+held_count = sum(entry['decision'] == 'held_for_selective_layout_repair' for entry in entries)
+require(held_count == 3, 'repair scope count mismatch')
+for path, digest in tracked.items():
+    require(sha(Path(path)) == digest, 'changed during review: ' + path)
+result = {
+    'schema': 'independent-png-component-review/1',
+    'reviewer': 'Sol independent reviewer',
+    'created_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    'accepted': False,
+    'scope': 'Only shaft_rotation_sd_108: 12 ordered pairs / 72 baseline PNGs; Seven Iron. Three density PNGs held for selective child review.',
+    'whole_publication_accepted': False,
+    'counts': {'pairs': 12, 'png_decisions': 72, 'accepted_pngs': 69, 'held_density_pngs': held_count, 'contacts_inspected': 36, 'full_size_originals_inspected': 3, 'all_format_assets_hash_verified': 192},
+    'completion_boundary': inventory['completion_boundary'],
+    'producer_sources': inventory['producer_sources'],
+    'findings': [{'kind': 'known_density_layout_clearance', 'held_indices': [111, 112, 119], 'scope_sha256': sha(scope_path)}],
+    'remaining_gates': ['Other PNG batches and final union coverage', 'Selective child PNG/PDF/SVG acceptance', 'Final report/narrative/PDF acceptance'],
+    'per_asset': entries,
+    'contacts_inspected': contacts,
+    'full_size_inspected': full,
+    'input_sha256': tracked,
+    'before_after_hashes_equal': True,
+    'limitations': ['Human visual inspection covered all PNGs on two-image contact sheets plus three full-size originals; not every original was opened at full resolution.', 'Density assets in measured repair scope remain held.', 'PDF/SVG files were hashed, not visually accepted by this review.'],
+}
+O.mkdir(exist_ok=True)
+target = O / 'review.json'
+target.write_text(json.dumps(result, indent=2) + '\n')
+print(json.dumps({'review_sha256': sha(target), 'counts': result['counts']}))

@@ -1,0 +1,13 @@
+{
+  "accepted": false,
+  "scope": "AGY Full-Precision Pair Identity Candidate; Final Independent Improvements Pending",
+  "pair_identity_tests_passed": 12,
+  "required_corrections": [
+    "Fractional cell suffix truncation",
+    "Ruff formatting and 1200-line budget",
+    "Remove unsupported cell_name fallback",
+    "Standalone path evidence uses dispersion suffix but production uses density"
+  ],
+  "valid_evidence": "384 distinct ordered identities and stems; synthetic pair rendering has32unique outputs; no full production figures rendered",
+  "terminal_exit_code": 0
+}

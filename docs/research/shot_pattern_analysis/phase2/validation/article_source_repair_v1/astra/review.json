@@ -1,0 +1,43 @@
+{
+  "status": "numeric_source_repair_verified_compilation_unverified",
+  "article": "/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex",
+  "article_sha256": "4da27a01c2c1f5046233b912cdc57a0422535f8eb2c8f496d7a45bab4964ba10",
+  "line_count": 941,
+  "generated_numeric_tokens_checked": 577,
+  "candidate_pattern_fields_verified": 576,
+  "candidate_interaction_fields_verified": 72,
+  "traceability_source_files_verified": 52,
+  "historical_section_unchanged": true,
+  "whole_article_visual_acceptance": false,
+  "compiler_result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"path\":\"/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift/docs/research/shot_pattern_analysis/shot_pattern_analysis.tex\",\"kind\":\"compile-failed\",\"message\":\"Could not compile the document\",\"diagnostics\":{\"untrustedData\":true,\"log\":\"note: \\\"version 2\\\" Tectonic command-line interface activated\\n\\nthread 'main' (2) panicked at src/config.rs:154:18:\\ncalled `Result::unwrap()` on an `Err` value: this bundle isn't cached, and we couldn't get it from the internet. Error: error sending request for url (https://relay.fullyjustified.net/default_bundle_v33.tar.index.gz)\\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\\n\"}}"
+      }
+    ],
+    "isError": true
+  },
+  "review_scope": "All candidate prose and tables, repaired source only; no graphics publication acceptance or empirical validation.",
+  "evidence_sha256": {
+    "repair_verification.json": "a95ada5294d1d9d2f839aaca39019fe3d52add8cd2fde1ac19f337f4e0042521",
+    "final_check.py": "0810981c15488c50a6964c271acc4dd1cfc57cf50c74516356d922cb4ee362c4",
+    "REJECTION.md": "b5c1fdddec6a9c89b01562487fd807cfc03cef3c845684e249db14afa29fcbc5",
+    "candidate_field_audit.txt": "06446beb76fba761fa0bc658964b2cd39327596f858e2147be1bfadf0a9d7a82",
+    "REVIEW.md": "da0c4d59c4ef65f1993f07d501c5d4f51fa6576fd206d9709a8410d91f3b96d8",
+    "verified_data.json": "e97e9481a7f29923ca5411df7c67e5fe0bd75792b2cf621f5a9b837fbc4fd78c",
+    "builtin_compile.json": "6ddf82fb03a15b56480806058fef55b2ad1f54f83d67650975089c84c1719b26",
+    "rejected_article.tex": "6b586441c0f094b9f077e49203f17fdf782d0f26c1d0727dd344fd3c080306ad",
+    "final_check.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "generated_numeric_fields.json": "2d884f0c2030ee96a55bf7738aaf115a73acd1e0a873b83e14e5c93fa340d679",
+    "audit_candidate.py": "18a6b0053e9a759092064e3794d4e2d89655a70b46667609d237cf527a3a2a15",
+    "repaired_article.tex": "4da27a01c2c1f5046233b912cdc57a0422535f8eb2c8f496d7a45bab4964ba10",
+    "verify_repair.py": "b62daad7f04ac5b210c445ae88b15aa415b5c7799d6b5bb69a8e97b96e83378d",
+    "failed_initial_harness.txt": "668e92db4cdabc68d8e280ea1e4a85ba8f059b67cf443e44a0464d67ccd606dc",
+    "candidate_field_audit.json": "1bf3bc401d3249470fa3ef109b4e6de284b7c47cdee85820600460c0bbaaeb35",
+    "candidate_interaction_audit.json": "57e127aa4e774095a64657bda3e9c7136af96f8ab3f653696e3dfa93ff42c075",
+    "audit_interactions.py": "a07bf932040bac481a6787b2266944764edb05fa8f684832f1ba1ba451f821e4",
+    "rewrite.py": "0f8b8a04bb802f4b7ce03307ff3e87cd17a4bf2c12d720ae534c55393903fd40",
+    "tidy_article.py": "9d26ca8e6dd725e27ee5b9870c4fc7d87abb974a3c4d38a820f38e35469936a1"
+  }
+}
