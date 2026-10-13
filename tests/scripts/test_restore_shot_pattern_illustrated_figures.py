@@ -64,7 +64,11 @@ def _archive_bytes(members: dict[str, bytes]) -> bytes:
     handle = io.BytesIO()
     with zipfile.ZipFile(handle, "w") as archive:
         for name, content in members.items():
-            archive.writestr(name, content)
+            info = zipfile.ZipInfo(name)
+            # ZipInfo folds os.sep to "/" on Windows; write the raw name so a
+            # hostile backslash member is reproduced on every platform.
+            info.filename = name
+            archive.writestr(info, content)
     return handle.getvalue()
 
 
