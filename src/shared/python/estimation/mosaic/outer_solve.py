@@ -42,6 +42,7 @@ from src.shared.python.estimation.mosaic.inner_solve import (
     reduced_gauss_newton,
     solve_inner,
 )
+from src.shared.python.estimation.mosaic.jerk_whiteness import KinematicJerkPrior
 from src.shared.python.estimation.mosaic.kinematic_basis import BSplineBasis
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -125,6 +126,7 @@ class OuterPriors:
     input_smoothness_weight: float
     template_weight: float
     anchors: tuple[LinearAnchor, ...] = ()
+    kinematic_jerk_weight: float = 0.0
 
     def __post_init__(self) -> None:
         require(
@@ -137,6 +139,11 @@ class OuterPriors:
         )
         require(
             bool(np.all(self.dynamics_sigma > 0.0)), "dynamics_sigma must be positive"
+        )
+        require(
+            self.kinematic_jerk_weight >= 0.0,
+            "kinematic_jerk_weight must be non-negative",
+            self.kinematic_jerk_weight,
         )
         for anchor in self.anchors:
             require(
@@ -246,6 +253,7 @@ class _Evaluation:
     inner: InnerSolution
     observation_residual: FloatArray
     outer_prior_residual: FloatArray
+    jerk_cost: float = 0.0
 
     @property
     def cost(self) -> float:
@@ -253,6 +261,7 @@ class _Evaluation:
             self.observation_residual @ self.observation_residual
             + self.inner.cost
             + self.outer_prior_residual @ self.outer_prior_residual
+            + self.jerk_cost
         )
 
 
@@ -379,6 +388,16 @@ def _evaluate(xi: FloatArray, ctx: _Context, factor: float) -> _Evaluation:
         fixed_parameters=parameters,
     )
     prior_residual, _ = _outer_prior_rows(ctx, geometry, parameters)
+    jerk_cost = (
+        sum(
+            KinematicJerkPrior(
+                trial.basis, ctx.priors.kinematic_jerk_weight
+            ).compute_cost(c)
+            for trial, c in zip(ctx.trials, coefficients, strict=True)
+        )
+        if ctx.priors.kinematic_jerk_weight > 0.0
+        else 0.0
+    )
     return _Evaluation(
         xi,
         model,
@@ -391,6 +410,7 @@ def _evaluate(xi: FloatArray, ctx: _Context, factor: float) -> _Evaluation:
         solve_inner(problem),
         np.concatenate(obs),
         prior_residual,
+        jerk_cost,
     )
 
 
@@ -453,6 +473,24 @@ def _outer_prior_jacobian(ev: _Evaluation, ctx: _Context) -> FloatArray:
     return jacobian
 
 
+def _jerk_prior_system(ev: _Evaluation, ctx: _Context) -> tuple[FloatArray, FloatArray]:
+    hessian = np.zeros((ev.xi.size, ev.xi.size))
+    gradient = np.zeros(ev.xi.size)
+    weight = ctx.priors.kinematic_jerk_weight
+    offsets = ctx.offsets
+    for k, (trial, c) in enumerate(zip(ctx.trials, ev.coefficients, strict=True)):
+        jp = KinematicJerkPrior(trial.basis, weight)
+        n_mat = jp.normal_matrix()
+        n_dof = c.shape[1]
+        block_h = np.kron(n_mat, np.eye(n_dof))
+        block_g = (n_mat @ c).ravel()
+        start = offsets[k]
+        stop = offsets[k + 1]
+        hessian[start:stop, start:stop] += block_h
+        gradient[start:stop] += block_g
+    return hessian, gradient
+
+
 def _reduced_system(
     ev: _Evaluation, ctx: _Context, factor: float
 ) -> tuple[FloatArray, FloatArray]:
@@ -462,6 +500,9 @@ def _reduced_system(
     gradient = (
         jac_obs.T @ ev.observation_residual + jac_prior.T @ ev.outer_prior_residual
     )
+    if ctx.priors.kinematic_jerk_weight > 0.0:
+        h_jerk, g_jerk = _jerk_prior_system(ev, ctx)
+        hessian, gradient = hessian + h_jerk, gradient + g_jerk
     if factor > 0.0:
         h_dyn, g_dyn = reduced_gauss_newton(
             ev.inner, _dynamics_jacobian(ev, ctx, factor)
