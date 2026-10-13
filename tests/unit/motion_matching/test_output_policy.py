@@ -14,12 +14,14 @@ from unittest.mock import patch
 
 import pytest
 
+from src.shared.python.motion_matching.club_observability import FaceObservability
 from src.shared.python.motion_matching.export import export_report
 from src.shared.python.motion_matching.output_policy import (
     ADVERTISED_OUTPUTS,
     WITHHELD_OUTPUTS,
     OutputPolicyError,
     evaluate_output_policy,
+    render_output_policy_markdown,
 )
 
 pytestmark = [pytest.mark.unit]
@@ -92,6 +94,50 @@ class TestEvaluateOutputPolicy:
     def test_outputs_must_be_a_mapping(self) -> None:
         with pytest.raises(OutputPolicyError, match="outputs must be a mapping"):
             evaluate_output_policy(_receipt(["face_angle"]))
+
+
+class TestFaceObservabilityPolicy:
+    """Unobservable face angle stays unavailable, never validated (#10382)."""
+
+    UNOBSERVABLE = FaceObservability(
+        observable=False,
+        reason="club head markers are collinear or coincident",
+        observed_frames=0,
+        total_frames=4,
+        gaps=((0, 4),),
+    )
+    OBSERVABLE = FaceObservability(
+        observable=True,
+        reason="observable",
+        observed_frames=4,
+        total_frames=4,
+        gaps=(),
+    )
+
+    def test_unobservable_face_angle_is_unavailable(self) -> None:
+        statuses = evaluate_output_policy(
+            _receipt(), face_observability=self.UNOBSERVABLE
+        )
+        assert statuses["face_angle"].status == "unavailable"
+        assert "collinear" in statuses["face_angle"].reason
+
+    def test_unobservable_face_angle_cannot_be_validated_by_evidence(self) -> None:
+        receipt = _receipt({"face_angle": {"validated": True, **EVIDENCE}})
+        with pytest.raises(OutputPolicyError, match="face_angle.*not observable"):
+            evaluate_output_policy(receipt, face_observability=self.UNOBSERVABLE)
+
+    def test_observable_face_angle_keeps_the_withheld_policy(self) -> None:
+        statuses = evaluate_output_policy(
+            _receipt(), face_observability=self.OBSERVABLE
+        )
+        assert statuses["face_angle"].status == "withheld"
+
+    def test_unavailable_face_angle_renders_as_unavailable(self) -> None:
+        statuses = evaluate_output_policy(
+            _receipt(), face_observability=self.UNOBSERVABLE
+        )
+        table = render_output_policy_markdown(statuses)
+        assert "| `face_angle` | **UNAVAILABLE** |" in table
 
 
 class TestExportReportPolicy:

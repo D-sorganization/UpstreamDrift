@@ -26,6 +26,8 @@ from src.shared.python.motion_matching.candidate import MatchedSwingCandidate
 from src.shared.python.motion_matching.candidate_io import load_candidate
 from src.shared.python.motion_matching.output_policy import (
     evaluate_output_policy,
+    face_observability_of_receipt,
+    render_face_observability_markdown,
     render_output_policy_markdown,
 )
 from src.shared.python.video_timing.frame_schedule import (
@@ -418,6 +420,16 @@ def _build_provenance_block(prov: dict[str, Any]) -> str:
     )
 
 
+def _render_policy_markdown(receipt_data: dict[str, Any]) -> str:
+    """Output policy table plus face-angle audit, from the receipt's own audit."""
+    audit = face_observability_of_receipt(receipt_data)
+    statuses = evaluate_output_policy(receipt_data, face_observability=audit)
+    return (
+        f"{render_output_policy_markdown(statuses)}\n"
+        f"{render_face_observability_markdown(audit)}"
+    )
+
+
 def _format_markdown_report(
     receipt_data: dict[str, Any],
     prov: dict[str, Any],
@@ -444,7 +456,7 @@ def _format_markdown_report(
     )
     policy_section = (
         "## Output Validation Policy (#10382)\n\n"
-        f"{render_output_policy_markdown(evaluate_output_policy(receipt_data))}\n"
+        f"{_render_policy_markdown(receipt_data)}\n"
     )
     prov_section = (
         f"## Cryptographic Provenance (#8820 / U3)\n\n{_build_provenance_block(prov)}\n"
