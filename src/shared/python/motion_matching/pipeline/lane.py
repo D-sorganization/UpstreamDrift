@@ -12,6 +12,10 @@ import numpy as np
 from src.shared.python.engine_core.engine_availability import is_engine_available
 from src.shared.python.motion_matching import posture_metrics as post
 from src.shared.python.motion_matching.club_face_target import merge_axis_targets
+from src.shared.python.motion_matching.club_observability import (
+    FaceObservability,
+    audit_face_observability,
+)
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
 from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
@@ -376,6 +380,8 @@ class Lane:
         self.face_weight = 0.0
         #: Why a requested face residual is unavailable (#12030); None if not.
         self.face_unavailable_reason: str | None = None
+        #: Face-angle observability audit of the capture (#10382); None until run.
+        self.face_observability: FaceObservability | None = None
         #: Restart policy of the full-capture trajectory solve (#12042).
         self.restart_policy = DEFAULT_IK_RESTART_POLICY
         #: Weight of the address-pose posture prior (#12042); 0 disables it.
@@ -474,11 +480,15 @@ class Lane:
         from src.shared.python.motion_matching.club_face_target import (
             TriadShapeMismatchError,
             face_axis_targets,
+            triad_offsets,
             validate_face_weight,
         )
 
         validate_face_weight(weight)
         self.face_weight = float(weight)
+        self.face_observability = audit_face_observability(
+            self.points, self.valid, self.labels, triad_offsets(attachments)
+        )
         self.face_unavailable_reason = None
         try:
             targets = face_axis_targets(

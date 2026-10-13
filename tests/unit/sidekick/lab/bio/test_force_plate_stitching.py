@@ -34,10 +34,21 @@ def test_empty_dataframe(processor_type: Any) -> None:
 
 def test_missing_columns(processor_type: Any) -> None:
     """Processor raises error if required columns are missing."""
-    processor = processor_type()
-    df = pd.DataFrame({"sample": [1], "fx": [10.0]})
-    with pytest.raises(Exception, match="DataFrame must contain columns"):
-        processor.process(df)
+    from src.shared.python.contracts import (
+        ContractLevel,
+        get_contract_level,
+        set_contract_level,
+    )
+
+    original_level = get_contract_level()
+    set_contract_level(ContractLevel.ENFORCE)
+    try:
+        processor = processor_type()
+        df = pd.DataFrame({"sample": [1], "fx": [10.0]})
+        with pytest.raises(Exception, match="DataFrame must contain columns"):
+            processor.process(df)
+    finally:
+        set_contract_level(original_level)
 
 
 def test_single_plate_processing(processor_type: Any) -> None:

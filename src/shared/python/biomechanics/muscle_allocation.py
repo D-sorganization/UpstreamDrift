@@ -16,9 +16,9 @@ from scipy.optimize import OptimizeResult, least_squares
 
 from src.shared.python.biomechanics.activation_dynamics import ActivationDynamics
 from src.shared.python.biomechanics.hill_muscle import HillMuscleModel
-from src.shared.python.biomechanics.muscle_force_evaluation import (
-    evaluate_quasistatic_muscle_force,
-)
+from src.shared.python.biomechanics.muscle_equilibrium import EquilibriumSolver
+
+from .muscle_force_evaluation import evaluate_quasistatic_muscle_force
 
 EffortUnit = Literal["N", "N*m"]
 
@@ -124,29 +124,38 @@ def _evaluate(
     )
 
 
-def allocate_muscle_excitations(
-    paths: Sequence[MuscleRecruitmentPath],
+@dataclass(frozen=True)
+class _ParsedAllocationRequest:
+    """Validated numeric inputs for muscle excitation allocation."""
+
+    target: np.ndarray
+    tolerances: np.ndarray
+    dt: float
+    force_tolerance: float
+    max_nfev: int
+    size: int
+
+
+@dataclass
+class _SearchOutcome:
+    best_candidate: np.ndarray | None
+    best_observation: tuple[np.ndarray, list[_Evaluation]] | None
+    evaluation_count: int
+    status_message: str
+    budget_exhausted: bool
+    optimizer_success: bool
+    evaluation_error: str | None
+
+
+def _parse_allocation_request(
     coordinate_names: Sequence[str],
     desired_generalized_effort: Sequence[float],
-    *,
     coordinate_effort_units: Sequence[EffortUnit],
-    dt_s: float,
     effort_tolerances: Sequence[float],
-    force_equilibrium_tolerance_n: float = 1e-4,
-    max_nfev: int = 80,
-) -> MuscleAllocationResult:
-    """Allocate a bounded single-step excitation vector without applying it.
-
-    A returned infeasible candidate is diagnostic only. Activation updates are
-    computed from the immutable input state; callers decide whether to apply.
-    Fixed excitation channels remain fixed and are evaluated without epsilon
-    widening of the box.
-    `max_nfev` caps complete candidate evaluations, including the initial
-    candidate and finite-difference objective probes; cached final reporting
-    does not perform an uncounted equilibrium solve.
-    """
-    if not paths or len({path.name for path in paths}) != len(paths):
-        raise ValueError("paths must be non-empty with unique names")
+    dt_s: float,
+    force_equilibrium_tolerance_n: float,
+    max_nfev: int,
+) -> _ParsedAllocationRequest:
     if not coordinate_names or len(set(coordinate_names)) != len(coordinate_names):
         raise ValueError("coordinate names must be non-empty and unique")
     size = len(coordinate_names)
@@ -172,7 +181,23 @@ def allocate_muscle_excitations(
         raise ValueError("dt and force tolerance must be positive")
     if isinstance(max_nfev, bool) or not isinstance(max_nfev, int) or max_nfev < 1:
         raise ValueError("max_nfev must be a positive integer")
+    return _ParsedAllocationRequest(
+        target=target,
+        tolerances=tolerances,
+        dt=dt,
+        force_tolerance=force_tolerance,
+        max_nfev=max_nfev,
+        size=size,
+    )
 
+
+def _validate_recruitment_paths(
+    paths: Sequence[MuscleRecruitmentPath],
+    coordinate_names: Sequence[str],
+    dt: float,
+) -> None:
+    if not paths or len({path.name for path in paths}) != len(paths):
+        raise ValueError("paths must be non-empty with unique names")
     for path in paths:
         if not path.name or path.muscle is None or path.activation_dynamics is None:
             raise ValueError(
@@ -201,176 +226,176 @@ def allocate_muscle_excitations(
         if _bounds(path, dt)[0] > _bounds(path, dt)[1]:
             raise ValueError(f"empty excitation/rate intersection for {path.name}")
 
-    boxes = [_bounds(path, dt) for path in paths]
-    fixed = {i: low for i, (low, high) in enumerate(boxes) if low == high}
-    free = [i for i, (low, high) in enumerate(boxes) if low < high]
-    candidate0 = np.asarray(
-        [
-            min(max(path.previous_excitation, boxes[i][0]), boxes[i][1])
-            for i, path in enumerate(paths)
-        ]
-    )
-    evaluation_count = 0
-    best_candidate: np.ndarray | None = None
-    best_observation: tuple[np.ndarray, list[_Evaluation]] | None = None
-    best_score = math.inf
 
-    def evaluate(values: np.ndarray) -> tuple[np.ndarray, list[_Evaluation]]:
-        nonlocal evaluation_count, best_candidate, best_observation, best_score
-        if evaluation_count >= max_nfev:
+def _seed_floor_plateaus(
+    candidate: np.ndarray,
+    free: Sequence[int],
+    boxes: Sequence[tuple[float, float]],
+    paths: Sequence[MuscleRecruitmentPath],
+) -> np.ndarray:
+    """Seed free controls above a flat activation-floor start when possible."""
+    seeded = candidate.copy()
+    for index in free:
+        lower, upper = boxes[index]
+        floor = float(paths[index].activation_dynamics.min_activation)
+        if candidate[index] <= floor < upper:
+            active_lower = max(lower, floor)
+            seeded[index] = active_lower + 0.5 * (upper - active_lower)
+    return seeded
+
+
+class _ExcitationSearcher:
+    """Bounded least-squares search over free excitation channels."""
+
+    def __init__(
+        self,
+        paths: Sequence[MuscleRecruitmentPath],
+        coordinate_names: Sequence[str],
+        request: _ParsedAllocationRequest,
+        boxes: list[tuple[float, float]],
+    ) -> None:
+        self._paths = paths
+        self._coordinate_names = coordinate_names
+        self._request = request
+        self._boxes = boxes
+        self._fixed = {i: low for i, (low, high) in enumerate(boxes) if low == high}
+        self._free = [i for i, (low, high) in enumerate(boxes) if low < high]
+        self._candidate0 = np.asarray(
+            [
+                min(max(path.previous_excitation, boxes[i][0]), boxes[i][1])
+                for i, path in enumerate(paths)
+            ]
+        )
+        self.evaluation_count = 0
+        self.best_candidate: np.ndarray | None = None
+        self.best_observation: tuple[np.ndarray, list[_Evaluation]] | None = None
+        self.best_score = math.inf
+
+    def _evaluate(self, values: np.ndarray) -> tuple[np.ndarray, list[_Evaluation]]:
+        if self.evaluation_count >= self._request.max_nfev:
             raise _EvaluationBudgetExhausted(
-                f"maximum candidate-evaluation budget {max_nfev} exhausted"
+                f"maximum candidate-evaluation budget {self._request.max_nfev} exhausted"
             )
-        evaluation_count += 1
+        self.evaluation_count += 1
         details = [
-            _evaluate(path, float(value), dt)
-            for path, value in zip(paths, values, strict=True)
+            _evaluate(path, float(value), self._request.dt)
+            for path, value in zip(self._paths, values, strict=True)
         ]
-        effort = np.zeros(size, dtype=float)
-        for path, detail in zip(paths, details, strict=True):
-            for i, coordinate in enumerate(coordinate_names):
+        effort = np.zeros(self._request.size, dtype=float)
+        for path, detail in zip(self._paths, details, strict=True):
+            for i, coordinate in enumerate(self._coordinate_names):
                 effort[i] += (
                     path.moment_arms_m_or_rad.get(coordinate, 0.0) * detail.tendon_force
                 )
         residual_vector = np.concatenate(
             (
-                (effort - target) / tolerances,
+                (effort - self._request.target) / self._request.tolerances,
                 np.asarray(
-                    [d.equilibrium_residual_n / force_tolerance for d in details]
+                    [
+                        d.equilibrium_residual_n / self._request.force_tolerance
+                        for d in details
+                    ]
                 ),
             )
         )
         score = float(np.linalg.norm(residual_vector))
-        if math.isfinite(score) and score < best_score:
-            best_candidate = values.copy()
-            best_observation = (effort, details)
-            best_score = score
+        if math.isfinite(score) and score < self.best_score:
+            self.best_candidate = values.copy()
+            self.best_observation = (effort, details)
+            self.best_score = score
         return effort, details
 
-    def expand(values: np.ndarray) -> np.ndarray:
-        result = candidate0.copy()
-        for i, value in fixed.items():
+    def _expand(self, values: np.ndarray) -> np.ndarray:
+        result = self._candidate0.copy()
+        for i, value in self._fixed.items():
             result[i] = value
-        for i, value in zip(free, values, strict=True):
+        for i, value in zip(self._free, values, strict=True):
             result[i] = value
         return result
 
-    status_message = "all channels fixed"
-    budget_exhausted = False
-    optimizer_success = True
-    evaluation_error: str | None = None
-    try:
-        evaluate(candidate0)
-        if free:
+    def run(self) -> _SearchOutcome:
+        status_message = "all channels fixed"
+        budget_exhausted = False
+        optimizer_success = True
+        evaluation_error: str | None = None
+        try:
+            self._evaluate(self._candidate0)
+            optimizer_start = _seed_floor_plateaus(
+                self._candidate0, self._free, self._boxes, self._paths
+            )
+            if self._free:
 
-            def objective(values: np.ndarray) -> np.ndarray:
-                effort, details = evaluate(expand(values))
-                return np.concatenate(
-                    (
-                        (effort - target) / tolerances,
-                        np.asarray(
-                            [
-                                d.equilibrium_residual_n / force_tolerance
-                                for d in details
-                            ]
-                        ),
+                def objective(values: np.ndarray) -> np.ndarray:
+                    effort, details = self._evaluate(self._expand(values))
+                    return np.concatenate(
+                        (
+                            (effort - self._request.target) / self._request.tolerances,
+                            np.asarray(
+                                [
+                                    d.equilibrium_residual_n
+                                    / self._request.force_tolerance
+                                    for d in details
+                                ]
+                            ),
+                        )
                     )
+
+                result = cast(Callable[..., OptimizeResult], least_squares)(
+                    objective,
+                    np.asarray([optimizer_start[i] for i in self._free]),
+                    bounds=(
+                        np.asarray([self._boxes[i][0] for i in self._free]),
+                        np.asarray([self._boxes[i][1] for i in self._free]),
+                    ),
+                    max_nfev=self._request.max_nfev,
+                    method="trf",
+                    x_scale="jac",
                 )
-
-            # SciPy 1.15 exposes this public function but mypy resolves the
-            # same-named submodule instead of the package re-export.
-            result = cast(Callable[..., OptimizeResult], least_squares)(
-                objective,
-                np.asarray([candidate0[i] for i in free]),
-                bounds=(
-                    np.asarray([boxes[i][0] for i in free]),
-                    np.asarray([boxes[i][1] for i in free]),
-                ),
-                max_nfev=max_nfev,
-                method="trf",
-                x_scale="jac",
-            )
-            status_message = f"{result.message}; optimizer_nfev={result.nfev}"
-            optimizer_success = bool(result.success)
-            budget_exhausted = not optimizer_success and (
-                getattr(result, "status", None) == 0
-                or "maximum" in str(result.message).lower()
-            )
-    except _EvaluationBudgetExhausted as exc:
-        budget_exhausted = True
-        status_message = str(exc)
-    except (ValueError, RuntimeError, FloatingPointError, OverflowError) as exc:
-        evaluation_error = str(exc)
-        status_message = f"candidate evaluation failed: {exc}"
-
-    if best_candidate is None or best_observation is None:
-        return MuscleAllocationResult(
-            status="evaluation_failed",
-            feasible=False,
-            excitations={},
-            effective_excitations={},
-            activations={},
-            effective_bounds={p.name: boxes[i] for i, p in enumerate(paths)},
-            muscle_forces_n={},
-            generalized_effort={},
-            residual_by_coordinate={},
-            nfev=evaluation_count,
-            message=status_message,
+                status_message = f"{result.message}; optimizer_nfev={result.nfev}"
+                optimizer_success = bool(result.success)
+                budget_exhausted = not optimizer_success and (
+                    getattr(result, "status", None) == 0
+                    or "maximum" in str(result.message).lower()
+                )
+        except _EvaluationBudgetExhausted as exc:
+            budget_exhausted = True
+            status_message = str(exc)
+        except (ValueError, RuntimeError, FloatingPointError, OverflowError) as exc:
+            evaluation_error = str(exc)
+            status_message = f"candidate evaluation failed: {exc}"
+        return _SearchOutcome(
+            best_candidate=self.best_candidate,
+            best_observation=self.best_observation,
+            evaluation_count=self.evaluation_count,
+            status_message=status_message,
+            budget_exhausted=budget_exhausted,
+            optimizer_success=optimizer_success,
+            evaluation_error=evaluation_error,
         )
-    if evaluation_error is not None:
-        return MuscleAllocationResult(
-            status="evaluation_failed",
-            feasible=False,
-            excitations={p.name: float(best_candidate[i]) for i, p in enumerate(paths)},
-            effective_excitations={
-                p.name: best_observation[1][i].effective_excitation
-                for i, p in enumerate(paths)
-            },
-            activations={
-                p.name: best_observation[1][i].activation for i, p in enumerate(paths)
-            },
-            effective_bounds={p.name: boxes[i] for i, p in enumerate(paths)},
-            muscle_forces_n={
-                p.name: best_observation[1][i].components for i, p in enumerate(paths)
-            },
-            generalized_effort={
-                name: float(best_observation[0][i])
-                for i, name in enumerate(coordinate_names)
-            },
-            residual_by_coordinate={
-                name: float(best_observation[0][i] - target[i])
-                for i, name in enumerate(coordinate_names)
-            },
-            nfev=evaluation_count,
-            message=status_message,
-        )
-    achieved, details = best_observation
+
+
+@dataclass(frozen=True)
+class _AllocationPayload:
+    excitations: dict[str, float]
+    effective_excitations: dict[str, float]
+    activations: dict[str, float]
+    effective_bounds: dict[str, tuple[float, float]]
+    muscle_forces_n: dict[str, dict[str, float]]
+    generalized_effort: dict[str, float]
+    residual_by_coordinate: dict[str, float]
+
+
+def _allocation_payload(
+    paths: Sequence[MuscleRecruitmentPath],
+    coordinate_names: Sequence[str],
+    best_candidate: np.ndarray,
+    achieved: np.ndarray,
+    details: list[_Evaluation],
+    boxes: list[tuple[float, float]],
+    target: np.ndarray,
+) -> _AllocationPayload:
     residual = achieved - target
-    feasible = bool(
-        np.all(np.abs(residual) <= tolerances)
-        and all(abs(item.equilibrium_residual_n) <= force_tolerance for item in details)
-        and not budget_exhausted
-        and optimizer_success
-    )
-    solver_failed = not optimizer_success and not budget_exhausted
-    status: Literal[
-        "feasible",
-        "infeasible",
-        "budget_exhausted",
-        "solver_failed",
-        "evaluation_failed",
-    ] = (
-        "budget_exhausted"
-        if budget_exhausted
-        else "solver_failed"
-        if solver_failed
-        else "feasible"
-        if feasible
-        else "infeasible"
-    )
-    return MuscleAllocationResult(
-        status=status,
-        feasible=feasible,
+    return _AllocationPayload(
         excitations={p.name: float(best_candidate[i]) for i, p in enumerate(paths)},
         effective_excitations={
             p.name: details[i].effective_excitation for i, p in enumerate(paths)
@@ -384,6 +409,126 @@ def allocate_muscle_excitations(
         residual_by_coordinate={
             name: float(residual[i]) for i, name in enumerate(coordinate_names)
         },
-        nfev=evaluation_count,
-        message=status_message,
     )
+
+
+def _finalize_allocation_result(
+    paths: Sequence[MuscleRecruitmentPath],
+    coordinate_names: Sequence[str],
+    request: _ParsedAllocationRequest,
+    boxes: list[tuple[float, float]],
+    outcome: _SearchOutcome,
+) -> MuscleAllocationResult:
+    if outcome.best_candidate is None or outcome.best_observation is None:
+        return MuscleAllocationResult(
+            status="evaluation_failed",
+            feasible=False,
+            excitations={},
+            effective_excitations={},
+            activations={},
+            effective_bounds={p.name: boxes[i] for i, p in enumerate(paths)},
+            muscle_forces_n={},
+            generalized_effort={},
+            residual_by_coordinate={},
+            nfev=outcome.evaluation_count,
+            message=outcome.status_message,
+        )
+    achieved, details = outcome.best_observation
+    payload = _allocation_payload(
+        paths,
+        coordinate_names,
+        outcome.best_candidate,
+        achieved,
+        details,
+        boxes,
+        request.target,
+    )
+    if outcome.evaluation_error is not None:
+        return MuscleAllocationResult(
+            status="evaluation_failed",
+            feasible=False,
+            nfev=outcome.evaluation_count,
+            message=outcome.status_message,
+            excitations=payload.excitations,
+            effective_excitations=payload.effective_excitations,
+            activations=payload.activations,
+            effective_bounds=payload.effective_bounds,
+            muscle_forces_n=payload.muscle_forces_n,
+            generalized_effort=payload.generalized_effort,
+            residual_by_coordinate=payload.residual_by_coordinate,
+        )
+    residual = achieved - request.target
+    feasible = bool(
+        np.all(np.abs(residual) <= request.tolerances)
+        and all(
+            abs(item.equilibrium_residual_n) <= request.force_tolerance
+            for item in details
+        )
+        and not outcome.budget_exhausted
+        and outcome.optimizer_success
+    )
+    solver_failed = not outcome.optimizer_success and not outcome.budget_exhausted
+    status: Literal[
+        "feasible",
+        "infeasible",
+        "budget_exhausted",
+        "solver_failed",
+        "evaluation_failed",
+    ] = (
+        "budget_exhausted"
+        if outcome.budget_exhausted
+        else "solver_failed"
+        if solver_failed
+        else "feasible"
+        if feasible
+        else "infeasible"
+    )
+    return MuscleAllocationResult(
+        status=status,
+        feasible=feasible,
+        nfev=outcome.evaluation_count,
+        message=outcome.status_message,
+        excitations=payload.excitations,
+        effective_excitations=payload.effective_excitations,
+        activations=payload.activations,
+        effective_bounds=payload.effective_bounds,
+        muscle_forces_n=payload.muscle_forces_n,
+        generalized_effort=payload.generalized_effort,
+        residual_by_coordinate=payload.residual_by_coordinate,
+    )
+
+
+def allocate_muscle_excitations(
+    paths: Sequence[MuscleRecruitmentPath],
+    coordinate_names: Sequence[str],
+    desired_generalized_effort: Sequence[float],
+    *,
+    coordinate_effort_units: Sequence[EffortUnit],
+    dt_s: float,
+    effort_tolerances: Sequence[float],
+    force_equilibrium_tolerance_n: float = 1e-4,
+    max_nfev: int = 80,
+) -> MuscleAllocationResult:
+    """Allocate a bounded single-step excitation vector without applying it.
+
+    A returned infeasible candidate is diagnostic only. Activation updates are
+    computed from the immutable input state; callers decide whether to apply.
+    Fixed excitation channels remain fixed and are evaluated without epsilon
+    widening of the box.
+    `max_nfev` caps complete candidate evaluations, including the initial
+    candidate and finite-difference objective probes; cached final reporting
+    does not perform an uncounted equilibrium solve.
+    """
+    request = _parse_allocation_request(
+        coordinate_names,
+        desired_generalized_effort,
+        coordinate_effort_units,
+        effort_tolerances,
+        dt_s,
+        force_equilibrium_tolerance_n,
+        max_nfev,
+    )
+    _validate_recruitment_paths(paths, coordinate_names, request.dt)
+    boxes = [_bounds(path, request.dt) for path in paths]
+    outcome = _ExcitationSearcher(paths, coordinate_names, request, boxes).run()
+    return _finalize_allocation_result(paths, coordinate_names, request, boxes, outcome)

@@ -28,6 +28,8 @@ EXCLUDED_PARTS = {
 # definition and exempt from the size budget (RM#1893).
 ARCHIVE_DIR = "docs/development/archive"
 DEVLOG_ARCHIVE_PREFIX = "docs/development/DEVELOPMENT_LOG_ARCHIVE_"
+# Verbatim history moved out of AGENT_HANDOFF.md (#12416).
+AGENT_HANDOFF_ARCHIVE = "docs/development/AGENT_HANDOFF_ARCHIVE.md"
 
 
 @dataclass(frozen=True)
@@ -69,7 +71,9 @@ def _is_document(path: Path) -> bool:
 
 def _is_archive(rel_path: str) -> bool:
     """Return whether a path is a verbatim HANDOFF/DEVELOPMENT_LOG archive."""
-    return rel_path.startswith((f"{ARCHIVE_DIR}/", DEVLOG_ARCHIVE_PREFIX))
+    return rel_path == AGENT_HANDOFF_ARCHIVE or rel_path.startswith(
+        (f"{ARCHIVE_DIR}/", DEVLOG_ARCHIVE_PREFIX)
+    )
 
 
 def _is_excluded(path: Path) -> bool:

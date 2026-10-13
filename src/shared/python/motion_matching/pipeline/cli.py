@@ -421,6 +421,8 @@ def _attach_face_report(
     """Add the face residual's receipt block when the residual was active,
     and the impact split (GCV-20) always."""
     ik_report["impact_split"] = lane.impact_split_report()
+    if lane.face_observability is not None:
+        ik_report["face_observability"] = lane.face_observability.to_receipt()
     if lane.face_targets is not None:
         ik_report["face_orientation"] = _face_orientation_report(
             lane, cal_res, *q_pair, weight
