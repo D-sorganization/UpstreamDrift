@@ -21,48 +21,77 @@ from src.shared.python._contracts_level import (
 
 pytestmark = pytest.mark.unit
 
-OPTIMIZED_LEVEL_PROBE = """
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+LEVEL_PROBE = """
 import json
-from src.shared.python import contracts as shared_contracts
+from src.shared.python import contracts as public_contracts
 from src.shared.python import _contracts_level as shared_level
 from src.shared.python.core import contracts as core_contracts
 from src.shared.python.core.contracts import level as core_level
 
-def raises_precondition(require):
+def raises_precondition(require_fn):
     try:
-        require(False, "must fail")
+        require_fn(False, "must fail")
     except Exception:
         return True
     return False
 
 print(json.dumps({
     "debug": __debug__,
+    "public_level": public_contracts.get_contract_level().value,
+    "public_enabled": public_contracts.CONTRACTS_ENABLED,
+    "public_require_raises": raises_precondition(public_contracts.require),
     "shared_level": shared_level.get_contract_level().value,
     "shared_enabled": shared_level.CONTRACTS_ENABLED,
-    "shared_require_raises": raises_precondition(shared_contracts.require),
     "core_level": core_level.get_contract_level().value,
     "core_enabled": core_level.contracts_enabled(),
     "core_require_raises": raises_precondition(core_contracts.require),
 }))
 """
+OPTIMIZED_LEVEL_PROBE = LEVEL_PROBE
 
 
-def _run_optimized_level_probe(dbc_level: str | None) -> dict[str, object]:
+def _run_level_probe(
+    dbc_level: str | None, *, optimized: bool = True
+) -> dict[str, object]:
     env = os.environ.copy()
     if dbc_level is None:
         env.pop("DBC_LEVEL", None)
     else:
         env["DBC_LEVEL"] = dbc_level
+
+    pythonpath_entries = [
+        str(REPO_ROOT),
+        str(REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"),
+    ]
+    existing_pythonpath = env.get("PYTHONPATH")
+    if existing_pythonpath:
+        pythonpath_entries.append(existing_pythonpath)
+    env["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
+
+    cmd = [sys.executable]
+    if optimized:
+        cmd.append("-O")
+    cmd.extend(["-c", LEVEL_PROBE])
+
     result = subprocess.run(
-        [sys.executable, "-O", "-c", OPTIMIZED_LEVEL_PROBE],
+        cmd,
         check=True,
         capture_output=True,
         text=True,
         env=env,
+        cwd=str(REPO_ROOT),
     )
     import json
 
     return json.loads(result.stdout)
+
+
+def _run_optimized_level_probe(dbc_level: str | None) -> dict[str, object]:
+    return _run_level_probe(dbc_level, optimized=True)
 
 
 class TestResolveLevel:
@@ -94,12 +123,29 @@ class TestResolveLevel:
         state = _run_optimized_level_probe(dbc_level=None)
 
         assert state["debug"] is False
+        # UD-owned helper and core contracts default to ENFORCE even under -O (#7680)
         assert state["shared_level"] == ContractLevel.ENFORCE.value
         assert state["shared_enabled"] is True
-        assert state["shared_require_raises"] is True
         assert state["core_level"] == ContractLevel.ENFORCE.value
         assert state["core_enabled"] is True
         assert state["core_require_raises"] is True
+        # Canonical public contracts provider (Tools-owned) defaults to OFF under -O (#12404)
+        assert state["public_level"] == ContractLevel.OFF.value
+        assert state["public_enabled"] is False
+        assert state["public_require_raises"] is False
+
+    def test_normal_python_defaults_to_enforce_when_env_unset(self):
+        state = _run_level_probe(dbc_level=None, optimized=False)
+
+        assert state["debug"] is True
+        assert state["shared_level"] == ContractLevel.ENFORCE.value
+        assert state["shared_enabled"] is True
+        assert state["core_level"] == ContractLevel.ENFORCE.value
+        assert state["core_enabled"] is True
+        assert state["core_require_raises"] is True
+        assert state["public_level"] == ContractLevel.ENFORCE.value
+        assert state["public_enabled"] is True
+        assert state["public_require_raises"] is True
 
     def test_optimized_python_respects_explicit_off(self):
         state = _run_optimized_level_probe(dbc_level="off")
@@ -107,10 +153,38 @@ class TestResolveLevel:
         assert state["debug"] is False
         assert state["shared_level"] == ContractLevel.OFF.value
         assert state["shared_enabled"] is False
-        assert state["shared_require_raises"] is False
         assert state["core_level"] == ContractLevel.OFF.value
         assert state["core_enabled"] is False
         assert state["core_require_raises"] is False
+        assert state["public_level"] == ContractLevel.OFF.value
+        assert state["public_enabled"] is False
+        assert state["public_require_raises"] is False
+
+    def test_optimized_python_respects_explicit_enforce(self):
+        state = _run_optimized_level_probe(dbc_level="enforce")
+
+        assert state["debug"] is False
+        assert state["shared_level"] == ContractLevel.ENFORCE.value
+        assert state["shared_enabled"] is True
+        assert state["core_level"] == ContractLevel.ENFORCE.value
+        assert state["core_enabled"] is True
+        assert state["core_require_raises"] is True
+        assert state["public_level"] == ContractLevel.ENFORCE.value
+        assert state["public_enabled"] is True
+        assert state["public_require_raises"] is True
+
+    def test_optimized_python_respects_explicit_warn(self):
+        state = _run_optimized_level_probe(dbc_level="warn")
+
+        assert state["debug"] is False
+        assert state["shared_level"] == ContractLevel.WARN.value
+        assert state["shared_enabled"] is True
+        assert state["core_level"] == ContractLevel.WARN.value
+        assert state["core_enabled"] is True
+        assert state["core_require_raises"] is False
+        assert state["public_level"] == ContractLevel.WARN.value
+        assert state["public_enabled"] is True
+        assert state["public_require_raises"] is False
 
 
 class TestSetGet:
