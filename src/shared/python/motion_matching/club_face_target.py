@@ -189,6 +189,58 @@ def _median_shape_residual(
     return float(np.median(residuals))
 
 
+def _centred_offsets(offsets: Mapping[str, Sequence[float] | Array]) -> Array:
+    local = np.array([_finite_vector(v, f"offset {k}") for k, v in offsets.items()])
+    return np.asarray(local - local.mean(axis=0), dtype=float)
+
+
+def _is_degenerate(centred: Array) -> bool:
+    return bool(np.linalg.svd(centred, compute_uv=False)[1] < MIN_TRIAD_SPREAD_M)
+
+
+def triad_is_degenerate(offsets: Mapping[str, Sequence[float] | Array]) -> bool:
+    """True when ``offsets`` cannot fix the club roll (``MIN_TRIAD_SPREAD_M``).
+
+    The offsets are collinear or coincident, so rotation about their common
+    line is unobservable. Raises ``ValueError`` for fewer than three offsets
+    or a non-finite offset.
+    """
+    if len(offsets) < 3:
+        raise ValueError("at least three triad markers are required")
+    return _is_degenerate(_centred_offsets(offsets))
+
+
+def triad_observed_mask(
+    points: Array,
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+    offsets: Mapping[str, Sequence[float] | Array],
+) -> NDArray[np.bool_]:
+    """Per-frame mask of frames where every triad marker is valid and finite.
+
+    Same inputs and validation as :func:`observe_frame_rotations`.
+    Postcondition: a boolean array of length ``points.shape[0]``.
+    """
+    return _prepare_triad(points, valid, labels, offsets)[2]
+
+
+def validate_marker_capture(
+    points: Array, valid: NDArray[np.bool_], labels: Sequence[str]
+) -> tuple[Array, NDArray[np.bool_]]:
+    """Return ``(points, valid)`` as arrays after checking their shapes.
+
+    Raises ``ValueError`` unless ``points`` is ``(frames, markers, 3)``,
+    ``valid`` is ``(frames, markers)`` and ``labels`` names every column.
+    """
+    pts = np.asarray(points, dtype=float)
+    mask = np.asarray(valid, dtype=bool)
+    if pts.ndim != 3 or pts.shape[2] != 3 or mask.shape != pts.shape[:2]:
+        raise ValueError("points must be (frames, markers, 3) with a matching mask")
+    if len(labels) != pts.shape[1]:
+        raise ValueError("labels must name every marker column")
+    return pts, mask
+
+
 def _prepare_triad(
     points: Array,
     valid: NDArray[np.bool_],
@@ -197,25 +249,21 @@ def _prepare_triad(
 ) -> tuple[Array, Array, NDArray[np.bool_]]:
     """Validate a triad observation; return centred offsets, the captured
     triad ``(frames, markers, 3)`` and the per-frame observed mask."""
-    pts = np.asarray(points, dtype=float)
-    mask = np.asarray(valid, dtype=bool)
+    pts, mask = validate_marker_capture(points, valid, labels)
     names = list(labels)
-    if pts.ndim != 3 or pts.shape[2] != 3 or mask.shape != pts.shape[:2]:
-        raise ValueError("points must be (frames, markers, 3) with a matching mask")
-    if len(names) != pts.shape[1]:
-        raise ValueError("labels must name every marker column")
     if len(offsets) < 3:
         raise ValueError("at least three triad markers are required")
     missing = [label for label in offsets if label not in names]
     if missing:
         raise ValueError(f"triad markers not in the capture: {missing}")
-    local = np.array([_finite_vector(v, f"offset {k}") for k, v in offsets.items()])
-    centred = local - local.mean(axis=0)
-    if np.linalg.svd(centred, compute_uv=False)[1] < MIN_TRIAD_SPREAD_M:
+    centred = _centred_offsets(offsets)
+    if _is_degenerate(centred):
         raise ValueError("triad offsets are degenerate (collinear or coincident)")
     cols = [names.index(label) for label in offsets]
     triad = pts[:, cols, :]
-    seen = mask[:, cols].all(axis=1) & np.isfinite(triad).all(axis=(1, 2))
+    seen = np.asarray(
+        mask[:, cols].all(axis=1) & np.isfinite(triad).all(axis=(1, 2)), dtype=bool
+    )
     return centred, triad, seen
 
 

@@ -163,6 +163,24 @@ Primary literature reviewed through 2026-10-08; applicability to golf is an engi
 | [Golf Ground-Reaction Study](https://pubmed.ncbi.nlm.nih.gov/31042142/)                                                                                                                                           | Supports explicit foot-force/moment and club-speed analysis                | Association does not establish controller causality             |
 | [Muscle-Synergy Identifiability Study](https://pmc.ncbi.nlm.nih.gov/articles/PMC3582774/)                                                                                                                         | Mechanical/task constraints can confound inferred modules                  | Covariance is not a neural-loop identifier                      |
 
+## Stateless Generalized-Effort Request Boundary (#12390)
+
+The F02 controller now separates its exact-state policy calculation from its
+stateful allocation boundary. DistributedFeedbackPolicy.request_for_step returns
+an immutable full-nv generalized-effort request and the selected-channel
+mapping/provenance, with the caller supplying the expected policy time. The
+stateless method does not own a clock, previous-applied history, allocator, or
+plant stepping. DistributedFeedbackController preserves the established public
+constructor and command_for_step flow by inheriting the policy and adding those stateful
+responsibilities; a failed or invalid allocation still cannot advance its clock
+or prior-input history. Model and task-provider callbacks are sampled as read-only inputs; the policy does not mutate plant or controller state. External callback side effects cannot be rolled back if later validation fails.
+
+This extraction makes the existing requested-effort calculation reusable without
+constructing an unused torque allocator. It does not define new actuator IDs or
+units, a muscle bridge, a native adapter, or a plant integration boundary. The
+existing analytic and one-joint checks remain software evidence only; no native
+qualification or cross-engine parity status changes.
+
 ## Open Decisions and First Slice
 
 First freeze the current native capability matrix, source/provider versions, existing parity tolerances and available private channels. Select the first small torque/contact and muscle fixtures; ratify missing muscle and runtime gates before human fitting. Assign accountable implementation owners only through the fleet claim/lease process. The child plan defines dependencies; this packet does not automatically dispatch expensive simulations or claim board/scientific approval.
