@@ -18,6 +18,11 @@ from src.shared.python.contracts import postcondition
 
 logger = logging.getLogger(__name__)
 
+_PRIVATE_DATA_HINT = (
+    "Private captures are not stored in this repository; set CAPTURE_DATA_DIR "
+    "to a local checkout of the private capture data repository."
+)
+
 __all__ = [
     "CaptureDataUnavailable",
     "CaptureInfo",
@@ -232,12 +237,13 @@ def resolve_capture(
         if resolved_data_dir is None:
             raise CaptureDataUnavailable(
                 f"Capture {capture_id!r} is private and CAPTURE_DATA_DIR environment "
-                "variable is not set."
+                f"variable is not set. {_PRIVATE_DATA_HINT}"
             )
         target_path = (Path(resolved_data_dir) / info.relative_path).resolve()
         if not target_path.is_file():
             raise CaptureDataUnavailable(
-                f"Private capture {capture_id!r} not found at {target_path}."
+                f"Private capture {capture_id!r} not found at {target_path}. "
+                f"{_PRIVATE_DATA_HINT}"
             )
     else:
         raise ValueError(f"Unknown capture 'where' location: {info.where!r}")

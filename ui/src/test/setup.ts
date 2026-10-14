@@ -1,6 +1,8 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { vi } from 'vitest';
+
+declare const afterEach: (fn: () => void) => void;
 
 // Cleanup after each test
 afterEach(() => {

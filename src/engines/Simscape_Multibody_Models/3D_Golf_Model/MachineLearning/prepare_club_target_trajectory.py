@@ -11,23 +11,6 @@ import numpy as np
 import pandas as pd
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-try:
-    from src.motion_capture.capture_registry import (
-        CaptureRegistryError,
-        resolve_capture,
-    )
-
-    DEFAULT_WORKBOOK = resolve_capture("club-workbook-wiffle")
-except CaptureRegistryError:
-    DEFAULT_WORKBOOK = (
-        SCRIPT_DIR.parent
-        / "matlab"
-        / "src"
-        / "apps"
-        / "golf_gui"
-        / "Motion Capture Plotter"
-        / "Wiffle_ProV1_club_3D_data.xlsx"
-    )
 DEFAULT_OUTPUT = SCRIPT_DIR / "data" / "processed" / "TW_ProV1_club_target.csv"
 LOGGER = logging.getLogger(__name__)
 
@@ -123,7 +106,12 @@ def prepare_target(workbook: Path, sheet: str, output: Path) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--workbook", type=Path, default=DEFAULT_WORKBOOK)
+    parser.add_argument(
+        "--workbook",
+        type=Path,
+        default=None,
+        help="Club workbook (default: private club-workbook-wiffle capture)",
+    )
     parser.add_argument("--sheet", default="TW_ProV1")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     return parser.parse_args()
@@ -132,7 +120,13 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     args = parse_args()
-    prepare_target(workbook=args.workbook, sheet=args.sheet, output=args.output)
+    workbook = args.workbook
+    if workbook is None:
+        from src.motion_capture.capture_registry import resolve_capture
+
+        # Raises CaptureDataUnavailable when CAPTURE_DATA_DIR is not set.
+        workbook = resolve_capture("club-workbook-wiffle")
+    prepare_target(workbook=workbook, sheet=args.sheet, output=args.output)
 
 
 if __name__ == "__main__":

@@ -25,6 +25,9 @@ NATIVE_SAMPLE_RATE_HZ = 240.0
 CLUB_DATA_SHA256 = "5d9183e1d01ea7c6f9c162375dd6855c076ee26a96b76c90e59e9cf2679dde25"
 WIFFLE_PROV1_SHA256 = "88d3eb31541d886031f6c5ad7c82493b0e3ee4e3f73a8652372277cc14d02234"
 
+# Historical repo-relative labels recorded in identity/reproduction evidence.
+# They are labels only: the workbooks are private and resolve through the
+# capture registry (``club-workbook-main`` / ``club-workbook-wiffle``).
 CLUB_DATA_RELATIVE = Path("data/Club_Data.xlsx")
 WIFFLE_PROV1_RELATIVE = Path(
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/"
@@ -423,28 +426,20 @@ def _resolve_club_workbook_paths(
 ) -> tuple[Path, Path]:
     """Resolve the club and wiffle workbook paths via the capture registry.
 
-    Falls back to the repo-relative default path when the registry does not
-    (yet) know the capture id.
+    The workbooks are private data and are no longer tracked in this
+    repository, so there is no repo-relative fallback.
+
+    Raises
+    ------
+    CaptureDataUnavailable
+        If ``CAPTURE_DATA_DIR`` (or ``data_dir``) does not provide them.
     """
-    from src.motion_capture.capture_registry import (
-        CaptureRegistryError,
-        resolve_capture,
+    from src.motion_capture.capture_registry import resolve_capture
+
+    club_path = resolve_capture("club-workbook-main", data_dir=data_dir, repo_root=root)
+    wiffle_path = resolve_capture(
+        "club-workbook-wiffle", data_dir=data_dir, repo_root=root
     )
-
-    try:
-        club_path = resolve_capture(
-            "club-workbook-main", data_dir=data_dir, repo_root=root
-        )
-    except CaptureRegistryError:
-        club_path = root / CLUB_DATA_RELATIVE
-
-    try:
-        wiffle_path = resolve_capture(
-            "club-workbook-wiffle", data_dir=data_dir, repo_root=root
-        )
-    except CaptureRegistryError:
-        wiffle_path = root / WIFFLE_PROV1_RELATIVE
-
     return club_path, wiffle_path
 
 
