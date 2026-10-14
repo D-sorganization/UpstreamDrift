@@ -247,6 +247,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="iterative-learning gain on pelvis command per shooting pass",
     )
     parser.add_argument(
+        "--root-yaw-weight",
+        type=_nonnegative_float,
+        default=0.0,
+        help="root-yaw target tracking weight for contact-aware shooting fit (#11672)",
+    )
+    parser.add_argument(
         "--zmp-filter",
         action="store_true",
         help="dynamics-filter reference to keep ZMP inside support polygon",
@@ -1004,6 +1010,7 @@ def _maybe_shooting_fit(
                 iterations=args.shooting_fit,
                 gain=args.shooting_gain,
                 tracking_backend=tracking,
+                root_yaw_weight=getattr(args, "root_yaw_weight", 0.0),
             ),
         )
     return q_track, zmp, shooting_report

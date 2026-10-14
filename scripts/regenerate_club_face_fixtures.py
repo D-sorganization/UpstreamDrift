@@ -46,12 +46,16 @@ FIXTURES = ROOT / "tests" / "fixtures" / "club_face"
 DOCS = ROOT / "docs" / "development" / "full_body_models"
 FIXTURE_STRIDE = 2  # the 1 kHz reference, every second sample (2 ms)
 FIXTURE_DT_S = 0.002
+#: Foot torsional-friction patch radius (m) of the canonical runs: the value
+#: #11671 fixed on the driver and validated on the 7-iron
+#: (FOOT_CONTACT_TORSION.md), adopted against the ground yaw slip (#11961).
+TORSION_PATCH_M = "0.05"
 #: The run's hip-calibrated, segment-scaled document: the fixture's model. It
 #: is committed beside the fixture as ``spec_<club>.json`` because the hip
 #: frames set the foot yaw: the raw document turns the lead foot 29-30 deg (#12222).
 SCALED_SPEC = "full_body_spec_hipcal_scaled.json"
 #: capture -> (fixture club alias, document, extra pipeline flags of the
-#: original fixture runs, read back from their receipts). The driver's static
+#: original fixture runs, read back from their receipts, plus the torsion patch). The driver's static
 #: trial holds the measured club cluster fixed: its per-capture grip rotation
 #: is fitted on it, and a free cluster moves the capture's own face (#12221).
 #: The 7-iron refit is adopted the same way now that the 0.125 ms export hold
@@ -60,12 +64,23 @@ CAPTURE_RUNS: dict[str, tuple[str, str, tuple[str, ...]]] = {
     "driver": (
         "driver",
         "full_body_spec_anthro_driver.json",
-        ("--static-seeds", "--fix-club-markers"),
+        (
+            "--static-seeds",
+            "--fix-club-markers",
+            "--torsional-patch-m",
+            TORSION_PATCH_M,
+        ),
     ),
     "iron": (
         "iron7",
         "full_body_spec_anthro_iron7.json",
-        ("--static-seeds", "--zmp-filter", "--fix-club-markers"),
+        (
+            "--static-seeds",
+            "--zmp-filter",
+            "--fix-club-markers",
+            "--torsional-patch-m",
+            TORSION_PATCH_M,
+        ),
     ),
 }
 #: Controller effort hold of the club-face same-input export (ms). The 1 ms

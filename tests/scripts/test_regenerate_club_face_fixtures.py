@@ -28,6 +28,13 @@ def test_pipeline_argv_keeps_the_original_run_flags_and_the_weight() -> None:
 
 
 @pytest.mark.parametrize("capture", ["driver", "iron"])
+def test_pipeline_argv_applies_the_foot_torsion_patch(capture: str) -> None:
+    """#11961: both canonical runs resist foot yaw with the #11671 patch."""
+    argv = regen.pipeline_argv(capture, Path("r"), 3.0)
+    assert argv[argv.index("--torsional-patch-m") + 1] == "0.05"
+
+
+@pytest.mark.parametrize("capture", ["driver", "iron"])
 def test_fixture_runs_hold_the_measured_club_cluster_fixed(capture: str) -> None:
     # Each grip rotation is fitted on the fixed cluster; a free cluster
     # re-absorbs it and moves the capture's own face (#12221). The 7-iron
