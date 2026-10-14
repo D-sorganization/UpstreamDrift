@@ -126,7 +126,7 @@ def segmented_replay(
 
     Returns one record per segment with its start time and end-of-segment
     coordinate and frame errors.  The bundle's recorded ball force is applied
-    on each segment's own clock.
+    on each segment's own clock, and its recorded effort hold (#12279) is used.
     """
     if segment_steps < 1:
         raise ValueError("segment_steps must be positive")
@@ -138,8 +138,9 @@ def segmented_replay(
             plant,
             bundle.reference_q[start],
             bundle.reference_v[start],
-            bundle.efforts[start:stop],
+            bundle.replay_efforts(stop)[start * bundle.effort_holds :],
             dt_s=bundle.dt_s,
+            policy=bundle.step_policy(),
             impact=None if impact is None else impact.shifted(-start * bundle.dt_s),
         )
         end_q, ref_q = rollout.q[-1], bundle.reference_q[stop]

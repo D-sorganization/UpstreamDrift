@@ -104,3 +104,43 @@ python3 -m pytest tests/unit/engines/myosuite/test_retarget.py tests/unit/engine
 
 - LaTeX reference: [`myosuite_retarget_map.tex`](../../research/myosuite_retarget_map/myosuite_retarget_map.tex). The MyoFullBody neck capacities are also in [`myofullbody_swing.tex`](../../research/myofullbody_swing/myofullbody_swing.tex).
 - Tests: `tests/unit/engines/myosuite/test_retarget.py` (`test_primary_source_alone_drives_its_target`, `test_fixture_map_targets_are_one_to_one`, `test_secondary_sources_are_omitted_and_documented`, `test_fixture_map_round_trips_mapped_sources`, `test_loader_rejects_two_sources_on_one_target`, `test_loader_rejects_duplicate_source`, `test_loader_rejects_zero_sign`); `tests/unit/engines/myofullbody/test_myofullbody_neck.py` (`test_capacities_follow_anthro_neck_axes`). All of them failed before the fix.
+
+## 20. Same-Input Effort Hold Is a Bundle Parameter (#12279)
+
+### What
+
+`generate_reference_bundle` evaluates the pipeline computed-torque controller and holds each sample (zero-order hold) during the open-loop export. The hold length is now a parameter, `effort_hold_s`. It must split the 1 ms step into 1, 2, 4 or 8 holds, so that the hold count divides the eight RK4 substeps (`effort_holds_for` validates this). `StepPolicy.effort_holds` holds the count. Each hold gets its own controller sample and `substeps / effort_holds` RK4 substeps. The closure projection still runs once per 1 ms step, so a finer hold does not add projection cost.
+
+The manifest records `policy.effort_holds_per_step` and `policy.effort_hold_s`. A finer bundle stores the hold-rate table as `hold_efforts` (`steps * effort_holds` rows). `efforts` keeps one row per step: each step's first sample, which is the controller torque at the step's start state. Per-step consumers (inverse-dynamics comparisons, overlays, kinetics) are therefore unchanged. Replays call `bundle.replay_efforts()` with `bundle.step_policy()`, so every engine uses the recorded hold. `segmented_replay`, `scripts.same_input_bundle replay` / `closed-loop` and `lifting.bar_path_parity` do this. A bundle without the keys (every committed bundle) loads as one hold per step.
+
+The default stays 1 ms (owner ruling 2026-10-11 on #12279), and with it the integrator gives bit-identical results to before. The 0.125 ms hold is opt-in for the club-face fixtures: `--effort-hold-ms 0.125` on `scripts.same_input_bundle export`.
+
+### Why
+
+The pipeline's own forward dynamics evaluates the controller at every RK4 stage. A 1 ms hold lags a stiff tracking law. On the 7-iron the hold, not the projection rate, slides both feet from about 0.67 s. The measurements are from #12279 on brick (run `s38-fxi2`, 0–0.9 s). They were taken in that session and not re-run here.
+
+| Hold                         | Max foot slip | Slip > 10 mm onset | Root error at 0.7 s | `mtp_angle_r` error at 0.8 s |
+| ---------------------------- | ------------- | ------------------ | ------------------- | ---------------------------- |
+| 1 ms, 8 substeps (default)   | 43 mm         | 0.71 s             | 24.0 mm             | −0.147 rad                   |
+| 0.125 ms, 1 substep per hold | 3.3 mm        | none               | 8.2 mm              | −0.001 rad                   |
+
+Full-horizon GCV-20 / OSV-10 results for the 7-iron bundle: −5.0 %, −5.1 ms, 8.71° with the 1 ms hold, and −2.5 %, −7.3 ms, 5.56° with the 0.125 ms hold. The tracked swing gives −1.9 %, −0.2 ms, 2.59°. The finer hold fixes speed, face and foot contact, but the speed peak moves to 7.3 ms early, against a 5 ms limit. So the 7-iron fixture still misses GCV-20, and that peak-timing miss is a separate follow-up under #11767. No tolerance was changed.
+
+### Limitations
+
+The club-face fixtures have not been regenerated with the finer hold. Regenerating them needs the capture data and a re-solve on a simulation host. The dependent tests (MSK grip recalibration, bushing) cascade from that. The 7-iron and driver expected-failure markers stay in place.
+
+### Reproduction
+
+`tests/unit/motion_matching/same_input/test_effort_hold.py` is engine-free. A toy computed-torque loop (bandwidth 1500 rad/s) has an exact tracked solution. The 1 ms hold diverges from it, while the 0.125 ms hold stays within the epic #11605 1e-6 rad coordinate bound. Below the stability limit the hold error falls monotonically with the hold. The tests also check manifest round-trips, legacy loading, and replay through `segmented_replay`.
+
+### What Was Tried and Rejected
+
+- **Making 0.125 ms the default hold:** rejected by the owner ruling of 2026-10-11 on #12279. It would change every committed bundle and the per-step consumers at once. Keeping it opt-in leaves existing bundles bit-identical.
+- **A faster closure projection instead of a finer hold:** the brick measurements on #12279 show the 1 ms hold, not the projection rate, slides the feet. The projection still runs once per 1 ms step.
+- **Hold counts that don't divide the eight RK4 substeps:** rejected by `effort_holds_for`. A non-dividing count would give uneven RK4 substeps within a step.
+
+### Evidence Receipt
+
+- Tests: `tests/unit/motion_matching/same_input/test_effort_hold.py`. They failed before the change. They cover the toy-loop divergence at 1 ms versus the 1e-6 rad bound at 0.125 ms, the manifest round-trip, legacy bundle loading, and replay through `segmented_replay`.
+- Measurements: the #12279 issue thread (brick run `s38-fxi2`), quoted in the table above.
