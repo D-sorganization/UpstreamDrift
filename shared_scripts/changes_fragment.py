@@ -46,8 +46,14 @@ import logging
 import subprocess
 import sys
 from collections.abc import Sequence
-from datetime import UTC, date, datetime
 from pathlib import Path
+
+try:
+    from datetime import UTC, date, datetime
+except ImportError:  # pragma: no cover - Python < 3.11 compatibility
+    from datetime import date, datetime, timezone
+
+    UTC = timezone.utc  # noqa: UP017 # type: ignore[attr-defined,misc]
 
 try:
     from shared_scripts import changes_fragment_schema as schema
@@ -73,6 +79,7 @@ except ImportError:  # pragma: no cover - non-package fleet copy
     _collate_mod = schema.sibling("changes_fragment_collate")
 
 log = logging.getLogger("changes_fragment")
+development_log = schema.development_log
 
 # Public API (stable; imported by fleet_hooks.py and pre_pr.py).
 CHANGES_DIR = schema.CHANGES_DIR
@@ -80,7 +87,6 @@ OPTIONAL_KEYS = schema.OPTIONAL_KEYS
 Fragment = schema.Fragment
 FragmentError = schema.FragmentError
 is_fragment_path = schema.is_fragment_path
-validate_fragment_file = schema.validate_fragment_file
 load_fragment = schema.load_fragment
 find_fragments = schema.find_fragments
 slugify = schema.slugify
@@ -104,6 +110,27 @@ __all__ = [
     "slugify",
     "validate_fragment_file",
 ]
+
+
+def validate_fragment_file(path: Path) -> list[str]:
+    """Return findings for the fragment at ``path`` (empty = valid).
+
+    Checks the schema, then, when the fragment sits in ``<repo>/changes/`` and
+    the repository has a development log, refuses a ``dl_state`` that would
+    move a shipped or abandoned entry (#2044). Catching it here, before the
+    merge, is the only point where the author can still fix it.
+    """
+    findings = schema.validate_fragment_file(path)
+    if findings or path.parent.name != CHANGES_DIR:
+        return findings
+    devlog = development_log.resolve_canonical_devlog_path(path.parent.parent)
+    if not devlog.is_file():
+        return findings
+    fragment = schema.load_fragment(path)
+    reason = _collate_mod.terminal_transition(
+        devlog.read_text(encoding="utf-8"), fragment
+    )
+    return [reason] if reason else []
 
 
 def new_fragment(
