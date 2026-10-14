@@ -303,7 +303,7 @@ def _grips(receipt: dict[str, Any]) -> str:
             _e(r["engine"]),
             f"L {r['attach_l']}; R {r['attach_r']}",
             r["intended_half_width_m"],
-            r["hand_half_spacing_zero_m"],
+            r["hand_half_spacing_start_m"],
             r["mismatch_m"],
             _closure_text(r["start_closure_native"]),
         ]
@@ -317,7 +317,7 @@ def _grips(receipt: dict[str, Any]) -> str:
                 "Engine",
                 "Attachment",
                 "Intended Half-Width m",
-                "Hand Half-Spacing m",
+                "Start Hand Half-Spacing m",
                 "Mismatch m",
                 "Native Start Closure",
             ],

@@ -97,7 +97,13 @@ def limit_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def grip_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
-    """Intended grip half-width vs achievable hand spacing, plus attachment kind."""
+    """Intended grip half-width vs start-pose hand spacing, plus attachment kind.
+
+    The mismatch compares the pack's intended half-width with the hand
+    half-spacing at the pack start pose, where the packs close their grips.
+    The neutral-pose spacing is kept as ``hand_half_spacing_zero_m`` for
+    reference only; it never feeds the mismatch (#12504).
+    """
     rows = []
     for lift in LIFTS:
         if lift == "squat":
@@ -107,7 +113,9 @@ def grip_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
             zero = res["same_q"]["zero"]["summary"]
             start = res["start"]["summary"]
             intended = abs(zero["hand_bar"]["l"]["lateral_m"])
-            actual = zero["grip_width_m"] / 2.0
+            # Packs close their grips at the start pose, not at the neutral
+            # pose, so the achievable spacing is measured there (#12504).
+            actual = start["grip_width_m"] / 2.0
             attach = res["structure"]["bar_hand_attachment"]
             rows.append(
                 {
@@ -116,7 +124,8 @@ def grip_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
                     "attach_l": attach["l"],
                     "attach_r": attach["r"],
                     "intended_half_width_m": intended,
-                    "hand_half_spacing_zero_m": actual,
+                    "hand_half_spacing_start_m": actual,
+                    "hand_half_spacing_zero_m": zero["grip_width_m"] / 2.0,
                     "mismatch_m": intended - actual,
                     "start_hand_spacing_m": start["grip_width_m"],
                     "start_closure_native": res["start"]["closure_native"],
