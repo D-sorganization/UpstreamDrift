@@ -38,6 +38,7 @@ import hashlib
 import hmac
 import io
 import json
+import logging
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
@@ -68,16 +69,24 @@ __all__ = [
     "ExportStamp",
     "ExportedAnimation",
     "ExportedFigure",
+    "apply_loaded_evaluation_to_widget",
     "evaluation_stamp",
     "export_figure",
     "export_vtk_stamped_animation",
     "export_vtk_stamped_frame",
+    "export_workbench_views",
     "header_digest",
     "load_workbench_evaluation",
+    "prompt_export_views_dialog",
+    "prompt_load_evaluation_dialog",
+    "prompt_save_evaluation_dialog",
     "read_animation_export",
     "read_export",
     "save_workbench_evaluation",
+    "update_action_tooltip_and_state",
 ]
+
+logger = logging.getLogger(__name__)
 
 EXPORT_SCHEMA_VERSION = "bunker-workbench-figure/1"
 """Version of the export header; bumped on any breaking change."""
@@ -739,3 +748,169 @@ def read_animation_export(path: Path | str) -> ExportedAnimation:
     frame_count = int(header.get("frame_count", n_frames))
     duration_s = float(header.get("duration_s", 0.0))
     return ExportedAnimation(source, stamp, digest, frame_count, duration_s)
+
+
+def export_workbench_views(
+    evaluation: Any,
+    destination_dir: Path | str,
+    *,
+    record_digest: str | None = None,
+) -> list[ExportedFigure]:
+    """Export stamped figures for all available evaluation views.
+
+    Args:
+        evaluation: The EvaluationResult / DesignEvaluation to render and export.
+        destination_dir: Directory where figures will be saved.
+        record_digest: Optional SHA-256 digest from a loaded record.
+
+    Returns:
+        List of verified ExportedFigure records.
+    """
+    from .render import sole_load_still
+
+    out_dir = Path(destination_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    exported: list[ExportedFigure] = []
+    shot = getattr(evaluation, "shot", None)
+    if shot is None:
+        return exported
+
+    sole_field = getattr(shot, "sole_field", None)
+    if sole_field is not None:
+        stamp = evaluation_stamp(
+            evaluation, view="sole_load", record_digest=record_digest
+        )
+        fig = sole_load_still(sole_field)
+        p = out_dir / "sole_load.png"
+        exported.append(export_figure(fig, p, stamp))
+
+    traces = getattr(shot, "traces", None)
+    if traces is not None:
+        from .render_traces import trace_panel_still
+
+        stamp = evaluation_stamp(evaluation, view="traces", record_digest=record_digest)
+        fig = trace_panel_still(traces)
+        p = out_dir / "traces.png"
+        exported.append(export_figure(fig, p, stamp))
+
+    scene = getattr(shot, "scene", None)
+    if scene is not None:
+        from .render3d import shot_scene_still
+
+        stamp = evaluation_stamp(
+            evaluation, view="shot_scene", record_digest=record_digest
+        )
+        fig = shot_scene_still(scene)
+        p = out_dir / "shot_scene.png"
+        exported.append(export_figure(fig, p, stamp))
+
+    return exported
+
+
+def prompt_export_views_dialog(parent: Any, widget: Any) -> None:
+    """Prompt user for an export directory and export views, handling errors."""
+    from PyQt6.QtWidgets import QFileDialog
+
+    dir_path = QFileDialog.getExistingDirectory(parent, "Export views to directory")
+    if dir_path:
+        try:
+            exported = widget.export_views(dir_path)
+            logger.info("exported %d views to %s", len(exported), dir_path)
+        except (ValueError, OSError) as exc:
+            logger.error("failed to export views: %s", exc)
+            widget._banner.show_error(f"Export failed: {exc}")
+
+
+def prompt_save_evaluation_dialog(parent: Any, widget: Any) -> None:
+    """Prompt user for a destination file path and save evaluation, handling errors."""
+    from PyQt6.QtWidgets import QFileDialog
+
+    path, _ = QFileDialog.getSaveFileName(
+        parent,
+        "Save workbench evaluation",
+        "",
+        "JSON evaluation (*.json);;All files (*)",
+    )
+    if path:
+        try:
+            saved = widget.save_evaluation(path)
+            logger.info("saved evaluation to %s", saved)
+        except (ValueError, OSError) as exc:
+            logger.error("failed to save evaluation: %s", exc)
+            widget._banner.show_error(f"Save failed: {exc}")
+
+
+def prompt_load_evaluation_dialog(parent: Any, widget: Any) -> None:
+    """Prompt user for a file path and load verified evaluation, handling errors."""
+    from PyQt6.QtWidgets import QFileDialog
+
+    path, _ = QFileDialog.getOpenFileName(
+        parent,
+        "Load workbench evaluation",
+        "",
+        "JSON evaluation (*.json);;All files (*)",
+    )
+    if path:
+        try:
+            widget.load_evaluation(path)
+        except (ValueError, OSError) as exc:
+            logger.error("failed to load evaluation: %s", exc)
+            widget._banner.show_error(f"Load failed: {exc}")
+
+
+def apply_loaded_evaluation_to_widget(
+    widget: Any,
+    record: dict[str, Any],
+    path: Path | str,
+) -> None:
+    """Apply loaded evaluation inputs, verdict banner, and summary text to widget."""
+    from bunkershot3d.solvers import EnvelopeStatus
+
+    inputs = record.get("inputs", {})
+    design_data = inputs.get("design", {})
+    if design_data and hasattr(widget._design_a, "set_design"):
+        widget._design_a.set_design(design_data)
+
+    sand_data = inputs.get("sand", {})
+    swing_data = inputs.get("swing", {})
+    if hasattr(widget._conditions, "set_conditions"):
+        widget._conditions.set_conditions(sand_data, swing_data)
+
+    verdict_info = record.get("verdict", {})
+    status_str = verdict_info.get("status", "beyond_validation")
+    status = EnvelopeStatus(status_str)
+    widget._banner.show_status(status)
+
+    src_path = Path(path)
+    digest = record.get("digest", "")
+    stamp = record.get("stamp", "")
+    schema = record.get("schema_version", "")
+    headline = verdict_info.get("headline", "")
+    summary = (
+        f"Loaded evaluation: {src_path.name}\n"
+        f"Schema: {schema}\n"
+        f"Digest: {digest}\n"
+        f"Stamp: {stamp}\n"
+        f"Verdict: {headline}"
+    )
+    widget._results.setPlainText(summary)
+    widget.update_control_states()
+    widget.evaluation_changed.emit()
+
+
+def update_action_tooltip_and_state(
+    action: Any,
+    reasons: dict[str, str | None],
+    action_key: str,
+    enabled_tooltip: str,
+) -> None:
+    """Helper to update a QAction enabled state and tooltip based on reasons dict."""
+    if action is None:
+        return
+    reason = reasons.get(action_key)
+    action.setEnabled(reason is None)
+    if reason:
+        action.setToolTip(f"Disabled: {reason}")
+    else:
+        action.setToolTip(enabled_tooltip)

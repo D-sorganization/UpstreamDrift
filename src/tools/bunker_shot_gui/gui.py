@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Any, TypeVar
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QAction, QFont
 from PyQt6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -74,14 +74,18 @@ from .design import (
 )
 from .export import (
     ExportedFigure,
-    evaluation_stamp,
-    export_figure,
+    apply_loaded_evaluation_to_widget,
+    export_workbench_views,
     load_workbench_evaluation,
+    prompt_export_views_dialog,
+    prompt_load_evaluation_dialog,
+    prompt_save_evaluation_dialog,
     save_workbench_evaluation,
+    update_action_tooltip_and_state,
 )
 from .field import LoadComponent, LoadScale, SoleLoadField
 from .model import DesignEvaluation, WorkbenchComparison, WorkbenchModel
-from .render import field_scales, sole_load_still
+from .render import field_scales
 from .render3d import SceneScale, scene_scale
 from .report import comparison_report, evaluation_report
 from .shot3d import ShotScene
@@ -970,58 +974,18 @@ class BunkerShotWidget(QWidget):
         Raises:
             ValueError: If no evaluation is available to export.
         """
-        evaluation = self._last_evaluation
-        if evaluation is None:
+        if self._last_evaluation is None:
             raise ValueError(
                 "no evaluation available to export; run design A or compare A vs B first"
             )
-        out_dir = Path(destination_dir)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        digest = None
-        if self._loaded_record is not None:
-            digest = self._loaded_record.get("digest")
-
-        exported: list[ExportedFigure] = []
-        shot = evaluation.shot
-        sole_field = shot.sole_field
-        if sole_field is not None:
-            stamp = evaluation_stamp(evaluation, view="sole_load", record_digest=digest)
-            fig = sole_load_still(sole_field)
-            p = out_dir / "sole_load.png"
-            exported.append(export_figure(fig, p, stamp))
-
-        traces = shot.traces
-        if traces is not None:
-            from .render_traces import trace_panel_still
-
-            stamp = evaluation_stamp(evaluation, view="traces", record_digest=digest)
-            fig = trace_panel_still(traces)
-            p = out_dir / "traces.png"
-            exported.append(export_figure(fig, p, stamp))
-
-        scene = shot.scene
-        if scene is not None:
-            from .render3d import shot_scene_still
-
-            stamp = evaluation_stamp(
-                evaluation, view="shot_scene", record_digest=digest
-            )
-            fig = shot_scene_still(scene)
-            p = out_dir / "shot_scene.png"
-            exported.append(export_figure(fig, p, stamp))
-
-        return exported
+        digest = self._loaded_record.get("digest") if self._loaded_record else None
+        return export_workbench_views(
+            self._last_evaluation, destination_dir, record_digest=digest
+        )
 
     def choose_export_views(self) -> None:
         """Ask for an output directory and export all stamped views."""
-        dir_path = QFileDialog.getExistingDirectory(self, "Export views to directory")
-        if dir_path:
-            try:
-                exported = self.export_views(dir_path)
-                logger.info("exported %d views to %s", len(exported), dir_path)
-            except (ValueError, OSError) as exc:
-                logger.error("failed to export views: %s", exc)
-                self._banner.show_error(f"Export failed: {exc}")
+        prompt_export_views_dialog(self, self)
 
     def save_evaluation(self, path: Path | str) -> Path:
         """Save the current evaluation to a verifiable JSON record.
@@ -1046,19 +1010,7 @@ class BunkerShotWidget(QWidget):
 
     def choose_save_evaluation(self) -> None:
         """Prompt for a file path and save the evaluation."""
-        path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save workbench evaluation",
-            "",
-            "JSON evaluation (*.json);;All files (*)",
-        )
-        if path:
-            try:
-                saved = self.save_evaluation(path)
-                logger.info("saved evaluation to %s", saved)
-            except (ValueError, OSError) as exc:
-                logger.error("failed to save evaluation: %s", exc)
-                self._banner.show_error(f"Save failed: {exc}")
+        prompt_save_evaluation_dialog(self, self)
 
     def load_evaluation(self, path: Path | str) -> dict[str, Any]:
         """Load a verified workbench evaluation record and update controls.
@@ -1076,57 +1028,21 @@ class BunkerShotWidget(QWidget):
         self._loaded_record = record
         self._last_evaluation = None
         self._last_comparison = None
-
-        inputs = record.get("inputs", {})
-        design_data = inputs.get("design", {})
-        if design_data and hasattr(self._design_a, "set_design"):
-            self._design_a.set_design(design_data)
-
-        sand_data = inputs.get("sand", {})
-        swing_data = inputs.get("swing", {})
-        if hasattr(self._conditions, "set_conditions"):
-            self._conditions.set_conditions(sand_data, swing_data)
-
-        verdict_info = record.get("verdict", {})
-        status_str = verdict_info.get("status", "beyond_validation")
-        status = EnvelopeStatus(status_str)
-        self._banner.show_status(status)
-
-        src_path = Path(path)
-        digest = record.get("digest", "")
-        stamp = record.get("stamp", "")
-        schema = record.get("schema_version", "")
-        headline = verdict_info.get("headline", "")
-        summary = (
-            f"Loaded evaluation: {src_path.name}\n"
-            f"Schema: {schema}\n"
-            f"Digest: {digest}\n"
-            f"Stamp: {stamp}\n"
-            f"Verdict: {headline}"
-        )
-        self._results.setPlainText(summary)
-        self.update_control_states()
-        self.evaluation_changed.emit()
+        apply_loaded_evaluation_to_widget(self, record, path)
         return record
 
     def choose_load_evaluation(self) -> None:
         """Prompt for a file path and load the verified evaluation."""
-        path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Load workbench evaluation",
-            "",
-            "JSON evaluation (*.json);;All files (*)",
-        )
-        if path:
-            try:
-                self.load_evaluation(path)
-            except (ValueError, OSError) as exc:
-                logger.error("failed to load evaluation: %s", exc)
-                self._banner.show_error(f"Load failed: {exc}")
+        prompt_load_evaluation_dialog(self, self)
 
 
 class BunkerShotWindow(QMainWindow):
     """Standalone window for the designer workbench."""
+
+    _widget: BunkerShotWidget
+    _export_action: QAction
+    _save_action: QAction
+    _load_action: QAction
 
     def __init__(
         self,
@@ -1146,33 +1062,38 @@ class BunkerShotWindow(QMainWindow):
             "F0 dynamic RFT. Every result carries a validity verdict; "
             "out-of-envelope queries are refused, not estimated."
         )
-        menubar = self.menuBar()
-        assert menubar is not None
 
-        file_menu = menubar.addMenu("&File")
-        self._export_action = file_menu.addAction("Export views…")
+        self._export_action = QAction("Export views…", self)
         self._export_action.setShortcut("Ctrl+E")
         self._export_action.triggered.connect(self._widget.choose_export_views)
 
-        self._save_action = file_menu.addAction("Save evaluation…")
+        self._save_action = QAction("Save evaluation…", self)
         self._save_action.setShortcut("Ctrl+S")
         self._save_action.triggered.connect(self._widget.choose_save_evaluation)
 
-        self._load_action = file_menu.addAction("Load evaluation…")
+        self._load_action = QAction("Load evaluation…", self)
         self._load_action.setShortcut("Ctrl+O")
         self._load_action.triggered.connect(self._widget.choose_load_evaluation)
 
+        menubar = self.menuBar()
+        if menubar is not None:
+            file_menu = menubar.addMenu("&File")
+            if file_menu is not None:
+                file_menu.addAction(self._export_action)
+                file_menu.addAction(self._save_action)
+                file_menu.addAction(self._load_action)
+
+            build_help_menu(
+                menubar,
+                self,
+                doc_target=(
+                    "BunkerShot3D Credibility Statement",
+                    "docs/bunkershot3d/credibility.md",
+                ),
+            )
+
         self._widget.evaluation_changed.connect(self.update_action_states)
         self.update_action_states()
-
-        build_help_menu(
-            menubar,
-            self,
-            doc_target=(
-                "BunkerShot3D Credibility Statement",
-                "docs/bunkershot3d/credibility.md",
-            ),
-        )
 
     @property
     def widget(self) -> BunkerShotWidget:
@@ -1186,32 +1107,24 @@ class BunkerShotWindow(QMainWindow):
     def update_action_states(self) -> None:
         """Update enabled states and tooltips for menu actions."""
         reasons = self._widget.disabled_reasons()
-        exp_reason = reasons.get("export_views")
-        self._export_action.setEnabled(exp_reason is None)
-        if exp_reason:
-            self._export_action.setToolTip(f"Disabled: {exp_reason}")
-        else:
-            self._export_action.setToolTip(
-                "Export stamped figures of the current evaluation."
-            )
-
-        save_reason = reasons.get("save_evaluation")
-        self._save_action.setEnabled(save_reason is None)
-        if save_reason:
-            self._save_action.setToolTip(f"Disabled: {save_reason}")
-        else:
-            self._save_action.setToolTip(
-                "Save the current evaluation to a verifiable JSON record."
-            )
-
-        load_reason = reasons.get("load_evaluation")
-        self._load_action.setEnabled(load_reason is None)
-        if load_reason:
-            self._load_action.setToolTip(f"Disabled: {load_reason}")
-        else:
-            self._load_action.setToolTip(
-                "Load and verify a stored evaluation JSON record."
-            )
+        update_action_tooltip_and_state(
+            self._export_action,
+            reasons,
+            "export_views",
+            "Export stamped figures of the current evaluation.",
+        )
+        update_action_tooltip_and_state(
+            self._save_action,
+            reasons,
+            "save_evaluation",
+            "Save the current evaluation to a verifiable JSON record.",
+        )
+        update_action_tooltip_and_state(
+            self._load_action,
+            reasons,
+            "load_evaluation",
+            "Load and verify a stored evaluation JSON record.",
+        )
 
     def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
         """Clean the widget up on close."""
