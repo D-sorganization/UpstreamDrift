@@ -175,7 +175,7 @@ The excess is a physical ball-contact collision transient: as clubhead speed inc
 - **Modifying bushing stiffness or damping in `GripInterface`:** rejected; alters cross-engine parity baseline across OSV-7 (#11739).
 - **Silent tolerance loosening:** rejected by owner ruling of 2026-10-11.
 
-### Evidence & Tests
+### Evidence Receipt
 
-- `tests/unit/motion_matching/test_grip_bushing_opensim.py`: `test_full_swing_deflection_within_limits[driver]` and `test_full_swing_internal_force_is_physical[driver]` enforce `_assert_bound` with ceiling verification.
+- Tests: [`tests/unit/motion_matching/test_grip_bushing_opensim.py`](../../../tests/unit/motion_matching/test_grip_bushing_opensim.py) (`test_full_swing_deflection_within_limits[driver]` and `test_full_swing_internal_force_is_physical[driver]`).
 - Reference: issues #12272, #12221, #11767, #11739.
