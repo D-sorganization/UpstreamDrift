@@ -25,7 +25,7 @@ and guarantees that cone violations and non-convergence are never silently clipp
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal, TypeAlias
+from typing import Any, Literal, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -546,14 +546,14 @@ def _solve_contact_wrenches_admm(
     w_smooth = problem.input_smoothness_weight
     has_smooth = w_smooth > 0.0 and n_nodes > 2
 
-    q_blocks = []
-    g_blocks = []
+    q_blocks: list[FloatArray] = []
+    g_blocks: list[FloatArray] = []
     for n in range(n_nodes):
         hn, gn = _build_node_cost(problem, n, w_mat, torques[n])
         q_blocks.append(hn)
         g_blocks.append(gn)
 
-    q_diag: sp.csc_matrix = sp.block_diag(q_blocks, format="csc").tocsc()
+    q_diag: Any = sp.block_diag(q_blocks, format="csc").tocsc()
     g_vec = np.concatenate(g_blocks)
 
     if has_smooth:
@@ -576,7 +576,7 @@ def _solve_contact_wrenches_admm(
             (smooth_u.data, (smooth_u.indices, col_indices)),
             shape=(smooth_u.shape[0], n_nodes * (n_u + n_lambda)),
         )
-        q_diag += (w_smooth**2) * (smooth_full.T @ smooth_full).tocsc()
+        q_diag = q_diag + (w_smooth**2) * (smooth_full.T @ smooth_full).tocsc()
 
     lambda_cols = np.concatenate(
         [
