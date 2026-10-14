@@ -206,59 +206,12 @@ def _compute_spec_poses(
     doc: dict[str, Any],
 ) -> tuple[float, dict[str, np.ndarray]]:
     """Compute total mass and world-frame neutral pose origins from spec."""
-    spec_mass = float(
-        sum(s["mass_kg"] for b in doc["bodies"] for s in b.get("solids", []))
+    from src.shared.python.humanoid_character_builder.spec_params import (
+        _compute_spec_poses as _calc_spec_poses,
     )
-    poses: dict[str, np.ndarray] = {"world": np.eye(4)}
-    for joint in order_full_body_joints(doc):
-        p_pose = poses[joint["parent"]]
-        p_base = np.asarray(joint["parent_to_base"], dtype=float)
-        c_follower = np.asarray(joint["child_to_follower"], dtype=float)
-        poses[joint["child"]] = p_pose @ p_base @ np.linalg.inv(c_follower)
 
-    frame_origins: dict[str, np.ndarray] = {}
-    for frame in doc.get("frames", []):
-        b_name = frame["body"]
-        if b_name in poses:
-            placement = np.asarray(frame["placement"], dtype=float)
-            frame_origins[frame["name"]] = (poses[b_name] @ placement)[:3, 3]
-
+    spec_mass, _, frame_origins = _calc_spec_poses(doc)
     return spec_mass, frame_origins
-
-
-def _solve_urdf_link_poses(root_elem: Any, root_link: str) -> dict[str, np.ndarray]:
-    """Propagate transforms through URDF joint tree at neutral pose."""
-    poses: dict[str, np.ndarray] = {root_link: np.eye(4)}
-    unresolved = list(root_elem.findall("joint"))
-    while unresolved:
-        next_unresolved = []
-        progress = False
-        for joint in unresolved:
-            p_link = joint.find("parent").attrib["link"]
-            c_link = joint.find("child").attrib["link"]
-            if p_link in poses:
-                origin_elem = joint.find("origin")
-                xyz = (
-                    [float(x) for x in origin_elem.attrib.get("xyz", "0 0 0").split()]
-                    if origin_elem is not None
-                    else [0.0, 0.0, 0.0]
-                )
-                rpy = (
-                    [float(x) for x in origin_elem.attrib.get("rpy", "0 0 0").split()]
-                    if origin_elem is not None
-                    else [0.0, 0.0, 0.0]
-                )
-                trans = np.eye(4)
-                trans[:3, :3] = Rotation.from_euler("xyz", rpy).as_matrix()
-                trans[:3, 3] = xyz
-                poses[c_link] = poses[p_link] @ trans
-                progress = True
-            else:
-                next_unresolved.append(joint)
-        if not progress:
-            break
-        unresolved = next_unresolved
-    return poses
 
 
 def _verify_urdf(
@@ -267,6 +220,9 @@ def _verify_urdf(
     """Verify URDF bundle mass, frame origins, and coordinate order."""
     from src.engines.physics_engines.drake.python.full_body_urdf import (
         export_full_body_urdf,
+    )
+    from src.shared.python.humanoid_character_builder.spec_params import (
+        solve_urdf_link_poses,
     )
 
     xml, sidecar = export_full_body_urdf(spec_bytes)
@@ -280,7 +236,7 @@ def _verify_urdf(
     )
     body_links = sidecar.get("body_links", {})
     root_link = body_links.get("world", "body_0")
-    link_poses = _solve_urdf_link_poses(root, root_link)
+    link_poses = solve_urdf_link_poses(root, root_link)
     frame_links = sidecar.get("frame_links", {})
     frame_errs = [
         float(np.linalg.norm(spec_frames[fname] - link_poses[flink][:3, 3]))
@@ -292,21 +248,14 @@ def _verify_urdf(
     return mass_kg, max_frame_err, coords
 
 
-def _parse_mjcf_pose(elem: Any) -> np.ndarray:
-    """Parse translation and quaternion from an MJCF element."""
-    trans = np.eye(4)
-    if "pos" in elem.attrib:
-        trans[:3, 3] = [float(x) for x in elem.attrib["pos"].split()]
-    if "quat" in elem.attrib:
-        w, x, y, z = [float(v) for v in elem.attrib["quat"].split()]
-        trans[:3, :3] = Rotation.from_quat([x, y, z, w]).as_matrix()
-    return trans
-
-
 def _collect_mjcf_sites(
     elem: Any, parent_pose: np.ndarray, sites: dict[str, np.ndarray]
 ) -> None:
     """Recursively collect world-frame positions of MJCF site elements."""
+    from src.shared.python.humanoid_character_builder.spec_params import (
+        _parse_mjcf_pose,
+    )
+
     world_t = parent_pose @ _parse_mjcf_pose(elem)
     for site in elem.findall("site"):
         name = site.attrib.get("name")

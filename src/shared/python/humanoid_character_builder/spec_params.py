@@ -250,29 +250,9 @@ def _verify_mjcf(
     return mjcf_mass_kg, mjcf_max_frame_err
 
 
-def _verify_urdf(
-    spec_bytes: bytes, spec_frame_origins: dict[str, np.ndarray]
-) -> tuple[float, float]:
-    """Verify URDF mass conservation and frame links."""
-    from src.engines.physics_engines.drake.python.full_body_urdf import (
-        export_full_body_urdf,
-    )
-
-    urdf_xml, urdf_sidecar = export_full_body_urdf(spec_bytes)
-    urdf_root = DefusedET.fromstring(urdf_xml)
-    urdf_mass_kg = float(
-        sum(
-            float(m.attrib["value"])
-            for link in urdf_root.findall("link")
-            for m in link.findall("inertial/mass")
-        )
-    )
-
-    body_links = urdf_sidecar.get("body_links", {})
-    root_link = body_links.get("world", "body_0")
-    urdf_link_origins: dict[str, np.ndarray] = {root_link: np.zeros(3)}
+def solve_urdf_link_poses(urdf_root: Any, root_link: str) -> dict[str, np.ndarray]:
+    """Propagate transforms through URDF joint tree at neutral pose."""
     urdf_link_poses: dict[str, np.ndarray] = {root_link: np.eye(4)}
-
     unresolved_urdf = list(urdf_root.findall("joint"))
     while unresolved_urdf:
         next_unresolved = []
@@ -297,13 +277,37 @@ def _verify_urdf(
                 T[:3, 3] = xyz
                 world_T = urdf_link_poses[p_link] @ T
                 urdf_link_poses[c_link] = world_T
-                urdf_link_origins[c_link] = world_T[:3, 3]
                 progress = True
             else:
                 next_unresolved.append(j)
         if not progress:
             break
         unresolved_urdf = next_unresolved
+    return urdf_link_poses
+
+
+def _verify_urdf(
+    spec_bytes: bytes, spec_frame_origins: dict[str, np.ndarray]
+) -> tuple[float, float]:
+    """Verify URDF mass conservation and frame links."""
+    from src.engines.physics_engines.drake.python.full_body_urdf import (
+        export_full_body_urdf,
+    )
+
+    urdf_xml, urdf_sidecar = export_full_body_urdf(spec_bytes)
+    urdf_root = DefusedET.fromstring(urdf_xml)
+    urdf_mass_kg = float(
+        sum(
+            float(m.attrib["value"])
+            for link in urdf_root.findall("link")
+            for m in link.findall("inertial/mass")
+        )
+    )
+
+    body_links = urdf_sidecar.get("body_links", {})
+    root_link = body_links.get("world", "body_0")
+    urdf_link_poses = solve_urdf_link_poses(urdf_root, root_link)
+    urdf_link_origins = {k: v[:3, 3] for k, v in urdf_link_poses.items()}
 
     urdf_frame_links = urdf_sidecar.get("frame_links", {})
     urdf_frame_errors = [
