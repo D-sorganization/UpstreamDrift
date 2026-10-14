@@ -168,6 +168,15 @@ describe('Capability Adapter (Tauri vs Browser)', () => {
       expect(action.alternativeRoute).toBeDefined();
     }
   });
+
+  it('keeps the BunkerShot3D native window under Tauri and offers its web page in a browser (#9545)', () => {
+    expect(resolveWorkspaceToolAction('bunkershot3d', { isTauri: true }).kind).toBe('native-launch');
+    const action = resolveWorkspaceToolAction('bunkershot3d', { isTauri: false });
+    expect(action.kind).toBe('native-only-explanation');
+    if (action.kind === 'native-only-explanation') {
+      expect(action.alternativeRoute).toBe('/tools/bunker-workbench');
+    }
+  });
 });
 
 describe('WorkspaceView and Shell Integration', () => {

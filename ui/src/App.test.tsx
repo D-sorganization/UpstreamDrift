@@ -24,6 +24,12 @@ vi.mock('@/pages/CrossEngineDashboard', () => ({
   ),
 }));
 
+vi.mock('@/pages/BunkerWorkbench', () => ({
+  BunkerWorkbenchPage: () => (
+    <div data-testid="bunker-workbench-page-mock">BunkerWorkbenchPage Mock</div>
+  ),
+}));
+
 vi.mock('@/pages/LiftBaseline', () => ({
   LiftBaselinePage: () => (
     <div data-testid="lift-baseline-page-mock">LiftBaselinePage Mock</div>
@@ -113,5 +119,11 @@ describe('App', () => {
     window.history.pushState({}, '', '/tools/lift-baseline');
     render(<App />, { wrapper: createWrapper() });
     expect(await screen.findByTestId('lift-baseline-page-mock')).toBeInTheDocument();
+  });
+
+  it('renders BunkerWorkbenchPage at /tools/bunker-workbench (#9545)', async () => {
+    window.history.pushState({}, '', '/tools/bunker-workbench');
+    render(<App />, { wrapper: createWrapper() });
+    expect(await screen.findByTestId('bunker-workbench-page-mock')).toBeInTheDocument();
   });
 });
