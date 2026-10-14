@@ -81,6 +81,7 @@ __all__ = [
     "SUPPORTED_SCHEMA_VERSIONS",
     "BunkerShotResultReader",
     "BunkerShotResultWriter",
+    "ChunkedAppender",
     "SandFieldPayload",
 ]
 
@@ -150,11 +151,16 @@ class SandFieldPayload(NamedTuple):
     digest: str
 
 
-class _Appender:
+class ChunkedAppender:
     """Buffered append to a resizable HDF5 dataset chunked along time.
 
     Rows are accumulated in memory and flushed in blocks so a 2 kHz run costs
     one dataset resize per chunk rather than one HDF5 object per sample.
+
+    Public because it is also the bounded-memory engine of the particle
+    trajectory artifact (:mod:`bunkershot3d.fields.trajectory`, issue #9545):
+    at most ``chunk`` rows plus the last block appended are ever held, so an
+    artifact far larger than RAM streams through a fixed buffer.
     """
 
     def __init__(
@@ -181,6 +187,11 @@ class _Appender:
         self._dtype = dtype
         self._blocks: list[np.ndarray] = []
         self._buffered = 0
+
+    @property
+    def buffered_rows(self) -> int:
+        """Rows held in memory and not yet written to the dataset."""
+        return self._buffered
 
     @property
     def _tail(self) -> tuple[int, ...]:
@@ -239,9 +250,10 @@ class _Stream:
         """
         self.group = group
         self._widths = dict(widths)
-        self._time = _Appender(group, _TIME, None, chunk)
+        self._time = ChunkedAppender(group, _TIME, None, chunk)
         self._columns = {
-            name: _Appender(group, name, width, chunk) for name, width in widths.items()
+            name: ChunkedAppender(group, name, width, chunk)
+            for name, width in widths.items()
         }
         self._last_time: float | None = None
 
@@ -290,10 +302,10 @@ class _RaggedStream:
             chunk: Frames per chunk on the time axis.
         """
         self.group = group
-        self._time = _Appender(group, _TIME, None, chunk)
-        self._counts = _Appender(group, _COUNTS, None, chunk, dtype=np.int64)
-        self._positions = _Appender(group, "positions", 3, chunk)
-        self._velocities = _Appender(group, "velocities", 3, chunk)
+        self._time = ChunkedAppender(group, _TIME, None, chunk)
+        self._counts = ChunkedAppender(group, _COUNTS, None, chunk, dtype=np.int64)
+        self._positions = ChunkedAppender(group, "positions", 3, chunk)
+        self._velocities = ChunkedAppender(group, "velocities", 3, chunk)
         self._last_time: float | None = None
 
     def append(
