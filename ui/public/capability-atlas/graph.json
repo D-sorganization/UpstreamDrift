@@ -752,17 +752,17 @@
     {
       "feature_id": "tools.matched_swing_browser",
       "title": "Matched Swing Results Browser",
-      "status": "gap",
+      "status": "parity",
       "pyqt": "src/tools/matched_swing_browser/gui.py",
       "api": "src/api/routes/matched_swings.py",
       "web": "ui/src/pages/MatchedSwings.tsx",
-      "issue": 11987,
+      "issue": null,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "matched_swing_browser"
       ],
-      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff (#10353 shipped the PyQt tile via #10543). The web page (MS-85 #10358) reads the same ledger through GET /matched-swings: desktop-ranked list with engine, capture, lane, verdict, drive-mode and profile filters and the desktop qualification note (#12061), receipt and parity JSON, GIF animation, 3D marker preview, impact parameters and grip-wrench charts. The Markdown and PDF Export Report (#12063, #11987; GET /matched-swings/{id}/report?format=pdf), frame-exact GIF Play/Pause/Restart (GET /matched-swings/{id}/animation/frames[/{index}], matching the desktop QMovie controls), and Export Video as GIF or MP4 (#11987; GET /matched-swings/{id}/video, reusing the desktop's export_video/export_report exactly) are on the web. Still missing on the web (#11987): the native-viewer handoff.",
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff (#10353 shipped the PyQt tile via #10543). The web page (MS-85 #10358) reads the same ledger through GET /matched-swings: desktop-ranked list with engine, capture, lane, verdict, drive-mode and profile filters and the desktop qualification note (#12061), receipt and parity JSON, GIF animation, 3D marker preview, impact parameters and grip-wrench charts. The Markdown and PDF Export Report (#12063, #11987; GET /matched-swings/{id}/report?format=pdf), frame-exact GIF Play/Pause/Restart (GET /matched-swings/{id}/animation/frames[/{index}], matching the desktop QMovie controls), Export Video as GIF or MP4 (#11987; GET /matched-swings/{id}/video, reusing the desktop's export_video/export_report exactly), and native-viewer handoff (#11987; POST /api/matched-swings/{id}/native-viewer) are on the web.",
       "id": "tools.matched_swing_browser"
     },
     {
@@ -3190,7 +3190,7 @@
   "inputs": {
     "src/config/models.yaml": "2a2e303aa92f6dda0ef3868fcc881ccbdbc54cf362ac3aae931333163969b90f",
     "src/config/launcher_manifest.json": "abc9913955858006e7bb6b8e9dca8c9693313e62d48d90dcc1ace33e632a79dc",
-    "src/config/feature_parity.json": "01045c26354a735d6223a41c85723da22b52d878e8de81facdfb4989de019db7",
+    "src/config/feature_parity.json": "292376cd76030a7e21253d449a8f3cc479360a50e4db47d15df1e8e05c71c351",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
