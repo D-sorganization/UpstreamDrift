@@ -2,7 +2,17 @@
  * Tests for MatchedSwings Results page (MS-85, #10358).
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { vi } from 'vitest';
+
+declare const describe: (name: string, fn: () => void) => void;
+declare const it: {
+  (name: string, fn: () => void | Promise<void>): void;
+  skip: (name: string, fn: () => void | Promise<void>) => void;
+  only: (name: string, fn: () => void | Promise<void>) => void;
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const expect: any;
+declare const beforeEach: (fn: () => void | Promise<void>) => void;
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
@@ -69,6 +79,7 @@ const {
   fetchMatchedSwingReceiptMock,
   fetchParityReportMock,
   fetchMatchedSwingAnimationInfoMock,
+  launchMatchedSwingNativeViewerMock,
 } = vi.hoisted(() => ({
   fetchCandidatePreviewFrameMock: vi.fn(async () => ({
     id: 'aaa111',
@@ -90,6 +101,14 @@ const {
     width: 1,
     height: 1,
   })),
+  launchMatchedSwingNativeViewerMock: vi.fn(async (runId: string) => ({
+    schema_version: 'matched-swing-native-viewer/1',
+    run_id: runId,
+    success: true,
+    backend: 'meshcat',
+    url: 'http://localhost:7000',
+    message: 'Native viewer meshcat launched successfully',
+  })),
 }));
 
 vi.mock('@/api/matchedSwings', async (importOriginal) => {
@@ -100,6 +119,7 @@ vi.mock('@/api/matchedSwings', async (importOriginal) => {
     fetchCandidatePreviewFrame: fetchCandidatePreviewFrameMock,
     fetchMatchedSwingReceipt: fetchMatchedSwingReceiptMock,
     fetchParityReport: fetchParityReportMock,
+    launchMatchedSwingNativeViewer: launchMatchedSwingNativeViewerMock,
     matchedSwingAnimationUrl: (id: string) => `/api/v1/matched-swings/${id}/animation.gif`,
     fetchMatchedSwingAnimationInfo: fetchMatchedSwingAnimationInfoMock,
     matchedSwingAnimationFrameUrl: (id: string, index: number) =>
@@ -112,6 +132,7 @@ describe('MatchedSwingsPage', () => {
     fetchCandidatePreviewFrameMock.mockClear();
     fetchMatchedSwingReceiptMock.mockClear();
     fetchParityReportMock.mockClear();
+    launchMatchedSwingNativeViewerMock.mockClear();
     vi.mocked(fetchMatchedSwingLedger).mockClear();
   });
 
@@ -454,4 +475,60 @@ describe('MatchedSwingsPage', () => {
       expect(screen.queryByText('unique_rejection_marker')).not.toBeInTheDocument();
     });
   });
+
+  it('launches native viewer successfully for a run with candidate NPZ', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    const launchBtn = screen.getByRole('button', { name: /open native viewer/i });
+    expect(launchBtn).toBeEnabled();
+    await user.click(launchBtn);
+
+    await waitFor(() => {
+      expect(launchMatchedSwingNativeViewerMock).toHaveBeenCalledWith('aaa111');
+    });
+    expect(
+      await screen.findByText('Native viewer meshcat launched successfully'),
+    ).toBeInTheDocument();
+  });
+
+  it('displays error when launching native viewer fails', async () => {
+    launchMatchedSwingNativeViewerMock.mockRejectedValueOnce(
+      new Error('Native viewer meshcat unavailable'),
+    );
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('button', { name: /drake/i });
+    const launchBtn = screen.getByRole('button', { name: /open native viewer/i });
+    await user.click(launchBtn);
+
+    expect(
+      await screen.findByText('Native viewer meshcat unavailable'),
+    ).toBeInTheDocument();
+  });
+
+  it('disables Open Native Viewer button for a run without candidate NPZ', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MatchedSwingsPage />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole('button', { name: /opensim/i }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /open native viewer/i })).toBeDisabled();
+    });
+  });
 });
+

@@ -3133,7 +3133,7 @@
     "tests/scripts/wave8_scripts/test_check_no_print_calls.py::test_run_git_raises",
     "tests/scripts/wave8_scripts/test_check_root_clutter.py::test_allowlist_is_frozen",
     "tests/scripts/wave8_scripts/test_check_root_clutter.py::test_main_fails_for_disallowed",
-    "tests/scripts/wave8_scripts/test_check_root_clutter.py::test_main_ignores_directories",
+    "tests/scripts/wave8_scripts/test_check_root_clutter.py::test_main_passes_with_allowlisted_directories",
     "tests/scripts/wave8_scripts/test_check_root_clutter.py::test_main_ignores_dotfiles",
     "tests/scripts/wave8_scripts/test_check_root_clutter.py::test_main_passes_with_allowed_files",
     "tests/scripts/wave8_scripts/test_module_size_baseline_truthfulness.py::test_baseline_file_exists",

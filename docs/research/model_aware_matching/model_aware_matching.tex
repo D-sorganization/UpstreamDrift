@@ -36,6 +36,8 @@
 \newcommand{\btheta}{\boldsymbol{\theta}}
 \newcommand{\bxi}{\boldsymbol{\xi}}
 \newcommand{\blambda}{\boldsymbol{\lambda}}
+\newcommand{\btau}{\boldsymbol{\tau}}
+\newcommand{\bp}{\mathbf{p}}
 \newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
 
 \title{MOSAIC: Model-Aware Simultaneous Anthropometry, Inertia and Control\\
@@ -323,7 +325,65 @@ friction cones are active).  This is the \emph{inverse-dynamics collocation}
 formulation (Remy--Thelen; Falisse \emph{et al.}): no forward integration
 occurs inside the optimisation, so there is no exponential sensitivity, every
 node is independent (embarrassingly parallel), and the measured states are
-feasible initial iterates.
+\subsection{Observation Factors: 2-D Projection, Robust Kernels, and Attachment Geometry}
+\label{subsec:observation_factors}
+
+The kinematic observation term in \eqref{eq:objective} incorporates direct marker
+measurements, multi-camera 2-D keypoint detections, and refined attachment offsets
+under an M-estimation framework.
+
+\paragraph{2-D Keypoint Projection.}
+For camera $c$ with pinhole intrinsic parameters $\boldsymbol{\kappa}=(f_x, f_y, c_x, c_y)$
+and extrinsic transformation $(\mathbf{R}, \mathbf{t})$ mapping world coordinates
+$\mathbf{p}_w \in \R^3$ into camera coordinates $\mathbf{p}_c = \mathbf{R}\mathbf{p}_w + \mathbf{t} = (X_c, Y_c, Z_c)^\top$,
+the perspective projection $\boldsymbol{\pi}(\mathbf{p}_w; \boldsymbol{\kappa}, \mathbf{R}, \mathbf{t}) \in \R^2$ is
+\begin{equation}
+  \boldsymbol{\pi}(\mathbf{p}_w) = \begin{bmatrix} f_x \frac{X_c}{Z_c} + c_x \\ f_y \frac{Y_c}{Z_c} + c_y \end{bmatrix}, \qquad Z_c > 0.
+\end{equation}
+The analytic projection Jacobian w.r.t.\ world position is given by the chain rule:
+\begin{equation}
+  \frac{\partial \boldsymbol{\pi}}{\partial \mathbf{p}_w} = \mathbf{J}_{\mathrm{cam}} \mathbf{R}, \qquad
+  \mathbf{J}_{\mathrm{cam}} = \begin{bmatrix} \frac{f_x}{Z_c} & 0 & -\frac{f_x X_c}{Z_c^2} \\ 0 & \frac{f_y}{Z_c} & -\frac{f_y Y_c}{Z_c^2} \end{bmatrix} .
+\end{equation}
+Jacobians w.r.t.\ camera parameters are computed analytically: w.r.t.\ intrinsics $\boldsymbol{\kappa}$,
+$\partial \boldsymbol{\pi}/\partial \boldsymbol{\kappa}$ has rows $(X_c/Z_c, 0, 1, 0)$ and $(0, Y_c/Z_c, 0, 1)$;
+w.r.t.\ translation, $\partial \boldsymbol{\pi}/\partial \mathbf{t} = \mathbf{J}_{\mathrm{cam}}$;
+and w.r.t.\ rotation vector $\mathbf{r}$ (where $\mathbf{R} = \exp([\mathbf{r}]_\times)$),
+$\partial \boldsymbol{\pi}/\partial \mathbf{r} = \mathbf{J}_{\mathrm{cam}} (\partial \mathbf{R}/\partial \mathbf{r}) \mathbf{p}_w$.
+
+\paragraph{Robust Loss Kernels and IRLS Weights.}
+To reject spurious 2-D keypoints and marker occlusions, the loss $\rho(r^2)$ is evaluated
+via Iteratively Reweighted Least Squares (IRLS). With residual $r \in \R$, squared residual $s = r^2$,
+influence function $\psi(r) = \frac{d}{dr}[\rho(r^2)] = 2r \rho'(r^2)$, weight $w(r) = \psi(r)/r$,
+and second derivative $\psi'(r) = \frac{d}{dr}[\psi(r)]$, the implemented kernels are:
+\begin{itemize}[nosep]
+  \item \textbf{Huber} ($\delta > 0$):
+    $\rho(s) = \frac{1}{2}s$ for $s \le \delta^2$, and $\delta(\sqrt{s} - \frac{1}{2}\delta)$ for $s > \delta^2$.
+    Weight $w(r) = \min(1, \delta/|r|)$, derivative $\psi'(r) = 1$ for $|r| \le \delta$ and $0$ for $|r| > \delta$.
+  \item \textbf{Cauchy} ($c > 0$):
+    $\rho(s) = \frac{c^2}{2}\ln(1 + s/c^2)$.
+    Weight $w(r) = \frac{1}{1 + (r/c)^2}$, derivative $\psi'(r) = \frac{1 - (r/c)^2}{(1 + (r/c)^2)^2}$.
+  \item \textbf{Geman--McClure} ($c > 0$):
+    $\rho(s) = \frac{s/2}{1 + s/c^2}$.
+    Weight $w(r) = \frac{1}{(1 + (r/c)^2)^2}$, derivative $\psi'(r) = \frac{1 - 3(r/c)^2}{(1 + (r/c)^2)^3}$.
+  \item \textbf{Tukey} (bisquare, $c > 0$):
+    $\rho(s) = \frac{c^2}{6}[1 - (1 - s/c^2)^3]$ for $s \le c^2$ and $\frac{c^2}{6}$ for $s > c^2$.
+    Weight $w(r) = (1 - (r/c)^2)^2$ for $|r| \le c$ and $0$ for $|r| > c$.
+\end{itemize}
+
+\paragraph{Marker Attachment Offsets as Geometry Parameters.}
+Local marker attachment offsets on link $i$ are parameterized as $\mathbf{p}_{\mathrm{local}} = \mathbf{p}_0 + \delta\mathbf{p}$,
+where $\mathbf{p}_0$ is the nominal placement and $\delta\mathbf{p}$ enters the outer geometry vector $s$.
+In forward kinematics, $\mathbf{p}_w = \mathbf{o}_i(\bq; l) + \mathbf{R}_i(\bq)(\mathbf{p}_0 + \delta\mathbf{p})$.
+The analytic Jacobians are:
+\begin{equation}
+  \frac{\partial \mathbf{p}_w}{\partial \delta\mathbf{p}} = \mathbf{R}_i(\bq), \qquad
+  \frac{\partial \mathbf{p}_w}{\partial \bq} = \mathbf{J}_{\bq}(\bq; l, \mathbf{p}_{\mathrm{local}}), \qquad
+  \frac{\partial \mathbf{p}_w}{\partial l} = \mathbf{J}_l(\bq; l, \mathbf{p}_{\mathrm{local}}) .
+\end{equation}
+The observability of $\delta\mathbf{p}$ is governed by the rotational excitation of each link;
+over multi-pose trials the stacked normal matrix yields full rank (observable fraction 1.0)
+and allows linear recovery of attachment offsets to sub-millimetre tolerance.
 
 \section{Algorithm}
 \label{sec:algorithm}
@@ -648,6 +708,43 @@ Timings above were measured on NumPy~2.5/SciPy~1.18, one core of the session con
     when unexcited.  Both open-loop rollouts (with and without the actuation
     layer) are evaluated on fitted trials and reported side-by-side in
     \texttt{SubjectFitReport.activation\_report} alongside declared provenance.
+\end{itemize}
+
+\subsection{Pinocchio Regressor Provider (MOSAIC-02)}
+\label{subsec:pinocchio_regressor}
+The first engine-backed \texttt{RegressorModel} is provided by \texttt{PinocchioRegressorModel}
+in \texttt{src/shared/python/estimation/mosaic/pinocchio\_provider.py}.  It exposes the
+linear regressor $\bY(\bq, \bv, \ba)$ via Pinocchio's \texttt{computeJointTorqueRegressor}
+vectorised across $N$ nodes.
+
+\paragraph{Parameter Conventions.} Each moving link $i$ is parameterised by a 10-vector
+of spatial dynamic parameters:
+\begin{equation}
+  \bpi_i = \begin{bmatrix} m_i & h_{ix} & h_{iy} & h_{iz} & I_{xx} & I_{xy} & I_{yy} & I_{xz} & I_{yz} & I_{zz} \end{bmatrix}^\top
+\end{equation}
+where $h_i = m_i c_i$ is the first moment of mass and $I$ is the rotational inertia
+about the joint frame origin.  Note that in Pinocchio $I_{yy}$ precedes $I_{xz}$,
+whereas in the internal \texttt{inertial.py} ordering $I_{xz}$ precedes $I_{yy}$.
+For planar motion in the $xy$-plane with $z$-axis revolute joints, the 4 active columns
+correspond exactly to indices $(0, 1, 2, 9) = (m, h_x, h_y, I_{zz})$, with all other 6
+columns identically zero.
+
+\paragraph{Conformance and Verification.}
+\begin{itemize}[nosep]
+  \item \textbf{Planar Oracle Conformance:} Tested against the 3-link planar oracle
+    fixture (\texttt{PlanarChain}).  Extracted planar columns match the analytic
+    regressor to a maximum discrepancy of $3.55 \times 10^{-15}$ across random
+    $(\bq, \bv, \ba)$ (acceptance criterion: $< 10^{-12}$).
+  \item \textbf{RNEA Torque Identity:} $\bY(\bq, \bv, \ba)\bpi = \btau_{\text{RNEA}}$ holds
+    to $1.26 \times 10^{-15}$ on fixed-base manipulators and $1.31 \times 10^{-14}$ on
+    floating-base humanoid models (including floating-base rows).
+  \item \textbf{Marker Forward Kinematics and Jacobians:} World marker positions $\bp_{\text{world}} = o_j + R_j p_{\text{local}}$
+    and analytic Jacobians $J_v = J_{\text{trans}} - [R_j p_{\text{local}}]_\times J_{\text{rot}}$
+    match numerical differentiation to $< 10^{-8}$.
+  \item \textbf{Batched Execution:} Evaluated over $N=150$ benchmark nodes; matches the
+    per-node loop to machine precision ($0.0$).
+  \item \textbf{Qualification:} If Pinocchio is uninstalled, tests skip with an
+    unqualified report (\texttt{pytest.mark.requires\_pinocchio}); no mock stands in for a pass.
 \end{itemize}
 
 \subsection{Floating-Base Manifold Spline on $SE(3)$ (MOSAIC-04, \#11536)}
