@@ -2775,10 +2775,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #12279
 - **Branch:** merged via #12502
-- **PR:** #12502
+- **PR:** #12502, #12517
 - **Paths:** see #12502
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-14 (`07619775`; collated from changes/12279-add-explicit-effort-hold-rate-manifest-p.md)
+- **Last verified:** 2026-10-14 (`79a83078`; collated from changes/12279-regenerate-the-7-iron-club-face-fixture.md)
 - **Summary:** Add explicit effort hold rate manifest policy for same-input bundles and document 0.125 ms ZOH findings
 - **Next step:** Shipped in PR #12502.
 
