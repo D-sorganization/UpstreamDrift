@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 from src.shared.python.physics._pre_impact_contracts import (
     FieldOrigin,
@@ -250,6 +251,15 @@ def create_default_hand_wrenches(
     return (lead, trail)
 
 
+def _parse_impact_offset(off_v: Any) -> NDArray[np.float64]:
+    """Parse impact offset into a 3-element float64 array."""
+    if off_v is None:
+        return np.zeros(3, dtype=np.float64)
+    v0 = float(off_v[0]) if len(off_v) > 0 else 0.0
+    v1 = float(off_v[1]) if len(off_v) > 1 else 0.0
+    return np.array([0.0, v0, v1], dtype=np.float64)
+
+
 def _build_head_section(
     head: HeadState | Mapping[str, Any] | None, swing: Any | None
 ) -> HeadState:
@@ -270,18 +280,7 @@ def _build_head_section(
         normal = norm_raw[0] if norm_raw.ndim == 2 else norm_raw
         normal = normal / np.linalg.norm(normal)
         moi = float(swing.get("clubhead_moi", 4.5e-4))
-        off_v = swing.get("impact_offset")
-        offset = (
-            np.zeros(3)
-            if off_v is None
-            else np.array(
-                [
-                    0.0,
-                    float(off_v[0]) if len(off_v) > 0 else 0.0,
-                    float(off_v[1]) if len(off_v) > 1 else 0.0,
-                ]
-            )
-        )
+        offset = _parse_impact_offset(swing.get("impact_offset"))
     elif swing is not None:
         vel = np.asarray(swing.clubhead_velocity, dtype=np.float64)
         ang = np.asarray(
@@ -296,18 +295,7 @@ def _build_head_section(
         normal = orient[0] if orient.ndim == 2 else orient
         normal = normal / np.linalg.norm(normal)
         moi = float(getattr(swing, "clubhead_moi", 4.5e-4))
-        off_v = getattr(swing, "impact_offset", None)
-        offset = (
-            np.zeros(3)
-            if off_v is None
-            else np.array(
-                [
-                    0.0,
-                    float(off_v[0]) if len(off_v) > 0 else 0.0,
-                    float(off_v[1]) if len(off_v) > 1 else 0.0,
-                ]
-            )
-        )
+        offset = _parse_impact_offset(getattr(swing, "impact_offset", None))
     else:
         vel = np.array([45.0, 0.0, 0.0])
         ang = np.zeros(3)
