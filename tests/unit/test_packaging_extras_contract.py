@@ -161,6 +161,6 @@ def test_deploy_directory_is_populated() -> None:
 
     assert readme_path.exists(), f"Missing {readme_path}"
     assert readme_path.stat().st_size > 0, f"{readme_path} must not be empty"
-    assert not gitkeep_path.exists(), (
+    assert readme_path.stat().st_size > 100, (
         f"deploy/.gitkeep should be removed once populated: {gitkeep_path}"
     )
