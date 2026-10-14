@@ -3,11 +3,12 @@
 from pathlib import Path
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 
 @pytest.fixture
 def native_pin(tmp_path: Path) -> Path:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     body = osim.Body("segment", 1.0, osim.Vec3(0), osim.Inertia(0.02))
     model.addBody(body)

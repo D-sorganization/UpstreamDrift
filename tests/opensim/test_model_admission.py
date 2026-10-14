@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from defusedxml.common import DTDForbidden
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python.tour_matching.model_admission import (
     audit_muscle_model_asset,
@@ -126,7 +127,7 @@ def test_dtd_is_forbidden_even_when_namespace_interpretation_is_disabled(
 
 @pytest.fixture
 def native_asset(tmp_path: Path) -> Path:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     model.setName("synthetic_asset_admission")
     body = osim.Body("hand", 1.0, osim.Vec3(0), osim.Inertia(0.01))
@@ -196,7 +197,7 @@ def test_native_identity_changes_with_effective_model_property(
     native_asset: Path,
 ) -> None:
     first = audit_muscle_model_asset(native_asset, _digest(native_asset))
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(native_asset))
     model.updMuscles().get(0).set_ignore_tendon_compliance(False)
     model.printToXML(str(native_asset))
@@ -229,7 +230,7 @@ def test_native_identity_is_repeatable_and_independent_of_role_labels(
 def test_recursive_muscles_outside_native_registry_are_explicit(
     native_asset: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(native_asset))
     extra = osim.Millard2012EquilibriumMuscle("outside_set", 10, 0.1, 0.2, 0)
     extra.addNewPathPoint("a", model.getGround(), osim.Vec3(0))
@@ -246,7 +247,7 @@ def test_recursive_muscles_outside_native_registry_are_explicit(
 def test_native_subtypes_and_auxiliary_components_are_observed(
     native_asset: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(native_asset))
     hand = model.getBodySet().get("hand")
     thelen = osim.Thelen2003Muscle("another_label", 10, 0.1, 0.2, 0)
@@ -301,7 +302,7 @@ def test_native_subtypes_and_auxiliary_components_are_observed(
 def test_native_constraints_do_not_become_independent_dof_counts(
     native_asset: Path,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(native_asset))
     body = osim.Body("other", 1, osim.Vec3(0), osim.Inertia(0.01))
     model.addBody(body)
@@ -386,7 +387,7 @@ def test_unknown_declared_frames_cannot_look_like_zero_coverage(
 
 
 def test_native_load_failure_is_not_initialization_evidence(tmp_path: Path) -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     path = tmp_path / "bad_socket.osim"
     path.write_text(
         '<OpenSimDocument Version="40500"><Model name="bad">'

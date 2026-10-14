@@ -10,6 +10,7 @@ from dataclasses import replace
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 from defusedxml import ElementTree
 
 from src.engines.physics_engines.opensim.python.tour_matching.generic_shoulder_lamina import (
@@ -241,7 +242,7 @@ def test_nontriangle_polygons_reject_even_with_updated_mesh_digest(
 def test_exact_reviewed_557_native_physical_and_kinematic_boundary(
     tmp_path: Path,
 ) -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     root = os.environ.get("GENERIC_SHOULDER_FIXTURE_ROOT")
     if root is None:
         pytest.skip("exact source/mesh fixture is outside this repository")

@@ -9,6 +9,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 from defusedxml import ElementTree as ET
 
 from src.engines.physics_engines.opensim.python.tour_matching.native_prepared_state import (
@@ -80,7 +81,7 @@ def _source(
     wrapped: bool = False,
     welded: bool = False,
 ) -> tuple[Path, DeclaredColdStart]:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     model.setGravity(osim.Vec3(0))
     for name, coordinate_name, default in (
@@ -185,7 +186,7 @@ def _welded_source_metrics(
         _restore_named_state,
     )
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(path))
     state = model.initSystem()
     _restore_named_state(model, state, named_state)
@@ -276,7 +277,7 @@ def test_custom_joint_coupler_and_two_muscles_replay_on_fresh_native_model(
         replay_constrained_muscle_bundle,
     )
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, declaration = _source(tmp_path, locked=False, custom=True)
     assert (
         osim.Model(str(path)).getJointSet().get("base").getConcreteClassName()
@@ -324,7 +325,7 @@ def test_moving_path_with_coupler_replays_under_declared_law(tmp_path: Path) -> 
     replay = replay_constrained_muscle_bundle(bundle, declaration)
     assert replay.states.shape == (3, len(declaration.named_state))
     assert np.isfinite(replay.muscle_forces_n).all()
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model(str(path))
     state = model.initSystem()
     guide = osim.MovingPathPoint.safeDownCast(
@@ -512,7 +513,7 @@ def test_source_mutation_and_unreviewed_force_fail_closed(tmp_path: Path) -> Non
         replay_constrained_muscle_bundle,
     )
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, declaration = _source(tmp_path)
     grid = np.array([0.0, 0.001])
     controls = _controls(grid, 0.1)
@@ -537,7 +538,7 @@ def _moco_problem(
         apply_moco_initial_bindings,
     )
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     initial = declaration.named_state
     bounds = {
         name: (max(0.01, value - 0.1), min(1.0, value + 0.1))
@@ -581,7 +582,7 @@ def test_native_moco_solves_coupled_unlocked_muscle_problem(
     tmp_path: Path,
 ) -> None:
     """Native optimizer feasibility, separate from anatomical qualification."""
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, declaration = _source(tmp_path, locked=False)
     target_q = declaration.named_state["/jointset/base/q/value"] + 5e-6
     study = _moco_problem(path, declaration, target_q=target_q)
@@ -720,7 +721,7 @@ def test_maintained_moco_preparation_separates_replay_from_solver_capability(
     from src.engines.physics_engines.opensim.python.tour_matching.trc import write_trc
     from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     path, declaration = _source(tmp_path, locked=locked)
     times = np.array([0.0, 0.001, 0.002])
     capture = TourCapture(
