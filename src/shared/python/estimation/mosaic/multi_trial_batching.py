@@ -175,27 +175,7 @@ def solve_block_arrow_schur(
     Back-substitution per trial:
         delta_c_k = H_{kk}^{-1} (g_k - H_{k, pi} delta_pi)
     """
-    require(h_kk.ndim == 3, "h_kk must be (K, d_c, d_c)")
-    require(h_kk.shape[1] == h_kk.shape[2], "h_kk slices must be square")
-    require(h_kpi.ndim == 3, "h_kpi must be (K, d_c, d_pi)")
-    require(h_pipi.ndim == 2, "h_pipi must be (d_pi, d_pi)")
-    require(h_pipi.shape[0] == h_pipi.shape[1], "h_pipi must be square")
-    require(g_k.ndim == 2, "g_k must be (K, d_c)")
-    require(g_pi.ndim == 1, "g_pi must be (d_pi,)")
-
-    k, d_c, _ = h_kk.shape
-    d_pi = h_pipi.shape[0]
-
-    require(h_kpi.shape[0] == k and h_kpi.shape[1] == d_c, "h_kpi trial dimensions")
-    require(h_kpi.shape[2] == d_pi, "h_kpi shared dimension matches h_pipi")
-    require(g_k.shape[0] == k and g_k.shape[1] == d_c, "g_k shape matches h_kk")
-    require(g_pi.shape[0] == d_pi, "g_pi shape matches h_pipi")
-
-    require(bool(np.all(np.isfinite(h_kk))), "h_kk must be finite")
-    require(bool(np.all(np.isfinite(h_kpi))), "h_kpi must be finite")
-    require(bool(np.all(np.isfinite(h_pipi))), "h_pipi must be finite")
-    require(bool(np.all(np.isfinite(g_k))), "g_k must be finite")
-    require(bool(np.all(np.isfinite(g_pi))), "g_pi must be finite")
+    _validate_block_arrow_inputs(h_kk, h_kpi, h_pipi, g_k, g_pi)
 
     # Vectorized solves over the leading trial dimension
     x_kpi = np.linalg.solve(h_kk, h_kpi)
@@ -218,14 +198,14 @@ def solve_block_arrow_schur(
     return BlockArrowSolution(delta_c=delta_c, delta_pi=delta_pi)
 
 
-def sequential_block_arrow_schur(
+def _validate_block_arrow_inputs(
     h_kk: FloatArray,
     h_kpi: FloatArray,
     h_pipi: FloatArray,
     g_k: FloatArray,
     g_pi: FloatArray,
-) -> BlockArrowSolution:
-    """Sequential (unvectorized loop) multi-trial block-arrow Schur solve reference."""
+) -> tuple[int, int, int]:
+    """Validate shapes, compatibility and finiteness of block-arrow system components."""
     require(h_kk.ndim == 3, "h_kk must be (K, d_c, d_c)")
     require(h_kk.shape[1] == h_kk.shape[2], "h_kk slices must be square")
     require(h_kpi.ndim == 3, "h_kpi must be (K, d_c, d_pi)")
@@ -247,6 +227,19 @@ def sequential_block_arrow_schur(
     require(bool(np.all(np.isfinite(h_pipi))), "h_pipi must be finite")
     require(bool(np.all(np.isfinite(g_k))), "g_k must be finite")
     require(bool(np.all(np.isfinite(g_pi))), "g_pi must be finite")
+
+    return k, d_c, d_pi
+
+
+def sequential_block_arrow_schur(
+    h_kk: FloatArray,
+    h_kpi: FloatArray,
+    h_pipi: FloatArray,
+    g_k: FloatArray,
+    g_pi: FloatArray,
+) -> BlockArrowSolution:
+    """Sequential (unvectorized loop) multi-trial block-arrow Schur solve reference."""
+    k, _, _ = _validate_block_arrow_inputs(h_kk, h_kpi, h_pipi, g_k, g_pi)
 
     sum_h = np.zeros_like(h_pipi)
     sum_g = np.zeros_like(g_pi)
