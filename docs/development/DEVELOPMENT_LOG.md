@@ -3763,10 +3763,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #11743
 - **Branch:** merged via #12241
-- **PR:** #12241, #12477, #12498
+- **PR:** #12241, #12477, #12498, #12507
 - **Paths:** see #12241
 - **Started:** 2026-10-14
-- **Last verified:** 2026-10-14 (`f995dcd3`; collated from changes/11743-pack-parity-audit-gains-a-phase-names-ga.md)
+- **Last verified:** 2026-10-14 (`656f16f2`; collated from changes/11743-lift-3-slice-3-re-measure-the-lift-pack.md)
 - **Summary:** LIFT-3: per-engine and per-lift start-pose conformance checks (bar, feet, closure, joint limits, static GRF) with a recorded matrix
 - **Next step:** Shipped in PR #12241.
 
