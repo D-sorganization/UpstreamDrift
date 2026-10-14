@@ -25,13 +25,20 @@ from PIL.PngImagePlugin import PngInfo
 
 from bunkershot3d.solvers import EnvelopeStatus, FidelityTier
 from src.tools.bunker_shot_gui.export import (
+    ANIMATION_SCHEMA_VERSION,
     EXPORT_METADATA_KEY,
     EXPORT_SCHEMA_VERSION,
     ExportIntegrityError,
     ExportStamp,
     evaluation_stamp,
     export_figure,
+    export_vtk_stamped_animation,
+    export_vtk_stamped_frame,
+    header_digest,
+    load_workbench_evaluation,
+    read_animation_export,
     read_export,
+    save_workbench_evaluation,
 )
 from src.tools.bunker_shot_gui.render import sole_load_still, stamp_axes
 from src.tools.bunker_shot_gui.report import (
@@ -272,3 +279,209 @@ def test_a_file_that_is_not_a_png_is_refused(tmp_path: Path) -> None:
 def test_a_missing_file_is_a_plain_file_error(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         read_export(tmp_path / "absent.png")
+
+
+# ---------------------------------------------------------------- save / load
+
+
+def test_save_and_load_workbench_evaluation_round_trips(
+    nominal_evaluation, tour_swing, tmp_path: Path
+) -> None:
+    path = tmp_path / "nominal_eval.json"
+    saved_path = save_workbench_evaluation(
+        nominal_evaluation, path, swing=tour_swing, handedness="right"
+    )
+    assert saved_path == path
+    assert saved_path.is_file()
+
+    reloaded = load_workbench_evaluation(saved_path)
+    assert reloaded["schema_version"] == "bunker-workbench-evaluation/1"
+    assert reloaded["predictive"] is False
+    assert reloaded["inputs"]["design"]["name"] == "nominal"
+    assert reloaded["inputs"]["swing"]["clubhead_speed_mps"] == 25.0
+    assert reloaded["shot"]["peak_force_n"] == pytest.approx(
+        nominal_evaluation.shot.peak_force_n
+    )
+
+
+def test_save_workbench_evaluation_requires_json_suffix(
+    nominal_evaluation, tmp_path: Path
+) -> None:
+    with pytest.raises(ValueError, match=r"\.json"):
+        save_workbench_evaluation(nominal_evaluation, tmp_path / "bad.txt")
+
+
+def test_load_workbench_evaluation_rejects_missing_file(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        load_workbench_evaluation(tmp_path / "missing.json")
+
+
+def test_load_workbench_evaluation_rejects_corrupted_json(tmp_path: Path) -> None:
+    bad = tmp_path / "corrupt.json"
+    bad.write_text("not json", encoding="utf-8")
+    with pytest.raises(ExportIntegrityError, match="readable JSON"):
+        load_workbench_evaluation(bad)
+
+
+def test_load_workbench_evaluation_rejects_non_dict_json(tmp_path: Path) -> None:
+    bad = tmp_path / "list.json"
+    bad.write_text("[1, 2, 3]", encoding="utf-8")
+    with pytest.raises(ExportIntegrityError, match="JSON object"):
+        load_workbench_evaluation(bad)
+
+
+def test_load_workbench_evaluation_rejects_unknown_schema(
+    nominal_evaluation, tour_swing, tmp_path: Path
+) -> None:
+    path = tmp_path / "schema.json"
+    save_workbench_evaluation(
+        nominal_evaluation, path, swing=tour_swing, handedness="right"
+    )
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["schema_version"] = "bunker-workbench-evaluation/999"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ExportIntegrityError, match="schema"):
+        load_workbench_evaluation(path)
+
+
+def test_load_workbench_evaluation_rejects_tampered_payload(
+    nominal_evaluation, tour_swing, tmp_path: Path
+) -> None:
+    path = tmp_path / "tampered.json"
+    save_workbench_evaluation(
+        nominal_evaluation, path, swing=tour_swing, handedness="right"
+    )
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["shot"]["peak_force_n"] = 99999.0
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ExportIntegrityError, match="digest"):
+        load_workbench_evaluation(path)
+
+
+def test_load_workbench_evaluation_rejects_predictive_claim(
+    nominal_evaluation, tour_swing, tmp_path: Path
+) -> None:
+    import hashlib
+
+    from src.tools.bunker_shot_gui.export import canonical_json
+
+    path = tmp_path / "predictive.json"
+    save_workbench_evaluation(
+        nominal_evaluation, path, swing=tour_swing, handedness="right"
+    )
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["predictive"] = True
+    body = {k: v for k, v in data.items() if k != "digest"}
+    data["digest"] = hashlib.sha256(canonical_json(body).encode("utf-8")).hexdigest()
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ExportIntegrityError, match="predictive"):
+        load_workbench_evaluation(path)
+
+
+# ------------------------------------------------------------- VTK export
+
+
+def test_export_vtk_stamped_frame_round_trips(tmp_path: Path) -> None:
+    stamp = _stamp(view="vtk_frame")
+    pixels = np.zeros((64, 64, 4), dtype=np.uint8)
+    pixels[:, :, 0] = 120
+    pixels[:, :, 3] = 255
+    path = tmp_path / "vtk_frame.png"
+    exported = export_vtk_stamped_frame(pixels, path, stamp)
+    assert exported.path == path
+    assert exported.shape == (64, 64, 4)
+
+    reloaded = read_export(path)
+    assert reloaded.stamp == stamp
+    assert reloaded.digest == exported.digest
+
+
+def test_export_vtk_stamped_frame_requires_png(tmp_path: Path) -> None:
+    stamp = _stamp()
+    pixels = np.zeros((10, 10, 4), dtype=np.uint8)
+    with pytest.raises(ValueError, match=r"\.png"):
+        export_vtk_stamped_frame(pixels, tmp_path / "frame.jpg", stamp)
+
+
+def test_export_vtk_stamped_frame_rejects_unsupported_type(tmp_path: Path) -> None:
+    stamp = _stamp()
+    with pytest.raises(TypeError, match="artists must be"):
+        export_vtk_stamped_frame("invalid", tmp_path / "f.png", stamp)
+
+
+def test_export_vtk_stamped_animation_round_trips(tmp_path: Path) -> None:
+    stamp = _stamp(view="vtk_animation")
+    frames = [
+        np.full((32, 32, 4), fill_value=val, dtype=np.uint8) for val in (50, 100, 150)
+    ]
+    path = tmp_path / "anim.gif"
+    exported = export_vtk_stamped_animation(frames, path, stamp, fps=10)
+    assert exported.path == path
+    assert exported.frame_count == 3
+    assert exported.duration_s > 0
+
+    reloaded = read_animation_export(path)
+    assert reloaded.stamp == stamp
+    assert reloaded.digest == exported.digest
+    assert reloaded.frame_count == 3
+    assert reloaded.duration_s == pytest.approx(exported.duration_s)
+
+
+def test_export_vtk_stamped_animation_requires_gif(tmp_path: Path) -> None:
+    stamp = _stamp()
+    frames = [np.zeros((10, 10, 4), dtype=np.uint8)]
+    with pytest.raises(ValueError, match=r"\.gif"):
+        export_vtk_stamped_animation(frames, tmp_path / "anim.mp4", stamp)
+
+
+def test_export_vtk_stamped_animation_requires_frames(tmp_path: Path) -> None:
+    stamp = _stamp()
+    with pytest.raises(ValueError, match="no frames"):
+        export_vtk_stamped_animation([], tmp_path / "anim.gif", stamp)
+
+
+def test_read_animation_export_rejects_missing_file(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        read_animation_export(tmp_path / "missing.gif")
+
+
+def test_read_animation_export_rejects_unstamped_gif(tmp_path: Path) -> None:
+    path = tmp_path / "unstamped.gif"
+    img = Image.new("RGBA", (16, 16), color=(255, 0, 0, 255))
+    img.save(path, format="GIF")
+    with pytest.raises(ExportIntegrityError, match="valid stamped GIF"):
+        read_animation_export(path)
+
+
+def test_read_animation_export_rejects_tampered_digest(tmp_path: Path) -> None:
+    stamp = _stamp(view="vtk_animation")
+    frames = [np.zeros((16, 16, 4), dtype=np.uint8)]
+    path = tmp_path / "tampered.gif"
+    export_vtk_stamped_animation(frames, path, stamp)
+
+    # Read GIF comment, tamper with fps, re-save
+    with Image.open(path) as img:
+        comment = img.info["comment"]
+        data = json.loads(comment)
+        data["fps"] = 999  # breaks digest
+        img.save(path, format="GIF", comment=json.dumps(data).encode("utf-8"))
+
+    with pytest.raises(ExportIntegrityError, match="changed after writing"):
+        read_animation_export(path)
+
+
+def test_read_animation_export_rejects_predictive_claim(tmp_path: Path) -> None:
+    stamp = _stamp(view="vtk_animation")
+    frames = [np.zeros((16, 16, 4), dtype=np.uint8)]
+    path = tmp_path / "predictive.gif"
+    export_vtk_stamped_animation(frames, path, stamp)
+
+    with Image.open(path) as img:
+        comment = img.info["comment"]
+        data = json.loads(comment)
+        data["predictive"] = True
+        data["digest"] = header_digest(data)
+        img.save(path, format="GIF", comment=json.dumps(data).encode("utf-8"))
+
+    with pytest.raises(ExportIntegrityError, match="predictive"):
+        read_animation_export(path)

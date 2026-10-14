@@ -9,7 +9,8 @@ preview anywhere in this package.
 
 from __future__ import annotations
 
-from typing import Protocol
+from collections.abc import Mapping
+from typing import Any, Protocol
 
 import numpy as np
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
@@ -678,6 +679,85 @@ class DesignPanel(QGroupBox):
             widget.blockSignals(False)
         self.changed.emit()
 
+    def set_design(self, design: WedgeDesign | Mapping[str, Any]) -> None:
+        """Update controls from a design or dictionary."""
+        if isinstance(design, WedgeDesign):
+            name = design.name
+            loft = design.loft_deg if design.loft_deg is not None else 56.0
+            bounce = (
+                design.marketed_bounce_deg
+                if design.marketed_bounce_deg is not None
+                else 10.0
+            )
+            sole_w = design.sole_width_mm if design.sole_width_mm is not None else 25.0
+            entry_h = (
+                design.entry_height_mm if design.entry_height_mm is not None else 2.0
+            )
+            lead_r = (
+                design.leading_edge_radius_mm
+                if design.leading_edge_radius_mm is not None
+                else 2.0
+            )
+            camber = (
+                design.camber_area_mm2 if design.camber_area_mm2 is not None else 0.0
+            )
+            heel = (
+                design.heel_relief_fraction
+                if design.heel_relief_fraction is not None
+                else 0.0
+            )
+            toe = (
+                design.toe_relief_fraction
+                if design.toe_relief_fraction is not None
+                else 0.0
+            )
+        elif isinstance(design, Mapping):
+            name = str(design.get("name", "Custom"))
+            loft = float(design.get("loft_deg", 56.0))
+            b_val = design.get("bounce_deg", design.get("marketed_bounce_deg", 10.0))
+            bounce = float(b_val)
+            w_val = design.get(
+                "sole_width_mm", float(design.get("sole_width_m", 0.025)) * 1e3
+            )
+            sole_w = float(w_val)
+            h_val = design.get(
+                "entry_height_mm", float(design.get("entry_height_m", 0.002)) * 1e3
+            )
+            entry_h = float(h_val)
+            r_val = design.get(
+                "leading_edge_radius_mm",
+                float(design.get("leading_edge_radius_m", 0.002)) * 1e3,
+            )
+            lead_r = float(r_val)
+            c_val = design.get(
+                "camber_area_mm2", float(design.get("camber_area_m2", 0.0)) * 1e6
+            )
+            camber = float(c_val)
+            heel = float(
+                design.get("heel_relief_fraction", design.get("heel_relief_m", 0.0))
+            )
+            toe = float(
+                design.get("toe_relief_fraction", design.get("toe_relief_m", 0.0))
+            )
+        else:
+            return
+        self._name.setText(name)
+        pairs: tuple[tuple[QDoubleSpinBox, float], ...] = (
+            (self._loft, float(loft)),
+            (self._bounce, float(bounce)),
+            (self._sole_width, float(sole_w)),
+            (self._entry_height, float(entry_h)),
+            (self._leading_radius, float(lead_r)),
+            (self._camber_area, float(camber)),
+            (self._heel_relief, float(heel)),
+            (self._toe_relief, float(toe)),
+        )
+        for spin_box, val in pairs:
+            spin_box.blockSignals(True)
+            spin_box.setValue(val)
+            spin_box.blockSignals(False)
+        self.changed.emit()
+
     def design(self) -> WedgeDesign:
         """Read the controls into a design.
 
@@ -869,6 +949,37 @@ class ConditionPanel(QWidget):
             carry_tolerance_fraction=self._tolerance.value(),
             playability_points=self._grid.value(),
         )
+
+    def set_conditions(
+        self,
+        sand: Mapping[str, Any] | None = None,
+        swing: Mapping[str, Any] | None = None,
+    ) -> None:
+        """Update sand and swing controls from stored parameters."""
+        if sand:
+            name = sand.get("name")
+            if name and name in playing_condition_names():
+                self._condition.setCurrentText(str(name))
+            if "firmness_kg_per_cm2" in sand:
+                self._firmness.setValue(float(sand["firmness_kg_per_cm2"]))
+        if swing:
+            if "clubhead_speed_mps" in swing:
+                self._speed.setValue(float(swing["clubhead_speed_mps"]))
+            if "attack_angle_deg" in swing:
+                self._attack.setValue(float(swing["attack_angle_deg"]))
+            if "face_open_deg" in swing:
+                self._face_open.setValue(float(swing["face_open_deg"]))
+            if "shaft_lean_deg" in swing:
+                self._shaft_lean.setValue(float(swing["shaft_lean_deg"]))
+            if "entry_distance_behind_ball_m" in swing:
+                val_m = float(swing["entry_distance_behind_ball_m"])
+                self._entry.setValue(val_m * 1e3)
+            if "ball_depth_m" in swing:
+                val_depth = float(swing["ball_depth_m"])
+                self._ball_depth.setValue(val_depth * 1e3)
+            if "dynamic_terms_active" in swing:
+                self._dynamic.setChecked(bool(swing["dynamic_terms_active"]))
+        self.changed.emit()
 
 
 def _in_mm(bounds_m: tuple[float, float]) -> tuple[float, float]:

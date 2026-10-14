@@ -35,10 +35,11 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, TypeVar
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QAction, QFont
 from PyQt6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -56,6 +57,7 @@ from PyQt6.QtWidgets import (
 )
 
 from bunkershot3d.fields.store import load_field
+from bunkershot3d.solvers import EnvelopeStatus
 
 from src.launchers.help_menu import build_help_menu
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
@@ -69,6 +71,17 @@ from .design import (
     SwingSetup,
     WedgeDesign,
     WorkbenchInputError,
+)
+from .export import (
+    ExportedFigure,
+    apply_loaded_evaluation_to_widget,
+    export_workbench_views,
+    load_workbench_evaluation,
+    prompt_export_views_dialog,
+    prompt_load_evaluation_dialog,
+    prompt_save_evaluation_dialog,
+    save_workbench_evaluation,
+    update_action_tooltip_and_state,
 )
 from .field import LoadComponent, LoadScale, SoleLoadField
 from .model import DesignEvaluation, WorkbenchComparison, WorkbenchModel
@@ -225,6 +238,8 @@ def _density_limits(
 class BunkerShotWidget(QWidget):
     """The workbench: two candidate soles, one condition, one verdict."""
 
+    evaluation_changed = pyqtSignal()
+
     def __init__(
         self,
         parent: QWidget | None = None,
@@ -240,7 +255,11 @@ class BunkerShotWidget(QWidget):
         """
         super().__init__(parent)
         self._model_factory: ModelFactory = model_factory or WorkbenchModel
+        self._last_evaluation: DesignEvaluation | None = None
+        self._last_comparison: WorkbenchComparison | None = None
+        self._loaded_record: dict[str, Any] | None = None
         self._build_ui()
+        self.update_control_states()
 
     # ------------------------------------------------------------------ build
 
@@ -299,6 +318,18 @@ class BunkerShotWidget(QWidget):
         )
         self._cross_tier_button.clicked.connect(self.run_cross_tier_async)
         column.addWidget(self._cross_tier_button)
+
+        self._export_button = QPushButton("Export views…")
+        self._export_button.clicked.connect(self.choose_export_views)
+        column.addWidget(self._export_button)
+
+        self._save_button = QPushButton("Save evaluation…")
+        self._save_button.clicked.connect(self.choose_save_evaluation)
+        column.addWidget(self._save_button)
+
+        self._load_button = QPushButton("Load evaluation…")
+        self._load_button.clicked.connect(self.choose_load_evaluation)
+        column.addWidget(self._load_button)
 
         self.action_bar = AsyncActionBar()
         self.action_bar.set_trigger_buttons(
@@ -621,6 +652,9 @@ class BunkerShotWidget(QWidget):
         Args:
             evaluation: The evaluated design.
         """
+        self._last_evaluation = evaluation
+        self._last_comparison = None
+        self._loaded_record = None
         self._banner.show_status(evaluation.shot.status)
         self._results.setPlainText(evaluation_report(evaluation))
         self._paint_maps(
@@ -643,6 +677,8 @@ class BunkerShotWidget(QWidget):
         # one cursor, which is the one thing the shared transport exists to
         # make impossible.
         self._cross_tier.clear()
+        self.update_control_states()
+        self.evaluation_changed.emit()
 
     def show_comparison(self, comparison: WorkbenchComparison) -> None:
         """Display an A/B comparison.
@@ -653,6 +689,9 @@ class BunkerShotWidget(QWidget):
         Args:
             comparison: The two evaluations and their ranking.
         """
+        self._last_comparison = comparison
+        self._last_evaluation = comparison.left
+        self._loaded_record = None
         self._banner.show_status(comparison.worst_status)
         self._results.setPlainText(
             "\n".join(
@@ -681,6 +720,8 @@ class BunkerShotWidget(QWidget):
         self._paint_field(comparison.right, self._field_b, scales)
         self._paint_shot(comparison.left, _shared_scene_scale(pair))
         self._cross_tier.clear()
+        self.update_control_states()
+        self.evaluation_changed.emit()
 
     def _clear_sand_field(self) -> None:
         """Drop a loaded sand field before a new run is displayed.
@@ -874,16 +915,146 @@ class BunkerShotWidget(QWidget):
         """Cancel and join any running action (#8880)."""
         self.action_bar.shutdown()
 
+    @property
+    def current_evaluation(self) -> DesignEvaluation | None:
+        """The evaluation currently on screen, or None if none run."""
+        return self._last_evaluation
+
+    def disabled_reasons(self) -> dict[str, str | None]:
+        """Each control mapped to None (active) or why it is disabled."""
+        reasons: dict[str, str | None] = {
+            "run_design_a": None,
+            "compare": None,
+            "cross_tier": None,
+            "load_sand_field": None,
+            "load_evaluation": None,
+        }
+        if self.action_bar.is_running:
+            reasons["run_design_a"] = "solver is busy"
+            reasons["compare"] = "solver is busy"
+            reasons["cross_tier"] = "solver is busy"
+        has_eval = self._last_evaluation is not None or self._loaded_record is not None
+        no_eval = (
+            None
+            if has_eval
+            else "no evaluation available; run design A or compare A vs B first"
+        )
+        reasons["export_views"] = no_eval
+        reasons["save_evaluation"] = no_eval
+        return reasons
+
+    def control_enabled(self, name: str) -> bool:
+        """Whether the named control accepts input."""
+        reasons = self.disabled_reasons()
+        return reasons.get(name) is None
+
+    def update_control_states(self) -> None:
+        """Update button enabled states and tooltips from disabled_reasons."""
+        reasons = self.disabled_reasons()
+        controls = (
+            ("export_views", self._export_button, "Export views…"),
+            ("save_evaluation", self._save_button, "Save evaluation…"),
+            ("load_evaluation", self._load_button, "Load evaluation…"),
+        )
+        for name, button, default_tip in controls:
+            reason = reasons.get(name)
+            enabled = reason is None
+            button.setEnabled(enabled)
+            button.setToolTip(default_tip if enabled else f"Disabled: {reason}")
+
+    def export_views(self, destination_dir: Path | str) -> list[ExportedFigure]:
+        """Export stamped figures of the current evaluation to a directory.
+
+        Args:
+            destination_dir: Directory where figures will be saved.
+
+        Returns:
+            List of verified ExportedFigure records.
+
+        Raises:
+            ValueError: If no evaluation is available to export.
+        """
+        if self._last_evaluation is None:
+            raise ValueError(
+                "no evaluation available to export; run design A or compare A vs B first"
+            )
+        digest = self._loaded_record.get("digest") if self._loaded_record else None
+        return export_workbench_views(
+            self._last_evaluation, destination_dir, record_digest=digest
+        )
+
+    def choose_export_views(self) -> None:
+        """Ask for an output directory and export all stamped views."""
+        prompt_export_views_dialog(self, self)
+
+    def save_evaluation(self, path: Path | str) -> Path:
+        """Save the current evaluation to a verifiable JSON record.
+
+        Args:
+            path: Destination path ending in .json.
+
+        Returns:
+            The saved Path.
+
+        Raises:
+            ValueError: If no evaluation is available to save.
+        """
+        if self._last_evaluation is not None:
+            swing = self._conditions.swing_setup()
+            return save_workbench_evaluation(self._last_evaluation, path, swing=swing)
+        if self._loaded_record is not None:
+            return save_workbench_evaluation(self._loaded_record, path)
+        raise ValueError(
+            "no evaluation available to save; run design A or compare A vs B first"
+        )
+
+    def choose_save_evaluation(self) -> None:
+        """Prompt for a file path and save the evaluation."""
+        prompt_save_evaluation_dialog(self, self)
+
+    def load_evaluation(self, path: Path | str) -> dict[str, Any]:
+        """Load a verified workbench evaluation record and update controls.
+
+        Args:
+            path: Path to the .json record.
+
+        Returns:
+            The verified record dictionary.
+
+        Raises:
+            ExportIntegrityError: If verification fails.
+        """
+        record = load_workbench_evaluation(path)
+        self._loaded_record = record
+        self._last_evaluation = None
+        self._last_comparison = None
+        apply_loaded_evaluation_to_widget(self, record, path)
+        return record
+
+    def choose_load_evaluation(self) -> None:
+        """Prompt for a file path and load the verified evaluation."""
+        prompt_load_evaluation_dialog(self, self)
+
 
 class BunkerShotWindow(QMainWindow):
     """Standalone window for the designer workbench."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    _widget: BunkerShotWidget
+    _export_action: QAction
+    _save_action: QAction
+    _load_action: QAction
+
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        *,
+        widget: BunkerShotWidget | None = None,
+    ) -> None:
         """Build the window around a :class:`BunkerShotWidget`."""
         super().__init__(parent)
         self.setWindowTitle("BunkerShot3D Designer Workbench")
         self.setMinimumSize(1200, 800)
-        self._widget = BunkerShotWidget(self)
+        self._widget = widget if widget is not None else BunkerShotWidget(self)
         self.setCentralWidget(self._widget)
         status = QStatusBar()
         self.setStatusBar(status)
@@ -891,15 +1062,68 @@ class BunkerShotWindow(QMainWindow):
             "F0 dynamic RFT. Every result carries a validity verdict; "
             "out-of-envelope queries are refused, not estimated."
         )
+
+        self._export_action = QAction("Export views…", self)
+        self._export_action.setShortcut("Ctrl+E")
+        self._export_action.triggered.connect(self._widget.choose_export_views)
+
+        self._save_action = QAction("Save evaluation…", self)
+        self._save_action.setShortcut("Ctrl+S")
+        self._save_action.triggered.connect(self._widget.choose_save_evaluation)
+
+        self._load_action = QAction("Load evaluation…", self)
+        self._load_action.setShortcut("Ctrl+O")
+        self._load_action.triggered.connect(self._widget.choose_load_evaluation)
+
         menubar = self.menuBar()
-        assert menubar is not None
-        build_help_menu(
-            menubar,
-            self,
-            doc_target=(
-                "BunkerShot3D Credibility Statement",
-                "docs/bunkershot3d/credibility.md",
-            ),
+        if menubar is not None:
+            file_menu = menubar.addMenu("&File")
+            if file_menu is not None:
+                file_menu.addAction(self._export_action)
+                file_menu.addAction(self._save_action)
+                file_menu.addAction(self._load_action)
+
+            build_help_menu(
+                menubar,
+                self,
+                doc_target=(
+                    "BunkerShot3D Credibility Statement",
+                    "docs/bunkershot3d/credibility.md",
+                ),
+            )
+
+        self._widget.evaluation_changed.connect(self.update_action_states)
+        self.update_action_states()
+
+    @property
+    def widget(self) -> BunkerShotWidget:
+        """The embedded workbench widget."""
+        return self._widget
+
+    def disabled_reasons(self) -> dict[str, str | None]:
+        """Delegate control disabled reasons to the embedded widget."""
+        return self._widget.disabled_reasons()
+
+    def update_action_states(self) -> None:
+        """Update enabled states and tooltips for menu actions."""
+        reasons = self._widget.disabled_reasons()
+        update_action_tooltip_and_state(
+            self._export_action,
+            reasons,
+            "export_views",
+            "Export stamped figures of the current evaluation.",
+        )
+        update_action_tooltip_and_state(
+            self._save_action,
+            reasons,
+            "save_evaluation",
+            "Save the current evaluation to a verifiable JSON record.",
+        )
+        update_action_tooltip_and_state(
+            self._load_action,
+            reasons,
+            "load_evaluation",
+            "Load and verify a stored evaluation JSON record.",
         )
 
     def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
