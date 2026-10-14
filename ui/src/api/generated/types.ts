@@ -759,6 +759,30 @@ export interface BunkerDesignV1 {
   toe_relief_fraction?: number | null;
 }
 
+/**
+ * A completed job's record, naming the job and the request it answers.
+ */
+export interface BunkerJobResultV1 {
+  job_id: string;
+  input_digest: string;
+  record: Record<string, unknown>;
+}
+
+/**
+ * The state of one bunker job; ``result`` only when ``completed``.
+ */
+export interface BunkerJobStatusV1 {
+  job_id: string;
+  kind: "evaluate" | "compare";
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  progress_percent: number;
+  shots_planned: number;
+  input_digest: string;
+  worker_active: boolean;
+  error?: string | null;
+  result?: BunkerJobResultV1 | null;
+}
+
 export interface BunkerObjectiveReportV1 {
   use: string;
   target_carry_m: number;

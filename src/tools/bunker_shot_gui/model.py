@@ -341,14 +341,28 @@ class WorkbenchModel:
     lofted meshes are cached at module level and shared either way.
     """
 
-    def __init__(self, settings: SolverSetup | None = None) -> None:
+    def __init__(
+        self,
+        settings: SolverSetup | None = None,
+        *,
+        on_shot: Callable[[], None] | None = None,
+    ) -> None:
         """Initialise the model.
 
         Args:
             settings: Discretisation and study settings; the defaults are
                 tuned so a single shot costs tens of milliseconds.
+            on_shot: Called before every shot, nominal or sweep point. A job
+                runner counts the calls for progress and raises from it to
+                cancel; whatever it raises ends the run (issue #9545).
         """
         self._settings = SolverSetup() if settings is None else settings
+        self._on_shot = on_shot
+
+    def _before_shot(self) -> None:
+        """Announce the next shot to the ``on_shot`` hook, if any."""
+        if self._on_shot is not None:
+            self._on_shot()
 
     @property
     def settings(self) -> SolverSetup:
@@ -453,6 +467,7 @@ class WorkbenchModel:
         Returns:
             The outcome. A refusal carries the verdict and nothing else.
         """
+        self._before_shot()
         build = self.head_build(geometry)
         solver = self.solver(sand, swing)
         delivered = deliver_wedge(geometry, swing.delivery())
@@ -855,6 +870,7 @@ class WorkbenchModel:
             and has no prismatic divot to divide by -- reporting the
             second as the first says the tool refused a real delivery.
         """
+        self._before_shot()
         build = self.head_build(geometry)
         solver = self.solver(sand, swing)
         kinematics = entry_kinematics(build, swing)
