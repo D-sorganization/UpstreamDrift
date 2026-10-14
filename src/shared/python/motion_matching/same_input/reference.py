@@ -122,30 +122,23 @@ def generate_reference_bundle(
     provenance: dict[str, Any] | None = None,
     impact: ImpactForce | None = None,
     split_time_s: float | None = None,
-    effort_hold_s: float = DEFAULT_EFFORT_HOLD_S,
+    effort_hold_s: float | None = None,
+    effort_hold_dt_s: float | None = None,
 ) -> InputBundle:
     """Track ``q_track`` in MuJoCo with the pipeline controller held per step.
 
-    Args:
-        spec_bytes: Scaled full-body spec of the run.
-        track_time_s: Reference sample times (seconds, increasing).
-        q_track: Tracked reference (len(track_time_s), nv) in spec order.
-        duration_s: Horizon; defaults to the reference span.
-        provenance: Extra manifest fields (source run, capture, ...).
-        impact: Ball force plan on the bundle clock; the force latched in
-            MuJoCo is recorded as ``provenance["ball_impact"]`` so every
-            engine's replay applies it identically (GCV-20).
-        split_time_s: Reference impact time on the bundle clock, splitting
-            the controller's reference rates (recorded in the provenance).
-        effort_hold_s: How long each controller sample is held (#12279);
-            must split the 1 ms step into a whole number of holds that
-            divides the eight RK4 substeps (1, 0.5, 0.25 or 0.125 ms).  The
-            default keeps the original 1 ms contract; the manifest records it.
-
-    Raises:
-        ValueError: If ``effort_hold_s`` does not split the step evenly.
+    ``effort_hold_dt_s`` is the controller hold duration in seconds (#12279);
+    defaults to 1 ms (0.001 s) with optional 0.125 ms (0.000125 s).
+    ``effort_hold_s`` is accepted as a backward-compatible alias.
     """
-    holds = effort_holds_for(effort_hold_s, DT_S)
+    from src.shared.python.motion_matching.same_input.effort_hold_policy import (
+        resolve_effort_hold_dt_s,
+    )
+
+    hold_dt = resolve_effort_hold_dt_s(
+        effort_hold_s=effort_hold_s, effort_hold_dt_s=effort_hold_dt_s
+    )
+    holds = effort_holds_for(hold_dt, DT_S)
     policy = StepPolicy(effort_holds=holds)
     rollout = closed_loop(
         "mujoco",
@@ -176,4 +169,5 @@ def generate_reference_bundle(
         },
         effort_holds=holds,
         hold_efforts=None if holds == 1 else rollout.efforts,
+        effort_hold_dt_s=hold_dt,
     )

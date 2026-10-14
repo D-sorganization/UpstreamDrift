@@ -58,6 +58,7 @@ class InputBundle:
     provenance: dict[str, Any] = field(default_factory=dict)
     effort_holds: int = 1
     hold_efforts: Array | None = None
+    effort_hold_dt_s: float | None = None
 
     def __post_init__(self) -> None:
         nv = len(self.coordinate_order)
@@ -81,7 +82,22 @@ class InputBundle:
         arrays = (self.q0, self.v0, self.efforts, self.reference_q, self.reference_v)
         if not all(np.isfinite(a).all() for a in arrays):
             raise ValueError("bundle arrays must be finite")
+        self._reconcile_effort_holds()
         self._check_hold_efforts()
+
+    def _reconcile_effort_holds(self) -> None:
+        """Sync effort_hold_dt_s and effort_holds (#12279)."""
+        if self.effort_hold_dt_s is not None:
+            from src.shared.python.motion_matching.same_input.integrator import (
+                effort_holds_for,
+            )
+
+            computed_holds = effort_holds_for(self.effort_hold_dt_s, self.dt_s)
+            if self.effort_holds != 1 and self.effort_holds != computed_holds:
+                raise ValueError("effort_holds must match effort_hold_dt_s")
+            object.__setattr__(self, "effort_holds", computed_holds)
+        else:
+            object.__setattr__(self, "effort_hold_dt_s", self.dt_s / self.effort_holds)
 
     def _check_hold_efforts(self) -> None:
         """``hold_efforts`` is present iff ``effort_holds > 1`` and its every
@@ -117,6 +133,29 @@ class InputBundle:
     def effort_hold_s(self) -> float:
         """Duration each recorded effort is held for in a replay."""
         return self.dt_s / self.effort_holds
+
+    @property
+    def effort_substeps(self) -> int:
+        """RK4 substeps per effort hold sample (#12279)."""
+        substeps = int(POLICY.get("substeps", 8))
+        return substeps // self.effort_holds
+
+    @property
+    def projection_dt_s(self) -> float:
+        """Closure projection interval in seconds (#12279)."""
+        return self.dt_s
+
+    def effort_hold_policy(self) -> Any:
+        """The EffortHoldPolicy contract for this bundle (#12279)."""
+        from src.shared.python.motion_matching.same_input.effort_hold_policy import (
+            EffortHoldPolicy,
+        )
+
+        return EffortHoldPolicy(
+            effort_hold_dt_s=float(self.effort_hold_dt_s or self.effort_hold_s),
+            effort_substeps=self.effort_substeps,
+            projection_dt_s=self.projection_dt_s,
+        )
 
     def replay_efforts(self, steps: int | None = None) -> Array:
         """Efforts at the hold rate for the first ``steps`` steps (default all).
@@ -157,6 +196,9 @@ class InputBundle:
                 **POLICY,
                 "effort_holds_per_step": self.effort_holds,
                 "effort_hold_s": self.effort_hold_s,
+                "effort_hold_dt_s": float(self.effort_hold_dt_s or self.effort_hold_s),
+                "effort_substeps": self.effort_substeps,
+                "projection_dt_s": self.projection_dt_s,
             },
             "reference_engine": self.reference_engine,
             "provenance": self.provenance,
@@ -213,6 +255,11 @@ class InputBundle:
                     manifest.get("policy", {}).get("effort_holds_per_step", 1)
                 ),
                 hold_efforts=data.get("hold_efforts"),
+                effort_hold_dt_s=(
+                    float(manifest["policy"]["effort_hold_dt_s"])
+                    if "policy" in manifest and "effort_hold_dt_s" in manifest["policy"]
+                    else None
+                ),
             )
         if bundle.spec_sha256 != manifest["spec_sha256"]:
             raise ValueError("bundle spec hash does not match its manifest")
