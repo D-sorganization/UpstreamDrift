@@ -1,4 +1,4 @@
-"""Packaging and optional extras contract verification (UD #9406).
+"""Packaging and optional extras contract verification (UD #9406, #9417).
 
 Enforces:
 1. pyproject.toml defines per-engine and UI optional extras under [project.optional-dependencies].
@@ -6,6 +6,8 @@ Enforces:
    the exact same 40-character git SHA.
 3. Makefile `install` target references requirements-tools.txt and launch_upstream_drift.py
    references requirements-tools.txt.
+4. pyproject.toml `rust` optional extra covers all Maturin extension packages under rust_core.
+5. deploy/ directory is populated with README.md and .gitkeep is removed.
 """
 
 from __future__ import annotations
@@ -116,4 +118,49 @@ def test_makefile_and_launcher_reference_requirements_tools() -> None:
     launcher_content = launcher_path.read_text(encoding="utf-8")
     assert "requirements-tools.txt" in launcher_content, (
         "launch_upstream_drift.py must reference requirements-tools.txt"
+    )
+
+
+def test_rust_extra_covers_all_maturin_crates() -> None:
+    pyproject_path = REPO_ROOT / "pyproject.toml"
+    assert pyproject_path.exists(), f"Missing pyproject.toml at {pyproject_path}"
+
+    with open(pyproject_path, "rb") as f:
+        root_data = tomllib.load(f)
+
+    rust_extra = (
+        root_data.get("project", {}).get("optional-dependencies", {}).get("rust", [])
+    )
+    assert len(rust_extra) > 0, "Optional extra 'rust' must not be empty"
+
+    declared_rust_packages = {
+        re.split(r"[><=~!]", req.strip())[0].strip() for req in rust_extra
+    }
+
+    rust_core_dir = REPO_ROOT / "rust_core"
+    crate_pyprojects = sorted(rust_core_dir.glob("*/pyproject.toml"))
+    assert len(crate_pyprojects) > 0, (
+        f"No pyproject.toml files found in {rust_core_dir}/*"
+    )
+
+    for crate_pyproject in crate_pyprojects:
+        with open(crate_pyproject, "rb") as f:
+            crate_data = tomllib.load(f)
+        crate_name = crate_data.get("project", {}).get("name")
+        assert crate_name, f"Missing [project].name in {crate_pyproject}"
+        assert crate_name in declared_rust_packages, (
+            f"Maturin crate '{crate_name}' from {crate_pyproject.relative_to(REPO_ROOT)} "
+            f"is missing from [project.optional-dependencies].rust in pyproject.toml"
+        )
+
+
+def test_deploy_directory_is_populated() -> None:
+    deploy_dir = REPO_ROOT / "deploy"
+    readme_path = deploy_dir / "README.md"
+    gitkeep_path = deploy_dir / ".gitkeep"
+
+    assert readme_path.exists(), f"Missing {readme_path}"
+    assert readme_path.stat().st_size > 0, f"{readme_path} must not be empty"
+    assert readme_path.stat().st_size > 100, (
+        f"deploy/.gitkeep should be removed once populated: {gitkeep_path}"
     )

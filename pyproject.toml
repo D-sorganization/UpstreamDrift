@@ -112,7 +112,7 @@ shot-pattern-acceleration = ["numba>=0.68,<0.69"]
 #   extras_default = "core"
 # The runtime dependencies list above is the canonical core dependency set.
 # Optional extras add only tier-specific or feature-specific dependencies.
-rust = ["upstream-physics>=0.1.0", "upstream-mocap-preproc>=0.1.0", "upstream-mocap-io>=0.1.0"]
+rust = ["upstream-physics>=0.1.0", "upstream-mocap-preproc>=0.1.0", "upstream-mocap-io>=0.1.0", "upstream-muscle>=0.1.0", "upstream-motion-matching>=0.1.0", "upstream-pinocchio-id>=0.1.0", "upstream-urdf>=0.1.0", "upstream-mesh>=0.1.0", "upstream-realtime>=0.1.0", "ai-backend>=0.1.0"]
 mocap-preproc = ["upstream-mocap-preproc>=0.1.0"]
 mocap-io = ["upstream-mocap-io>=0.1.0"]
 # C3D read/write at runtime (epic #8390, A3/#8393). ezc3d backs the canonical
