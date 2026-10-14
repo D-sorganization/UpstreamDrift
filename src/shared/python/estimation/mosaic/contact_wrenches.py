@@ -481,7 +481,7 @@ def _solve_node_slsqp(
     x0 = la.solve(h_mat + 1e-4 * np.eye(n_u + n_lambda), g_vec, assume_a="pos")
     x0[n_u:] = project_friction_cone(x0[n_u:], mu, contact_dim=dim)
 
-    res = opt.minimize(
+    res = opt.minimize(  # type: ignore[call-overload]
         fun,
         x0,
         jac=jac,
@@ -553,7 +553,7 @@ def _solve_contact_wrenches_admm(
         q_blocks.append(hn)
         g_blocks.append(gn)
 
-    q_diag = sp.block_diag(q_blocks, format="csc")
+    q_diag: sp.csc_matrix = sp.block_diag(q_blocks, format="csc").tocsc()
     g_vec = np.concatenate(g_blocks)
 
     if has_smooth:
@@ -593,11 +593,11 @@ def _solve_contact_wrenches_admm(
     h_aug = (q_diag + rho * (s_lambda.T @ s_lambda)).tocsc()
     lu_solver = splu(h_aug)
 
-    z = np.zeros(n_nodes * n_lambda)
-    y = np.zeros(n_nodes * n_lambda)
+    z: FloatArray = np.zeros(n_nodes * n_lambda)
+    y: FloatArray = np.zeros(n_nodes * n_lambda)
     converged_all = False
     iter_count = 0
-    x_sol = np.zeros(n_nodes * (n_u + n_lambda))
+    x_sol: FloatArray = np.zeros(n_nodes * (n_u + n_lambda))
 
     for k in range(max_iterations):
         iter_count = k + 1
