@@ -37,7 +37,10 @@ def _find_bash() -> str | None:
 
 
 BASH = _find_bash()
-pytestmark = pytest.mark.skipif(BASH is None, reason="bash required")
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(BASH is None, reason="bash required"),
+]
 
 
 def _steps() -> list[dict[str, Any]]:
@@ -61,11 +64,17 @@ def _fake_bin(tmp_path: Path) -> Path:
     """``gh`` names PR 7 for every commit; ``python3`` refuses ``*-bad.md``."""
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
-    (bin_dir / "gh").write_bytes(b"#!/bin/sh\necho 7\n")
-    (bin_dir / "python3").write_bytes(
-        b'#!/bin/sh\nfor a in "$@"; do last="$a"; done\n'
-        b'case "$last" in *-bad.md) exit 1 ;; esac\nrm -f "$last"\n'
-    )
+    stubs = {
+        "gh": b"#!/bin/sh\necho 7\n",
+        "python3": (
+            b'#!/bin/sh\nfor a in "$@"; do last="$a"; done\n'
+            b'case "$last" in *-bad.md) exit 1 ;; esac\nrm -f "$last"\n'
+        ),
+    }
+    for name, body in stubs.items():
+        stub = bin_dir / name
+        stub.write_bytes(body)
+        stub.chmod(0o755)  # POSIX PATH lookup skips non-executable files
     return bin_dir
 
 
