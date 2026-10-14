@@ -51,6 +51,25 @@ def _read_tier_value(tier_path: Path) -> str | None:
     return None
 
 
+def _resolve_tier_path(physics_root: Path, engine_name: str) -> Path:
+    """Return the ``_tier.py`` path for an engine package.
+
+    Precondition: ``physics_root`` is a ``pathlib.Path`` (the physics_engines
+    directory); its parent is the engines root that may hold packages such as
+    ``src/engines/simscape``.
+    Postcondition: returns the first existing ``_tier.py`` searched in
+    ``physics_root / engine_name`` then ``physics_root.parent / engine_name``;
+    if neither exists, returns the canonical ``physics_root`` path so the
+    violation message names the expected location.
+    """
+    candidate_roots = (physics_root, physics_root.parent)
+    for candidate_root in candidate_roots:
+        tier_path = candidate_root / engine_name / "_tier.py"
+        if tier_path.exists():
+            return tier_path
+    return candidate_roots[0] / engine_name / "_tier.py"
+
+
 def check_engine_tiers(physics_root: Path) -> list[str]:
     """Return metadata violations for required engine packages.
 
@@ -62,7 +81,7 @@ def check_engine_tiers(physics_root: Path) -> list[str]:
 
     violations: list[str] = []
     for engine_name, expected_tier in REQUIRED_ENGINE_TIERS.items():
-        tier_path = physics_root / engine_name / "_tier.py"
+        tier_path = _resolve_tier_path(physics_root, engine_name)
         if not tier_path.exists():
             violations.append(f"{engine_name} is missing {tier_path}")
             continue
