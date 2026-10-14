@@ -41,6 +41,14 @@ evidence.
 - The hands are welded to the club by a dual-grip closure. Ground contact uses
   one shared Hunt–Crossley law with common parameters.
 - MuJoCo is the reference engine for the trajectory levels.
+- The **3-Tier Cross-Engine Mathematical Equivalency Contract**
+  (`src/engines/tiers.py`: `tier_1_rigid_body`, `tier_2_soft_contact`,
+  `tier_3_musculoskeletal` via #11709, PR #12468) and
+  `are_engines_tier_compatible`.
+- The **Subject-Mass Hand-Scaling Policy**
+  (`src/shared/python/full_body/native_spec.py`: `match_subject_mass=True`
+  scales `LHand` and `RHand` uniformly via #12300, PR #12486, while Simscape
+  reference-capture builds pass `match_subject_mass=False`).
 
 ## Equations
 
@@ -163,6 +171,8 @@ receipt hashes and per-frame tables are in the LaTeX reference.
 | `score_replay`, `segmented_replay`, `growth_rate` | `src/shared/python/motion_matching/same_input/scoring.py` |
 | Pointwise receipt (L1) | `docs/development/full_body_models/evidence/same_input/pointwise_parity_receipt.json` |
 | Bundle export, replay and closed-loop CLI | `scripts/same_input_bundle.py` |
+| `ENGINE_EQUIVALENCY_TIERS`, `PRIMARY_EQUIVALENCY_TIER`, `are_engines_tier_compatible` | `src/engines/tiers.py` |
+| `build_full_body_spec` (`match_subject_mass`) | `src/shared/python/full_body/native_spec.py` |
 
 ## Tests and Reproduction
 

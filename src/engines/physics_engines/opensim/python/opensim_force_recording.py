@@ -28,6 +28,7 @@ from src.shared.python.force_overlay.playback import (
     render_force_playback,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = get_logger(__name__)
 
@@ -182,7 +183,7 @@ def main(argv: list[str] | None = None) -> PlaybackReceipt | int:
     args = parser.parse_args(argv)
 
     try:
-        import opensim  # type: ignore[import-not-found]
+        opensim = import_opensim()
     except ImportError:
         logger.error(
             "OpenSim Python package is required to execute playback recording."

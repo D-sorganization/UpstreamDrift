@@ -165,6 +165,205 @@ def preset_listing() -> list[dict[str, Any]]:
     ]
 
 
+import defusedxml.ElementTree as DefusedET
+import numpy as np
+from src.shared.python.humanoid_character_builder.spec_params import (
+    _compute_spec_poses,
+    _verify_mjcf,
+    _verify_osim_joint_offsets,
+    _verify_urdf,
+)
+
+
+def _verify_osim(
+    doc: dict[str, Any], spec_body_poses: dict[str, np.ndarray]
+) -> tuple[float, float]:
+    """Verify OpenSim mass conservation and body placement parity."""
+    from src.engines.physics_engines.opensim.python.full_body_osim import (
+        clean_osim_body_name,
+        export_full_body_osim,
+    )
+
+    osim_xml, _ = export_full_body_osim(doc)
+    osim_root = DefusedET.fromstring(osim_xml.replace("::", "__"))
+    osim_mass_kg = float(
+        sum(
+            float(m.text)
+            for m in osim_root.findall(".//BodySet/objects/Body/mass")
+            if m.text is not None
+        )
+    )
+
+    osim_bodies = {
+        b.attrib["name"]
+        for b in osim_root.findall(".//BodySet/objects/Body")
+        if "name" in b.attrib
+    }
+    for b in doc["bodies"]:
+        if b["name"] == "world":
+            continue
+        expected_name = clean_osim_body_name(b["name"])
+        if expected_name not in osim_bodies:
+            raise ValueError(f"OpenSim missing body {expected_name} (from {b['name']})")
+
+    osim_markers = {
+        m.attrib["name"]
+        for m in osim_root.findall(".//MarkerSet/objects/Marker")
+        if "name" in m.attrib
+    }
+    for mname in doc.get("marker_attachments", {}):
+        if mname not in osim_markers:
+            raise ValueError(f"OpenSim missing marker {mname}")
+
+    osim_poses = _verify_osim_joint_offsets(list(osim_root.findall(".//CustomJoint")))
+    osim_body_errors = []
+    for b in doc["bodies"]:
+        if b["name"] == "world":
+            continue
+        clean = clean_osim_body_name(b["name"])
+        sp = f"/bodyset/{clean}"
+        if sp in osim_poses and b["name"] in spec_body_poses:
+            err = float(
+                np.linalg.norm(
+                    spec_body_poses[b["name"]][:3, 3] - osim_poses[sp][:3, 3]
+                )
+            )
+            osim_body_errors.append(err)
+    osim_max_frame_err = max(osim_body_errors) if osim_body_errors else 0.0
+    return osim_mass_kg, osim_max_frame_err
+
+
+def _verify_pinocchio(
+    doc: dict[str, Any],
+    spec_frame_origins: dict[str, np.ndarray],
+    spec_mass_kg: float,
+    *,
+    mass_tol_kg: float,
+    frame_tol_m: float,
+) -> int:
+    """Verify Pinocchio depth-first joint tree length and native frame origins if installed."""
+    from src.engines.physics_engines.pinocchio.python.native_model import (
+        depth_first_joints,
+    )
+
+    pin_joints = depth_first_joints(doc["joints"])
+    if len(pin_joints) != len(doc["joints"]):
+        raise ValueError(
+            f"Pinocchio joint tree length mismatch: {len(pin_joints)} != {len(doc['joints'])}"
+        )
+
+    try:
+        import sys
+        import types
+
+        import pinocchio  # noqa: F401
+
+        is_mock = not isinstance(pinocchio, types.ModuleType) or (
+            not hasattr(pinocchio, "__file__")
+            and pinocchio.__name__ not in sys.builtin_module_names
+        )
+        if not is_mock:
+            from src.engines.physics_engines.pinocchio.python.native_model import (
+                FullBodyPinocchioModel,
+            )
+
+            pin_model = FullBodyPinocchioModel(doc)
+            pin_frame_poses = pin_model.frame_poses({})
+            for fname, fpose in pin_frame_poses.items():
+                if fname in spec_frame_origins:
+                    err = float(
+                        np.linalg.norm(spec_frame_origins[fname] - fpose[:3, 3])
+                    )
+                    if err > frame_tol_m:
+                        raise ValueError(
+                            f"Pinocchio frame origin error {err} > {frame_tol_m} for {fname}"
+                        )
+            pin_total_mass = float(sum(b.mass for b in pin_model.model.inertias))
+            if abs(pin_total_mass - spec_mass_kg) > mass_tol_kg:
+                raise ValueError(
+                    f"Pinocchio mass mismatch: {pin_total_mass} vs {spec_mass_kg}"
+                )
+    except (ImportError, ModuleNotFoundError, TypeError):
+        pass
+
+    return len(pin_joints)
+
+
+def verify_cross_engine_l0_parity(
+    character: CompiledCharacter,
+    *,
+    mass_tol_kg: float = 1e-9,
+    frame_tol_m: float = 1e-3,
+) -> dict[str, Any]:
+    """Verify L0 export parity across MuJoCo, Drake/URDF, OpenSim, and Pinocchio (CMB-11, #11662).
+
+    Validates total mass conservation and world-frame origin agreement at
+    neutral pose (q = 0) against the compiled full-body specification.
+    """
+    if mass_tol_kg <= 0:
+        raise ValueError(f"mass_tol_kg must be > 0, got {mass_tol_kg}")
+    if frame_tol_m <= 0:
+        raise ValueError(f"frame_tol_m must be > 0, got {frame_tol_m}")
+
+    doc = character.document
+    spec_mass_kg, spec_body_poses, spec_frame_origins = _compute_spec_poses(doc)
+    spec_bytes = serialize_spec(doc).encode("utf-8")
+
+    mjcf_mass_kg, mjcf_max_frame_err = _verify_mjcf(spec_bytes, spec_frame_origins)
+    urdf_mass_kg, urdf_max_frame_err = _verify_urdf(spec_bytes, spec_frame_origins)
+    osim_mass_kg, osim_max_frame_err = _verify_osim(doc, spec_body_poses)
+    pin_joint_count = _verify_pinocchio(
+        doc,
+        spec_frame_origins,
+        spec_mass_kg,
+        mass_tol_kg=mass_tol_kg,
+        frame_tol_m=frame_tol_m,
+    )
+
+    engine_masses_kg = {
+        "mjcf": mjcf_mass_kg,
+        "urdf": urdf_mass_kg,
+        "osim": osim_mass_kg,
+    }
+    engine_max_frame_error_m = {
+        "mjcf": mjcf_max_frame_err,
+        "urdf": urdf_max_frame_err,
+        "osim": osim_max_frame_err,
+    }
+
+    mass_errors = [abs(m - spec_mass_kg) for m in engine_masses_kg.values()]
+    max_mass_error_kg = float(max(mass_errors)) if mass_errors else 0.0
+    max_frame_origin_error_m = (
+        float(max(engine_max_frame_error_m.values()))
+        if engine_max_frame_error_m
+        else 0.0
+    )
+
+    if max_mass_error_kg > mass_tol_kg:
+        raise ValueError(
+            f"Cross-engine mass parity violation: max mass error {max_mass_error_kg:.4e} kg "
+            f"> tolerance {mass_tol_kg:.4e} kg (engine masses: {engine_masses_kg})"
+        )
+
+    if max_frame_origin_error_m > frame_tol_m:
+        raise ValueError(
+            f"Cross-engine frame origin parity violation: max frame origin error "
+            f"{max_frame_origin_error_m:.4e} m > tolerance {frame_tol_m:.4e} m "
+            f"(engine errors: {engine_max_frame_error_m})"
+        )
+
+    return {
+        "spec_sha256": character.sha256,
+        "spec_mass_kg": spec_mass_kg,
+        "engine_masses_kg": engine_masses_kg,
+        "engine_max_frame_error_m": engine_max_frame_error_m,
+        "max_mass_error_kg": max_mass_error_kg,
+        "max_frame_origin_error_m": max_frame_origin_error_m,
+        "pinocchio_joint_count": pin_joint_count,
+        "passed": True,
+    }
+
+
 __all__ = [
     "EXPORT_FORMATS",
     "CompiledCharacter",
@@ -174,4 +373,5 @@ __all__ = [
     "export_character",
     "preset_listing",
     "resolve_parameters",
+    "verify_cross_engine_l0_parity",
 ]

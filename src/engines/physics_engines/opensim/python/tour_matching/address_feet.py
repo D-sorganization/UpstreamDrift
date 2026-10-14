@@ -20,6 +20,7 @@ from src.shared.python.motion_matching.foot_progression import (
     model_long_axis,
     progression_angle_deg,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 __all__ = ["apply_toe_out_seed", "opensim_foot_progression_deg"]
 
@@ -40,7 +41,7 @@ def opensim_foot_progression_deg(
 
     Raises ``ImportError`` when the OpenSim runtime is missing.
     """
-    import opensim as osim
+    osim = import_opensim()
 
     model = osim.Model(str(model_path))
     state = model.initSystem()

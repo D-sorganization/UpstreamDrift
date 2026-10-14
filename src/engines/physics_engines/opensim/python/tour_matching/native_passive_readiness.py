@@ -20,6 +20,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.native_constraint_
     audit_native_constraint_state,
     native_muscles,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 def _finite(value: Any) -> float:
@@ -269,7 +270,7 @@ def audit_native_passive_readiness(
     be shared. The existing constraint audit retains that incomplete-state gate.
     This function never equilibrates, assembles, unlocks, disables or overrides.
     """
-    import opensim as osim
+    osim = import_opensim()
 
     if not isinstance(model, osim.Model) or not isinstance(state, osim.State):
         raise TypeError("passive audit requires actual native Model and State")

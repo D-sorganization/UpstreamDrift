@@ -21,6 +21,7 @@ from __future__ import annotations
 from typing import Any, cast
 
 import matplotlib
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 # Ensure a non-interactive backend is selected when this module is imported
 # from a context that has not already configured one (e.g. pytest under
@@ -62,7 +63,7 @@ __all__ = [
 def _opensim_visualizer_available() -> bool:
     """Return ``True`` iff ``opensim.Visualizer`` can be imported."""
     try:
-        import opensim  # noqa: F401
+        import_opensim()
     except ImportError:  # pragma: no cover - depends on host install
         return False
     # The Visualizer class is part of the SimTK Java/OpenGL viewer.

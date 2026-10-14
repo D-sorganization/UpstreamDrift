@@ -12,6 +12,7 @@ from typing import Any, Sequence
 
 import numpy as np
 from numpy.typing import NDArray
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 GUESS_FILENAME = "native_initial_guess.sto"
@@ -57,7 +58,7 @@ def _state_names(model: Any) -> tuple[str, ...]:
 def _read_table(
     model: Any, guess_path: Path, clock: NDArray[np.float64]
 ) -> tuple[tuple[str, ...], NDArray[np.float64]]:
-    import opensim as osim
+    osim = import_opensim()
 
     try:
         table = osim.TimeSeriesTable(str(guess_path))
@@ -145,7 +146,7 @@ def audit_native_moco_guess(
     time_seconds: Sequence[float] | NDArray[np.float64],
 ) -> NativeMocoGuessReceipt:
     """Check state order, finite values and exact clock against loaded native model."""
-    import opensim as osim
+    osim = import_opensim()
 
     source = _source(Path(model_path), expected_source_sha256)
     clock = _clock(time_seconds)
@@ -172,7 +173,7 @@ def materialize_native_moco_guess(
     output_dir: Path,
 ) -> NativeMocoGuessReceipt:
     """Write one constant native-equilibrated numerical seed; never infer bounds."""
-    import opensim as osim
+    osim = import_opensim()
 
     source = _source(Path(model_path), expected_source_sha256)
     clock = _clock(time_seconds)

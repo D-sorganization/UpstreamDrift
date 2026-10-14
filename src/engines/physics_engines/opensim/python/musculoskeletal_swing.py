@@ -40,6 +40,7 @@ from src.engines.physics_engines.opensim.python.msk_club import (
     TRAIL_CONSTRAINT as TRAIL_GRIP_CONSTRAINT,
 )
 from src.shared.python.contracts import ensure, require
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -320,7 +321,7 @@ def resolve_base_model(explicit: str | Path | None = None) -> Path:
 
 def _require_opensim() -> Any:
     try:
-        import opensim
+        opensim = import_opensim()
     except ImportError as exc:  # pragma: no cover - environment dependent
         raise ImportError("OpenSim python bindings are required") from exc
     return opensim

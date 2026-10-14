@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 class ProbeStatus(Enum):
@@ -661,7 +662,7 @@ class OpenSimProbe(EngineProbe):
 
         # Check for opensim package
         try:
-            import opensim
+            opensim = import_opensim()
 
             version = getattr(opensim, "__version__", "unknown")
             if version == "unknown":

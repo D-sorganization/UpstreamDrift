@@ -15,6 +15,7 @@ export const KNOWN_APP_ROUTES = [
     '/tools/data-explorer',
     '/tools/motion-capture',
     '/tools/terrain',
+    '/tools/bunker-workbench',
     '/tools/dataset',
     '/tools/analysis',
     '/tools/character-builder',

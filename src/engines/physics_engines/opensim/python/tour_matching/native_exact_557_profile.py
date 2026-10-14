@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from defusedxml import ElementTree as ET
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 EXACT_SOURCE_SHA256 = "453e09c4e42dcc3f4b74a3b2efeff063e96c3820b3eee1efe95eef249579010d"
 _COMPONENT_SHA256 = "c81fcb306692cfbf34b49466119943f6d1686dc8067d08eb0fe5f18a32d9db0b"
@@ -79,7 +80,7 @@ def validate_exact_source_bytes(raw: bytes) -> None:
 
 def validate_exact_loaded_model(model: Any, declaration: Any) -> None:
     """Bind native component topology and all source clamped-coordinate ranges."""
-    import opensim as osim
+    osim = import_opensim()
 
     records = sorted(
         (item.getAbsolutePathString(), item.getConcreteClassName())
