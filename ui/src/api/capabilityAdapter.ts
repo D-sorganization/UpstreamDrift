@@ -41,6 +41,15 @@ export const TOOL_WEB_ROUTES: Record<string, string> = {
 };
 
 /**
+ * Partial web pages for desktop tools that keep their native window under
+ * Tauri: the browser fallback points at the page instead of `/simulation`.
+ * The BunkerShot3D page covers the v1 solve and A/B comparison only (#9545).
+ */
+export const PARTIAL_WEB_ROUTES: Record<string, string> = {
+  bunkershot3d: '/tools/bunker-workbench',
+};
+
+/**
  * Format a canonical tool ID to a readable title.
  */
 export function formatToolTitle(toolId: string): string {
@@ -85,7 +94,9 @@ export function resolveWorkspaceToolAction(
 
   // Web browser fallback
   let alternativeRoute: string | undefined = '/simulation';
-  if (toolId.includes('course') || toolId.includes('terrain')) {
+  if (toolId in PARTIAL_WEB_ROUTES) {
+    alternativeRoute = PARTIAL_WEB_ROUTES[toolId];
+  } else if (toolId.includes('course') || toolId.includes('terrain')) {
     alternativeRoute = '/tools/terrain';
   } else if (toolId.includes('optimizer') || toolId.includes('training')) {
     alternativeRoute = '/tools/swing-objective-lab';
