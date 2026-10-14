@@ -15,6 +15,7 @@ Usage:
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -24,6 +25,21 @@ from src.shared.python.core.constants import GRAVITY
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
+
+
+class MockEngineQuarantineError(RuntimeError):
+    """Raised when MockPhysicsEngine is used in a fail-closed scientific verification lane."""
+
+
+def _is_mock_engine_forbidden() -> bool:
+    """Check if MockPhysicsEngine is forbidden by environment configuration.
+
+    Returns True if either GOLF_FORBID_MOCK_ENGINE or GOLF_FAIL_CLOSED_PHYSICS
+    is set to a truthy value (1, true, yes, case-insensitive).
+    """
+    forbid_mock = os.environ.get("GOLF_FORBID_MOCK_ENGINE", "").strip().lower()
+    fail_closed = os.environ.get("GOLF_FAIL_CLOSED_PHYSICS", "").strip().lower()
+    return forbid_mock in {"1", "true", "yes"} or fail_closed in {"1", "true", "yes"}
 
 
 @dataclass
@@ -51,8 +67,14 @@ class MockPhysicsEngine:
     _torques: np.ndarray = field(default_factory=lambda: np.array([]))
     _requested_torques: np.ndarray = field(default_factory=lambda: np.array([]))
     _is_loaded: bool = field(default=False, init=False)
+    is_mock_engine: bool = field(default=True, init=False)
 
     def __post_init__(self) -> None:
+        if _is_mock_engine_forbidden():
+            raise MockEngineQuarantineError(
+                "MockPhysicsEngine is forbidden when GOLF_FORBID_MOCK_ENGINE or "
+                "GOLF_FAIL_CLOSED_PHYSICS is enabled."
+            )
         n_q = self.num_joints if self.num_q is None else int(self.num_q)
         n_v = self.num_joints if self.num_v is None else int(self.num_v)
         n_u = self.num_joints if self.num_u is None else int(self.num_u)
@@ -270,6 +292,34 @@ class MockPhysicsEngine:
 
     def get_body_velocity(self, body_name: str) -> np.ndarray:
         return np.zeros(6)
+
+
+def assert_not_mock_engine(
+    engine: Any, context: str = "scientific verification"
+) -> None:
+    """Guard function to enforce that mock or stub engines are not used.
+
+    Raises MockEngineQuarantineError if the engine is a MockPhysicsEngine,
+    a unittest.mock stub, or has is_mock_engine=True.
+
+    Args:
+        engine: The physics engine instance to validate.
+        context: A description of where the engine is being used (for error messages).
+
+    Raises:
+        ValueError: If engine is None.
+        MockEngineQuarantineError: If engine is a mock or stub.
+    """
+    if engine is None:
+        raise ValueError("engine must not be None")
+    is_mock = isinstance(engine, MockPhysicsEngine)
+    has_mock_flag = bool(getattr(engine, "is_mock_engine", False))
+    is_unittest_mock = type(engine).__module__.startswith("unittest.mock")
+    if is_mock or has_mock_flag or is_unittest_mock:
+        raise MockEngineQuarantineError(
+            f"Mock or stub physics engine ({type(engine).__name__}) is quarantined and "
+            f"cannot be used for {context}."
+        )
 
 
 def get_mock_engine() -> MockPhysicsEngine:
