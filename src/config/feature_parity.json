@@ -154,10 +154,9 @@
       "pyqt": "src/tools/matched_swing_browser/gui.py",
       "api": "src/api/routes/matched_swings.py",
       "web": "ui/src/pages/MatchedSwings.tsx",
-      "status": "gap",
-      "issue": 11987,
+      "status": "parity",
       "tiles": ["matched_swing_browser"],
-      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff (#10353 shipped the PyQt tile via #10543). The web page (MS-85 #10358) reads the same ledger through GET /matched-swings: desktop-ranked list with engine, capture, lane, verdict, drive-mode and profile filters and the desktop qualification note (#12061), receipt and parity JSON, GIF animation, 3D marker preview, impact parameters and grip-wrench charts. The Markdown and PDF Export Report (#12063, #11987; GET /matched-swings/{id}/report?format=pdf), frame-exact GIF Play/Pause/Restart (GET /matched-swings/{id}/animation/frames[/{index}], matching the desktop QMovie controls), and Export Video as GIF or MP4 (#11987; GET /matched-swings/{id}/video, reusing the desktop's export_video/export_report exactly) are on the web. Still missing on the web (#11987): the native-viewer handoff."
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff (#10353 shipped the PyQt tile via #10543). The web page (MS-85 #10358) reads the same ledger through GET /matched-swings: desktop-ranked list with engine, capture, lane, verdict, drive-mode and profile filters and the desktop qualification note (#12061), receipt and parity JSON, GIF animation, 3D marker preview, impact parameters and grip-wrench charts. The Markdown and PDF Export Report (#12063, #11987; GET /matched-swings/{id}/report?format=pdf), frame-exact GIF Play/Pause/Restart (GET /matched-swings/{id}/animation/frames[/{index}], matching the desktop QMovie controls), Export Video as GIF or MP4 (#11987; GET /matched-swings/{id}/video, reusing the desktop's export_video/export_report exactly), and native-viewer handoff (#11987; POST /api/matched-swings/{id}/native-viewer) are on the web."
     },
     "analysis.impact_parameters": {
       "title": "Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line",

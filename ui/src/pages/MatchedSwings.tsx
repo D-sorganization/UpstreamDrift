@@ -23,6 +23,7 @@ import {
   fetchMatchedSwingReceipt,
   fetchParityReport,
   formatMetric,
+  launchMatchedSwingNativeViewer,
   matchedSwingReportUrl,
   matchedSwingVideoUrl,
   verdictBadgeClass,
@@ -85,6 +86,9 @@ export function MatchedSwingsPage() {
   const [receiptError, setReceiptError] = useState<string | null>(null);
   const [parityJson, setParityJson] = useState<Record<string, unknown> | null>(null);
   const [parityError, setParityError] = useState<string | null>(null);
+  const [viewerStatus, setViewerStatus] = useState<string | null>(null);
+  const [viewerError, setViewerError] = useState<string | null>(null);
+  const [isLaunchingViewer, setIsLaunchingViewer] = useState(false);
 
   const loadPreview = useCallback(async (run: MatchedSwingRun, frameIndex: number) => {
     if (!run.capabilities.has_candidate_npz) {
@@ -110,6 +114,8 @@ export function MatchedSwingsPage() {
       setReceiptError(null);
       setParityJson(null);
       setParityError(null);
+      setViewerStatus(null);
+      setViewerError(null);
       void Promise.resolve().then(() => loadPreview(run, 0));
     },
     [loadPreview],
@@ -144,6 +150,20 @@ export function MatchedSwingsPage() {
     } catch (err: unknown) {
       setParityJson(null);
       setParityError(err instanceof Error ? err.message : 'Failed to load parity report');
+    }
+  }, []);
+
+  const handleOpenNativeViewer = useCallback(async (runId: string) => {
+    setIsLaunchingViewer(true);
+    setViewerError(null);
+    setViewerStatus(null);
+    try {
+      const res = await launchMatchedSwingNativeViewer(runId);
+      setViewerStatus(res.message || `Launched native viewer (${res.backend})`);
+    } catch (err: unknown) {
+      setViewerError(err instanceof Error ? err.message : 'Failed to launch native viewer');
+    } finally {
+      setIsLaunchingViewer(false);
     }
   }, []);
 
@@ -439,6 +459,14 @@ export function MatchedSwingsPage() {
           >
             View Parity Report
           </button>
+          <button
+            type="button"
+            onClick={() => void handleOpenNativeViewer(selectedRun.id)}
+            disabled={!selectedRun.capabilities.has_candidate_npz || isLaunchingViewer}
+            className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isLaunchingViewer ? 'Launching Viewer…' : 'Open Native Viewer'}
+          </button>
           <a
             href={matchedSwingReportUrl(selectedRun.id)}
             download
@@ -489,6 +517,8 @@ export function MatchedSwingsPage() {
             </>
           )}
         </div>
+        {viewerError && <p className="text-xs text-red-300" role="alert">{viewerError}</p>}
+        {viewerStatus && <p className="text-xs text-emerald-300">{viewerStatus}</p>}
         {receiptError && <p className="text-xs text-red-300">{receiptError}</p>}
         {receiptJson && (
           <OutputStatusBadges payload={receiptJson.output_policy} receipt={receiptJson.receipt} />
