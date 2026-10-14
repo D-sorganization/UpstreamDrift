@@ -32,6 +32,7 @@ _EXEMPT = frozenset(
         / "test_adapter_parity.py",
         _TESTS_ROOT / "unit" / "test_third_party_integration_batch2.py",
         _TESTS_ROOT / "integration" / "test_urdf_engine_loadability.py",
+        _TESTS_ROOT / "integration" / "cross_engine" / "test_force_overlay_parity.py",
     }
 )
 
