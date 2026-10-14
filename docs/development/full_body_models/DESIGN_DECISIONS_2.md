@@ -133,3 +133,14 @@ The club-face fixtures have not been regenerated with the finer hold. Regenerati
 ### Reproduction
 
 `tests/unit/motion_matching/same_input/test_effort_hold.py` is engine-free. A toy computed-torque loop (bandwidth 1500 rad/s) has an exact tracked solution. The 1 ms hold diverges from it, while the 0.125 ms hold stays within the epic #11605 1e-6 rad coordinate bound. Below the stability limit the hold error falls monotonically with the hold. The tests also check manifest round-trips, legacy loading, and replay through `segmented_replay`.
+
+### What Was Tried and Rejected
+
+- **Making 0.125 ms the default hold:** rejected by the owner ruling of 2026-10-11 on #12279. It would change every committed bundle and the per-step consumers at once. Keeping it opt-in leaves existing bundles bit-identical.
+- **A faster closure projection instead of a finer hold:** the brick measurements on #12279 show the 1 ms hold, not the projection rate, slides the feet. The projection still runs once per 1 ms step.
+- **Hold counts that don't divide the eight RK4 substeps:** rejected by `effort_holds_for`. A non-dividing count would give uneven RK4 substeps within a step.
+
+### Evidence Receipt
+
+- Tests: `tests/unit/motion_matching/same_input/test_effort_hold.py`. They failed before the change. They cover the toy-loop divergence at 1 ms versus the 1e-6 rad bound at 0.125 ms, the manifest round-trip, legacy bundle loading, and replay through `segmented_replay`.
+- Measurements: the #12279 issue thread (brick run `s38-fxi2`), quoted in the table above.
