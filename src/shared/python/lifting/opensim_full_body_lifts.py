@@ -180,7 +180,7 @@ def compose_opensim_full_body_lift(
         "elbow_l",
         "wrist_l",
     )
-    contacts = ("foot_r_sphere", "foot_l_sphere")
+    contacts: tuple[str, ...] = ("foot_r_sphere", "foot_l_sphere")
     if spec.bench_contact or spec.lift == "bench_press":
         contacts = (*contacts, "bench_back_contact")
 

@@ -277,23 +277,14 @@ def _evaluate_held_out_replay(
         return None, None
     q, v, _ = trial.basis.evaluate(coefficients)
     reference = np.concatenate([q, v], axis=1)
-    steps = np.diff(trial.times)
-    dt = float(steps[0])
-    step = config.step_factory(geometry, parameters, dt)
-    nominal_inputs = inputs[:-1]
-    linearization = linearize_along_trajectory(
-        step, reference[:-1], nominal_inputs, 1e-6
-    )
-    gains = tvlqr_gains(linearization, config.state_weight, config.input_weight)
-    report = replay_acceptance(
-        step,
-        reference,
-        nominal_inputs,
-        gains,
-        config.initial_perturbation,
-        config.position_tolerance,
-        dt,
-    )
+    dt = float(np.diff(trial.times)[0])
+    step_fn = config.step_factory(geometry, parameters, dt)
+    u_nom = inputs[:-1]
+    lin = linearize_along_trajectory(step_fn, reference[:-1], u_nom, 1e-6)
+    fb_gains = tvlqr_gains(lin, config.state_weight, config.input_weight)
+    tol = config.position_tolerance
+    pert = config.initial_perturbation
+    report = replay_acceptance(step_fn, reference, u_nom, fb_gains, pert, tol, dt)
     return report, float(report.open_loop_rms)
 
 

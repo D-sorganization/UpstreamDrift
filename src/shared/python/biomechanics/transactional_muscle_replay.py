@@ -243,7 +243,14 @@ class TransactionalMuscleStepper:
             if not self._is_state_valid(post_state):
                 advance_failed = True
                 error_msg = "Plant returned invalid or non-finite state"
-        except Exception as exc:  # noqa: BLE001
+        except (
+            RuntimeError,
+            ValueError,
+            TypeError,
+            ArithmeticError,
+            LookupError,
+            AttributeError,
+        ) as exc:
             advance_failed = True
             error_msg = f"Plant advance raised exception: {exc}"
 
@@ -259,7 +266,14 @@ class TransactionalMuscleStepper:
         try:
             self.plant.restore_state_snapshot(proposal.pre_state_snapshot)
             restored = True
-        except Exception:  # noqa: BLE001
+        except (
+            RuntimeError,
+            ValueError,
+            TypeError,
+            ArithmeticError,
+            LookupError,
+            AttributeError,
+        ):
             restored = False
 
         status = "step_rejected_restored" if restored else "step_failed_unrecoverable"
