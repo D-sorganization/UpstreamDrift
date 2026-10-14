@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from ..lift_spec import lift_phase_names
+from ..lift_spec import lift_phase_names, standard_version
 from .names import ENGINES, LIFTS
 
 LIMIT_TOL_RAD = 1e-4  # limit_abs_rad in the parity standard
@@ -150,6 +150,28 @@ def start_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
                 }
             )
     return rows
+
+
+def _major(version: Any, label: str) -> int:
+    head = version.split(".", 1)[0] if isinstance(version, str) else ""
+    if not head.isdigit():
+        raise ValueError(f"{label} standard version must be semver, got {version!r}")
+    return int(head)
+
+
+def receipt_predates_standard(receipt: dict[str, Any]) -> bool:
+    """True when *receipt* was measured against an older standard major.
+
+    Named phases were introduced in standard v2 (RM#2025), so phase names in a
+    receipt measured at v1.x predate the packs' renames and must be
+    re-measured before they count as gaps (#11743).
+
+    Raises:
+        ValueError: The receipt's or the vendored standard's version is not
+            semver.
+    """
+    measured = _major(receipt["standard"].get("version"), "receipt")
+    return measured < _major(standard_version(), "vendored")
 
 
 def _str_list(value: Sequence[str], label: str) -> list[str]:

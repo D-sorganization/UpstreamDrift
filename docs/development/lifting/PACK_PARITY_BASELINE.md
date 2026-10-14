@@ -213,7 +213,7 @@ Hand-bar is the perpendicular distance from a hand origin to the bar axis, worst
 | Floor-pull start pose is not at the floor | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#381; Drake_Models#364; MuJoCo_Models#407; OpenSim_Models#416; Pinocchio_Models#450 | LIFT-4 | new |
 | Joint limits differ from the parity standard | MuJoCo, Pinocchio | MuJoCo_Models#407; MuJoCo_Models#409; Pinocchio_Models#433 | LIFT-5 | existing |
 | Phase count differs from the standard | Drake, MuJoCo, Pinocchio | Drake_Models#372; MuJoCo_Models#401; Pinocchio_Models#434 | LIFT-6 | existing |
-| Phase names differ from the standard | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#372; MuJoCo_Models#401; Pinocchio_Models#434 | LIFT-3 | existing |
+| Phase names differ from the standard | Drake, MuJoCo, OpenSim, Pinocchio | - | LIFT-3 | stale, re-measure |
 | Phase targets are left-side only | Pinocchio | Pinocchio_Models#449 | LIFT-6 | new |
 | Phase keys do not resolve to model coordinates | Drake, OpenSim, Pinocchio | Drake_Models#390; OpenSim_Models#414; Pinocchio_Models#436 | LIFT-6 | new |
 | Bench mass convention differs across packs | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#391; MuJoCo_Models#428; OpenSim_Models#415; Pinocchio_Models#451 | LIFT-2 | new |

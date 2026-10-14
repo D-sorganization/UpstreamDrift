@@ -413,6 +413,14 @@ def _phases(receipt: dict[str, Any]) -> str:
     )
 
 
+def _issue_status(gap: dict[str, Any]) -> str:
+    if gap.get("stale"):
+        return "stale, re-measure"
+    if not gap["issues"]:
+        return "none filed"
+    return "new" if gap["new_issue"] else "existing"
+
+
 def _gaps(receipt: dict[str, Any]) -> str:
     rows = []
     for g in derive_gaps(receipt):
@@ -420,9 +428,9 @@ def _gaps(receipt: dict[str, Any]) -> str:
             [
                 g["title"],
                 ", ".join(_e(e) for e in g["engines"]),
-                "; ".join(g["issues"]),
+                "; ".join(g["issues"]) or "-",
                 g["lift_story"],
-                "new" if g["new_issue"] else "existing",
+                _issue_status(g),
             ]
         )
     return _table(["Discrepancy", "Engines", "Issues", "Epic Child", "Issue"], rows)

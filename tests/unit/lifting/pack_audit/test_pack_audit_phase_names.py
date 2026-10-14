@@ -10,7 +10,7 @@ from typing import Any
 
 import pytest
 
-from src.shared.python.lifting.lift_spec import lift_phase_names
+from src.shared.python.lifting.lift_spec import lift_phase_names, standard_version
 from src.shared.python.lifting.pack_audit import analysis as an
 from src.shared.python.lifting.pack_audit.gaps import derive_gaps
 from src.shared.python.lifting.pack_audit.report import render_markdown
@@ -96,7 +96,12 @@ def test_phase_rows_carry_a_reason_exactly_when_names_differ(committed):
         assert (row["names_reason"] is None) == row["names_match"]
 
 
+def _measured_against_vendored_standard(receipt: dict[str, Any]) -> None:
+    receipt["standard"]["version"] = standard_version()
+
+
 def test_pack_with_standard_names_has_no_phase_names_gap(receipt):
+    _measured_against_vendored_standard(receipt)
     for lift in an.LIFTS:
         for engine in an.engines_of(receipt, lift):
             _rename_to_standard(receipt, lift, engine)
@@ -104,6 +109,7 @@ def test_pack_with_standard_names_has_no_phase_names_gap(receipt):
 
 
 def test_renamed_or_missing_phase_is_a_gap_with_a_reason(receipt):
+    _measured_against_vendored_standard(receipt)
     for lift in an.LIFTS:
         for engine in an.engines_of(receipt, lift):
             _rename_to_standard(receipt, lift, engine)
@@ -114,25 +120,66 @@ def test_renamed_or_missing_phase_is_a_gap_with_a_reason(receipt):
     assert gap is not None
     assert gap["engines"] == ["drake", "mujoco"]
     assert gap["lift_story"] == "LIFT-3"
-    assert gap["issues"], "every phase-name gap maps to a tracking issue"
+    assert gap["stale"] is False
     evidence = " | ".join(gap["evidence"])
     assert "drake/deadlift: missing: descent" in evidence
     assert "mujoco/deadlift: missing: first_pull; unexpected: below_knee" in evidence
 
 
-def test_committed_receipt_reports_every_pack_off_standard(committed):
+def test_phase_names_gap_never_cites_the_closed_rename_trackers(receipt):
+    """MuJoCo#401, Drake#372 and Pinocchio#434 merged; all packs match v2.1."""
+    _measured_against_vendored_standard(receipt)
+    gap = _phase_names_gap(receipt)
+    assert gap is not None
+    assert gap["issues"] == []
+    assert not gap["new_issue"]
+
+
+@pytest.mark.parametrize(
+    ("version", "stale"), [("1.2.0", True), ("2.0.0", False), ("2.1.0", False)]
+)
+def test_receipt_predates_named_phases_only_below_the_vendored_major(
+    receipt, version: str, stale: bool
+):
+    receipt["standard"]["version"] = version
+    assert an.receipt_predates_standard(receipt) is stale
+
+
+@pytest.mark.parametrize("version", [None, "", "two", 2])
+def test_receipt_standard_version_must_be_semver(receipt, version: Any):
+    receipt["standard"]["version"] = version
+    with pytest.raises(ValueError, match="standard version"):
+        an.receipt_predates_standard(receipt)
+
+
+def test_committed_receipt_marks_the_phase_names_gap_stale(committed):
+    """The receipt was measured at standard v1.2, before the pack renames."""
+    assert an.receipt_predates_standard(committed)
     gap = _phase_names_gap(committed)
     assert gap is not None
+    assert gap["stale"] is True
+    assert gap["issues"] == []
+    assert not gap["new_issue"]
     assert gap["engines"] == sorted(an.ENGINES)
-    assert len(gap["evidence"]) == sum(
+    assert gap["evidence"][0].startswith("stale: receipt predates pack renames")
+    assert "re-measure" in gap["evidence"][0]
+    assert len(gap["evidence"]) == 1 + sum(
         not r["names_match"] for r in an.phase_rows(committed)
     )
+
+
+def test_every_other_gap_is_not_stale(committed):
+    for gap in derive_gaps(committed):
+        assert gap["stale"] is (gap["key"] == "phase_names"), gap["key"]
 
 
 def test_report_has_a_names_column_built_on_names_match(committed):
     text = render_markdown(committed)
     assert "| Names Match Standard |" in text
-    assert "Phase names differ from the standard" in text
+    row = next(
+        ln for ln in text.splitlines() if "Phase names differ from the standard" in ln
+    )
+    assert "stale, re-measure" in row
 
 
 # -- offline regeneration -----------------------------------------------------

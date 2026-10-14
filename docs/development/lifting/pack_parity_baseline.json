@@ -15224,7 +15224,8 @@
       ],
       "issues": ["Drake_Models#365", "Pinocchio_Models#443"],
       "lift_story": "LIFT-3",
-      "new_issue": false
+      "new_issue": false,
+      "stale": false
     },
     {
       "key": "grip_width",
@@ -15240,7 +15241,8 @@
         "Pinocchio_Models#443"
       ],
       "lift_story": "LIFT-3",
-      "new_issue": false
+      "new_issue": false,
+      "stale": false
     },
     {
       "key": "start_pose",
@@ -15268,7 +15270,8 @@
         "Pinocchio_Models#450"
       ],
       "lift_story": "LIFT-4",
-      "new_issue": true
+      "new_issue": true,
+      "stale": false
     },
     {
       "key": "limits",
@@ -15291,7 +15294,8 @@
         "Pinocchio_Models#433"
       ],
       "lift_story": "LIFT-5",
-      "new_issue": false
+      "new_issue": false,
+      "stale": false
     },
     {
       "key": "phase_count",
@@ -15312,13 +15316,15 @@
         "Pinocchio_Models#434"
       ],
       "lift_story": "LIFT-6",
-      "new_issue": false
+      "new_issue": false,
+      "stale": false
     },
     {
       "key": "phase_names",
       "title": "Phase names differ from the standard",
       "engines": ["drake", "mujoco", "opensim", "pinocchio"],
       "evidence": [
+        "stale: receipt predates pack renames (MuJoCo_Models#401, Pinocchio_Models#434, Drake_Models#372 merged); measured at standard v1.2.0, vendored v2.1.0; re-measure with all four engines",
         "mujoco/squat: missing: standing, descent, ascent; unexpected: descent_start, half_depth, drive",
         "opensim/squat: missing: standing, ascent; unexpected: start, drive",
         "drake/squat: missing: standing, descent, ascent; unexpected: unrack",
@@ -15340,13 +15346,10 @@
         "drake/clean_and_jerk: missing: setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery; unexpected: floor, knee_pass, rack_position, jerk_dip, overhead_lockout",
         "pinocchio/clean_and_jerk: missing: setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery; unexpected: clean_first_pull, clean_second_pull, clean_catch, clean_stand, jerk_dip, jerk_drive, jerk_catch, jerk_recovery"
       ],
-      "issues": [
-        "Drake_Models#372",
-        "MuJoCo_Models#401",
-        "Pinocchio_Models#434"
-      ],
+      "issues": [],
       "lift_story": "LIFT-3",
-      "new_issue": false
+      "new_issue": false,
+      "stale": true
     },
     {
       "key": "phase_asymmetric",
@@ -15361,7 +15364,8 @@
       ],
       "issues": ["Pinocchio_Models#449"],
       "lift_story": "LIFT-6",
-      "new_issue": true
+      "new_issue": true,
+      "stale": false
     },
     {
       "key": "phase_keys",
@@ -15386,7 +15390,8 @@
         "Pinocchio_Models#436"
       ],
       "lift_story": "LIFT-6",
-      "new_issue": true
+      "new_issue": true,
+      "stale": false
     },
     {
       "key": "bench_mass",
@@ -15405,7 +15410,8 @@
         "Pinocchio_Models#451"
       ],
       "lift_story": "LIFT-2",
-      "new_issue": true
+      "new_issue": true,
+      "stale": false
     },
     {
       "key": "contacts",
@@ -15421,7 +15427,8 @@
       ],
       "issues": ["MuJoCo_Models#427", "OpenSim_Models#384"],
       "lift_story": "LIFT-4",
-      "new_issue": true
+      "new_issue": true,
+      "stale": false
     },
     {
       "key": "no_grf",
@@ -15433,7 +15440,8 @@
       ],
       "issues": ["Drake_Models#371", "Pinocchio_Models#432"],
       "lift_story": "LIFT-9",
-      "new_issue": false
+      "new_issue": false,
+      "stale": false
     },
     {
       "key": "inertia",
@@ -15442,7 +15450,8 @@
       "evidence": ["mujoco/thigh_l: median principal moment 0.179 vs 0.138"],
       "issues": ["MuJoCo_Models#392"],
       "lift_story": "LIFT-2",
-      "new_issue": true
+      "new_issue": true,
+      "stale": false
     }
   ]
 }
