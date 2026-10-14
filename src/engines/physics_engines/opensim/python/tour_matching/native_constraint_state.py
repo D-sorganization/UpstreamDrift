@@ -16,6 +16,7 @@ from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Iterator
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 @dataclass(frozen=True)
@@ -244,7 +245,7 @@ def audit_native_constraint_state(
     remain shared. No missing target is inferred from q or source defaults. This
     function does not integrate, assemble, equilibrate, or admit replay.
     """
-    import opensim as osim
+    osim = import_opensim()
 
     if not isinstance(model, osim.Model) or not isinstance(state, osim.State):
         raise TypeError("audit requires actual native OpenSim Model and State")
@@ -331,7 +332,7 @@ def owned_native_source_state(
     Native initSystem includes OpenSim's initialization assembly; restoring named
     continuous values afterward does not invoke a second assembly here.
     """
-    import opensim as osim
+    osim = import_opensim()
 
     source = Path(model_path)
     payload = source.read_bytes()

@@ -20,6 +20,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.marker_set import 
     MarkerPlacement,
 )
 from src.shared.python.motion_matching.marker_calibration import Array, Pose
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 Bindings = Mapping[str, tuple[str, Sequence[float]]]
 
@@ -41,7 +42,7 @@ class NativeMarkerGeometry:
         assembly_accuracy: float = 1e-14,
         coordinate_tolerance: float = 1e-7,
     ) -> None:
-        import opensim as osim
+        osim = import_opensim()
 
         paths = tuple(coordinate_paths)
         if not paths or len(set(paths)) != len(paths):

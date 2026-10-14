@@ -30,6 +30,7 @@ from src.shared.python.engine_core.capabilities import (
 from src.shared.python.body_part_viz import AxialLoadFrame
 from src.shared.python.force_overlay import ForceTorqueFrame, WrenchKind
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 if TYPE_CHECKING:
     from .opensim_force_torque import OpenSimForceTorqueSource
@@ -39,7 +40,7 @@ logger = get_logger(__name__)
 
 # Import OpenSim if available
 if OPENSIM_AVAILABLE:
-    import opensim
+    opensim = import_opensim()
 else:
     opensim = None  # type: ignore[assignment]
     logger.warning(

@@ -34,6 +34,7 @@ from .base import (
     MotionMatchingResult,
 )
 from .inverse_dyn_pinocchio import PinocchioInverseDynMatchingSolver
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +95,7 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
             if osim_model is None or state is None:
                 return np.zeros_like(q_row, dtype=np.float64)
             try:  # pragma: no cover - exercised only when opensim installed
-                import opensim as osim  # noqa: F401
+                import_opensim()
 
                 n_coord = osim_model.getNumCoordinates()  # type: ignore[attr-defined]
                 if len(q_row) == n_coord:
@@ -201,7 +202,7 @@ class CMCMatchingSolver(BaseMotionMatchingSolver):
         osim_model = None
         state = None
         try:  # pragma: no cover - exercised when opensim installed
-            import opensim as osim
+            osim = import_opensim()
 
             osim_model = osim.Model()
             state = osim_model.initSystem()

@@ -38,6 +38,7 @@ from src.shared.python.motion_matching.contact_law import (
     GroundPlane,
     sphere_ground_contact,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 #: Coordinates whose efforts carry the grip-weld reaction (arms and scapulae).
 LOOP_COORDINATE_PREFIXES: tuple[str, ...] = (
@@ -99,7 +100,7 @@ class SkeletonDynamics:
     """
 
     def __init__(self, spec_bytes: bytes) -> None:
-        import opensim
+        opensim = import_opensim()
 
         self._osim = opensim
         self.spec = graft.spec_document(spec_bytes)

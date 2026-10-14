@@ -23,6 +23,7 @@ from .native_constraint_state import (
     audit_native_constraint_state,
     owned_native_source_state,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 
 def _finite(value: float, name: str) -> float:
@@ -227,7 +228,7 @@ def _remove_matching_source_controller(
     replacement: tuple[str, str, float],
     commands: Mapping[str, float],
 ) -> None:
-    import opensim as osim
+    osim = import_opensim()
 
     if controllers.getSize() != 1:
         raise ValueError("source controller identity requires exactly one controller")
@@ -266,7 +267,7 @@ def _build_prescribed_player(
     initial_time: float,
     command_step: tuple[float, Mapping[str, float]] | None,
 ) -> Any:
-    import opensim as osim
+    osim = import_opensim()
 
     player = osim.PrescribedController()
     player.setName("owned_time_only_cold_start_player")
@@ -301,7 +302,7 @@ def _install_owned_input_player(
     initial_time: float,
     command_step: tuple[float, Mapping[str, float]] | None,
 ) -> bool:
-    import opensim as osim
+    osim = import_opensim()
 
     controllers = model.updControllerSet()
     components = tuple(model.getComponentsList())

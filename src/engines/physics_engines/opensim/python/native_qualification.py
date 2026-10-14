@@ -29,6 +29,7 @@ from src.shared.python.native_lanes.common import (
     check_rollout_dynamics,
     compute_marker_metrics,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 OPENSIM_ENGINE_LIMITATIONS: tuple[str, ...] = (
     "hill_type_activation_dynamics: muscle excitation to activation first-order lag (tau_act ~ 10-15 ms, tau_deact ~ 40-50 ms)",
@@ -180,7 +181,7 @@ def assess_opensim_qualification(
     """Assess qualification status, returning UNAVAILABLE if opensim runtime is missing."""
     if opensim_available is None:
         try:
-            import opensim  # noqa: F401
+            import_opensim()
 
             opensim_available = True
         except ImportError:

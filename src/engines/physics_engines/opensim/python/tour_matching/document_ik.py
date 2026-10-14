@@ -38,6 +38,7 @@ from src.shared.python.motion_matching.candidate import (
 )
 from src.shared.python.motion_matching.candidate_io import save_candidate
 from src.shared.python.motion_matching.pipeline.dynamics import segment_rms
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +146,7 @@ def _load_mot_table(
     rotational_mask: Sequence[bool],
 ) -> tuple[np.ndarray, np.ndarray]:
     """Parse TimeSeriesTable or STO/MOT file into time and q array."""
-    import opensim  # type: ignore[import-not-found]
+    opensim = import_opensim()
 
     table = opensim.TimeSeriesTable(str(mot_path))
     in_degrees = table.getTableMetaDataAsString("inDegrees") == "yes"
@@ -330,7 +331,7 @@ def _run_opensim_ik_tool(
     max_frames: int | None = None,
 ) -> None:
     """Configure and execute OpenSim InverseKinematicsTool."""
-    import opensim  # type: ignore[import-not-found]
+    opensim = import_opensim()
 
     end_idx = len(cap.time_s) - 1
     if max_frames is not None and 0 < max_frames < len(cap.time_s):
@@ -415,7 +416,7 @@ def run_document_ik(
     canonical_receipt_path: Path | None = None,
 ) -> dict[str, Any]:
     """Execute OpenSim InverseKinematicsTool on document model with MS-04 weights."""
-    import opensim  # type: ignore[import-not-found]
+    opensim = import_opensim()
 
     t_start = time.monotonic()
     spec_file = spec_path or DEFAULT_SPEC_PATH

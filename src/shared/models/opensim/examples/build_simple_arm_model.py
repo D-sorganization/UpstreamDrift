@@ -30,19 +30,23 @@ from __future__ import annotations
 import logging
 import math
 import sys
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from src.shared.python.core.constants import GRAVITY_M_S2
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 logger = logging.getLogger(__name__)
 
-try:
+if TYPE_CHECKING:
     import opensim as osim
-except ImportError:
-    logger.error("ERROR: OpenSim Python package not installed.")
-    logger.info("Installation: conda install -c opensim-org opensim")
-    logger.info("Alternative: pip install opensim (if available)")
-    sys.exit(1)
+else:
+    try:
+        osim = import_opensim()
+    except ImportError:
+        logger.error("ERROR: OpenSim Python package not installed.")
+        logger.info("Installation: conda install -c opensim-org opensim")
+        logger.info("Alternative: pip install opensim (if available)")
+        sys.exit(1)
 
 
 def _create_arm_bodies() -> tuple[Any, Any]:

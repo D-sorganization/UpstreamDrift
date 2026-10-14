@@ -38,6 +38,7 @@ from .native_prepared_state import (
     observe_declared_native_sample,
 )
 from .native_constraint_state import _restore_named_state
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _ACCURACY = 1e-8
 
@@ -101,7 +102,7 @@ def _restore(
 ) -> tuple[Any, tuple[str, ...], Any]:
     if declaration is None:
         return muscle_replay._restore_continuous_state(model, initial, 0.0)
-    import opensim as osim
+    osim = import_opensim()
 
     if (
         dict(initial) != dict(declaration.named_state)
@@ -130,7 +131,7 @@ def _prepare(
 ) -> tuple[
     Any, Any, tuple[str, ...], Any, NativeMixedProfile, dict[str, tuple[float, ...]]
 ]:
-    import opensim as osim
+    osim = import_opensim()
 
     raw = path.read_bytes()
     if declaration is not None and (
