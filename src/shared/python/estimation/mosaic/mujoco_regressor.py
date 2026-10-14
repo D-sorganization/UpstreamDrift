@@ -265,6 +265,29 @@ def pseudo_inertia_to_spatial_parameters(pseudo: FloatArray) -> FloatArray:
     return np.asarray(params[0] if pseudo.ndim == 2 else params, dtype=np.float64)
 
 
+def _extract_marker_info(markers: Any) -> tuple[Any, Any]:
+    require(markers is not None, "markers must not be None")
+    if hasattr(markers, "link_index") and hasattr(markers, "offsets"):
+        return markers.link_index, markers.offsets
+    if hasattr(markers, "body_id") and hasattr(markers, "offsets"):
+        return markers.body_id, markers.offsets
+    raise ValueError(f"Unsupported marker container type: {type(markers)}")
+
+
+def _resolve_body_and_offset(
+    moving_bodies: list[int],
+    link_idx: int,
+    offset: Any,
+) -> tuple[int, FloatArray]:
+    body_id = int(link_idx)
+    if body_id < moving_bodies[0]:
+        body_id = moving_bodies[body_id]
+    offset_3d: FloatArray = np.zeros(3, dtype=np.float64)
+    raw_offset = np.asarray(offset, dtype=np.float64)
+    offset_3d[: raw_offset.size] = raw_offset
+    return body_id, offset_3d
+
+
 # ---------------------------------------------------------------------------
 # MujocoRegressorModel
 # ---------------------------------------------------------------------------
@@ -303,6 +326,20 @@ class MujocoRegressorModel:
         mujoco.mj_setConst(self.model, self.data)
 
     @classmethod
+    def _from_mjmodel(
+        cls,
+        model: Any,
+        planar: bool = False,
+        input_matrix: FloatArray | None = None,
+    ) -> MujocoRegressorModel:
+        return cls(
+            model=model,
+            data=mujoco.MjData(model),
+            planar=planar,
+            input_matrix_override=input_matrix,
+        )
+
+    @classmethod
     def from_xml_string(
         cls,
         xml: str,
@@ -311,13 +348,10 @@ class MujocoRegressorModel:
     ) -> MujocoRegressorModel:
         """Create a MujocoRegressorModel from an MJCF XML string."""
         require(_MUJOCO_AVAILABLE, "mujoco must be installed")
-        model = mujoco.MjModel.from_xml_string(xml)
-        data = mujoco.MjData(model)
-        return cls(
-            model=model,
-            data=data,
+        return cls._from_mjmodel(
+            mujoco.MjModel.from_xml_string(xml),
             planar=planar,
-            input_matrix_override=input_matrix,
+            input_matrix=input_matrix,
         )
 
     @classmethod
@@ -329,13 +363,10 @@ class MujocoRegressorModel:
     ) -> MujocoRegressorModel:
         """Create a MujocoRegressorModel from an MJCF XML file path."""
         require(_MUJOCO_AVAILABLE, "mujoco must be installed")
-        model = mujoco.MjModel.from_xml_path(path)
-        data = mujoco.MjData(model)
-        return cls(
-            model=model,
-            data=data,
+        return cls._from_mjmodel(
+            mujoco.MjModel.from_xml_path(path),
             planar=planar,
-            input_matrix_override=input_matrix,
+            input_matrix=input_matrix,
         )
 
     # ------------------------------------------------------------------ properties
@@ -505,13 +536,17 @@ class MujocoRegressorModel:
                     pi_plus = pi_orig.copy()
                     pi_plus[k] += h_step
                     m_p, c_p, I_p, q_p = spatial_to_mujoco_parameters(pi_plus)
-                    tau_plus = self._eval_inverse_for_body(b, m_p, c_p, I_p, q_p, q, v, a)
+                    tau_plus = self._eval_inverse_for_body(
+                        b, m_p, c_p, I_p, q_p, q, v, a
+                    )
 
                     # Backward perturbation
                     pi_minus = pi_orig.copy()
                     pi_minus[k] -= h_step
                     m_m, c_m, I_m, q_m = spatial_to_mujoco_parameters(pi_minus)
-                    tau_minus = self._eval_inverse_for_body(b, m_m, c_m, I_m, q_m, q, v, a)
+                    tau_minus = self._eval_inverse_for_body(
+                        b, m_m, c_m, I_m, q_m, q, v, a
+                    )
 
                     col = b_idx * SPATIAL_PARAMETERS_PER_BODY + k
                     Y_full[:, col] = (tau_plus - tau_minus) / (2.0 * h_step)
@@ -560,16 +595,7 @@ class MujocoRegressorModel:
     # ------------------------------------------------------------------ markers
     def marker_positions(self, q: FloatArray, markers: Any) -> FloatArray:
         """Compute world positions of attached markers."""
-        require(markers is not None, "markers must not be None")
-        # Support planar marker set or generic marker set
-        if hasattr(markers, "link_index") and hasattr(markers, "offsets"):
-            link_indices = markers.link_index
-            offsets = markers.offsets
-        elif hasattr(markers, "body_id") and hasattr(markers, "offsets"):
-            link_indices = markers.body_id
-            offsets = markers.offsets
-        else:
-            raise ValueError(f"Unsupported marker container type: {type(markers)}")
+        link_indices, offsets = _extract_marker_info(markers)
 
         n_markers = len(link_indices)
         is_batched = q.ndim == 2
@@ -583,15 +609,9 @@ class MujocoRegressorModel:
             mujoco.mj_fwdPosition(self.model, self.data)
 
             for m in range(n_markers):
-                # 1-indexed body id from link index (link 0 -> body 1)
-                body_id = int(link_indices[m])
-                if body_id < self._moving_bodies[0]:
-                    body_id = self._moving_bodies[body_id]
-
-                offset_3d: FloatArray = np.zeros(3, dtype=np.float64)
-                raw_offset = np.asarray(offsets[m], dtype=np.float64)
-                offset_3d[: raw_offset.size] = raw_offset
-
+                body_id, offset_3d = _resolve_body_and_offset(
+                    self._moving_bodies, link_indices[m], offsets[m]
+                )
                 R_body = self.data.xmat[body_id].reshape(3, 3)
                 p_body = self.data.xpos[body_id]
                 positions[b_i, m] = p_body + R_body @ offset_3d
@@ -604,15 +624,7 @@ class MujocoRegressorModel:
         self, q: FloatArray, markers: Any
     ) -> tuple[FloatArray, FloatArray]:
         """Compute marker Jacobians w.r.t coordinates q and geometry s."""
-        require(markers is not None, "markers must not be None")
-        if hasattr(markers, "link_index") and hasattr(markers, "offsets"):
-            link_indices = markers.link_index
-            offsets = markers.offsets
-        elif hasattr(markers, "body_id") and hasattr(markers, "offsets"):
-            link_indices = markers.body_id
-            offsets = markers.offsets
-        else:
-            raise ValueError(f"Unsupported marker container type: {type(markers)}")
+        link_indices, offsets = _extract_marker_info(markers)
 
         n_markers = len(link_indices)
         is_batched = q.ndim == 2
@@ -630,14 +642,9 @@ class MujocoRegressorModel:
             mujoco.mj_fwdPosition(self.model, self.data)
 
             for m in range(n_markers):
-                body_id = int(link_indices[m])
-                if body_id < self._moving_bodies[0]:
-                    body_id = self._moving_bodies[body_id]
-
-                offset_3d: FloatArray = np.zeros(3, dtype=np.float64)
-                raw_offset = np.asarray(offsets[m], dtype=np.float64)
-                offset_3d[: raw_offset.size] = raw_offset
-
+                body_id, offset_3d = _resolve_body_and_offset(
+                    self._moving_bodies, link_indices[m], offsets[m]
+                )
                 R_body = self.data.xmat[body_id].reshape(3, 3)
                 p_body = self.data.xpos[body_id]
                 pt = p_body + R_body @ offset_3d
