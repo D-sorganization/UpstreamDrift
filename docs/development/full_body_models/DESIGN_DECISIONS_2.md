@@ -144,3 +144,38 @@ The club-face fixtures have not been regenerated with the finer hold. Regenerati
 
 - Tests: `tests/unit/motion_matching/same_input/test_effort_hold.py`. They failed before the change. They cover the toy-loop divergence at 1 ms versus the 1e-6 rad bound at 0.125 ms, the manifest round-trip, legacy bundle loading, and replay through `segmented_replay`.
 - Measurements: the #12279 issue thread (brick run `s38-fxi2`), quoted in the table above.
+
+---
+
+## 21. OpenSim Bushing Grip Ball-Impact Transient Bounds (OSV-7, #12272)
+
+### What
+
+Document the ball-impact transient waiver and windowing rule for `tests/unit/motion_matching/test_grip_bushing_opensim.py` under the #12221 refit driver club-face fixture (replaying the clubhead to the ball at -2.5 % of capture-A's speed, meeting GCV-20 #11767).
+
+Driving the OpenSim bushing grip (`BushingGripSimulator`) with that fixture over the full 0–1.8 s window exceeds the steady-state full-swing rotation and squeeze bounds specifically at ball impact ($t = 1.326$–$1.332$ s):
+
+| Metric                | Full-Swing Bound  | Baseline (-5.1 % speed) | Refit (-2.5 % speed)        | Contact Window        |
+| --------------------- | ----------------- | ----------------------- | --------------------------- | --------------------- |
+| Peak bushing rotation | 2.0° (0.0349 rad) | 1.81° at $t = 1.330$ s  | **2.62°** at $t = 1.328$ s  | $t = 1.326$–$1.332$ s |
+| Peak axial squeeze    | 50.0 N            | 34.5 N at $t = 1.332$ s | **51.3 N** at $t = 1.330$ s | $t = 1.326$–$1.332$ s |
+| Translation           | 3.0 mm            | 1.98 mm                 | 1.98 mm                     | within bound          |
+
+### Decision (Owner Ruling 2026-10-11)
+
+Apply the full-swing bounds outside the $\pm 5$ ms ball-contact window ($t = 1.3255 \pm 0.005$ s). The impact-transient exceedance is governed by a strict xfail waiver (`_IMPACT_WAIVERS` ceiling: 2.62° + 3% and 51.3 N + 3%), ensuring no silent loosening of physics bounds occurs outside the documented excursion window.
+
+### Why
+
+The excess is a physical ball-contact collision transient: as clubhead speed increases toward true capture speed (-5.1 % to -2.5 %), the impulse at ball strike naturally drives higher transient bushing rotation and squeeze. Loosening the general full-swing bounds would weaken kinematic verification across the backswing and downswing, while modifying bushing stiffness/damping would violate OSV-7 cross-engine parity (#11739). Governing the transient with a bounded waiver maintains full-swing integrity while accommodating verified ball impact physics.
+
+### What Was Tried and Rejected
+
+- **Widening full-swing bounds generally:** rejected; would weaken kinematic verification during downswing and backswing.
+- **Modifying bushing stiffness or damping in `GripInterface`:** rejected; alters cross-engine parity baseline across OSV-7 (#11739).
+- **Silent tolerance loosening:** rejected by owner ruling of 2026-10-11.
+
+### Evidence & Tests
+
+- `tests/unit/motion_matching/test_grip_bushing_opensim.py`: `test_full_swing_deflection_within_limits[driver]` and `test_full_swing_internal_force_is_physical[driver]` enforce `_assert_bound` with ceiling verification.
+- Reference: issues #12272, #12221, #11767, #11739.
