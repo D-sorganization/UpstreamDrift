@@ -374,7 +374,9 @@ def _phases(receipt: dict[str, Any]) -> str:
         "Hand-bar is the perpendicular distance from a hand origin to the bar axis, "
         "worst over the pack's own phases; a squat bar rides on the back, so about "
         "0.59 m is expected there. Inferred keys are phase keys that had to be "
-        "interpreted (side or coordinate guessed) to apply them."
+        "interpreted (side or coordinate guessed) to apply them. Names match "
+        "the standard only when the pack's ordered phase names equal the "
+        "vendored parity standard's; each reason is in the receipt's gap evidence."
     )
     hb = {(r["lift"], r["engine"]): r for r in an.phase_hand_bar_rows(receipt)}
     rows = []
@@ -385,6 +387,7 @@ def _phases(receipt: dict[str, Any]) -> str:
                 TITLES[r["lift"]],
                 _e(r["engine"]),
                 f"{r['count']} / {r['standard_count']}",
+                "yes" if r["names_match"] else "no",
                 len(r["unsymmetric"]),
                 ", ".join(r["unmapped"]) or "-",
                 len(r["interpreted"]),
@@ -399,6 +402,7 @@ def _phases(receipt: dict[str, Any]) -> str:
                 "Lift",
                 "Engine",
                 "Phases / Standard",
+                "Names Match Standard",
                 "Left-Only Phases",
                 "Unmapped Keys",
                 "Inferred Keys",
@@ -465,5 +469,9 @@ def render_markdown(receipt: dict[str, Any]) -> str:
         "python3 scripts/lifting/render_pack_stills.py   # optional stills\n"
         "```\n\n"
         "The receipt is `docs/development/lifting/pack_parity_baseline.json`. "
-        "`LIFT_PACK_ROOT` overrides the directory searched for the checkouts.\n"
+        "`LIFT_PACK_ROOT` overrides the directory searched for the checkouts. "
+        "After an analysis or report change, `--from-receipt "
+        "docs/development/lifting/pack_parity_baseline.json` re-derives the gaps "
+        "and re-renders both files from the committed receipt without the "
+        "engines; nothing is re-measured.\n"
     )

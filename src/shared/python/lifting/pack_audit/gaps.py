@@ -30,6 +30,9 @@ ISSUES: dict[str, dict[str, list[int]]] = {
     },
     "limits": {"mujoco": [407, 409], "pinocchio": [433]},
     "phase_count": {"mujoco": [401], "drake": [372], "pinocchio": [434]},
+    # Pack renames to the vendored standard (LIFT-3 slice 2 handoff); OpenSim
+    # has no lift phase-name issue yet, so it is reported without one.
+    "phase_names": {"mujoco": [401], "drake": [372], "pinocchio": [434]},
     "phase_asymmetric": {"pinocchio": [449]},
     "phase_keys": {"opensim": [414], "drake": [390], "pinocchio": [436]},
     "bench_mass": {
@@ -43,7 +46,14 @@ ISSUES: dict[str, dict[str, list[int]]] = {
     "no_grf": {"drake": [371], "pinocchio": [432]},
 }
 
-EXISTING_ONLY = {"grip_attachment", "grip_width", "limits", "phase_count", "no_grf"}
+EXISTING_ONLY = {
+    "grip_attachment",
+    "grip_width",
+    "limits",
+    "phase_count",
+    "phase_names",
+    "no_grf",
+}
 
 
 def _gap(
@@ -171,6 +181,7 @@ def _phases(receipt: dict[str, Any]) -> list[dict[str, Any]]:
     short = [
         r for r in rows if r["standard_count"] and r["count"] != r["standard_count"]
     ]
+    renamed = [r for r in rows if not r["names_match"]]
     asym = [r for r in rows if r["unsymmetric"]]
     keys = [r for r in rows if r["unmapped"] or r["interpreted"]]
     return [
@@ -183,6 +194,13 @@ def _phases(receipt: dict[str, Any]) -> list[dict[str, Any]]:
             ],
             sorted({r["engine"] for r in short}),
             "LIFT-6",
+        ),
+        _gap(
+            "phase_names",
+            "Phase names differ from the standard",
+            [f"{r['engine']}/{r['lift']}: {r['names_reason']}" for r in renamed],
+            sorted({r["engine"] for r in renamed}),
+            "LIFT-3",
         ),
         _gap(
             "phase_asymmetric",

@@ -6,6 +6,7 @@ synthetic receipts and re-run without any engine installed.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 from ..lift_spec import lift_phase_names
@@ -151,12 +152,57 @@ def start_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
+def _str_list(value: Sequence[str], label: str) -> list[str]:
+    if isinstance(value, str) or not isinstance(value, Sequence):
+        raise TypeError(
+            f"{label} must be a sequence of str, got {type(value).__name__}"
+        )
+    if not all(isinstance(v, str) for v in value):
+        raise TypeError(f"{label} must contain only str: {list(value)!r}")
+    return list(value)
+
+
+def phase_name_mismatch(
+    names: Sequence[str], standard_names: Sequence[str]
+) -> str | None:
+    """Why a pack's ordered phase *names* differ from *standard_names*.
+
+    Preconditions: both are sequences of ``str`` (``TypeError``);
+    *standard_names* is non-empty, unique and has no blank name (``ValueError``).
+    Postcondition: returns ``None`` exactly when ``list(names) ==
+    list(standard_names)``; otherwise a non-empty reason naming the missing,
+    unexpected or duplicated phases, or the order difference (#11743).
+    """
+    got = _str_list(names, "names")
+    want = _str_list(standard_names, "standard_names")
+    if not want or len(set(want)) != len(want) or not all(n.strip() for n in want):
+        raise ValueError(
+            f"standard_names must be non-empty, unique and non-blank: {want!r}"
+        )
+    missing = [n for n in want if n not in got]
+    unexpected = [n for n in got if n not in want]
+    parts = []
+    if missing:
+        parts.append("missing: " + ", ".join(missing))
+    if unexpected:
+        parts.append("unexpected: " + ", ".join(unexpected))
+    if not parts:
+        dupes = sorted({n for n in got if got.count(n) > 1})
+        if dupes:
+            parts.append("duplicate: " + ", ".join(dupes))
+        elif got != want:
+            parts.append("order differs from the standard")
+    reason = "; ".join(parts) or None
+    assert (reason is None) == (got == want), "mismatch reason postcondition"
+    return reason
+
+
 def phase_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
     """Per lift/engine: phase count and names vs standard, symmetry, mapping.
 
     ``standard_names`` are the vendored standard's ordered phase names and
     ``names_match`` is True only when the pack's phase names equal them in
-    order (#11743).
+    order; ``names_reason`` says why they differ, or is ``None`` (#11743).
     """
     want = receipt["standard_reference"]["phase_count"]
     rows = []
@@ -168,15 +214,18 @@ def phase_rows(receipt: dict[str, Any]) -> list[dict[str, Any]]:
                 c["name"]: (c["lower"], c["upper"], c.get("zero_offset", 0.0))
                 for c in receipt["results"][lift][engine]["coordinates"]
             }
+            names = [p["name"] for p in phases]
+            reason = phase_name_mismatch(names, standard_names)
             rows.append(
                 {
                     "lift": lift,
                     "engine": engine,
                     "count": len(phases),
                     "standard_count": want.get(lift),
-                    "names": [p["name"] for p in phases],
+                    "names": names,
                     "standard_names": standard_names,
-                    "names_match": [p["name"] for p in phases] == standard_names,
+                    "names_match": reason is None,
+                    "names_reason": reason,
                     "unsymmetric": [p["name"] for p in phases if not p["bilateral"]],
                     "unmapped": sorted({k for p in phases for k in p["unmapped_keys"]}),
                     "interpreted": sorted(

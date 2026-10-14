@@ -15315,6 +15315,40 @@
       "new_issue": false
     },
     {
+      "key": "phase_names",
+      "title": "Phase names differ from the standard",
+      "engines": ["drake", "mujoco", "opensim", "pinocchio"],
+      "evidence": [
+        "mujoco/squat: missing: standing, descent, ascent; unexpected: descent_start, half_depth, drive",
+        "opensim/squat: missing: standing, ascent; unexpected: start, drive",
+        "drake/squat: missing: standing, descent, ascent; unexpected: unrack",
+        "pinocchio/squat: missing: standing, ascent; unexpected: start, drive",
+        "mujoco/deadlift: missing: setup, first_pull, knee_pass, descent; unexpected: floor, below_knee, above_knee",
+        "opensim/deadlift: missing: setup, first_pull, descent; unexpected: floor, break_floor, hip_drive",
+        "drake/deadlift: missing: first_pull, descent",
+        "pinocchio/deadlift: missing: setup, first_pull, descent; unexpected: floor, break_floor",
+        "mujoco/bench_press: missing: unrack, chest_touch, lockout; unexpected: lockout_start, chest, lockout_finish",
+        "opensim/bench_press: missing: unrack, chest_touch; unexpected: lockout_top, chest",
+        "drake/bench_press: missing: unrack, descent, press, lockout; unexpected: lockout_top, lockout_finish",
+        "pinocchio/bench_press: missing: unrack, chest_touch, press, lockout; unexpected: lockout_top, chest, drive, lockout_finish",
+        "mujoco/snatch: missing: setup; unexpected: transition",
+        "opensim/snatch: missing: setup, catch; unexpected: transition, catch_overhead",
+        "drake/snatch: missing: setup, first_pull, second_pull, turnover, catch, recovery; unexpected: floor, knee_pass, power_position, overhead_catch, standing",
+        "pinocchio/snatch: missing: setup; unexpected: transition",
+        "mujoco/clean_and_jerk: missing: setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery; unexpected: clean_pull, clean_transition, clean_extension, clean_catch, jerk_dip, jerk_drive, jerk_catch, recovery",
+        "opensim/clean_and_jerk: missing: setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery; unexpected: clean_setup, clean_first_pull, clean_second_pull, clean_catch, jerk_dip, jerk_drive, jerk_split, jerk_recovery",
+        "drake/clean_and_jerk: missing: setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery; unexpected: floor, knee_pass, rack_position, jerk_dip, overhead_lockout",
+        "pinocchio/clean_and_jerk: missing: setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery; unexpected: clean_first_pull, clean_second_pull, clean_catch, clean_stand, jerk_dip, jerk_drive, jerk_catch, jerk_recovery"
+      ],
+      "issues": [
+        "Drake_Models#372",
+        "MuJoCo_Models#401",
+        "Pinocchio_Models#434"
+      ],
+      "lift_story": "LIFT-3",
+      "new_issue": false
+    },
+    {
       "key": "phase_asymmetric",
       "title": "Phase targets are left-side only",
       "engines": ["pinocchio"],

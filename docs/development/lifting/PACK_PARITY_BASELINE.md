@@ -179,30 +179,30 @@ Closure is the native hand-to-bar residual at the pack start pose (m; OpenSim va
 
 ## Phases
 
-Hand-bar is the perpendicular distance from a hand origin to the bar axis, worst over the pack's own phases; a squat bar rides on the back, so about 0.59 m is expected there. Inferred keys are phase keys that had to be interpreted (side or coordinate guessed) to apply them.
+Hand-bar is the perpendicular distance from a hand origin to the bar axis, worst over the pack's own phases; a squat bar rides on the back, so about 0.59 m is expected there. Inferred keys are phase keys that had to be interpreted (side or coordinate guessed) to apply them. Names match the standard only when the pack's ordered phase names equal the vendored parity standard's; each reason is in the receipt's gap evidence.
 
-| Lift | Engine | Phases / Standard | Left-Only Phases | Unmapped Keys | Inferred Keys | Worst Hand-Bar m (phase/side) |
-|---|---|---|---|---|---|---|
-| Back Squat | MuJoCo | 5 / 5 | 0 | - | 0 | 0.599 (descent_start/l) |
-| Back Squat | OpenSim | 5 / 5 | 0 | - | 2 | 0.587 (start/l) |
-| Back Squat | Drake | 3 / 5 | 0 | - | 0 | 0.587 (unrack/l) |
-| Back Squat | Pinocchio | 5 / 5 | 5 | - | 1 | 0.587 (start/l) |
-| Deadlift | MuJoCo | 4 / 5 | 0 | - | 0 | 0.000 () |
-| Deadlift | OpenSim | 5 / 5 | 0 | - | 2 | 0.000 () |
-| Deadlift | Drake | 3 / 5 | 0 | - | 0 | 0.000 () |
-| Deadlift | Pinocchio | 4 / 5 | 4 | - | 1 | 0.000 () |
-| Bench Press | MuJoCo | 5 / 5 | 0 | - | 0 | 0.000 () |
-| Bench Press | OpenSim | 5 / 5 | 0 | - | 2 | 0.000 () |
-| Bench Press | Drake | 3 / 5 | 0 | shoulder_l_abd, shoulder_r_abd | 0 | 0.000 () |
-| Bench Press | Pinocchio | 5 / 5 | 5 | - | 1 | 0.836 (lockout_top/r) |
-| Snatch | MuJoCo | 6 / 6 | 0 | - | 0 | 0.000 () |
-| Snatch | OpenSim | 6 / 6 | 0 | - | 3 | 0.000 () |
-| Snatch | Drake | 5 / 6 | 0 | - | 0 | 0.000 () |
-| Snatch | Pinocchio | 6 / 6 | 6 | - | 2 | 1.182 (catch/r) |
-| Clean and Jerk | MuJoCo | 8 / 8 | 0 | - | 0 | 0.000 () |
-| Clean and Jerk | OpenSim | 8 / 8 | 0 | - | 4 | 0.000 () |
-| Clean and Jerk | Drake | 5 / 8 | 0 | - | 0 | 0.000 () |
-| Clean and Jerk | Pinocchio | 8 / 8 | 8 | - | 2 | 1.182 (jerk_catch/r) |
+| Lift | Engine | Phases / Standard | Names Match Standard | Left-Only Phases | Unmapped Keys | Inferred Keys | Worst Hand-Bar m (phase/side) |
+|---|---|---|---|---|---|---|---|
+| Back Squat | MuJoCo | 5 / 5 | no | 0 | - | 0 | 0.599 (descent_start/l) |
+| Back Squat | OpenSim | 5 / 5 | no | 0 | - | 2 | 0.587 (start/l) |
+| Back Squat | Drake | 3 / 5 | no | 0 | - | 0 | 0.587 (unrack/l) |
+| Back Squat | Pinocchio | 5 / 5 | no | 5 | - | 1 | 0.587 (start/l) |
+| Deadlift | MuJoCo | 4 / 5 | no | 0 | - | 0 | 0.000 () |
+| Deadlift | OpenSim | 5 / 5 | no | 0 | - | 2 | 0.000 () |
+| Deadlift | Drake | 3 / 5 | no | 0 | - | 0 | 0.000 () |
+| Deadlift | Pinocchio | 4 / 5 | no | 4 | - | 1 | 0.000 () |
+| Bench Press | MuJoCo | 5 / 5 | no | 0 | - | 0 | 0.000 () |
+| Bench Press | OpenSim | 5 / 5 | no | 0 | - | 2 | 0.000 () |
+| Bench Press | Drake | 3 / 5 | no | 0 | shoulder_l_abd, shoulder_r_abd | 0 | 0.000 () |
+| Bench Press | Pinocchio | 5 / 5 | no | 5 | - | 1 | 0.836 (lockout_top/r) |
+| Snatch | MuJoCo | 6 / 6 | no | 0 | - | 0 | 0.000 () |
+| Snatch | OpenSim | 6 / 6 | no | 0 | - | 3 | 0.000 () |
+| Snatch | Drake | 5 / 6 | no | 0 | - | 0 | 0.000 () |
+| Snatch | Pinocchio | 6 / 6 | no | 6 | - | 2 | 1.182 (catch/r) |
+| Clean and Jerk | MuJoCo | 8 / 8 | no | 0 | - | 0 | 0.000 () |
+| Clean and Jerk | OpenSim | 8 / 8 | no | 0 | - | 4 | 0.000 () |
+| Clean and Jerk | Drake | 5 / 8 | no | 0 | - | 0 | 0.000 () |
+| Clean and Jerk | Pinocchio | 8 / 8 | no | 8 | - | 2 | 1.182 (jerk_catch/r) |
 
 ## Discrepancies and Tracking Issues
 
@@ -213,6 +213,7 @@ Hand-bar is the perpendicular distance from a hand origin to the bar axis, worst
 | Floor-pull start pose is not at the floor | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#381; Drake_Models#364; MuJoCo_Models#407; OpenSim_Models#416; Pinocchio_Models#450 | LIFT-4 | new |
 | Joint limits differ from the parity standard | MuJoCo, Pinocchio | MuJoCo_Models#407; MuJoCo_Models#409; Pinocchio_Models#433 | LIFT-5 | existing |
 | Phase count differs from the standard | Drake, MuJoCo, Pinocchio | Drake_Models#372; MuJoCo_Models#401; Pinocchio_Models#434 | LIFT-6 | existing |
+| Phase names differ from the standard | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#372; MuJoCo_Models#401; Pinocchio_Models#434 | LIFT-3 | existing |
 | Phase targets are left-side only | Pinocchio | Pinocchio_Models#449 | LIFT-6 | new |
 | Phase keys do not resolve to model coordinates | Drake, OpenSim, Pinocchio | Drake_Models#390; OpenSim_Models#414; Pinocchio_Models#436 | LIFT-6 | new |
 | Bench mass convention differs across packs | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#391; MuJoCo_Models#428; OpenSim_Models#415; Pinocchio_Models#451 | LIFT-2 | new |
@@ -251,4 +252,4 @@ python3 scripts/lifting/run_pack_parity_baseline.py
 python3 scripts/lifting/render_pack_stills.py   # optional stills
 ```
 
-The receipt is `docs/development/lifting/pack_parity_baseline.json`. `LIFT_PACK_ROOT` overrides the directory searched for the checkouts.
+The receipt is `docs/development/lifting/pack_parity_baseline.json`. `LIFT_PACK_ROOT` overrides the directory searched for the checkouts. After an analysis or report change, `--from-receipt docs/development/lifting/pack_parity_baseline.json` re-derives the gaps and re-renders both files from the committed receipt without the engines; nothing is re-measured.
