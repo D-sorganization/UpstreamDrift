@@ -13,7 +13,7 @@
   "totals": {
     "identical": 377,
     "diverged": 271,
-    "ud-only": 1713,
+    "ud-only": 1717,
     "tools-only": 838,
     "spelling-only": 121
   },
@@ -336,7 +336,7 @@
     "estimation": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 56,
+      "ud-only": 57,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -483,7 +483,7 @@
     "lifting": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 33,
+      "ud-only": 36,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -6124,7 +6124,7 @@
       "classification": "ud-only",
       "package": "club_data",
       "subpackage": "",
-      "ud_bytes": 22745,
+      "ud_bytes": 22570,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7864,7 +7864,7 @@
       "classification": "ud-only",
       "package": "engine_core",
       "subpackage": "",
-      "ud_bytes": 10672,
+      "ud_bytes": 12727,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12900,6 +12900,30 @@
       "spelling_only": false
     },
     {
+      "path": "lifting/_canonical/MANIFEST.json",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "_canonical",
+      "ud_bytes": 242,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/_canonical/biomech_parity_standard.json",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "_canonical",
+      "ud_bytes": 26716,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "lifting/bar_path_parity.py",
       "classification": "ud-only",
       "package": "lifting",
@@ -12965,6 +12989,18 @@
       "package": "lifting",
       "subpackage": "",
       "ud_bytes": 6326,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "lifting/lift_spec.py",
+      "classification": "ud-only",
+      "package": "lifting",
+      "subpackage": "",
+      "ud_bytes": 5414,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13120,7 +13156,7 @@
       "classification": "ud-only",
       "package": "lifting",
       "subpackage": "pack_audit",
-      "ud_bytes": 10014,
+      "ud_bytes": 10420,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15376,7 +15412,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 29643,
+      "ud_bytes": 29513,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15388,7 +15424,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 19453,
+      "ud_bytes": 19549,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
