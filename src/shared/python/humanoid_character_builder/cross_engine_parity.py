@@ -4,7 +4,23 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+import defusedxml.ElementTree as DefusedET
+import numpy as np
+from scipy.spatial.transform import Rotation
+
+from src.engines.physics_engines.drake.python.full_body_urdf import (
+    export_full_body_urdf,
+)
+from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+    export_full_body_mjcf,
+)
+from src.engines.physics_engines.opensim.python.full_body_osim import (
+    clean_osim_body_name,
+    export_full_body_osim,
+)
+from src.engines.physics_engines.pinocchio.python.native_model import depth_first_joints
 from src.shared.python.humanoid_character_builder.spec_params import serialize_spec
+from src.shared.python.motion_matching.full_body_spec import order_full_body_joints
 
 if TYPE_CHECKING:
     from src.shared.python.humanoid_character_builder.spec_export import (
@@ -16,45 +32,11 @@ def _body_mass(body: Any) -> float:
     return float(sum(s["mass_kg"] for s in body["solids"]))
 
 
-def verify_cross_engine_l0_parity(
-    character: CompiledCharacter,
-    *,
-    mass_tol_kg: float = 1e-9,
-    frame_tol_m: float = 1e-3,
-) -> dict[str, Any]:
-    """Verify L0 export parity across MuJoCo, Drake/URDF, OpenSim, and Pinocchio (CMB-11, #11662).
-
-    Validates total mass conservation and world-frame origin agreement at
-    neutral pose (q = 0) against the compiled full-body specification.
-    """
-    if mass_tol_kg <= 0:
-        raise ValueError(f"mass_tol_kg must be > 0, got {mass_tol_kg}")
-    if frame_tol_m <= 0:
-        raise ValueError(f"frame_tol_m must be > 0, got {frame_tol_m}")
-
-    import defusedxml.ElementTree as DefusedET
-    import numpy as np
-    from scipy.spatial.transform import Rotation
-
-    from src.engines.physics_engines.drake.python.full_body_urdf import (
-        export_full_body_urdf,
-    )
-    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-        export_full_body_mjcf,
-    )
-    from src.engines.physics_engines.opensim.python.full_body_osim import (
-        clean_osim_body_name,
-        export_full_body_osim,
-    )
-    from src.engines.physics_engines.pinocchio.python.native_model import (
-        depth_first_joints,
-    )
-    from src.shared.python.motion_matching.full_body_spec import order_full_body_joints
-
-    doc = character.document
+def _compute_spec_poses(
+    doc: dict[str, Any],
+) -> tuple[float, dict[str, np.ndarray], dict[str, np.ndarray]]:
+    """Compute spec mass, body poses and frame origins at q=0."""
     spec_mass_kg = float(sum(_body_mass(b) for b in doc["bodies"]))
-
-    # Reference world poses for bodies and frame origins at q = 0
     spec_body_poses: dict[str, np.ndarray] = {"world": np.eye(4)}
     for joint in order_full_body_joints(doc):
         parent = joint["parent"]
@@ -71,57 +53,60 @@ def verify_cross_engine_l0_parity(
         f_world = spec_body_poses[b_name] @ placement
         spec_frame_origins[frame["name"]] = f_world[:3, 3]
 
-    spec_bytes = serialize_spec(doc).encode("utf-8")
+    return spec_mass_kg, spec_body_poses, spec_frame_origins
 
-    # --- 1. MJCF ---
+
+def _parse_mjcf_pose(elem: Any) -> np.ndarray:
+    T = np.eye(4)
+    if "pos" in elem.attrib:
+        T[:3, 3] = [float(x) for x in elem.attrib["pos"].split()]
+    if "quat" in elem.attrib:
+        w, x, y, z = [float(v) for v in elem.attrib["quat"].split()]
+        T[:3, :3] = Rotation.from_quat([x, y, z, w]).as_matrix()
+    return T
+
+
+def _verify_mjcf(
+    spec_bytes: bytes, spec_frame_origins: dict[str, np.ndarray]
+) -> tuple[float, float]:
+    """Verify MJCF mass conservation and site origins."""
     mjcf_xml, mjcf_meta = export_full_body_mjcf(spec_bytes)
     mjcf_root = DefusedET.fromstring(mjcf_xml)
     mjcf_mass_kg = float(
         sum(float(i.attrib["mass"]) for i in mjcf_root.iter("inertial"))
     )
 
-    def _parse_mjcf_pose(elem: Any) -> np.ndarray:
-        T = np.eye(4)
-        if "pos" in elem.attrib:
-            T[:3, 3] = [float(x) for x in elem.attrib["pos"].split()]
-        if "quat" in elem.attrib:
-            w, x, y, z = [float(v) for v in elem.attrib["quat"].split()]
-            T[:3, :3] = Rotation.from_quat([x, y, z, w]).as_matrix()
-        return T
-
     mjcf_site_origins: dict[str, np.ndarray] = {}
-    mjcf_body_origins: dict[str, np.ndarray] = {}
 
-    def _traverse_mjcf(elem: Any, parent_pose: np.ndarray) -> None:
+    def _traverse(elem: Any, parent_pose: np.ndarray) -> None:
         world_T = parent_pose @ _parse_mjcf_pose(elem)
-        if elem.tag == "body":
-            b_name = elem.attrib.get("name")
-            if b_name:
-                mjcf_body_origins[b_name] = world_T[:3, 3]
         for site in elem.findall("site"):
             s_name = site.attrib.get("name")
             if s_name:
                 s_world = world_T @ _parse_mjcf_pose(site)
                 mjcf_site_origins[s_name] = s_world[:3, 3]
         for child_body in elem.findall("body"):
-            _traverse_mjcf(child_body, world_T)
+            _traverse(child_body, world_T)
 
     worldbody = mjcf_root.find("worldbody")
     if worldbody is not None:
         for b in worldbody.findall("body"):
-            _traverse_mjcf(b, np.eye(4))
+            _traverse(b, np.eye(4))
 
     frame_sites = mjcf_meta.get("frame_sites", {})
-    mjcf_frame_errors = []
-    for fname, sname in frame_sites.items():
-        if fname in spec_frame_origins and sname in mjcf_site_origins:
-            err = float(
-                np.linalg.norm(spec_frame_origins[fname] - mjcf_site_origins[sname])
-            )
-            mjcf_frame_errors.append(err)
+    mjcf_frame_errors = [
+        float(np.linalg.norm(spec_frame_origins[fname] - mjcf_site_origins[sname]))
+        for fname, sname in frame_sites.items()
+        if fname in spec_frame_origins and sname in mjcf_site_origins
+    ]
     mjcf_max_frame_err = max(mjcf_frame_errors) if mjcf_frame_errors else 0.0
+    return mjcf_mass_kg, mjcf_max_frame_err
 
-    # --- 2. URDF ---
+
+def _verify_urdf(
+    spec_bytes: bytes, spec_frame_origins: dict[str, np.ndarray]
+) -> tuple[float, float]:
+    """Verify URDF mass conservation and frame links."""
     urdf_xml, urdf_sidecar = export_full_body_urdf(spec_bytes)
     urdf_root = DefusedET.fromstring(urdf_xml)
     urdf_mass_kg = float(
@@ -170,49 +155,20 @@ def verify_cross_engine_l0_parity(
         unresolved_urdf = next_unresolved
 
     urdf_frame_links = urdf_sidecar.get("frame_links", {})
-    urdf_frame_errors = []
-    for fname, flink in urdf_frame_links.items():
-        if fname in spec_frame_origins and flink in urdf_link_origins:
-            err = float(
-                np.linalg.norm(spec_frame_origins[fname] - urdf_link_origins[flink])
-            )
-            urdf_frame_errors.append(err)
+    urdf_frame_errors = [
+        float(np.linalg.norm(spec_frame_origins[fname] - urdf_link_origins[flink]))
+        for fname, flink in urdf_frame_links.items()
+        if fname in spec_frame_origins and flink in urdf_link_origins
+    ]
     urdf_max_frame_err = max(urdf_frame_errors) if urdf_frame_errors else 0.0
+    return urdf_mass_kg, urdf_max_frame_err
 
-    # --- 3. OpenSim ---
-    osim_xml, _ = export_full_body_osim(doc)
-    osim_root = DefusedET.fromstring(osim_xml.replace("::", "__"))
-    osim_mass_kg = float(
-        sum(
-            float(m.text)
-            for m in osim_root.findall(".//BodySet/objects/Body/mass")
-            if m.text is not None
-        )
-    )
 
-    osim_bodies = {
-        b.attrib["name"]
-        for b in osim_root.findall(".//BodySet/objects/Body")
-        if "name" in b.attrib
-    }
-    for b in doc["bodies"]:
-        if b["name"] == "world":
-            continue
-        expected_name = clean_osim_body_name(b["name"])
-        if expected_name not in osim_bodies:
-            raise ValueError(f"OpenSim missing body {expected_name} (from {b['name']})")
-
-    osim_markers = {
-        m.attrib["name"]
-        for m in osim_root.findall(".//MarkerSet/objects/Marker")
-        if "name" in m.attrib
-    }
-    for mname in doc.get("marker_attachments", {}):
-        if mname not in osim_markers:
-            raise ValueError(f"OpenSim missing marker {mname}")
-
+def _verify_osim_joint_offsets(
+    unresolved_osim: list[Any],
+) -> dict[str, np.ndarray]:
+    """Solve OpenSim PhysicalOffsetFrame hierarchy to world transforms."""
     osim_poses: dict[str, np.ndarray] = {"/ground": np.eye(4)}
-    unresolved_osim = list(osim_root.findall(".//CustomJoint"))
     while unresolved_osim:
         next_unresolved = []
         progress = False
@@ -270,7 +226,45 @@ def verify_cross_engine_l0_parity(
         if not progress:
             break
         unresolved_osim = next_unresolved
+    return osim_poses
 
+
+def _verify_osim(
+    doc: dict[str, Any], spec_body_poses: dict[str, np.ndarray]
+) -> tuple[float, float]:
+    """Verify OpenSim mass conservation and body placement parity."""
+    osim_xml, _ = export_full_body_osim(doc)
+    osim_root = DefusedET.fromstring(osim_xml.replace("::", "__"))
+    osim_mass_kg = float(
+        sum(
+            float(m.text)
+            for m in osim_root.findall(".//BodySet/objects/Body/mass")
+            if m.text is not None
+        )
+    )
+
+    osim_bodies = {
+        b.attrib["name"]
+        for b in osim_root.findall(".//BodySet/objects/Body")
+        if "name" in b.attrib
+    }
+    for b in doc["bodies"]:
+        if b["name"] == "world":
+            continue
+        expected_name = clean_osim_body_name(b["name"])
+        if expected_name not in osim_bodies:
+            raise ValueError(f"OpenSim missing body {expected_name} (from {b['name']})")
+
+    osim_markers = {
+        m.attrib["name"]
+        for m in osim_root.findall(".//MarkerSet/objects/Marker")
+        if "name" in m.attrib
+    }
+    for mname in doc.get("marker_attachments", {}):
+        if mname not in osim_markers:
+            raise ValueError(f"OpenSim missing marker {mname}")
+
+    osim_poses = _verify_osim_joint_offsets(list(osim_root.findall(".//CustomJoint")))
     osim_body_errors = []
     for b in doc["bodies"]:
         if b["name"] == "world":
@@ -285,14 +279,23 @@ def verify_cross_engine_l0_parity(
             )
             osim_body_errors.append(err)
     osim_max_frame_err = max(osim_body_errors) if osim_body_errors else 0.0
+    return osim_mass_kg, osim_max_frame_err
 
-    # --- 4. Pinocchio ---
+
+def _verify_pinocchio(
+    doc: dict[str, Any],
+    spec_frame_origins: dict[str, np.ndarray],
+    spec_mass_kg: float,
+    *,
+    mass_tol_kg: float,
+    frame_tol_m: float,
+) -> int:
+    """Verify Pinocchio depth-first joint tree length and native frame origins if installed."""
     pin_joints = depth_first_joints(doc["joints"])
     if len(pin_joints) != len(doc["joints"]):
         raise ValueError(
             f"Pinocchio joint tree length mismatch: {len(pin_joints)} != {len(doc['joints'])}"
         )
-    pin_joint_count = len(pin_joints)
 
     try:
         import sys
@@ -327,6 +330,40 @@ def verify_cross_engine_l0_parity(
                 )
     except (ImportError, ModuleNotFoundError, TypeError):
         pass
+
+    return len(pin_joints)
+
+
+def verify_cross_engine_l0_parity(
+    character: CompiledCharacter,
+    *,
+    mass_tol_kg: float = 1e-9,
+    frame_tol_m: float = 1e-3,
+) -> dict[str, Any]:
+    """Verify L0 export parity across MuJoCo, Drake/URDF, OpenSim, and Pinocchio (CMB-11, #11662).
+
+    Validates total mass conservation and world-frame origin agreement at
+    neutral pose (q = 0) against the compiled full-body specification.
+    """
+    if mass_tol_kg <= 0:
+        raise ValueError(f"mass_tol_kg must be > 0, got {mass_tol_kg}")
+    if frame_tol_m <= 0:
+        raise ValueError(f"frame_tol_m must be > 0, got {frame_tol_m}")
+
+    doc = character.document
+    spec_mass_kg, spec_body_poses, spec_frame_origins = _compute_spec_poses(doc)
+    spec_bytes = serialize_spec(doc).encode("utf-8")
+
+    mjcf_mass_kg, mjcf_max_frame_err = _verify_mjcf(spec_bytes, spec_frame_origins)
+    urdf_mass_kg, urdf_max_frame_err = _verify_urdf(spec_bytes, spec_frame_origins)
+    osim_mass_kg, osim_max_frame_err = _verify_osim(doc, spec_body_poses)
+    pin_joint_count = _verify_pinocchio(
+        doc,
+        spec_frame_origins,
+        spec_mass_kg,
+        mass_tol_kg=mass_tol_kg,
+        frame_tol_m=frame_tol_m,
+    )
 
     engine_masses_kg = {
         "mjcf": mjcf_mass_kg,
