@@ -100,11 +100,13 @@ record \texttt{docs/research/simscape\_matching\_reference/}.
     including the floating-base $SE(3)$ manifold spline (\S\ref{sec:manifold_spline}),
     against closed-form double-pendulum dynamics, analytic screw motions and synthetic ground truth
     (47 behavioural tests, \texttt{tests/unit/estimation/mosaic/}).
+  \item Verified: MuJoCo regressor provider with closed-form spatial inertia
+    roundtrip mappings, exact torque reconstruction, and planar chain conformance
+    (MOSAIC-03, \#11535; \texttt{tests/unit/estimation/mosaic/test\_mujoco\_regressor.py}).
   \item Measured: the planar results of \S\ref{sec:results} on the analytic
     fixture (capture-A/capture-O style noise levels, no engine).
   \item Not yet done: any fit of a human capture (capture-A, capture-O), any
-    full-body 3-D floating-base model with contacts, any contact-wrench estimation, any engine-backed
-    regressor.  These are the child issues of the follow-up epic
+    full-body 3-D floating-base model with contacts, any contact-wrench estimation.  These are the child issues of the follow-up epic
     (\S\ref{sec:roadmap}).  Nothing here qualifies the GS3DX IK videos.
 \end{itemize}
 
@@ -162,6 +164,38 @@ Both facts hold for every rigid multibody engine (Pinocchio exposes $\bY$ as
 differentiating inverse dynamics with respect to the body inertias).  MOSAIC
 consumes only $\bY$, $\bB$, $\bJ_c$ and marker forward kinematics, so it is
 engine-agnostic by construction.
+
+\subsection{MuJoCo/MJX Regressor Provider (MOSAIC-03)}
+\label{sec:mujoco_regressor}
+For general kinematic trees with arbitrary joints, \texttt{MujocoRegressorModel}
+(\texttt{estimation.mosaic.mujoco\_regressor}) implements the \texttt{RegressorModel} protocol
+backed by MuJoCo's recursive Newton--Euler inverse dynamics (\texttt{mj\_inverse}).
+
+\paragraph{Parameter Mapping.}
+MuJoCo stores each body's mass $m_b$, center-of-mass offset $\mathbf{c}_b$ (\texttt{body\_ipos}),
+principal diagonal moments $\mathbf{I}_{\text{diag}, b}=(I_{1}, I_{2}, I_{3})$ (\texttt{body\_inertia}),
+and principal-axis orientation quaternion $\mathbf{q}_b$ (\texttt{body\_iquat}).
+The standard 10-vector of spatial inertial parameters about the body-frame origin is
+$\bpi_b = [m_b, \bh_b^{\!\top}, I_{o,xx}, I_{o,xy}, I_{o,xz}, I_{o,yy}, I_{o,yz}, I_{o,zz}]^{\!\top}$,
+where $\bh_b = m_b \mathbf{c}_b$ is the first moment and the central inertia matrix is
+$\mathbf{I}_{c, b} = \mathbf{R}(\mathbf{q}_b)\,\mathrm{diag}(\mathbf{I}_{\text{diag}, b})\,\mathbf{R}(\mathbf{q}_b)^{\!\top}$.
+By the parallel axis theorem, the origin inertia tensor is
+\begin{equation}
+  \mathbf{I}_{o, b} = \mathbf{I}_{c, b} + m_b \bigl( (\mathbf{c}_b^{\!\top}\mathbf{c}_b)\mathbf{I}_3 - \mathbf{c}_b \mathbf{c}_b^{\!\top} \bigr) .
+  \label{eq:parallel_axis}
+\end{equation}
+Conversely, given $\bpi_b$, the center of mass is $\mathbf{c}_b = \bh_b / m_b$, the central inertia $\mathbf{I}_{c,b}$ is recovered by reversing \eqref{eq:parallel_axis}, and spectral decomposition $\mathbf{I}_{c,b}=\mathbf{R}_b\boldsymbol{\Lambda}_b\mathbf{R}_b^{\!\top}$ yields principal inertias $\mathbf{I}_{\text{diag},b}=\mathrm{diag}(\boldsymbol{\Lambda}_b)$ and orientation quaternion $\mathbf{q}_b=\operatorname{quat}(\mathbf{R}_b)$ (with right-handed parity $\det\mathbf{R}_b=+1$).  This parameter bijection satisfies machine-precision roundtrip consistency ($\lVert\bpi - \operatorname{roundtrip}(\bpi)\rVert < 10^{-15}$).
+
+\paragraph{Exact Regressor Formation.}
+Because $\boldsymbol{\tau}_{\text{mj\_inverse}}(\bq, \bv, \ba)$ is strictly linear in $\bpi$, the regressor matrix $\bY(\bq,\bv,\ba)\in\R^{n_v\times 10 n_b}$ is formed by differentiating inverse dynamics w.r.t.\ each body's spatial parameters via central differences with step $h=10^{-6}$:
+\begin{equation}
+  \bY_{:, j} = \frac{\partial \boldsymbol{\tau}_{\text{mj\_inverse}}}{\partial \pi_j}
+  \approx \frac{\boldsymbol{\tau}(\bpi + h\mathbf{e}_j) - \boldsymbol{\tau}(\bpi - h\mathbf{e}_j)}{2h} .
+\end{equation}
+Body parameter mutations in MuJoCo require disabling the \texttt{body\_sameframe} optimization and updating solver constants via \texttt{mj\_setConst(model, data)}, followed by restoring knot states $(\bq, \bv, \ba)$.  The reconstructed torque $\bY\bpi$ matches $\boldsymbol{\tau}_{\text{mj\_inverse}}$ down to numerical differentiating accuracy ($<10^{-8}\,\mathrm{N\,m}$).
+
+\paragraph{Planar Oracle Conformance.}
+For planar mechanisms revolving about the local $z$-axis, only 4 parameters per body are dynamic: $(m, h_x, h_y, I_{o,zz})$ (columns $0, 1, 2, 9$ in the 10-vector).  When \texttt{planar=True}, \texttt{MujocoRegressorModel} extracts these active columns and conforms to the analytic \texttt{PlanarChain} regressor down to $\lVert\bY_{\text{planar}} - \bY_{\text{mujoco}}\rVert < 10^{-7}$.
 
 \subsection{ZTCF and ZVCF as Exact Projections of the Regressor}
 \label{sec:ztcf}

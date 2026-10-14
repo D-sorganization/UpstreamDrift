@@ -16,6 +16,7 @@ import math
 from pathlib import Path
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from defusedxml import ElementTree as SafeET
 
@@ -191,7 +192,7 @@ def test_attach_visual_club_fails_closed_without_assets(tmp_path: Path) -> None:
 
 
 def test_visual_club_model_loads_in_opensim_with_unchanged_mass(tmp_path: Path) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     from src.engines.physics_engines.opensim.python import club_visuals
 
     club_visuals.register_geometry_path()

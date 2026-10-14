@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python import msk_club as mc
 
@@ -16,7 +17,7 @@ TRAIL_TOL_M = 0.02  # trail hand to its grip (the weld closes the rest)
 
 @pytest.fixture(scope="module")
 def tracked():  # noqa: ANN201
-    pytest.importorskip("opensim")
+    require_opensim()
     pytest.importorskip("scipy")
     from src.engines.physics_engines.opensim.python import msk_club_tracking as mt
 
@@ -81,7 +82,7 @@ def test_track_swing_rejects_misaligned_foot_track() -> None:
 
 def test_foot_track_lifts_the_tracked_trail_heel() -> None:
     """A per-row heel lift moves the tracked trail calcaneus; static feet do not."""
-    pytest.importorskip("opensim")
+    require_opensim()
     pytest.importorskip("scipy")
     from src.engines.physics_engines.opensim.python import msk_club_calibration as cal
     from src.engines.physics_engines.opensim.python import msk_club_tracking as mt

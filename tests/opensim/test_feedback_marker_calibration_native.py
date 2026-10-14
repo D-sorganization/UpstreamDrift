@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.feedback_comparison import DriveMode
 from src.engines.feedback_marker_calibration import (
@@ -24,7 +25,7 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture
 def native_pin(tmp_path: Path) -> Path:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     model = osim.Model()
     body = osim.Body("segment", 1.0, osim.Vec3(0), osim.Inertia(0.02))
     model.addBody(body)

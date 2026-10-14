@@ -17,6 +17,7 @@ import math
 from pathlib import Path
 import numpy as np
 import pytest
+from tests.helpers.opensim_support import require_opensim
 
 from src.engines.physics_engines.opensim.python.tour_matching.address import (
     FROZEN_ADDRESS_TOLERANCE_PROFILE,
@@ -261,7 +262,7 @@ def test_real_tour_capture_address_pose_fit_and_metrics() -> None:
 
 def test_opensim_toe_out_seed_reaches_target_within_two_degrees() -> None:
     """OSV-4 (#11730): the OpenSim address seed turns both feet to the target."""
-    pytest.importorskip("opensim")
+    require_opensim()
     if not SCALED_MODEL_PATH.is_file():
         pytest.skip("Required input models not found.")
     from src.engines.physics_engines.opensim.python.tour_matching.address_feet import (

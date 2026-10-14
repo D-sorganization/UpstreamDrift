@@ -9,6 +9,7 @@ from io import StringIO
 from typing import Any
 
 import pytest
+from tests.helpers.opensim_support import require_opensim
 from defusedxml import ElementTree as ET
 
 from src.engines.physics_engines.opensim.python.native_abdominal_reduction import (
@@ -127,7 +128,7 @@ def test_native_buet_fresh_reload_preserves_complete_prepared_state(
     tmp_path: Path,
     variant: str,
 ) -> None:
-    osim = pytest.importorskip("opensim")
+    osim = require_opensim()
     prefix = "BUET_REDUCTION" if variant == "source473" else "BUET_ASSEMBLED_REDUCTION"
     source_text = os.environ.get(prefix + "_SOURCE")
     prepared_text = os.environ.get(prefix + "_PREPARED")
@@ -190,7 +191,7 @@ def test_native_buet_fresh_reload_preserves_complete_prepared_state(
 def test_native_source_and_state_mutations_reject(
     tmp_path: Path, mutation: str
 ) -> None:
-    pytest.importorskip("opensim")
+    require_opensim()
     source_text, prepared_text = (
         os.environ.get("BUET_REDUCTION_SOURCE"),
         os.environ.get("BUET_REDUCTION_PREPARED"),
