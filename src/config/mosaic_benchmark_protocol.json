@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "MOSAIC Planar Benchmark Protocol and Frozen Tolerances",
+  "version": "1.0.0",
+  "fixture": {
+    "n_trials": 2,
+    "n_nodes": 150,
+    "sample_rate_hz": 200.0,
+    "marker_noise_m": 0.0005,
+    "data_seed": 8,
+    "prior_seed": 2,
+    "geometry_scale": 1.05,
+    "prior_relative_spread": 0.10
+  },
+  "anchors": {
+    "mass_row": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+    "mass_anchor_weight": 100.0,
+    "club_parameters": [8, 9, 11],
+    "club_anchor_weight": 1000.0
+  },
+  "tolerances": {
+    "geometry_error_max_m": 0.0001,
+    "kinematic_rms_max_rad": 0.001,
+    "torque_rms_ratio_max": 0.25,
+    "structural_rank": 9,
+    "unobservable_parameters": [
+      "m_0"
+    ],
+    "open_loop_replay_rms_max_rad": 0.035,
+    "open_loop_horizon_s": 0.75
+  },
+  "promotion_metrics": {
+    "geometry_error_target_m": 2.5e-05,
+    "kinematic_rms_target_rad": 0.00075,
+    "torque_rms_ratio_nominal": 0.20,
+    "closed_loop_effort_rms_max": 0.05,
+    "open_loop_replay_rms_nominal_rad": 0.031
+  },
+  "policy": {
+    "freeze_trailer_required": "Tolerance-Change-Evidence",
+    "description": "Never loosen a tolerance without empirical measurements and a commit trailer"
+  }
+}
