@@ -99,6 +99,7 @@ jobs:
           fi
           shopt -s nullglob
           COLLATED=0
+          FAILED=0
           for FRAGMENT in changes/*.md; do
             case "$(basename "$FRAGMENT")" in [Rr][Ee][Aa][Dd][Mm][Ee].md) continue ;; esac
             SHA=$(git log -1 --diff-filter=A --format=%H -- "$FRAGMENT")
@@ -113,11 +114,19 @@ jobs:
               echo "::warning::No merged PR found for $FRAGMENT (added in $SHA); left in place."
               continue
             fi
-            python3 shared_scripts/changes_fragment.py collate \
-              --pr "$PR" --sha "$SHA" "$FRAGMENT"
-            COLLATED=$((COLLATED + 1))
+            # One refused fragment must not block the rest (RM#2044, RM#2093):
+            # collate deletes nothing on refusal, so it stays in place and is
+            # reported, and the job fails after the others are proposed.
+            if python3 shared_scripts/changes_fragment.py collate \
+              --pr "$PR" --sha "$SHA" "$FRAGMENT"; then
+              COLLATED=$((COLLATED + 1))
+            else
+              echo "::error file=$FRAGMENT::collation refused (PR #$PR); fragment left in place"
+              FAILED=$((FAILED + 1))
+            fi
           done
           echo "COLLATED=$COLLATED" >> "$GITHUB_ENV"
+          echo "FAILED=$FAILED" >> "$GITHUB_ENV"
 
       - name: Propose collation as a pull request
         env:
@@ -169,6 +178,14 @@ jobs:
             echo "OUTCOME=collation PR #$PR_NUM, auto-merge withheld" >> "$GITHUB_ENV"
           fi
 
+      - name: Fail when a fragment was refused
+        shell: bash
+        run: |
+          if [ "${FAILED:-0}" != "0" ]; then
+            echo "::error::${FAILED} fragment(s) were refused; see the errors above."
+            exit 1
+          fi
+
       - name: Summary
         if: always()
         shell: bash
@@ -177,5 +194,6 @@ jobs:
             echo "## Collate Change Fragments"
             echo ""
             echo "- **Fragments collated:** ${COLLATED:-0}"
+            echo "- **Fragments refused:** ${FAILED:-0}"
             echo "- **Outcome:** ${OUTCOME:-not reached}"
           } >> "$GITHUB_STEP_SUMMARY"
