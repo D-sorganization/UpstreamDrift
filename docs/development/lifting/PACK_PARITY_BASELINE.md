@@ -4,14 +4,14 @@ Measured baseline of the four lift model packs before any change (issue #11741, 
 
 ## Setup
 
-Reference lifter 80.0 kg, 1.78 m; competition bar (20 kg) plus 50.0 kg per side, 120.0 kg on the bar. Parity standard 1.2.0 (canonical frame +Z up, +X forward, +Y left; cross-engine position tolerance 0.02 m, mass 1e-06 relative).
+Reference lifter 80.0 kg, 1.78 m; competition bar (20 kg) plus 50.0 kg per side, 120.0 kg on the bar. Parity standard 2.1.0 (canonical frame +Z up, +X forward, +Y left; cross-engine position tolerance 0.02 m, mass 1e-06 relative).
 
 | Engine | Repository | Commit | Licence |
 |---|---|---|---|
-| MuJoCo | MuJoCo_Models | 735712cd63fe | MIT License |
-| OpenSim | OpenSim_Models | c854c4ed3256 | MIT License |
-| Drake | Drake_Models | 6ca7dcf18f78 | MIT License |
-| Pinocchio | Pinocchio_Models | 6a4bb51a8fdb | MIT License |
+| MuJoCo | MuJoCo_Models | 8e1e9f8bbb19 | MIT License |
+| OpenSim | OpenSim_Models | 4f87e2d4bacc | MIT License |
+| Drake | Drake_Models | 2eeba803911a | MIT License |
+| Pinocchio | Pinocchio_Models | 7d3d60fa341b | MIT License |
 
 Environment: python 3.12.13, platform Linux-7.0.0-38-generic-x86_64-with-glibc2.39, mujoco 3.8.0, pinocchio 4.1.0, opensim 4.6-2026-06-22-85aaf64, pydrake 1.57.0.
 
@@ -21,49 +21,49 @@ Environment: python 3.12.13, platform Linux-7.0.0-38-generic-x86_64-with-glibc2.
 |---|---|---|---|---|---|---|---|---|
 | Back Squat | MuJoCo | 56/52 | 18 | free | free body, welded to torso | L none; R none | yes | 5 |
 | Back Squat | OpenSim | 34/34 | 18 | FreeJoint | WeldJoint, child of torso | L none; R none | yes | 5 |
-| Back Squat | Drake | 35/34 | 32 | free (6 dof, implicit) | weld joint, child of torso | L none; R none | yes | 3 |
+| Back Squat | Drake | 35/34 | 32 | free (6 dof, implicit) | weld joint, child of torso | L none; R none | yes | 5 |
 | Back Squat | Pinocchio | 35/34 | 32 | none in URDF (consumer adds free-flyer; audit used JointModelFreeFlyer) | fixed joint, child of torso | L none; R none | yes | 5 |
-| Deadlift | MuJoCo | 56/52 | 18 | free | free body, welded to hand_l, hand_r | L weld constraint; R weld constraint | yes | 4 |
+| Deadlift | MuJoCo | 56/52 | 18 | free | free body, welded to hand_l, hand_r | L weld constraint; R weld constraint | yes | 5 |
 | Deadlift | OpenSim | 34/34 | 18 | FreeJoint | WeldJoint, child of hand_l | L WeldJoint (bar is child); R WeldConstraint (closure) | yes | 5 |
-| Deadlift | Drake | 35/34 | 32 | free (6 dof, implicit) | weld joint, child of hand_l | L weld joint (bar is child); R none | yes | 3 |
-| Deadlift | Pinocchio | 35/34 | 33 | none in URDF (consumer adds free-flyer; audit used JointModelFreeFlyer) | fixed joint, child of hand_l | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | yes | 4 |
-| Bench Press | MuJoCo | 56/52 | 19 | free | free body, welded to bench, hand_l, hand_r, pelvis | L weld constraint; R weld constraint | yes | 5 |
+| Deadlift | Drake | 35/34 | 32 | free (6 dof, implicit) | weld joint, child of hand_l | L weld joint (bar is child); R none | yes | 5 |
+| Deadlift | Pinocchio | 35/34 | 33 | none in URDF (consumer adds free-flyer; audit used JointModelFreeFlyer) | fixed joint, child of hand_l | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | yes | 5 |
+| Bench Press | MuJoCo | 49/46 | 19 | fixed | free body, welded to bench, hand_l, hand_r, pelvis | L weld constraint; R weld constraint | yes | 5 |
 | Bench Press | OpenSim | 28/28 | 19 | WeldJoint | WeldJoint, child of hand_l | L WeldJoint (bar is child); R WeldConstraint (closure) | yes | 5 |
-| Bench Press | Drake | 28/28 | 33 | welded | weld joint, child of hand_l | L weld joint (bar is child); R none | yes | 3 |
+| Bench Press | Drake | 28/28 | 33 | welded | weld joint, child of hand_l | L weld joint (bar is child); R none | yes | 5 |
 | Bench Press | Pinocchio | 35/34 | 34 | none in URDF (consumer adds free-flyer; audit used JointModelFreeFlyer) | fixed joint, child of hand_l | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | yes | 5 |
 | Snatch | MuJoCo | 56/52 | 18 | free | free body, welded to hand_l, hand_r | L weld constraint; R weld constraint | yes | 6 |
 | Snatch | OpenSim | 34/34 | 18 | FreeJoint | WeldJoint, child of hand_l | L WeldJoint (bar is child); R WeldConstraint (closure) | yes | 6 |
-| Snatch | Drake | 35/34 | 32 | free (6 dof, implicit) | weld joint, child of hand_l | L weld joint (bar is child); R none | yes | 5 |
+| Snatch | Drake | 35/34 | 32 | free (6 dof, implicit) | weld joint, child of hand_l | L weld joint (bar is child); R none | yes | 6 |
 | Snatch | Pinocchio | 35/34 | 33 | none in URDF (consumer adds free-flyer; audit used JointModelFreeFlyer) | fixed joint, child of hand_l | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | yes | 6 |
 | Clean and Jerk | MuJoCo | 56/52 | 18 | free | free body, welded to hand_l, hand_r | L weld constraint; R weld constraint | yes | 8 |
 | Clean and Jerk | OpenSim | 34/34 | 18 | FreeJoint | WeldJoint, child of hand_l | L WeldJoint (bar is child); R WeldConstraint (closure) | yes | 8 |
-| Clean and Jerk | Drake | 35/34 | 32 | free (6 dof, implicit) | weld joint, child of hand_l | L weld joint (bar is child); R none | yes | 5 |
+| Clean and Jerk | Drake | 35/34 | 32 | free (6 dof, implicit) | weld joint, child of hand_l | L weld joint (bar is child); R none | yes | 8 |
 | Clean and Jerk | Pinocchio | 35/34 | 33 | none in URDF (consumer adds free-flyer; audit used JointModelFreeFlyer) | fixed joint, child of hand_l | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | yes | 8 |
 
 Phase names per pack (start pose is the first phase; catch and rack poses are the pack's own named phases):
 
 | Lift | Engine | Phases |
 |---|---|---|
-| Back Squat | MuJoCo | descent_start, half_depth, bottom, drive, lockout |
-| Back Squat | OpenSim | start, descent, bottom, drive, lockout |
-| Back Squat | Drake | unrack, bottom, lockout |
-| Back Squat | Pinocchio | start, descent, bottom, drive, lockout |
-| Deadlift | MuJoCo | floor, below_knee, above_knee, lockout |
-| Deadlift | OpenSim | floor, break_floor, knee_pass, hip_drive, lockout |
-| Deadlift | Drake | setup, knee_pass, lockout |
-| Deadlift | Pinocchio | floor, break_floor, knee_pass, lockout |
-| Bench Press | MuJoCo | lockout_start, descent, chest, press, lockout_finish |
-| Bench Press | OpenSim | lockout_top, descent, chest, press, lockout |
-| Bench Press | Drake | lockout_top, chest_touch, lockout_finish |
-| Bench Press | Pinocchio | lockout_top, descent, chest, drive, lockout_finish |
-| Snatch | MuJoCo | first_pull, transition, second_pull, turnover, catch, recovery |
-| Snatch | OpenSim | first_pull, transition, second_pull, turnover, catch_overhead, recovery |
-| Snatch | Drake | floor, knee_pass, power_position, overhead_catch, standing |
-| Snatch | Pinocchio | first_pull, transition, second_pull, turnover, catch, recovery |
-| Clean and Jerk | MuJoCo | clean_pull, clean_transition, clean_extension, clean_catch, jerk_dip, jerk_drive, jerk_catch, recovery |
-| Clean and Jerk | OpenSim | clean_setup, clean_first_pull, clean_second_pull, clean_catch, jerk_dip, jerk_drive, jerk_split, jerk_recovery |
-| Clean and Jerk | Drake | floor, knee_pass, rack_position, jerk_dip, overhead_lockout |
-| Clean and Jerk | Pinocchio | clean_first_pull, clean_second_pull, clean_catch, clean_stand, jerk_dip, jerk_drive, jerk_catch, jerk_recovery |
+| Back Squat | MuJoCo | standing, descent, bottom, ascent, lockout |
+| Back Squat | OpenSim | standing, descent, bottom, ascent, lockout |
+| Back Squat | Drake | standing, descent, bottom, ascent, lockout |
+| Back Squat | Pinocchio | standing, descent, bottom, ascent, lockout |
+| Deadlift | MuJoCo | setup, first_pull, knee_pass, lockout, descent |
+| Deadlift | OpenSim | setup, first_pull, knee_pass, lockout, descent |
+| Deadlift | Drake | setup, first_pull, knee_pass, lockout, descent |
+| Deadlift | Pinocchio | setup, first_pull, knee_pass, lockout, descent |
+| Bench Press | MuJoCo | unrack, descent, chest_touch, press, lockout |
+| Bench Press | OpenSim | unrack, descent, chest_touch, press, lockout |
+| Bench Press | Drake | unrack, descent, chest_touch, press, lockout |
+| Bench Press | Pinocchio | unrack, descent, chest_touch, press, lockout |
+| Snatch | MuJoCo | setup, first_pull, second_pull, turnover, catch, recovery |
+| Snatch | OpenSim | setup, first_pull, second_pull, turnover, catch, recovery |
+| Snatch | Drake | setup, first_pull, second_pull, turnover, catch, recovery |
+| Snatch | Pinocchio | setup, first_pull, second_pull, turnover, catch, recovery |
+| Clean and Jerk | MuJoCo | setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery |
+| Clean and Jerk | OpenSim | setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery |
+| Clean and Jerk | Drake | setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery |
+| Clean and Jerk | Pinocchio | setup, first_pull, second_pull, rack_catch, rack_recovery, jerk_dip_drive, overhead_catch, overhead_recovery |
 
 ## Mass and Segment Totals
 
@@ -77,10 +77,10 @@ Phase names per pack (start pose is the first phase; catch and rack poses are th
 | Deadlift | OpenSim | 80 | 120 | 0 | 0 |  |
 | Deadlift | Drake | 80 | 120 | 0 | 0 |  |
 | Deadlift | Pinocchio | 80 | 120 | 0 | 0 |  |
-| Bench Press | MuJoCo | 80 | 120 | 12.48 | 0 |  |
+| Bench Press | MuJoCo | 80 | 120 | 0.0001 | 0 |  |
 | Bench Press | OpenSim | 80 | 120 | 0.0001 | 0 |  |
 | Bench Press | Drake | 80 | 120 | 30 | 0 |  |
-| Bench Press | Pinocchio | 80 | 120 | 1e-06 | 0 |  |
+| Bench Press | Pinocchio | 80 | 120 | 0.0001 | 0 |  |
 | Snatch | MuJoCo | 80 | 120 | 0 | 0 |  |
 | Snatch | OpenSim | 80 | 120 | 0 | 0 |  |
 | Snatch | Drake | 80 | 120 | 0 | 0 |  |
@@ -96,13 +96,13 @@ Worst pairwise difference (metres) over all engine pairs and all same-q poses (p
 
 | Lift | Segments | Hands | Feet | Bar Centre | Lifter CoM | Mass Spread kg |
 |---|---|---|---|---|---|---|
-| Back Squat | 0.0115 (opensim vs drake @ flexion) | 0.0115 (opensim vs drake @ flexion) | 0.0053 (opensim vs pinocchio @ frontal) | 0.1000 (mujoco vs pinocchio @ zero) | 0.0788 (mujoco vs opensim @ squat_bottom) | 1.4e-05 |
-| Deadlift | 0.0115 (opensim vs drake @ flexion) | 0.0115 (opensim vs drake @ flexion) | 0.0053 (opensim vs pinocchio @ frontal) | 0.1915 (mujoco vs opensim @ flexion) | 0.0788 (mujoco vs opensim @ squat_bottom) | 1.5e-05 |
-| Bench Press | 0.0115 (opensim vs drake @ flexion) | 0.0115 (opensim vs drake @ flexion) | 0.0053 (opensim vs drake @ frontal) | 0.2406 (mujoco vs opensim @ overhead) | 0.0788 (mujoco vs opensim @ squat_bottom) | 30 |
-| Snatch | 0.0115 (opensim vs drake @ flexion) | 0.0115 (opensim vs drake @ flexion) | 0.0053 (opensim vs pinocchio @ frontal) | 0.0200 (mujoco vs drake @ zero) | 0.0788 (mujoco vs opensim @ squat_bottom) | 1.5e-05 |
-| Clean and Jerk | 0.0115 (opensim vs drake @ flexion) | 0.0115 (opensim vs drake @ flexion) | 0.0053 (opensim vs pinocchio @ frontal) | 0.1168 (mujoco vs pinocchio @ flexion) | 0.0788 (mujoco vs opensim @ squat_bottom) | 1.5e-05 |
+| Back Squat | 0.0000 (mujoco vs drake @ flexion) | 0.0000 (mujoco vs drake @ overhead) | 0.0000 (mujoco vs opensim @ hip_hinge) | 0.1325 (mujoco vs drake @ zero) | 0.0788 (mujoco vs opensim @ squat_bottom) | 1.4e-05 |
+| Deadlift | 0.0000 (mujoco vs drake @ flexion) | 0.0000 (mujoco vs drake @ overhead) | 0.0000 (mujoco vs opensim @ hip_hinge) | 0.0570 (opensim vs drake @ zero) | 0.0788 (mujoco vs opensim @ squat_bottom) | 1.5e-05 |
+| Bench Press | 0.0000 (drake vs pinocchio @ overhead) | 0.0000 (drake vs pinocchio @ overhead) | 0.0000 (drake vs pinocchio @ zero) | 0.2233 (drake vs pinocchio @ frontal) | 0.0788 (mujoco vs opensim @ squat_bottom) | 30 |
+| Snatch | 0.0000 (mujoco vs drake @ flexion) | 0.0000 (mujoco vs drake @ overhead) | 0.0000 (mujoco vs opensim @ hip_hinge) | 0.2071 (drake vs pinocchio @ zero) | 0.0788 (mujoco vs opensim @ squat_bottom) | 1.5e-05 |
+| Clean and Jerk | 0.0000 (mujoco vs drake @ flexion) | 0.0000 (mujoco vs drake @ overhead) | 0.0000 (mujoco vs opensim @ hip_hinge) | 0.1358 (opensim vs drake @ frontal) | 0.0788 (mujoco vs opensim @ squat_bottom) | 1.5e-05 |
 
-Each engine's FK against the standard's reference FK (all lifts, worst pose): MuJoCo 2.22e-16 m (foot_r); OpenSim 1.15e-02 m (forearm_l); Drake 3.33e-16 m (upper_arm_l); Pinocchio 2.22e-16 m (forearm_l).
+Each engine's FK against the standard's reference FK (all lifts, worst pose): MuJoCo 2.50e-16 m (hand_l); OpenSim 2.22e-16 m (foot_r); Drake 3.33e-16 m (head); Pinocchio 2.22e-16 m (forearm_l).
 
 ## Hand and Bar Attachment
 
@@ -110,72 +110,72 @@ Closure is the native hand-to-bar residual at the pack start pose (m; OpenSim va
 
 | Lift | Engine | Attachment | Intended Half-Width m | Hand Half-Spacing m | Mismatch m | Native Start Closure |
 |---|---|---|---|---|---|---|
-| Deadlift | MuJoCo | L weld constraint; R weld constraint | 0.22 | 0.1709 | 0.04912 | l 0.0491, r 0.0491 |
-| Deadlift | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.4 | 0.1594 | 0.2406 | weld_translation_norm 1.13e-16 |
-| Deadlift | Drake | L weld joint (bar is child); R none | 0.22 | 0.1709 | 0.04912 | - |
-| Deadlift | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.393 | 0.1709 | 0.2221 | - |
-| Bench Press | MuJoCo | L weld constraint; R weld constraint | 0.1709 | 0.1709 | 0 | l 3.33e-16, r 3.33e-16 |
-| Bench Press | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.4 | 0.1594 | 0.2406 | weld_translation_norm 8.87e-13 |
-| Bench Press | Drake | L weld joint (bar is child); R none | 0.4 | 0.1709 | 0.2291 | - |
-| Bench Press | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.393 | 0.1709 | 0.2221 | - |
-| Snatch | MuJoCo | L weld constraint; R weld constraint | 0.6 | 0.1709 | 0.4291 | l 0.429, r 0.429 |
-| Snatch | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.58 | 0.1594 | 0.4206 | weld_translation_norm 1.84e-13 |
-| Snatch | Drake | L weld joint (bar is child); R none | 0.58 | 0.1709 | 0.4091 | - |
-| Snatch | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.5895 | 0.1709 | 0.4186 | - |
-| Clean and Jerk | MuJoCo | L weld constraint; R weld constraint | 0.25 | 0.1709 | 0.07912 | l 0.0791, r 0.0791 |
-| Clean and Jerk | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.25 | 0.1594 | 0.09065 | weld_translation_norm 1.11e-16 |
-| Clean and Jerk | Drake | L weld joint (bar is child); R none | 0.25 | 0.1709 | 0.07912 | - |
-| Clean and Jerk | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.3668 | 0.1709 | 0.1959 | - |
+| Deadlift | MuJoCo | L weld constraint; R weld constraint | 0.2248 | 0.1709 | 0.05388 | l 6.16e-10, r 6.16e-10 |
+| Deadlift | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.2248 | 0.1709 | 0.05388 | weld_translation_norm 2.38e-14 |
+| Deadlift | Drake | L weld joint (bar is child); R none | 0.1709 | 0.1709 | 0 | - |
+| Deadlift | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.2248 | 0.1709 | 0.05388 | - |
+| Bench Press | MuJoCo | L weld constraint; R weld constraint | 0.3666 | 0.1709 | 0.1957 | l 3.74e-10, r 3.74e-10 |
+| Bench Press | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.3666 | 0.1709 | 0.1957 | weld_translation_norm 1.23e-13 |
+| Bench Press | Drake | L weld joint (bar is child); R none | 0.1709 | 0.1709 | 0 | - |
+| Bench Press | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.3666 | 0.1709 | 0.1957 | - |
+| Snatch | MuJoCo | L weld constraint; R weld constraint | 0.4375 | 0.1709 | 0.2666 | l 4.75e-10, r 4.75e-10 |
+| Snatch | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.4375 | 0.1709 | 0.2666 | weld_translation_norm 5.55e-15 |
+| Snatch | Drake | L weld joint (bar is child); R none | 0.4664 | 0.1709 | 0.2955 | - |
+| Snatch | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.4375 | 0.1709 | 0.2666 | - |
+| Clean and Jerk | MuJoCo | L weld constraint; R weld constraint | 0.2957 | 0.1709 | 0.1248 | l 6.14e-10, r 6.14e-10 |
+| Clean and Jerk | OpenSim | L WeldJoint (bar is child); R WeldConstraint (closure) | 0.2957 | 0.1709 | 0.1248 | weld_translation_norm 4.39e-15 |
+| Clean and Jerk | Drake | L weld joint (bar is child); R none | 0.1709 | 0.1709 | 0 | - |
+| Clean and Jerk | Pinocchio | L fixed joint (bar is child); R none (only dummy frame barbell_grip_r) | 0.2957 | 0.1709 | 0.1248 | - |
 
 ## Start Poses
 
 | Lift | Engine | Bar Centre Above Sole m | Sole z m | Ground Contact N | Non-Ground Contact N |
 |---|---|---|---|---|---|
-| Back Squat | MuJoCo | 1.608 | 9.194e-17 | 0 | 2775 |
-| Back Squat | OpenSim | 1.605 | -1.793e-07 | 407.1 | - |
+| Back Squat | MuJoCo | 1.619 | -0.0009842 | 7910 | 0 |
+| Back Squat | OpenSim | 1.618 | 3.772e-05 | 468.5 | - |
 | Back Squat | Drake | 1.625 | -1.11e-16 | unavailable | - |
-| Back Squat | Pinocchio | 1.555 | -0.983 | unavailable | - |
-| Deadlift | MuJoCo | 1.017 | 9.194e-17 | 0 | 4.317e+05 |
-| Deadlift | OpenSim | 0.7097 | 4.149e-07 | 236.9 | - |
-| Deadlift | Drake | 0.6969 | -1.388e-17 | unavailable | - |
-| Deadlift | Pinocchio | 0.6586 | -0.672 | unavailable | - |
-| Bench Press | MuJoCo | 0.681 | 0.4923 | 0 | 1.525e+04 |
-| Bench Press | OpenSim | 0.6397 | 0.33 | 2.168e+04 | - |
-| Bench Press | Drake | 0.721 | 0.3 | unavailable | - |
-| Bench Press | Pinocchio | 1.049 | -0.4579 | unavailable | - |
-| Snatch | MuJoCo | 1.017 | 9.194e-17 | 0 | 4.486e+05 |
-| Snatch | OpenSim | 0.8301 | 4.149e-07 | 236.9 | - |
-| Snatch | Drake | 0.8392 | -3.469e-17 | unavailable | - |
-| Snatch | Pinocchio | 0.6669 | -0.6783 | unavailable | - |
-| Clean and Jerk | MuJoCo | 1.017 | 9.194e-17 | 0 | 4.319e+05 |
-| Clean and Jerk | OpenSim | 0.667 | 4.149e-07 | 236.9 | - |
-| Clean and Jerk | Drake | 0.7684 | 1.388e-17 | unavailable | - |
-| Clean and Jerk | Pinocchio | 0.6984 | -0.7118 | unavailable | - |
+| Back Squat | Pinocchio | 1.617 | 0.001236 | unavailable | - |
+| Deadlift | MuJoCo | 0.2299 | -0.001042 | 5936 | 0 |
+| Deadlift | OpenSim | 0.2289 | -3.816e-05 | 478 | - |
+| Deadlift | Drake | 0.225 | 5.378e-17 | unavailable | - |
+| Deadlift | Pinocchio | 0.2277 | 0.001156 | unavailable | - |
+| Bench Press | MuJoCo | 1.187 | -0.0001852 | 3961 | 5014 |
+| Bench Press | OpenSim | 1.187 | -0.0001716 | 493.5 | - |
+| Bench Press | Drake | 0.7655 | 0.3 | unavailable | - |
+| Bench Press | Pinocchio | 1.186 | 0.5886 | unavailable | - |
+| Snatch | MuJoCo | 0.2299 | -0.001002 | 6426 | 0 |
+| Snatch | OpenSim | 0.2289 | -1.222e-05 | 473.9 | - |
+| Snatch | Drake | 0.2562 | -3.816e-17 | unavailable | - |
+| Snatch | Pinocchio | 0.2277 | 0.00118 | unavailable | - |
+| Clean and Jerk | MuJoCo | 0.2299 | -0.001011 | 6220 | 0 |
+| Clean and Jerk | OpenSim | 0.2289 | -8.45e-05 | 485.8 | - |
+| Clean and Jerk | Drake | 0.225 | 5.378e-17 | unavailable | - |
+| Clean and Jerk | Pinocchio | 0.2277 | 0.001113 | unavailable | - |
 
 ## Joint Limits Versus the Standard
 
 | Lift | Engine | Checked | Off Standard | Coordinates (rad) |
 |---|---|---|---|---|
-| Back Squat | MuJoCo | 28 | 6 | hip_l_flex (0.150), hip_l_rotate (0.175), knee_l_flex (0.150), hip_r_flex (0.150), hip_r_rotate (0.175), knee_r_flex (0.150) |
+| Back Squat | MuJoCo | 28 | 0 |  |
 | Back Squat | OpenSim | 28 | 0 |  |
-| Back Squat | Drake | 28 | 0 |  |
-| Back Squat | Pinocchio | 28 | 10 | ankle_l_flex (0.524), ankle_r_flex (0.524), lumbar_flex (0.262), lumbar_lateral (0.175), lumbar_rotate (0.349), neck_flex (0.698) |
-| Deadlift | MuJoCo | 28 | 4 | hip_l_flex (1.396), knee_l_flex (1.047), hip_r_flex (1.396), knee_r_flex (1.047) |
+| Back Squat | Drake | 28 | 2 | shoulder_l_adduct (2.618), shoulder_r_adduct (2.618) |
+| Back Squat | Pinocchio | 28 | 0 |  |
+| Deadlift | MuJoCo | 28 | 0 |  |
 | Deadlift | OpenSim | 28 | 0 |  |
-| Deadlift | Drake | 28 | 0 |  |
-| Deadlift | Pinocchio | 28 | 10 | ankle_l_flex (0.524), ankle_r_flex (0.524), lumbar_flex (0.262), lumbar_lateral (0.175), lumbar_rotate (0.349), neck_flex (0.698) |
+| Deadlift | Drake | 28 | 2 | shoulder_l_adduct (2.618), shoulder_r_adduct (2.618) |
+| Deadlift | Pinocchio | 28 | 0 |  |
 | Bench Press | MuJoCo | 28 | 0 |  |
 | Bench Press | OpenSim | 28 | 0 |  |
-| Bench Press | Drake | 28 | 0 |  |
-| Bench Press | Pinocchio | 28 | 10 | ankle_l_flex (0.524), ankle_r_flex (0.524), lumbar_flex (0.262), lumbar_lateral (0.175), lumbar_rotate (0.349), neck_flex (0.698) |
-| Snatch | MuJoCo | 28 | 8 | shoulder_l_adduct (0.524), wrist_l_deviate (0.524), shoulder_r_adduct (0.524), wrist_r_deviate (0.524), hip_l_flex (1.396), knee_l_flex (1.047) |
+| Bench Press | Drake | 28 | 2 | shoulder_l_adduct (2.618), shoulder_r_adduct (2.618) |
+| Bench Press | Pinocchio | 28 | 0 |  |
+| Snatch | MuJoCo | 28 | 0 |  |
 | Snatch | OpenSim | 28 | 0 |  |
-| Snatch | Drake | 28 | 0 |  |
-| Snatch | Pinocchio | 28 | 10 | ankle_l_flex (0.524), ankle_r_flex (0.524), lumbar_flex (0.262), lumbar_lateral (0.175), lumbar_rotate (0.349), neck_flex (0.698) |
-| Clean and Jerk | MuJoCo | 28 | 6 | shoulder_l_rotate (0.785), shoulder_r_rotate (0.785), hip_l_flex (1.396), knee_l_flex (1.047), hip_r_flex (1.396), knee_r_flex (1.047) |
+| Snatch | Drake | 28 | 2 | shoulder_l_adduct (2.618), shoulder_r_adduct (2.618) |
+| Snatch | Pinocchio | 28 | 0 |  |
+| Clean and Jerk | MuJoCo | 28 | 0 |  |
 | Clean and Jerk | OpenSim | 28 | 0 |  |
-| Clean and Jerk | Drake | 28 | 0 |  |
-| Clean and Jerk | Pinocchio | 28 | 10 | ankle_l_flex (0.524), ankle_r_flex (0.524), lumbar_flex (0.262), lumbar_lateral (0.175), lumbar_rotate (0.349), neck_flex (0.698) |
+| Clean and Jerk | Drake | 28 | 2 | shoulder_l_adduct (2.618), shoulder_r_adduct (2.618) |
+| Clean and Jerk | Pinocchio | 28 | 0 |  |
 
 ## Phases
 
@@ -183,61 +183,56 @@ Hand-bar is the perpendicular distance from a hand origin to the bar axis, worst
 
 | Lift | Engine | Phases / Standard | Names Match Standard | Left-Only Phases | Unmapped Keys | Inferred Keys | Worst Hand-Bar m (phase/side) |
 |---|---|---|---|---|---|---|---|
-| Back Squat | MuJoCo | 5 / 5 | no | 0 | - | 0 | 0.599 (descent_start/l) |
-| Back Squat | OpenSim | 5 / 5 | no | 0 | - | 2 | 0.587 (start/l) |
-| Back Squat | Drake | 3 / 5 | no | 0 | - | 0 | 0.587 (unrack/l) |
-| Back Squat | Pinocchio | 5 / 5 | no | 5 | - | 1 | 0.587 (start/l) |
-| Deadlift | MuJoCo | 4 / 5 | no | 0 | - | 0 | 0.000 () |
-| Deadlift | OpenSim | 5 / 5 | no | 0 | - | 2 | 0.000 () |
-| Deadlift | Drake | 3 / 5 | no | 0 | - | 0 | 0.000 () |
-| Deadlift | Pinocchio | 4 / 5 | no | 4 | - | 1 | 0.000 () |
-| Bench Press | MuJoCo | 5 / 5 | no | 0 | - | 0 | 0.000 () |
-| Bench Press | OpenSim | 5 / 5 | no | 0 | - | 2 | 0.000 () |
-| Bench Press | Drake | 3 / 5 | no | 0 | shoulder_l_abd, shoulder_r_abd | 0 | 0.000 () |
-| Bench Press | Pinocchio | 5 / 5 | no | 5 | - | 1 | 0.836 (lockout_top/r) |
-| Snatch | MuJoCo | 6 / 6 | no | 0 | - | 0 | 0.000 () |
-| Snatch | OpenSim | 6 / 6 | no | 0 | - | 3 | 0.000 () |
-| Snatch | Drake | 5 / 6 | no | 0 | - | 0 | 0.000 () |
-| Snatch | Pinocchio | 6 / 6 | no | 6 | - | 2 | 1.182 (catch/r) |
-| Clean and Jerk | MuJoCo | 8 / 8 | no | 0 | - | 0 | 0.000 () |
-| Clean and Jerk | OpenSim | 8 / 8 | no | 0 | - | 4 | 0.000 () |
-| Clean and Jerk | Drake | 5 / 8 | no | 0 | - | 0 | 0.000 () |
-| Clean and Jerk | Pinocchio | 8 / 8 | no | 8 | - | 2 | 1.182 (jerk_catch/r) |
+| Back Squat | MuJoCo | 5 / 5 | yes | 0 | - | 0 | 0.044 (standing/l) |
+| Back Squat | OpenSim | 5 / 5 | yes | 0 | - | 0 | 0.044 (standing/l) |
+| Back Squat | Drake | 5 / 5 | yes | 0 | - | 0 | 0.159 (bottom/l) |
+| Back Squat | Pinocchio | 5 / 5 | yes | 0 | - | 0 | 0.044 (standing/l) |
+| Deadlift | MuJoCo | 5 / 5 | yes | 0 | - | 0 | 0.044 (lockout/r) |
+| Deadlift | OpenSim | 5 / 5 | yes | 0 | - | 0 | 0.044 (lockout/r) |
+| Deadlift | Drake | 5 / 5 | yes | 0 | - | 0 | 0.086 (lockout/r) |
+| Deadlift | Pinocchio | 5 / 5 | yes | 0 | - | 0 | 0.044 (lockout/r) |
+| Bench Press | MuJoCo | 5 / 5 | yes | 0 | - | 0 | 0.455 (chest_touch/r) |
+| Bench Press | OpenSim | 5 / 5 | yes | 0 | - | 0 | 0.455 (chest_touch/r) |
+| Bench Press | Drake | 5 / 5 | yes | 0 | - | 0 | 0.532 (chest_touch/r) |
+| Bench Press | Pinocchio | 5 / 5 | yes | 0 | - | 0 | 0.455 (chest_touch/r) |
+| Snatch | MuJoCo | 6 / 6 | yes | 0 | - | 0 | 0.041 (recovery/r) |
+| Snatch | OpenSim | 6 / 6 | yes | 0 | - | 0 | 0.041 (recovery/r) |
+| Snatch | Drake | 6 / 6 | yes | 0 | - | 0 | 0.442 (catch/r) |
+| Snatch | Pinocchio | 6 / 6 | yes | 0 | - | 0 | 0.041 (recovery/r) |
+| Clean and Jerk | MuJoCo | 8 / 8 | yes | 0 | - | 0 | 0.361 (rack_catch/r) |
+| Clean and Jerk | OpenSim | 8 / 8 | yes | 0 | - | 0 | 0.361 (rack_catch/r) |
+| Clean and Jerk | Drake | 8 / 8 | yes | 0 | - | 0 | 0.397 (rack_recovery/r) |
+| Clean and Jerk | Pinocchio | 8 / 8 | yes | 0 | - | 0 | 0.361 (rack_catch/r) |
 
 ## Discrepancies and Tracking Issues
 
 | Discrepancy | Engines | Issues | Epic Child | Issue |
 |---|---|---|---|---|
-| Right hand is not attached to the bar | Drake, Pinocchio | Drake_Models#365; Pinocchio_Models#443 | LIFT-3 | existing |
-| Grip half-width does not match achievable hand spacing | Drake, MuJoCo, OpenSim, Pinocchio | MuJoCo_Models#408; OpenSim_Models#394; Pinocchio_Models#443 | LIFT-3 | existing |
-| Floor-pull start pose is not at the floor | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#381; Drake_Models#364; MuJoCo_Models#407; OpenSim_Models#416; Pinocchio_Models#450 | LIFT-4 | new |
-| Joint limits differ from the parity standard | MuJoCo, Pinocchio | MuJoCo_Models#407; MuJoCo_Models#409; Pinocchio_Models#433 | LIFT-5 | existing |
-| Phase count differs from the standard | Drake, MuJoCo, Pinocchio | Drake_Models#372; MuJoCo_Models#401; Pinocchio_Models#434 | LIFT-6 | existing |
-| Phase names differ from the standard | Drake, MuJoCo, OpenSim, Pinocchio | - | LIFT-3 | stale, re-measure |
-| Phase targets are left-side only | Pinocchio | Pinocchio_Models#449 | LIFT-6 | new |
-| Phase keys do not resolve to model coordinates | Drake, OpenSim, Pinocchio | Drake_Models#390; OpenSim_Models#414; Pinocchio_Models#436 | LIFT-6 | new |
-| Bench mass convention differs across packs | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#391; MuJoCo_Models#428; OpenSim_Models#415; Pinocchio_Models#451 | LIFT-2 | new |
-| Start pose carries unphysical contact force | MuJoCo, OpenSim | MuJoCo_Models#427; OpenSim_Models#384 | LIFT-4 | new |
-| No ground-reaction output available | Drake, Pinocchio | Drake_Models#371; Pinocchio_Models#432 | LIFT-9 | existing |
+| Right hand is not attached to the bar | Drake, Pinocchio | UpstreamDrift#12504 | LIFT-3 | existing |
+| Grip half-width does not match achievable hand spacing | Drake, MuJoCo, OpenSim, Pinocchio | UpstreamDrift#12504 | LIFT-3 | existing |
+| Joint limits differ from the parity standard | Drake | Drake_Models#429 | LIFT-5 | existing |
+| Bench mass convention differs across packs | Drake, MuJoCo, OpenSim, Pinocchio | Drake_Models#429 | LIFT-2 | new |
+| Start pose carries unphysical contact force | MuJoCo | MuJoCo_Models#496 | LIFT-4 | new |
+| No ground-reaction output available | Drake, Pinocchio | UpstreamDrift#12504 | LIFT-9 | existing |
 | Segment inertia differs from the other packs | MuJoCo | MuJoCo_Models#392 | LIFT-2 | new |
 
 ## Epic Defect List Review
 
 | Issues | Defect | Finding |
 |---|---|---|
-| OpenSim_Models#394, MuJoCo_Models#408, Pinocchio_Models#443, Drake_Models#365 | Barbell grip welds | Confirmed. Right hand unattached in Drake and Pinocchio; MuJoCo has conflicting welds (0.049 m start closure, deadlift); OpenSim closes only after assembly moves coordinates. |
-| Drake_Models#381, #364, MuJoCo_Models#407 | Start poses | Confirmed in all four packs, not only Drake (see Start Poses). |
-| OpenSim_Models#384 | Bench default pose contact | Confirmed: 21.7 kN vertical contact force at the bench start pose. |
+| OpenSim_Models#394, MuJoCo_Models#408, Pinocchio_Models#443, Drake_Models#365 | Barbell grip welds | Re-measured 2026-10-14: MuJoCo and OpenSim close both grips at the start pose (below 1e-9 m); the Drake and Pinocchio right-hand result is an audit limitation (UpstreamDrift#12504). |
+| Drake_Models#381, #364, MuJoCo_Models#407 | Start poses | Not reproduced 2026-10-14: every floor-pull bar centre is within 0.05 m of the plate radius (see Start Poses). |
+| OpenSim_Models#384 | Bench default pose contact | Not reproduced 2026-10-14: 494 N ground contact at the bench start pose (was 21.7 kN). |
 | MuJoCo_Models#409 | Bench shoulder ref outside range | Not reproduced at this commit: the reported bench shoulder_flex default (1.571 rad) lies inside its range [-1.047, 3.142]; recheck against the issue's ref value. |
 | MuJoCo_Models#403, #404 | IK and controller API | Not exercised by this audit (capability gaps, not parity). |
-| Repository_Management#2024, #2025 | Root joint and named phases | Consistent with measurements: MuJoCo supine via quaternion; phase keys inconsistent across packs. |
-| MuJoCo_Models#401, Pinocchio_Models#434 | Deadlift phase count | Confirmed (4 vs 5). Drake_Models#372 also holds for all lifts. |
+| Repository_Management#2024, #2025 | Root joint and named phases | Re-measured 2026-10-14: the MuJoCo bench pelvis is fixed and supine via its body quaternion; all four packs use the v2.1 phase names. |
+| MuJoCo_Models#401, Pinocchio_Models#434 | Deadlift phase count | Not reproduced 2026-10-14: every pack has the standard phase count for every lift (Drake_Models#372 also merged). |
 | OpenSim_Models#380, MuJoCo_Models#392, Drake_Models#361, Pinocchio_Models#425 | Parity roadmaps | Not re-measured. |
 
 ## Deferred
 
 - **Simscape and MATLAB lift models**: No lift models exist in any repository (epic #11740: Simscape lift models are missing everywhere); MATLAB R2025b is required if they are added, and nothing was substituted.
-- **Ground-reaction force at the start pose in Drake and Pinocchio**: Neither pack exposes a contact model (Drake_Models#371, Pinocchio_Models#432); reported as unavailable, never zero.
+- **Ground-reaction force at the start pose in Drake and Pinocchio**: The audit adapters do not read the packs' contact APIs yet (UpstreamDrift#12504); reported as unavailable, never zero.
 - **MuJoCo phase out-of-range reading**: Pack phase values may be absolute qpos or ref-relative angles; the audit reads them as canonical angles, so out-of-range flags for MuJoCo phases are interpretation dependent and are not used as gaps.
 - **Native renders in OpenSim, Drake and Pinocchio**: The packs have no offscreen renderer (MuJoCo_Models#412, Drake_Models#375, Pinocchio_Models#438); stills are skeleton plots of each engine's own FK, not native renders.
 - **Physical validation against measured lifts**: No lift mocap or force data exist (epic #11740); this baseline records software parity only, not scientific qualification.

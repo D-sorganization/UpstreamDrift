@@ -12,6 +12,7 @@ from ..model import CoordinateInfo, EngineAdapter, PoseEval
 from ._common import PELVIS_ORIGIN, build_model_text, native_angles
 
 _BAR_PARTS = ("barbell_shaft", "barbell_left_sleeve", "barbell_right_sleeve")
+_IDENTITY_QUAT = (1.0, 0.0, 0.0, 0.0)
 
 
 class MujocoAdapter(EngineAdapter):
@@ -205,22 +206,36 @@ class MujocoAdapter(EngineAdapter):
         mass = m.body_mass[1:]
         return np.asarray(mass @ d.xipos[1:] / mass.sum())
 
+    def _pelvis_free_qposadr(self) -> int | None:
+        """qpos address of the pelvis free joint; ``None`` when it is fixed."""
+        m = self.model
+        jnt = int(m.body_jntadr[self._body("pelvis")])
+        if jnt < 0 or int(m.jnt_type[jnt]) != int(mujoco.mjtJoint.mjJNT_FREE):
+            return None
+        return int(m.jnt_qposadr[jnt])
+
     def evaluate(self, q: Mapping[str, float] | None) -> PoseEval:
         m, d = self.model, self.data
         d.qpos[:] = self._start_qpos()
         notes: list[str] = []
         if q is not None:
             qpos = np.array(m.qpos0, dtype=float)
-            root = int(m.jnt_qposadr[0])
-            start = self._start_qpos()
-            # Keep the pack's own root orientation (the bench press is made
-            # supine by the keyframe quaternion, not by body geometry); the
-            # root is only re-placed where the pack leaves the lifter free.
-            qpos[root + 3 : root + 7] = start[root + 3 : root + 7]
-            if self.lift == "bench_press":
-                qpos[root : root + 3] = start[root : root + 3]
+            root = self._pelvis_free_qposadr()
+            if root is None:
+                # The bench press pelvis is fixed and made supine by the pack's
+                # body quaternion; there is no root coordinate to place.
+                notes.append("pelvis has no free joint; root left at the model pose")
+            elif self.lift == "bench_press":
+                # A free supine pelvis keeps the pack's own start pose.
+                start = self._start_qpos()
+                qpos[root : root + 7] = start[root : root + 7]
             else:
+                # Same input for every engine: pelvis at the origin with the
+                # identity orientation, as the OpenSim, Drake and Pinocchio
+                # adapters set it. The pack's start keyframe tilts the pelvis
+                # (floor-pull set-up), which must not leak into same-q poses.
                 qpos[root : root + 3] = PELVIS_ORIGIN
+                qpos[root + 3 : root + 7] = _IDENTITY_QUAT
             for name, angle in native_angles(self.engine, q).items():
                 jid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, name)
                 if jid < 0:

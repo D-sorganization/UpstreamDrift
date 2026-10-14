@@ -33,8 +33,8 @@ STANDING_DEFERRALS = [
     },
     {
         "item": "Ground-reaction force at the start pose in Drake and Pinocchio",
-        "reason": "Neither pack exposes a contact model (Drake_Models#371, "
-        "Pinocchio_Models#432); reported as unavailable, never zero.",
+        "reason": "The audit adapters do not read the packs' contact APIs yet "
+        "(UpstreamDrift#12504); reported as unavailable, never zero.",
     },
     {
         "item": "MuJoCo phase out-of-range reading",
@@ -59,19 +59,21 @@ EPIC_DEFECTS = [
     (
         "OpenSim_Models#394, MuJoCo_Models#408, Pinocchio_Models#443, Drake_Models#365",
         "Barbell grip welds",
-        "Confirmed. Right hand unattached in Drake and Pinocchio; MuJoCo has "
-        "conflicting welds (0.049 m start closure, deadlift); OpenSim closes only "
-        "after assembly moves coordinates.",
+        "Re-measured 2026-10-14: MuJoCo and OpenSim close both grips at the "
+        "start pose (below 1e-9 m); the Drake and Pinocchio right-hand result "
+        "is an audit limitation (UpstreamDrift#12504).",
     ),
     (
         "Drake_Models#381, #364, MuJoCo_Models#407",
         "Start poses",
-        "Confirmed in all four packs, not only Drake (see Start Poses).",
+        "Not reproduced 2026-10-14: every floor-pull bar centre is within "
+        "0.05 m of the plate radius (see Start Poses).",
     ),
     (
         "OpenSim_Models#384",
         "Bench default pose contact",
-        "Confirmed: 21.7 kN vertical contact force at the bench start pose.",
+        "Not reproduced 2026-10-14: 494 N ground contact at the bench start "
+        "pose (was 21.7 kN).",
     ),
     (
         "MuJoCo_Models#409",
@@ -88,13 +90,14 @@ EPIC_DEFECTS = [
     (
         "Repository_Management#2024, #2025",
         "Root joint and named phases",
-        "Consistent with measurements: MuJoCo supine via quaternion; phase keys "
-        "inconsistent across packs.",
+        "Re-measured 2026-10-14: the MuJoCo bench pelvis is fixed and supine "
+        "via its body quaternion; all four packs use the v2.1 phase names.",
     ),
     (
         "MuJoCo_Models#401, Pinocchio_Models#434",
         "Deadlift phase count",
-        "Confirmed (4 vs 5). Drake_Models#372 also holds for all lifts.",
+        "Not reproduced 2026-10-14: every pack has the standard phase count "
+        "for every lift (Drake_Models#372 also merged).",
     ),
     (
         "OpenSim_Models#380, MuJoCo_Models#392, Drake_Models#361, Pinocchio_Models#425",

@@ -31,6 +31,14 @@ def test_all_engines_load_and_step(receipt):
         assert res["smoke"]["loaded"] and res["smoke"]["stepped"]
 
 
+def test_no_engine_is_deferred(receipt):
+    """A stale name mapping must not silently drop a pack from the baseline."""
+    assert receipt["deferred"] == []
+    assert sorted(receipt["results"]["deadlift"]) == sorted(
+        ("mujoco", "opensim", "drake", "pinocchio")
+    )
+
+
 def test_same_q_feet_agree_across_engines(receipt):
     comp = receipt["comparisons"]["deadlift"]["poses"]
     for pairs in comp.values():

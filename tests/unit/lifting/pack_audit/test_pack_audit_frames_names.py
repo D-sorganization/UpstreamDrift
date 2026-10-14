@@ -44,11 +44,16 @@ def test_canonical_set_matches_the_standard_count() -> None:
     ("engine", "canonical", "native"),
     [
         ("mujoco", "knee_l_flex", "knee_l_flex"),
-        ("opensim", "wrist_r_deviate", "wrist_r_deviation"),
-        ("opensim", "ankle_l_invert", "ankle_l_inversion"),
+        # OpenSim_Models and Pinocchio_Models adopted the standard v2 names
+        # (measured on origin/main 4f87e2d and 7d3d60f, issue #11743).
+        ("opensim", "wrist_r_deviate", "wrist_r_deviate"),
+        ("opensim", "ankle_l_invert", "ankle_l_invert"),
         ("drake", "knee_r_flex", "knee_r"),
-        ("pinocchio", "neck_flex", "neck"),
-        ("pinocchio", "elbow_l_flex", "elbow_l"),
+        ("drake", "neck_flex", "neck"),
+        ("drake", "elbow_l_flex", "elbow_l"),
+        ("pinocchio", "neck_flex", "neck_flex"),
+        ("pinocchio", "elbow_l_flex", "elbow_l_flex"),
+        ("pinocchio", "knee_r_flex", "knee_r_flex"),
     ],
 )
 def test_engine_names_round_trip(engine: str, canonical: str, native: str) -> None:
@@ -80,10 +85,20 @@ def test_phase_key_expansion_exact_and_interpreted() -> None:
 
 
 def test_canonical_spelling_foreign_to_the_pack_is_flagged() -> None:
-    # Pinocchio's URDF joint is ``knee_l``; an objective written as ``knee_l_flex``
+    # Drake's URDF joint is ``knee_l``; an objective written as ``knee_l_flex``
     # still resolves but is reported as interpreted (name mismatch).
-    assert names.expand_phase_key("pinocchio", "knee_l_flex") == (
+    assert names.expand_phase_key("drake", "knee_l_flex") == (
         ["knee_l_flex"],
         False,
     )
-    assert names.expand_phase_key("pinocchio", "knee_l") == (["knee_l_flex"], True)
+    assert names.expand_phase_key("drake", "knee_l") == (["knee_l_flex"], True)
+
+
+def test_pinocchio_pack_spelling_is_canonical() -> None:
+    # Pinocchio_Models renamed its URDF joints to the standard v2 names, so
+    # the canonical spelling is exact and the legacy ``knee_l`` is unmapped.
+    assert names.expand_phase_key("pinocchio", "knee_l_flex") == (
+        ["knee_l_flex"],
+        True,
+    )
+    assert names.expand_phase_key("pinocchio", "knee_l") == ([], False)

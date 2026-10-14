@@ -204,7 +204,8 @@ class PinocchioAdapter(EngineAdapter):
     def start_contact_force(self) -> dict[str, Any]:
         return {
             "value_n": None,
-            "reason": "URDF carries no contact model (Pinocchio_Models#432)",
+            "reason": "audit does not read the pack contact API yet "
+            "(UpstreamDrift#12504)",
         }
 
     def bar_hold_wrench(self) -> dict[str, Any]:

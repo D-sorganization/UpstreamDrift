@@ -168,7 +168,8 @@ class DrakeAdapter(EngineAdapter):
     def start_contact_force(self) -> dict[str, Any]:
         return {
             "value_n": None,
-            "reason": "pack exposes no contact-results API (Drake_Models#371)",
+            "reason": "audit does not read the pack contact API yet "
+            "(UpstreamDrift#12504)",
         }
 
     def bar_hold_wrench(self) -> dict[str, Any]:

@@ -20,32 +20,34 @@ REPO = {
 }
 
 # engine -> issue numbers, per defect class (existing unless marked new).
+# Live re-measure on brick, 2026-10-14 (#11743 slice 3): the phase_count and
+# phase_names gaps no longer reproduce (MuJoCo_Models#401, Drake_Models#372 and
+# Pinocchio_Models#434 merged), so neither cites a tracker. File one issue per
+# pack if a fresh receipt shows either gap again.
 ISSUES: dict[str, dict[str, list[int]]] = {
-    "grip_attachment": {"drake": [365], "pinocchio": [443]},
-    "grip_width": {"mujoco": [408], "opensim": [394], "pinocchio": [443]},
     "start_pose": {
         "mujoco": [407],
         "drake": [381, 364],
         "opensim": [416],
         "pinocchio": [450],
     },
-    "limits": {"mujoco": [407, 409], "pinocchio": [433]},
-    "phase_count": {"mujoco": [401], "drake": [372], "pinocchio": [434]},
-    # phase_names has no tracker: the rename issues (MuJoCo_Models#401,
-    # Drake_Models#372, Pinocchio_Models#434) merged and all four packs match
-    # standard v2.1 on origin/main (2026-10-14). File one issue per pack if a
-    # fresh receipt shows the gap again.
+    "limits": {"mujoco": [407, 409], "pinocchio": [433], "drake": [429]},
     "phase_asymmetric": {"pinocchio": [449]},
     "phase_keys": {"opensim": [414], "drake": [390], "pinocchio": [436]},
-    "bench_mass": {
-        "drake": [391],
-        "mujoco": [428],
-        "opensim": [415],
-        "pinocchio": [451],
-    },
-    "contacts": {"mujoco": [427], "opensim": [384]},
+    "bench_mass": {"drake": [429]},
+    "contacts": {"mujoco": [496], "opensim": [384]},
     "inertia": {"drake": [391], "opensim": [392], "mujoco": [392]},
-    "no_grf": {"drake": [371], "pinocchio": [432]},
+}
+
+# Gaps that remain because the audit lags the packs, not because of a pack
+# defect: the pack trackers closed (Drake_Models#365 and #371,
+# Pinocchio_Models#443 and #432, MuJoCo_Models#408, OpenSim_Models#394) and
+# the adapters or gap rules still read the old pack structure.
+AUDIT_REPO = "UpstreamDrift"
+AUDIT_ISSUES: dict[str, list[int]] = {
+    "grip_attachment": [12504],
+    "grip_width": [12504],
+    "no_grf": [12504],
 }
 
 EXISTING_ONLY = {
@@ -77,6 +79,7 @@ def _gap(
         []
         if stale
         else [f"{REPO[e]}#{n}" for e in engines for n in ISSUES.get(key, {}).get(e, [])]
+        + [f"{AUDIT_REPO}#{n}" for n in AUDIT_ISSUES.get(key, []) if engines]
     )
     return {
         "key": key,
