@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import hashlib
-from importlib import import_module
 from pathlib import Path
 import re
 from typing import Any, Mapping
@@ -17,6 +16,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.full_swing_trackin
 from src.engines.physics_engines.opensim.python.tour_matching._native_model_inventory import (
     observe_native_model,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 _REQUIRED = (
     "source-license-and-ancestry",
@@ -189,7 +189,7 @@ def audit_muscle_model_asset(
     native, diagnostic, status = None, "", "serialized-only"
     if run_native:
         try:
-            osim = import_module("opensim")
+            osim = import_opensim()
         except (ImportError, OSError) as exc:
             status, diagnostic = "native-unavailable", str(exc)
         else:

@@ -34,7 +34,6 @@ import json
 import math
 import tempfile
 from collections.abc import Mapping
-from importlib import import_module
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +48,7 @@ from src.engines.physics_engines.opensim.python.full_body_osim import (
     clean_osim_body_name,
     export_full_body_osim,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -88,7 +88,7 @@ class OpenSimFullBodyParityAdapter:
         self.specification = spec
         self.coordinate_order: tuple[str, ...] = tuple(spec["coordinate_order"])
         self.nv = len(self.coordinate_order)
-        self._osim: Any = import_module("opensim")
+        self._osim: Any = import_opensim()
         logger = self._osim.Logger
         logger.setLevelString("Warn")
         self._build_model(spec_bytes)

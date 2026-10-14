@@ -17,7 +17,6 @@ import json
 import tempfile
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from importlib import import_module
 from pathlib import Path
 from typing import Any
 
@@ -35,6 +34,7 @@ from src.shared.python.biomechanics.grip_wrench import (
     HandWrench,
     analyze_grip,
 )
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 from src.shared.python.grip_contact import (
     ClubKinematics,
     ConditioningReport,
@@ -132,7 +132,7 @@ def prepare_motion(
 
 
 def _osim() -> Any:
-    return import_module("opensim")
+    return import_opensim()
 
 
 def _vec(v: Any) -> np.ndarray:

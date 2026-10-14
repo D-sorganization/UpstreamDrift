@@ -31,6 +31,7 @@ from src.engines.physics_engines.opensim.python.musculoskeletal_swing import (
     write_sto,
 )
 from src.shared.python.contracts import ensure, require
+from src.shared.python.engine_core.opensim_runtime import import_opensim
 
 DEFAULT_FRICTION = 1.0
 DEFAULT_SOLE_OFFSET_M = 0.025
@@ -174,7 +175,7 @@ def _pelvis_rotation(model: Any, state: Any) -> np.ndarray:
 
 
 def _force_free_copy(model: Any) -> Any:
-    osim = __import__("opensim")
+    osim = import_opensim()
     free = osim.Model(model)
     for i in range(free.getForceSet().getSize()):
         free.updForceSet().get(i).set_appliesForce(False)
@@ -239,7 +240,7 @@ def estimate_ground_reactions(
         dict with ``forces (N, P, 3)``, ``spins (N, P)``, ``points_world (N, P, 3)``, ``floor_y``,
         ``residual_norm (N,)``, ``required (N, 6)``, ``active (N, P)``.
     """
-    osim = __import__("opensim")
+    osim = import_opensim()
     pts = points or default_contact_points()
     n = len(times)
     require(n > 12, "need at least 13 frames")
@@ -323,7 +324,7 @@ def write_external_loads(
     spins: np.ndarray | None = None,
 ) -> Path:
     """Write ``<stem>.sto`` and ``<stem>.xml`` (ExternalLoads); return the XML path."""
-    osim = __import__("opensim")
+    osim = import_opensim()
     require(forces.shape[:2] == (len(times), len(points)), "forces/points mismatch")
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)

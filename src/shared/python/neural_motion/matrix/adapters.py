@@ -16,6 +16,8 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_core.opensim_runtime import import_opensim
+
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -65,7 +67,7 @@ def is_runtime_available_for_model(model_id: str) -> bool:
 
     if "opensim" in model_id:
         try:
-            importlib.import_module("opensim")
+            import_opensim()
             return True
         except ImportError:
             return False

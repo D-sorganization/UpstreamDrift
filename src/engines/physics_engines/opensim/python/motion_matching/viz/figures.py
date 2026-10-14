@@ -63,11 +63,11 @@ __all__ = [
 def _opensim_visualizer_available() -> bool:
     """Return ``True`` iff ``opensim.Visualizer`` can be imported."""
     try:
-        import_opensim()
+        osim = import_opensim()
     except ImportError:  # pragma: no cover - depends on host install
         return False
     # The Visualizer class is part of the SimTK Java/OpenGL viewer.
-    return hasattr(__import__("opensim"), "Visualizer")
+    return hasattr(osim, "Visualizer")
 
 
 def plot_trajectory_overlay(
